@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Review Profile{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Review Profile</h2>
+    <p><strong>Username:</strong> {{ profile.user.username }}</p>
+    <p><strong>Email:</strong> {{ profile.user.email }}</p>
+    <p><strong>Account Type:</strong> {{ profile.get_account_type_display }}</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="approve">Approve</button>
+        <button type="submit" name="reject">Reject</button>
+    </form>
+</div>
+{% endblock %}

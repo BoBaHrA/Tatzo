@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile Form</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'users/styles.css' %}">
+</head>
+<body>
+    <!-- Добавляем кнопку Home для перехода на главную страницу -->
+    <div class="navigation">
+        <a href="{% url 'home' %}" class="btn">Home</a>
+    </div>
+    
+    <h1>Profile Form</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Pending Verifications{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Pending Verifications</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Account Type</th>
+                <th>Documents</th> <!-- Колонка для вывода документов -->
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for profile in pending_profiles %}
+                <tr>
+                    <td>{{ profile.user.username }}</td>
+                    <td>{{ profile.user.email }}</td>
+                    <td>{{ profile.get_account_type_display }}</td>
+                    <td>
+                        {% with documents=profile.user.verificationdocument_set.all %}
+                            {% if documents %}
+                                {% for document in documents %}
+                                    <p><strong>{{ document.get_document_type_display }}:</strong></p>
+                                    <p><a href="{{ document.document_file.url }}" target="_blank">View Document</a></p>
+                                    {% if document.identity_document %}
+                                        <p><strong>Identity Document:</strong></p>
+                                        <p><a href="{{ document.identity_document.url }}" target="_blank">View Identity Document</a></p>
+                                    {% endif %}
+                                    <hr>
+                                {% endfor %}
+                            {% else %}
+                                <p>No documents available</p>
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>
+                        <!-- Форма для подтверждения профиля -->
+                        <form method="POST" action="{% url 'approve_profile' profile.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">Approve</button>
+                        </form>
+                        
+                        <!-- Форма для отклонения профиля -->
+                        <form method="POST" action="{% url 'reject_profile' profile.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

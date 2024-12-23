@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Pending Profiles{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Profiles Pending Verification</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Account Type</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for profile in pending_profiles %}
+                <tr>
+                    <td>{{ profile.user.username }}</td>
+                    <td>{{ profile.user.email }}</td>
+                    <td>{{ profile.get_account_type_display }}</td>
+                    <td>
+                        <a href="{% url 'admin_verification' profile.id %}">Review</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

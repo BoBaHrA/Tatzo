@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Sign Up</h2>
+    <p>To register as a Tattoo Artist, you will need to provide documents to verify your status. This helps us ensure that all artists on our platform are certified and genuine, providing trust and safety for our community.</p>
+    <form method="post" action="{% url 'signup' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.non_field_errors }}
+        </div>
+        <div class="form-group">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {{ form.username.errors }}
+        </div>
+        <div class="form-group">
+            {{ form.email.label_tag }}
+            {{ form.email }}
+            {{ form.email.errors }}
+        </div>
+        <div class="form-group">
+            {{ form.password1.label_tag }}
+            {{ form.password1 }}
+            {{ form.password1.errors }}
+        </div>
+        <div class="form-group">
+            {{ form.password2.label_tag }}
+            {{ form.password2 }}
+            {{ form.password2.errors }}
+        </div>
+        <div class="form-group">
+            {{ form.account_type.label_tag }}
+            {{ form.account_type }}
+            {{ form.account_type.errors }}
+        </div>
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+    <p>Already have an account? <a href="{% url 'login' %}">Log in here</a></p>
+</div>
+{% endblock %}

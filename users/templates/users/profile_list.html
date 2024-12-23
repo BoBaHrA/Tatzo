@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Profiles
+{% endblock %}
+
+{% block content %}
+<div>
+    <!-- Добавим ссылки на Home и My Profile -->
+    <nav>
+    </nav>
+    
+    <h2>Profiles List</h2>
+    <ul>
+        {% for profile in profiles %}
+            <li>{{ profile.user.username }} - {{ profile.get_account_type_display }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

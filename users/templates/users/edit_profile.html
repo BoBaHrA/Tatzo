@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h2>Edit Profile</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ user_form.username.label_tag }}
+                {{ user_form.username }}
+                {{ user_form.username.errors }}
+            </div>
+            <div class="form-group">
+                {{ user_form.email.label_tag }}
+                {{ user_form.email }}
+                {{ user_form.email.errors }}
+            </div>
+            <div class="form-group">
+                {{ profile_form.account_type.label_tag }}
+                {{ profile_form.account_type }}
+                {{ profile_form.account_type.errors }}
+            </div>
+            <div class="form-group">
+                {{ profile_form.bio.label_tag }}
+                {{ profile_form.bio }}
+                {{ profile_form.bio.errors }}
+            </div>
+            <div class="form-group">
+                {{ profile_form.profile_image.label_tag }}
+                {{ profile_form.profile_image }}
+                {{ profile_form.profile_image.errors }}
+            </div>
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Verification{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Verify Profile: {{ profile.user.username }}</h2>
+    <p>Email: {{ profile.user.email }}</p>
+    <p>Account Type: {{ profile.get_account_type_display }}</p>
+    
+    <h3>Documents:</h3>
+    {% for document in documents %}
+        <p>{{ document.document_type }}: <a href="{{ document.document_file.url }}">Download</a></p>
+    {% endfor %}
+    
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="approve">Approve</button>
+        <button type="submit" name="reject">Reject</button>
+    </form>
+</div>
+{% endblock %}

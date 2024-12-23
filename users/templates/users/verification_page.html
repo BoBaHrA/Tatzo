@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Verification Page{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Submit Verification Documents</h2>
+    <p>Please upload the required documents to verify your status as a Tattoo Artist.</p>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.identity_document.label_tag }}<br>
+        {{ form.identity_document }}<br><br>
+
+        {{ form.document_type.label_tag }}<br>
+        {{ form.document_type }}<br><br>
+
+        {{ form.document_file.label_tag }}<br>
+        {{ form.document_file }}<br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+</div>
+{% endblock %}

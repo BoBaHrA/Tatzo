@@ -1,0 +1,138 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Tattoo App{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+
+    
+    <!-- Модальное окно для уведомлений -->
+    <div id="notificationModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <p id="notificationMessage"></p>
+        </div>
+    </div>
+    
+    <!-- Добавляем блок для отображения сообщений -->
+    {% if messages %}
+        <script>
+            // Собираем все сообщения в одно модальное окно
+            var messages = "";
+            {% for message in messages %}
+                messages += "{{ message }}<br>";
+            {% endfor %}
+
+            // Функция для отображения модального окна
+            function showModal() {
+                var modal = document.getElementById("notificationModal");
+                var messageElement = document.getElementById("notificationMessage");
+                messageElement.innerHTML = messages;
+                modal.style.display = "block";
+            }
+
+            // Функция для закрытия модального окна
+            function closeModal() {
+                var modal = document.getElementById("notificationModal");
+                modal.style.display = "none";
+            }
+
+            // Показываем модальное окно при загрузке страницы, если есть сообщения
+            window.onload = showModal;
+        </script>
+    {% endif %}
+
+    <div class="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Добавьте стили для модального окна -->
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            text-align: center;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</body>
+</html>
+<script>
+    const textarea = document.getElementById('postText');
+    const postButton = document.getElementById('postButton');
+    const fileIcon = document.querySelector('.file-icon');
+    const postContainer = document.querySelector(".create-post");
+    const postOptions = document.getElementById("postOptions");
+
+    // Показывает кнопку Post и расширяет контейнер при фокусе на текстовое поле
+    textarea.addEventListener('focus', () => {
+        expandPostOptions();
+    });
+
+    // Скрывает кнопку Post, если текстовое поле пустое после потери фокуса
+    textarea.addEventListener('blur', () => {
+        if (textarea.value.trim() === '') {
+            postButton.style.display = 'none';
+        }
+    });
+
+    // Расширяет контейнер при нажатии на иконку добавления файла
+    fileIcon.addEventListener('click', (event) => {
+        expandPostOptions();
+        event.stopPropagation(); // Останавливает всплытие, чтобы не закрывать контейнер сразу
+    });
+
+    function expandPostOptions() {
+        postContainer.classList.add("expanded");
+        postButton.style.display = 'inline-block';
+        postOptions.style.display = 'block';
+    }
+
+    function collapsePostOptions() {
+        postContainer.classList.remove("expanded");
+        postButton.style.display = 'none';
+        postOptions.style.display = 'none';
+    }
+
+    // Свернуть контейнер при нажатии на область вне контейнера
+    document.addEventListener('click', (event) => {
+        if (!postContainer.contains(event.target) && textarea.value.trim() === '') {
+            collapsePostOptions();
+        }
+    });
+
+    // Останавливает всплытие события, чтобы не закрывать контейнер при нажатии внутри него
+    postContainer.addEventListener('click', (event) => {
+        event.stopPropagation();
+    });
+</script>

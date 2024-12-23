@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Кнопка для возврата на главную страницу -->
+    <a href="{% url 'home' %}" class="btn">Home</a>
+
+    <h2>My Profile</h2>
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Account Type:</strong> {{ profile.get_account_type_display }} 
+        {% if profile.account_type == 'tattoo_artist' and profile.verification_status == 'pending' %}
+            - <span style="color: orange;">{{ profile.get_verification_status_display }}</span>
+        {% endif %}
+    </p>
+    <p><strong>Bio:</strong> {{ profile.bio }}</p>
+    <p><strong>Profile Image:</strong></p>
+    {% if profile.profile_image %}
+        <img src="{{ profile.profile_image.url }}" alt="Profile Image" width="200">
+    {% else %}
+        <p>No profile image uploaded.</p>
+    {% endif %}
+    <a href="{% url 'edit_profile' %}">Edit Profile</a>
+</div>
+{% endblock %}

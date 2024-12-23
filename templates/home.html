@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="sidebar">
+    <ul>
+        <li><a href="#"><img src="{% static 'icons/profile.svg' %}" alt="My Profile"><span>My Profile</span></a></li>
+        <li><a href="#"><img src="{% static 'icons/home.svg' %}" alt="Home"><span>Home</span></a></li>
+        <li><a href="#"><img src="{% static 'icons/search1.svg' %}" alt="Search"><span>Search</span></a></li>
+        <li><a href="#"><img src="{% static 'icons/chats.svg' %}" alt="Chats"><span>Chats</span></a></li>
+        <li><a href="#"><img src="{% static 'icons/calendar.svg' %}" alt="Calendar"><span>Calendar</span></a></li>
+        <li><a href="#"><img src="{% static 'icons/bookmarks.svg' %}" alt="Bookmarks"><span>Bookmarks</span></a></li>
+        <li><a href="#"><img src="{% static 'icons/contest.svg' %}" alt="Contests"><span>Contets</span></a></li>
+        <li><a href="#"><img src="{% static 'icons/clean_sheet.svg' %}" alt="Clean slate"><span>Clean slate</span></a></li>
+        <li><a href="#"><img src="{% static 'icons/notifications.svg' %}" alt="Notifications"><span>Notifications</span></a></li>
+    </ul>
+    <ul class="more">
+        <li><a href="#"><img src="{% static 'icons/more.svg' %}" alt="More"><span>More</span></a></li>
+    </ul>
+</div>
+
+<div class="create-post expanded">
+    <textarea placeholder="Got something new? Share it!" id="postText" onfocus="expandPostOptions()"></textarea>
+    <div class="post-options" id="postOptions" style="display: none;">
+        <label><input type="checkbox" id="disableComments"> Disable comments</label>
+        <label><input type="checkbox" id="markAsAd"> Mark as Ad</label>
+        <div class="geo-location">
+            <button onclick="addLocation()">Add Location</button>
+        </div>
+        <div class="schedule">
+            <button onclick="schedulePost()">Schedule Post</button>
+        </div>
+        <div class="poll">
+            <button onclick="createPoll()">Create Poll</button>
+        </div>
+    </div>
+    <input type="file" id="fileInput" style="display: none;" />
+    <label for="fileInput" class="file-icon"><img src="{% static 'icons/upload.svg' %}" alt="Attach File"></label>
+    <button class="post-button" id="postButton" style="display: none;">Post</button>
+</div>
+
+
+<div class="feed">
+    {% for post in posts %}
+        <div class="post {% if post.user == request.user %}current-user{% else %}other-user{% endif %}">
+            <div class="avatar"><img src="{{ post.user.profile_image.url }}" alt="User Avatar"></div>
+            <div class="username">{{ post.user.username }}</div>
+            <div class="content">{{ post.content }}</div>
+        </div>
+    {% empty %}
+        <p>No posts available.</p>
+    {% endfor %}
+</div>
+
+
+
+
+    <div class="auth-buttons">
+        {% if user.is_authenticated %}
+            <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn">Logout</button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}" class="btn">Login</a>
+            <a href="{% url 'signup' %}" class="btn">Signup</a>
+        {% endif %}
+    </div>
+    
+    
+    <!-- Рекомендации -->
+    <div class="suggestions">
+        <h3>Recommendations</h3>
+        <div class="suggested-profile">
+            <img src="{% static 'icons/user.png' %}" alt="User" class="avatar">
+            <div class="suggested-info">
+                <span class="username">TattooStudio1</span>
+                <button>Follow</button>
+            </div>
+        </div>
+        <div class="suggested-profile">
+            <img src="{% static 'icons/user.png' %}" alt="User" class="avatar">
+            <div class="suggested-info">
+                <span class="username">TattooArtist2</span>
+                <button>Follow</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

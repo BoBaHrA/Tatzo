@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Review Verifications{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Review Verifications</h2>
+    <ul>
+        {% for document in documents %}
+            <li>
+                {{ document.user.username }} - {{ document.get_document_type_display }}
+                <a href="{% url 'verify_document' document.id %}">Review</a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
