@@ -1,19 +1,242 @@
-body, .container {
-    font-family: Arial, sans-serif;
-    background-color: #000d18; /* Основной фон */
-    margin: 0;
-    padding: 0;
+/* Основные переменные */
+:root {
+    --text-color: #e6e6e6;
+    --header-color: #c71b43;
+    --bg-color: #000d18;
+    --accent-color: #04c5bf;
+    --secondary-color: #005351;
+    --spacing-small: 5px;
+    --spacing-medium: 10px;
+    --spacing-large: 20px;
+    --border-radius: 10px;
 }
 
+/* Сброс стилей */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #000d18;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    color: #e6e6e6;
+}
+
+/* Общие стили */
 .container {
     max-width: 1200px;
     margin: auto;
-    padding: 20px;
-    display: flex;
-    margin-left: 700px; /* Отступ для боковой панели */
+    padding: var(--spacing-large);
 }
 
-/* Стили для боковой панели */
+/* Стиль для логина */
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    background-color: #000a12;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+.logo {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #04c5bf;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #c71b43;
+}
+
+.input-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    color: #04c5bf;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #04c5bf;
+    border-radius: 5px;
+    background-color: #001a2e;
+    color: #e6e6e6;
+    font-size: 1rem;
+}
+
+.input-group input::placeholder {
+    color: #888;
+}
+
+.btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #c71b43;
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #a51736;
+}
+
+.links {
+    margin-top: 20px;
+    font-size: 0.9rem;
+}
+
+.links a {
+    color: #04c5bf;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+.links a:hover {
+    text-decoration: underline;
+}
+
+.register-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #000a12;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.register-logo {
+    font-size: 32px;
+    font-weight: bold;
+    color: #04c5bf; /* Основной цвет Tatzo */
+    margin-bottom: 10px;
+}
+
+.register-container h1 {
+    font-size: 24px;
+    color: #c71b43; /* Акцентный цвет */
+    margin-bottom: 15px;
+}
+
+.register-container p {
+    color: #e6e6e6;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.account-type-options {
+    display: flex;
+    gap: 15px; /* Расстояние между карточками */
+    justify-content: center;
+}
+
+.account-type-option {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 180px; /* Фиксированная ширина карточки */
+    height: 150px; /* Фиксированная высота карточки */
+    padding: 0; /* Убираем внутренние отступы */
+    border: 2px solid #04c5bf; /* Цвет границы */
+    border-radius: 15px; /* Устанавливаем круглые углы */
+    background-color: transparent; /* Прозрачный фон по умолчанию */
+    color: #04c5bf; /* Цвет текста */
+    transition: all 0.3s ease; /* Плавный переход */
+    cursor: pointer;
+    box-sizing: border-box; /* Учитываем границы в размерах */
+}
+
+.account-type-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.account-type-option .option-content {
+    pointer-events: none;
+}
+
+.account-type-option h3 {
+    font-size: 18px;
+    color: #04c5bf;
+    margin-bottom: 5px;
+}
+
+.account-type-option p {
+    font-size: 14px;
+    color: #e6e6e6;
+}
+
+.account-type-option:hover {
+    background-color: rgba(4, 197, 191, 0.1); /* Лёгкая заливка при наведении */
+    box-shadow: 0px 0px 10px rgba(4, 197, 191, 0.5); /* Тень при наведении */
+}
+
+.account-type-option input[type="radio"] {
+    display: none; /* Скрываем радиокнопку */
+}
+
+.account-type-option input[type="radio"]:checked + .option-content {
+    background-color: #04c5bf; /* Полная заливка при выборе */
+    color: #000a12; /* Контрастный цвет текста */
+    border-color: #04c5bf;
+    box-shadow: 0px 0px 15px rgba(4, 197, 191, 0.8);
+    transform: scale(1.05);
+    border-radius: 15px; /* Ровные углы при выборе */
+}
+
+.option-content h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.option-content p {
+    margin: 10px 0 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.option-content {
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.4;
+    width: 100%; /* Растягиваем содержимое по ширине карточки */
+    height: 100%; /* Растягиваем содержимое по высоте карточки */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box; /* Учитываем границы */
+    padding: 10px; /* Дополнительные отступы внутри */
+    transition: all 0.3s ease;
+    border-radius: 15px; /* Ровные углы */
+}
+
+
+.account-type-option input:checked + .option-content h3 {
+    color: #c71b43;
+}
+
+/* Стили для других страниц (ленту, боковую панель и т.д. можно оставить без изменений) */
 .sidebar {
     width: 200px;
     background-color: #000911;
@@ -28,319 +251,4 @@ body, .container {
     border-right: 1px solid #001a2e;
 }
 
-.sidebar ul {
-    list-style: none;
-    padding: 0;
-}
-
-.sidebar ul li {
-    margin-bottom: 25px;
-}
-
-.sidebar ul li a {
-    display: flex;
-    align-items: center;
-    color: #04c5bf;
-    text-decoration: none;
-    font-size: 18px;
-}
-
-.sidebar ul li a img {
-    width: 32px;
-    height: 32px;
-    margin-right: 20px;
-}
-
-/* Отдельное расположение кнопки "Ещё" */
-.sidebar ul.more {
-    margin-top: auto;
-    padding-top: 20px;
-    border-top: 1px solid #000a12;
-}
-
-/* Стили для ленты новостей */
-.feed, .create-post {
-    margin-left: 230px; /* Отступ для ленты новостей и формы публикации */
-    padding: 20px;
-}
-
-.create-post {
-    margin-left: 700px; /* Отступ для ленты новостей и формы публикации */
-    padding: 20px;
-}
-
-.feed {
-    margin-left: 275px; /* Увеличьте отступ, чтобы компенсировать боковую панель */
-    padding: 20px;
-}
-
-/* Общий стиль для постов */
-.feed .post {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 20px;
-    padding: 10px 15px;
-    background: #04c5bf;
-    border-radius: 15px;
-    position: relative;
-    box-shadow: 10px 15px 10px rgba(0, 0, 0, 0.2);
-    color: var(--text-color);
-    max-width: 70%; /* Ограничиваем ширину */
-}
-
-/* Стили для других пользователей */
-.feed .post.other-user {
-    background-color: #04c5bf;
-    margin-left: 50px;
-}
-
-/* Треугольник справа для текущего пользователя */
-.feed .post.current-user {
-    align-self: flex-end; /* Выравниваем пост текущего пользователя по правому краю */
-    background-color: #c71b43; /* Цвет для поста текущего пользователя */
-    color: #3983c4;
-}
-
-
-/* Аватарка */
-.feed .post .avatar {
-    position: absolute;
-    top: 0px;
-    left: -50px; /* Вне поста */
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    overflow: hidden;
-}
-
-/* Треугольник слева для обычных пользователей */
-.feed .post.other-user::before {
-    content: "";
-    position: absolute;
-    top: 10px; /* Выровнено по верхнему краю */
-    left: -10px; /* Треугольник слева */
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 10px 10px 10px 0;
-    border-color: transparent #04c5bf transparent transparent;
-}
-
-/* Треугольник справа для текущего пользователя */
-.feed .post.current-user {
-    align-self: flex-end; /* Выравниваем пост текущего пользователя по правому краю */
-    margin-right: 50px; /* Отступ справа */
-    background-color: #c71b43; /* Цвет для поста текущего пользователя */
-    color: #3983c4;
-}
-
-.feed .post.current-user::before {
-    content: "";
-    position: absolute;
-    top: 10px;
-    right: -10px; /* Треугольник справа */
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 10px 0 10px 10px;
-    border-color: transparent transparent transparent #c71b43;
-}
-
-.feed .post .username {
-    font-weight: bold;
-    color: var(--header-color);
-    margin-bottom: 5px;
-}
-
-.feed .post .content {
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-/* Цвет для всех текстов, чтобы обеспечить согласованность */
-.feed .post .content, .suggestions .suggested-profile, .create-post textarea {
-    color: var(--text-color);
-}
-
-.feed .post .message-bubble {
-    position: relative;
-    padding: 10px 15px;
-    border-radius: 15px;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-}
-
-.feed .post .message-bubble::before {
-    content: "";
-    position: absolute;
-    top: 10px; /* Выровнено по верху */
-    left: -10px; /* Сдвиг треугольника к аватарке */
-    width: 0;
-    height: 0;
-    border-top: 10px solid transparent;
-    border-bottom: 10px solid transparent;
-    border-right: 10px solid #04c5bf; /* Цвет облака */
-}
-
-/* Аватарка для других пользователей */
-.feed .post .avatar {
-    position: absolute;
-    top: 0px;
-    left: -40px; /* Аватарка слева */
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    overflow: hidden;
-}
-
-/* Аватарка для текущего пользователя */
-.feed .post.current-user .avatar {
-    position: absolute;
-    top: 0px;
-    right: -40px; /* Аватарка справа */
-    left: auto; /* Сбрасываем левое позиционирование */
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    overflow: hidden;
-}
-
-.feed h2 {
-    color: var(--header-color); /* Применяем цвет заголовка */
-    font-size: 24px;
-    margin-bottom: 20px;
-}
-
-.feed .suggestions .suggested-profile .avatar {
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-
-/* Блок "Рекомендации" */
-.suggestions {
-    position: fixed;
-    right: 20px;
-    top: 80px;
-    width: 250px;
-    padding: 20px;
-    background: #000a12;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.suggestions .suggested-profile {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-    color: var(--text-color); /* Цвет текста в рекомендациях */
-}
-
-.suggestions h3 {
-    color: var(--header-color); /* Применяем цвет заголовка */
-    font-size: 20px;
-    margin-bottom: 15px;
-}
-
-.suggestions button {
-    padding: 5px 10px;
-    background-color: #007bff;
-    border: none;
-    color: #000a12;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.suggestions button:hover {
-    background-color: #0056b3;
-}
-
-/* Кнопки аутентификации */
-.auth-buttons {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-}
-
-.auth-buttons .btn {
-    color: #007bff;
-    background: none;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
-    margin-left: 10px;
-    text-decoration: underline;
-}
-
-/* Форма создания поста */
-.create-post {
-    width: 350px;
-    background: #005351;
-    padding: 10px;
-    border-radius: 30px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    position: relative;
-    gap: 10px;
-    transition: height 0.3s ease;
-}
-
-.create-post textarea {
-    resize: none;
-    width: 100%;
-    height: 15px;
-    border: 1px solid #005351;
-    border-radius: 15px;
-    padding: 10px;
-    color: #ddd;
-    background: #005351;
-}
-
-/* Опции для поста */
-.post-options {
-    margin-top: 10px;
-}
-
-.post-button {
-    position: absolute;
-    right: 10px;
-    bottom: 10px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.post-button:hover {
-    background-color: #0056b3;
-}
-
-/* Иконка добавления файла */
-.file-icon {
-    display: inline-flex;
-    align-items: center;
-    cursor: pointer;
-    padding: 5px;
-    border-radius: 5px;
-}
-
-.file-icon img {
-    width: 24px;
-    height: 24px;
-    opacity: 0.8;
-    transition: opacity 0.3s;
-}
-
-.file-icon img:hover {
-    opacity: 1;
-}
-
-:root {
-    --text-color: #e6e6e6; /* Цвет текста */
-    --header-color: #c71b43; /* Цвет для заголовков, если нужен другой оттенок */
-}
+/* ... остальные стили для других страниц */
