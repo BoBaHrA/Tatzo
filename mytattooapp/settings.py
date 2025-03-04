@@ -31,6 +31,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Это стандартный бэкенд Django для аутентификации
+]
+
 ROOT_URLCONF = 'mytattooapp.urls'
 
 # Шаблоны
@@ -39,7 +43,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),  # Путь к общей папке шаблонов
-            os.path.join(BASE_DIR, 'users/templates'),  # Путь к шаблонам приложения users
+            os.path.join(BASE_DIR, 'users/templates/users'),  # Путь к шаблонам приложения users
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -68,18 +72,18 @@ DATABASES = {
 
 # Настройки паролей
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+   # {
+   #     'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+   # },
+   # {
+   #     'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+   # },
+   # {
+   #     'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+   # },
+    #{
+   #    'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+   # },
 ]
 
 # Локализация
@@ -92,6 +96,11 @@ USE_TZ = True
 # Статические файлы
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# settings.py
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Это по умолчанию для хранения сессий в базе данных
+
 
 # Медиа файлы (если используются)
 MEDIA_URL = '/media/'

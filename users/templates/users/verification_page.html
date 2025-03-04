@@ -1,24 +1,71 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
 
-{% block title %}Verification Page{% endblock %}
+{% block title %}Верификация документов{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/verification_page.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2>Submit Verification Documents</h2>
-    <p>Please upload the required documents to verify your status as a Tattoo Artist.</p>
-
-    <form method="post" enctype="multipart/form-data">
+<div class="container verification-container">
+    <h2>Отправка документов на верификацию</h2>
+    <form method="post" enctype="multipart/form-data" class="verification-form">
         {% csrf_token %}
-        {{ form.identity_document.label_tag }}<br>
-        {{ form.identity_document }}<br><br>
 
-        {{ form.document_type.label_tag }}<br>
-        {{ form.document_type }}<br><br>
+        <div class="form-group">
+            <label for="id_business_document_type">Тип бизнес-документа:</label>
+            {{ form.business_document_type }}
+            <span class="tooltip" title="Выберите документ, подтверждающий регистрацию бизнеса (например, Kbis во Франции)">?</span>
+        </div>
 
-        {{ form.document_file.label_tag }}<br>
-        {{ form.document_file }}<br><br>
+        <div class="form-group">
+            <label for="id_business_document_file">Файл бизнес-документа:</label>
+            {{ form.business_document_file }}
+        </div>
 
-        <button type="submit">Submit</button>
+        <label class="file-upload" for="id_business_document_file">Выберите файл</label>
+        <input type="file" id="id_business_document_file" name="business_document_file">
+
+        <div class="form-group">
+            <label for="id_id_document_type">Тип документа личности:</label>
+            {{ form.id_document_type }}
+            <span class="tooltip" title="Выберите документ, подтверждающий вашу личность">?</span>
+        </div>
+
+        <div class="form-group">
+            <label for="id_id_document_file">Файл документа личности:</label>
+            {{ form.id_document_file }}
+        </div>
+
+        <label class="file-upload" for="id_id_document_file">Выберите файл</label>
+        <input type="file" id="id_id_document_file" name="id_document_file">
+
+        <!-- Контейнер для анимации -->
+        <div id="confirmation-animation" class="hidden">
+            <div class="paper">
+                <div class="paper-content">
+                    <div class="paper-text"></div>
+                    <div class="paper-text"></div>
+                    <div class="paper-text"></div>
+                    <div class="paper-photo"></div>
+                </div>
+            </div>
+            <img src="{% static 'images/tattoo_machine.png' %}" alt="Tattoo Machine" class="tattoo-machine" id="tattooMachine">
+            <canvas id="drawCanvas" width="200" height="200"></canvas>
+            <div class="checkmark">✔</div>
+        </div>
+
+        <button type="submit" class="btn-submit">Отправить документы</button>
+
+        <p class="disclaimer">
+            Ваши данные останутся конфиденциальными и будут доступны только модераторам.
+        </p>
+
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/verification.js' %}"></script>
 {% endblock %}

@@ -1,0 +1,282 @@
+/* Основные переменные */
+:root {
+    --text-color: #e6e6e6;
+    --header-color: #c71b43;
+    --bg-color: #000d18;
+    --accent-color: #04c5bf;
+    --secondary-color: #005351;
+    --spacing-small: 5px;
+    --spacing-medium: 10px;
+    --spacing-large: 20px;
+    --border-radius: 10px;
+}
+
+/* Сброс стилей */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #000d18;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    color: #e6e6e6;
+}
+
+/* Общие стили */
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: var(--spacing-large);
+}
+
+/* Стиль для логина */
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    background-color: #000a12;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+.logo {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #04c5bf;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #c71b43;
+}
+
+.input-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    color: #04c5bf;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #04c5bf;
+    border-radius: 5px;
+    background-color: #001a2e;
+    color: #e6e6e6;
+    font-size: 1rem;
+}
+
+.input-group input::placeholder {
+    color: #888;
+}
+
+.btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #c71b43;
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #a51736;
+}
+
+.links {
+    margin-top: 20px;
+    font-size: 0.9rem;
+}
+
+.links a {
+    color: #04c5bf;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+.links a:hover {
+    text-decoration: underline;
+}
+
+.register-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #000a12;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.register-logo {
+    font-size: 32px;
+    font-weight: bold;
+    color: #04c5bf; /* Основной цвет Tatzo */
+    margin-bottom: 10px;
+}
+
+.register-container h1 {
+    font-size: 24px;
+    color: #c71b43; /* Акцентный цвет */
+    margin-bottom: 15px;
+}
+
+.register-container p {
+    color: #e6e6e6;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.account-type-options {
+    display: flex;
+    gap: 15px; /* Расстояние между карточками */
+    justify-content: center;
+}
+
+.account-type-option {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 180px; /* Фиксированная ширина карточки */
+    height: 150px; /* Фиксированная высота карточки */
+    padding: 0; /* Убираем внутренние отступы */
+    border: 2px solid #04c5bf; /* Цвет границы */
+    border-radius: 15px; /* Устанавливаем круглые углы */
+    background-color: transparent; /* Прозрачный фон по умолчанию */
+    color: #04c5bf; /* Цвет текста */
+    transition: all 0.3s ease; /* Плавный переход */
+    cursor: pointer;
+    box-sizing: border-box; /* Учитываем границы в размерах */
+}
+
+.account-type-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.account-type-option .option-content {
+    pointer-events: none;
+}
+
+.account-type-option h3 {
+    font-size: 18px;
+    color: #04c5bf;
+    margin-bottom: 5px;
+}
+
+.account-type-option p {
+    font-size: 14px;
+    color: #e6e6e6;
+}
+
+.account-type-option:hover {
+    background-color: rgba(4, 197, 191, 0.1); /* Лёгкая заливка при наведении */
+    box-shadow: 0px 0px 10px rgba(4, 197, 191, 0.5); /* Тень при наведении */
+}
+
+.account-type-option input[type="radio"] {
+    display: none; /* Скрываем радиокнопку */
+}
+
+.account-type-option input[type="radio"]:checked + .option-content {
+    background-color: #04c5bf; /* Полная заливка при выборе */
+    color: #000a12; /* Контрастный цвет текста */
+    border-color: #04c5bf;
+    box-shadow: 0px 0px 15px rgba(4, 197, 191, 0.8);
+    transform: scale(1.05);
+    border-radius: 15px; /* Ровные углы при выборе */
+}
+
+.option-content h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.option-content p {
+    margin: 10px 0 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.option-content {
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.4;
+    width: 100%; /* Растягиваем содержимое по ширине карточки */
+    height: 100%; /* Растягиваем содержимое по высоте карточки */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box; /* Учитываем границы */
+    padding: 10px; /* Дополнительные отступы внутри */
+    transition: all 0.3s ease;
+    border-radius: 15px; /* Ровные углы */
+}
+
+
+.account-type-option input:checked + .option-content h3 {
+    color: #c71b43;
+}
+
+/* Стили для других страниц (ленту, боковую панель и т.д. можно оставить без изменений) */
+.sidebar {
+    width: 200px;
+    background-color: #000911;
+    color: white;
+    padding: 20px;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #001a2e;
+}
+
+/* ... остальные стили для других страниц */
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }
+  
+  .tooltip .tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px;
+    border-radius: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+  }

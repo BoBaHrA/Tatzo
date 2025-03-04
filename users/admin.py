@@ -28,10 +28,9 @@ class ProfileAdmin(admin.ModelAdmin):
 # Регистрация модели VerificationDocument с действиями
 @admin.register(VerificationDocument)
 class VerificationDocumentAdmin(admin.ModelAdmin):
-    list_display = ('user', 'document_type', 'is_verified', 'created_at')  # Поля для отображения
-    list_filter = ('document_type', 'is_verified')  # Фильтры
-    search_fields = ('user__username', 'user__email')  # Поля для поиска
-    actions = ['approve_documents', 'reject_documents']  # Массовые действия
+    list_display = ('user', 'business_document_type', 'id_document_type', 'is_verified')  # Обновленные поля
+    list_filter = ('business_document_type', 'id_document_type', 'is_verified')  # Обновленные поля
+    search_fields = ('user__username',)
 
     # Действие для подтверждения документов
     @admin.action(description='Approve selected documents')
@@ -43,7 +42,7 @@ class VerificationDocumentAdmin(admin.ModelAdmin):
     def reject_documents(self, request, queryset):
         queryset.update(is_verified=False)
 
-# Регистрация модели Post (если нужна для админки)
+# Регистрация модели Post
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = ('user', 'content', 'created_at')  # Поля для отображения

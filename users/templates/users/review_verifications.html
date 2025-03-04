@@ -9,7 +9,8 @@
         {% for document in documents %}
             <li>
                 {{ document.user.username }} - {{ document.get_document_type_display }}
-                <a href="{% url 'verify_document' document.id %}">Review</a>
+                <a href="{% url 'approve_document' document.id %}">Approve</a>
+                <a href="{% url 'reject_document' document.id %}">Reject</a>
             </li>
         {% endfor %}
     </ul>

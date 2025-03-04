@@ -1,34 +1,22 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from users.models import Profile, VerificationDocument, Post, USER_TYPE_CHOICES  # Исправленный импорт
+from .models import Profile, VerificationDocument, BUSINESS_DOCUMENT_CHOICES, ID_DOCUMENT_CHOICES
+from django.db import models
 
 
 # Форма для профиля
 class ProfileForm(forms.ModelForm):
     class Meta:
-        model = Profile
-        fields = ('account_type', 'bio', 'profile_image')  # Поля для редактирования профиля
+        model = Profile  # Указываем модель
+        fields = ['account_type', 'bio', 'profile_image']  # Указываем поля, которые будут в форме
+        account_type = forms.ChoiceField(choices=[('user', 'User'), ('tattoo_artist', 'Tattoo Artist')])  # Убедитесь, что тут есть все возможные значения
 
-
-# Кастомная форма для создания пользователя
-class CustomUserCreationForm(UserCreationForm):
-    email = forms.EmailField(required=True)
-    account_type = forms.ChoiceField(choices=USER_TYPE_CHOICES, required=True, label="Account Type")
-
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'password1', 'password2')  # Удаляем account_type из Meta
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.email = self.cleaned_data['email']
-        if commit:
-            user.save()
-            # Создаем профиль с указанием типа аккаунта
-            Profile.objects.create(user=user, account_type=self.cleaned_data['account_type'])
-        return user
-
+# Предположим, что у тебя есть такие выборы для типа аккаунта
+USER_TYPE_CHOICES = [
+    ('regular_user', 'Обычный пользователь'),
+    ('tattoo_artist', 'Тату-мастер'),
+]
 
 # Форма для создания постов
 class PostForm(forms.ModelForm):
@@ -39,6 +27,26 @@ class PostForm(forms.ModelForm):
 
 # Форма для верификации документов
 class VerificationForm(forms.ModelForm):
+    business_document_type = forms.ChoiceField(
+        choices=BUSINESS_DOCUMENT_CHOICES, 
+        label="Тип бизнес-документа",
+        required=True
+    )
+    business_document_file = forms.FileField(
+        label="Файл бизнес-документа",
+        required=True
+    )
+
+    id_document_type = forms.ChoiceField(
+        choices=ID_DOCUMENT_CHOICES, 
+        label="Тип документа личности",
+        required=True
+    )
+    id_document_file = forms.FileField(
+        label="Файл документа личности",
+        required=True
+    )
+
     class Meta:
-        model = VerificationDocument  # Модель для хранения верификационных данных
-        fields = ['document_type', 'document_file']  # Поля формы
+        model = VerificationDocument
+        fields = ['business_document_type', 'business_document_file', 'id_document_type', 'id_document_file']

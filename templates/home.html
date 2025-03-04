@@ -4,6 +4,8 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
+ <!-- Подключаем стили для домашней страницы -->
+ <link rel="stylesheet" href="{% static 'css/home.css' %}">
 <div class="sidebar">
     <ul>
         <li><a href="#"><img src="{% static 'icons/profile.svg' %}" alt="My Profile"><span>My Profile</span></a></li>

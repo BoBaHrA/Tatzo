@@ -1,15 +1,21 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My Tattoo App{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- Подключение дополнительных стилей для отдельных страниц -->
+    {% block extra_css %}{% endblock %}
 </head>
 
-    
+<body>
+
     <!-- Модальное окно для уведомлений -->
     <div id="notificationModal" class="modal" style="display: none;">
         <div class="modal-content">
@@ -18,40 +24,13 @@
         </div>
     </div>
     
-    <!-- Добавляем блок для отображения сообщений -->
-    {% if messages %}
-        <script>
-            // Собираем все сообщения в одно модальное окно
-            var messages = "";
-            {% for message in messages %}
-                messages += "{{ message }}<br>";
-            {% endfor %}
-
-            // Функция для отображения модального окна
-            function showModal() {
-                var modal = document.getElementById("notificationModal");
-                var messageElement = document.getElementById("notificationMessage");
-                messageElement.innerHTML = messages;
-                modal.style.display = "block";
-            }
-
-            // Функция для закрытия модального окна
-            function closeModal() {
-                var modal = document.getElementById("notificationModal");
-                modal.style.display = "none";
-            }
-
-            // Показываем модальное окно при загрузке страницы, если есть сообщения
-            window.onload = showModal;
-        </script>
-    {% endif %}
-
+    <!-- Основной контент -->
     <div class="content">
         {% block content %}
         {% endblock %}
     </div>
 
-    <!-- Добавьте стили для модального окна -->
+    <!-- Добавляем стили для модального окна -->
     <style>
         .modal {
             display: none;
@@ -85,54 +64,40 @@
             cursor: pointer;
         }
     </style>
+
+    {% if messages %}
+<div id="messagesContainer" data-messages="{% for message in messages %}{{ message|escapejs }}|{% endfor %}"></div>
+
+<script>
+    window.onload = function() {
+        var notificationModal = document.getElementById("notificationModal");
+        var messageElement = document.getElementById("notificationMessage");
+        var messagesContainer = document.getElementById("messagesContainer");
+
+        if (notificationModal && messageElement && messagesContainer) {
+            var messagesData = messagesContainer.getAttribute("data-messages");
+            var messages = messagesData.split("|").filter(msg => msg.trim() !== ""); // Убираем пустые строки
+
+            if (messages.length > 0) {
+                messageElement.innerHTML = messages.join("<br>");
+                notificationModal.style.display = "block";
+            }
+        }
+    };
+
+    function closeModal() {
+        var modal = document.getElementById("notificationModal");
+        if (modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+{% endif %}
+
+    <!-- Подключение дополнительных скриптов для отдельных страниц -->
+    {% block extra_js %}
+        <script src="{% static 'js/verification.js' %}"></script>
+    {% endblock %}
+
 </body>
 </html>
-<script>
-    const textarea = document.getElementById('postText');
-    const postButton = document.getElementById('postButton');
-    const fileIcon = document.querySelector('.file-icon');
-    const postContainer = document.querySelector(".create-post");
-    const postOptions = document.getElementById("postOptions");
-
-    // Показывает кнопку Post и расширяет контейнер при фокусе на текстовое поле
-    textarea.addEventListener('focus', () => {
-        expandPostOptions();
-    });
-
-    // Скрывает кнопку Post, если текстовое поле пустое после потери фокуса
-    textarea.addEventListener('blur', () => {
-        if (textarea.value.trim() === '') {
-            postButton.style.display = 'none';
-        }
-    });
-
-    // Расширяет контейнер при нажатии на иконку добавления файла
-    fileIcon.addEventListener('click', (event) => {
-        expandPostOptions();
-        event.stopPropagation(); // Останавливает всплытие, чтобы не закрывать контейнер сразу
-    });
-
-    function expandPostOptions() {
-        postContainer.classList.add("expanded");
-        postButton.style.display = 'inline-block';
-        postOptions.style.display = 'block';
-    }
-
-    function collapsePostOptions() {
-        postContainer.classList.remove("expanded");
-        postButton.style.display = 'none';
-        postOptions.style.display = 'none';
-    }
-
-    // Свернуть контейнер при нажатии на область вне контейнера
-    document.addEventListener('click', (event) => {
-        if (!postContainer.contains(event.target) && textarea.value.trim() === '') {
-            collapsePostOptions();
-        }
-    });
-
-    // Останавливает всплытие события, чтобы не закрывать контейнер при нажатии внутри него
-    postContainer.addEventListener('click', (event) => {
-        event.stopPropagation();
-    });
-</script>

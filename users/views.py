@@ -1,16 +1,31 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
+from django.contrib.auth.models import User
 from .models import Post
-from .forms import PostForm  # Если у вас есть форма для создания постов
+from .forms import PostForm, ProfileForm, VerificationForm # Если у вас есть форма для создания постов
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from .forms import CustomUserCreationForm   
 from django.contrib.auth import login
+from .models import Profile, VerificationDocument
+from .forms_custom import CustomUserCreationForm  # Импортируем из нового файла
+import logging
 
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # Проверка учетных данных
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)  # Вход пользователя
+            return redirect('home')  # Перенаправление на главную страницу
+        else:
+            print("Ошибка: Неверные учетные данные")  # Ошибка, если аутентификация не прошла
+    return render(request, 'users/login.html')
 
 # Главная страница
-@login_required
 def home(request):
     return render(request, 'home.html')
 
@@ -109,16 +124,32 @@ def delete_post(request, post_id):
         messages.error(request, 'Вы не можете удалить этот пост.')
     return redirect('news_feed')
 
+logger = logging.getLogger(__name__)
+
+
+
 def signup(request):
     if request.method == "POST":
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)  # Автоматический вход после регистрации
-            return redirect("home")  # Замените "home" на имя вашей домашней страницы
+        user_form = CustomUserCreationForm(request.POST)  # Создаем форму
+        if user_form.is_valid():
+            user = user_form.save()
+            login(request, user)  # Логин нового пользователя
+
+            # Проверяем тип аккаунта
+            profile = Profile.objects.get(user=user)
+            if profile.account_type == "tattoo_artist":
+                return redirect("verification_page")  # Тату-мастер → верификация
+            else:
+                return redirect("home")  # Обычный пользователь → на главную
+
+        # Логирование ошибок формы, если она не прошла валидацию
+        print("User form errors:", user_form.errors)
+
     else:
-        form = CustomUserCreationForm()
-    return render(request, "users/signup.html", {"form": form})
+        user_form = CustomUserCreationForm()  # Пустая форма для GET-запроса
+
+    return render(request, "signup.html", {"user_form": user_form})
+
 
 # Обработка редактирования поста
 @login_required
@@ -165,8 +196,21 @@ def admin_verification(request, profile_id):
 
 @login_required
 def verification_page(request):
-    documents = VerificationDocument.objects.filter(user=request.user)
-    return render(request, 'users/verification_page.html', {'documents': documents})
+    if request.method == 'POST':
+        form = VerificationForm(request.POST, request.FILES)
+        if form.is_valid():
+            verification_document = form.save(commit=False)
+            verification_document.user = request.user
+            verification_document.save()
+            messages.success(request, "Ваши документы отправлены на проверку!")
+            return redirect('home')  # После загрузки → на главную
+        else:
+            messages.error(request, "Ошибка при загрузке документов. Проверьте файлы.")
+
+    else:
+        form = VerificationForm()
+
+    return render(request, 'users/verification_page.html', {'form': form})
 
 # Проверка, является ли пользователь администратором
 def is_admin(user):
@@ -174,7 +218,7 @@ def is_admin(user):
 
 @user_passes_test(is_admin)
 def review_verifications(request):
-    documents = VerificationDocument.objects.filter(is_verified=False)  # Отображение неподтвержденных документов
+    documents = VerificationDocument.objects.filter(is_verified=False)  # Отображаем документы, которые еще не проверены
     return render(request, 'users/review_verifications.html', {'documents': documents})
 
 @user_passes_test(is_admin)
@@ -218,6 +262,26 @@ def review_profile(request, profile_id):
 
     return render(request, 'users/review_profile.html', {'profile': profile})
 
+@login_required
+def upload_verification_documents(request):
+    if request.method == 'POST':
+        document_type = request.POST.get('document_type')
+        document_file = request.FILES.get('document_file')
+        identity_document = request.FILES.get('identity_document')
+
+        # Сохраняем документ
+        verification_document = VerificationDocument(
+            user=request.user,
+            document_type=document_type,
+            document_file=document_file,
+            identity_document=identity_document
+        )
+        verification_document.save()
+
+        messages.success(request, "Your documents have been submitted for verification.")
+        return redirect('home')  # Перенаправляем на главную страницу или другую, если нужно
+    return render(request, 'users/upload_verification_documents.html')
+
 @user_passes_test(is_admin)
 def approve_profile(request, profile_id):
     # Получаем профиль по ID или возвращаем 404
@@ -247,4 +311,20 @@ def reject_profile(request, profile_id):
 
     # Перенаправление обратно на список профилей или другую страницу
     return redirect('profile_list')  # Замените на ваш URL для списка профилей
+
+@user_passes_test(is_admin)
+def approve_profile(request, profile_id):
+    profile = get_object_or_404(Profile, id=profile_id)
+    profile.verification_status = 'approved'
+    profile.save()
+    messages.success(request, f"Profile '{profile.user.username}' has been approved.")
+    return redirect('profile_list')
+
+@user_passes_test(is_admin)
+def reject_profile(request, profile_id):
+    profile = get_object_or_404(Profile, id=profile_id)
+    profile.verification_status = 'rejected'
+    profile.save()
+    messages.success(request, f"Profile '{profile.user.username}' has been rejected.")
+    return redirect('profile_list')
 
