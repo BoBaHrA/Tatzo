@@ -3,6 +3,7 @@ console.log("✅ JS загружен и выполняется!");
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.querySelector(".verification-form");
     const submitButton = document.querySelector(".btn-submit");
+    const verificationContainer = document.querySelector(".verification-container");
 
     if (form) {
         form.addEventListener("submit", function (event) {
@@ -11,69 +12,55 @@ document.addEventListener("DOMContentLoaded", function () {
             event.preventDefault(); // Останавливаем стандартную отправку формы
             submitButton.disabled = true;
 
+            // Отключаем кликабельность всей формы и скрываем кнопки
+            verificationContainer.style.pointerEvents = "none";
+            verificationContainer.classList.add("hide-during-animation");
+
             const confirmationBox = document.getElementById("confirmation-animation");
             console.log("🖼️ Показываем контейнер анимации!");
-
             confirmationBox.classList.remove("hidden");
             confirmationBox.style.opacity = "1";
-            confirmationBox.classList.add("animate"); // Добавляем класс анимации
+            confirmationBox.classList.add("animate");
 
-            console.log("✅ Запускаем анимацию рисования галочки!");
-            drawCheckmark(); // Запускаем рисование галочки
+            // Показываем бумагу
+            const paper = document.querySelector(".paper");
+            if (paper) {
+                console.log("📜 Бумага найдена! Запускаем анимацию.");
+                paper.classList.add("animate");
+            } else {
+                console.log("⚠️ Ошибка: бумага не найдена!");
+            }
 
-            // После завершения анимации отправляем форму
+            const overlay = document.getElementById("dark-overlay");
+            overlay.classList.remove("hidden");
+            overlay.classList.add("show");
+
+
+
+            // ⏳ Переадресация после завершения анимации
             setTimeout(() => {
-                console.log("📤 Отправка формы после анимации");
-                form.submit();
-            }, 3000);
+                console.log("📤 Анимация завершена — можно перенаправлять пользователя.");
+                window.location.href = "/"; // или другая нужная страница
+            }, 3000); // Ожидание окончания анимации
         });
+    } else {
+        console.log("⚠️ Ошибка: форма не найдена!");
     }
 });
 
-// Функция рисования галочки
-function drawCheckmark() {
-    console.log("🖌 Начинаем рисование галочки");
+document.addEventListener("DOMContentLoaded", function () {
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    fileInputs.forEach(input => {
+        input.addEventListener("change", function () {
+            const label = this.previousElementSibling;
+            if (this.files.length > 0) {
+                label.textContent = "Файл загружен ✅";
+                label.classList.add("file-selected");
+            } else {
+                label.textContent = "Выберите файл";
+                label.classList.remove("file-selected");
+            }
+        });
+    });
+});
 
-    const canvas = document.getElementById("drawCanvas");
-    if (!canvas) {
-        console.log("⚠️ Ошибка: canvas не найден!");
-        return;
-    }
-
-    const ctx = canvas.getContext("2d");
-    ctx.strokeStyle = "#04c5bf";
-    ctx.lineWidth = 4;
-    ctx.lineCap = "round";
-
-    let progress = 0;
-    const checkPoints = [
-        { x: 50, y: 100 },
-        { x: 80, y: 150 },
-        { x: 130, y: 60 }
-    ];
-
-    function draw() {
-        if (progress < checkPoints.length - 1) {
-            ctx.beginPath();
-            ctx.moveTo(checkPoints[progress].x, checkPoints[progress].y);
-            ctx.lineTo(checkPoints[progress + 1].x, checkPoints[progress + 1].y);
-            ctx.stroke();
-
-            progress++;
-            setTimeout(draw, 500);
-        }
-    }
-    
-    draw();
-    console.log("📜 Бумага должна стать видимой!");
-
-    setTimeout(() => {
-        const checkmark = document.querySelector(".checkmark");
-        if (checkmark) {
-            checkmark.classList.add("animate");
-            console.log("✅ Галочка появилась!");
-        } else {
-            console.log("⚠️ Ошибка: галочка не найдена!");
-        }
-    }, 1500);
-}

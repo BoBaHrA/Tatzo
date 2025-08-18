@@ -40,6 +40,8 @@ class Profile(models.Model):
     bio = models.TextField(blank=True, null=True)
     profile_image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
     verification_status = models.CharField(max_length=20, default='pending', choices=[('pending', 'На проверке'), ('approved', 'Одобрен'), ('rejected', 'Отклонён')])
+    is_email_verified = models.BooleanField(default=False)
+
 
     def __str__(self):
         return f"{self.user.username} - {self.account_type}"

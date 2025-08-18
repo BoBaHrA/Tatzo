@@ -1,15 +1,14 @@
 {% extends 'base.html' %}
+{% load static %}  {# 🟢 Важно: static подключаем до любых блоков #}
 
 {% block title %}Регистрация{% endblock %}
 
 {% block content %}
-<!-- Добавьте загрузку тега static -->
-{% load static %}
-<!-- Подключаем стили для страницы регистрации -->
 <link rel="stylesheet" href="{% static 'css/signup.css' %}">
 
 <div class="login-container">
-    <div class="logo">Tatzo</div>
+    <div class="logo">
+    <img src="{% static 'images/tatzo5.png' %}" alt="Tatzo">
     <h1>Добро пожаловать</h1>
 
     <!-- Текст, который изменяется в зависимости от типа аккаунта -->
@@ -30,6 +29,10 @@
         <div class="input-group">
             <label for="password1">Пароль</label>
             <input type="password" id="password1" name="password1" placeholder="Введите пароль" required>
+            <p id="password-hint" class="password-hint" style="display: none;">
+                Пароль должен содержать не менее 8 символов, одну заглавную букву и одну цифру.
+            </p>
+             
         </div>
         <div class="input-group">
             <label for="password2">Подтвердите пароль</label>
@@ -59,21 +62,45 @@
         
         <button type="submit" class="btn">Зарегистрироваться</button>
     </form>
+    
     <div class="links">
         <a href="{% url 'login' %}">Уже есть аккаунт? Вам сюда!</a>
     </div>
+
+    <!-- Ошибки формы -->
+    {% if form.non_field_errors %}
+      <div class="errors">
+        <ul>
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% for field in form %}
+      {% for error in field.errors %}
+        <div class="errors">
+          <ul><li>{{ error }}</li></ul>
+        </div>
+      {% endfor %}
+    {% endfor %}
 </div>
 
-{% if form.errors %}
-    <div class="errors">
-        <ul>
-            {% for field in form %}
-                {% for error in field.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            {% endfor %}
-        </ul>
-    </div>
+{% if show_verification_modal %}
+<div id="emailModal" class="modal" style="display:block;">
+  <div class="modal-content" style="background-color: #000a12; color: white; padding: 20px; border-radius: 10px;">
+    <span class="close" onclick="closeModal()" style="float:right;cursor:pointer;">&times;</span>
+    <p>🎉 Регистрация успешна!</p>
+    <p>Подтвердите свою почту, перейдя по ссылке в письме. После этого вы будете перенаправлены на нужную страницу.</p>
+  </div>
+</div>
+<script>
+  function closeModal() {
+    const modal = document.getElementById("emailModal");
+    if (modal) modal.style.display = "none";
+  }
+</script>
 {% endif %}
 
 <script>
@@ -88,4 +115,15 @@
         }
     }
 </script>
+{% endblock %}
+
+{% if not user.profile.is_email_verified %}
+  <div class="alert alert-info">
+    Мы отправили вам письмо для подтверждения email. Проверьте почту!
+  </div>
+{% endif %}
+
+
+{% block scripts %}
+<script src="{% static 'js/signup.js' %}"></script>
 {% endblock %}

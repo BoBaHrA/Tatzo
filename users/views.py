@@ -10,24 +10,63 @@ from django.contrib.auth import login
 from .models import Profile, VerificationDocument
 from .forms_custom import CustomUserCreationForm  # Импортируем из нового файла
 import logging
+from django.utils.http import urlsafe_base64_decode
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_str
+from .utils import send_verification_email
+from django.contrib.auth import authenticate, login
+
 
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        # Проверка учетных данных
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            login(request, user)  # Вход пользователя
-            return redirect('home')  # Перенаправление на главную страницу
+            profile = Profile.objects.get(user=user)
+            if not profile.is_email_verified:
+                messages.error(request, 'Пожалуйста, подтвердите свою почту перед входом.')
+                return redirect('login')  # Или просто вернём ту же страницу
+            login(request, user)
+            return redirect('home')
         else:
-            print("Ошибка: Неверные учетные данные")  # Ошибка, если аутентификация не прошла
+            messages.error(request, 'Неверные имя пользователя или пароль.')
+
     return render(request, 'users/login.html')
 
 # Главная страница
 def home(request):
-    return render(request, 'home.html')
+    posts = Post.objects.all().order_by('-created_at')
+    return render(request, 'home.html', {'posts': posts})
+
+from django.contrib.auth import login
+
+def verify_email(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (User.DoesNotExist, ValueError, TypeError):
+        user = None
+
+    if user and default_token_generator.check_token(user, token):
+        profile = user.profile
+        profile.is_email_verified = True
+        profile.save()
+
+        user.is_active = True
+        user.save()
+
+        login(request, user)
+
+        if profile.account_type == "tattoo_artist":
+            return redirect("verification_page")
+        else:
+            return redirect("home")
+    else:
+        messages.error(request, "Ссылка недействительна или устарела.")
+        return redirect("login")
+
 
 # Лента новостей
 @login_required
@@ -50,6 +89,9 @@ def create_post(request):
     """
     Обработчик для создания нового поста.
     """
+    if not request.user.is_authenticated:
+        return redirect('login')  # или любой твой URL
+
     if request.method == 'POST':
         form = PostForm(request.POST)
         if form.is_valid():
@@ -129,27 +171,27 @@ logger = logging.getLogger(__name__)
 
 
 def signup(request):
+    show_verification_modal = False
+
     if request.method == "POST":
-        user_form = CustomUserCreationForm(request.POST)  # Создаем форму
+        user_form = CustomUserCreationForm(request.POST)
         if user_form.is_valid():
             user = user_form.save()
-            login(request, user)  # Логин нового пользователя
+            send_verification_email(request, user)
+            show_verification_modal = True  # Показываем сообщение "подтвердите почту"
 
-            # Проверяем тип аккаунта
-            profile = Profile.objects.get(user=user)
-            if profile.account_type == "tattoo_artist":
-                return redirect("verification_page")  # Тату-мастер → верификация
-            else:
-                return redirect("home")  # Обычный пользователь → на главную
-
-        # Логирование ошибок формы, если она не прошла валидацию
-        print("User form errors:", user_form.errors)
+            # 🔴 Не логиним! Ждём подтверждения
 
     else:
-        user_form = CustomUserCreationForm()  # Пустая форма для GET-запроса
+        user_form = CustomUserCreationForm()
 
-    return render(request, "signup.html", {"user_form": user_form})
-
+    return render(request, "signup.html", {
+        "form": user_form,
+        "show_verification_modal": show_verification_modal
+    })
+    
+def contests_page(request):
+    return render(request, 'users/contests.html')
 
 # Обработка редактирования поста
 @login_required

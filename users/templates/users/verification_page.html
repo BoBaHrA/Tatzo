@@ -41,6 +41,8 @@
         <label class="file-upload" for="id_id_document_file">Выберите файл</label>
         <input type="file" id="id_id_document_file" name="id_document_file">
 
+        <div id="dark-overlay" class="hidden"></div>
+
         <!-- Контейнер для анимации -->
         <div id="confirmation-animation" class="hidden">
             <div class="paper">
@@ -48,11 +50,13 @@
                     <div class="paper-text"></div>
                     <div class="paper-text"></div>
                     <div class="paper-text"></div>
+                    <div class="paper-text"></div>
+                    <div class="paper-text"></div>
+                    <div class="paper-text"></div>
                     <div class="paper-photo"></div>
                 </div>
             </div>
             <img src="{% static 'images/tattoo_machine.png' %}" alt="Tattoo Machine" class="tattoo-machine" id="tattooMachine">
-            <canvas id="drawCanvas" width="200" height="200"></canvas>
             <div class="checkmark">✔</div>
         </div>
 

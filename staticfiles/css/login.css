@@ -84,14 +84,6 @@ button:hover {
     color: #ff4081;
 }
 
-/* Стили для логотипа */
-.logo {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #04c5bf;
-    margin-bottom: 20px;
-}
-
 /* Заголовок */
 h1 {
     font-size: 1.5rem;
@@ -283,4 +275,36 @@ body, .container {
     padding: 20px;
     display: flex;
     margin-left: 700px; /* Отступ для боковой панели */
+}
+
+.errors {
+    background-color: rgba(255, 0, 0, 0.1);
+    border: 1px solid #ff4c4c;
+    color: #ff4c4c;
+    padding: 12px;
+    border-radius: 6px;
+    margin-top: 15px;
+    text-align: left;
+    font-size: 14px;
+}
+.errors ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+/* Стили для логотипа */
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+.logo img {
+    width: 180px;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border: 5px solid red;
 }

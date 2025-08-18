@@ -24,7 +24,7 @@ body {
     background-color: #000a12;
     padding: 20px;
     border-radius: 15px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 15px #04c5bf, 0 0 40px rgba(4, 197, 191, 0.2); 
     text-align: center;
     margin: 0; /* Убираем лишние отступы */
     display: flex;
@@ -63,7 +63,7 @@ button {
 }
 
 button:hover {
-    background-color: #e72a7f;
+    background-color: #ee0c6f;
 }
 
 /* Стили для ссылок */
@@ -81,21 +81,13 @@ button:hover {
 }
 
 .links a:hover {
-    color: #ff4081;
-}
-
-/* Стили для логотипа */
-.logo {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #04c5bf;
-    margin-bottom: 20px;
+    color: #ee0c6f;
 }
 
 /* Заголовок */
 h1 {
     font-size: 1.5rem;
-    color: #c71b43;
+    color: #ee0c6f;
     margin-bottom: 20px;
 }
 
@@ -140,7 +132,7 @@ h1 {
 }
 
 .btn:hover {
-    background-color: #e72a7f;
+    background-color: #ee0c6f;
 }
 
 
@@ -165,7 +157,7 @@ h1 {
 
 .register-container h1 {
     font-size: 24px;
-    color: #c71b43; /* Акцентный цвет */
+    color: #ee0c6f; /* Акцентный цвет */
     margin-bottom: 15px;
 }
 
@@ -267,7 +259,7 @@ h1 {
 
 
 .account-type-option input:checked + .option-content h3 {
-    color: #c71b43;
+    color: #ee0c6f;
 }
 
 body, .container {
@@ -283,4 +275,35 @@ body, .container {
     padding: 20px;
     display: flex;
     margin-left: 700px; /* Отступ для боковой панели */
+}
+
+.errors {
+    background-color: rgba(255, 0, 0, 0.1);
+    border: 1px solid #ff4c4c;
+    color: #ff4c4c;
+    padding: 12px;
+    border-radius: 6px;
+    margin-top: 15px;
+    text-align: left;
+    font-size: 14px;
+}
+.errors ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+/* Стили для логотипа */
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+.logo img {
+    width: 180px;
+    max-width: 100%;
+    height: auto;
+    display: block;
 }

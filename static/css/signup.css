@@ -1,7 +1,7 @@
 /* Основные переменные */
 :root {
     --text-color: #e6e6e6;
-    --header-color: #c71b43;
+    --header-color: #ee0c6f;
     --bg-color: #000d18;
     --accent-color: #04c5bf;
     --secondary-color: #005351;
@@ -48,10 +48,19 @@ body {
     margin-bottom: 20px;
 }
 
+.logo img {
+    width: 160px;
+    height: auto;
+    max-width: 100%;
+    display: block;
+    margin: 0 auto;
+}
+
+
 h1 {
     font-size: 1.5rem;
     margin-bottom: 20px;
-    color: #c71b43;
+    color: #ee0c6f;
 }
 
 .input-group {
@@ -85,7 +94,7 @@ h1 {
     padding: 10px;
     border: none;
     border-radius: 5px;
-    background-color: #c71b43;
+    background-color: #ee0c6f;
     color: white;
     font-size: 1rem;
     font-weight: bold;
@@ -94,7 +103,7 @@ h1 {
 }
 
 .btn:hover {
-    background-color: #a51736;
+    background-color: #ee0c6f;
 }
 
 .links {
@@ -131,7 +140,7 @@ h1 {
 
 .register-container h1 {
     font-size: 24px;
-    color: #c71b43; /* Акцентный цвет */
+    color: #ee0c6f; /* Акцентный цвет */
     margin-bottom: 15px;
 }
 
@@ -233,7 +242,7 @@ h1 {
 
 
 .account-type-option input:checked + .option-content h3 {
-    color: #c71b43;
+    color: #ee0c6f;
 }
 
 /* Стили для других страниц (ленту, боковую панель и т.д. можно оставить без изменений) */
@@ -280,3 +289,48 @@ h1 {
     visibility: visible;
     opacity: 1;
   }
+
+  .errors {
+    background-color: rgba(255, 0, 0, 0.1);
+    border: 1px solid #ff4c4c;
+    color: #ff4c4c;
+    padding: 12px;
+    border-radius: 6px;
+    margin-top: 15px;
+    text-align: left;
+    font-size: 14px;
+}
+.errors ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.password-hint {
+    margin-top: 5px;
+    font-size: 13px;
+    color: #888;
+    text-align: left;
+  }
+  
+  .hidden {
+    display: none;
+  }
+ 
+.logo h1 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    color: #ee0c6f;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 18px;
+    margin-bottom: 1px;
+}
+
+.form-info p {
+    font-size: 14px;  /* ← Чуть меньше */
+    color: #04c5bf;
+    margin-bottom: 20px;
+    font-weight: 600;
+    text-align: center;
+}

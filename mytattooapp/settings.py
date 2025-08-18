@@ -15,9 +15,9 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'users.apps.UsersConfig',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users',  # Наше приложение
 ]
 
 # Настройки middleware
@@ -109,6 +109,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'  # Перенаправление после входа
 LOGOUT_REDIRECT_URL = '/'  # Перенаправление после выхода
+
+# ✅ Вывод писем в консоль
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
 
 # Конец файла

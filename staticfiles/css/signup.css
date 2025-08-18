@@ -280,3 +280,30 @@ h1 {
     visibility: visible;
     opacity: 1;
   }
+
+  .errors {
+    background-color: rgba(255, 0, 0, 0.1);
+    border: 1px solid #ff4c4c;
+    color: #ff4c4c;
+    padding: 12px;
+    border-radius: 6px;
+    margin-top: 15px;
+    text-align: left;
+    font-size: 14px;
+}
+.errors ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.password-hint {
+    margin-top: 5px;
+    font-size: 13px;
+    color: #888;
+    text-align: left;
+  }
+  
+  .hidden {
+    display: none;
+  }
+  

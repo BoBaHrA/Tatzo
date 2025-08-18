@@ -1,15 +1,17 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Вход{% endblock %}
 
-{% block content %}
-<!-- Загружаем тег static -->
-{% load static %}
- <!-- Подключаем стили для страницы логина -->
- <link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
 
+{% block content %}
 <div class="login-container">
-    <div class="logo">Tatzo</div>
+    <div class="logo">
+        <img src="{% static 'images/tatzo5.png' %}" alt="Tatzo">
+    </div>
     <h1>Добро пожаловать</h1>
     <form method="post">
         {% csrf_token %}
@@ -29,16 +31,13 @@
     </div>
 </div>
 
-{% if form.errors %}
+{% if form.non_field_errors %}
     <div class="errors">
         <ul>
-            {% for field in form %}
-                {% for error in field.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
             {% endfor %}
         </ul>
     </div>
 {% endif %}
-
 {% endblock %}

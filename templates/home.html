@@ -4,91 +4,173 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
- <!-- Подключаем стили для домашней страницы -->
- <link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+
+<!-- Sidebar -->
 <div class="sidebar">
-    <ul>
-        <li><a href="#"><img src="{% static 'icons/profile.svg' %}" alt="My Profile"><span>My Profile</span></a></li>
-        <li><a href="#"><img src="{% static 'icons/home.svg' %}" alt="Home"><span>Home</span></a></li>
-        <li><a href="#"><img src="{% static 'icons/search1.svg' %}" alt="Search"><span>Search</span></a></li>
-        <li><a href="#"><img src="{% static 'icons/chats.svg' %}" alt="Chats"><span>Chats</span></a></li>
-        <li><a href="#"><img src="{% static 'icons/calendar.svg' %}" alt="Calendar"><span>Calendar</span></a></li>
-        <li><a href="#"><img src="{% static 'icons/bookmarks.svg' %}" alt="Bookmarks"><span>Bookmarks</span></a></li>
-        <li><a href="#"><img src="{% static 'icons/contest.svg' %}" alt="Contests"><span>Contets</span></a></li>
-        <li><a href="#"><img src="{% static 'icons/clean_sheet.svg' %}" alt="Clean slate"><span>Clean slate</span></a></li>
-        <li><a href="#"><img src="{% static 'icons/notifications.svg' %}" alt="Notifications"><span>Notifications</span></a></li>
-    </ul>
-    <ul class="more">
-        <li><a href="#"><img src="{% static 'icons/more.svg' %}" alt="More"><span>More</span></a></li>
-    </ul>
+  <ul>
+    <li><a href="{% url 'user_profile' %}" class="{% if request.path == '/profile/' %}active{% endif %}">
+      <img src="{% static 'icons/profile.svg' %}" alt="My Profile"><span>My Profile</span>
+    </a></li>
+    <li><a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}">
+      <img src="{% static 'icons/house.svg' %}" alt="Home"><span>Home</span>
+    </a></li>
+    <li><a href="#"><img src="{% static 'icons/loupe.svg' %}" alt="Search"><span>Search</span></a></li>
+    <li><a href="#"><img src="{% static 'icons/maps.svg' %}" alt="Maps"><span>Maps</span></a></li>
+    <li><a href="#"><img src="{% static 'icons/chats.svg' %}" alt="Chats"><span>Chats</span></a></li>
+    <li><a href="#"><img src="{% static 'icons/calendar.svg' %}" alt="Calendar"><span>Calendar</span></a></li>
+    <li><a href="#"><img src="{% static 'icons/bookmark.svg' %}" alt="Bookmarks"><span>Bookmarks</span></a></li>
+    <li><a href="{% url 'contests_page' %}" class="{% if request.path == '/contests/' %}active{% endif %}">
+      <img src="{% static 'icons/trophy.svg' %}" alt="Contests"><span>Contests</span>
+    </a></li>
+    <li><a href="#"><img src="{% static 'icons/sprout.svg' %}" alt="Clean slate"><span>Clean slate</span></a></li>
+    <li><a href="#"><img src="{% static 'icons/notifications.svg' %}" alt="Notifications"><span>Notifications</span></a></li>
+  </ul>
+  <ul class="more">
+    <li><a href="#"><img src="{% static 'icons/menu.svg' %}" alt="More"><span>More</span></a></li>
+  </ul>
 </div>
+<div class="main-content">
+  {% if user.is_authenticated %}
+  <div class="create-post" id="create-post">
+    <div class="post-create-header" onclick="togglePostBox()">
+      <div class="textarea-wrapper">
+        <textarea id="post-textarea" placeholder="Got something new? Share it!"></textarea>
+      </div>
 
-<div class="create-post expanded">
-    <textarea placeholder="Got something new? Share it!" id="postText" onfocus="expandPostOptions()"></textarea>
-    <div class="post-options" id="postOptions" style="display: none;">
-        <label><input type="checkbox" id="disableComments"> Disable comments</label>
-        <label><input type="checkbox" id="markAsAd"> Mark as Ad</label>
-        <div class="geo-location">
-            <button onclick="addLocation()">Add Location</button>
-        </div>
-        <div class="schedule">
-            <button onclick="schedulePost()">Schedule Post</button>
-        </div>
-        <div class="poll">
-            <button onclick="createPoll()">Create Poll</button>
+    <div class="file-icon" id="custom-file-trigger" data-icon-url="{% static 'icons/plus.svg' %}" onclick="event.stopPropagation();">
+    <img src="{% static 'icons/plus.svg' %}" alt="Add file">
+    </div>
+    <input type="file" id="file-upload" accept="image/png, image/jpeg, video/mp4, video/webm" style="display: none;" multiple>
+
+</div>   
+      <div id="file-preview" class="file-preview"></div>
+
+    <div class="post-options" id="post-options">
+        <!-- Кнопки опций -->
+        <label class="custom-checkbox">
+        <input type="checkbox">
+        <span class="checkmark"></span>
+        Disable comments
+        </label>
+        <label class="custom-checkbox">
+    <input type="checkbox">
+    <span class="checkmark"></span>
+    Mark as Ad
+  </label>
+
+  <!-- Кнопки с иконками -->
+  <button>
+    <img src="{% static 'icons/location.svg' %}" alt="Location" class="option-icon">
+    Add Location
+  </button>
+
+  <button>
+    <img src="{% static 'icons/poll.svg' %}" alt="Poll" class="option-icon">
+    Create Poll
+  </button>
+
+  <button>
+    <img src="{% static 'icons/schedule.svg' %}" alt="Schedule" class="option-icon">
+    Schedule Post
+  </button>
+
+  <div>
+    <button>
+      <img src="{% static 'icons/coauthors.svg' %}" alt="Co-authors" class="option-icon">
+      Invite Co-authors
+    </button>
+
+    <button>
+      <img src="{% static 'icons/eye.svg' %}" alt="Who can see" class="option-icon">
+      Who can see this
+    </button>
+
+    <button>
+      <img src="{% static 'icons/settings.svg' %}" alt="Settings" class="option-icon">
+      Additional options
+    </button>
         </div>
     </div>
-    <input type="file" id="fileInput" style="display: none;" />
-    <label for="fileInput" class="file-icon"><img src="{% static 'icons/upload.svg' %}" alt="Attach File"></label>
-    <button class="post-button" id="postButton" style="display: none;">Post</button>
-</div>
-
-
-<div class="feed">
+      <div class="post-submit">
+    <button id="post-btn" class="post-btn">Post</button>
+  </div>
+  </div>
+{% endif %}
+  <div class="feed">
     {% for post in posts %}
-        <div class="post {% if post.user == request.user %}current-user{% else %}other-user{% endif %}">
-            <div class="avatar"><img src="{{ post.user.profile_image.url }}" alt="User Avatar"></div>
-            <div class="username">{{ post.user.username }}</div>
-            <div class="content">{{ post.content }}</div>
+    <div class="post {% if post.user == request.user %}current-user{% else %}other-user{% endif %}">
+      <div class="avatar">
+        <img src="{{ post.user.profile_image.url }}" alt="User Avatar">
+      </div>
+
+      {% if post.user != request.user %}
+      <svg class="bubble-tail left" viewBox="0 0 20 20">
+        <path d="M0,20 Q30,5 20,-30 L20,20 Z" fill="#04c5bf" />
+      </svg>
+      {% else %}
+      <svg class="bubble-tail right" viewBox="0 0 20 20">
+        <path d="M0,20 Q30,5 20,-30 L20,20 Z" fill="#c71b43" />
+      </svg>
+      {% endif %}
+
+      <div class="message-bubble">
+        <div class="username">{{ post.user.username }}</div>
+        <div class="content">{{ post.content }}</div>
+        <div class="post-actions">
+          <button class="action-btn" title="Like">
+            <img src="{% static 'icons/heart.svg' %}" alt="Like">
+          </button>
+          <button class="action-btn" title="Comment">
+            <img src="{% static 'icons/comments1.svg' %}" alt="Comment">
+          </button>
+          <button class="action-btn" title="Repost">
+            <img src="{% static 'icons/share1.svg' %}" alt="Repost">
+          </button>
+          <button class="action-btn" title="Bookmark">
+            <img src="{% static 'icons/bookmark11.svg' %}" alt="Bookmark">
+          </button>
         </div>
+      </div>
+    </div>
     {% empty %}
-        <p>No posts available.</p>
+    <p>No posts available.</p>
     {% endfor %}
+  </div>
+</div>
 </div>
 
-
-
-
-    <div class="auth-buttons">
-        {% if user.is_authenticated %}
-            <form action="{% url 'logout' %}" method="post" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn">Logout</button>
-            </form>
-        {% else %}
-            <a href="{% url 'login' %}" class="btn">Login</a>
-            <a href="{% url 'signup' %}" class="btn">Signup</a>
-        {% endif %}
+<!-- Right sidebar: Recommendations -->
+<div class="suggestions">
+  <h3>Recommendations</h3>
+  <div class="suggested-profile">
+    <img src="{% static 'icons/user.png' %}" alt="User" class="avatar">
+    <div class="suggested-info">
+      <span class="username">TattooStudio1</span>
+      <button>Follow</button>
     </div>
-    
-    
-    <!-- Рекомендации -->
-    <div class="suggestions">
-        <h3>Recommendations</h3>
-        <div class="suggested-profile">
-            <img src="{% static 'icons/user.png' %}" alt="User" class="avatar">
-            <div class="suggested-info">
-                <span class="username">TattooStudio1</span>
-                <button>Follow</button>
-            </div>
-        </div>
-        <div class="suggested-profile">
-            <img src="{% static 'icons/user.png' %}" alt="User" class="avatar">
-            <div class="suggested-info">
-                <span class="username">TattooArtist2</span>
-                <button>Follow</button>
-            </div>
-        </div>
+  </div>
+  <div class="suggested-profile">
+    <img src="{% static 'icons/user.png' %}" alt="User" class="avatar">
+    <div class="suggested-info">
+      <span class="username">TattooArtist2</span>
+      <button>Follow</button>
     </div>
+  </div>
 </div>
+
+<!-- Auth buttons -->
+<div class="auth-buttons">
+  {% if user.is_authenticated %}
+  <form action="{% url 'logout' %}" method="post" style="display: inline;">
+    {% csrf_token %}
+    <button type="submit" class="btn">Logout</button>
+  </form>
+  {% else %}
+  <a href="{% url 'login' %}" class="btn">Login</a>
+  <a href="{% url 'signup' %}" class="btn">Signup</a>
+  {% endif %}
+</div>
+
+<script src="{% static 'js/home.js' %}"></script>
 {% endblock %}
