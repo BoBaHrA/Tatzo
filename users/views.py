@@ -3,11 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.models import User
 from .models import Post
-from .forms import PostForm, ProfileForm, VerificationForm # Если у вас есть форма для создания постов
+from .forms import PostForm, ProfileForm, VerificationForm, PostMediaUploadForm # Если у вас есть форма для создания постов
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import login
-from .models import Profile, VerificationDocument
+from .models import Profile, VerificationDocument, Post, PostMedia
 from .forms_custom import CustomUserCreationForm  # Импортируем из нового файла
 import logging
 from django.utils.http import urlsafe_base64_decode
@@ -15,7 +15,11 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_str
 from .utils import send_verification_email
 from django.contrib.auth import authenticate, login
-
+from django.http import JsonResponse
+from django.db import transaction
+from django.views.decorators.http import require_POST
+from .models import Post, PostMedia
+from django.template.loader import render_to_string
 
 def login_view(request):
     if request.method == 'POST':
@@ -84,29 +88,40 @@ def news_feed(request):
     return render(request, 'feed.html', context)
 
 # Создание нового поста
+@require_POST
 @login_required
 def create_post(request):
-    """
-    Обработчик для создания нового поста.
-    """
-    if not request.user.is_authenticated:
-        return redirect('login')  # или любой твой URL
+    content = (request.POST.get('content') or '').strip()
+    files = request.FILES.getlist('media')
 
-    if request.method == 'POST':
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.user = request.user  # Указываем текущего пользователя как автора поста
-            post.save()
-            messages.success(request, 'Ваш пост был успешно создан!')
-            return redirect('news_feed')  # Перенаправляем на ленту новостей
-    else:
-        form = PostForm()
+    if not content and not files:
+        return JsonResponse({'ok': False, 'error': 'Пост не может быть пустым.'}, status=400)
 
-    context = {
-        'form': form
-    }
-    return render(request, 'create_post.html', context)
+    disable_comments = request.POST.get('disable_comments') == '1'
+    is_ad = request.POST.get('is_ad') == '1'
+    visibility = request.POST.get('visibility') or 'public'
+    location = (request.POST.get('location') or '').strip()
+
+    layout = request.POST.get('layout') or 'grid'
+    if layout not in ('grid', 'carousel'):
+        layout = 'grid'
+
+    post = Post.objects.create(
+        user=request.user,
+        content=content,
+        disable_comments=disable_comments,
+        is_ad=is_ad,
+        visibility=visibility,
+        location=location,
+        layout=layout,
+    )
+
+    for i, f in enumerate(files):
+        mt = 'video' if (f.content_type or '').startswith('video/') else 'image'
+        PostMedia.objects.create(post=post, file=f, media_type=mt, order=i)
+
+    html = render_to_string('partials/post_card.html', {'post': post, 'request': request})
+    return JsonResponse({'ok': True, 'post_id': post.id, 'html': html})
 
 # Выход из системы
 @login_required
@@ -164,7 +179,7 @@ def delete_post(request, post_id):
         messages.success(request, 'Ваш пост был удалён.')
     else:
         messages.error(request, 'Вы не можете удалить этот пост.')
-    return redirect('news_feed')
+    return redirect('home')
 
 logger = logging.getLogger(__name__)
 
@@ -202,14 +217,14 @@ def edit_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     if post.user != request.user:
         messages.error(request, 'Вы не можете редактировать этот пост.')
-        return redirect('news_feed')
+        return redirect('home')
 
     if request.method == 'POST':
         form = PostForm(request.POST, instance=post)
         if form.is_valid():
             form.save()
             messages.success(request, 'Ваш пост был успешно обновлен!')
-            return redirect('news_feed')
+            return redirect('home')
     else:
         form = PostForm(instance=post)
 
@@ -353,20 +368,3 @@ def reject_profile(request, profile_id):
 
     # Перенаправление обратно на список профилей или другую страницу
     return redirect('profile_list')  # Замените на ваш URL для списка профилей
-
-@user_passes_test(is_admin)
-def approve_profile(request, profile_id):
-    profile = get_object_or_404(Profile, id=profile_id)
-    profile.verification_status = 'approved'
-    profile.save()
-    messages.success(request, f"Profile '{profile.user.username}' has been approved.")
-    return redirect('profile_list')
-
-@user_passes_test(is_admin)
-def reject_profile(request, profile_id):
-    profile = get_object_or_404(Profile, id=profile_id)
-    profile.verification_status = 'rejected'
-    profile.save()
-    messages.success(request, f"Profile '{profile.user.username}' has been rejected.")
-    return redirect('profile_list')
-

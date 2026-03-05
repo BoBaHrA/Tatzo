@@ -2,7 +2,10 @@ from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
 from users.forms_custom import CustomSetPasswordForm
-
+from .views import create_post
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 urlpatterns = [
@@ -17,7 +20,7 @@ urlpatterns = [
     path('pending-verifications/', views.pending_verifications, name='pending_verifications'),
     path('', views.home, name='home'),
     path('contests/', views.contests_page, name='contests_page'),
-    path('create_post/', views.create_post, name='create_post'),  # Добавляем этот маршрут
+    path('posts/create/', views.create_post, name='create_post'),
     path('review-profile/<int:profile_id>/', views.review_profile, name='review_profile'),  # Добавлен маршрут для просмотра профиля
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     # Новые маршруты для подтверждения и отклонения профиля
@@ -32,3 +35,5 @@ urlpatterns = [
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='users/password_reset_complete.html'), name='password_reset_complete'),
     # ... другие маршруты
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

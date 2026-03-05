@@ -44,8 +44,24 @@
     <input type="file" id="file-upload" accept="image/png, image/jpeg, video/mp4, video/webm" style="display: none;" multiple>
 
 </div>   
-      <div id="file-preview" class="file-preview"></div>
+    <!-- Панель управления предпросмотром -->
+<div class="preview-toolbar" id="preview-toolbar" style="display:none;">
+  <div class="preview-mode">
+    <button type="button" class="mode-btn active" data-mode="grid">Сетка</button>
+    <button type="button" class="mode-btn" data-mode="carousel">Карусель</button>
+  </div>
+</div>
 
+<div id="file-preview" class="file-preview is-composer" data-mode="grid" data-count="0"></div>
+<!-- Lightbox для просмотра файлов -->
+<div class="media-lightbox" id="media-lightbox" aria-hidden="true">
+  <div class="lb-inner" role="dialog" aria-modal="true">
+    <div class="lb-close" id="lb-close">✖</div>
+    <div class="lb-nav lb-prev" id="lb-prev">‹</div>
+    <div class="lb-nav lb-next" id="lb-next">›</div>
+    <div class="lb-body" id="lb-body"></div>
+  </div>
+</div>
     <div class="post-options" id="post-options">
         <!-- Кнопки опций -->
         <label class="custom-checkbox">
@@ -97,42 +113,9 @@
   </div>
   </div>
 {% endif %}
-  <div class="feed">
+  <div class="feed" id="feed">
     {% for post in posts %}
-    <div class="post {% if post.user == request.user %}current-user{% else %}other-user{% endif %}">
-      <div class="avatar">
-        <img src="{{ post.user.profile_image.url }}" alt="User Avatar">
-      </div>
-
-      {% if post.user != request.user %}
-      <svg class="bubble-tail left" viewBox="0 0 20 20">
-        <path d="M0,20 Q30,5 20,-30 L20,20 Z" fill="#04c5bf" />
-      </svg>
-      {% else %}
-      <svg class="bubble-tail right" viewBox="0 0 20 20">
-        <path d="M0,20 Q30,5 20,-30 L20,20 Z" fill="#c71b43" />
-      </svg>
-      {% endif %}
-
-      <div class="message-bubble">
-        <div class="username">{{ post.user.username }}</div>
-        <div class="content">{{ post.content }}</div>
-        <div class="post-actions">
-          <button class="action-btn" title="Like">
-            <img src="{% static 'icons/heart.svg' %}" alt="Like">
-          </button>
-          <button class="action-btn" title="Comment">
-            <img src="{% static 'icons/comments1.svg' %}" alt="Comment">
-          </button>
-          <button class="action-btn" title="Repost">
-            <img src="{% static 'icons/share1.svg' %}" alt="Repost">
-          </button>
-          <button class="action-btn" title="Bookmark">
-            <img src="{% static 'icons/bookmark11.svg' %}" alt="Bookmark">
-          </button>
-        </div>
-      </div>
-    </div>
+      {% include 'partials/post_card.html' with post=post %}
     {% empty %}
     <p>No posts available.</p>
     {% endfor %}

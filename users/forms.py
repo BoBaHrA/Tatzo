@@ -1,50 +1,74 @@
+# users/forms.py
 from django import forms
-from django.contrib.auth.models import User
-from users.models import Profile, VerificationDocument, Post, USER_TYPE_CHOICES  # Исправленный импорт
-from .models import Profile, VerificationDocument, BUSINESS_DOCUMENT_CHOICES, ID_DOCUMENT_CHOICES
-from django.db import models
+from django.forms.widgets import ClearableFileInput
+
+from .models import (
+    Profile,
+    VerificationDocument,
+    Post,
+    BUSINESS_DOCUMENT_CHOICES,
+    ID_DOCUMENT_CHOICES,
+    USER_TYPE_CHOICES,
+)
+
+# ✅ Виджет, который умеет multiple
+class MultiFileInput(ClearableFileInput):
+    allow_multiple_selected = True
 
 
-# Форма для профиля
+# -------- Профиль --------
 class ProfileForm(forms.ModelForm):
+    # поле объявляем на уровне класса (не в Meta!)
+    account_type = forms.ChoiceField(choices=USER_TYPE_CHOICES, required=True)
+
     class Meta:
-        model = Profile  # Указываем модель
-        fields = ['account_type', 'bio', 'profile_image']  # Указываем поля, которые будут в форме
-        account_type = forms.ChoiceField(choices=[('user', 'User'), ('tattoo_artist', 'Tattoo Artist')])  # Убедитесь, что тут есть все возможные значения
+        model = Profile
+        fields = ['account_type', 'bio', 'profile_image']
 
-# Предположим, что у тебя есть такие выборы для типа аккаунта
-USER_TYPE_CHOICES = [
-    ('regular_user', 'Обычный пользователь'),
-    ('tattoo_artist', 'Тату-мастер'),
-]
 
-# Форма для создания постов
+# -------- Пост (текст) --------
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['content']  # Поля, которые должны быть в форме
+        fields = ['content']
 
 
-# Форма для верификации документов
+# -------- Медиа к посту (несколько файлов) --------
+class PostMediaUploadForm(forms.Form):
+    media = forms.FileField(
+        required=False,
+        widget=MultiFileInput(attrs={'multiple': True})
+    )
+
+    # простая валидация
+    ALLOWED = {'image/jpeg', 'image/png', 'video/mp4', 'video/webm'}
+    MAX_MB = 50
+
+    def clean(self):
+        cleaned = super().clean()
+        files = self.files.getlist('media') if hasattr(self, 'files') else []
+
+        for f in files:
+            if f.content_type not in self.ALLOWED:
+                raise forms.ValidationError(f"Тип файла не поддерживается: {f.content_type}")
+            if f.size > self.MAX_MB * 1024 * 1024:
+                raise forms.ValidationError(f"Файл {f.name} больше {self.MAX_MB}MB.")
+        return cleaned
+
+
+# -------- Верификация документов --------
 class VerificationForm(forms.ModelForm):
     business_document_type = forms.ChoiceField(
-        choices=BUSINESS_DOCUMENT_CHOICES, 
-        label="Тип бизнес-документа",
-        required=True
+        choices=BUSINESS_DOCUMENT_CHOICES, label="Тип бизнес-документа", required=True
     )
     business_document_file = forms.FileField(
-        label="Файл бизнес-документа",
-        required=True
+        label="Файл бизнес-документа", required=True
     )
-
     id_document_type = forms.ChoiceField(
-        choices=ID_DOCUMENT_CHOICES, 
-        label="Тип документа личности",
-        required=True
+        choices=ID_DOCUMENT_CHOICES, label="Тип документа личности", required=True
     )
     id_document_file = forms.FileField(
-        label="Файл документа личности",
-        required=True
+        label="Файл документа личности", required=True
     )
 
     class Meta:

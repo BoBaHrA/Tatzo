@@ -1,6 +1,9 @@
 :root {
   --text-color: #e6e6e6;
   --header-color: #c71b43;
+
+  /* единая высота «пилюли» создания поста */
+  --pill-h: 20px;
 }
 
 body {
@@ -73,7 +76,7 @@ body {
   padding: 30px 20px;
 }
 
-/* Создание поста */
+/* ---------- CREATE POST ---------- */
 .create-post {
   width: 700px;
   margin: 20px auto;
@@ -84,30 +87,134 @@ body {
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
-  max-height: 20px;
+  max-height: var(--pill-h);   /* фикс: единая высота пилюли в свернутом состоянии */
   overflow: hidden;
 }
 
 /* В свёрнутом состоянии — строго по центру и одной строкой */
-.create-post:not(.expanded) #post-textarea{
-  height:44px;
-  line-height:44px;          /* ← вертикальное центрирование плейсхолдера */
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+.create-post:not(.expanded) #post-textarea {
+  height: var(--pill-h) !important;
+  line-height: var(--pill-h) !important;  /* центр плейсхолдера по вертикали */
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin: 0 !important;
+  box-sizing: content-box;
 }
 
 .create-post.expanded {
-  max-height: 1000px;
-  box-shadow: 0 4px 16px rgba(4, 197, 191, 0.35); /* Переносим сюда */ 
+  max-height: none !important;      /* убираем ограничение высоты */
+  overflow: visible !important;      /* даём контенту вытолкнуть низ */
+  box-shadow: 0 4px 16px rgba(4, 197, 191, 0.35);
 }
 
 /* Хедер: textarea + кнопка */
-.post-create-header{
-  display:flex; align-items:center; gap:10px;
-  min-height:44px;           /* ← единая высота «пилюли» */
-  padding:0 12px;            /* боковые отступы вместо padding у textarea */
-  border-radius:9999px;
+.post-create-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--pill-h);   /* фикс: одна высота для контейнера */
+  padding: 0 12px;             /* боковые отступы вместо padding у textarea */
+  border-radius: 9999px;
+}
+
+#create-post textarea,
+.create-post textarea {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: #00c9c9;
+  font-size: 14px;
+  line-height: 1.2;
+  resize: none;
+  outline: none;
+  padding: 0;                  /* важно! не вмешиваемся в вертикальное центрирование */
+  overflow: hidden;
+  width: 100%;
+}
+
+.textarea-wrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+}
+
+/* Плюс — ровно по центру */
+.file-icon { 
+  width: var(--pill-h); 
+  height: var(--pill-h); 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  border-radius: 9999px; 
+  cursor: pointer; } 
+
+.file-icon:hover { background: rgba(255, 255, 255, 0.1); }
+
+.file-icon img {
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+
+.file-icon .plus-icon {
+  width: 16px;
+  height: 16px;
+  stroke: #04c5bf;   /* фиксированный цвет — больше не пропадёт */
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;   /* чтобы клик шёл по кнопке, а не по svg */
+}
+
+/* на всякий случай подсветка при hover/active */
+.file-icon:hover .plus-icon { opacity: .9; }
+.file-icon:active .plus-icon { transform: scale(.96); }
+
+/* убираем абсолют у картинки внутри кастомного триггера */
+#custom-file-trigger {
+  font-size: 0 !important;
+}
+
+#custom-file-trigger img {
+  position: static !important;
+  transform: none !important;
+  color: #04c5bf;              /* ← ВАЖНО: цвет для currentColor */
+  opacity: 1;                  /* подстраховка */
+  filter: none;                /* подстраховка */
+}
+
+#custom-file-trigger:focus img,
+#custom-file-trigger:active img {
+  color: #04c5bf;
+  opacity: 1;
+}
+
+.file-icon.file-selected img {
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: none !important;
+  display: block !important;
+}
+
+#file-preview {
+  padding-top: 10px;
+  margin-bottom: 12px;
+  gap: 12px;
+  border-radius: 12px;     /* можно оставить тут, раз он уже есть */
+}
+
+.preview-image,
+.preview-video {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 0 5px #0006;
 }
 
 .post-options {
@@ -132,28 +239,7 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-#create-post textarea,
-.create-post textarea{
-  flex:1;
-  border:0;
-  background:transparent;
-  color:#00c9c9;
-  font-size:14px;
-  line-height:1.2;
-  resize:none;
-  outline:none;
-  padding:0;                 /* ← важно! убираем padding, он и поднимал текст */
-  overflow:hidden;
-  width:100%;
-}
-
-.textarea-wrapper {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  height: 100%;
-}
-
+/* Кнопки опций */
 .post-options button {
   display: inline-flex;
   align-items: center;
@@ -171,7 +257,9 @@ body {
   font-size: 14px;
   line-height: 1;
 }
-
+.post-options button:hover {
+  background-color: #03b3ad;
+}
 .post-options button img.option-icon {
   width: 16px;
   height: 16px;
@@ -179,101 +267,7 @@ body {
   vertical-align: middle;
 }
 
-.post-submit {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 12px;
-}
-
-.post-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: bold;
-  background-color: #04c5bf;
-  color: #000;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(4, 197, 191, 0.3);
-}
-
-.post-btn:hover {
-  background-color: #03b3ad;
-  box-shadow: 0 4px 12px rgba(4, 197, 191, 0.5);
-  transform: translateY(-1px);
-}
-
-#post-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-#post-btn {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-
-#post-btn.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* Плюс той же высоты – чтобы иконка ровно по центру */
-.file-icon{
-  width:44px; height:44px;
-  display:flex; align-items:center; justify-content:center;
-  border-radius:9999px; cursor:pointer;
-}
-
-.file-icon:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.file-icon img{ 
-  width:20px; 
-  height:20px; 
-  pointer-events:none; 
-}
-
-#file-preview {
-  padding-top: 10px;
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: flex-start;
-}
-
-.preview-image, .preview-video {
-  width: 140px;
-  height: 140px;
-  object-fit: cover;
-  border-radius: 10px;
-  box-shadow: 0 0 5px #0006;
-}
-
-/* Кнопки */
-.post-options button {
-  padding: 6px 12px;
-  margin: 5px 4px 0 0;
-  border: none;
-  background-color: #04c5bf;
-  color: #000;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background 0.3s ease;
-}
-
-.post-options button:hover {
-  background-color: #03b3ad;
-}
-
-/* Чекбоксы и подписи */
+/* Чекбоксы */
 .post-options label {
   display: inline-flex;
   align-items: center;
@@ -295,8 +289,6 @@ body {
   color: var(--text-color);
   user-select: none;
 }
-
-/* Скрываем оригинальный чекбокс */
 .custom-checkbox input {
   position: absolute;
   opacity: 0;
@@ -304,8 +296,6 @@ body {
   height: 0;
   width: 0;
 }
-
-/* Стиль кастомной галочки */
 .custom-checkbox .checkmark {
   position: absolute;
   left: 0;
@@ -318,22 +308,16 @@ body {
   border-radius: 4px;
   transition: 0.2s ease;
 }
-
 .custom-checkbox .checkmark:hover {
   box-shadow: 0 0 6px #04c5bf;
   background-color: #014f4f;
 }
-
-/* Галочка при выборе */
 .custom-checkbox input:checked ~ .checkmark {
   background-color: #04c5bf;
 }
-
 .custom-checkbox input:active ~ .checkmark {
   transform: scale(0.95) translateY(-50%);
 }
-
-/* Галочка внутри */
 .custom-checkbox .checkmark::after {
   content: "";
   position: absolute;
@@ -342,39 +326,85 @@ body {
   top: 1px;
   width: 4px;
   height: 9px;
-  border-color: #fff; /* вместо #000 */
+  border-color: #fff;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
   transition: all 0.2s ease;
 }
-
-/* Показываем галочку при выборе */
 .custom-checkbox input:checked ~ .checkmark::after {
   display: block;
 }
 
-/* Feed */
+/* Отправка */
+.post-submit {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.post-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #04c5bf;
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(4, 197, 191, 0.3);
+}
+.post-btn:hover {
+  background-color: #03b3ad;
+  box-shadow: 0 4px 12px rgba(4, 197, 191, 0.5);
+  transform: translateY(-1px);
+}
+#post-btn:disabled {        /* фикс селектора :disabled */
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+#post-btn {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+#post-btn.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* скрываем реальный input[type=file] */
+input[type="file"] { display: none; }
+.file-preview:empty { display: none; }
+
+/* ---------- FEED ---------- */
+.feed { max-width: 700px; margin: 20px auto; }
+
 .feed .post {
   position: relative;
-  background: #04c5bf;
+  background: transparent;
   border-radius: 15px;
-  padding: 20px;
+  padding: 0px;
   margin-bottom: 25px;
   max-width: 700px;
   margin: 0 auto 25px auto;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: none;
 }
 
-.feed .post.other-user {
-  margin-left: 60px;
+/* сообщение другого пользователя */
+.feed .post.other-user .message-bubble{
+  margin-left: 0px;
   border-top-left-radius: 0;
+  border-bottom-left-radius: 15; /* ← ВАЖНО */
 }
 
 .feed .post.current-user {
   margin-left: auto;
   margin-right: 0;
-  background: #04c5bf;
-  border-top-right-radius: 0;
+  background: transparent;
 }
 
 .feed .post .avatar {
@@ -386,36 +416,24 @@ body {
   border-radius: 50%;
   overflow: hidden;
 }
-
 .feed .post.current-user .avatar {
   left: auto;
   right: -50px;
 }
 
 .feed .post .message-bubble {
-  color: #000;
+  background: #04c5bf;
+  border-radius: 15px;
+  padding: 16px 18px 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  color:#000;
 }
+.feed .post .username { font-weight: bold; color: var(--header-color); }
 
-.feed .post .username {
-  font-weight: bold;
-  color: var(--header-color);
-}
-
-.post-actions {
-  display: flex;
-  margin-top: 10px;
-  gap: 12px;
-}
-
-.post-actions .action-btn {
-  background: none; 
-  border: none;
-  cursor: pointer;
-}
-
-.post-actions .action-btn img {
-  width: 28px;
-  height: 28px;
+.feed .post.current-user .message-bubble{
+  margin-left: auto;
+  margin-right: 0;
+  border-top-right-radius: 0;
 }
 
 /* Tails */
@@ -423,22 +441,31 @@ body {
   position: absolute;
   width: 20px;
   height: 20px;
-  top: 20px; /* чуть ниже верхнего края */
+  top: 20px;
+  z-index: 2;
 }
 
-.bubble-tail.left {
-  left: -18px;
-  transform: scaleY(-1);
-  top: 0px;
+.bubble-tail.left { left: -18px; transform: scaleY(-1); top: 0; } 
+.bubble-tail.right { right: -20px; transform: scale(-1, -1); top: 0; } /* цвета хвостиков через CSS, не внутри svg */ 
+.bubble-tail path { fill: #04c5bf; }
+.feed .post.current-user .bubble-tail path { fill: #c71b43; }
+
+.post-actions {
+  display: flex;
+  margin-top: 10px;
+  gap: 12px;
+}
+.post-actions .action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.post-actions .action-btn img {
+  width: 28px;
+  height: 28px;
 }
 
-.bubble-tail.right {
-  right: -20px;
-  transform: scale(-1, -1);
-  top: 0px;
-} 
-
-/* Suggestions */
+/* ---------- Suggestions (правый сайдбар) ---------- */
 .suggestions {
   position: fixed;
   top: 80px;
@@ -466,9 +493,7 @@ body {
   margin-right: 10px;
 }
 
-.suggested-info .username {
-  display: block;
-}
+.suggested-info .username { display: block; }
 
 .suggested-info button {
   margin-top: 5px;
@@ -479,18 +504,14 @@ body {
   border-radius: 4px;
   cursor: pointer;
 }
+.suggested-info button:hover { background: #0056b3; }
 
-.suggested-info button:hover {
-  background: #0056b3;
-}
-
-/* Auth buttons */
+/* ---------- Auth buttons (верхний правый угол) ---------- */
 .auth-buttons {
   position: absolute;
   top: 20px;
   right: 20px;
 }
-
 .auth-buttons .btn {
   background: none;
   color: #007bff;
@@ -500,47 +521,724 @@ body {
   text-decoration: underline;
 }
 
-input[type="file"] {
-  display: none;
+/* ---------- Preview toolbar ---------- */
+.preview-toolbar{
+  display:flex; justify-content:flex-end; align-items:center;
+  margin-top: 10px;
+}
+.preview-mode{
+  background: #004645; border:1px solid #016b68; border-radius:10px;
+  padding:2px; display:inline-flex; gap:2px;
+}
+.mode-btn{
+  background:transparent; color:#04c5bf; border:none; cursor:pointer;
+  padding:6px 10px; border-radius:8px; font-weight:600; font-size:12px;
+}
+.mode-btn.active{ background:#016b68; color:#e6e6e6; }
+
+/* ---------- Preview base ---------- */
+#file-preview{
+  padding-top: 10px;
+  margin-bottom: 12px;      /* чтобы не прилипало к чекбоксам */
+  border-radius: 12px;
 }
 
-.file-preview:empty {
-  display: none;
+/* крестик удаления */
+.preview-remove{
+  position:absolute; right:6px; top:6px;
+  background:#000c; color:#fff; border-radius:50%;
+  width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+  font-size:14px; cursor:pointer; user-select:none;
 }
 
-#custom-file-trigger {
-  font-size: 0 !important;
-  color: transparent !important;
+/* счётчик +N на последней плитке */
+.preview-more{
+  position:absolute; inset:0; background:rgba(0,0,0,.45);
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:700; font-size:24px;
+}
+
+/* База без дисплея — ничего не ломаем */
+#file-preview { padding-top: 10px; }
+
+/* ====== ЕДИНАЯ БАЗА ДЛЯ ПРЕДПРОСМОТРА ====== */
+
+/* =========================
+   PREVIEW LAYOUTS (1..12)
+   ========================= */
+
+#file-preview[data-mode="grid"]{
+  display: grid;
+  gap: 12px;
+  grid-auto-rows: clamp(120px, 18vw, 210px);
+}
+
+/* плитки */
+#file-preview .preview-item{
   position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #002b2a;
 }
 
-#custom-file-trigger img {
+#file-preview .preview-item > img,
+#file-preview .preview-item > video{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* крестик — добавил z-index, чтобы он был поверх */
+#file-preview .preview-remove{
+  position:absolute;
+  right:6px;
+  top:6px;
+  z-index: 10;
+  background:#000c;
+  color:#fff;
+  border-radius:50%;
+  width:22px;
+  height:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  cursor:pointer;
+  user-select:none;
+}
+
+/* 1 — одна */
+#file-preview.l1{ grid-template-columns: 1fr; }
+
+/* 2 — две рядом */
+#file-preview.l2{ grid-template-columns: repeat(2, 1fr); }
+
+/* 3 — большая слева (2x2), справа две */
+#file-preview.l3{ grid-template-columns: repeat(3, 1fr); }
+#file-preview.l3 .preview-item:nth-child(1){
+  grid-column: 1 / span 2;
+  grid-row: span 2;
+}
+#file-preview.l3 .preview-item:nth-child(2){ grid-column: 3; }
+#file-preview.l3 .preview-item:nth-child(3){ grid-column: 3; }
+
+/* 4 — 2x2 */
+#file-preview.l4{ grid-template-columns: repeat(2, 1fr); }
+
+/* 5 — 2 сверху, 3 снизу */
+#file-preview.l5{ grid-template-columns: repeat(6, 1fr); }
+#file-preview.l5 .preview-item:nth-child(1),
+#file-preview.l5 .preview-item:nth-child(2){ grid-column: span 3; }
+#file-preview.l5 .preview-item:nth-child(3),
+#file-preview.l5 .preview-item:nth-child(4),
+#file-preview.l5 .preview-item:nth-child(5){ grid-column: span 2; }
+
+/* 6 — 3x2 */
+#file-preview.l6{ grid-template-columns: repeat(3, 1fr); }
+
+/* 8 — 2 сверху, 6 снизу (оставим сеткой как было) */
+#file-preview.l8{ grid-template-columns: repeat(6, 1fr); }
+#file-preview.l8 .preview-item:nth-child(1),
+#file-preview.l8 .preview-item:nth-child(2){ grid-column: span 3; }
+#file-preview.l8 .preview-item:nth-child(n+3){ grid-column: span 2; }
+
+/* 9 — 3x3 */
+#file-preview.l9{ grid-template-columns: repeat(3, 1fr); }
+
+/* 7 и 10+ — 2 сверху + лента снизу */
+#file-preview.lstrip{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#file-preview.lstrip .preview-top{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  grid-auto-rows: clamp(120px, 18vw, 210px);
+}
+
+#file-preview.lstrip .preview-bottom{
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+#file-preview.lstrip .preview-bottom .preview-item{
+  flex: 0 0 140px;
+  min-width: 140px;
+  height: 140px;
+}
+
+/* мобилка */
+@media (max-width: 520px){
+  #file-preview.lstrip .preview-top{ grid-template-columns: 1fr; }
+  #file-preview.l2,
+  #file-preview.l4{ grid-template-columns: 1fr; }
+  #file-preview.l5,
+  #file-preview.l8{ grid-template-columns: 1fr; }
+}
+
+
+/* ==== VK-style bottom row: ВСЁ видно, без скролла ==== */
+#file-preview.lstrip{
+  --gap: 12px;
+  --bottom-count: 5; /* дефолт, JS перезапишет */
+}
+
+#file-preview.lstrip .preview-bottom{
+  display: flex;
+  gap: var(--gap);
+  overflow: hidden;        /* никаких скроллов */
+  padding-bottom: 0;
+}
+
+#file-preview.lstrip .preview-bottom .preview-item{
+  /* ширина = (100% - gap*(n-1)) / n */
+  flex: 0 0 calc((100% - (var(--gap) * (var(--bottom-count) - 1))) / var(--bottom-count));
+  aspect-ratio: 1 / 1;     /* квадрат */
+  height: auto;            /* aspect-ratio сам задаст высоту */
+  min-width: 40px;         /* чтобы совсем не исчезало */
+  border-radius: 12px;
+}
+
+/* =========================
+   LIGHTBOX PREVIEW
+   ========================= */
+.media-lightbox{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 24px;
+}
+
+.media-lightbox.open{ display:flex; }
+
+.media-lightbox .lb-inner{
+  position: relative;
+  width: min(980px, 96vw);
+  max-height: 90vh;
+  background: #000a12;
+  border: 1px solid #014f4f;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+}
+
+.media-lightbox .lb-body{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height: 90vh;
+  max-height: 90vh;
+}
+
+.media-lightbox img,
+.media-lightbox video{
+  max-width: 100%;
+  max-height: 100%;
+  display:block;
+}
+
+.media-lightbox video{ width: 100%; height: 100%; object-fit: contain; }
+
+.media-lightbox .lb-close{
+  position:absolute;
+  top:10px; right:10px;
+  width:34px; height:34px;
+  border-radius:50%;
+  background: rgba(0,0,0,.55);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  z-index: 2;
+  font-size: 18px;
+  user-select:none;
+}
+
+.media-lightbox .lb-nav{
+  position:absolute;
+  top:50%;
+  transform: translateY(-50%);
+  width:44px; height:44px;
+  border-radius:50%;
+  background: rgba(0,0,0,.45);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  z-index: 2;
+  font-size: 26px;
+  user-select:none;
+}
+
+.media-lightbox .lb-prev{ left:12px; }
+.media-lightbox .lb-next{ right:12px; }
+
+/* делаем плитки "кликабельными" */
+#file-preview .preview-item{ cursor: pointer; }
+#file-preview .preview-remove{ cursor: pointer; } /* уже есть, но ок */
+
+/* =========================
+   CAROUSEL MODE (active + thumbs)
+   ========================= */
+
+/* крестик на миниатюрах */
+#file-preview[data-mode="carousel"] .thumb .preview-remove{
+  width: 20px;
+  height: 20px;
+  font-size: 13px;
+  right: 6px;
+  top: 6px;
+}
+
+#file-preview[data-mode="carousel"]{
+  display:flex;
+  flex-direction:column;
+  gap: 12px;
+}
+
+#file-preview[data-mode="carousel"] .carousel-main{
+  padding: 0px;
+  box-sizing: border-box;
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #001b1a;
+  height: clamp(220px, 34vw, 420px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  --bg: none; /* <<< добавь */
+}
+
+#file-preview[data-mode="carousel"] .carousel-main img,
+#file-preview[data-mode="carousel"] .carousel-main video{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;      /* 🔥 ключевой момент */
+  object-position: center;
+  display:block;
+  border-radius: 0px;
+}
+
+/* blur background */
+#file-preview[data-mode="carousel"] .carousel-main::before{
+  content:"";
+  position:absolute;
+  border-radius: inherit;  /* ✅ иначе по краям может “светиться” */
+  inset:0;
+  background-image: var(--bg);
+  background-size: cover;
+  background-position: center;
+  filter: blur(40px);     /* больше */
+  transform: scale(1.4);  /* чтобы не было краёв */
+  opacity: .65;
+  z-index: 0;
+}
+
+#file-preview[data-mode="carousel"] .carousel-main::after{
+  content:"";
+  position:absolute;
+  border-radius: inherit;  /* ✅ иначе по краям может “светиться” */
+  inset:0;
+  background: rgba(0,0,0,.28);
+  z-index: 1;
+}
+
+#file-preview[data-mode="carousel"] .carousel-main > *{
+  position: relative;
+  z-index: 2;
+}
+
+/* fade */
+#file-preview[data-mode="carousel"] .carousel-main.fade-out{ opacity:0; transition:opacity .12s ease; }
+#file-preview[data-mode="carousel"] .carousel-main.fade-in{ opacity:1; transition:opacity .16s ease; }
+
+/* arrows */
+#file-preview[data-mode="carousel"] .car-nav{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.45);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  user-select:none;
+  z-index: 5;
+  font-size: 26px;
+}
+#file-preview[data-mode="carousel"] .car-prev{ left: 10px; }
+#file-preview[data-mode="carousel"] .car-next{ right: 10px; }
+
+/* thumbs row (no overlap) */
+#file-preview[data-mode="carousel"] .carousel-thumbs{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+}
+
+#file-preview[data-mode="carousel"] .thumb{
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #002b2a;
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+
+  flex: 1 1 0;
+  min-width: 34px;
+  transition: flex .18s ease, box-shadow .18s ease;
+}
+#file-preview[data-mode="carousel"] .thumb.active{
+  flex: 2 1 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+#file-preview[data-mode="carousel"] .thumb img,
+#file-preview[data-mode="carousel"] .thumb video{
+  width:100%;
+  height:100%;
+  object-fit: cover;
+  display:block;
+}
+
+/* ===== Fix: крестик в carousel-main всегда ровный и в углу ===== */
+#file-preview[data-mode="carousel"] .carousel-main .preview-remove{
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 12px;
+  right: 12px;
+
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: rgba(0,0,0,.55);
+  color: #fff;
+
+  font-size: 18px;
+  line-height: 1;
+
+  z-index: 20;          /* выше blur/оверлея/видео */
+  flex: 0 0 auto;       /* чтобы не "плющило" */
+  transform: none;
+  pointer-events: auto;
+}
+
+/* overlay только для центр-кнопки, НЕ на весь main */
+#file-preview[data-mode="carousel"] .car-play{
+  position:absolute;
+  left:50%;
+  top:50%;
   transform: translate(-50%, -50%);
+  z-index: 6;
+  cursor: pointer;
 }
 
-.file-icon.file-selected img {
-  opacity: 1 !important;
-  visibility: visible !important;
-  filter: none !important;
+#file-preview[data-mode="carousel"] .car-play .btn{
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.45);
+  color: #fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 30px;
+  user-select:none;
+  backdrop-filter: blur(2px);
+}
+
+#file-preview[data-mode="carousel"] .carousel-main.playing .car-play{
+  display:none;
+}
+
+/* fullscreen кнопка рядом с крестиком */
+#file-preview[data-mode="carousel"] .carousel-main .car-full{
+  position: absolute;
+  top: 12px;
+  right: 54px;              /* левее крестика */
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.55);
+  color: #fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 18px;
+  line-height: 1;
+  z-index: 20;
+  cursor: pointer;
+  user-select:none;
+}
+#file-preview[data-mode="carousel"] .carousel-main .car-full:hover{
+  background: rgba(0,0,0,.68);
+}
+
+.post-media{
+  margin-top: 10px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.post-media-item{
+  width: 100%;
+  max-height: 420px;
+  border-radius: 12px;
+  object-fit: cover;
+  display: block;
+  background: #001a2e;
+}
+
+
+.post-header{
+  display:flex;
+  align-items:center;
+  margin-bottom: 10px;
+}
+
+.post-media{
+  margin: 10px 0 12px;
+  border-radius: 16px;
+  overflow:hidden;
+}
+
+/* GRID: как Instagram плитки */
+.post-media--grid{
+  display:grid;
+  gap:10px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.post-media--grid img,
+.post-media--grid video{
+  width:100%;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  display:block;
+  border-radius: 12px;
+}
+
+/* CAROUSEL: один главный + миниатюры */
+.post-media--carousel{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 6px;
+}
+
+.post-media--carousel img,
+.post-media--carousel video{
+  flex: 0 0 85%;
+  max-width: 85%;
+  height: 320px;
+  object-fit: cover;
+  display:block;
+  border-radius: 16px;
+  scroll-snap-align: start;
+}
+
+.post-actions.under-bubble{
+  display:flex;
+  gap:12px;
+  margin-top: 10px;
+  padding-left: 14px; /* чтобы было похоже на “под сообщением” */
+  opacity: .95;
+}
+
+.post-actions.under-bubble .action-btn img{
+  width: 26px;
+  height: 26px;
+}
+
+/* =========================
+   FEED POST MEDIA (FIX)
+   ========================= */
+
+/* общий контейнер медиа внутри bubble */
+.feed .post .post-media{
+  margin: 10px 0 12px;
+  padding: 0;
+  border-radius: 16px;
+  overflow: hidden;          /* чтобы ничего не “вываливалось” */
+}
+
+/* ---------- GRID ---------- */
+.feed .post .post-media--grid{
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.feed .post .post-media--grid .post-media-item{
+  width: 100%;
+  aspect-ratio: 1 / 1;       /* все плитки одинаковые */
+  height: auto;              /* важно: не фиксируем высоту */
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
+  background: #001a2e;
+  max-height: none;          /* перебиваем твой max-height:420px */
+}
+
+/* мобильная адаптация */
+@media (max-width: 520px){
+  .feed .post .post-media--grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---------- CAROUSEL ---------- */
+.feed .post .post-media--carousel{
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;          /* скролл только здесь */
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 6px;
+}
+
+.feed .post .post-media--carousel .post-media-item{
+  flex: 0 0 85%;
+  max-width: 85%;
+  height: 320px;             /* нормальная высота, не “гигант” */
+  object-fit: cover;
+  display: block;
+  border-radius: 16px;
+  background: #001a2e;
+  scroll-snap-align: start;
+  max-height: none;          /* перебиваем твой max-height */
+}
+
+/* чтобы видео не растягивалось странно */
+.feed .post .post-media--carousel video.post-media-item,
+.feed .post .post-media--grid video.post-media-item{
+  width: 100%;
+  height: 100%;
+}
+
+/* =========================
+   POST MEDIA uses SAME layout as #file-preview
+   ========================= */
+
+/* контейнер медиа в посте = тот же движок */
+.post-media{
+  margin: 10px 0 12px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* Снимаем твои старые режимы, чтобы не мешали */
+.post-media--grid,
+.post-media--carousel{
   display: block !important;
-}
-
-/* --- FINAL LOCK: центр плейсхолдера в свернутом состоянии --- */
-.create-post:not(.expanded) .textarea-wrapper { 
-  align-items: center;                 /* на всякий случай */
-}
-
-.create-post:not(.expanded) #post-textarea {
-  height: 44px !important;
-  line-height: 44px !important;
-  padding-top: 0 !important;
+  overflow: visible !important;
+  scroll-snap-type: none !important;
   padding-bottom: 0 !important;
-  margin: 0 !important;
-  box-sizing: content-box;             /* исключаем влияние рамок/паддингов */
-  white-space: nowrap !important;      /* чтобы не переносился текст */
-  overflow: hidden; 
-  text-overflow: ellipsis;
+}
+
+/* ВАЖНО: делаем .post-media совместимым с твоими правилами #file-preview */
+.post-media.media-layout[data-mode="grid"]{
+  display: grid;
+  gap: 12px;
+  grid-auto-rows: clamp(120px, 18vw, 210px);
+}
+
+/* плитки */
+.post-media.media-layout .preview-item{
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #002b2a;
+}
+
+.post-media.media-layout .preview-item > img,
+.post-media.media-layout .preview-item > video{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display:block;
+}
+
+/* ==== схемы 1..9 (как в create) ==== */
+.post-media.media-layout.l1{ grid-template-columns: 1fr; }
+.post-media.media-layout.l2{ grid-template-columns: repeat(2, 1fr); }
+
+.post-media.media-layout.l3{ grid-template-columns: repeat(3, 1fr); }
+.post-media.media-layout.l3 .preview-item:nth-child(1){
+  grid-column: 1 / span 2;
+  grid-row: span 2;
+}
+.post-media.media-layout.l3 .preview-item:nth-child(2){ grid-column: 3; }
+.post-media.media-layout.l3 .preview-item:nth-child(3){ grid-column: 3; }
+
+.post-media.media-layout.l4{ grid-template-columns: repeat(2, 1fr); }
+
+.post-media.media-layout.l5{ grid-template-columns: repeat(6, 1fr); }
+.post-media.media-layout.l5 .preview-item:nth-child(1),
+.post-media.media-layout.l5 .preview-item:nth-child(2){ grid-column: span 3; }
+.post-media.media-layout.l5 .preview-item:nth-child(3),
+.post-media.media-layout.l5 .preview-item:nth-child(4),
+.post-media.media-layout.l5 .preview-item:nth-child(5){ grid-column: span 2; }
+
+.post-media.media-layout.l6{ grid-template-columns: repeat(3, 1fr); }
+
+.post-media.media-layout.l8{ grid-template-columns: repeat(6, 1fr); }
+.post-media.media-layout.l8 .preview-item:nth-child(1),
+.post-media.media-layout.l8 .preview-item:nth-child(2){ grid-column: span 3; }
+.post-media.media-layout.l8 .preview-item:nth-child(n+3){ grid-column: span 2; }
+
+.post-media.media-layout.l9{ grid-template-columns: repeat(3, 1fr); }
+
+/* ==== 7 и 10+ (2 сверху + нижняя лента без скролла) ==== */
+.post-media.media-layout.lstrip{
+  display: flex !important;
+  flex-direction: column;
+  gap: 12px;
+  --gap: 12px;
+  --bottom-count: 5; /* JS выставит сколько нужно */
+}
+
+.post-media.media-layout.lstrip .preview-top{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  grid-auto-rows: clamp(120px, 18vw, 210px);
+}
+
+.post-media.media-layout.lstrip .preview-bottom{
+  display: flex;
+  gap: var(--gap);
+  overflow: hidden;     /* без скролла */
+  padding-bottom: 0;
+}
+
+.post-media.media-layout.lstrip .preview-bottom .preview-item{
+  flex: 0 0 calc((100% - (var(--gap) * (var(--bottom-count) - 1))) / var(--bottom-count));
+  aspect-ratio: 1 / 1;
+  height: auto;
+  min-width: 40px;
 }

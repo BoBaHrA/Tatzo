@@ -1,0 +1,52 @@
+{% load static %}
+
+<div class="post {% if post.user == request.user %}current-user{% else %}other-user{% endif %}">
+  <div class="avatar">
+    {% if post.user.profile.profile_image %}
+      <img src="{{ post.user.profile.profile_image.url }}" alt="User Avatar">
+    {% else %}
+      <img src="{% static 'icons/user.png' %}" alt="User Avatar">
+    {% endif %}
+  </div>
+
+  {# ✅ хвостик #}
+  {% if post.user != request.user %}
+    <svg class="bubble-tail left" viewBox="0 0 20 20" aria-hidden="true">
+      <path d="M0,20 Q30,5 20,-30 L20,20 Z"></path>
+    </svg>
+  {% else %}
+    <svg class="bubble-tail right" viewBox="0 0 20 20" aria-hidden="true">
+      <path d="M0,20 Q30,5 20,-30 L20,20 Z"></path>
+    </svg>
+  {% endif %}
+
+  <div class="message-bubble">
+    <div class="post-header">
+      <div class="username">{{ post.user.username }}</div>
+    </div>
+
+    {% if post.medias.all %}
+      <div class="post-media post-media--{{ post.layout }}">
+        {% for m in post.medias.all %}
+          {% if m.media_type == 'image' %}
+            <img src="{{ m.file.url }}" alt="media">
+          {% else %}
+            <video src="{{ m.file.url }}" controls playsinline preload="metadata"></video>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if post.content %}
+      <div class="content">{{ post.content }}</div>
+    {% endif %}
+  </div>
+
+  {# ✅ actions ВНЕ bubble (под bubble) #}
+  <div class="post-actions under-bubble">
+    <button class="action-btn" title="Like"><img src="{% static 'icons/heart.svg' %}" alt="Like"></button>
+    <button class="action-btn" title="Comment"><img src="{% static 'icons/comments1.svg' %}" alt="Comment"></button>
+    <button class="action-btn" title="Repost"><img src="{% static 'icons/share1.svg' %}" alt="Repost"></button>
+    <button class="action-btn" title="Bookmark"><img src="{% static 'icons/bookmark11.svg' %}" alt="Bookmark"></button>
+  </div>
+</div>
