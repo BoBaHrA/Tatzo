@@ -21,7 +21,7 @@ from .forms import (  # Если у вас есть форма для созда
     VerificationForm,
 )
 from .forms_custom import CustomUserCreationForm  # Импортируем из нового файла
-from .models import Post, PostMedia, Profile, VerificationDocument
+from posts.models import Post, PostMedia
 from .utils import send_verification_email
 
 

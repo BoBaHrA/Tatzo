@@ -2,11 +2,11 @@
 from django import forms
 from django.forms.widgets import ClearableFileInput
 
+from posts.models import Post  # ✅ вот это новое
 from .models import (
     BUSINESS_DOCUMENT_CHOICES,
     ID_DOCUMENT_CHOICES,
     USER_TYPE_CHOICES,
-    Post,
     Profile,
     VerificationDocument,
 )

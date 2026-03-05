@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from .models import Post, Profile, VerificationDocument
+from posts.models import Post
+from .models import Profile, VerificationDocument
 
 
 # Действие для массового подтверждения профилей

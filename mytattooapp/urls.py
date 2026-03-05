@@ -4,4 +4,5 @@ from django.urls import include, path  # Подключаем include для м�
 urlpatterns = [
     path("admin/", admin.site.urls),  # Стандартный маршрут для админки
     path("", include("users.urls")),  # Подключаем маршруты приложения "users"
+    path("posts/", include("posts.urls")),
 ]
