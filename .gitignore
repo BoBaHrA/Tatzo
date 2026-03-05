@@ -1,17 +1,22 @@
 # Python
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
 *.pyd
 
 # Django
 db.sqlite3
 media/
+staticfiles/
 
-# migrations cache
+# Local uploads / docs (keep out of repo)
+identity_documents/
+verification_documents/
+profile_images/
+
+# Migrations cache
 */migrations/__pycache__/
 
-# virtual environment
+# Virtual environment
 venv/
 .env
 
@@ -22,11 +27,3 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
-
-# Local uploads / docs (keep out of repo)
-identity_documents/
-verification_documents/
-profile_images/
-
-# Generated static (collectstatic)
-staticfiles/
