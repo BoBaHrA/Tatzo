@@ -1,16 +1,18 @@
 # users/forms_custom.py
-from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-from users.models import Profile
-from django.core.exceptions import ValidationError
 import re
-from django.contrib.auth.forms import SetPasswordForm
+
+from django import forms
+from django.contrib.auth.forms import SetPasswordForm, UserCreationForm
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+
+from users.models import Profile
 
 USER_TYPE_CHOICES = [
-    ('regular_user', 'Обычный пользователь'),
-    ('tattoo_artist', 'Тату-мастер'),
+    ("regular_user", "Обычный пользователь"),
+    ("tattoo_artist", "Тату-мастер"),
 ]
+
 
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -29,27 +31,28 @@ class CustomUserCreationForm(UserCreationForm):
             user.profile.account_type = self.cleaned_data["account_type"]
             user.profile.save()
         return user
-    
+
     def clean_password2(self):
-            password1 = self.cleaned_data.get("password1")
-            password2 = self.cleaned_data.get("password2")
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
 
-            errors = []
+        errors = []
 
-            if password1 and password2 and password1 != password2:
-                errors.append("Пароли не совпадают.")
-        
-            if len(password1) < 8:
-                errors.append("Пароль должен содержать минимум 8 символов.")
-            if not re.search(r'[A-Z]', password1):
-                errors.append("Пароль должен содержать хотя бы одну заглавную букву.")
-            if not re.search(r'\d', password1):
-                errors.append("Пароль должен содержать хотя бы одну цифру.")
+        if password1 and password2 and password1 != password2:
+            errors.append("Пароли не совпадают.")
 
-            if errors:
-                raise ValidationError(errors)
+        if len(password1) < 8:
+            errors.append("Пароль должен содержать минимум 8 символов.")
+        if not re.search(r"[A-Z]", password1):
+            errors.append("Пароль должен содержать хотя бы одну заглавную букву.")
+        if not re.search(r"\d", password1):
+            errors.append("Пароль должен содержать хотя бы одну цифру.")
 
-            return password2
+        if errors:
+            raise ValidationError(errors)
+
+        return password2
+
 
 class CustomSetPasswordForm(SetPasswordForm):
     def clean_new_password1(self):
@@ -58,9 +61,9 @@ class CustomSetPasswordForm(SetPasswordForm):
 
         if len(password1) < 8:
             errors.append("Пароль должен содержать минимум 8 символов.")
-        if not re.search(r'[A-Z]', password1):
+        if not re.search(r"[A-Z]", password1):
             errors.append("Пароль должен содержать хотя бы одну заглавную букву.")
-        if not re.search(r'\d', password1):
+        if not re.search(r"\d", password1):
             errors.append("Пароль должен содержать хотя бы одну цифру.")
 
         if errors:
@@ -85,4 +88,3 @@ class CustomSetPasswordForm(SetPasswordForm):
         if commit:
             user.save()
         return user
-    

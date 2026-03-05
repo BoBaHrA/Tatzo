@@ -1,0 +1,330 @@
+/* Основные стили */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #000d18;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    color: #e6e6e6;
+}
+
+/* Контейнер формы */
+.verification-container {
+    background-color: #000a12;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+}
+
+/* Заголовок */
+h2 {
+    font-size: 22px;
+    color: #04c5bf;
+    margin-bottom: 20px;
+}
+
+/* Общий стиль для полей */
+.form-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+/* Выбор документа */
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #04c5bf;
+    border-radius: 5px;
+    background-color: #001a2e;
+    color: #e6e6e6;
+    font-size: 1rem;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2304c5bf' width='24' height='24'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
+}
+
+/* Улучшенный вопросительный знак */
+/* Вопросительный знак - теперь он точно круглый */
+.tooltip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px; /* Размер круга */
+    height: 20px;
+    border-radius: 50%; /* Делаем его круглым */
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #e6e6e6;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: background 0.3s ease;
+}
+
+.tooltip:hover {
+    background-color: #04c5bf;
+    color: #000d18;
+}
+
+/* Поднимаем вторую кнопку выбора файла */
+.file-upload-container:last-of-type {
+    margin-top: -15px; /* Увеличили отступ вверх */
+}
+
+/* Дополнительно фиксируем стили для кнопки */
+.file-upload {
+    display: inline-block;
+    background-color: #04c5bf;
+    color: black;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 14px;
+    text-align: center;
+    cursor: pointer;
+    margin-top: 5px; /* Делаем одинаковый отступ */
+    margin-bottom: 5px; /* Добавляем небольшой отступ снизу */
+    width: auto;
+    min-width: 150px;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.file-upload:hover {
+    background-color: #03a99c;
+}
+
+.file-upload.file-selected {
+    background-color: #039b9b;
+    color: white;
+}
+
+
+input[type="file"] {
+    display: none; /* Скрываем стандартный input */
+}
+
+/* Кнопка отправки */
+.btn-submit {
+    background-color: #ee0c6f;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    width: 100%;
+    z-index: 10; /* Ниже затемнения */
+    transition: background-color 0.3s ease;
+    margin-top: 5px; /* Добавляем больше отступа перед кнопкой */
+}
+
+.btn-submit:hover {
+    background-color: #e72a7f;
+}
+
+/* Дисклеймер */
+.disclaimer {
+    font-size: 14px;
+    color: #999;
+    text-align: center;
+    margin-top: 15px;
+}
+
+
+/* Контейнер анимации */
+#confirmation-animation {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 250px;
+    height: 300px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 100; /* Поверх затемнения */
+    pointer-events: auto; /* Кликабельно до запуска */
+}
+
+
+/* Когда анимация активна, включаем кликабельность */
+#confirmation-animation.animate {
+    pointer-events: none;
+}
+
+.verification-container {
+    pointer-events: auto; /* ✅ Кнопки работают ДО анимации */
+}
+
+#confirmation-animation.animate ~ .verification-container .file-upload {
+    display: none; /* Полностью убираем кнопки */
+    pointer-events: none; /* Отключаем клики */
+}
+
+/* Скрытие контейнера */
+.hidden {
+    display: none;             /* Полностью убираем блок, чтобы не перекрывал кнопки */
+    visibility: hidden;
+    pointer-events: none;
+    z-index: -1;               /* Ставим ниже всех, чтобы не перекрывал ничего! */
+}
+
+
+/* Запускаем анимацию */
+.confirmation-box.animate {
+    opacity: 1;
+}
+
+/* Анимация тату-машинки */
+@keyframes tattooDraw {
+    0% { top: 165px; left: 150px; transform: rotate(-30deg); }
+    50% { top: 190px; left: 175px; transform: rotate(-10deg); }
+    100% { top: 138px; left: 217px; transform: rotate(20deg); }
+}
+
+
+.tattoo-machine {
+    width: 50px;
+    height: 50px;
+    background: url("/static/images/tattoo_machine.png") no-repeat center;
+    background-size: contain;
+    position: absolute;
+    opacity: 1;
+    z-index: 100;
+}
+
+#confirmation-animation.animate .tattoo-machine {
+    animation: tattooDraw 0.5s ease-in-out forwards;
+}
+
+/* Галочка */
+.checkmark {
+    font-size: 80px; /* Увеличиваем размер */
+    font-weight: bold;
+    color: #04c5bf;
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    opacity: 0;
+    transform: scale(0);
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+#confirmation-animation.animate .checkmark {
+    opacity: 1;
+    transform: scale(1);
+}
+
+
+/* Подтверждение выбора файла */
+.file-upload.file-selected {
+    background-color: #039b9b;
+    color: white;
+}
+
+.file-upload, .btn-submit {
+    position: relative;
+    z-index: 50; /* Повышаем приоритет для кнопок над скрытым контейнером */
+}
+
+/* Бумага */
+.paper {
+    width: 210px;  /* Стандартная ширина A4 */
+    height: 297px; /* Высота A4 */
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0px 20px 30px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    bottom: 20px; /* Смещаем ниже */
+    left: 50%;
+    transform: translateX(-50%) scale(0.8); /* Чтобы лист бумаги был ровно по центру */
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+/* Когда анимация активирована */
+#confirmation-animation.animate .paper {
+    opacity: 1 !important;  /* Делаем её видимой */
+    transform: translateX(-50%) scale(1) !important;
+}
+
+/* Имитация документа */
+.paper-content {
+    width: 80%;
+    height: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: absolute;
+    top: 10px;
+    padding-top: 50px; /* Отодвигаем текст ниже фото */
+    bottom: 30px;
+}
+
+/* Линии текста */
+.paper-text {
+    height: 6px;
+    width: 90%;
+    background: rgba(0, 0, 0, 0.295);
+    margin-bottom: 5px;
+    margin-left: 5%; /* Делаем отступ слева */
+}
+
+/* Фото */
+.paper-photo {
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.733);
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-radius: 3px;
+}
+
+/* Прячем кнопки отправки и выбора файлов во время анимации */
+.verification-container.hide-during-animation .file-upload {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+}
+
+
+#dark-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.781);
+    z-index: 80; /* Выше формы, ниже анимации */
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none; /* Чтобы не мешал кликам */
+}
+
+#dark-overlay.show {
+    opacity: 1;
+}
+
+
+#dark-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}

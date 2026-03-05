@@ -3,13 +3,14 @@ from django import forms
 from django.forms.widgets import ClearableFileInput
 
 from .models import (
-    Profile,
-    VerificationDocument,
-    Post,
     BUSINESS_DOCUMENT_CHOICES,
     ID_DOCUMENT_CHOICES,
     USER_TYPE_CHOICES,
+    Post,
+    Profile,
+    VerificationDocument,
 )
+
 
 # ✅ Виджет, который умеет multiple
 class MultiFileInput(ClearableFileInput):
@@ -23,34 +24,35 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ['account_type', 'bio', 'profile_image']
+        fields = ["account_type", "bio", "profile_image"]
 
 
 # -------- Пост (текст) --------
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['content']
+        fields = ["content"]
 
 
 # -------- Медиа к посту (несколько файлов) --------
 class PostMediaUploadForm(forms.Form):
     media = forms.FileField(
-        required=False,
-        widget=MultiFileInput(attrs={'multiple': True})
+        required=False, widget=MultiFileInput(attrs={"multiple": True})
     )
 
     # простая валидация
-    ALLOWED = {'image/jpeg', 'image/png', 'video/mp4', 'video/webm'}
+    ALLOWED = {"image/jpeg", "image/png", "video/mp4", "video/webm"}
     MAX_MB = 50
 
     def clean(self):
         cleaned = super().clean()
-        files = self.files.getlist('media') if hasattr(self, 'files') else []
+        files = self.files.getlist("media") if hasattr(self, "files") else []
 
         for f in files:
             if f.content_type not in self.ALLOWED:
-                raise forms.ValidationError(f"Тип файла не поддерживается: {f.content_type}")
+                raise forms.ValidationError(
+                    f"Тип файла не поддерживается: {f.content_type}"
+                )
             if f.size > self.MAX_MB * 1024 * 1024:
                 raise forms.ValidationError(f"Файл {f.name} больше {self.MAX_MB}MB.")
         return cleaned
@@ -67,10 +69,13 @@ class VerificationForm(forms.ModelForm):
     id_document_type = forms.ChoiceField(
         choices=ID_DOCUMENT_CHOICES, label="Тип документа личности", required=True
     )
-    id_document_file = forms.FileField(
-        label="Файл документа личности", required=True
-    )
+    id_document_file = forms.FileField(label="Файл документа личности", required=True)
 
     class Meta:
         model = VerificationDocument
-        fields = ['business_document_type', 'business_document_file', 'id_document_type', 'id_document_file']
+        fields = [
+            "business_document_type",
+            "business_document_file",
+            "id_document_type",
+            "id_document_file",
+        ]
