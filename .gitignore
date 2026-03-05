@@ -22,3 +22,11 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local uploads / docs (keep out of repo)
+identity_documents/
+verification_documents/
+profile_images/
+
+# Generated static (collectstatic)
+staticfiles/
