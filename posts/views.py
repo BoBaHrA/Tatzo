@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Post, PostMedia
-from users.forms import PostForm, PostMediaUploadForm
+from .forms import PostForm, PostMediaUploadForm
 
 
 def feed(request):

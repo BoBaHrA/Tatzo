@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.db import transaction
 from django.http import JsonResponse
@@ -14,16 +14,14 @@ from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.http import require_POST
 
-from .forms import (  # Если у вас есть форма для создания постов
-    PostForm,
-    PostMediaUploadForm,
-    ProfileForm,
-    VerificationForm,
-)
+from posts.forms import PostForm, PostMediaUploadForm
+from .forms import ProfileForm, VerificationForm
+
 from .forms_custom import CustomUserCreationForm  # Импортируем из нового файла
 from posts.models import Post, PostMedia
 from .utils import send_verification_email
 
+User = get_user_model()
 
 def login_view(request):
     if request.method == "POST":
