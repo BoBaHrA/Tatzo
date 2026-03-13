@@ -10,6 +10,12 @@ class Post(models.Model):
         ("carousel", "Carousel"),
     ]
 
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["-created_at"]),
+        ]
+    
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

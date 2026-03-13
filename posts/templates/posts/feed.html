@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="feed-container">
+
+    <!-- Создание поста -->
+    <div class="create-post">
+        <form method="POST" enctype="multipart/form-data" action="{% url 'create_post' %}">
+            {% csrf_token %}
+
+            {{ post_form.content }}
+
+            <input type="file" name="media" multiple>
+
+            <button type="submit">Post</button>
+        </form>
+    </div>
+
+    <hr>
+
+    <!-- Лента -->
+    {% for post in posts %}
+    <div class="post">
+
+        <div class="post-header">
+            <strong>{{ post.user.username }}</strong>
+            <span>{{ post.created_at }}</span>
+        </div>
+
+        <div class="post-content">
+            {{ post.content }}
+        </div>
+
+        <div class="post-media">
+            {% for media in post.media.all %}
+                {% if media.file.url|lower|endswith:".mp4" %}
+                    <video controls width="400">
+                        <source src="{{ media.file.url }}">
+                    </video>
+                {% else %}
+                    <img src="{{ media.file.url }}" width="400">
+                {% endif %}
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <hr>
+    {% endfor %}
+
+</div>
+
+{% endblock %}

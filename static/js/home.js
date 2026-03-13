@@ -691,3 +691,18 @@ function renderCarousel() {
     } 
   } 
 });
+
+document.addEventListener("click", function (e) {
+  const likeBtn = e.target.closest(".like-btn");
+  if (likeBtn) {
+    e.preventDefault();
+    likeBtn.classList.toggle("liked");
+    return;
+  }
+
+  const bookmarkBtn = e.target.closest(".bookmark-btn");
+  if (bookmarkBtn) {
+    e.preventDefault();
+    bookmarkBtn.classList.toggle("bookmarked");
+  }
+});

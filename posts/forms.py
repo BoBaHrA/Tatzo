@@ -11,7 +11,14 @@ class MultiFileInput(ClearableFileInput):
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ["content"]
+        fields = [
+            "content",
+            "location",
+            "disable_comments",
+            "is_ad",
+            "visibility",
+            "layout",
+        ]
 
 
 # -------- Медиа к посту (несколько файлов) --------

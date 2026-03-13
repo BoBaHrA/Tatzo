@@ -9,7 +9,6 @@
     {% endif %}
   </div>
 
-  {# ✅ хвостик #}
   {% if post.user != request.user %}
     <svg class="bubble-tail left" viewBox="0 0 20 20" aria-hidden="true">
       <path d="M0,20 Q30,5 20,-30 L20,20 Z"></path>
@@ -22,31 +21,87 @@
 
   <div class="message-bubble">
     <div class="post-header">
-      <div class="username">{{ post.user.username }}</div>
+      <div class="post-header-main">
+        <div class="username">{{ post.user.username }}</div>
+
+        {% if post.location %}
+          <div class="post-location">📍 {{ post.location }}</div>
+        {% endif %}
+      </div>
+
+      <div class="post-meta">
+        <span class="post-date">{{ post.created_at|date:"d.m.Y H:i" }}</span>
+      </div>
     </div>
 
-    {% if post.medias.all %}
-      <div class="post-media post-media--{{ post.layout }}">
-        {% for m in post.medias.all %}
-          {% if m.media_type == 'image' %}
-            <img src="{{ m.file.url }}" alt="media">
-          {% else %}
-            <video src="{{ m.file.url }}" controls playsinline preload="metadata"></video>
-          {% endif %}
-        {% endfor %}
+    {% if post.is_ad or post.disable_comments or post.visibility != "public" %}
+      <div class="post-badges">
+        {% if post.is_ad %}
+          <span class="post-badge">Ad</span>
+        {% endif %}
+
+        {% if post.disable_comments %}
+          <span class="post-badge">Comments off</span>
+        {% endif %}
+
+        {% if post.visibility != "public" %}
+          <span class="post-badge">{{ post.visibility }}</span>
+        {% endif %}
       </div>
     {% endif %}
+
+      {% if post.medias.all %}
+        <div class="post-media post-media--{{ post.layout }}">
+          {% for m in post.medias.all %}
+            <div class="post-media-item">
+              {% if m.media_type == 'image' %}
+                <img src="{{ m.file.url }}" alt="media">
+              {% else %}
+                <video src="{{ m.file.url }}" controls playsinline preload="metadata"></video>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
 
     {% if post.content %}
       <div class="content">{{ post.content }}</div>
     {% endif %}
   </div>
 
-  {# ✅ actions ВНЕ bubble (под bubble) #}
   <div class="post-actions under-bubble">
-    <button class="action-btn" title="Like"><img src="{% static 'icons/heart.svg' %}" alt="Like"></button>
-    <button class="action-btn" title="Comment"><img src="{% static 'icons/comments1.svg' %}" alt="Comment"></button>
-    <button class="action-btn" title="Repost"><img src="{% static 'icons/share1.svg' %}" alt="Repost"></button>
-    <button class="action-btn" title="Bookmark"><img src="{% static 'icons/bookmark11.svg' %}" alt="Bookmark"></button>
+    <button class="action-btn like-btn" data-post="{{ post.id }}">
+
+      <img class="like-icon not-liked"
+          src="{% static 'icons/heart-circle-svgrepo-com.svg' %}"
+          alt="Like">
+
+      <img class="like-icon liked"
+          src="{% static 'icons/liked.svg' %}"
+          alt="Liked">
+
+    </button>
+
+    <button class="action-btn" title="Comment">
+      <img src="{% static 'icons/comments-svgrepo-com.svg' %}" alt="Comment">
+    </button>
+
+    <button class="action-btn" title="Repost">
+          <img src="{% static 'icons/share-svgrepo-com.svg' %}" alt="Repost">
+        </button>
+
+        <button class="action-btn bookmark-btn" data-post="{{ post.id }}" title="Bookmark">
+      <img
+        class="bookmark-icon not-bookmarked"
+        src="{% static 'icons/bookmark-svgrepo-com.svg' %}"
+        alt="Bookmark"
+      >
+
+      <img
+        class="bookmark-icon bookmarked"
+        src="{% static 'icons/bookmarked.svg' %}"
+        alt="Bookmarked"
+      >
+    </button>
   </div>
 </div>
