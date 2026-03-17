@@ -1200,16 +1200,10 @@ input[type="file"] { display: none; }
   background: rgba(255, 255, 255, 0.08);
 }
 
-.like-btn .liked {
-  display: none;
-}
-
-.like-btn.liked .not-liked {
-  display: none;
-}
-
-.like-btn.liked .liked {
-  display: inline-block;
+.like-btn .like-icon {
+  width: 22px;
+  height: 22px;
+  display: block;
 }
 
 .bookmark-btn .bookmarked {

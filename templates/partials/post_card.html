@@ -74,12 +74,11 @@
   <div class="post-actions under-bubble">
     <div class="post-actions-left">
       <button class="action-btn like-btn {% if post.id in liked_post_ids %}liked{% endif %}" data-post="{{ post.id }}">
-        <img class="like-icon not-liked"
-            src="{% static 'icons/heart-circle-svgrepo-com.svg' %}"
-            alt="Like">
-        <img class="like-icon liked"
-            src="{% static 'icons/liked.svg' %}"
-            alt="Liked">
+        <img
+          class="like-icon"
+          src="{% if post.id in liked_post_ids %}{% static 'icons/liked.svg' %}{% else %}{% static 'icons/heart-circle-svgrepo-com.svg' %}{% endif %}"
+          alt="Like"
+        >
       </button>
 
       <span class="action-count like-count">

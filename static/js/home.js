@@ -986,6 +986,13 @@ function renderCarousel() {
 
         likeBtn.classList.toggle("liked", data.liked);
 
+        const iconEl = likeBtn.querySelector(".like-icon");
+        if (iconEl) {
+          iconEl.src = data.liked
+            ? "/static/icons/liked.svg"
+            : "/static/icons/heart-circle-svgrepo-com.svg";
+        }
+
         const postActionsLeft = likeBtn.closest(".post-actions-left");
         const countEl = postActionsLeft?.querySelector(".like-count");
         if (countEl) {

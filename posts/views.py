@@ -85,7 +85,7 @@ def create_post(request):
                 )
 
         html = render_to_string(
-            "posts/includes/post_card.html",
+            "templates/partials/post_card.html",
             {
                 "post": post,
                 "request": request,
