@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', function () {
   let carMain = null;
   let carThumbs = null;
   let carMainMedia = null;
+  let lbItems = [];
+  let lbMode = 'preview';
 
   // ===== ObjectURL cache (чтобы не плодить URL.createObjectURL) =====
   const urlCache = new WeakMap();
@@ -60,6 +62,11 @@ document.addEventListener('DOMContentLoaded', function () {
       const feed = document.getElementById('feed');
       if (feed && data.html) {
         feed.insertAdjacentHTML('afterbegin', data.html);
+
+        const firstPostRenderer = feed.querySelector('.post-media-renderer');
+        if (firstPostRenderer) {
+          renderSavedPostMedia(firstPostRenderer);
+        }
       }
 
       // ✅ успех: очистка формы
@@ -226,42 +233,77 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(swap, 120);
   }
 
-  function openLightbox(index){
-    if (!selectedFiles.length) return;
-  
-    lbIndex = Math.max(0, Math.min(index, selectedFiles.length - 1));
+  function openLightbox(index, items = null, mode = 'preview'){
+    if (mode === 'saved') {
+      if (!items || !items.length) return;
+      lbItems = items;
+      lbMode = 'saved';
+      lbIndex = Math.max(0, Math.min(index, lbItems.length - 1));
+    } else {
+      if (!selectedFiles.length) return;
+      lbItems = selectedFiles.map(file => ({
+        type: file.type.startsWith('image/') ? 'image' :
+              file.type.startsWith('video/') ? 'video' : 'file',
+        file
+      }));
+      lbMode = 'preview';
+      lbIndex = Math.max(0, Math.min(index, lbItems.length - 1));
+    }
+
     stopAndResetVideo(carMain);
     renderLightboxItem();
     lightbox.classList.add('open');
     lightbox.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden'; // чтобы фон не скроллился
+    document.body.style.overflow = 'hidden';
   }
 
   function closeLightbox(){
     lightbox.classList.remove('open');
     lightbox.setAttribute('aria-hidden', 'true');
     lbBody.innerHTML = '';
+    lbBody.style.removeProperty('--lb-bg');
     document.body.style.overflow = '';
   }
 
   function renderLightboxItem(){
-    lbBody.innerHTML = '';
+  lbBody.innerHTML = '';
 
-    const file = selectedFiles[lbIndex];
-    if (!file) return;
+  const item = lbItems[lbIndex];
+  if (!item) return;
 
+  if (lbMode === 'saved') {
+    lbBody.style.setProperty('--lb-bg', `url("${item.url}")`);
+
+    if (item.type === 'image') {
+      const img = document.createElement('img');
+      img.src = item.url;
+      img.alt = 'preview';
+      lbBody.appendChild(img);
+    } else if (item.type === 'video') {
+      const video = document.createElement('video');
+      video.src = item.url;
+      video.controls = true;
+      video.autoplay = false;
+      video.playsInline = true;
+      video.preload = 'metadata';
+      lbBody.appendChild(video);
+    }
+  } else {
+    const file = item.file;
     const url = getObjectUrl(file);
 
-    if (file.type.startsWith('image/')){
+    lbBody.style.setProperty('--lb-bg', `url("${url}")`);
+
+    if (item.type === 'image') {
       const img = document.createElement('img');
       img.src = url;
       img.alt = file.name || 'preview';
       lbBody.appendChild(img);
-    } else if (file.type.startsWith('video/')){
+    } else if (item.type === 'video') {
       const video = document.createElement('video');
       video.src = url;
       video.controls = true;
-      video.autoplay = false; // или просто удали эту строку
+      video.autoplay = false;
       video.playsInline = true;
       video.preload = 'metadata';
       lbBody.appendChild(video);
@@ -272,16 +314,16 @@ document.addEventListener('DOMContentLoaded', function () {
       box.textContent = file.name;
       lbBody.appendChild(box);
     }
+  }
 
-    // скрываем стрелки, если 1 файл
-    const multi = selectedFiles.length > 1;
-    lbPrev.style.display = multi ? 'flex' : 'none';
-    lbNext.style.display = multi ? 'flex' : 'none';
+  const multi = lbItems.length > 1;
+  lbPrev.style.display = multi ? 'flex' : 'none';
+  lbNext.style.display = multi ? 'flex' : 'none';
 }
 
 function lbGo(delta){
-  if (!selectedFiles.length) return;
-  lbIndex = (lbIndex + delta + selectedFiles.length) % selectedFiles.length;
+  if (!lbItems.length) return;
+  lbIndex = (lbIndex + delta + lbItems.length) % lbItems.length;
   renderLightboxItem();
 }
 
@@ -469,6 +511,7 @@ function createPreviewItem(file, index, placement = 'grid') {
   // Открыть просмотр по клику на плитку (но НЕ по крестику удаления)
   wrapper.addEventListener('click', (ev) => {
     if (ev.target.closest('.preview-remove')) return;
+    if (ev.target.closest('video')) return;
     openLightbox(index);
   });
   
@@ -681,6 +724,236 @@ function renderCarousel() {
     fileUpload.files = dt.files; 
   } 
 
+  function renderSavedPostMedia(container) {
+    const layout = container.dataset.layout;
+    const items = Array.from(container.querySelectorAll('.media-source')).map(el => ({
+      type: el.dataset.type,
+      url: el.dataset.url
+    }));
+
+    container.innerHTML = '';
+    container.classList.add('media-layout');
+
+    if (layout === 'carousel') {
+      renderSavedCarousel(container, items);
+    } else {
+      renderSavedGrid(container, items);
+    }
+  }
+
+  function renderSavedGrid(container, items) {
+    const total = items.length;
+    if (!total) return;
+
+    const countForCss = Math.min(total, 10);
+    container.setAttribute('data-mode', 'grid');
+    container.setAttribute('data-count', String(countForCss));
+
+    container.classList.remove(
+      'l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9', 'l10', 'lstrip'
+    );
+
+    if (total === 7 || total >= 10) {
+      container.classList.add('lstrip');
+
+      const top = document.createElement('div');
+      top.className = 'preview-top';
+
+      const bottom = document.createElement('div');
+      bottom.className = 'preview-bottom';
+
+      items.forEach((item, i) => {
+        const node = createSavedPreviewItem(item, i, i < 2 ? 'top' : 'bottom', items);
+        if (i < 2) top.appendChild(node);
+        else bottom.appendChild(node);
+      });
+
+      container.appendChild(top);
+      container.appendChild(bottom);
+
+      const bottomCount = Math.max(1, total - 2);
+      container.style.setProperty('--bottom-count', bottomCount);
+      return;
+    }
+
+    container.classList.add('l' + total);
+
+    items.forEach((item, i) => {
+      container.appendChild(createSavedPreviewItem(item, i, 'grid', items));
+    });
+  }
+
+  function renderSavedCarousel(container, items) {
+    const total = items.length;
+    if (!total) return;
+
+    container.setAttribute('data-mode', 'carousel');
+    container.classList.add('saved-carousel');
+
+    let currentIndex = 0;
+
+    const main = document.createElement('div');
+    main.className = 'carousel-main';
+
+    main.addEventListener('click', (e) => {
+      if (e.target.closest('.car-nav')) return;
+      if (e.target.closest('video')) return;
+      openLightbox(currentIndex, items, 'saved');
+    });
+
+    const thumbs = document.createElement('div');
+    thumbs.className = 'carousel-thumbs';
+
+    let currentMedia = null;
+
+    function stopAndResetSavedVideo(root) {
+      if (!root) return;
+      const v = root.querySelector('video');
+      if (!v) return;
+      try {
+        v.pause();
+        v.currentTime = 0;
+      } catch (_) {}
+    }
+
+    function renderMain(index, withFade = false) {
+      const item = items[index];
+      if (!item) return;
+
+      const swap = () => {
+        if (currentMedia) currentMedia.remove();
+
+        let node;
+        if (item.type === 'image') {
+          node = document.createElement('img');
+          node.src = item.url;
+          node.alt = 'media';
+        } else if (item.type === 'video') {
+          node = document.createElement('video');
+          node.src = item.url;
+          node.controls = true;
+          node.playsInline = true;
+          node.preload = 'metadata';
+        }
+
+        currentMedia = node;
+        main.insertBefore(node, main.firstChild);
+
+        main.classList.remove('fade-out');
+        if (withFade) {
+          main.classList.add('fade-in');
+          setTimeout(() => main.classList.remove('fade-in'), 160);
+        }
+      };
+
+      stopAndResetSavedVideo(main);
+
+      if (!withFade) {
+        swap();
+        return;
+      }
+
+      main.classList.remove('fade-in');
+      main.classList.add('fade-out');
+      setTimeout(swap, 120);
+    }
+
+    function setIndex(nextIndex) {
+      const prev = currentIndex;
+      currentIndex = Math.max(0, Math.min(nextIndex, items.length - 1));
+
+      const prevEl = thumbs.querySelector(`.thumb[data-i="${prev}"]`);
+      const nextEl = thumbs.querySelector(`.thumb[data-i="${currentIndex}"]`);
+
+      if (prevEl) prevEl.classList.remove('active');
+      if (nextEl) nextEl.classList.add('active');
+
+      renderMain(currentIndex, true);
+    }
+
+    const prev = document.createElement('div');
+    prev.className = 'car-nav car-prev';
+    prev.textContent = '‹';
+    prev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setIndex((currentIndex - 1 + items.length) % items.length);
+    });
+
+    const next = document.createElement('div');
+    next.className = 'car-nav car-next';
+    next.textContent = '›';
+    next.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setIndex((currentIndex + 1) % items.length);
+    });
+
+    if (items.length > 1) {
+      main.appendChild(prev);
+      main.appendChild(next);
+    }
+
+    items.forEach((item, i) => {
+      const t = document.createElement('div');
+      t.className = 'thumb' + (i === 0 ? ' active' : '');
+      t.dataset.i = String(i);
+
+      if (item.type === 'image') {
+        const img = document.createElement('img');
+        img.src = item.url;
+        t.appendChild(img);
+      } else if (item.type === 'video') {
+        const video = document.createElement('video');
+        video.src = item.url;
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = 'metadata';
+        t.appendChild(video);
+      }
+
+      t.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setIndex(i);
+      });
+
+      thumbs.appendChild(t);
+    });
+
+    container.appendChild(main);
+    container.appendChild(thumbs);
+
+    renderMain(0, false);
+  }
+
+  function createSavedPreviewItem(item, index, placement = 'grid', allItems = []) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'preview-item';
+    wrapper.dataset.index = String(index);
+
+    wrapper.addEventListener('click', (ev) => {
+      if (ev.target.closest('video')) return;
+      openLightbox(index, allItems, 'saved');
+    });
+
+    if (item.type === 'image') {
+      const img = document.createElement('img');
+      img.src = item.url;
+      wrapper.appendChild(img);
+    } else if (item.type === 'video') {
+      const video = document.createElement('video');
+      video.src = item.url;
+      video.controls = (placement !== 'bottom');
+      video.preload = 'metadata';
+      video.playsInline = true;
+      wrapper.appendChild(video);
+    }
+
+    return wrapper;
+  }
+  
+  document.querySelectorAll('.post-media-renderer').forEach(container => {
+    renderSavedPostMedia(container);
+  });
+
   function updatePostButtonVisibility() { 
     const hasText = textarea.value.trim().length > 0; 
     const hasFiles = selectedFiles.length > 0; 
@@ -690,19 +963,45 @@ function renderCarousel() {
       postBtn.classList.remove('visible'); 
     } 
   } 
-});
 
-document.addEventListener("click", function (e) {
-  const likeBtn = e.target.closest(".like-btn");
-  if (likeBtn) {
-    e.preventDefault();
-    likeBtn.classList.toggle("liked");
-    return;
-  }
 
-  const bookmarkBtn = e.target.closest(".bookmark-btn");
-  if (bookmarkBtn) {
-    e.preventDefault();
-    bookmarkBtn.classList.toggle("bookmarked");
-  }
+  document.addEventListener("click", async function (e) {
+    const likeBtn = e.target.closest(".like-btn");
+    if (likeBtn) {
+      e.preventDefault();
+
+      const postId = likeBtn.dataset.post;
+
+      try {
+        const res = await fetch(`/posts/${postId}/like/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        });
+
+        const data = await res.json();
+        if (!data.ok) return;
+
+        likeBtn.classList.toggle("liked", data.liked);
+
+        const postActionsLeft = likeBtn.closest(".post-actions-left");
+        const countEl = postActionsLeft?.querySelector(".like-count");
+        if (countEl) {
+          countEl.textContent = data.likes_count;
+        }
+      } catch (err) {
+        console.error("Like toggle error:", err);
+      }
+
+      return;
+    }
+
+    const bookmarkBtn = e.target.closest(".bookmark-btn");
+    if (bookmarkBtn) {
+      e.preventDefault();
+      bookmarkBtn.classList.toggle("bookmarked");
+    }
+  });
 });

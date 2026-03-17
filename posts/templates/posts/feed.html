@@ -50,5 +50,9 @@
     {% endfor %}
 
 </div>
-
+<div id="feed" class="feed">
+  {% for post in posts %}
+    {% include "posts/post_card.html" with post=post %}
+  {% endfor %}
+</div>
 {% endblock %}

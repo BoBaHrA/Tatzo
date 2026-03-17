@@ -381,16 +381,21 @@ input[type="file"] { display: none; }
 .file-preview:empty { display: none; }
 
 /* ---------- FEED ---------- */
-.feed { max-width: 700px; margin: 20px auto; }
+.feed {
+  max-width: 700px;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
 
 .feed .post {
   position: relative;
   background: transparent;
   border-radius: 15px;
-  padding: 0px;
-  margin-bottom: 25px;
+  padding: 0;
   max-width: 700px;
-  margin: 0 auto 25px auto;
+  margin: 0 auto;
   box-shadow: none;
 }
 
@@ -436,6 +441,28 @@ input[type="file"] { display: none; }
   border-top-right-radius: 0;
 }
 
+#feed {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.post {
+  animation: postAppear 0.25s ease;
+}
+
+@keyframes postAppear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Tails */
 .bubble-tail {
   position: absolute;
@@ -455,11 +482,19 @@ input[type="file"] { display: none; }
   margin-top: 10px;
   gap: 12px;
 }
+
+.action-btn:hover {
+  transform: scale(1.15);
+  opacity: 0.9;
+}
+
 .post-actions .action-btn {
+  transition: transform 0.15s ease, opacity 0.15s ease;
   background: none;
   border: none;
   cursor: pointer;
 }
+
 .post-actions .action-btn img {
   width: 28px;
   height: 28px;
@@ -733,11 +768,39 @@ input[type="file"] { display: none; }
 }
 
 .media-lightbox .lb-body{
+  position: relative;
   display:flex;
   align-items:center;
   justify-content:center;
   height: 90vh;
   max-height: 90vh;
+  overflow: hidden;
+}
+
+.media-lightbox .lb-body::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image: var(--lb-bg);
+  background-size: cover;
+  background-position: center;
+  filter: blur(45px);
+  transform: scale(1.2);
+  opacity: 0.65;
+  z-index: 0;
+}
+
+.media-lightbox .lb-body::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,0.25);
+  z-index: 1;
+}
+
+.media-lightbox .lb-body > *{
+  position: relative;
+  z-index: 2;
 }
 
 .media-lightbox img,
@@ -995,151 +1058,6 @@ input[type="file"] { display: none; }
   background: rgba(0,0,0,.68);
 }
 
-.post-media{
-  margin-top: 10px;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-}
-
-.post-media-item{
-  width: 100%;
-  max-height: 420px;
-  border-radius: 12px;
-  object-fit: cover;
-  display: block;
-  background: #001a2e;
-}
-
-
-.post-header{
-  display:flex;
-  align-items:center;
-  margin-bottom: 10px;
-}
-
-.post-media{
-  margin: 10px 0 12px;
-  border-radius: 16px;
-  overflow:hidden;
-}
-
-/* GRID: как Instagram плитки */
-.post-media--grid{
-  display:grid;
-  gap:10px;
-  grid-template-columns: repeat(3, 1fr);
-}
-
-.post-media--grid img,
-.post-media--grid video{
-  width:100%;
-  aspect-ratio: 1/1;
-  object-fit: cover;
-  display:block;
-  border-radius: 12px;
-}
-
-/* CAROUSEL: один главный + миниатюры */
-.post-media--carousel{
-  display:flex;
-  gap:10px;
-  overflow-x:auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 6px;
-}
-
-.post-media--carousel img,
-.post-media--carousel video{
-  flex: 0 0 85%;
-  max-width: 85%;
-  height: 320px;
-  object-fit: cover;
-  display:block;
-  border-radius: 16px;
-  scroll-snap-align: start;
-}
-
-.post-actions.under-bubble{
-  display:flex;
-  gap:12px;
-  margin-top: 10px;
-  padding-left: 14px; /* чтобы было похоже на “под сообщением” */
-  opacity: .95;
-}
-
-.post-actions.under-bubble .action-btn img{
-  width: 26px;
-  height: 26px;
-}
-
-/* =========================
-   FEED POST MEDIA (FIX)
-   ========================= */
-
-/* общий контейнер медиа внутри bubble */
-.feed .post .post-media{
-  margin: 10px 0 12px;
-  padding: 0;
-  border-radius: 16px;
-  overflow: hidden;          /* чтобы ничего не “вываливалось” */
-}
-
-/* ---------- GRID ---------- */
-.feed .post .post-media--grid{
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.feed .post .post-media--grid .post-media-item{
-  width: 100%;
-  aspect-ratio: 1 / 1;       /* все плитки одинаковые */
-  height: auto;              /* важно: не фиксируем высоту */
-  object-fit: cover;
-  display: block;
-  border-radius: 12px;
-  background: #001a2e;
-  max-height: none;          /* перебиваем твой max-height:420px */
-}
-
-/* мобильная адаптация */
-@media (max-width: 520px){
-  .feed .post .post-media--grid{
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* ---------- CAROUSEL ---------- */
-.feed .post .post-media--carousel{
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;          /* скролл только здесь */
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 6px;
-}
-
-.feed .post .post-media--carousel .post-media-item{
-  flex: 0 0 85%;
-  max-width: 85%;
-  height: 320px;             /* нормальная высота, не “гигант” */
-  object-fit: cover;
-  display: block;
-  border-radius: 16px;
-  background: #001a2e;
-  scroll-snap-align: start;
-  max-height: none;          /* перебиваем твой max-height */
-}
-
-/* чтобы видео не растягивалось странно */
-.feed .post .post-media--carousel video.post-media-item,
-.feed .post .post-media--grid video.post-media-item{
-  width: 100%;
-  height: 100%;
-}
-
 /* =========================
    POST MEDIA uses SAME layout as #file-preview
    ========================= */
@@ -1354,67 +1272,135 @@ input[type="file"] { display: none; }
   100% { transform: scale(1); }
 }
 
-.post-media {
-  margin-top: 10px;
+/* =========================
+   SAVED POST CAROUSEL
+   ========================= */
+
+.post-media.media-layout[data-mode="carousel"] {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.post-media.media-layout[data-mode="carousel"] .carousel-main {
+  padding: 0;
+  box-sizing: border-box;
+  position: relative;
   border-radius: 14px;
   overflow: hidden;
+  background: #001b1a;
+  height: clamp(220px, 34vw, 420px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.post-media.media-layout[data-mode="carousel"] .carousel-main img,
+.post-media.media-layout[data-mode="carousel"] .carousel-main video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.post-media.media-layout[data-mode="carousel"] .carousel-thumbs {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.post-media.media-layout[data-mode="carousel"] .thumb {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #002b2a;
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+  flex: 1 1 0;
+  min-width: 34px;
+  transition: flex .18s ease, box-shadow .18s ease;
+}
+
+.post-media.media-layout[data-mode="carousel"] .thumb.active {
+  flex: 2 1 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+.post-media.media-layout[data-mode="carousel"] .thumb img,
+.post-media.media-layout[data-mode="carousel"] .thumb video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.post-media.media-layout[data-mode="carousel"] .car-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.45);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  z-index: 5;
+  font-size: 26px;
+}
+
+.post-media.media-layout[data-mode="carousel"] .car-prev {
+  left: 10px;
+}
+
+.post-media.media-layout[data-mode="carousel"] .car-next {
+  right: 10px;
+}
+
+.post-media.media-layout[data-mode="carousel"] .carousel-main.fade-out {
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+
+.post-media.media-layout[data-mode="carousel"] .carousel-main.fade-in {
+  opacity: 1;
+  transition: opacity .16s ease;
+}
+
+.post-actions.under-bubble{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top: 10px;
+}
+
+.post-actions-left,
+.post-actions-right{
+  display:flex;
+  align-items:center;
+  gap:12px;
 }
 
 .post-media img,
 .post-media video {
-  width: 100%;
-  display: block;
-  border-radius: 12px;
-  background: #071018;
+  transition: transform 0.25s ease, filter 0.25s ease;
+  cursor: pointer;
 }
 
-/* GRID */
-.post-media--grid {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.post-media img:hover,
+.post-media video:hover {
+  transform: scale(1.03);
+  filter: brightness(1.05);
 }
 
-.post-media--grid > *:only-child {
-  grid-column: 1 / -1;
-}
-
-.post-media--grid img,
-.post-media--grid video {
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-}
-
-/* CAROUSEL */
-.post-media--carousel {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 4px;
-}
-
-.post-media--carousel > * {
-  flex: 0 0 100%;
-  scroll-snap-align: start;
-}
-
-.post-media--carousel img,
-.post-media--carousel video {
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
-}
-
-/* scrollbar optional */
-.post-media--carousel::-webkit-scrollbar {
-  height: 6px;
-}
-
-.post-media--carousel::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.18);
-  border-radius: 999px;
-}
-
-.post-media-item {
-  width: 100%;
+.action-count {
+  font-size: 13px;
+  opacity: 0.7;
+  user-select: none;
+  min-width: 10px;
 }
