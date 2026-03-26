@@ -20,6 +20,31 @@
     <hr>
 
 </div>
+<div class="comment-edit-modal" id="comment-edit-modal">
+  <div class="comment-edit-modal-inner">
+    <div class="comment-edit-modal-header">
+      <div class="comment-edit-modal-title">Edit comment</div>
+      <button type="button" class="comment-edit-modal-close" id="comment-edit-modal-close">✕</button>
+    </div>
+
+    <div class="comment-edit-modal-body">
+      <textarea
+        id="comment-edit-textarea"
+        class="comment-edit-textarea"
+        placeholder="Edit your comment..."
+      ></textarea>
+    </div>
+
+    <div class="comment-edit-modal-actions">
+      <button type="button" class="comment-edit-cancel" id="comment-edit-cancel">
+        Cancel
+      </button>
+      <button type="button" class="comment-edit-save" id="comment-edit-save">
+        Save
+      </button>
+    </div>
+  </div>
+</div>
 <div id="feed" class="feed">
   {% for post in posts %}
     {% include "partials/post_card.html" with post=post %}

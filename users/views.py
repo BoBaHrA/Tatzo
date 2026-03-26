@@ -18,7 +18,7 @@ from posts.forms import PostForm, PostMediaUploadForm
 from .forms import ProfileForm, VerificationForm
 
 from .forms_custom import CustomUserCreationForm  # Импортируем из нового файла
-from posts.models import Post, PostMedia
+from posts.models import Post, PostMedia,  PostLike
 from .utils import send_verification_email
 
 User = get_user_model()
@@ -46,9 +46,24 @@ def login_view(request):
 
 # Главная страница
 def home(request):
-    posts = Post.objects.all().order_by("-created_at")
-    return render(request, "home.html", {"posts": posts})
+    posts = (
+        Post.objects
+        .select_related("user", "user__profile")
+        .prefetch_related("medias", "likes", "comments")
+        .order_by("-created_at")
+    )
 
+    liked_post_ids = set()
+    if request.user.is_authenticated:
+        liked_post_ids = set(
+            PostLike.objects.filter(user=request.user).values_list("post_id", flat=True)
+        )
+
+    context = {
+        "posts": posts,
+        "liked_post_ids": liked_post_ids,
+    }
+    return render(request, "home.html", context)
 
 from django.contrib.auth import login
 
@@ -133,7 +148,12 @@ def create_post(request):
         PostMedia.objects.create(post=post, file=f, media_type=mt, order=i)
 
     html = render_to_string(
-        "partials/post_card.html", {"post": post, "request": request}
+        "partials/post_card.html",
+        {
+            "post": post,
+            "request": request,
+            "liked_post_ids": set(),
+        }
     )
     return JsonResponse({"ok": True, "post_id": post.id, "html": html})
 

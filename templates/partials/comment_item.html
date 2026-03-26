@@ -1,0 +1,115 @@
+{% load static %}
+
+<div class="comment-thread">
+  <div class="comment-item">
+    <div class="comment-avatar">
+      {% if comment.user.profile.profile_image %}
+        <img src="{{ comment.user.profile.profile_image.url }}" alt="User Avatar">
+      {% else %}
+        <img src="{% static 'icons/user.png' %}" alt="User Avatar">
+      {% endif %}
+    </div>
+
+    <div class="comment-body">
+      <div class="comment-top">
+        <span class="comment-username">{{ comment.user.username }}</span>
+        <span class="comment-date">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
+      </div>
+
+      <div class="comment-content">{{ comment.content }}</div>
+
+      <div class="comment-actions">
+        <button class="comment-like-btn {% if comment.id in liked_comment_ids %}liked{% endif %}" data-id="{{ comment.id }}">
+          <img
+            class="comment-like-icon"
+            src="{% if comment.id in liked_comment_ids %}{% static 'icons/liked.svg' %}{% else %}{% static 'icons/heart-circle-svgrepo-com.svg' %}{% endif %}"
+            alt="Like"
+          >
+          <span class="like-count" title="{{ comment.likes.count }}">
+            <span class="count-value">{{ comment.likes.count }}</span>
+          </span>
+        </button>
+
+        <button class="comment-reply-btn" data-id="{{ comment.id }}" data-user="{{ comment.user.username }}">
+          Reply
+        </button>
+
+        {% if request.user == comment.user %}
+          <button class="comment-edit-btn" data-id="{{ comment.id }}">
+            Edit
+          </button>
+          <button class="comment-delete-btn" data-id="{{ comment.id }}">
+            Delete
+          </button>
+        {% else %}
+          <button class="comment-report-btn" data-id="{{ comment.id }}">
+            Report
+          </button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% if comment.replies.count %}
+    <button
+      class="comment-toggle-replies"
+      type="button"
+      data-comment-id="{{ comment.id }}"
+    >
+      View replies ({{ comment.replies.count }})
+    </button>
+
+    <div class="comment-replies" data-comment-id="{{ comment.id }}" hidden>
+      {% for reply in comment.replies.all %}
+        <div class="comment-item comment-reply">
+          <div class="comment-avatar">
+            {% if reply.user.profile.profile_image %}
+              <img src="{{ reply.user.profile.profile_image.url }}" alt="User Avatar">
+            {% else %}
+              <img src="{% static 'icons/user.png' %}" alt="User Avatar">
+            {% endif %}
+          </div>
+
+          <div class="comment-body">
+            <div class="comment-top">
+              <span class="comment-username">{{ reply.user.username }}</span>
+              <span class="comment-date">{{ reply.created_at|date:"d.m.Y H:i" }}</span>
+            </div>
+
+            <div class="comment-content">{{ reply.content }}</div>
+
+            <div class="comment-actions">
+              <button class="comment-like-btn {% if reply.id in liked_comment_ids %}liked{% endif %}" data-id="{{ reply.id }}">
+                <img
+                  class="comment-like-icon"
+                  src="{% if reply.id in liked_comment_ids %}{% static 'icons/liked.svg' %}{% else %}{% static 'icons/heart-circle-svgrepo-com.svg' %}{% endif %}"
+                  alt="Like"
+                >
+                <span class="like-count" title="{{ reply.likes.count }}">
+                  <span class="count-value">{{ reply.likes.count }}</span>
+                </span>
+              </button>
+
+              <button class="comment-reply-btn" data-id="{{ reply.id }}" data-user="{{ reply.user.username }}">
+                Reply
+              </button>
+
+              {% if request.user == reply.user %}
+                <button class="comment-edit-btn" data-id="{{ reply.id }}">
+                  Edit
+                </button>
+                <button class="comment-delete-btn" data-id="{{ reply.id }}">
+                  Delete
+                </button>
+              {% else %}
+                <button class="comment-report-btn" data-id="{{ reply.id }}">
+                  Report
+                </button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>

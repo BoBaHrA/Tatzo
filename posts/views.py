@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 
 from .forms import PostForm, PostMediaUploadForm
-from .models import Post, PostMedia, PostLike, PostComment
+from .models import Post, PostMedia, PostLike, PostComment, CommentLike, CommentReport
 
 
 def feed(request):
@@ -85,7 +85,7 @@ def create_post(request):
                 )
 
         html = render_to_string(
-            "templates/partials/post_card.html",
+            "partials/post_card.html",
             {
                 "post": post,
                 "request": request,
@@ -104,3 +104,146 @@ def create_post(request):
         "ok": False,
         "error": "Ошибка валидации формы."
     }, status=400)
+    
+@login_required
+@require_POST
+def create_comment(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    content = (request.POST.get("content") or "").strip()
+    parent_id = request.POST.get("parent_id")
+
+    if not content:
+        return JsonResponse(
+            {"ok": False, "error": "Комментарий не может быть пустым."},
+            status=400,
+        )
+
+    parent = None
+    if parent_id:
+        parent = get_object_or_404(PostComment, id=parent_id, post=post)
+
+    comment = PostComment.objects.create(
+        post=post,
+        user=request.user,
+        content=content,
+        parent=parent,
+    )
+
+    html = render_to_string(
+        "partials/comment_item.html",
+        {
+            "comment": comment,
+            "request": request,
+            "liked_comment_ids": set(),
+        },
+        request=request,
+    )
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "html": html,
+            "comments_count": post.comments.count(),
+        }
+    )
+    
+def get_comments(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    liked_comment_ids = set()
+    if request.user.is_authenticated:
+        liked_comment_ids = set(
+            CommentLike.objects.filter(user=request.user, comment__post=post)
+            .values_list("comment_id", flat=True)
+        )
+
+    comments = post.comments.filter(parent__isnull=True)
+
+    html = render_to_string(
+        "partials/comments_list.html",
+        {
+            "comments": comments,
+            "request": request,
+            "liked_comment_ids": liked_comment_ids,
+        },
+        request=request,
+    )
+
+    return JsonResponse({"html": html})
+
+@login_required
+@require_POST
+def toggle_comment_like(request, comment_id):
+    comment = get_object_or_404(PostComment, id=comment_id)
+
+    like, created = CommentLike.objects.get_or_create(
+        user=request.user,
+        comment=comment
+    )
+
+    if not created:
+        like.delete()
+        liked = False
+    else:
+        liked = True
+
+    return JsonResponse({
+        "ok": True,
+        "liked": liked,
+        "count": comment.likes.count(),
+    })
+    
+@login_required
+@require_POST
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(PostComment, id=comment_id, user=request.user)
+    post = comment.post
+    comment.delete()
+
+    return JsonResponse({
+        "ok": True,
+        "comments_count": post.comments.count(),
+    })
+    
+@login_required
+@require_POST
+def edit_comment(request, comment_id):
+    comment = get_object_or_404(PostComment, id=comment_id, user=request.user)
+
+    content = (request.POST.get("content") or "").strip()
+    if not content:
+        return JsonResponse(
+            {"ok": False, "error": "Комментарий не может быть пустым."},
+            status=400,
+        )
+
+    comment.content = content
+    comment.save(update_fields=["content"])
+
+    return JsonResponse({
+        "ok": True,
+        "content": comment.content,
+    })
+    
+@login_required
+@require_POST
+def report_comment(request, comment_id):
+    comment = get_object_or_404(PostComment, id=comment_id)
+
+    if comment.user == request.user:
+        return JsonResponse(
+            {"ok": False, "error": "Нельзя пожаловаться на свой комментарий."},
+            status=400,
+        )
+
+    report, created = CommentReport.objects.get_or_create(
+        comment=comment,
+        user=request.user,
+    )
+
+    return JsonResponse({
+        "ok": True,
+        "created": created,
+        "message": "Жалоба отправлена." if created else "Вы уже жаловались на этот комментарий.",
+    })

@@ -1,0 +1,5 @@
+{% for comment in comments %}
+  {% include "partials/comment_item.html" with comment=comment liked_comment_ids=liked_comment_ids %}
+{% empty %}
+  <p class="no-comments">No comments yet.</p>
+{% endfor %}

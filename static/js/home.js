@@ -10,6 +10,32 @@ document.addEventListener('DOMContentLoaded', function () {
   const lbClose = document.getElementById('lb-close');
   const lbPrev = document.getElementById('lb-prev');
   const lbNext = document.getElementById('lb-next');
+  const postModal = document.getElementById('post-modal');
+  const postModalLeft = document.getElementById('post-modal-left');
+  const modalCommentsList = document.getElementById('modal-comments-list');
+  const modalCommentForm = document.getElementById('modal-comment-form');
+  const modalCommentInput = document.getElementById('modal-comment-input');
+  const postModalClose = document.getElementById('post-modal-close');
+  const commentEditModal = document.getElementById('comment-edit-modal');
+  const commentEditTextarea = document.getElementById('comment-edit-textarea');
+  const commentEditSave = document.getElementById('comment-edit-save');
+  const commentEditCancel = document.getElementById('comment-edit-cancel');
+  const commentEditModalClose = document.getElementById('comment-edit-modal-close');
+  const commentDeleteModal = document.getElementById('comment-delete-modal');
+  const commentDeleteConfirm = document.getElementById('comment-delete-confirm');
+  const commentDeleteCancel = document.getElementById('comment-delete-cancel');
+  const commentDeleteModalClose = document.getElementById('comment-delete-modal-close');
+
+  const commentReportModal = document.getElementById('comment-report-modal');
+  const commentReportConfirm = document.getElementById('comment-report-confirm');
+  const commentReportCancel = document.getElementById('comment-report-cancel');
+  const commentReportModalClose = document.getElementById('comment-report-modal-close');
+  const commentReportText = document.getElementById('comment-report-text');
+
+  let editingCommentId = null;
+  let editingCommentContentEl = null;
+  let pendingDeleteCommentId = null;
+  let pendingReportCommentId = null;
 
   let lbIndex = 0;
   let selectedFiles = []; 
@@ -20,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
   let carMainMedia = null;
   let lbItems = [];
   let lbMode = 'preview';
+  let currentPostId = null;
 
   // ===== ObjectURL cache (чтобы не плодить URL.createObjectURL) =====
   const urlCache = new WeakMap();
@@ -27,6 +54,55 @@ document.addEventListener('DOMContentLoaded', function () {
   function getCookie(name) {
     const v = document.cookie.split('; ').find(row => row.startsWith(name + '='));
     return v ? decodeURIComponent(v.split('=')[1]) : '';
+  }
+
+  function openCommentEditModal(commentId, oldContent, contentEl) {
+    if (!commentEditModal || !commentEditTextarea) return;
+
+    editingCommentId = commentId;
+    editingCommentContentEl = contentEl;
+
+    commentEditTextarea.value = oldContent;
+    commentEditModal.classList.add("open");
+    document.body.style.overflow = "hidden";
+
+    setTimeout(() => {
+      commentEditTextarea.focus();
+      commentEditTextarea.setSelectionRange(
+        commentEditTextarea.value.length,
+        commentEditTextarea.value.length
+      );
+    }, 10);
+  }
+
+  function closeCommentEditModal() {
+    if (!commentEditModal) return;
+
+    commentEditModal.classList.remove("open");
+    document.body.style.overflow = "";
+
+    editingCommentId = null;
+    editingCommentContentEl = null;
+
+    if (commentEditTextarea) {
+      commentEditTextarea.value = "";
+    }
+  }
+
+  if (commentEditCancel) {
+    commentEditCancel.addEventListener("click", closeCommentEditModal);
+  }
+
+  if (commentEditModalClose) {
+    commentEditModalClose.addEventListener("click", closeCommentEditModal);
+  }
+
+  if (commentEditModal) {
+    commentEditModal.addEventListener("click", function (e) {
+      if (e.target === commentEditModal) {
+        closeCommentEditModal();
+      }
+    });
   }
 
   postBtn.addEventListener('click', async (e) => {
@@ -372,16 +448,17 @@ document.addEventListener('keydown', (e) => {
   } 
 
   // Раскрытие пост-блока 
-  document.addEventListener('click', function (e) { 
-    const isInside = createPost.contains(e.target); 
-    const isPreviewItem = e.target.closest('#file-preview'); 
-    const isDeleteBtn = e.target.closest('.preview-remove'); 
-    if (isInside || isPreviewItem || isDeleteBtn) { 
-      createPost.classList.add('expanded'); 
-    } else { 
-      createPost.classList.remove('expanded'); 
-    } 
-  }); 
+  document.addEventListener('click', function (e) {
+    const isInside = createPost ? createPost.contains(e.target) : false;
+    const isPreviewItem = e.target.closest('#file-preview');
+    const isDeleteBtn = e.target.closest('.preview-remove');
+
+    if (createPost && (isInside || isPreviewItem || isDeleteBtn)) {
+      createPost.classList.add('expanded');
+    } else if (createPost) {
+      createPost.classList.remove('expanded');
+    }
+  });
 
   // Обработка текста и авторасширение textarea 
   function autosizeTextarea() { 
@@ -501,6 +578,65 @@ document.addEventListener('keydown', (e) => {
   });
 }
 
+function formatCount(num) {
+  num = Number(num);
+
+  if (num < 1000) return num;
+
+  if (num < 1000000) {
+    const value = num / 1000;
+    return Number.isInteger(value)
+      ? `${value}K`
+      : `${value.toFixed(1)}K`;
+  }
+
+  const value = num / 1000000;
+  return Number.isInteger(value)
+    ? `${value}M`
+    : `${value.toFixed(1)}M`;
+}
+
+function animateCountChange(countEl, newValue) {
+  if (!countEl) return;
+
+  const formatted = formatCount(newValue);
+  const currentNode = countEl.querySelector(".count-value");
+  const oldText = currentNode ? currentNode.textContent : null;
+
+  // если анимация уже шла или это первый рендер
+  if (!oldText) {
+    countEl.innerHTML = `<span class="count-value">${formatted}</span>`;
+    countEl.title = String(newValue);
+    return;
+  }
+
+  if (oldText === formatted) {
+    countEl.innerHTML = `<span class="count-value">${formatted}</span>`;
+    countEl.title = String(newValue);
+    return;
+  }
+
+  // сбрасываем контейнер и строим анимацию заново
+  countEl.innerHTML = "";
+
+  const oldNode = document.createElement("span");
+  oldNode.className = "count-value count-out-up";
+  oldNode.textContent = oldText;
+
+  const newNode = document.createElement("span");
+  newNode.className = "count-value count-in-up";
+  newNode.textContent = formatted;
+
+  countEl.appendChild(oldNode);
+  countEl.appendChild(newNode);
+  countEl.title = String(newValue);
+
+  clearTimeout(countEl._countTimer);
+  countEl._countTimer = setTimeout(() => {
+    countEl.innerHTML = `<span class="count-value">${formatted}</span>`;
+  }, 220);
+}
+
 // helper: создаёт одну плитку + крестик удаления
 function createPreviewItem(file, index, placement = 'grid') {
   const wrapper = document.createElement('div');
@@ -556,7 +692,6 @@ function createPreviewItem(file, index, placement = 'grid') {
   wrapper.appendChild(del);
   return wrapper;
 }
- 
 
 function renderCarousel() {
   previewContainer.innerHTML = '';
@@ -730,6 +865,33 @@ function renderCarousel() {
       type: el.dataset.type,
       url: el.dataset.url
     }));
+
+    // сохраняем для будущей реинициализации, например в модалке
+    container.dataset.items = JSON.stringify(items);
+
+    container.innerHTML = '';
+    container.classList.add('media-layout');
+
+    if (layout === 'carousel') {
+      renderSavedCarousel(container, items);
+    } else {
+      renderSavedGrid(container, items);
+    }
+  }
+
+  function rehydrateSavedPostMedia(container) {
+    const layout = container.dataset.layout || 'grid';
+    const raw = container.dataset.items;
+
+    if (!raw) return;
+
+    let items = [];
+    try {
+      items = JSON.parse(raw);
+    } catch (err) {
+      console.error("Failed to parse media items:", err);
+      return;
+    }
 
     container.innerHTML = '';
     container.classList.add('media-layout');
@@ -970,6 +1132,9 @@ function renderCarousel() {
     if (likeBtn) {
       e.preventDefault();
 
+      if (likeBtn.dataset.busy === "1") return;
+      likeBtn.dataset.busy = "1";
+
       const postId = likeBtn.dataset.post;
 
       try {
@@ -996,10 +1161,12 @@ function renderCarousel() {
         const postActionsLeft = likeBtn.closest(".post-actions-left");
         const countEl = postActionsLeft?.querySelector(".like-count");
         if (countEl) {
-          countEl.textContent = data.likes_count;
+          animateCountChange(countEl, data.likes_count);
         }
       } catch (err) {
         console.error("Like toggle error:", err);
+      } finally {
+        delete likeBtn.dataset.busy;
       }
 
       return;
@@ -1011,4 +1178,480 @@ function renderCarousel() {
       bookmarkBtn.classList.toggle("bookmarked");
     }
   });
+
+  document.addEventListener("click", async function (e) {
+    const commentBtn = e.target.closest(".comment-btn");
+    if (!commentBtn) return;
+
+    e.preventDefault();
+
+    const postId = commentBtn.dataset.post;
+    const postEl = commentBtn.closest(".post");
+
+    if (!postId || !postEl || !postModal || !postModalLeft || !modalCommentsList) {
+      console.warn("Comment modal: missing required element");
+      return;
+    }
+
+    currentPostId = postId;
+
+    const clonedPost = postEl.cloneNode(true);
+
+    // Убираем действия из клона, чтобы слева был только сам пост
+    const clonedActions = clonedPost.querySelector(".post-actions");
+    if (clonedActions) {
+      clonedActions.remove();
+    }
+
+    postModalLeft.innerHTML = "";
+    postModalLeft.appendChild(clonedPost);
+
+    postModalLeft.querySelectorAll(".post-media-renderer").forEach(container => {
+      rehydrateSavedPostMedia(container);
+    });
+
+    // Перерисовываем медиа внутри клона
+
+    try {
+      const res = await fetch(`/posts/${postId}/comments/`, {
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      });
+
+      const data = await res.json();
+      modalCommentsList.innerHTML = data.html || "";
+      modalCommentsList.querySelectorAll(".like-count").forEach(el => {
+        const valueNode = el.querySelector(".count-value");
+        if (!valueNode) return;
+
+        const original = valueNode.textContent.trim();
+        valueNode.textContent = formatCount(original);
+        el.title = original;
+      });
+
+      console.log("Opening modal for post:", postId);
+
+      postModal.classList.add("open");
+      document.body.style.overflow = "hidden";
+    } catch (err) {
+      console.error("Open comments modal error:", err);
+    }
+  });
+
+  if (postModalClose) {
+    postModalClose.addEventListener("click", function () {
+      postModal.classList.remove("open");
+      document.body.style.overflow = "";
+      postModalLeft.innerHTML = "";
+      modalCommentsList.innerHTML = "";
+    });
+  }
+
+  if (postModal) {
+    postModal.addEventListener("click", function (e) {
+      if (e.target === postModal) {
+        postModal.classList.remove("open");
+        document.body.style.overflow = "";
+        postModalLeft.innerHTML = "";
+        modalCommentsList.innerHTML = "";
+      }
+    });
+  }
+
+  if (modalCommentForm) {
+    modalCommentForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      if (!currentPostId || !modalCommentInput) return;
+
+      const content = modalCommentInput.value.trim();
+      if (!content) return;
+
+      const parentId = modalCommentInput.dataset.replyTo || "";
+
+      const fd = new FormData();
+      fd.append("content", content);
+      fd.append("parent_id", parentId);
+
+      try {
+        const res = await fetch(`/posts/${currentPostId}/comment/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "X-Requested-With": "XMLHttpRequest",
+          },
+          body: fd,
+        });
+
+        const data = await res.json();
+        if (!data.ok) return;
+
+        const commentsRes = await fetch(`/posts/${currentPostId}/comments/`, {
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        });
+
+        const commentsData = await commentsRes.json();
+        modalCommentsList.innerHTML = commentsData.html || "";
+
+        modalCommentsList.querySelectorAll(".like-count").forEach(el => {
+          const original = el.textContent.trim();
+          el.innerHTML = `<span class="count-value">${formatCount(original)}</span>`;
+          el.title = original;
+        });
+
+        const originalPost = document
+          .querySelector(`.comment-btn[data-post="${currentPostId}"]`)
+          ?.closest(".post");
+
+        const countEl = originalPost?.querySelector(".comment-count");
+        if (countEl) {
+          animateCountChange(countEl, data.comments_count);
+          countEl.title = data.comments_count;
+        }
+
+        modalCommentInput.value = "";
+        delete modalCommentInput.dataset.replyTo;
+        modalCommentInput.placeholder = "Write a comment...";
+      } catch (err) {
+        console.error("Create comment error:", err);
+      }
+    });
+  }
+
+  document.addEventListener("click", async (e) => {
+    const btn = e.target.closest(".comment-like-btn");
+    if (btn) {
+      e.preventDefault();
+
+      if (btn.dataset.busy === "1") return;
+      btn.dataset.busy = "1";
+
+      const id = btn.dataset.id;
+
+      try {
+        const res = await fetch(`/posts/comment/${id}/like/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "X-Requested-With": "XMLHttpRequest",
+          }
+        });
+
+        const data = await res.json();
+        if (!data.ok) return;
+
+        const countEl = btn.querySelector(".like-count");
+        if (countEl) {
+          animateCountChange(countEl, data.count);
+        }
+
+        const iconEl = btn.querySelector(".comment-like-icon");
+
+        btn.classList.toggle("liked", data.liked);
+
+        if (iconEl) {
+          iconEl.src = data.liked
+            ? "/static/icons/liked.svg"
+            : "/static/icons/heart-circle-svgrepo-com.svg";
+
+          if (data.liked) {
+            iconEl.classList.remove("pop-animate");
+            void iconEl.offsetWidth;
+            iconEl.classList.add("pop-animate");
+          } else {
+            iconEl.classList.remove("pop-animate");
+          }
+        }
+      } catch (err) {
+        console.error("Comment like error:", err);
+      } finally {
+        delete btn.dataset.busy;
+      }
+
+      return;
+    }
+
+    const replyBtn = e.target.closest(".comment-reply-btn");
+    if (replyBtn) {
+      e.preventDefault();
+
+      const username = replyBtn.dataset.user;
+      const commentId = replyBtn.dataset.id;
+
+      modalCommentInput.value = `@${username} `;
+      modalCommentInput.focus();
+      modalCommentInput.dataset.replyTo = commentId;
+    }
+  });
+
+  document.querySelectorAll(".like-count, .comment-count").forEach(el => {
+    const original = el.textContent.trim();
+    el.innerHTML = `<span class="count-value">${formatCount(original)}</span>`;
+    el.title = original;
+  });
+
+  document.addEventListener("click", function (e) {
+    const toggleRepliesBtn = e.target.closest(".comment-toggle-replies");
+    if (!toggleRepliesBtn) return;
+
+    e.preventDefault();
+
+    const commentId = toggleRepliesBtn.dataset.commentId;
+
+    const repliesBlock = document.querySelector(`.comment-replies[data-comment-id="${commentId}"]`);
+    if (!repliesBlock) return;
+
+    const isHidden = repliesBlock.hasAttribute("hidden");
+
+    if (isHidden) {
+      repliesBlock.removeAttribute("hidden");
+      toggleRepliesBtn.textContent = "Hide replies";
+    } else {
+      repliesBlock.setAttribute("hidden", "");
+      const count = repliesBlock.querySelectorAll(".comment-reply").length;
+      toggleRepliesBtn.textContent = `View replies (${count})`;
+    }
+  });
+
+  if (commentEditSave) {
+    commentEditSave.addEventListener("click", async function () {
+      if (!editingCommentId || !editingCommentContentEl || !commentEditTextarea) return;
+
+      const trimmed = commentEditTextarea.value.trim();
+      const oldContent = editingCommentContentEl.textContent.trim();
+
+      if (!trimmed || trimmed === oldContent) {
+        closeCommentEditModal();
+        return;
+      }
+
+      const fd = new FormData();
+      fd.append("content", trimmed);
+
+      try {
+        const res = await fetch(`/posts/comment/${editingCommentId}/edit/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "X-Requested-With": "XMLHttpRequest",
+          },
+          body: fd,
+        });
+
+        const data = await res.json();
+        if (!data.ok) return;
+
+        editingCommentContentEl.textContent = data.content;
+        closeCommentEditModal();
+      } catch (err) {
+        console.error("Edit comment error:", err);
+      }
+    });
+  }
+
+  function refreshCommentsModalHtml(html) {
+    modalCommentsList.innerHTML = html || "";
+
+    modalCommentsList.querySelectorAll(".like-count").forEach(el => {
+      const original = el.textContent.trim();
+      el.innerHTML = `<span class="count-value">${formatCount(original)}</span>`;
+      el.title = original;
+    });
+  }
+
+  function updatePostCommentCounter(newCount) {
+    const originalPost = document
+      .querySelector(`.comment-btn[data-post="${currentPostId}"]`)
+      ?.closest(".post");
+
+    const countEl = originalPost?.querySelector(".comment-count");
+    if (countEl) {
+      animateCountChange(countEl, newCount);
+      countEl.title = newCount;
+    }
+  }
+
+  function openDeleteModal(commentId) {
+    if (!commentDeleteModal) return;
+    pendingDeleteCommentId = commentId;
+    commentDeleteModal.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeDeleteModal() {
+    if (!commentDeleteModal) return;
+    pendingDeleteCommentId = null;
+    commentDeleteModal.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  function openReportModal(commentId) {
+    if (!commentReportModal) return;
+    pendingReportCommentId = commentId;
+    if (commentReportText) commentReportText.value = "";
+    commentReportModal.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeReportModal() {
+    if (!commentReportModal) return;
+    pendingReportCommentId = null;
+    if (commentReportText) commentReportText.value = "";
+    commentReportModal.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  document.addEventListener("click", function (e) {
+    const editBtn = e.target.closest(".comment-edit-btn");
+    if (editBtn) {
+      e.preventDefault();
+
+      const commentId = editBtn.dataset.id;
+      const commentItem = editBtn.closest(".comment-item");
+      const contentEl = commentItem?.querySelector(".comment-content");
+
+      if (!contentEl) {
+        console.warn("Edit: .comment-content not found");
+        return;
+      }
+
+      const oldContent = contentEl.textContent.trim();
+      openCommentEditModal(commentId, oldContent, contentEl);
+      return;
+    }
+
+    const deleteBtn = e.target.closest(".comment-delete-btn");
+    if (deleteBtn) {
+      e.preventDefault();
+      openDeleteModal(deleteBtn.dataset.id);
+      return;
+    }
+
+    const reportBtn = e.target.closest(".comment-report-btn");
+    if (reportBtn) {
+      e.preventDefault();
+      openReportModal(reportBtn.dataset.id);
+      return;
+    }
+  });
+
+  if (commentEditSave) {
+    commentEditSave.addEventListener("click", async function () {
+      if (!editingCommentId || !editingCommentContentEl || !commentEditTextarea) return;
+
+      const trimmed = commentEditTextarea.value.trim();
+      const oldContent = editingCommentContentEl.textContent.trim();
+
+      if (!trimmed || trimmed === oldContent) {
+        closeCommentEditModal();
+        return;
+      }
+
+      const fd = new FormData();
+      fd.append("content", trimmed);
+
+      try {
+        const res = await fetch(`/posts/comment/${editingCommentId}/edit/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "X-Requested-With": "XMLHttpRequest",
+          },
+          body: fd,
+        });
+
+        const data = await res.json();
+        if (!data.ok) return;
+
+        editingCommentContentEl.textContent = data.content;
+        closeCommentEditModal();
+      } catch (err) {
+        console.error("Edit comment error:", err);
+      }
+    });
+  }
+
+  if (commentDeleteCancel) {
+    commentDeleteCancel.addEventListener("click", closeDeleteModal);
+  }
+  if (commentDeleteModalClose) {
+    commentDeleteModalClose.addEventListener("click", closeDeleteModal);
+  }
+  if (commentDeleteModal) {
+    commentDeleteModal.addEventListener("click", function (e) {
+      if (e.target === commentDeleteModal) closeDeleteModal();
+    });
+  }
+  if (commentDeleteConfirm) {
+    commentDeleteConfirm.addEventListener("click", async function () {
+      if (!pendingDeleteCommentId) return;
+
+      try {
+        const res = await fetch(`/posts/comment/${pendingDeleteCommentId}/delete/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        });
+
+        const data = await res.json();
+        if (!data.ok) return;
+
+        const commentsRes = await fetch(`/posts/${currentPostId}/comments/`, {
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        });
+
+        const commentsData = await commentsRes.json();
+        refreshCommentsModalHtml(commentsData.html);
+        updatePostCommentCounter(data.comments_count);
+        closeDeleteModal();
+      } catch (err) {
+        console.error("Delete comment error:", err);
+      }
+    });
+  }
+
+  if (commentReportCancel) {
+    commentReportCancel.addEventListener("click", closeReportModal);
+  }
+  if (commentReportModalClose) {
+    commentReportModalClose.addEventListener("click", closeReportModal);
+  }
+  if (commentReportModal) {
+    commentReportModal.addEventListener("click", function (e) {
+      if (e.target === commentReportModal) closeReportModal();
+    });
+  }
+  if (commentReportConfirm) {
+    commentReportConfirm.addEventListener("click", async function () {
+      if (!pendingReportCommentId) return;
+
+      const fd = new FormData();
+      fd.append("reason", commentReportText?.value?.trim() || "");
+
+      try {
+        const res = await fetch(`/posts/comment/${pendingReportCommentId}/report/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "X-Requested-With": "XMLHttpRequest",
+          },
+          body: fd,
+        });
+
+        const data = await res.json();
+        if (!data.ok) return;
+
+        closeReportModal();
+      } catch (err) {
+        console.error("Report comment error:", err);
+      }
+    });
+  }
 });

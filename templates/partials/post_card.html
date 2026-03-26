@@ -85,11 +85,11 @@
         {{ post.likes.count }}
       </span>
 
-      <button class="action-btn" title="Comment">
+      <button class="action-btn comment-btn" data-post="{{ post.id }}" title="Comment">
         <img src="{% static 'icons/comments-svgrepo-com.svg' %}" alt="Comment">
       </button>
 
-      <span class="action-count">
+      <span class="action-count comment-count">
         {{ post.comments.count }}
       </span>
 

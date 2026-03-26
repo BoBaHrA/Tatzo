@@ -3,8 +3,11 @@
 
 {% block title %}Home{% endblock %}
 
-{% block content %}
+{% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
 
 <!-- Sidebar -->
 <div class="sidebar">
@@ -115,7 +118,7 @@
 {% endif %}
   <div class="feed" id="feed">
     {% for post in posts %}
-      {% include 'partials/post_card.html' with post=post %}
+      {% include 'partials/post_card.html' with post=post liked_post_ids=liked_post_ids %}
     {% empty %}
     <p>No posts available.</p>
     {% endfor %}
@@ -155,5 +158,28 @@
   {% endif %}
 </div>
 
+<div class="post-modal" id="post-modal">
+  <div class="post-modal-inner">
+
+    <div class="post-modal-close" id="post-modal-close">✖</div>
+
+    <div class="post-modal-left" id="post-modal-left"></div>
+
+    <div class="post-modal-right">
+
+      <div class="comments-list" id="modal-comments-list"></div>
+
+      <form id="modal-comment-form">
+        <input type="text" id="modal-comment-input" placeholder="Write a comment...">
+        <button type="submit">Send</button>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
 <script src="{% static 'js/home.js' %}"></script>
 {% endblock %}
