@@ -29,19 +29,29 @@
         {% endif %}
       </div>
 
-      <div class="post-meta">
-        <span class="post-date">{{ post.created_at|date:"d.m.Y H:i" }}</span>
+      <div class="post-meta-wrap">
+        <div class="post-meta">
+          <span class="post-date">{{ post.created_at|date:"d.m.Y H:i" }}</span>
+        </div>
+
+        <div class="post-menu-wrapper">
+          <button class="post-menu-btn">⋯</button>
+
+          <div class="post-menu">
+            {% if request.user == post.user %}
+              <button class="post-delete-btn" data-id="{{ post.id }}">Delete post</button>
+            {% else %}
+              <button class="post-report-btn" data-id="{{ post.id }}">Report post</button>
+            {% endif %}
+          </div>
+        </div>
       </div>
     </div>
 
-    {% if post.is_ad or post.disable_comments or post.visibility != "public" %}
+    {% if post.is_ad or post.visibility != "public" %}
       <div class="post-badges">
         {% if post.is_ad %}
-          <span class="post-badge">Ad</span>
-        {% endif %}
-
-        {% if post.disable_comments %}
-          <span class="post-badge">Comments off</span>
+          <span class="post-badge post-badge-ad">Ad</span>
         {% endif %}
 
         {% if post.visibility != "public" %}
@@ -71,6 +81,20 @@
     {% endif %}
   </div>
 
+  <div class="username">
+    <a href="{% url 'profile' post.user.username %}">{{ post.user.username }}</a>
+  </div>
+
+  <div class="avatar">
+    <a href="{% url 'profile' post.user.username %}">
+      {% if post.user.profile.profile_image %}
+        <img src="{{ post.user.profile.profile_image.url }}" alt="User Avatar">
+      {% else %}
+        <img src="{% static 'icons/user.png' %}" alt="User Avatar">
+      {% endif %}
+    </a>
+  </div>
+
   <div class="post-actions under-bubble">
     <div class="post-actions-left">
       <button class="action-btn like-btn {% if post.id in liked_post_ids %}liked{% endif %}" data-post="{{ post.id }}">
@@ -81,17 +105,24 @@
         >
       </button>
 
-      <span class="action-count like-count">
+      <span class="action-count like-count {% if post.likes.count == 0 %}is-empty{% endif %}">
         {{ post.likes.count }}
       </span>
 
-      <button class="action-btn comment-btn" data-post="{{ post.id }}" title="Comment">
+      <button
+        class="action-btn comment-btn {% if post.disable_comments %}comments-disabled{% endif %}"
+        data-post="{{ post.id }}"
+        data-comments-disabled="{% if post.disable_comments %}1{% else %}0{% endif %}"
+        title="Comment"
+      >
         <img src="{% static 'icons/comments-svgrepo-com.svg' %}" alt="Comment">
       </button>
 
-      <span class="action-count comment-count">
-        {{ post.comments.count }}
-      </span>
+      {% if not post.disable_comments %}
+        <span class="action-count comment-count">
+          {{ post.comments.count }}
+        </span>
+      {% endif %}
 
       <button class="action-btn" title="Repost">
         <img src="{% static 'icons/share-svgrepo-com.svg' %}" alt="Repost">

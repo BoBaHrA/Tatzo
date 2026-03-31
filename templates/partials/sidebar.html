@@ -1,0 +1,70 @@
+{% load static %}
+
+<div class="sidebar">
+  <ul>
+    <li>
+      {% if request.user.is_authenticated %}
+        <a href="{% url 'profile' request.user.username %}"
+           class="{% if request.resolver_match.url_name == 'profile' and request.resolver_match.kwargs.username == request.user.username %}active{% endif %}">
+          <img src="{% static 'icons/profile.svg' %}" alt="My Profile">
+          <span>My Profile</span>
+        </a>
+      {% else %}
+        <a href="{% url 'login' %}">
+          <img src="{% static 'icons/profile.svg' %}" alt="My Profile">
+          <span>My Profile</span>
+        </a>
+      {% endif %}
+    </li>
+
+    <li>
+      <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}">
+        <img src="{% static 'icons/house.svg' %}" alt="Home">
+        <span>Home</span>
+      </a>
+    </li>
+
+    <li><a href="#"><img src="{% static 'icons/loupe.svg' %}" alt="Search"><span>Search</span></a></li>
+    <li><a href="#"><img src="{% static 'icons/maps.svg' %}" alt="Maps"><span>Maps</span></a></li>
+    <li><a href="#"><img src="{% static 'icons/chats.svg' %}" alt="Chats"><span>Chats</span></a></li>
+    <li><a href="#"><img src="{% static 'icons/calendar.svg' %}" alt="Calendar"><span>Calendar</span></a></li>
+    <li><a href="#"><img src="{% static 'icons/bookmark.svg' %}" alt="Bookmarks"><span>Bookmarks</span></a></li>
+
+    <li>
+      <a href="{% url 'contests_page' %}" class="{% if request.path == '/contests/' %}active{% endif %}">
+        <img src="{% static 'icons/trophy.svg' %}" alt="Contests">
+        <span>Contests</span>
+      </a>
+    </li>
+
+    <li><a href="#"><img src="{% static 'icons/sprout.svg' %}" alt="Clean slate"><span>Clean slate</span></a></li>
+    <li><a href="#"><img src="{% static 'icons/notifications.svg' %}" alt="Notifications"><span>Notifications</span></a></li>
+  </ul>
+
+  <ul class="more">
+    {% if request.user.is_authenticated %}
+      <li>
+        <form action="{% url 'logout' %}" method="post" style="margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="sidebar-logout-btn">
+            <img src="{% static 'icons/menu.svg' %}" alt="Logout">
+            <span>Logout</span>
+          </button>
+        </form>
+      </li>
+    {% else %}
+      <li>
+        <a href="{% url 'login' %}">
+          <img src="{% static 'icons/menu.svg' %}" alt="Login">
+          <span>Login</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'signup' %}">
+          <img src="{% static 'icons/menu.svg' %}" alt="Signup">
+          <span>Signup</span>
+        </a>
+      </li>
+    {% endif %}
+  </ul>
+</div>

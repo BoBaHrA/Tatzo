@@ -10,29 +10,7 @@
 {% block content %}
 
 <!-- Sidebar -->
-<div class="sidebar">
-  <ul>
-    <li><a href="{% url 'user_profile' %}" class="{% if request.path == '/profile/' %}active{% endif %}">
-      <img src="{% static 'icons/profile.svg' %}" alt="My Profile"><span>My Profile</span>
-    </a></li>
-    <li><a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}">
-      <img src="{% static 'icons/house.svg' %}" alt="Home"><span>Home</span>
-    </a></li>
-    <li><a href="#"><img src="{% static 'icons/loupe.svg' %}" alt="Search"><span>Search</span></a></li>
-    <li><a href="#"><img src="{% static 'icons/maps.svg' %}" alt="Maps"><span>Maps</span></a></li>
-    <li><a href="#"><img src="{% static 'icons/chats.svg' %}" alt="Chats"><span>Chats</span></a></li>
-    <li><a href="#"><img src="{% static 'icons/calendar.svg' %}" alt="Calendar"><span>Calendar</span></a></li>
-    <li><a href="#"><img src="{% static 'icons/bookmark.svg' %}" alt="Bookmarks"><span>Bookmarks</span></a></li>
-    <li><a href="{% url 'contests_page' %}" class="{% if request.path == '/contests/' %}active{% endif %}">
-      <img src="{% static 'icons/trophy.svg' %}" alt="Contests"><span>Contests</span>
-    </a></li>
-    <li><a href="#"><img src="{% static 'icons/sprout.svg' %}" alt="Clean slate"><span>Clean slate</span></a></li>
-    <li><a href="#"><img src="{% static 'icons/notifications.svg' %}" alt="Notifications"><span>Notifications</span></a></li>
-  </ul>
-  <ul class="more">
-    <li><a href="#"><img src="{% static 'icons/menu.svg' %}" alt="More"><span>More</span></a></li>
-  </ul>
-</div>
+{% include "partials/sidebar.html" %}
 <div class="main-content">
   {% if user.is_authenticated %}
   <div class="create-post" id="create-post">
@@ -68,15 +46,16 @@
     <div class="post-options" id="post-options">
         <!-- Кнопки опций -->
         <label class="custom-checkbox">
-        <input type="checkbox">
-        <span class="checkmark"></span>
-        Disable comments
+          <input type="checkbox" id="opt-disable-comments" name="disable_comments">
+          <span class="checkmark"></span>
+          Disable comments
         </label>
+
         <label class="custom-checkbox">
-    <input type="checkbox">
-    <span class="checkmark"></span>
-    Mark as Ad
-  </label>
+          <input type="checkbox" id="opt-is-ad" name="is_ad">
+          <span class="checkmark"></span>
+          Mark as Ad
+        </label>
 
   <!-- Кнопки с иконками -->
   <button>
@@ -123,7 +102,6 @@
     <p>No posts available.</p>
     {% endfor %}
   </div>
-</div>
 </div>
 
 <!-- Right sidebar: Recommendations -->
@@ -177,7 +155,111 @@
     </div>
   </div>
 </div>
+<div class="comment-edit-modal" id="comment-edit-modal">
+  <div class="comment-edit-modal-inner">
+    <div class="comment-edit-modal-header">
+      <div class="comment-edit-modal-title">Edit comment</div>
+      <button type="button" class="comment-edit-modal-close" id="comment-edit-modal-close">✖</button>
+    </div>
 
+    <div class="comment-edit-modal-body">
+      <textarea
+        id="comment-edit-textarea"
+        class="comment-edit-textarea"
+        placeholder="Update your comment..."
+      ></textarea>
+    </div>
+
+    <div class="comment-edit-modal-actions">
+      <button type="button" class="comment-edit-cancel" id="comment-edit-cancel">Cancel</button>
+      <button type="button" class="comment-edit-save" id="comment-edit-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="comment-edit-modal" id="comment-delete-modal">
+  <div class="comment-edit-modal-inner">
+    <div class="comment-edit-modal-header">
+      <div class="comment-edit-modal-title">Delete comment</div>
+      <button type="button" class="comment-edit-modal-close" id="comment-delete-modal-close">✖</button>
+    </div>
+
+    <div class="comment-edit-modal-body">
+      <p style="color:#e3f4f5; margin:0;">
+        Are you sure you want to delete this comment?
+      </p>
+    </div>
+
+    <div class="comment-edit-modal-actions">
+      <button type="button" class="comment-edit-cancel" id="comment-delete-cancel">Cancel</button>
+      <button type="button" class="comment-edit-save" id="comment-delete-confirm">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="comment-edit-modal" id="post-delete-modal">
+  <div class="comment-edit-modal-inner">
+    <div class="comment-edit-modal-header">
+      <div class="comment-edit-modal-title">Delete post</div>
+      <button type="button" class="comment-edit-modal-close" id="post-delete-modal-close">✖</button>
+    </div>
+
+    <div class="comment-edit-modal-body">
+      <p style="color:#e3f4f5; margin:0;">
+        Are you sure you want to delete this post?
+      </p>
+    </div>
+
+    <div class="comment-edit-modal-actions">
+      <button type="button" class="comment-edit-cancel" id="post-delete-cancel">Cancel</button>
+      <button type="button" class="comment-edit-save" id="post-delete-confirm">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="comment-edit-modal" id="post-report-modal">
+  <div class="comment-edit-modal-inner">
+    <div class="comment-edit-modal-header">
+      <div class="comment-edit-modal-title">Report post</div>
+      <button type="button" class="comment-edit-modal-close" id="post-report-modal-close">✖</button>
+    </div>
+
+    <div class="comment-edit-modal-body">
+      <textarea
+        id="post-report-text"
+        class="comment-edit-textarea"
+        placeholder="Describe the problem (optional)..."
+      ></textarea>
+    </div>
+
+    <div class="comment-edit-modal-actions">
+      <button type="button" class="comment-edit-cancel" id="post-report-cancel">Cancel</button>
+      <button type="button" class="comment-edit-save" id="post-report-confirm">Send report</button>
+    </div>
+  </div>
+</div>
+
+<div class="comment-edit-modal" id="comment-report-modal">
+  <div class="comment-edit-modal-inner">
+    <div class="comment-edit-modal-header">
+      <div class="comment-edit-modal-title">Report comment</div>
+      <button type="button" class="comment-edit-modal-close" id="comment-report-modal-close">✖</button>
+    </div>
+
+    <div class="comment-edit-modal-body">
+      <textarea
+        id="comment-report-text"
+        class="comment-edit-textarea"
+        placeholder="Describe the problem (optional)..."
+      ></textarea>
+    </div>
+
+    <div class="comment-edit-modal-actions">
+      <button type="button" class="comment-edit-cancel" id="comment-report-cancel">Cancel</button>
+      <button type="button" class="comment-edit-save" id="comment-report-confirm">Send report</button>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}

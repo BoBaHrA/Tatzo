@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 
 from .forms import PostForm, PostMediaUploadForm
-from .models import Post, PostMedia, PostLike, PostComment, CommentLike, CommentReport
+from .models import Post, PostMedia, PostLike, PostComment, CommentLike, CommentReport, PostReport
 
 
 def feed(request):
@@ -109,6 +109,12 @@ def create_post(request):
 @require_POST
 def create_comment(request, post_id):
     post = get_object_or_404(Post, id=post_id)
+    
+    if post.disable_comments:
+        return JsonResponse(
+            {"ok": False, "error": "Комментарии для этого поста отключены."},
+            status=403,
+        )
 
     content = (request.POST.get("content") or "").strip()
     parent_id = request.POST.get("parent_id")
@@ -246,4 +252,45 @@ def report_comment(request, comment_id):
         "ok": True,
         "created": created,
         "message": "Жалоба отправлена." if created else "Вы уже жаловались на этот комментарий.",
+    })
+    
+@login_required
+@require_POST
+def delete_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id, user=request.user)
+    post.delete()
+
+    return JsonResponse({
+        "ok": True,
+        "post_id": post_id,
+    })
+
+
+@login_required
+@require_POST
+def report_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    if post.user == request.user:
+        return JsonResponse(
+            {"ok": False, "error": "Нельзя пожаловаться на свой пост."},
+            status=400,
+        )
+
+    reason = (request.POST.get("reason") or "").strip()
+
+    report, created = PostReport.objects.get_or_create(
+        post=post,
+        user=request.user,
+        defaults={"reason": reason},
+    )
+
+    if not created and reason and not report.reason:
+        report.reason = reason
+        report.save(update_fields=["reason"])
+
+    return JsonResponse({
+        "ok": True,
+        "created": created,
+        "message": "Жалоба на пост отправлена." if created else "Вы уже жаловались на этот пост.",
     })

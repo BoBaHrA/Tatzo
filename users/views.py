@@ -204,7 +204,7 @@ def edit_profile(request):
 @login_required
 def user_profile(request):
     profile = get_object_or_404(Profile, user=request.user)
-    return render(request, "users/profile.html", {"profile": profile})
+    return redirect('profile', username=request.user.username)
 
 
 # Обработка удаления поста
@@ -434,3 +434,23 @@ def reject_profile(request, profile_id):
 
     # Перенаправление обратно на список профилей или другую страницу
     return redirect("profile_list")  # Замените на ваш URL для списка профилей
+
+def profile_view(request, username):
+    user_obj = get_object_or_404(
+        User.objects.select_related("profile"),
+        username=username
+    )
+
+    posts = (
+        Post.objects
+        .filter(user=user_obj)
+        .prefetch_related("medias")
+        .order_by("-created_at")
+    )
+
+    context = {
+        "profile_user": user_obj,
+        "posts": posts,
+        "posts_count": posts.count(),
+    }
+    return render(request, "users/profile.html", context)

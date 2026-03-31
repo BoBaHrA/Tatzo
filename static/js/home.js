@@ -31,6 +31,19 @@ document.addEventListener('DOMContentLoaded', function () {
   const commentReportCancel = document.getElementById('comment-report-cancel');
   const commentReportModalClose = document.getElementById('comment-report-modal-close');
   const commentReportText = document.getElementById('comment-report-text');
+  const postDeleteModal = document.getElementById('post-delete-modal');
+  const postDeleteConfirm = document.getElementById('post-delete-confirm');
+  const postDeleteCancel = document.getElementById('post-delete-cancel');
+  const postDeleteModalClose = document.getElementById('post-delete-modal-close');
+
+  const postReportModal = document.getElementById('post-report-modal');
+  const postReportConfirm = document.getElementById('post-report-confirm');
+  const postReportCancel = document.getElementById('post-report-cancel');
+  const postReportModalClose = document.getElementById('post-report-modal-close');
+  const postReportText = document.getElementById('post-report-text');
+
+  let pendingDeletePostId = null;
+  let pendingReportPostId = null;
 
   let editingCommentId = null;
   let editingCommentContentEl = null;
@@ -1162,6 +1175,12 @@ function renderCarousel() {
         const countEl = postActionsLeft?.querySelector(".like-count");
         if (countEl) {
           animateCountChange(countEl, data.likes_count);
+
+          if (Number(data.likes_count) > 0) {
+            countEl.classList.remove("is-empty");
+          } else {
+            countEl.classList.add("is-empty");
+          }
         }
       } catch (err) {
         console.error("Like toggle error:", err);
@@ -1184,6 +1203,10 @@ function renderCarousel() {
     if (!commentBtn) return;
 
     e.preventDefault();
+
+    if (commentBtn.dataset.commentsDisabled === "1") {
+      return;
+    }
 
     const postId = commentBtn.dataset.post;
     const postEl = commentBtn.closest(".post");
@@ -1416,42 +1439,6 @@ function renderCarousel() {
     }
   });
 
-  if (commentEditSave) {
-    commentEditSave.addEventListener("click", async function () {
-      if (!editingCommentId || !editingCommentContentEl || !commentEditTextarea) return;
-
-      const trimmed = commentEditTextarea.value.trim();
-      const oldContent = editingCommentContentEl.textContent.trim();
-
-      if (!trimmed || trimmed === oldContent) {
-        closeCommentEditModal();
-        return;
-      }
-
-      const fd = new FormData();
-      fd.append("content", trimmed);
-
-      try {
-        const res = await fetch(`/posts/comment/${editingCommentId}/edit/`, {
-          method: "POST",
-          headers: {
-            "X-CSRFToken": getCookie("csrftoken"),
-            "X-Requested-With": "XMLHttpRequest",
-          },
-          body: fd,
-        });
-
-        const data = await res.json();
-        if (!data.ok) return;
-
-        editingCommentContentEl.textContent = data.content;
-        closeCommentEditModal();
-      } catch (err) {
-        console.error("Edit comment error:", err);
-      }
-    });
-  }
-
   function refreshCommentsModalHtml(html) {
     modalCommentsList.innerHTML = html || "";
 
@@ -1526,6 +1513,9 @@ function renderCarousel() {
     const deleteBtn = e.target.closest(".comment-delete-btn");
     if (deleteBtn) {
       e.preventDefault();
+      document.querySelectorAll(".comment-menu").forEach(m => {
+        m.style.display = "none";
+      });
       openDeleteModal(deleteBtn.dataset.id);
       return;
     }
@@ -1617,6 +1607,36 @@ function renderCarousel() {
     });
   }
 
+    function closeAllCommentMenus() {
+      document.querySelectorAll(".comment-menu.open").forEach(menu => {
+        menu.classList.remove("open");
+      });
+    }
+
+    document.addEventListener("click", function (e) {
+      const menuBtn = e.target.closest(".comment-menu-btn");
+      const clickedInsideMenu = e.target.closest(".comment-menu");
+
+      if (menuBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const menu = menuBtn.nextElementSibling;
+        const isOpen = menu?.classList.contains("open");
+
+        closeAllCommentMenus();
+
+        if (menu && !isOpen) {
+          menu.classList.add("open");
+        }
+        return;
+      }
+
+      if (clickedInsideMenu) return;
+
+      closeAllCommentMenus();
+    });
+
   if (commentReportCancel) {
     commentReportCancel.addEventListener("click", closeReportModal);
   }
@@ -1651,6 +1671,168 @@ function renderCarousel() {
         closeReportModal();
       } catch (err) {
         console.error("Report comment error:", err);
+      }
+    });
+  }
+  function closeAllPostMenus() {
+    document.querySelectorAll(".post-menu.open").forEach(menu => {
+      menu.classList.remove("open");
+    });
+  }
+
+  document.addEventListener("click", function (e) {
+    const menuBtn = e.target.closest(".post-menu-btn");
+    const clickedInsideMenu = e.target.closest(".post-menu");
+
+    if (menuBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const menu = menuBtn.nextElementSibling;
+      const isOpen = menu?.classList.contains("open");
+
+      closeAllPostMenus();
+
+      if (menu && !isOpen) {
+        menu.classList.add("open");
+      }
+      return;
+    }
+
+    if (clickedInsideMenu) return;
+
+    closeAllPostMenus();
+  });
+
+  document.addEventListener("click", async function (e) {
+    const deleteBtn = e.target.closest(".post-delete-btn");
+    if (deleteBtn) {
+      e.preventDefault();
+      closeAllPostMenus();
+
+      const postId = deleteBtn.dataset.id;
+      if (!postId) return;
+
+      openPostDeleteModal(postId);
+      return;
+    }
+
+    const reportBtn = e.target.closest(".post-report-btn");
+    if (reportBtn) {
+      e.preventDefault();
+      closeAllPostMenus();
+
+      const postId = reportBtn.dataset.id;
+      if (!postId) return;
+
+      openPostReportModal(postId);
+      return;
+    }
+  });
+
+  function openPostDeleteModal(postId) {
+    if (!postDeleteModal) return;
+    pendingDeletePostId = postId;
+    postDeleteModal.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closePostDeleteModal() {
+    if (!postDeleteModal) return;
+    pendingDeletePostId = null;
+    postDeleteModal.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  function openPostReportModal(postId) {
+    if (!postReportModal) return;
+    pendingReportPostId = postId;
+    if (postReportText) postReportText.value = "";
+    postReportModal.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closePostReportModal() {
+    if (!postReportModal) return;
+    pendingReportPostId = null;
+    if (postReportText) postReportText.value = "";
+    postReportModal.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  if (postDeleteCancel) {
+  postDeleteCancel.addEventListener("click", closePostDeleteModal);
+}
+if (postDeleteModalClose) {
+  postDeleteModalClose.addEventListener("click", closePostDeleteModal);
+}
+if (postDeleteModal) {
+  postDeleteModal.addEventListener("click", function (e) {
+    if (e.target === postDeleteModal) closePostDeleteModal();
+  });
+}
+if (postDeleteConfirm) {
+  postDeleteConfirm.addEventListener("click", async function () {
+    if (!pendingDeletePostId) return;
+
+    try {
+      const res = await fetch(`/posts/${pendingDeletePostId}/delete/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      });
+
+      const data = await res.json();
+      if (!data.ok) return;
+
+      const postEl = document.querySelector(`.post-delete-btn[data-id="${pendingDeletePostId}"]`)?.closest(".post");
+      if (postEl) {
+        postEl.remove();
+      }
+
+      closePostDeleteModal();
+    } catch (err) {
+      console.error("Delete post error:", err);
+    }
+  });
+}
+
+  if (postReportCancel) {
+    postReportCancel.addEventListener("click", closePostReportModal);
+  }
+  if (postReportModalClose) {
+    postReportModalClose.addEventListener("click", closePostReportModal);
+  }
+  if (postReportModal) {
+    postReportModal.addEventListener("click", function (e) {
+      if (e.target === postReportModal) closePostReportModal();
+    });
+  }
+  if (postReportConfirm) {
+    postReportConfirm.addEventListener("click", async function () {
+      if (!pendingReportPostId) return;
+
+      const fd = new FormData();
+      fd.append("reason", postReportText?.value?.trim() || "");
+
+      try {
+        const res = await fetch(`/posts/${pendingReportPostId}/report/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "X-Requested-With": "XMLHttpRequest",
+          },
+          body: fd,
+        });
+
+        const data = await res.json();
+        if (!data.ok) return;
+
+        closePostReportModal();
+      } catch (err) {
+        console.error("Report post error:", err);
       }
     });
   }

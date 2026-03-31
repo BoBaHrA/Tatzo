@@ -34,18 +34,18 @@
           Reply
         </button>
 
-        {% if request.user == comment.user %}
-          <button class="comment-edit-btn" data-id="{{ comment.id }}">
-            Edit
-          </button>
-          <button class="comment-delete-btn" data-id="{{ comment.id }}">
-            Delete
-          </button>
-        {% else %}
-          <button class="comment-report-btn" data-id="{{ comment.id }}">
-            Report
-          </button>
-        {% endif %}
+        <div class="comment-menu-wrapper">
+          <button class="comment-menu-btn">⋯</button>
+
+          <div class="comment-menu">
+            {% if request.user == comment.user %}
+              <button class="comment-edit-btn" data-id="{{ comment.id }}">Edit</button>
+              <button class="comment-delete-btn" data-id="{{ comment.id }}">Delete</button>
+            {% else %}
+              <button class="comment-report-btn" data-id="{{ comment.id }}">Report</button>
+            {% endif %}
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -94,18 +94,18 @@
                 Reply
               </button>
 
-              {% if request.user == reply.user %}
-                <button class="comment-edit-btn" data-id="{{ reply.id }}">
-                  Edit
-                </button>
-                <button class="comment-delete-btn" data-id="{{ reply.id }}">
-                  Delete
-                </button>
-              {% else %}
-                <button class="comment-report-btn" data-id="{{ reply.id }}">
-                  Report
-                </button>
-              {% endif %}
+              <div class="comment-menu-wrapper">
+                <button class="comment-menu-btn">⋯</button>
+
+                <div class="comment-menu">
+                  {% if request.user == reply.user %}
+                    <button class="comment-edit-btn" data-id="{{ reply.id }}">Edit</button>
+                    <button class="comment-delete-btn" data-id="{{ reply.id }}">Delete</button>
+                  {% else %}
+                    <button class="comment-report-btn" data-id="{{ reply.id }}">Report</button>
+                  {% endif %}
+                </div>
+              </div>
             </div>
           </div>
         </div>

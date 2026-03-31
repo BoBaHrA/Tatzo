@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ profile_user.username }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+<div class="profile-page">
+  <div class="profile-shell">
+
+    <div class="profile-header">
+      <div class="profile-avatar-wrap">
+        {% if profile_user.profile.profile_image %}
+          <img class="profile-avatar" src="{{ profile_user.profile.profile_image.url }}" alt="{{ profile_user.username }}">
+        {% else %}
+          <img class="profile-avatar" src="{% static 'icons/user.png' %}" alt="{{ profile_user.username }}">
+        {% endif %}
+      </div>
+
+      <div class="profile-main">
+        <div class="profile-top-row">
+          <div>
+            <div class="profile-name-row">
+              <h1 class="profile-username">{{ profile_user.username }}</h1>
+
+              {% if profile_user.profile.account_type == "tattoo_artist" %}
+                <span class="profile-badge profile-badge-artist">Tattoo Artist</span>
+              {% endif %}
+
+              {% if profile_user.profile.verification_status == "approved" %}
+                <span class="profile-badge profile-badge-verified">Verified</span>
+              {% endif %}
+            </div>
+
+            <div class="profile-subline">
+              {% if profile_user.profile.account_type == "tattoo_artist" %}
+                Professional portfolio
+              {% else %}
+                Community profile
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="profile-actions">
+            {% if request.user == profile_user %}
+              <button class="profile-btn profile-btn-primary" type="button">Edit profile</button>
+            {% else %}
+              <button class="profile-btn profile-btn-primary" type="button">Follow</button>
+              <button class="profile-btn profile-btn-secondary" type="button">Message</button>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="profile-stats">
+          <div class="profile-stat">
+            <span class="profile-stat-value">{{ posts_count }}</span>
+            <span class="profile-stat-label">posts</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat-value">0</span>
+            <span class="profile-stat-label">followers</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat-value">0</span>
+            <span class="profile-stat-label">following</span>
+          </div>
+        </div>
+
+        <div class="profile-bio-card">
+          {% if profile_user.profile.bio %}
+            {{ profile_user.profile.bio }}
+          {% else %}
+            <span class="profile-muted">No bio yet.</span>
+          {% endif %}
+        </div>
+
+        {% if profile_user.profile.account_type == "tattoo_artist" %}
+          <div class="artist-info-grid">
+            <div class="artist-info-card">
+              <div class="artist-info-title">Artist status</div>
+              <div class="artist-info-value">
+                {{ profile_user.profile.verification_status|title }}
+              </div>
+            </div>
+
+            <div class="artist-info-card">
+              <div class="artist-info-title">Portfolio</div>
+              <div class="artist-info-value">Building in progress</div>
+            </div>
+
+            <div class="artist-info-card">
+              <div class="artist-info-title">Booking</div>
+              <div class="artist-info-value">Coming later</div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="profile-tabs">
+      <button class="profile-tab active" type="button">Posts</button>
+      <button class="profile-tab" type="button">Saved</button>
+    </div>
+
+    <div class="profile-posts-grid">
+      {% for post in posts %}
+        <div class="profile-post-card" data-post-id="{{ post.id }}">
+          {% with first_media=post.medias.first %}
+            {% if first_media %}
+              {% if first_media.media_type == "video" %}
+                <video class="profile-post-media" src="{{ first_media.file.url }}" muted playsinline preload="metadata"></video>
+                <span class="profile-post-type">▶</span>
+              {% else %}
+                <img class="profile-post-media" src="{{ first_media.file.url }}" alt="Post media">
+              {% endif %}
+            {% else %}
+              <div class="profile-post-empty">No media</div>
+            {% endif %}
+          {% endwith %}
+        </div>
+      {% empty %}
+        <div class="profile-empty-state">
+          <div class="profile-empty-title">No posts yet</div>
+          <div class="profile-empty-text">
+            {% if request.user == profile_user %}
+              Your posts will appear here.
+            {% else %}
+              This user has not published anything yet.
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

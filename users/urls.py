@@ -86,6 +86,7 @@ urlpatterns = [
         ),
         name="password_reset_complete",
     ),
+    path("profile/<str:username>/", views.profile_view, name="profile"),
     # ... другие маршруты
 ]
 
