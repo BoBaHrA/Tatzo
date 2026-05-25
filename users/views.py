@@ -7,18 +7,21 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.db import transaction
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.http import require_POST
+from .models import Profile, VerificationDocument, ManualVerificationRequest, UserFollow, PortfolioAlbum, PortfolioWork, ChatThread, ChatMessage, ChatAttachment
 
 from posts.forms import PostForm, PostMediaUploadForm
-from .forms import ProfileForm, VerificationForm
+from .forms import ProfileForm, VerificationForm, UserEditForm, ManualVerificationForm, PortfolioWorkForm, PortfolioAlbumForm
 
-from .forms_custom import CustomUserCreationForm  # Импортируем из нового файла
-from posts.models import Post, PostMedia,  PostLike
+from .forms_custom import CustomUserCreationForm
+from posts.models import Post, PostMedia,  PostLike, PostBookmark, PostReport, PostComment, CommentReport
 from .utils import send_verification_email
 
 User = get_user_model()
@@ -49,22 +52,29 @@ def home(request):
     posts = (
         Post.objects
         .select_related("user", "user__profile")
-        .prefetch_related("medias", "likes", "comments")
+        .prefetch_related("medias", "likes", "comments", "bookmarks")
         .order_by("-created_at")
     )
 
     liked_post_ids = set()
+    bookmarked_post_ids = set()
+
     if request.user.is_authenticated:
         liked_post_ids = set(
             PostLike.objects.filter(user=request.user).values_list("post_id", flat=True)
         )
 
+        bookmarked_post_ids = set(
+            PostBookmark.objects.filter(user=request.user).values_list("post_id", flat=True)
+        )
+
     context = {
         "posts": posts,
         "liked_post_ids": liked_post_ids,
+        "bookmarked_post_ids": bookmarked_post_ids,
     }
-    return render(request, "home.html", context)
 
+    return render(request, "home.html", context)
 from django.contrib.auth import login
 
 
@@ -153,6 +163,7 @@ def create_post(request):
             "post": post,
             "request": request,
             "liked_post_ids": set(),
+            "bookmarked_post_ids": set(),
         }
     )
     return JsonResponse({"ok": True, "post_id": post.id, "html": html})
@@ -168,16 +179,6 @@ def logout(request):
     return redirect("home")
 
 
-# Страница профиля
-@login_required
-def profile(request):
-    """
-    Отображение профиля пользователя.
-    """
-    context = {"user": request.user}
-    return render(request, "profile.html", context)
-
-
 def profile_list(request):
     profiles = Profile.objects.all()  # Получаем все профили
     return render(request, "users/profile_list.html", {"profiles": profiles})
@@ -185,26 +186,33 @@ def profile_list(request):
 
 @login_required
 def edit_profile(request):
-    profile = Profile.objects.get(user=request.user)
+    profile = request.user.profile
+    user_obj = request.user
 
     if request.method == "POST":
-        form = ProfileForm(request.POST, request.FILES, instance=profile)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Your profile has been updated!")
-            return redirect(
-                "profile"
-            )  # Замените на название маршрута для профиля, если требуется
-    else:
-        form = ProfileForm(instance=profile)
+        user_form = UserEditForm(request.POST, instance=user_obj)
+        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
 
-    return render(request, "users/edit_profile.html", {"form": form})
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, "Profile updated successfully.")
+            return redirect("profile", username=request.user.username)
+    else:
+        user_form = UserEditForm(instance=user_obj)
+        profile_form = ProfileForm(instance=profile)
+
+    context = {
+        "user_form": user_form,
+        "profile_form": profile_form,
+        "profile_user": request.user,
+    }
+    return render(request, "users/edit_profile.html", context)
 
 
 @login_required
 def user_profile(request):
-    profile = get_object_or_404(Profile, user=request.user)
-    return redirect('profile', username=request.user.username)
+    return redirect("profile", username=request.user.username)
 
 
 # Обработка удаления поста
@@ -299,21 +307,89 @@ def admin_verification(request, profile_id):
 
 @login_required
 def verification_page(request):
+    profile = request.user.profile
+
+    if profile.account_type != "tattoo_artist":
+        return redirect("home")
+
+    existing_document_request = VerificationDocument.objects.filter(
+        user=request.user
+    ).first()
+
+    existing_manual_request = ManualVerificationRequest.objects.filter(
+        user=request.user
+    ).first()
+
+    document_form = VerificationForm(instance=existing_document_request)
+    manual_form = ManualVerificationForm(instance=existing_manual_request)
+
     if request.method == "POST":
-        form = VerificationForm(request.POST, request.FILES)
-        if form.is_valid():
-            verification_document = form.save(commit=False)
-            verification_document.user = request.user
-            verification_document.save()
-            messages.success(request, "Ваши документы отправлены на проверку!")
-            return redirect("home")  # После загрузки → на главную
+        verification_action = request.POST.get("verification_action")
+
+        if verification_action == "documents":
+            document_form = VerificationForm(
+                request.POST,
+                request.FILES,
+                instance=existing_document_request,
+            )
+
+            if document_form.is_valid():
+                verification_document = document_form.save(commit=False)
+                verification_document.user = request.user
+                verification_document.is_verified = False
+                verification_document.save()
+
+                profile.verification_status = "pending_documents"
+                profile.save(update_fields=["verification_status"])
+
+                messages.success(
+                    request,
+                    "Your documents have been submitted for review.",
+                )
+                return redirect("home")
+
+        elif verification_action == "manual":
+            manual_form = ManualVerificationForm(
+                request.POST,
+                request.FILES,
+                instance=existing_manual_request,
+            )
+
+            if manual_form.is_valid():
+                manual_request = manual_form.save(commit=False)
+                manual_request.user = request.user
+                manual_request.is_reviewed = False
+                manual_request.save()
+
+                profile.verification_status = "pending_manual_review"
+                profile.save(update_fields=["verification_status"])
+
+                messages.success(
+                    request,
+                    "Your manual review request has been submitted.",
+                )
+                return redirect("home")
+
         else:
-            messages.error(request, "Ошибка при загрузке документов. Проверьте файлы.")
+            messages.error(request, "Invalid verification request.")
 
-    else:
-        form = VerificationForm()
+    status_labels = {
+        "not_submitted": "Not submitted",
+        "pending_documents": "Pending documents review",
+        "pending_manual_review": "Pending manual review",
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+    }
 
-    return render(request, "users/verification_page.html", {"form": form})
+    context = {
+        "verification_status_label": status_labels.get(profile.verification_status, profile.verification_status),
+        "document_form": document_form,
+        "manual_form": manual_form,
+        "verification_status": profile.verification_status,
+    }
+
+    return render(request, "users/verification_page.html", context)
 
 
 # Проверка, является ли пользователь администратором
@@ -444,13 +520,750 @@ def profile_view(request, username):
     posts = (
         Post.objects
         .filter(user=user_obj)
-        .prefetch_related("medias")
+        .select_related("user", "user__profile")
+        .prefetch_related("medias", "likes", "comments", "bookmarks")
         .order_by("-created_at")
     )
+
+    can_view_liked = (
+        request.user == user_obj
+        or user_obj.profile.show_liked_posts
+    )
+
+    liked_posts = Post.objects.none()
+
+    if can_view_liked:
+        liked_posts = (
+            Post.objects
+            .filter(likes__user=user_obj)
+            .select_related("user", "user__profile")
+            .prefetch_related("medias", "likes", "comments", "bookmarks")
+            .distinct()
+            .order_by("-created_at")
+        )
+
+    liked_post_ids = set()
+    bookmarked_post_ids = set()
+
+    if request.user.is_authenticated:
+        liked_post_ids = set(
+            PostLike.objects.filter(user=request.user).values_list("post_id", flat=True)
+        )
+
+        bookmarked_post_ids = set(
+            PostBookmark.objects.filter(user=request.user).values_list("post_id", flat=True)
+        )
+
+    followers_count = UserFollow.objects.filter(following=user_obj).count()
+    following_count = UserFollow.objects.filter(follower=user_obj).count()
+
+    is_following = False
+
+    if request.user.is_authenticated and request.user != user_obj:
+        is_following = UserFollow.objects.filter(
+            follower=request.user,
+            following=user_obj,
+        ).exists()
+
+    portfolio_works_count = 0
+
+    if user_obj.profile.account_type == "tattoo_artist":
+        portfolio_works_count = PortfolioWork.objects.filter(user=user_obj).count()
 
     context = {
         "profile_user": user_obj,
         "posts": posts,
+        "liked_posts": liked_posts,
         "posts_count": posts.count(),
+        "can_view_liked": can_view_liked,
+        "liked_post_ids": liked_post_ids,
+        "bookmarked_post_ids": bookmarked_post_ids,
+        "followers_count": followers_count,
+        "following_count": following_count,
+        "is_following": is_following,
+        "portfolio_works_count": portfolio_works_count,
     }
+
     return render(request, "users/profile.html", context)
+
+@login_required
+@require_POST
+def toggle_follow(request, username):
+    target_user = get_object_or_404(User, username=username)
+
+    if target_user == request.user:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "You cannot follow yourself.",
+            },
+            status=400,
+        )
+
+    follow_relation, created = UserFollow.objects.get_or_create(
+        follower=request.user,
+        following=target_user,
+    )
+
+    if created:
+        is_following = True
+    else:
+        follow_relation.delete()
+        is_following = False
+
+    followers_count = UserFollow.objects.filter(following=target_user).count()
+    following_count = UserFollow.objects.filter(follower=target_user).count()
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "is_following": is_following,
+            "followers_count": followers_count,
+            "following_count": following_count,
+            "button_text": "Following" if is_following else "Follow",
+        }
+    )
+
+
+def followers_list(request, username):
+    profile_user = get_object_or_404(
+        User.objects.select_related("profile"),
+        username=username,
+    )
+
+    followers = (
+        UserFollow.objects
+        .filter(following=profile_user)
+        .select_related("follower", "follower__profile")
+        .order_by("-created_at")
+    )
+
+    followers_count = followers.count()
+
+    return render(
+        request,
+        "users/followers_list.html",
+        {
+            "profile_user": profile_user,
+            "followers": followers,
+            "followers_count": followers_count,
+        },
+    )
+
+
+def following_list(request, username):
+    profile_user = get_object_or_404(
+        User.objects.select_related("profile"),
+        username=username,
+    )
+
+    following = (
+        UserFollow.objects
+        .filter(follower=profile_user)
+        .select_related("following", "following__profile")
+        .order_by("-created_at")
+    )
+
+    following_count = following.count()
+
+    return render(
+        request,
+        "users/following_list.html",
+        {
+            "profile_user": profile_user,
+            "following": following,
+            "following_count": following_count,
+        },
+    )
+
+@login_required
+def add_portfolio_work(request, username):
+    profile_user = get_object_or_404(
+        User.objects.select_related("profile"),
+        username=username,
+    )
+
+    if request.user != profile_user:
+        return redirect("artist_portfolio", username=profile_user.username)
+
+    if profile_user.profile.account_type != "tattoo_artist":
+        return redirect("profile", username=profile_user.username)
+
+    if request.method == "POST":
+        form = PortfolioWorkForm(request.POST, request.FILES, user=request.user)
+
+        if form.is_valid():
+            album = form.cleaned_data.get("album")
+            new_album_title = (form.cleaned_data.get("new_album_title") or "").strip()
+            images = form.cleaned_data.get("images") or []
+
+            title = (form.cleaned_data.get("title") or "").strip()
+            description = (form.cleaned_data.get("description") or "").strip()
+            style = (form.cleaned_data.get("style") or "").strip()
+            body_placement = (form.cleaned_data.get("body_placement") or "").strip()
+
+            if new_album_title:
+                album, _ = PortfolioAlbum.objects.get_or_create(
+                    user=request.user,
+                    title=new_album_title,
+                    defaults={
+                        "style": style,
+                    },
+                )
+
+            created_count = 0
+
+            for index, image in enumerate(images, start=1):
+                work_title = title
+
+                if title and len(images) > 1:
+                    work_title = f"{title} #{index}"
+
+                PortfolioWork.objects.create(
+                    user=request.user,
+                    album=album,
+                    image=image,
+                    title=work_title,
+                    description=description,
+                    style=style,
+                    body_placement=body_placement,
+                )
+
+                created_count += 1
+
+            if created_count == 1:
+                messages.success(request, "Portfolio work added successfully.")
+            else:
+                messages.success(request, f"{created_count} portfolio works added successfully.")
+
+            return redirect("artist_portfolio", username=request.user.username)
+    else:
+        form = PortfolioWorkForm(user=request.user)
+
+    return render(request, "users/add_portfolio_work.html", {"form": form})
+
+@login_required
+@require_POST
+def create_portfolio_album(request, username):
+    profile_user = get_object_or_404(User, username=username)
+
+    if request.user != profile_user:
+        return redirect("artist_portfolio", username=profile_user.username)
+
+    form = PortfolioAlbumForm(request.POST, request.FILES)
+
+    if form.is_valid():
+        album = form.save(commit=False)
+        album.user = request.user
+        album.save()
+        messages.success(request, "Portfolio album created.")
+
+    return redirect("artist_portfolio", username=request.user.username)
+
+def artist_portfolio(request, username):
+    profile_user = get_object_or_404(
+        User.objects.select_related("profile"),
+        username=username,
+    )
+
+    if profile_user.profile.account_type != "tattoo_artist":
+        return redirect("profile", username=profile_user.username)
+
+    albums = (
+        PortfolioAlbum.objects
+        .filter(user=profile_user)
+        .prefetch_related("works")
+        .order_by("-id")
+    )
+
+    works = (
+        PortfolioWork.objects
+        .filter(user=profile_user)
+        .select_related("album")
+        .order_by("-id")
+    )
+
+    context = {
+        "profile_user": profile_user,
+        "albums": albums,
+        "works": works,
+        "works_count": works.count(),
+        "is_owner": request.user.is_authenticated and request.user == profile_user,
+    }
+
+    return render(request, "users/artist_portfolio.html", context)
+
+def artist_portfolio_album(request, username, album_id):
+    profile_user = get_object_or_404(
+        User.objects.select_related("profile"),
+        username=username,
+    )
+
+    if profile_user.profile.account_type != "tattoo_artist":
+        return redirect("profile", username=profile_user.username)
+
+    album = get_object_or_404(
+        PortfolioAlbum.objects.filter(user=profile_user),
+        id=album_id,
+    )
+
+    works = (
+        PortfolioWork.objects
+        .filter(user=profile_user, album=album)
+        .select_related("album")
+    )
+
+    context = {
+        "profile_user": profile_user,
+        "album": album,
+        "works": works,
+        "works_count": works.count(),
+        "is_owner": request.user.is_authenticated and request.user == profile_user,
+    }
+
+    return render(request, "users/artist_portfolio_album.html", context)
+
+@login_required
+def edit_portfolio_album(request, username, album_id):
+    profile_user = get_object_or_404(User, username=username)
+
+    if request.user != profile_user:
+        return redirect("artist_portfolio", username=profile_user.username)
+
+    album = get_object_or_404(
+        PortfolioAlbum.objects.filter(user=request.user),
+        id=album_id,
+    )
+
+    if request.method == "POST":
+        form = PortfolioAlbumForm(request.POST, request.FILES, instance=album)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Album updated successfully.")
+            return redirect("artist_portfolio", username=request.user.username)
+    else:
+        form = PortfolioAlbumForm(instance=album)
+
+    return render(
+        request,
+        "users/edit_portfolio_album.html",
+        {
+            "form": form,
+            "album": album,
+        },
+    )
+
+
+@login_required
+@require_POST
+def delete_portfolio_album(request, username, album_id):
+    profile_user = get_object_or_404(User, username=username)
+
+    if request.user != profile_user:
+        return redirect("artist_portfolio", username=profile_user.username)
+
+    album = get_object_or_404(
+        PortfolioAlbum.objects.filter(user=request.user),
+        id=album_id,
+    )
+
+    album.delete()
+    messages.success(request, "Album deleted. Works were kept in All works.")
+
+    return redirect("artist_portfolio", username=request.user.username)
+
+
+@login_required
+@require_POST
+def delete_portfolio_work(request, username, work_id):
+    profile_user = get_object_or_404(User, username=username)
+
+    if request.user != profile_user:
+        return redirect("artist_portfolio", username=profile_user.username)
+
+    work = get_object_or_404(
+        PortfolioWork.objects.filter(user=request.user),
+        id=work_id,
+    )
+
+    album = work.album
+    work.delete()
+
+    messages.success(request, "Portfolio work deleted.")
+
+    if album:
+        return redirect(
+            "artist_portfolio_album",
+            username=request.user.username,
+            album_id=album.id,
+        )
+
+    return redirect("artist_portfolio", username=request.user.username)
+
+@user_passes_test(is_admin)
+def moderation_dashboard(request):
+    pending_document_requests = VerificationDocument.objects.filter(
+        is_verified=False,
+        user__profile__verification_status="pending_documents",
+    ).select_related("user", "user__profile")
+
+    pending_manual_requests = ManualVerificationRequest.objects.filter(
+        is_reviewed=False,
+        user__profile__verification_status="pending_manual_review",
+    ).select_related("user", "user__profile")
+
+    post_reports = (
+        PostReport.objects
+        .filter(is_resolved=False)
+        .select_related("post", "post__user", "user")
+        .prefetch_related("post__medias")
+        .order_by("-created_at")
+    )
+
+    comment_reports = (
+        CommentReport.objects
+        .filter(is_resolved=False)
+        .select_related("comment", "comment__user", "comment__post", "user")
+        .order_by("-created_at")
+    )
+
+    context = {
+        "pending_document_requests": pending_document_requests,
+        "pending_manual_requests": pending_manual_requests,
+        "post_reports": post_reports,
+        "comment_reports": comment_reports,
+        "document_count": pending_document_requests.count(),
+        "manual_count": pending_manual_requests.count(),
+        "post_reports_count": post_reports.count(),
+        "comment_reports_count": comment_reports.count(),
+    }
+
+    return render(request, "users/moderation_dashboard.html", context)
+
+
+@user_passes_test(is_admin)
+@require_POST
+def moderation_approve_artist(request, username):
+    user_obj = get_object_or_404(User.objects.select_related("profile"), username=username)
+
+    user_obj.profile.verification_status = "approved"
+    user_obj.profile.save(update_fields=["verification_status"])
+
+    VerificationDocument.objects.filter(user=user_obj).update(is_verified=True)
+    ManualVerificationRequest.objects.filter(user=user_obj).update(is_reviewed=True)
+
+    messages.success(request, f"{user_obj.username} has been approved as a tattoo artist.")
+    return redirect("moderation_dashboard")
+
+
+@user_passes_test(is_admin)
+@require_POST
+def moderation_reject_artist(request, username):
+    user_obj = get_object_or_404(User.objects.select_related("profile"), username=username)
+
+    user_obj.profile.verification_status = "rejected"
+    user_obj.profile.save(update_fields=["verification_status"])
+
+    VerificationDocument.objects.filter(user=user_obj).update(is_verified=False)
+    ManualVerificationRequest.objects.filter(user=user_obj).update(is_reviewed=True)
+
+    messages.success(request, f"{user_obj.username}'s verification has been rejected.")
+    return redirect("moderation_dashboard")
+
+
+@user_passes_test(is_admin)
+@require_POST
+def moderation_resolve_post_report(request, report_id):
+    report = get_object_or_404(PostReport, id=report_id)
+
+    report.is_resolved = True
+    report.resolved_at = timezone.now()
+    report.save(update_fields=["is_resolved", "resolved_at"])
+
+    messages.success(request, "Post report resolved.")
+    return redirect("moderation_dashboard")
+
+
+@user_passes_test(is_admin)
+@require_POST
+def moderation_delete_reported_post(request, report_id):
+    report = get_object_or_404(
+        PostReport.objects.select_related("post"),
+        id=report_id,
+    )
+
+    post = report.post
+    post.delete()
+
+    PostReport.objects.filter(post=post).update(
+        is_resolved=True,
+        resolved_at=timezone.now(),
+    )
+
+    messages.success(request, "Reported post deleted.")
+    return redirect("moderation_dashboard")
+
+
+@user_passes_test(is_admin)
+@require_POST
+def moderation_resolve_comment_report(request, report_id):
+    report = get_object_or_404(CommentReport, id=report_id)
+
+    report.is_resolved = True
+    report.resolved_at = timezone.now()
+    report.save(update_fields=["is_resolved", "resolved_at"])
+
+    messages.success(request, "Comment report resolved.")
+    return redirect("moderation_dashboard")
+
+
+@user_passes_test(is_admin)
+@require_POST
+def moderation_delete_reported_comment(request, report_id):
+    report = get_object_or_404(
+        CommentReport.objects.select_related("comment"),
+        id=report_id,
+    )
+
+    comment = report.comment
+    comment.delete()
+
+    CommentReport.objects.filter(comment=comment).update(
+        is_resolved=True,
+        resolved_at=timezone.now(),
+    )
+
+    messages.success(request, "Reported comment deleted.")
+    return redirect("moderation_dashboard")
+
+@login_required
+def chats_list(request):
+    threads = (
+        ChatThread.objects
+        .filter(
+            Q(participant_one=request.user) |
+            Q(participant_two=request.user)
+        )
+        .select_related(
+            "participant_one",
+            "participant_one__profile",
+            "participant_two",
+            "participant_two__profile",
+        )
+        .prefetch_related("messages")
+        .order_by("-updated_at")
+    )
+
+    chat_rows = []
+
+    for thread in threads:
+        other_user = thread.get_other_user(request.user)
+        last_message = thread.messages.order_by("-created_at").first()
+
+        unread_count = thread.messages.filter(
+            is_read=False
+        ).exclude(
+            sender=request.user
+        ).count()
+
+        chat_rows.append({
+            "thread": thread,
+            "other_user": other_user,
+            "last_message": last_message,
+            "unread_count": unread_count,
+        })
+
+    return render(
+        request,
+        "users/chats_list.html",
+        {
+            "chat_rows": chat_rows,
+        },
+    )
+
+
+@login_required
+def start_chat(request, username):
+    target_user = get_object_or_404(
+        User.objects.select_related("profile"),
+        username=username,
+    )
+
+    if target_user == request.user:
+        messages.error(request, "You cannot start a chat with yourself.")
+        return redirect("profile", username=username)
+
+    thread = ChatThread.get_or_create_for_users(request.user, target_user)
+
+    return redirect("chat_thread", thread_id=thread.id)
+
+
+@login_required
+def chat_thread(request, thread_id):
+    thread = get_object_or_404(
+        ChatThread.objects.select_related(
+            "participant_one",
+            "participant_one__profile",
+            "participant_two",
+            "participant_two__profile",
+        ),
+        id=thread_id,
+    )
+
+    if not thread.has_user(request.user):
+        messages.error(request, "You cannot access this chat.")
+        return redirect("chats_list")
+
+    other_user = thread.get_other_user(request.user)
+
+    thread.messages.filter(
+        is_read=False
+    ).exclude(
+        sender=request.user
+    ).update(is_read=True)
+
+    chat_messages = (
+        thread.messages
+        .select_related("sender", "sender__profile")
+        .order_by("created_at")
+    )
+
+    return render(
+        request,
+        "users/chat_thread.html",
+        {
+            "thread": thread,
+            "other_user": other_user,
+            "chat_messages": chat_messages,
+        },
+    )
+
+
+@login_required
+@require_POST
+def send_chat_message(request, thread_id):
+    thread = get_object_or_404(ChatThread, id=thread_id)
+
+    if not thread.has_user(request.user):
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "You cannot send messages in this chat.",
+            },
+            status=403,
+        )
+
+    content = (request.POST.get("content") or "").strip()
+    files = request.FILES.getlist("attachments")
+
+    if not content and not files:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "Message cannot be empty.",
+            },
+            status=400,
+        )
+
+    message = ChatMessage.objects.create(
+        thread=thread,
+        sender=request.user,
+        content=content,
+    )
+
+    for file in files:
+        ChatAttachment.objects.create(
+            message=message,
+            file=file,
+        )
+
+    thread.updated_at = timezone.now()
+    thread.save(update_fields=["updated_at"])
+
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        message = (
+            ChatMessage.objects
+            .select_related("sender", "sender__profile")
+            .prefetch_related("attachments")
+            .get(id=message.id)
+        )
+
+        html = render_to_string(
+            "partials/chat_message.html",
+            {
+                "message": message,
+                "request": request,
+            },
+        )
+
+        return JsonResponse(
+            {
+                "ok": True,
+                "message_id": message.id,
+                "html": html,
+            }
+        )
+
+    return redirect("chat_thread", thread_id=thread.id)
+
+@login_required
+def chat_new_messages(request, thread_id):
+    thread = get_object_or_404(ChatThread, id=thread_id)
+
+    if not thread.has_user(request.user):
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "You cannot access this chat.",
+            },
+            status=403,
+        )
+
+    last_id = request.GET.get("after")
+
+    try:
+        last_id = int(last_id or 0)
+    except ValueError:
+        last_id = 0
+
+    new_messages = (
+        thread.messages
+        .filter(id__gt=last_id)
+        .select_related("sender", "sender__profile")
+        .prefetch_related("attachments")
+        .order_by("created_at")
+    )
+
+    incoming_ids = [
+        message.id
+        for message in new_messages
+        if message.sender_id != request.user.id and not message.is_read
+    ]
+
+    if incoming_ids:
+        ChatMessage.objects.filter(id__in=incoming_ids).update(is_read=True)
+
+    html = "".join(
+        render_to_string(
+            "partials/chat_message.html",
+            {
+                "message": message,
+                "request": request,
+            },
+        )
+        for message in new_messages
+    )
+
+    last_message_id = last_id
+
+    for message in new_messages:
+        last_message_id = max(last_message_id, message.id)
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "html": html,
+            "last_id": last_message_id,
+        }
+    )

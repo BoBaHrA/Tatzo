@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit album{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="portfolio-page">
+  <div class="portfolio-form-shell">
+
+    <div class="portfolio-header">
+      <div>
+        <a href="{% url 'artist_portfolio' request.user.username %}" class="portfolio-back">
+          ← Back to portfolio
+        </a>
+
+        <h1>Edit album</h1>
+
+        <p>
+          Update album name, style, description or cover image.
+        </p>
+      </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="portfolio-form">
+      {% csrf_token %}
+
+      <div class="portfolio-field">
+        <label for="{{ form.title.id_for_label }}">Album name</label>
+        {{ form.title }}
+      </div>
+
+      <div class="portfolio-field">
+        <label for="{{ form.style.id_for_label }}">Style</label>
+        {{ form.style }}
+      </div>
+
+      <div class="portfolio-field">
+        <label for="{{ form.description.id_for_label }}">Description</label>
+        {{ form.description }}
+      </div>
+
+      <div class="portfolio-field">
+        <label for="{{ form.cover_image.id_for_label }}">Cover image</label>
+        {{ form.cover_image }}
+      </div>
+
+      {% if form.errors %}
+        <div class="portfolio-errors">
+          {{ form.errors }}
+        </div>
+      {% endif %}
+
+      <button type="submit" class="portfolio-btn portfolio-btn-full">
+        Save changes
+      </button>
+    </form>
+
+  </div>
+</div>
+{% endblock %}

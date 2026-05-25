@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ profile_user.username }} following{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="follow-page">
+  <div class="follow-shell">
+
+    <div class="follow-header">
+      <a href="{% url 'profile' profile_user.username %}" class="follow-back">
+        ← Back to profile
+      </a>
+
+      <h1>{{ profile_user.username }} is following</h1>
+      <p>Profiles followed by this user.</p>
+    </div>
+
+    <div class="follow-list">
+      {% for relation in following %}
+        {% with user_item=relation.following %}
+          <a href="{% url 'profile' user_item.username %}" class="follow-card">
+            {% if user_item.profile.profile_image %}
+              <img
+                src="{{ user_item.profile.profile_image.url }}"
+                alt="{{ user_item.username }}"
+                class="follow-avatar"
+              >
+            {% else %}
+              <div class="follow-avatar follow-avatar-fallback">
+                {{ user_item.username|first|upper }}
+              </div>
+            {% endif %}
+
+            <div>
+              <strong>{{ user_item.username }}</strong>
+
+              {% if user_item.profile.account_type == "tattoo_artist" %}
+                <span>Tattoo Artist</span>
+              {% else %}
+                <span>Community profile</span>
+              {% endif %}
+            </div>
+          </a>
+        {% endwith %}
+      {% empty %}
+        <div class="follow-empty">
+          <h3>No following yet</h3>
+          <p>This user is not following anyone yet.</p>
+        </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

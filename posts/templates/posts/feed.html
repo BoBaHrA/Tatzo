@@ -47,7 +47,9 @@
 </div>
 <div id="feed" class="feed">
   {% for post in posts %}
-    {% include "partials/post_card.html" with post=post %}
+    {% include "partials/post_card.html" with post=post liked_post_ids=liked_post_ids bookmarked_post_ids=bookmarked_post_ids %}
+  {% empty %}
+    <p>No posts available.</p>
   {% endfor %}
 </div>
 {% endblock %}

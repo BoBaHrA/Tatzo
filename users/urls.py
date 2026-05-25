@@ -10,13 +10,108 @@ from .views import create_post
 
 urlpatterns = [
     path("signup/", views.signup, name="signup"),
+    path(
+    "moderation/",
+    views.moderation_dashboard,
+    name="moderation_dashboard",
+    ),
+    path(
+        "moderation/artist/<str:username>/approve/",
+        views.moderation_approve_artist,
+        name="moderation_approve_artist",
+    ),
+    path(
+        "moderation/artist/<str:username>/reject/",
+        views.moderation_reject_artist,
+        name="moderation_reject_artist",
+    ),
+    path(
+        "moderation/reports/posts/<int:report_id>/resolve/",
+        views.moderation_resolve_post_report,
+        name="moderation_resolve_post_report",
+    ),
+    path(
+        "moderation/reports/posts/<int:report_id>/delete-post/",
+        views.moderation_delete_reported_post,
+        name="moderation_delete_reported_post",
+    ),
+    path(
+        "moderation/reports/comments/<int:report_id>/resolve/",
+        views.moderation_resolve_comment_report,
+        name="moderation_resolve_comment_report",
+    ),
+    path(
+        "moderation/reports/comments/<int:report_id>/delete-comment/",
+        views.moderation_delete_reported_comment,
+        name="moderation_delete_reported_comment",
+    ),
+    path("chats/", views.chats_list, name="chats_list"),
+    path("chats/start/<str:username>/", views.start_chat, name="start_chat"),
+    path("chats/<int:thread_id>/", views.chat_thread, name="chat_thread"),
+    path("chats/<int:thread_id>/send/", views.send_chat_message, name="send_chat_message"),
+    path(
+        "chats/<int:thread_id>/new/",
+        views.chat_new_messages,
+        name="chat_new_messages",
+    ),
+    
+    path(
+    "profile/<str:username>/follow/",
+    views.toggle_follow,
+    name="toggle_follow",
+    ),
+    path(
+        "profile/<str:username>/portfolio/",
+        views.artist_portfolio,
+        name="artist_portfolio",
+    ),
+    path(
+        "profile/<str:username>/portfolio/add/",
+        views.add_portfolio_work,
+        name="add_portfolio_work",
+    ),
+    path(
+        "profile/<str:username>/portfolio/albums/create/",
+        views.create_portfolio_album,
+        name="create_portfolio_album",
+    ),
+    path(
+        "profile/<str:username>/portfolio/album/<int:album_id>/",
+        views.artist_portfolio_album,
+        name="artist_portfolio_album",
+    ),
+    path(
+    "profile/<str:username>/portfolio/album/<int:album_id>/edit/",
+    views.edit_portfolio_album,
+    name="edit_portfolio_album",
+    ),
+    path(
+        "profile/<str:username>/portfolio/album/<int:album_id>/delete/",
+        views.delete_portfolio_album,
+        name="delete_portfolio_album",
+    ),
+    path(
+        "profile/<str:username>/portfolio/work/<int:work_id>/delete/",
+        views.delete_portfolio_work,
+        name="delete_portfolio_work",
+    ),
+    path(
+        "profile/<str:username>/followers/",
+        views.followers_list,
+        name="followers_list",
+    ),
+    path(
+        "profile/<str:username>/following/",
+        views.following_list,
+        name="following_list",
+    ),
     path("profiles/", views.profile_list, name="profile_list"),
     path(
         "admin/verification/<int:profile_id>/",
         views.admin_verification,
         name="admin_verification",
     ),
-    path("edit-profile/", views.edit_profile, name="edit_profile"),
+    path("profile/edit/", views.edit_profile, name="edit_profile"),
     path("profile/", views.user_profile, name="user_profile"),
     path("verification/", views.verification_page, name="verification_page"),
     path(

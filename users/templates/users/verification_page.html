@@ -1,75 +1,141 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Верификация документов{% endblock %}
+{% block title %}Artist verification{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/verification_page.css' %}">
+<link rel="stylesheet" href="{% static 'css/verification.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container verification-container">
-    <h2>Отправка документов на верификацию</h2>
-    <form method="post" enctype="multipart/form-data" class="verification-form">
-        {% csrf_token %}
+<div class="verification-page">
+  <div class="verification-shell">
 
-        <div class="form-group">
-            <label for="id_business_document_type">Тип бизнес-документа:</label>
-            {{ form.business_document_type }}
-            <span class="tooltip" title="Выберите документ, подтверждающий регистрацию бизнеса (например, Kbis во Франции)">?</span>
-        </div>
-
-        <div class="form-group">
-            <label for="id_business_document_file">Файл бизнес-документа:</label>
-            {{ form.business_document_file }}
-        </div>
-
-        <label class="file-upload" for="id_business_document_file">Выберите файл</label>
-        <input type="file" id="id_business_document_file" name="business_document_file">
-
-        <div class="form-group">
-            <label for="id_id_document_type">Тип документа личности:</label>
-            {{ form.id_document_type }}
-            <span class="tooltip" title="Выберите документ, подтверждающий вашу личность">?</span>
-        </div>
-
-        <div class="form-group">
-            <label for="id_id_document_file">Файл документа личности:</label>
-            {{ form.id_document_file }}
-        </div>
-
-        <label class="file-upload" for="id_id_document_file">Выберите файл</label>
-        <input type="file" id="id_id_document_file" name="id_document_file">
-
-        <div id="dark-overlay" class="hidden"></div>
-
-        <!-- Контейнер для анимации -->
-        <div id="confirmation-animation" class="hidden">
-            <div class="paper">
-                <div class="paper-content">
-                    <div class="paper-text"></div>
-                    <div class="paper-text"></div>
-                    <div class="paper-text"></div>
-                    <div class="paper-text"></div>
-                    <div class="paper-text"></div>
-                    <div class="paper-text"></div>
-                    <div class="paper-photo"></div>
-                </div>
-            </div>
-            <img src="{% static 'images/tattoo_machine.png' %}" alt="Tattoo Machine" class="tattoo-machine" id="tattooMachine">
-            <div class="checkmark">✔</div>
-        </div>
-
-        <button type="submit" class="btn-submit">Отправить документы</button>
-
-        <p class="disclaimer">
-            Ваши данные останутся конфиденциальными и будут доступны только модераторам.
+    <div class="verification-header">
+      <div class="verification-icon">✓</div>
+      <div>
+        <h1>Artist verification</h1>
+        <p>
+          Verify your tattoo artist profile to build trust and unlock professional features.
         </p>
+      </div>
+    </div>
 
-    </form>
+    <div class="verification-status-card">
+      <span>Status</span>
+      <strong>{{ verification_status|default:"not_submitted"|title }}</strong>
+    </div>
+
+    <div class="verification-grid">
+
+      <form method="post" enctype="multipart/form-data" class="verification-card">
+        {% csrf_token %}
+        <input type="hidden" name="verification_action" value="documents">
+
+        <div class="verification-card-header">
+          <h2>I have documents</h2>
+          <p>
+            Upload your professional document and identity document.
+          </p>
+        </div>
+
+        <div class="verification-field">
+          <label for="{{ document_form.business_document_type.id_for_label }}">
+            Business document type
+          </label>
+          {{ document_form.business_document_type }}
+        </div>
+
+        <div class="verification-field">
+          <label for="{{ document_form.business_document_file.id_for_label }}">
+            Business document file
+          </label>
+          {{ document_form.business_document_file }}
+        </div>
+
+        <div class="verification-field">
+          <label for="{{ document_form.id_document_type.id_for_label }}">
+            Identity document type
+          </label>
+          {{ document_form.id_document_type }}
+        </div>
+
+        <div class="verification-field">
+          <label for="{{ document_form.id_document_file.id_for_label }}">
+            Identity document file
+          </label>
+          {{ document_form.id_document_file }}
+        </div>
+
+        {% if document_form.errors %}
+          <div class="verification-errors">
+            {{ document_form.errors }}
+          </div>
+        {% endif %}
+
+        <button type="submit" class="verification-btn verification-btn-primary">
+          Submit documents
+        </button>
+      </form>
+
+      <form method="post" enctype="multipart/form-data" class="verification-card verification-card-highlight">
+        {% csrf_token %}
+        <input type="hidden" name="verification_action" value="manual">
+
+        <div class="verification-card-header">
+          <h2>No official documents?</h2>
+          <p>
+            Request a manual review. Send your portfolio, social links and a short explanation.
+          </p>
+        </div>
+
+        <div class="verification-field">
+          <label for="{{ manual_form.portfolio_link.id_for_label }}">
+            Portfolio link
+          </label>
+          {{ manual_form.portfolio_link }}
+        </div>
+
+        <div class="verification-field">
+          <label for="{{ manual_form.social_link.id_for_label }}">
+            Social media link
+          </label>
+          {{ manual_form.social_link }}
+        </div>
+
+        <div class="verification-field">
+          <label for="{{ manual_form.city_country.id_for_label }}">
+            City / Country
+          </label>
+          {{ manual_form.city_country }}
+        </div>
+
+        <div class="verification-field">
+          <label for="{{ manual_form.explanation.id_for_label }}">
+            Explanation
+          </label>
+          {{ manual_form.explanation }}
+        </div>
+
+        <div class="verification-field">
+          <label for="{{ manual_form.extra_file.id_for_label }}">
+            Optional file
+          </label>
+          {{ manual_form.extra_file }}
+        </div>
+
+        {% if manual_form.errors %}
+          <div class="verification-errors">
+            {{ manual_form.errors }}
+          </div>
+        {% endif %}
+
+        <button type="submit" class="verification-btn verification-btn-secondary">
+          Request manual review
+        </button>
+      </form>
+
+    </div>
+  </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="{% static 'js/verification.js' %}"></script>
 {% endblock %}

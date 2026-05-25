@@ -19,15 +19,19 @@
     <form method="post">
         {% csrf_token %}
         <div class="input-group">
-            <label for="username">Имя пользователя</label>
+            <label for="username">Username</label>
             <input type="text" id="username" name="username" placeholder="Выберите имя пользователя" required>
+            <p class="signup-tag-hint">
+                Ваш уникальный @tag будет создан автоматически на основе имени пользователя.
+                Позже вы сможете изменить его в настройках профиля.
+            </p>
         </div>
         <div class="input-group">
             <label for="email">Email</label>
             <input type="email" id="email" name="email" placeholder="Введите email" required>
         </div>
         <div class="input-group">
-            <label for="password1">Пароль</label>
+            <label for="password1">Password</label>
             <input type="password" id="password1" name="password1" placeholder="Введите пароль" required>
             <p id="password-hint" class="password-hint" style="display: none;">
                 Пароль должен содержать не менее 8 символов, одну заглавную букву и одну цифру.
@@ -85,16 +89,28 @@
         </div>
       {% endfor %}
     {% endfor %}
+    </div>
 </div>
-
 {% if show_verification_modal %}
-<div id="emailModal" class="modal" style="display:block;">
-  <div class="modal-content" style="background-color: #000a12; color: white; padding: 20px; border-radius: 10px;">
-    <span class="close" onclick="closeModal()" style="float:right;cursor:pointer;">&times;</span>
-    <p>🎉 Регистрация успешна!</p>
-    <p>Подтвердите свою почту, перейдя по ссылке в письме. После этого вы будете перенаправлены на нужную страницу.</p>
+<div id="emailModal" class="signup-verification-modal">
+  <div class="signup-verification-backdrop" onclick="closeModal()"></div>
+
+  <div class="signup-verification-dialog">
+    <button type="button" class="signup-verification-close" onclick="closeModal()">
+      ×
+    </button>
+
+    <div class="signup-verification-icon">🎉</div>
+
+    <h3>Регистрация успешна!</h3>
+
+    <p>
+      Подтвердите свою почту, перейдя по ссылке в письме.
+      После этого вы будете перенаправлены на нужную страницу.
+    </p>
   </div>
 </div>
+
 <script>
   function closeModal() {
     const modal = document.getElementById("emailModal");
@@ -116,13 +132,6 @@
     }
 </script>
 {% endblock %}
-
-{% if not user.profile.is_email_verified %}
-  <div class="alert alert-info">
-    Мы отправили вам письмо для подтверждения email. Проверьте почту!
-  </div>
-{% endif %}
-
 
 {% block scripts %}
 <script src="{% static 'js/signup.js' %}"></script>

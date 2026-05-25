@@ -1,0 +1,557 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Moderation dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/moderation.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="moderation-page">
+  <div class="moderation-shell">
+
+    <header class="moderation-header">
+      <div>
+        <a href="{% url 'home' %}" class="moderation-back">← Back to Tatzo</a>
+        <h1>Moderation dashboard</h1>
+        <p>Review artist verification requests, reports and platform safety issues.</p>
+      </div>
+    </header>
+
+    <section class="moderation-stats">
+      <div class="moderation-stat-card">
+        <span>Document requests</span>
+        <strong>{{ document_count }}</strong>
+      </div>
+
+      <div class="moderation-stat-card">
+        <span>Manual reviews</span>
+        <strong>{{ manual_count }}</strong>
+      </div>
+
+      <div class="moderation-stat-card">
+        <span>Post reports</span>
+        <strong>{{ post_reports_count }}</strong>
+      </div>
+
+      <div class="moderation-stat-card">
+        <span>Comment reports</span>
+        <strong>{{ comment_reports_count }}</strong>
+      </div>
+    </section>
+
+    <div class="moderation-toolbar">
+        <div class="moderation-folder-tabs">
+            <button type="button" class="moderation-folder-tab active" data-folder-tab="verification">
+            Verification
+            <span>{{ document_count|add:manual_count }}</span>
+            </button>
+
+            <button type="button" class="moderation-folder-tab" data-folder-tab="posts">
+            Post reports
+            <span>{{ post_reports_count }}</span>
+            </button>
+
+            <button type="button" class="moderation-folder-tab" data-folder-tab="comments">
+            Comment reports
+            <span>{{ comment_reports_count }}</span>
+            </button>
+        </div>
+
+        <div class="moderation-filters">
+            <input
+            type="text"
+            id="moderationSearch"
+            placeholder="Search by username, email, reason..."
+            autocomplete="off"
+            >
+
+            <input type="hidden" id="moderationSort" value="newest">
+            <input type="hidden" id="moderationReasonFilter" value="all">
+
+            <div class="moderation-custom-select" data-custom-select>
+                <button type="button" class="moderation-custom-select-btn">
+                    <span data-custom-select-label>Newest first</span>
+                    <span class="moderation-custom-select-arrow"></span>
+                </button>
+
+                <div class="moderation-custom-select-menu">
+                    <button type="button" data-select-target="moderationSort" data-select-value="newest">
+                    Newest first
+                    </button>
+                    <button type="button" data-select-target="moderationSort" data-select-value="oldest">
+                    Oldest first
+                    </button>
+                </div>
+                </div>
+
+                <div class="moderation-custom-select" data-custom-select>
+                <button type="button" class="moderation-custom-select-btn">
+                    <span data-custom-select-label>All</span>
+                    <span class="moderation-custom-select-arrow"></span>
+                </button>
+
+                <div class="moderation-custom-select-menu">
+                    <button type="button" data-select-target="moderationReasonFilter" data-select-value="all">
+                    All
+                    </button>
+                    <button type="button" data-select-target="moderationReasonFilter" data-select-value="with-reason">
+                    With reason
+                    </button>
+                    <button type="button" data-select-target="moderationReasonFilter" data-select-value="no-reason">
+                    No reason
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="moderation-folder-panel active" data-folder-panel="verification">
+        <section class="moderation-section">
+            <div class="moderation-section-head">
+            <h2>Artist document requests</h2>
+            <span>{{ document_count }}</span>
+            </div>
+
+            {% if pending_document_requests %}
+            <div class="moderation-list">
+                {% for doc in pending_document_requests %}
+                <article
+                    class="moderation-card"
+                    data-moderation-card
+                    data-date="0"
+                    data-reason="with-reason"
+                    data-search="{{ doc.user.username }} {{ doc.user.email }} {{ doc.business_document_type }} {{ doc.id_document_type }}"
+                >
+                    <div class="moderation-card-main">
+                    <div class="moderation-avatar">
+                        {{ doc.user.username|first|upper }}
+                    </div>
+
+                    <div>
+                        <h3>{{ doc.user.username }}</h3>
+                        <p>{{ doc.user.email }}</p>
+
+                        <div class="moderation-meta">
+                        <span>Business: {{ doc.business_document_type }}</span>
+                        <span>ID: {{ doc.id_document_type }}</span>
+                        </div>
+
+                        <div class="moderation-file-links">
+                        <a href="{{ doc.business_document_file.url }}" target="_blank">
+                            Open business document
+                        </a>
+                        <a href="{{ doc.id_document_file.url }}" target="_blank">
+                            Open ID document
+                        </a>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div class="moderation-actions">
+                    <form method="post" action="{% url 'moderation_approve_artist' doc.user.username %}">
+                        {% csrf_token %}
+                        <button type="submit" class="moderation-btn moderation-btn-approve">
+                        Approve
+                        </button>
+                    </form>
+
+                    <form method="post" action="{% url 'moderation_reject_artist' doc.user.username %}">
+                        {% csrf_token %}
+                        <button type="submit" class="moderation-btn moderation-btn-danger">
+                        Reject
+                        </button>
+                    </form>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="moderation-empty">No pending document requests.</div>
+            {% endif %}
+        </section>
+
+        <section class="moderation-section">
+            <div class="moderation-section-head">
+            <h2>Manual review requests</h2>
+            <span>{{ manual_count }}</span>
+            </div>
+
+            {% if pending_manual_requests %}
+            <div class="moderation-list">
+                {% for item in pending_manual_requests %}
+                <article
+                    class="moderation-card"
+                    data-moderation-card
+                    data-date="{{ item.created_at|date:'U' }}"
+                    data-reason="with-reason"
+                    data-search="{{ item.user.username }} {{ item.user.email }} {{ item.city_country }} {{ item.portfolio_link }} {{ item.social_link }} {{ item.explanation }}"
+                >
+                    <div class="moderation-card-main">
+                    <div class="moderation-avatar moderation-avatar-pink">
+                        {{ item.user.username|first|upper }}
+                    </div>
+
+                    <div>
+                        <h3>{{ item.user.username }}</h3>
+                        <p>{{ item.user.email }}</p>
+
+                        <div class="moderation-meta">
+                        {% if item.city_country %}
+                            <span>{{ item.city_country }}</span>
+                        {% endif %}
+
+                        {% if item.portfolio_link %}
+                            <a href="{{ item.portfolio_link }}" target="_blank">Portfolio</a>
+                        {% endif %}
+
+                        {% if item.social_link %}
+                            <a href="{{ item.social_link }}" target="_blank">Social link</a>
+                        {% endif %}
+                        </div>
+
+                        <div class="moderation-explanation">
+                        {{ item.explanation }}
+                        </div>
+
+                        {% if item.extra_file %}
+                        <div class="moderation-file-links">
+                            <a href="{{ item.extra_file.url }}" target="_blank">
+                            Open optional file
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    </div>
+
+                    <div class="moderation-actions">
+                    <form method="post" action="{% url 'moderation_approve_artist' item.user.username %}">
+                        {% csrf_token %}
+                        <button type="submit" class="moderation-btn moderation-btn-approve">
+                        Approve
+                        </button>
+                    </form>
+
+                    <form method="post" action="{% url 'moderation_reject_artist' item.user.username %}">
+                        {% csrf_token %}
+                        <button type="submit" class="moderation-btn moderation-btn-danger">
+                        Reject
+                        </button>
+                    </form>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="moderation-empty">No pending manual reviews.</div>
+            {% endif %}
+        </section>
+        </div>
+
+        <div class="moderation-folder-panel" data-folder-panel="posts" hidden>
+        <section class="moderation-section">
+            <div class="moderation-section-head">
+            <h2>Post reports</h2>
+            <span>{{ post_reports_count }}</span>
+            </div>
+
+            {% if post_reports %}
+            <div class="moderation-list">
+                {% for report in post_reports %}
+                <article
+                    class="moderation-card moderation-report-card"
+                    data-moderation-card
+                    data-date="{{ report.created_at|date:'U' }}"
+                    data-reason="{% if report.reason %}with-reason{% else %}no-reason{% endif %}"
+                    data-search="{{ report.post.user.username }} {{ report.user.username }} {{ report.reason }} {{ report.post.content }}"
+                >
+                    <div class="moderation-card-main">
+                    <div class="moderation-report-icon">!</div>
+
+                    <div>
+                        <h3>Post by {{ report.post.user.username }}</h3>
+                        <p>Reported by {{ report.user.username }} · {{ report.created_at|date:"d M Y H:i" }}</p>
+
+                        <div class="moderation-explanation">
+                        {% if report.reason %}
+                            {{ report.reason }}
+                        {% else %}
+                            No reason provided.
+                        {% endif %}
+                        </div>
+
+                        <div class="moderation-post-preview">
+                        {{ report.post.content|truncatechars:220 }}
+                        </div>
+                    </div>
+                    </div>
+
+                    <div class="moderation-actions">
+                    <a
+                      href="{% url 'profile' report.post.user.username %}?open_post={{ report.post.id }}"
+                      class="moderation-btn moderation-btn-neutral moderation-view-post-link"
+                    >
+                      View post
+                    </a>
+
+                    <form method="post" action="{% url 'moderation_resolve_post_report' report.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="moderation-btn moderation-btn-approve">
+                        Resolve
+                        </button>
+                    </form>
+
+                    <form method="post" action="{% url 'moderation_delete_reported_post' report.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="moderation-btn moderation-btn-danger">
+                        Delete post
+                        </button>
+                    </form>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="moderation-empty">No unresolved post reports.</div>
+            {% endif %}
+        </section>
+        </div>
+
+        <div class="moderation-folder-panel" data-folder-panel="comments" hidden>
+        <section class="moderation-section">
+            <div class="moderation-section-head">
+            <h2>Comment reports</h2>
+            <span>{{ comment_reports_count }}</span>
+            </div>
+
+            {% if comment_reports %}
+            <div class="moderation-list">
+                {% for report in comment_reports %}
+                <article
+                    class="moderation-card moderation-report-card"
+                    data-moderation-card
+                    data-date="{{ report.created_at|date:'U' }}"
+                    data-reason="{% if report.reason %}with-reason{% else %}no-reason{% endif %}"
+                    data-search="{{ report.comment.user.username }} {{ report.user.username }} {{ report.reason }} {{ report.comment.content }}"
+                >
+                    <div class="moderation-card-main">
+                    <div class="moderation-report-icon">!</div>
+
+                    <div>
+                        <h3>Comment by {{ report.comment.user.username }}</h3>
+                        <p>Reported by {{ report.user.username }} · {{ report.created_at|date:"d M Y H:i" }}</p>
+
+                        <div class="moderation-explanation">
+                        {% if report.reason %}
+                            {{ report.reason }}
+                        {% else %}
+                            No reason provided.
+                        {% endif %}
+                        </div>
+
+                        <div class="moderation-post-preview">
+                        {{ report.comment.content|truncatechars:220 }}
+                        </div>
+                    </div>
+                    </div>
+
+                    <div class="moderation-actions">
+                    <a
+                        href="{% url 'profile' report.comment.user.username %}"
+                        class="moderation-btn moderation-btn-neutral"
+                    >
+                        View author
+                    </a>
+
+                    <form method="post" action="{% url 'moderation_resolve_comment_report' report.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="moderation-btn moderation-btn-approve">
+                        Resolve
+                        </button>
+                    </form>
+
+                    <form method="post" action="{% url 'moderation_delete_reported_comment' report.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="moderation-btn moderation-btn-danger">
+                        Delete comment
+                        </button>
+                    </form>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="moderation-empty">No unresolved comment reports.</div>
+            {% endif %}
+        </section>
+    </div>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const tabs = document.querySelectorAll("[data-folder-tab]");
+    const panels = document.querySelectorAll("[data-folder-panel]");
+
+    const searchInput = document.getElementById("moderationSearch");
+    const sortSelect = document.getElementById("moderationSort");
+    const reasonSelect = document.getElementById("moderationReasonFilter");
+    const customSelects = document.querySelectorAll("[data-custom-select]");
+
+    function applyFilters() {
+      const activePanel = document.querySelector("[data-folder-panel].active");
+      if (!activePanel) return;
+
+      const query = (searchInput?.value || "").trim().toLowerCase();
+      const reasonFilter = reasonSelect?.value || "all";
+      const sortValue = sortSelect?.value || "newest";
+
+      const cards = Array.from(activePanel.querySelectorAll("[data-moderation-card]"));
+
+      cards.forEach((card) => {
+        const searchText = (card.dataset.search || "").toLowerCase();
+        const reason = card.dataset.reason || "no-reason";
+
+        const matchesSearch = !query || searchText.includes(query);
+        const matchesReason = reasonFilter === "all" || reason === reasonFilter;
+
+        card.hidden = !(matchesSearch && matchesReason);
+      });
+
+      const visibleCards = cards.filter((card) => !card.hidden);
+
+      visibleCards.sort((a, b) => {
+        const dateA = Number(a.dataset.date || 0);
+        const dateB = Number(b.dataset.date || 0);
+
+        if (sortValue === "oldest") {
+          return dateA - dateB;
+        }
+
+        return dateB - dateA;
+      });
+
+      visibleCards.forEach((card) => {
+        const list = card.closest(".moderation-list");
+        if (list) list.appendChild(card);
+      });
+    }
+
+    function activateFolder(folder) {
+      tabs.forEach((tab) => {
+        tab.classList.toggle("active", tab.dataset.folderTab === folder);
+      });
+
+      panels.forEach((panel) => {
+        const isActive = panel.dataset.folderPanel === folder;
+
+        panel.hidden = !isActive;
+        panel.classList.toggle("active", isActive);
+      });
+
+      applyFilters();
+    }
+
+    customSelects.forEach((select) => {
+      const btn = select.querySelector(".moderation-custom-select-btn");
+      const label = select.querySelector("[data-custom-select-label]");
+      const options = select.querySelectorAll("[data-select-value]");
+
+      btn?.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        customSelects.forEach((item) => {
+          if (item !== select) item.classList.remove("open");
+        });
+
+        select.classList.toggle("open");
+      });
+
+      options.forEach((option) => {
+        option.addEventListener("click", (e) => {
+          e.preventDefault();
+
+          const targetId = option.dataset.selectTarget;
+          const value = option.dataset.selectValue;
+          const targetInput = document.getElementById(targetId);
+
+          if (targetInput) {
+            targetInput.value = value;
+          }
+
+          if (label) {
+            label.textContent = option.textContent.trim();
+          }
+
+          options.forEach((item) => item.classList.remove("active"));
+          option.classList.add("active");
+
+          select.classList.remove("open");
+          applyFilters();
+        });
+      });
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest("[data-custom-select]")) {
+        customSelects.forEach((select) => {
+          select.classList.remove("open");
+        });
+      }
+    });
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        activateFolder(tab.dataset.folderTab);
+      });
+    });
+
+    searchInput?.addEventListener("input", applyFilters);
+
+    document.addEventListener("click", (e) => {
+      const viewPostBtn = e.target.closest(".moderation-view-post-btn");
+      if (!viewPostBtn) return;
+
+      const card = viewPostBtn.closest(".moderation-card");
+      const detail = card?.querySelector(".moderation-post-detail");
+
+      if (!detail) return;
+
+      const modal = document.createElement("div");
+      modal.className = "moderation-post-modal";
+
+      modal.innerHTML = `
+        <div class="moderation-post-modal-dialog">
+          <button type="button" class="moderation-post-modal-close">×</button>
+          ${detail.innerHTML}
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+      document.body.style.overflow = "hidden";
+
+      function closeModal() {
+        modal.remove();
+        document.body.style.overflow = "";
+      }
+
+      modal.addEventListener("click", (event) => {
+        if (
+          event.target === modal ||
+          event.target.closest(".moderation-post-modal-close")
+        ) {
+          closeModal();
+        }
+      });
+
+      document.addEventListener("keydown", function escHandler(event) {
+        if (event.key === "Escape") {
+          closeModal();
+          document.removeEventListener("keydown", escHandler);
+        }
+      });
+    });
+
+    applyFilters();
+  });
+</script>
+{% endblock %}

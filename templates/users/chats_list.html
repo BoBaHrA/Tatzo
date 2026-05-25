@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Chats{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+
+<div class="chat-page">
+  <div class="chat-shell">
+
+    <header class="chat-header">
+      <div>
+        <h1>Chats</h1>
+        <p>Your conversations with artists and users.</p>
+      </div>
+    </header>
+
+    <section class="chat-list-card">
+      {% if chat_rows %}
+        <div class="chat-list">
+          {% for row in chat_rows %}
+            <a href="{% url 'chat_thread' row.thread.id %}" class="chat-list-item">
+              <div class="chat-list-avatar">
+                {% if row.other_user.profile.profile_image %}
+                  <img src="{{ row.other_user.profile.profile_image.url }}" alt="{{ row.other_user.username }}">
+                {% else %}
+                  <span>{{ row.other_user.username|first|upper }}</span>
+                {% endif %}
+              </div>
+
+              <div class="chat-list-main">
+                <div class="chat-list-top">
+                  <strong>{{ row.other_user.username }}</strong>
+
+                  {% if row.last_message %}
+                    <span>{{ row.last_message.created_at|date:"d.m.Y H:i" }}</span>
+                  {% endif %}
+                </div>
+
+                <div class="chat-list-preview">
+                  {% if row.last_message %}
+                    {% if row.last_message.sender == request.user %}
+                      <span class="chat-you">You:</span>
+                    {% endif %}
+                    {{ row.last_message.content|truncatechars:90 }}
+                  {% else %}
+                    No messages yet.
+                  {% endif %}
+                </div>
+              </div>
+
+              {% if row.unread_count %}
+                <div class="chat-unread-badge">
+                  {{ row.unread_count }}
+                </div>
+              {% endif %}
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="chat-empty">
+          <h3>No chats yet</h3>
+          <p>Open someone’s profile and click Message to start a conversation.</p>
+        </div>
+      {% endif %}
+    </section>
+
+  </div>
+</div>
+{% endblock %}

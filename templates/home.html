@@ -97,9 +97,9 @@
 {% endif %}
   <div class="feed" id="feed">
     {% for post in posts %}
-      {% include 'partials/post_card.html' with post=post liked_post_ids=liked_post_ids %}
+      {% include 'partials/post_card.html' with post=post liked_post_ids=liked_post_ids bookmarked_post_ids=bookmarked_post_ids %}
     {% empty %}
-    <p>No posts available.</p>
+      <p>No posts available.</p>
     {% endfor %}
   </div>
 </div>
@@ -138,23 +138,27 @@
 
 <div class="post-modal" id="post-modal">
   <div class="post-modal-inner">
-
-    <div class="post-modal-close" id="post-modal-close">✖</div>
+    <button type="button" class="post-modal-close" id="post-modal-close">✖</button>
 
     <div class="post-modal-left" id="post-modal-left"></div>
 
     <div class="post-modal-right">
+      <div class="modal-comments-list" id="modal-comments-list"></div>
 
-      <div class="comments-list" id="modal-comments-list"></div>
-
-      <form id="modal-comment-form">
-        <input type="text" id="modal-comment-input" placeholder="Write a comment...">
+      <form class="modal-comment-form" id="modal-comment-form">
+        {% csrf_token %}
+        <input
+          type="text"
+          id="modal-comment-input"
+          placeholder="Write a comment..."
+          autocomplete="off"
+        >
         <button type="submit">Send</button>
       </form>
-
     </div>
   </div>
 </div>
+
 <div class="comment-edit-modal" id="comment-edit-modal">
   <div class="comment-edit-modal-inner">
     <div class="comment-edit-modal-header">
@@ -260,6 +264,24 @@
     </div>
   </div>
 </div>
+
+<div class="share-soon-modal" id="share-soon-modal" aria-hidden="true">
+  <div class="share-soon-modal-inner">
+    <button class="share-soon-close" id="share-soon-close" type="button">×</button>
+
+    <h3>Coming soon</h3>
+
+    <p>
+      Sharing posts will be available soon.
+      We’re still working on this feature.
+    </p>
+
+    <button class="share-soon-ok" id="share-soon-ok" type="button">
+      Got it
+    </button>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}

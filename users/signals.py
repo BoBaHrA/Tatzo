@@ -11,7 +11,11 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
         # Создаём профиль только если его ещё нет
         if not hasattr(instance, "profile"):
-            Profile.objects.create(user=instance, is_email_verified=False)
+            Profile.objects.create(
+                user=instance,
+                is_email_verified=False,
+                tag=Profile.generate_unique_tag(instance.username),
+            )
         instance.is_active = False
         instance.save()
 

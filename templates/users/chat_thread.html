@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Chat with {{ other_user.username }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+
+<div class="chat-page">
+  <div class="chat-shell chat-thread-shell">
+
+    <header class="chat-thread-header">
+      <a href="{% url 'chats_list' %}" class="chat-back">← Back to chats</a>
+
+      <a href="{% url 'profile' other_user.username %}" class="chat-user-head">
+        <div class="chat-thread-avatar">
+          {% if other_user.profile.profile_image %}
+            <img src="{{ other_user.profile.profile_image.url }}" alt="{{ other_user.username }}">
+          {% else %}
+            <span>{{ other_user.username|first|upper }}</span>
+          {% endif %}
+        </div>
+
+        <div>
+          <h1>{{ other_user.username }}</h1>
+          <p>
+            {% if other_user.profile.account_type == "tattoo_artist" %}
+              Tattoo Artist
+            {% else %}
+              Community profile
+            {% endif %}
+          </p>
+        </div>
+      </a>
+    </header>
+
+    <section class="chat-thread-card">
+      <div class="chat-messages" id="chatMessages">
+        {% for message in chat_messages %}
+            {% include "partials/chat_message.html" with message=message %}
+        {% empty %}
+            <div class="chat-empty chat-empty-inside">
+                <h3>No messages yet</h3>
+                <p>Start the conversation with {{ other_user.username }}.</p>
+            </div>
+        {% endfor %}
+      </div>
+
+      <form
+            method="post"
+            action="{% url 'send_chat_message' thread.id %}"
+            class="chat-message-form"
+            id="chatMessageForm"
+            enctype="multipart/form-data"
+            data-new-url="{% url 'chat_new_messages' thread.id %}"
+            >
+            {% csrf_token %}
+
+            <label class="chat-file-btn" for="chatAttachments">
+                +
+            </label>
+
+            <input
+                type="file"
+                id="chatAttachments"
+                name="attachments"
+                multiple
+                hidden
+            >
+
+            <div class="chat-input-wrap">
+                <textarea
+                name="content"
+                id="chatMessageInput"
+                placeholder="Write a message..."
+                rows="1"
+                maxlength="2000"
+                ></textarea>
+
+                <div class="chat-selected-files" id="chatSelectedFiles"></div>
+            </div>
+
+            <button type="submit">
+                Send
+            </button>
+      </form>
+    </section>
+
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const messagesBox = document.getElementById("chatMessages");
+    const form = document.getElementById("chatMessageForm");
+    const input = document.getElementById("chatMessageInput");
+    const fileInput = document.getElementById("chatAttachments");
+    const selectedFilesBox = document.getElementById("chatSelectedFiles");
+
+    let pollingTimer = null;
+    let isPolling = false;
+
+    function getCookie(name) {
+      const cookie = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith(`${name}=`));
+
+      return cookie ? decodeURIComponent(cookie.split("=")[1]) : "";
+    }
+
+    function getLastMessageId() {
+      const messages = messagesBox.querySelectorAll("[data-message-id]");
+      const last = messages[messages.length - 1];
+
+      return last ? Number(last.dataset.messageId || 0) : 0;
+    }
+
+    function scrollToBottom(force = false) {
+      if (!messagesBox) return;
+
+      const distanceFromBottom =
+        messagesBox.scrollHeight - messagesBox.scrollTop - messagesBox.clientHeight;
+
+      if (force || distanceFromBottom < 160) {
+        messagesBox.scrollTop = messagesBox.scrollHeight;
+      }
+    }
+
+    function autosizeTextarea() {
+      if (!input) return;
+
+      input.style.height = "auto";
+
+      const maxHeight = 120;
+      const nextHeight = Math.min(input.scrollHeight, maxHeight);
+
+      input.style.height = `${nextHeight}px`;
+      input.style.overflowY = input.scrollHeight > maxHeight ? "auto" : "hidden";
+    }
+
+    function updateSelectedFiles() {
+      if (!selectedFilesBox || !fileInput) return;
+
+      const files = Array.from(fileInput.files || []);
+
+      if (!files.length) {
+        selectedFilesBox.innerHTML = "";
+        selectedFilesBox.classList.remove("visible");
+        return;
+      }
+
+      selectedFilesBox.classList.add("visible");
+      selectedFilesBox.innerHTML = files
+        .map((file) => `<span>📎 ${file.name}</span>`)
+        .join("");
+    }
+
+    function openChatMediaModal(type, url, title = "") {
+        if (!type || !url) return;
+
+        const modal = document.createElement("div");
+        modal.className = "chat-media-modal";
+
+        let mediaHtml = "";
+
+        if (type === "image") {
+            mediaHtml = `<img src="${url}" alt="${title || "Chat media"}">`;
+        } else if (type === "video") {
+            mediaHtml = `
+            <video src="${url}" controls autoplay playsinline></video>
+            `;
+        }
+
+        modal.innerHTML = `
+            <button type="button" class="chat-media-modal-close">×</button>
+
+            <div class="chat-media-modal-content">
+            ${mediaHtml}
+            ${title ? `<div class="chat-media-modal-title">${title}</div>` : ""}
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        document.body.style.overflow = "hidden";
+
+        function closeModal() {
+            const video = modal.querySelector("video");
+
+            if (video) {
+            video.pause();
+            video.src = "";
+            }
+
+            modal.remove();
+            document.body.style.overflow = "";
+        }
+
+        modal.addEventListener("click", (event) => {
+            if (
+            event.target === modal ||
+            event.target.closest(".chat-media-modal-close")
+            ) {
+            closeModal();
+            }
+        });
+
+        document.addEventListener("keydown", function escHandler(event) {
+            if (event.key === "Escape") {
+            closeModal();
+            document.removeEventListener("keydown", escHandler);
+            }
+        });
+    }
+
+    async function pollNewMessages() {
+      if (!form || !messagesBox || isPolling) return;
+
+      isPolling = true;
+
+      const newUrl = form.dataset.newUrl;
+      const lastId = getLastMessageId();
+
+      try {
+        const res = await fetch(`${newUrl}?after=${lastId}`, {
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        });
+
+        const data = await res.json();
+
+        if (data.ok && data.html) {
+          const emptyState = messagesBox.querySelector(".chat-empty-inside");
+          if (emptyState) emptyState.remove();
+
+          messagesBox.insertAdjacentHTML("beforeend", data.html);
+          scrollToBottom(false);
+        }
+      } catch (err) {
+        console.error("Chat polling error:", err);
+      } finally {
+        isPolling = false;
+      }
+    }
+
+    scrollToBottom(true);
+    autosizeTextarea();
+
+    input?.addEventListener("input", autosizeTextarea);
+    fileInput?.addEventListener("change", updateSelectedFiles);
+
+    messagesBox?.addEventListener("click", (e) => {
+        const previewBtn = e.target.closest(".chat-attachment-preview");
+        if (!previewBtn) return;
+
+        e.preventDefault();
+
+        openChatMediaModal(
+            previewBtn.dataset.chatMediaType,
+            previewBtn.dataset.chatMediaUrl,
+            previewBtn.dataset.chatMediaTitle || ""
+        );
+    });
+
+    input?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        form?.requestSubmit();
+      }
+    });
+
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const content = input.value.trim();
+      const hasFiles = fileInput.files && fileInput.files.length > 0;
+
+      if (!content && !hasFiles) return;
+
+      const submitBtn = form.querySelector("button[type='submit']");
+      submitBtn.disabled = true;
+
+      const fd = new FormData(form);
+
+      try {
+        const res = await fetch(form.action, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "X-Requested-With": "XMLHttpRequest",
+          },
+          body: fd,
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Message was not sent.");
+        }
+
+        const emptyState = messagesBox.querySelector(".chat-empty-inside");
+        if (emptyState) emptyState.remove();
+
+        messagesBox.insertAdjacentHTML("beforeend", data.html);
+
+        input.value = "";
+        fileInput.value = "";
+        updateSelectedFiles();
+        autosizeTextarea();
+        scrollToBottom(true);
+      } catch (err) {
+        console.error("Chat send error:", err);
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    pollingTimer = setInterval(pollNewMessages, 2000);
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        clearInterval(pollingTimer);
+      } else {
+        pollNewMessages();
+        pollingTimer = setInterval(pollNewMessages, 2000);
+      }
+    });
+  });
+</script>
+{% endblock %}

@@ -1,12 +1,16 @@
 {% load static %}
 
-<div class="post {% if post.user == request.user %}current-user{% else %}other-user{% endif %}">
+<div class="post {% if post.user == request.user %}current-user{% else %}other-user{% endif %}" data-post-id="{{ post.id }}">
   <div class="avatar">
-    {% if post.user.profile.profile_image %}
-      <img src="{{ post.user.profile.profile_image.url }}" alt="User Avatar">
-    {% else %}
-      <img src="{% static 'icons/user.png' %}" alt="User Avatar">
-    {% endif %}
+    <a href="{% url 'profile' post.user.username %}">
+      {% if post.user.profile.profile_image %}
+        <img src="{{ post.user.profile.profile_image.url }}" alt="User Avatar">
+      {% else %}
+        <div class="avatar-fallback">
+          {{ post.user.username|first|upper }}
+        </div>
+      {% endif %}
+    </a>
   </div>
 
   {% if post.user != request.user %}
@@ -22,7 +26,9 @@
   <div class="message-bubble">
     <div class="post-header">
       <div class="post-header-main">
-        <div class="username">{{ post.user.username }}</div>
+        <a href="{% url 'profile' post.user.username %}" class="username post-username-link">
+          {{ post.user.username }}
+        </a>
 
         {% if post.location %}
           <div class="post-location">📍 {{ post.location }}</div>
@@ -60,39 +66,25 @@
       </div>
     {% endif %}
 
-        <div class="post-media-shell">
-          <div 
-            class="post-media post-media-renderer"
-            data-layout="{{ post.layout }}"
-            data-post-id="{{ post.id }}"
-          >
-            {% for m in post.medias.all %}
-              <div
-                class="media-source"
-                data-type="{{ m.media_type }}"
-                data-url="{{ m.file.url }}"
-              ></div>
-            {% endfor %}
-          </div>
-        </div>
+    <div class="post-media-shell">
+      <div 
+        class="post-media post-media-renderer"
+        data-layout="{{ post.layout }}"
+        data-post-id="{{ post.id }}"
+      >
+        {% for m in post.medias.all %}
+          <div
+            class="media-source"
+            data-type="{{ m.media_type }}"
+            data-url="{{ m.file.url }}"
+          ></div>
+        {% endfor %}
+      </div>
+    </div>
 
     {% if post.content %}
       <div class="content">{{ post.content }}</div>
     {% endif %}
-  </div>
-
-  <div class="username">
-    <a href="{% url 'profile' post.user.username %}">{{ post.user.username }}</a>
-  </div>
-
-  <div class="avatar">
-    <a href="{% url 'profile' post.user.username %}">
-      {% if post.user.profile.profile_image %}
-        <img src="{{ post.user.profile.profile_image.url }}" alt="User Avatar">
-      {% else %}
-        <img src="{% static 'icons/user.png' %}" alt="User Avatar">
-      {% endif %}
-    </a>
   </div>
 
   <div class="post-actions under-bubble">
@@ -115,7 +107,7 @@
         data-comments-disabled="{% if post.disable_comments %}1{% else %}0{% endif %}"
         title="Comment"
       >
-        <img src="{% static 'icons/comments-svgrepo-com.svg' %}" alt="Comment">
+        <img src="{% static 'icons/comments-main.svg' %}" alt="Comment">
       </button>
 
       {% if not post.disable_comments %}
@@ -124,16 +116,20 @@
         </span>
       {% endif %}
 
-      <button class="action-btn" title="Repost">
-        <img src="{% static 'icons/share-svgrepo-com.svg' %}" alt="Repost">
+      <button class="action-btn share-btn" data-post="{{ post.id }}" title="Share">
+        <img src="{% static 'icons/share-main.svg' %}" alt="Share">
       </button>
     </div>
 
     <div class="post-actions-right">
-      <button class="action-btn bookmark-btn" data-post="{{ post.id }}" title="Bookmark">
+      <button
+        class="action-btn bookmark-btn {% if post.id in bookmarked_post_ids %}bookmarked{% endif %}"
+        data-post="{{ post.id }}"
+        title="Bookmark"
+      >
         <img
           class="bookmark-icon not-bookmarked"
-          src="{% static 'icons/bookmark-svgrepo-com.svg' %}"
+          src="{% static 'icons/bookmark-main.svg' %}"
           alt="Bookmark"
         >
         <img

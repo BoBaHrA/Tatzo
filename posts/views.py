@@ -7,21 +7,27 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 
 from .forms import PostForm, PostMediaUploadForm
-from .models import Post, PostMedia, PostLike, PostComment, CommentLike, CommentReport, PostReport
+from .models import Post, PostMedia, PostLike, PostComment, CommentLike, CommentReport, PostReport, PostBookmark
 
 
 def feed(request):
     posts = (
         Post.objects
         .select_related("user", "user__profile")
-        .prefetch_related("medias", "likes", "comments")
+        .prefetch_related("medias", "likes", "comments", "bookmarks")
         .all()
     )
 
     liked_post_ids = set()
+    bookmarked_post_ids = set()
+
     if request.user.is_authenticated:
         liked_post_ids = set(
             PostLike.objects.filter(user=request.user).values_list("post_id", flat=True)
+        )
+
+        bookmarked_post_ids = set(
+            PostBookmark.objects.filter(user=request.user).values_list("post_id", flat=True)
         )
 
     context = {
@@ -29,6 +35,7 @@ def feed(request):
         "post_form": PostForm(),
         "media_form": PostMediaUploadForm(),
         "liked_post_ids": liked_post_ids,
+        "bookmarked_post_ids": bookmarked_post_ids,
     }
 
     return render(request, "posts/feed.html", context)
@@ -90,6 +97,7 @@ def create_post(request):
                 "post": post,
                 "request": request,
                 "liked_post_ids": set(),
+                "bookmarked_post_ids": set(),
             },
             request=request,
         )
@@ -293,4 +301,87 @@ def report_post(request, post_id):
         "ok": True,
         "created": created,
         "message": "Жалоба на пост отправлена." if created else "Вы уже жаловались на этот пост.",
+    })
+    
+def post_detail_fragment(request, post_id):
+    post = get_object_or_404(
+        Post.objects
+        .select_related("user", "user__profile")
+        .prefetch_related("medias", "likes", "comments"),
+        id=post_id,
+    )
+
+    liked_post_ids = set()
+    bookmarked_post_ids = set()
+
+    if request.user.is_authenticated:
+        liked_post_ids = set(
+            PostLike.objects.filter(user=request.user).values_list("post_id", flat=True)
+        )
+
+        bookmarked_post_ids = set(
+            PostBookmark.objects.filter(user=request.user).values_list("post_id", flat=True)
+        )
+
+    html = render_to_string(
+        "partials/post_card.html",
+        {
+            "post": post,
+            "request": request,
+            "liked_post_ids": liked_post_ids,
+            "bookmarked_post_ids": bookmarked_post_ids,
+        },
+        request=request,
+    )
+
+    return JsonResponse({
+        "ok": True,
+        "html": html,
+    })
+    
+@login_required
+def toggle_bookmark(request, post_id):
+    if request.method != "POST":
+        return JsonResponse({"ok": False, "error": "Invalid method"}, status=405)
+
+    post = get_object_or_404(Post, id=post_id)
+
+    bookmark, created = PostBookmark.objects.get_or_create(
+        user=request.user,
+        post=post,
+    )
+
+    if not created:
+        bookmark.delete()
+        bookmarked = False
+    else:
+        bookmarked = True
+
+    return JsonResponse({
+        "ok": True,
+        "bookmarked": bookmarked,
+    })
+
+
+@login_required
+def bookmarks_page(request):
+    bookmarks = (
+        PostBookmark.objects
+        .filter(user=request.user)
+        .select_related("post", "post__user", "post__user__profile")
+        .prefetch_related("post__medias", "post__likes", "post__comments")
+    )
+
+    posts = [bookmark.post for bookmark in bookmarks]
+
+    liked_post_ids = set(
+        PostLike.objects.filter(user=request.user).values_list("post_id", flat=True)
+    )
+
+    bookmarked_post_ids = set(post.id for post in posts)
+
+    return render(request, "posts/bookmarks.html", {
+        "posts": posts,
+        "liked_post_ids": liked_post_ids,
+        "bookmarked_post_ids": bookmarked_post_ids,
     })

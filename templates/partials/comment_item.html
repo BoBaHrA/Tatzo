@@ -6,7 +6,9 @@
       {% if comment.user.profile.profile_image %}
         <img src="{{ comment.user.profile.profile_image.url }}" alt="User Avatar">
       {% else %}
-        <img src="{% static 'icons/user.png' %}" alt="User Avatar">
+        <div class="comment-avatar-fallback">
+          {{ comment.user.username|first|upper }}
+        </div>
       {% endif %}
     </div>
 
@@ -66,7 +68,9 @@
             {% if reply.user.profile.profile_image %}
               <img src="{{ reply.user.profile.profile_image.url }}" alt="User Avatar">
             {% else %}
-              <img src="{% static 'icons/user.png' %}" alt="User Avatar">
+              <div class="comment-avatar-fallback">
+                {{ reply.user.username|first|upper }}
+              </div>
             {% endif %}
           </div>
 

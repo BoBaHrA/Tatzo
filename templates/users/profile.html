@@ -16,9 +16,15 @@
     <div class="profile-header">
       <div class="profile-avatar-wrap">
         {% if profile_user.profile.profile_image %}
-          <img class="profile-avatar" src="{{ profile_user.profile.profile_image.url }}" alt="{{ profile_user.username }}">
+          <img
+            class="profile-avatar"
+            src="{{ profile_user.profile.profile_image.url }}"
+            alt="{{ profile_user.username }}"
+          >
         {% else %}
-          <img class="profile-avatar" src="{% static 'icons/user.png' %}" alt="{{ profile_user.username }}">
+          <div class="profile-avatar profile-avatar-fallback">
+            {{ profile_user.username|first|upper }}
+          </div>
         {% endif %}
       </div>
 
@@ -48,10 +54,28 @@
 
           <div class="profile-actions">
             {% if request.user == profile_user %}
-              <button class="profile-btn profile-btn-primary" type="button">Edit profile</button>
+              <a href="{% url 'edit_profile' %}" class="profile-btn profile-btn-primary">
+                Edit profile
+              </a>
             {% else %}
-              <button class="profile-btn profile-btn-primary" type="button">Follow</button>
-              <button class="profile-btn profile-btn-secondary" type="button">Message</button>
+              <button
+                class="profile-btn profile-btn-primary profile-follow-btn {% if is_following %}is-following{% endif %}"
+                type="button"
+                data-username="{{ profile_user.username }}"
+              >
+                {% if is_following %}
+                  Following
+                {% else %}
+                  Follow
+                {% endif %}
+              </button>
+
+              <a
+                href="{% url 'start_chat' profile_user.username %}"
+                class="profile-btn profile-btn-secondary"
+              >
+                Message
+              </a>
             {% endif %}
           </div>
         </div>
@@ -62,11 +86,11 @@
             <span class="profile-stat-label">posts</span>
           </div>
           <div class="profile-stat">
-            <span class="profile-stat-value">0</span>
+            <span class="profile-stat-value" id="followers-count">{{ followers_count }}</span>
             <span class="profile-stat-label">followers</span>
           </div>
           <div class="profile-stat">
-            <span class="profile-stat-value">0</span>
+            <span class="profile-stat-value" id="following-count">{{ following_count }}</span>
             <span class="profile-stat-label">following</span>
           </div>
         </div>
@@ -82,15 +106,41 @@
         {% if profile_user.profile.account_type == "tattoo_artist" %}
           <div class="artist-info-grid">
             <div class="artist-info-card">
-              <div class="artist-info-title">Artist status</div>
+              <div class="artist-info-title">Verification</div>
+
               <div class="artist-info-value">
-                {{ profile_user.profile.verification_status|title }}
+                {{ profile_user.profile.public_verification_status }}
               </div>
+
+              {% if request.user == profile_user and profile_user.profile.verification_status == "not_submitted" %}
+                <a href="{% url 'verification_page' %}" class="artist-info-link">
+                  Start verification
+                </a>
+              {% endif %}
             </div>
 
             <div class="artist-info-card">
               <div class="artist-info-title">Portfolio</div>
-              <div class="artist-info-value">Building in progress</div>
+              <div class="artist-info-value">
+                <a
+                  href="{% url 'artist_portfolio' profile_user.username %}"
+                  class="artist-info-link"
+                >
+                  {% if request.user == profile_user %}
+                    {% if portfolio_works_count %}
+                      Manage portfolio
+                    {% else %}
+                      Add your works
+                    {% endif %}
+                  {% else %}
+                    {% if portfolio_works_count %}
+                      Take a look
+                    {% else %}
+                      No works yet
+                    {% endif %}
+                  {% endif %}
+                </a>
+              </div>
             </div>
 
             <div class="artist-info-card">
@@ -103,40 +153,236 @@
     </div>
 
     <div class="profile-tabs">
-      <button class="profile-tab active" type="button">Posts</button>
-      <button class="profile-tab" type="button">Saved</button>
+      <button class="profile-tab active" type="button" data-profile-tab="posts">Posts</button>
+      <button class="profile-tab" type="button" data-profile-tab="liked">Liked</button>
     </div>
 
-    <div class="profile-posts-grid">
-      {% for post in posts %}
-        <div class="profile-post-card" data-post-id="{{ post.id }}">
-          {% with first_media=post.medias.first %}
-            {% if first_media %}
-              {% if first_media.media_type == "video" %}
-                <video class="profile-post-media" src="{{ first_media.file.url }}" muted playsinline preload="metadata"></video>
-                <span class="profile-post-type">▶</span>
+    <div class="profile-tab-panel active" data-profile-panel="posts">
+      <div class="profile-posts-grid">
+        {% for post in posts %}
+          <div class="profile-post-card" data-post-id="{{ post.id }}">
+            {% with first_media=post.medias.first %}
+              {% if first_media %}
+                {% if first_media.media_type == "video" %}
+                  <video class="profile-post-media" src="{{ first_media.file.url }}" muted playsinline preload="metadata"></video>
+                  <span class="profile-post-type">▶</span>
+                {% else %}
+                  <img class="profile-post-media" src="{{ first_media.file.url }}" alt="Post media">
+                {% endif %}
               {% else %}
-                <img class="profile-post-media" src="{{ first_media.file.url }}" alt="Post media">
+                <div class="profile-post-empty">No media</div>
               {% endif %}
-            {% else %}
-              <div class="profile-post-empty">No media</div>
-            {% endif %}
-          {% endwith %}
+            {% endwith %}
+          </div>
+        {% empty %}
+          <div class="profile-empty-state">
+            <div class="profile-empty-title">No posts yet</div>
+            <div class="profile-empty-text">
+              {% if request.user == profile_user %}
+                Your posts will appear here.
+              {% else %}
+                This user has not published anything yet.
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="profile-tab-panel" data-profile-panel="liked" hidden>
+      {% if can_view_liked %}
+        <div class="profile-posts-grid">
+          {% for post in liked_posts %}
+            <div class="profile-post-card" data-post-id="{{ post.id }}">
+              {% with first_media=post.medias.first %}
+                {% if first_media %}
+                  {% if first_media.media_type == "video" %}
+                    <video class="profile-post-media" src="{{ first_media.file.url }}" muted playsinline preload="metadata"></video>
+                    <span class="profile-post-type">▶</span>
+                  {% else %}
+                    <img class="profile-post-media" src="{{ first_media.file.url }}" alt="Liked post media">
+                  {% endif %}
+                {% else %}
+                  <div class="profile-post-empty">No media</div>
+                {% endif %}
+              {% endwith %}
+            </div>
+          {% empty %}
+            <div class="profile-empty-state">
+              <div class="profile-empty-title">No liked posts yet</div>
+              <div class="profile-empty-text">
+                {% if request.user == profile_user %}
+                  Liked posts will appear here.
+                {% else %}
+                  This user has no public liked posts yet.
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
         </div>
-      {% empty %}
+      {% else %}
         <div class="profile-empty-state">
-          <div class="profile-empty-title">No posts yet</div>
+          <div class="profile-empty-title">Liked posts are hidden</div>
           <div class="profile-empty-text">
-            {% if request.user == profile_user %}
-              Your posts will appear here.
-            {% else %}
-              This user has not published anything yet.
-            {% endif %}
+            This user decided to hide liked posts.
           </div>
         </div>
-      {% endfor %}
+      {% endif %}
     </div>
 
+    <div class="profile-hidden-posts" hidden>
+      {% for post in posts %}
+        {% include "partials/post_card.html" with post=post liked_post_ids=liked_post_ids bookmarked_post_ids=bookmarked_post_ids %}
+      {% endfor %}
+
+      {% for post in liked_posts %}
+        {% include "partials/post_card.html" with post=post liked_post_ids=liked_post_ids bookmarked_post_ids=bookmarked_post_ids %}
+      {% endfor %}
+    </div>
   </div>
 </div>
+<div class="post-modal" id="post-modal">
+  <div class="post-modal-inner">
+    <button type="button" class="post-modal-close" id="post-modal-close">✖</button>
+
+    <div class="post-modal-left" id="post-modal-left"></div>
+
+    <div class="post-modal-right">
+      <div class="modal-comments-list" id="modal-comments-list"></div>
+
+      <form class="modal-comment-form" id="modal-comment-form">
+        {% csrf_token %}
+        <input
+          type="text"
+          id="modal-comment-input"
+          placeholder="Write a comment..."
+          autocomplete="off"
+        >
+        <button type="submit">Send</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/home.js' %}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const tabs = document.querySelectorAll("[data-profile-tab]");
+    const panels = document.querySelectorAll("[data-profile-panel]");
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const target = tab.dataset.profileTab;
+
+        tabs.forEach((btn) => {
+          btn.classList.toggle("active", btn === tab);
+        });
+
+        panels.forEach((panel) => {
+          const isActive = panel.dataset.profilePanel === target;
+
+          if (isActive) {
+            panel.hidden = false;
+            requestAnimationFrame(() => {
+              panel.classList.add("active");
+            });
+          } else {
+            panel.classList.remove("active");
+            setTimeout(() => {
+              if (!panel.classList.contains("active")) {
+                panel.hidden = true;
+              }
+            }, 180);
+          }
+        });
+      });
+    });
+  });
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const followBtn = document.querySelector(".profile-follow-btn");
+
+    if (!followBtn) return;
+
+    function getCookie(name) {
+      const cookie = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith(`${name}=`));
+
+      return cookie ? decodeURIComponent(cookie.split("=")[1]) : "";
+    }
+
+    function setFollowButtonState(isFollowing) {
+      followBtn.textContent = isFollowing ? "Following" : "Follow";
+      followBtn.classList.toggle("is-following", isFollowing);
+    }
+
+    followBtn.addEventListener("click", async () => {
+      const username = followBtn.dataset.username;
+
+      if (!username || followBtn.dataset.busy === "1") return;
+
+      followBtn.dataset.busy = "1";
+      followBtn.disabled = true;
+
+      try {
+        const res = await fetch(`/profile/${username}/follow/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Follow action failed.");
+        }
+
+        setFollowButtonState(data.is_following);
+
+        const followersCount = document.getElementById("followers-count");
+        const followingCount = document.getElementById("following-count");
+
+        if (followersCount) {
+          followersCount.textContent = data.followers_count;
+        }
+
+        if (followingCount) {
+          followingCount.textContent = data.following_count;
+        }
+      } catch (err) {
+        console.error("Follow error:", err);
+      } finally {
+        followBtn.disabled = false;
+        delete followBtn.dataset.busy;
+      }
+    });
+  });
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+    const postIdToOpen = params.get("open_post");
+
+    if (!postIdToOpen) return;
+
+    setTimeout(() => {
+      const postCard = document.querySelector(
+        `.profile-post-card[data-post-id="${postIdToOpen}"]`
+      );
+
+      if (postCard) {
+        postCard.click();
+
+        const cleanUrl = `${window.location.pathname}`;
+        window.history.replaceState({}, "", cleanUrl);
+      }
+    }, 250);
+  });
+</script>
 {% endblock %}

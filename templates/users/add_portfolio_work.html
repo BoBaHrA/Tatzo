@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Add portfolio work{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="portfolio-page">
+  <div class="portfolio-form-shell">
+
+    <div class="portfolio-header">
+      <div>
+        <a href="{% url 'artist_portfolio' request.user.username %}" class="portfolio-back">
+          ← Back to portfolio
+        </a>
+
+        <h1>Add portfolio work</h1>
+
+        <p>
+          Upload a tattoo work and optionally organize it into an album.
+        </p>
+      </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="portfolio-form">
+      {% csrf_token %}
+
+      <div class="portfolio-field">
+        <label for="{{ form.images.id_for_label }}">Images</label>
+        {{ form.images }}
+
+        <p class="portfolio-help">
+            You can select multiple images at once. Each image will become a separate portfolio work.
+        </p>
+
+        <div class="portfolio-upload-preview" id="portfolio-upload-preview"></div>
+      </div>
+
+      <div class="portfolio-field">
+        <label for="{{ form.title.id_for_label }}">Title</label>
+        {{ form.title }}
+      </div>
+
+      <div class="portfolio-field">
+        <label for="{{ form.album.id_for_label }}">Existing album</label>
+        {{ form.album }}
+      </div>
+
+      <div class="portfolio-field">
+        <label for="{{ form.new_album_title.id_for_label }}">New album</label>
+        {{ form.new_album_title }}
+      </div>
+
+      <div class="portfolio-field">
+        <label for="{{ form.style.id_for_label }}">Style</label>
+        {{ form.style }}
+      </div>
+
+      <div class="portfolio-field">
+        <label for="{{ form.body_placement.id_for_label }}">Body placement</label>
+        {{ form.body_placement }}
+      </div>
+
+      <div class="portfolio-field">
+        <label for="{{ form.description.id_for_label }}">Description</label>
+        {{ form.description }}
+      </div>
+
+      {% if form.errors %}
+        <div class="portfolio-errors">
+          {{ form.errors }}
+        </div>
+      {% endif %}
+
+      <button type="submit" class="portfolio-btn portfolio-btn-full">
+        Save work
+      </button>
+    </form>
+
+  </div>
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const input = document.querySelector('input[name="images"]');
+    const preview = document.getElementById("portfolio-upload-preview");
+
+    if (!input || !preview) return;
+
+    input.addEventListener("change", () => {
+      preview.innerHTML = "";
+
+      const files = Array.from(input.files || []);
+
+      files.forEach((file) => {
+        if (!file.type.startsWith("image/")) return;
+
+        const url = URL.createObjectURL(file);
+
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "portfolio-upload-preview-item";
+
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = file.name;
+
+        item.appendChild(img);
+        preview.appendChild(item);
+
+        item.addEventListener("click", () => {
+          const modal = document.createElement("div");
+          modal.className = "portfolio-lightbox open";
+          modal.innerHTML = `
+            <button type="button" class="portfolio-lightbox-close">×</button>
+            <img src="${url}" alt="">
+          `;
+
+          document.body.appendChild(modal);
+          document.body.style.overflow = "hidden";
+
+          function close() {
+            modal.remove();
+            document.body.style.overflow = "";
+          }
+
+          modal.addEventListener("click", (e) => {
+            if (e.target === modal || e.target.closest(".portfolio-lightbox-close")) {
+              close();
+            }
+          });
+
+          document.addEventListener("keydown", function escHandler(e) {
+            if (e.key === "Escape") {
+              close();
+              document.removeEventListener("keydown", escHandler);
+            }
+          });
+        });
+      });
+    });
+  });
+</script>
+{% endblock %}

@@ -3,101 +3,147 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My Tattoo App{% endblock %}</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-    <!-- Подключение дополнительных стилей для отдельных страниц -->
     {% block extra_css %}{% endblock %}
 </head>
-{% block scripts %}{% endblock %}
+
 <body>
 
-    <!-- Модальное окно для уведомлений -->
-    <div id="notificationModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <p id="notificationMessage"></p>
-        </div>
+    {% if messages %}
+    <div class="flash-stack">
+        {% for message in messages %}
+            <div class="flash-message flash-{{ message.tags|default:'info' }}">
+                <span class="flash-message-text">{{ message }}</span>
+                <button type="button" class="flash-close" aria-label="Close">×</button>
+            </div>
+        {% endfor %}
     </div>
-    
-    <!-- Основной контент -->
+    {% endif %}
+
     <div class="content">
         {% block content %}
         {% endblock %}
     </div>
 
-    <!-- Добавляем стили для модального окна -->
     <style>
-        .modal {
-            display: none;
+        .flash-stack {
             position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5);
+            top: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 12000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: min(92vw, 520px);
         }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 50%;
-            text-align: center;
+
+        .flash-message {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 15px 18px;
+            border-radius: 18px;
+            background: rgba(0, 19, 29, 0.96);
+            border: 1px solid rgba(4, 197, 191, 0.2);
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.32);
+            backdrop-filter: blur(8px);
+            transition: opacity 0.22s ease, transform 0.22s ease;
+            animation: flashSlideDown 0.22s ease;
         }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
+
+        .flash-message-text {
+            color: #eaffff;
+            font-family: "Poppins", sans-serif;
+            font-size: 15px;
+            line-height: 1.4;
+            font-weight: 500;
         }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
+
+        .flash-close {
+            border: none;
+            background: transparent;
+            color: rgba(234, 255, 255, 0.58);
+            font-size: 24px;
+            line-height: 1;
             cursor: pointer;
+            padding: 0;
+            flex: 0 0 auto;
+            transition: color 0.15s ease, transform 0.15s ease;
+        }
+
+        .flash-close:hover {
+            color: #ffffff;
+            transform: scale(1.08);
+        }
+
+        .flash-success {
+            border-color: rgba(22, 207, 213, 0.28);
+            box-shadow:
+                0 14px 40px rgba(0, 0, 0, 0.32),
+                0 0 0 1px rgba(22, 207, 213, 0.08);
+        }
+
+        .flash-error {
+            border-color: rgba(255, 107, 150, 0.28);
+        }
+
+        .flash-warning {
+            border-color: rgba(255, 190, 92, 0.28);
+        }
+
+        .flash-info {
+            border-color: rgba(4, 197, 191, 0.2);
+        }
+
+        @keyframes flashSlideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 
-    {% if messages %}
-<div id="messagesContainer" data-messages="{% for message in messages %}{{ message|escapejs }}|{% endfor %}"></div>
+    <script>
+        document.addEventListener("click", function (e) {
+            const closeBtn = e.target.closest(".flash-close");
+            if (!closeBtn) return;
 
-<script>
-    window.onload = function() {
-        var notificationModal = document.getElementById("notificationModal");
-        var messageElement = document.getElementById("notificationMessage");
-        var messagesContainer = document.getElementById("messagesContainer");
+            const flash = closeBtn.closest(".flash-message");
+            if (!flash) return;
 
-        if (notificationModal && messageElement && messagesContainer) {
-            var messagesData = messagesContainer.getAttribute("data-messages");
-            var messages = messagesData.split("|").filter(msg => msg.trim() !== ""); // Убираем пустые строки
+            flash.style.opacity = "0";
+            flash.style.transform = "translateY(-8px)";
+            setTimeout(() => flash.remove(), 220);
+        });
 
-            if (messages.length > 0) {
-                messageElement.innerHTML = messages.join("<br>");
-                notificationModal.style.display = "block";
-            }
-        }
-    };
+        window.addEventListener("load", function () {
+            const messages = document.querySelectorAll(".flash-message");
 
-    function closeModal() {
-        var modal = document.getElementById("notificationModal");
-        if (modal) {
-            modal.style.display = "none";
-        }
-    }
-</script>
-{% endif %}
+            if (!messages.length) return;
 
-    <!-- Подключение дополнительных скриптов для отдельных страниц -->
+            setTimeout(() => {
+                messages.forEach((msg) => {
+                    msg.style.opacity = "0";
+                    msg.style.transform = "translateY(-8px)";
+                    setTimeout(() => msg.remove(), 220);
+                });
+            }, 2600);
+        });
+    </script>
+
     {% block extra_js %}
         <script src="{% static 'js/verification.js' %}"></script>
     {% endblock %}
-
 </body>
 </html>

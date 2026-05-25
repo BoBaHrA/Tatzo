@@ -334,3 +334,178 @@ h1 {
     font-weight: 600;
     text-align: center;
 }
+
+.signup-tag-hint {
+  margin: 8px 0 0;
+  color: rgba(223, 252, 255, 0.68);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.signup-tag-hint::before {
+  content: "@";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+  border-radius: 50%;
+  color: #04c5bf;
+  border: 1px solid rgba(4, 197, 191, 0.35);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* === Signup verification modal === */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 5, 10, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.modal-content {
+  width: min(92vw, 420px);
+  background: #000a12 !important;
+  color: #eaffff !important;
+  padding: 24px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(4, 197, 191, 0.28);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.48);
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+}
+
+.modal-content p {
+  margin: 10px 0;
+  color: #dffcff;
+  line-height: 1.45;
+}
+
+.modal-content p:first-of-type {
+  color: #04c5bf;
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.modal .close {
+  color: rgba(234, 255, 255, 0.72);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.modal .close:hover {
+  color: #ffffff;
+}
+
+/* === Signup verification modal final === */
+
+.signup-verification-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.signup-verification-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 5, 10, 0.78);
+  backdrop-filter: blur(7px);
+}
+
+.signup-verification-dialog {
+  position: relative;
+  z-index: 2;
+
+  width: min(92vw, 440px);
+  padding: 30px 28px 28px;
+
+  background: #000a12;
+  border: 1px solid rgba(4, 197, 191, 0.28);
+  border-radius: 22px;
+
+  box-shadow:
+    0 22px 70px rgba(0, 0, 0, 0.58),
+    0 0 26px rgba(4, 197, 191, 0.08);
+
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+  animation: signupModalIn 0.22s ease;
+}
+
+.signup-verification-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+
+  width: 30px;
+  height: 30px;
+
+  border: none;
+  background: transparent;
+  color: rgba(234, 255, 255, 0.72);
+
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.signup-verification-close:hover {
+  color: #ffffff;
+}
+
+.signup-verification-icon {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: rgba(4, 197, 191, 0.12);
+  border: 1px solid rgba(4, 197, 191, 0.28);
+
+  font-size: 28px;
+}
+
+.signup-verification-dialog h3 {
+  margin: 0 0 12px;
+  color: #04c5bf;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.signup-verification-dialog p {
+  margin: 0;
+  color: #dffcff;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+@keyframes signupModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

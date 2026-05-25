@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bookmarks{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+
+<div class="bookmarks-page">
+  <div class="bookmarks-header">
+    <h1>Bookmarks</h1>
+    <p>Your saved posts are stored here.</p>
+  </div>
+
+  {% if posts %}
+    <div class="feed bookmarks-feed" id="feed">
+      {% for post in posts %}
+        {% include "partials/post_card.html" with post=post liked_post_ids=liked_post_ids bookmarked_post_ids=bookmarked_post_ids %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="bookmarks-empty">
+      <div class="bookmarks-empty-icon">
+      <img src="{% static 'icons/bookmark-main.svg' %}" alt="Bookmarks">
+      </div>
+      <h2>No bookmarks yet</h2>
+      <p>Save posts you like and they will appear here.</p>
+      <a href="{% url 'home' %}" class="bookmarks-empty-btn">Go to feed</a>
+    </div>
+  {% endif %}
+</div>
+<div class="media-lightbox" id="media-lightbox" aria-hidden="true">
+  <div class="lb-inner" role="dialog" aria-modal="true">
+    <div class="lb-close" id="lb-close">✖</div>
+    <div class="lb-nav lb-prev" id="lb-prev">‹</div>
+    <div class="lb-nav lb-next" id="lb-next">›</div>
+    <div class="lb-body" id="lb-body"></div>
+  </div>
+</div>
+
+<div class="post-modal" id="post-modal">
+  <div class="post-modal-inner">
+    <button type="button" class="post-modal-close" id="post-modal-close">✖</button>
+
+    <div class="post-modal-left" id="post-modal-left"></div>
+
+    <div class="post-modal-right">
+      <div class="modal-comments-list" id="modal-comments-list"></div>
+
+      <form class="modal-comment-form" id="modal-comment-form">
+        {% csrf_token %}
+        <input
+          type="text"
+          id="modal-comment-input"
+          placeholder="Write a comment..."
+          autocomplete="off"
+        >
+        <button type="submit">Send</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/home.js' %}"></script>
+{% endblock %}

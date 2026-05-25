@@ -1,44 +1,472 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Profile</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
-    <div class="container">
-        <h2>Edit Profile</h2>
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-group">
-                {{ user_form.username.label_tag }}
-                {{ user_form.username }}
-                {{ user_form.username.errors }}
-            </div>
-            <div class="form-group">
-                {{ user_form.email.label_tag }}
-                {{ user_form.email }}
-                {{ user_form.email.errors }}
-            </div>
-            <div class="form-group">
-                {{ profile_form.account_type.label_tag }}
-                {{ profile_form.account_type }}
-                {{ profile_form.account_type.errors }}
-            </div>
-            <div class="form-group">
-                {{ profile_form.bio.label_tag }}
-                {{ profile_form.bio }}
-                {{ profile_form.bio.errors }}
-            </div>
-            <div class="form-group">
-                {{ profile_form.profile_image.label_tag }}
-                {{ profile_form.profile_image }}
-                {{ profile_form.profile_image.errors }}
-            </div>
-            <button type="submit">Save Changes</button>
-        </form>
+
+{% block title %}Edit profile{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="edit-profile-page">
+  <div class="edit-profile-card">
+      <div class="edit-profile-header edit-profile-hero">
+    <div class="edit-profile-title-icon">
+      <img src="{% static 'icons/profile-icon.svg' %}" alt="">
     </div>
-</body>
-</html>
+
+    <div>
+      <h1>Edit profile</h1>
+      <p>Update your public identity, privacy and avatar.</p>
+    </div>
+  </div>
+
+    <form method="post" enctype="multipart/form-data" class="edit-profile-form">
+      {% csrf_token %}
+
+      <div class="edit-profile-layout">
+        <div class="edit-profile-left">
+          <div class="edit-profile-field edit-profile-clean-field">
+            <div class="edit-profile-field-title">
+              <label for="{{ user_form.username.id_for_label }}">Username</label>
+            </div>
+
+            <div class="edit-profile-input-wrap">
+              <img src="{% static 'icons/profile-icon.svg' %}" alt="">
+              {{ user_form.username }}
+            </div>
+
+            <p class="edit-profile-help">
+              This is how other users will see you on Tatzo.
+            </p>
+
+            {% if user_form.username.errors %}
+              <div class="form-errors">{{ user_form.username.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="edit-profile-field edit-profile-clean-field">
+            <div class="edit-profile-field-title">
+              <label for="{{ profile_form.tag.id_for_label }}">Tag</label>
+            </div>
+
+            <div class="edit-profile-input-wrap edit-profile-tag-wrap">
+              <span class="tag-prefix">@</span>
+              {{ profile_form.tag }}
+            </div>
+
+            <p class="edit-profile-help">
+              Your unique tag helps people find you faster.
+            </p>
+
+            {% if profile_form.tag.errors %}
+              <div class="form-errors">{{ profile_form.tag.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="edit-profile-field edit-profile-clean-field">
+            <div class="edit-profile-field-title">
+              <label for="{{ profile_form.bio.id_for_label }}">Bio</label>
+            </div>
+
+            <div class="edit-profile-textarea-wrap">
+              <img src="{% static 'icons/pen.svg' %}" alt="">
+              {{ profile_form.bio }}
+            </div>
+
+            <div class="edit-profile-help-row">
+              <p class="edit-profile-help">
+                Tell others about yourself. You can use up to 300 characters.
+              </p>
+
+              <span class="bio-counter" id="bioCounter">
+                {{ profile_form.bio.value|default_if_none:""|length }} / 300
+              </span>
+            </div>
+
+            {% if profile_form.bio.errors %}
+              <div class="form-errors">{{ profile_form.bio.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="edit-profile-field edit-profile-field-card edit-profile-privacy-field">
+            <div class="privacy-main-row">
+              <div class="privacy-icon-circle">
+                <img src="{% static 'icons/lock.svg' %}" alt="">
+              </div>
+
+              <div class="privacy-copy">
+                <strong>Liked posts privacy</strong>
+                <small>Choose who can see the posts you've liked.</small>
+              </div>
+
+              <label class="privacy-switch-only">
+                {{ profile_form.show_liked_posts }}
+                <span class="edit-profile-switch"></span>
+              </label>
+            </div>
+
+            <div class="privacy-inner-card">
+              <img src="{% static 'icons/group.svg' %}" alt="">
+              <div>
+                <strong>Show my liked posts on my profile</strong>
+                <small>If disabled, other users will see that your liked posts are hidden.</small>
+              </div>
+            </div>
+
+            {% if profile_form.show_liked_posts.errors %}
+              <div class="form-errors">{{ profile_form.show_liked_posts.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="edit-profile-right">
+          <div class="edit-profile-field edit-profile-avatar-card">
+            <label>Profile image</label>
+
+            <div class="avatar-upload-stack">
+              {% if request.user.profile.profile_image %}
+                <img id="avatarPreview" src="{{ request.user.profile.profile_image.url }}" alt="Current avatar" class="avatar-upload-preview">
+                <div id="avatarPlaceholder" class="avatar-upload-placeholder" style="display:none;">
+                  {{ request.user.username|first|upper }}
+                </div>
+              {% else %}
+                <div id="avatarPlaceholder" class="avatar-upload-placeholder">
+                  {{ request.user.username|first|upper }}
+                </div>
+                <img id="avatarPreview" src="" alt="Avatar preview" class="avatar-upload-preview" style="display:none;">
+              {% endif %}
+
+              <input type="file" name="profile_image" id="id_profile_image" accept="image/*" hidden>
+
+              <label for="id_profile_image" class="avatar-upload-btn avatar-upload-btn-outline">
+                <img src="{% static 'icons/upload.svg' %}" alt="">
+                <span>Upload new avatar</span>
+              </label>
+
+              <div class="avatar-info-card avatar-info-dashed">
+                <img src="{% static 'icons/image-upload.svg' %}" alt="">
+                <strong>JPG, PNG or WEBP</strong>
+                <small>Max size 10MB</small>
+              </div>
+
+              <div class="avatar-info-card avatar-info-dashed avatar-tip-card">
+                <img src="{% static 'icons/tip.svg' %}" alt="">
+                <div>
+                  <strong>Tip</strong>
+                  <small>A clear profile picture helps others recognize you.</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="edit-profile-actions edit-profile-actions-right">
+            <button class="profile-btn profile-btn-primary" type="submit">Save changes</button>
+            <a href="{% url 'profile' request.user.username %}" class="profile-btn profile-btn-secondary">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="avatar-crop-modal" id="avatarCropModal">
+  <div class="avatar-crop-modal__backdrop"></div>
+
+  <div class="avatar-crop-modal__dialog">
+    <div class="avatar-crop-modal__header">
+      <h3>Adjust avatar</h3>
+      <button type="button" class="avatar-crop-close" id="avatarCropClose">✕</button>
+    </div>
+
+    <div class="avatar-crop-modal__body">
+      <div class="avatar-crop-stage-wrap">
+        <div class="avatar-crop-stage" id="avatarCropStage">
+          <img id="avatarCropImage" src="" alt="Crop preview">
+          <div class="avatar-crop-mask"></div>
+        </div>
+      </div>
+
+      <div class="avatar-crop-controls">
+        <label for="avatarZoomRange">Zoom avatar</label>
+        <input type="range" id="avatarZoomRange" min="1" max="3" step="0.01" value="1">
+      </div>
+    </div>
+
+    <div class="avatar-crop-modal__actions">
+      <button type="button" class="profile-btn profile-btn-secondary" id="avatarCropCancel">Cancel</button>
+      <button type="button" class="profile-btn profile-btn-primary" id="avatarCropApply">Save</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const fileInput = document.getElementById("id_profile_image");
+  const preview = document.getElementById("avatarPreview");
+  const placeholder = document.getElementById("avatarPlaceholder");
+
+  const cropModal = document.getElementById("avatarCropModal");
+  const cropClose = document.getElementById("avatarCropClose");
+  const cropCancel = document.getElementById("avatarCropCancel");
+  const cropApply = document.getElementById("avatarCropApply");
+  const cropStage = document.getElementById("avatarCropStage");
+  const cropImage = document.getElementById("avatarCropImage");
+  const zoomRange = document.getElementById("avatarZoomRange");
+
+  if (!fileInput || !preview || !cropModal || !cropStage || !cropImage || !zoomRange) return;
+
+  let sourceImage = null;
+  let naturalWidth = 0;
+  let naturalHeight = 0;
+  let baseScale = 1;
+  let zoom = 1;
+  let posX = 0;
+  let posY = 0;
+
+  let dragging = false;
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let startPosX = 0;
+  let startPosY = 0;
+
+  function openCropModal() {
+    cropModal.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeCropModal() {
+    cropModal.classList.remove("open");
+    document.body.style.overflow = "";
+    dragging = false;
+    cropStage.classList.remove("dragging");
+  }
+
+  function updateCropImage() {
+    const totalScale = baseScale * zoom;
+    cropImage.style.transform =
+      `translate(calc(-50% + ${posX}px), calc(-50% + ${posY}px)) scale(${totalScale})`;
+  }
+
+  function clampPosition() {
+    const stageRect = cropStage.getBoundingClientRect();
+    const maskRadius = 108;
+    const displayedWidth = naturalWidth * baseScale * zoom;
+    const displayedHeight = naturalHeight * baseScale * zoom;
+
+    const minOffsetX = maskRadius - displayedWidth / 2;
+    const maxOffsetX = displayedWidth / 2 - maskRadius;
+
+    const minOffsetY = maskRadius - displayedHeight / 2;
+    const maxOffsetY = displayedHeight / 2 - maskRadius;
+
+    posX = Math.min(Math.max(posX, minOffsetX), maxOffsetX);
+    posY = Math.min(Math.max(posY, minOffsetY), maxOffsetY);
+  }
+
+  function prepareImage(src) {
+    const img = new Image();
+    img.onload = function () {
+      sourceImage = img;
+      naturalWidth = img.naturalWidth;
+      naturalHeight = img.naturalHeight;
+
+      const cropDiameter = 216;
+      baseScale = Math.max(cropDiameter / naturalWidth, cropDiameter / naturalHeight);
+      zoom = 1;
+      posX = 0;
+      posY = 0;
+      zoomRange.value = "1";
+
+      cropImage.src = src;
+      clampPosition();
+      updateCropImage();
+      openCropModal();
+    };
+    img.src = src;
+  }
+
+  fileInput.addEventListener("change", function () {
+    const file = this.files && this.files[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      prepareImage(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  zoomRange.addEventListener("input", function () {
+    zoom = parseFloat(this.value);
+    clampPosition();
+    updateCropImage();
+  });
+
+  cropStage.addEventListener("mousedown", function (e) {
+    dragging = true;
+    cropStage.classList.add("dragging");
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    startPosX = posX;
+    startPosY = posY;
+  });
+
+  cropStage.addEventListener("wheel", function (e) {
+    e.preventDefault();
+
+    const step = 0.08;
+    const min = parseFloat(zoomRange.min || "1");
+    const max = parseFloat(zoomRange.max || "3");
+
+    if (e.deltaY < 0) {
+      zoom = Math.min(max, zoom + step);
+    } else {
+      zoom = Math.max(min, zoom - step);
+    }
+
+    zoomRange.value = zoom.toFixed(2);
+    clampPosition();
+    updateCropImage();
+  }, { passive: false });
+
+  window.addEventListener("mousemove", function (e) {
+    if (!dragging) return;
+    posX = startPosX + (e.clientX - dragStartX);
+    posY = startPosY + (e.clientY - dragStartY);
+    clampPosition();
+    updateCropImage();
+  });
+
+  window.addEventListener("mouseup", function () {
+    dragging = false;
+    cropStage.classList.remove("dragging");
+  });
+
+  cropStage.addEventListener("touchstart", function (e) {
+    const touch = e.touches[0];
+    dragging = true;
+    cropStage.classList.add("dragging");
+    dragStartX = touch.clientX;
+    dragStartY = touch.clientY;
+    startPosX = posX;
+    startPosY = posY;
+  }, { passive: true });
+
+  window.addEventListener("touchmove", function (e) {
+    if (!dragging) return;
+    const touch = e.touches[0];
+    posX = startPosX + (touch.clientX - dragStartX);
+    posY = startPosY + (touch.clientY - dragStartY);
+    clampPosition();
+    updateCropImage();
+  }, { passive: true });
+
+  window.addEventListener("touchend", function () {
+    dragging = false;
+    cropStage.classList.remove("dragging");
+  });
+
+  function applyCrop() {
+    if (!sourceImage) return;
+
+    const canvas = document.createElement("canvas");
+    const size = 512;
+    canvas.width = size;
+    canvas.height = size;
+
+    const ctx = canvas.getContext("2d");
+    const cropDiameter = 216;
+    const totalScale = baseScale * zoom;
+
+    const sourceX = (naturalWidth / 2) - ((cropDiameter / 2 + posX) / totalScale);
+    const sourceY = (naturalHeight / 2) - ((cropDiameter / 2 + posY) / totalScale);
+    const sourceSize = cropDiameter / totalScale;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+
+    ctx.drawImage(
+      sourceImage,
+      sourceX,
+      sourceY,
+      sourceSize,
+      sourceSize,
+      0,
+      0,
+      size,
+      size
+    );
+
+    ctx.restore();
+
+    canvas.toBlob(function (blob) {
+      if (!blob) return;
+
+      const croppedFile = new File(
+        [blob],
+        "avatar-cropped.png",
+        { type: "image/png" }
+      );
+
+      const dt = new DataTransfer();
+      dt.items.add(croppedFile);
+      fileInput.files = dt.files;
+
+      const croppedDataUrl = URL.createObjectURL(blob);
+      preview.src = croppedDataUrl;
+      preview.style.display = "block";
+
+      if (placeholder) {
+        placeholder.style.display = "none";
+      }
+
+      closeCropModal();
+    }, "image/png");
+  }
+
+  cropApply.addEventListener("click", applyCrop);
+  cropClose.addEventListener("click", closeCropModal);
+  cropCancel.addEventListener("click", closeCropModal);
+
+  cropModal.addEventListener("click", function (e) {
+    if (e.target.classList.contains("avatar-crop-modal__backdrop")) {
+      closeCropModal();
+    }
+  });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const bioInput = document.getElementById("{{ profile_form.bio.id_for_label }}");
+  const bioCounter = document.getElementById("bioCounter");
+  const maxLength = 300;
+
+  if (!bioInput || !bioCounter) return;
+
+  function updateBioCounter() {
+    const currentLength = bioInput.value.length;
+    bioCounter.textContent = `${currentLength} / ${maxLength}`;
+
+    if (currentLength > maxLength * 0.9) {
+      bioCounter.classList.add("bio-counter-warning");
+    } else {
+      bioCounter.classList.remove("bio-counter-warning");
+    }
+  }
+
+  updateBioCounter();
+  bioInput.addEventListener("input", updateBioCounter);
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.body.classList.add("edit-profile-no-scroll");
+});
+</script>
+{% endblock %}

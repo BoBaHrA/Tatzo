@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ album.title }} — {{ profile_user.username }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="portfolio-page">
+  <div class="portfolio-shell">
+
+    <div class="portfolio-header portfolio-album-detail-header">
+      <div>
+        <a href="{% url 'artist_portfolio' profile_user.username %}" class="portfolio-back">
+          ← Back to portfolio
+        </a>
+
+        <h1>{{ album.title }}</h1>
+
+        {% if album.description %}
+          <p>{{ album.description }}</p>
+        {% elif album.style %}
+          <p>{{ album.style }} tattoo works by {{ profile_user.username }}.</p>
+        {% else %}
+          <p>Portfolio album by {{ profile_user.username }}.</p>
+        {% endif %}
+      </div>
+
+      {% if is_owner %}
+        <a href="{% url 'add_portfolio_work' profile_user.username %}" class="portfolio-btn">
+          + Add work
+        </a>
+      {% endif %}
+    </div>
+
+    <section class="portfolio-section">
+      <div class="portfolio-section-head">
+        <h2>Works</h2>
+        <span>{{ works_count }}</span>
+      </div>
+
+      {% if works %}
+        <div class="portfolio-works-grid portfolio-works-grid-large">
+          {% for work in works %}
+            <article
+                class="portfolio-work-card portfolio-work-card-large portfolio-previewable"
+                data-full-image="{{ work.image.url }}"
+                data-title="{{ work.title|default:'Portfolio work' }}"
+            >
+                <img
+                    src="{{ work.image.url }}"
+                    alt="{{ work.title|default:'Portfolio work' }}"
+                >
+
+                {% if is_owner %}
+                    <div class="portfolio-card-menu-wrap">
+                        <button type="button" class="portfolio-card-menu-btn">⋯</button>
+
+                        <div class="portfolio-card-menu">
+                        <form
+                            method="post"
+                            action="{% url 'delete_portfolio_work' profile_user.username work.id %}"
+                            class="portfolio-delete-form"
+                            data-confirm="Delete this portfolio work?"
+                        >
+                            {% csrf_token %}
+                            <button type="submit">Delete work</button>
+                        </form>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="portfolio-work-overlay">
+
+                {% if work.title %}
+                  <strong>{{ work.title }}</strong>
+                {% endif %}
+
+                {% if work.style %}
+                  <span>{{ work.style }}</span>
+                {% endif %}
+
+                {% if work.body_placement %}
+                  <small>{{ work.body_placement }}</small>
+                {% endif %}
+
+                {% if work.description %}
+                  <p>{{ work.description }}</p>
+                {% endif %}
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="portfolio-empty">
+          <h3>No works in this album yet</h3>
+
+          {% if is_owner %}
+            <p>Add works to this album to build a stronger portfolio.</p>
+            <a href="{% url 'add_portfolio_work' profile_user.username %}" class="portfolio-btn">
+              Add work
+            </a>
+          {% else %}
+            <p>This album has no works yet.</p>
+          {% endif %}
+        </div>
+      {% endif %}
+    </section>
+
+  </div>
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    function closeAllPortfolioMenus() {
+      document.querySelectorAll(".portfolio-card-menu-wrap.open").forEach((item) => {
+        item.classList.remove("open");
+      });
+    }
+
+    function openPortfolioConfirm(message, onConfirm) {
+      const modal = document.createElement("div");
+      modal.className = "portfolio-confirm-modal";
+
+      modal.innerHTML = `
+        <div class="portfolio-confirm-dialog">
+          <button type="button" class="portfolio-confirm-close">×</button>
+
+          <div class="portfolio-confirm-icon">!</div>
+
+          <h3>Confirm deletion</h3>
+
+          <p>${message}</p>
+
+          <div class="portfolio-confirm-actions">
+            <button type="button" class="portfolio-confirm-cancel">
+              Cancel
+            </button>
+
+            <button type="button" class="portfolio-confirm-delete">
+              Delete
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+      document.body.style.overflow = "hidden";
+
+      function close() {
+        modal.remove();
+        document.body.style.overflow = "";
+      }
+
+      modal.addEventListener("click", (e) => {
+        if (
+          e.target === modal ||
+          e.target.closest(".portfolio-confirm-close") ||
+          e.target.closest(".portfolio-confirm-cancel")
+        ) {
+          close();
+        }
+      });
+
+      modal.querySelector(".portfolio-confirm-delete").addEventListener("click", () => {
+        close();
+        onConfirm();
+      });
+
+      document.addEventListener("keydown", function escHandler(e) {
+        if (e.key === "Escape") {
+          close();
+          document.removeEventListener("keydown", escHandler);
+        }
+      });
+    }
+
+    function openPortfolioPreview(card) {
+      const imageUrl = card.dataset.fullImage;
+      const title = card.dataset.title || "";
+
+      if (!imageUrl) return;
+
+      const modal = document.createElement("div");
+      modal.className = "portfolio-lightbox open";
+
+      modal.innerHTML = `
+        <button type="button" class="portfolio-lightbox-close">×</button>
+        <div class="portfolio-lightbox-content">
+          <img src="${imageUrl}" alt="${title}">
+          ${title ? `<div class="portfolio-lightbox-title">${title}</div>` : ""}
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+      document.body.style.overflow = "hidden";
+
+      function close() {
+        modal.remove();
+        document.body.style.overflow = "";
+      }
+
+      modal.addEventListener("click", (event) => {
+        if (
+          event.target === modal ||
+          event.target.closest(".portfolio-lightbox-close")
+        ) {
+          close();
+        }
+      });
+
+      document.addEventListener("keydown", function escHandler(event) {
+        if (event.key === "Escape") {
+          close();
+          document.removeEventListener("keydown", escHandler);
+        }
+      });
+    }
+
+    document.addEventListener("click", (e) => {
+      const menuBtn = e.target.closest(".portfolio-card-menu-btn");
+      const menuWrap = e.target.closest(".portfolio-card-menu-wrap");
+
+      if (menuBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const wrap = menuBtn.closest(".portfolio-card-menu-wrap");
+        if (!wrap) return;
+
+        document.querySelectorAll(".portfolio-card-menu-wrap.open").forEach((item) => {
+          if (item !== wrap) item.classList.remove("open");
+        });
+
+        wrap.classList.toggle("open");
+        return;
+      }
+
+      if (menuWrap) {
+        e.stopPropagation();
+        return;
+      }
+
+      closeAllPortfolioMenus();
+
+      const card = e.target.closest(".portfolio-previewable");
+      if (!card) return;
+
+      openPortfolioPreview(card);
+    });
+
+    document.querySelectorAll(".portfolio-delete-form").forEach((form) => {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const message = form.dataset.confirm || "Delete this item?";
+
+        openPortfolioConfirm(message, () => {
+          form.submit();
+        });
+      });
+    });
+  });
+</script>
+{% endblock %}
