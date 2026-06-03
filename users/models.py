@@ -2,6 +2,8 @@ import re
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 # Определяем варианты выбора для типа пользователя
 USER_TYPE_CHOICES = [
@@ -363,3 +365,42 @@ class ChatAttachment(models.Model):
     def is_video(self):
         name = self.file.name.lower()
         return name.endswith((".mp4", ".webm", ".mov"))
+    
+class UserReport(models.Model):
+    REPORT_TYPES = [
+        ("bug", _("Bug")),
+        ("suggestion", _("Suggestion")),
+        ("other", _("Other")),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="reports",
+        verbose_name=_("User"),
+    )
+    report_type = models.CharField(
+        _("Report type"),
+        max_length=20,
+        choices=REPORT_TYPES,
+        default="bug",
+    )
+    title = models.CharField(_("Title"), max_length=120)
+    message = models.TextField(_("Message"))
+    page_url = models.CharField(_("Page URL"), max_length=500, blank=True)
+    attachment = models.FileField(
+        _("Attachment"),
+        upload_to="reports/",
+        blank=True,
+        null=True,
+    )
+    created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
+    is_resolved = models.BooleanField(_("Resolved"), default=False)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = _("User report")
+        verbose_name_plural = _("User reports")
+
+    def __str__(self):
+        return f"{self.get_report_type_display()} — {self.title}"

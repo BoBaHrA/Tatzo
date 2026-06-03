@@ -1,0 +1,1795 @@
+# Russian translations for Tatzo.
+# Copyright (C) 2026 Tatzo
+# This file is distributed under the same license as the Tatzo package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Tatzo\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-03 17:53+0200\n"
+"PO-Revision-Date: 2026-05-27 09:40+0200\n"
+"Last-Translator: Vladimir Procopisin\n"
+"Language-Team: Russian\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: .\mytattooapp\settings.py:101
+msgid "English"
+msgstr "Английский"
+
+#: .\mytattooapp\settings.py:102
+msgid "Français"
+msgstr "Французский"
+
+#: .\mytattooapp\settings.py:103
+msgid "Русский"
+msgstr "Русский"
+
+#: .\posts\templates\posts\bookmarks.html:4
+#: .\posts\templates\posts\bookmarks.html:13
+#: .\posts\templates\posts\bookmarks.html:18
+#: .\templates\partials\sidebar.html:82 .\templates\partials\sidebar.html:83
+msgid "Bookmarks"
+msgstr "Закладки"
+
+#: .\posts\templates\posts\bookmarks.html:14 .\templates\home.html:14
+#: .\templates\home.html:367 .\templates\users\profile.html:293
+msgid "Write a comment..."
+msgstr "Напишите комментарий..."
+
+#: .\posts\templates\posts\bookmarks.html:19
+msgid "Your saved posts are stored here."
+msgstr "Ваши сохранённые посты хранятся здесь."
+
+#: .\posts\templates\posts\bookmarks.html:35
+msgid "Saved"
+msgstr "Сохранённое"
+
+#: .\posts\templates\posts\bookmarks.html:38
+msgid "No bookmarks yet"
+msgstr "Закладок пока нет"
+
+#: .\posts\templates\posts\bookmarks.html:41
+msgid "Save posts you like and they will appear here."
+msgstr "Сохраняйте понравившиеся посты, и они появятся здесь."
+
+#: .\posts\templates\posts\bookmarks.html:45
+msgid "Go to feed"
+msgstr "Перейти к ленте"
+
+#: .\posts\templates\posts\bookmarks.html:77 .\templates\home.html:183
+#: .\templates\home.html:362 .\templates\users\chat_thread.html:103
+#: .\templates\users\profile.html:301
+msgid "Send"
+msgstr "Отправить"
+
+#: .\templates\home.html:4 .\templates\partials\sidebar.html:28
+#: .\templates\partials\sidebar.html:29
+msgid "Home"
+msgstr "Главная"
+
+#: .\templates\home.html:12
+msgid "Got something new? Share it!"
+msgstr "Есть что-то новое? Поделитесь!"
+
+#: .\templates\home.html:13 .\templates\users\chat_thread.html:75
+#: .\templates\users\chat_thread.html:76
+msgid "Add file"
+msgstr "Добавить файл"
+
+#: .\templates\home.html:15
+msgid "Update your comment..."
+msgstr "Обновите комментарий..."
+
+#: .\templates\home.html:16
+msgid "Describe the problem (optional)..."
+msgstr "Опишите проблему (необязательно)..."
+
+#: .\templates\home.html:49
+msgid "Grid"
+msgstr "Сетка"
+
+#: .\templates\home.html:53
+msgid "Carousel"
+msgstr "Карусель"
+
+#: .\templates\home.html:73
+msgid "Disable comments"
+msgstr "Отключить комментарии"
+
+#: .\templates\home.html:79
+msgid "Mark as Ad"
+msgstr "Отметить как рекламу"
+
+#: .\templates\home.html:83
+msgid "Location"
+msgstr "Местоположение"
+
+#: .\templates\home.html:84
+msgid "Add Location"
+msgstr "Добавить место"
+
+#: .\templates\home.html:88
+msgid "Poll"
+msgstr "Опрос"
+
+#: .\templates\home.html:89
+msgid "Create Poll"
+msgstr "Создать опрос"
+
+#: .\templates\home.html:93
+msgid "Schedule"
+msgstr "Планирование"
+
+#: .\templates\home.html:94
+msgid "Schedule Post"
+msgstr "Запланировать пост"
+
+#: .\templates\home.html:99
+msgid "Co-authors"
+msgstr "Соавторы"
+
+#: .\templates\home.html:100
+msgid "Invite Co-authors"
+msgstr "Пригласить соавторов"
+
+#: .\templates\home.html:104
+msgid "Who can see"
+msgstr "Кто может видеть"
+
+#: .\templates\home.html:105
+msgid "Who can see this"
+msgstr "Кто может это видеть"
+
+#: .\templates\home.html:109 .\templates\partials\sidebar.html:127
+msgid "Settings"
+msgstr "Настройки"
+
+#: .\templates\home.html:110
+msgid "Additional options"
+msgstr "Дополнительные настройки"
+
+#: .\templates\home.html:117 .\templates\home.html:353
+msgid "Post"
+msgstr "Опубликовать"
+
+#: .\templates\home.html:127
+msgid "No posts available."
+msgstr "Постов пока нет."
+
+#: .\templates\home.html:133
+msgid "Recommendations"
+msgstr "Рекомендации"
+
+#: .\templates\home.html:136 .\templates\home.html:145
+#: .\templates\users\search.html:114 .\users\models.py:380
+msgid "User"
+msgstr "Пользователь"
+
+#: .\templates\home.html:140 .\templates\home.html:149
+#: .\templates\users\profile.html:74 .\templates\users\profile.html:347
+msgid "Follow"
+msgstr "Подписаться"
+
+#: .\templates\home.html:158
+msgid "Logout"
+msgstr "Выйти"
+
+#: .\templates\home.html:161 .\templates\registration\login.html:4
+msgid "Login"
+msgstr "Вход"
+
+#: .\templates\home.html:162 .\users\templates\users\signup.html:4
+#: .\users\templates\users\signup.html:121
+msgid "Sign up"
+msgstr "Регистрация"
+
+#: .\templates\home.html:192
+msgid "Edit comment"
+msgstr "Редактировать комментарий"
+
+#: .\templates\home.html:206 .\templates\home.html:231
+#: .\templates\home.html:256 .\templates\home.html:283
+#: .\templates\home.html:310 .\templates\users\artist_portfolio.html:209
+#: .\templates\users\artist_portfolio_album.html:127
+#: .\templates\users\report_problem.html:71
+#: .\users\templates\users\edit_profile.html:188
+#: .\users\templates\users\edit_profile.html:222
+msgid "Cancel"
+msgstr "Отмена"
+
+#: .\templates\home.html:210 .\users\templates\users\edit_profile.html:226
+#: .\users\templates\users\password_reset_confirm.html:26
+msgid "Save"
+msgstr "Сохранить"
+
+#: .\templates\home.html:219 .\templates\users\moderation_dashboard.html:416
+msgid "Delete comment"
+msgstr "Удалить комментарий"
+
+#: .\templates\home.html:225
+msgid "Are you sure you want to delete this comment?"
+msgstr "Вы уверены, что хотите удалить этот комментарий?"
+
+#: .\templates\home.html:235 .\templates\home.html:260
+#: .\templates\home.html:356 .\templates\partials\comment_item.html:57
+#: .\templates\partials\comment_item.html:138
+#: .\templates\users\artist_portfolio.html:210
+#: .\templates\users\artist_portfolio_album.html:128
+msgid "Delete"
+msgstr "Удалить"
+
+#: .\templates\home.html:244 .\templates\partials\post_card.html:56
+#: .\templates\users\moderation_dashboard.html:338
+msgid "Delete post"
+msgstr "Удалить пост"
+
+#: .\templates\home.html:250
+msgid "Are you sure you want to delete this post?"
+msgstr "Вы уверены, что хотите удалить этот пост?"
+
+#: .\templates\home.html:269 .\templates\partials\post_card.html:60
+msgid "Report post"
+msgstr "Пожаловаться на пост"
+
+#: .\templates\home.html:287 .\templates\home.html:314
+#: .\templates\home.html:361 .\templates\users\report_problem.html:75
+msgid "Send report"
+msgstr "Отправить жалобу"
+
+#: .\templates\home.html:296
+msgid "Report comment"
+msgstr "Пожаловаться на комментарий"
+
+#: .\templates\home.html:324 .\templates\users\coming_soon.html:4
+#: .\templates\users\coming_soon.html:20 .\users\views.py:1342
+msgid "Coming soon"
+msgstr "Скоро будет"
+
+#: .\templates\home.html:327
+msgid ""
+"Sharing posts will be available soon. We’re still working on this feature."
+msgstr ""
+"Возможность делиться постами скоро появится. Мы всё ещё работаем над этой "
+"функцией."
+
+#: .\templates\home.html:331
+msgid "Got it"
+msgstr "Понятно"
+
+#: .\templates\home.html:341
+msgid "Success"
+msgstr "Успешно"
+
+#: .\templates\home.html:342
+msgid "Action failed"
+msgstr "Действие не выполнено"
+
+#: .\templates\home.html:343
+msgid "Info"
+msgstr "Информация"
+
+#: .\templates\home.html:344
+msgid "Done."
+msgstr "Готово."
+
+#: .\templates\home.html:346
+msgid "Unsupported file"
+msgstr "Неподдерживаемый файл"
+
+#: .\templates\home.html:347
+msgid "Remove file"
+msgstr "Удалить файл"
+
+#: .\templates\home.html:348
+msgid "Open preview"
+msgstr "Открыть предпросмотр"
+
+#: .\templates\home.html:349
+msgid "Preview"
+msgstr "Предпросмотр"
+
+#: .\templates\home.html:350
+msgid "Media"
+msgstr "Медиа"
+
+#: .\templates\home.html:352
+msgid "Posting..."
+msgstr "Публикация..."
+
+#: .\templates\home.html:354
+msgid "Post could not be created."
+msgstr "Не удалось создать пост."
+
+#: .\templates\home.html:357
+msgid "Deleting..."
+msgstr "Удаление..."
+
+#: .\templates\home.html:358
+msgid "Delete failed."
+msgstr "Не удалось удалить."
+
+#: .\templates\home.html:359
+msgid "Post deleted."
+msgstr "Пост удалён."
+
+#: .\templates\home.html:363
+msgid "Sending..."
+msgstr "Отправка..."
+
+#: .\templates\home.html:364
+msgid "Report failed."
+msgstr "Не удалось отправить жалобу."
+
+#: .\templates\home.html:365
+msgid "Report sent."
+msgstr "Жалоба отправлена."
+
+#: .\templates\home.html:368
+msgid "Edit comment:"
+msgstr "Редактировать комментарий:"
+
+#: .\templates\home.html:369
+msgid "Delete this comment?"
+msgstr "Удалить этот комментарий?"
+
+#: .\templates\home.html:370
+msgid "Comments are disabled for this post."
+msgstr "Комментарии к этому посту отключены."
+
+#: .\templates\home.html:372
+msgid "Hide replies"
+msgstr "Скрыть ответы"
+
+#: .\templates\home.html:373
+msgid "View replies"
+msgstr "Показать ответы"
+
+#: .\templates\partials\chat_message.html:18
+msgid "Image attachment"
+msgstr "Изображение"
+
+#: .\templates\partials\chat_message.html:19
+#: .\templates\users\chats_list.html:55
+#: .\templates\users\report_problem.html:56 .\users\forms.py:270
+#: .\users\models.py:392
+msgid "Attachment"
+msgstr "Вложение"
+
+#: .\templates\partials\chat_message.html:34
+msgid "Video attachment"
+msgstr "Видео"
+
+#: .\templates\partials\chat_message.html:51
+msgid "Open file"
+msgstr "Открыть файл"
+
+#: .\templates\partials\comment_item.html:7
+#: .\templates\partials\comment_item.html:88
+#: .\templates\partials\post_card.html:3
+msgid "User Avatar"
+msgstr "Аватар пользователя"
+
+#: .\templates\partials\comment_item.html:32
+#: .\templates\partials\comment_item.html:113
+#: .\templates\partials\post_card.html:4
+msgid "Like"
+msgstr "Лайк"
+
+#: .\templates\partials\comment_item.html:45
+#: .\templates\partials\comment_item.html:126
+msgid "Reply"
+msgstr "Ответить"
+
+#: .\templates\partials\comment_item.html:54
+#: .\templates\partials\comment_item.html:135
+msgid "Edit"
+msgstr "Редактировать"
+
+#: .\templates\partials\comment_item.html:61
+#: .\templates\partials\comment_item.html:142
+msgid "Report"
+msgstr "Пожаловаться"
+
+#: .\templates\partials\comment_item.html:76
+#, python-format
+msgid ""
+"\n"
+"        View reply (%(reply_count)s)\n"
+"      "
+msgid_plural ""
+"\n"
+"        View replies (%(reply_count)s)\n"
+"      "
+msgstr[0] ""
+"\n"
+"        Показать ответ (%(reply_count)s)\n"
+"      "
+msgstr[1] ""
+"\n"
+"        Показать ответы (%(reply_count)s)\n"
+"      "
+msgstr[2] ""
+"\n"
+"        Показать ответы (%(reply_count)s)\n"
+"      "
+
+#: .\templates\partials\comments_list.html:6
+msgid "No comments yet."
+msgstr "Комментариев пока нет."
+
+#: .\templates\partials\post_card.html:5
+msgid "Comment"
+msgstr "Комментарий"
+
+#: .\templates\partials\post_card.html:6
+msgid "Share"
+msgstr "Поделиться"
+
+#: .\templates\partials\post_card.html:7
+msgid "Bookmark"
+msgstr "Добавить в закладки"
+
+#: .\templates\partials\post_card.html:8
+msgid "Bookmarked"
+msgstr "В закладках"
+
+#: .\templates\partials\post_card.html:71
+msgid "Ad"
+msgstr "Реклама"
+
+#: .\templates\partials\sidebar.html:10 .\templates\partials\sidebar.html:16
+#: .\templates\partials\sidebar.html:21
+msgid "My Profile"
+msgstr "Мой профиль"
+
+#: .\templates\partials\sidebar.html:38 .\templates\partials\sidebar.html:39
+#: .\templates\users\search.html:4 .\templates\users\search.html:19
+msgid "Search"
+msgstr "Поиск"
+
+#: .\templates\partials\sidebar.html:48 .\templates\partials\sidebar.html:49
+#: .\users\views.py:1315
+msgid "Maps"
+msgstr "Карты"
+
+#: .\templates\partials\sidebar.html:58 .\templates\partials\sidebar.html:59
+#: .\templates\users\chats_list.html:4 .\templates\users\chats_list.html:19
+msgid "Chats"
+msgstr "Чаты"
+
+#: .\templates\partials\sidebar.html:72 .\templates\partials\sidebar.html:73
+#: .\users\views.py:1320
+msgid "Calendar"
+msgstr "Календарь"
+
+#: .\templates\partials\sidebar.html:92 .\templates\partials\sidebar.html:93
+#: .\users\templates\users\contests.html:4 .\users\views.py:1335
+msgid "Contests"
+msgstr "Конкурсы"
+
+#: .\templates\partials\sidebar.html:102 .\templates\partials\sidebar.html:103
+#: .\users\views.py:1325
+msgid "Clean slate"
+msgstr "Чистый лист"
+
+#: .\templates\partials\sidebar.html:112 .\templates\partials\sidebar.html:113
+#: .\users\views.py:1330
+msgid "Notifications"
+msgstr "Уведомления"
+
+#: .\templates\partials\sidebar.html:121 .\templates\partials\sidebar.html:122
+msgid "More"
+msgstr "Ещё"
+
+#: .\templates\partials\sidebar.html:135
+msgid "Language"
+msgstr "Язык"
+
+#: .\templates\partials\sidebar.html:154
+#: .\templates\users\report_problem.html:4
+#: .\templates\users\report_problem.html:21
+msgid "Report a problem"
+msgstr "Сообщить о проблеме"
+
+#: .\templates\partials\sidebar.html:158
+msgid "Your activity helps us prioritize new features."
+msgstr "Ваша активность помогает нам выбирать, какие функции добавлять раньше."
+
+#: .\templates\registration\logged_out.html:4
+msgid "Logged out"
+msgstr "Выход выполнен"
+
+#: .\templates\registration\logged_out.html:7
+msgid "You have been logged out."
+msgstr "Вы вышли из аккаунта."
+
+#: .\templates\registration\logged_out.html:8
+msgid "Return to Home"
+msgstr "Вернуться на главную"
+
+#: .\templates\registration\login.html:12
+msgid "Enter your username"
+msgstr "Введите имя пользователя"
+
+#: .\templates\registration\login.html:13
+#: .\users\templates\users\signup.html:14
+msgid "Enter your password"
+msgstr "Введите пароль"
+
+#: .\templates\registration\login.html:20
+#: .\users\templates\users\signup.html:24
+msgid "Welcome"
+msgstr "Добро пожаловать"
+
+#: .\templates\registration\login.html:26
+#: .\users\templates\users\edit_profile.html:32
+#: .\users\templates\users\pending_profiles.html:13
+#: .\users\templates\users\pending_verifications.html:13
+#: .\users\templates\users\review_profile.html:11
+#: .\users\templates\users\signup.html:34
+msgid "Username"
+msgstr "Имя пользователя"
+
+#: .\templates\registration\login.html:37
+#: .\users\templates\users\signup.html:60
+msgid "Password"
+msgstr "Пароль"
+
+#: .\templates\registration\login.html:48
+msgid "Log in"
+msgstr "Войти"
+
+#: .\templates\registration\login.html:53
+msgid "Create account"
+msgstr "Создать аккаунт"
+
+#: .\templates\registration\login.html:55
+msgid "Forgot password?"
+msgstr "Забыли пароль?"
+
+#: .\templates\users\add_portfolio_work.html:4
+#: .\templates\users\add_portfolio_work.html:23
+msgid "Add portfolio work"
+msgstr "Добавить работу в портфолио"
+
+#: .\templates\users\add_portfolio_work.html:12
+msgid "Preview image"
+msgstr "Предпросмотр изображения"
+
+#: .\templates\users\add_portfolio_work.html:20
+#: .\templates\users\artist_portfolio_album.html:20
+#: .\templates\users\edit_portfolio_album.html:17
+msgid "Back to portfolio"
+msgstr "Назад к портфолио"
+
+#: .\templates\users\add_portfolio_work.html:26
+msgid "Upload a tattoo work and optionally organize it into an album."
+msgstr "Загрузите тату-работу и при желании добавьте её в альбом."
+
+#: .\templates\users\add_portfolio_work.html:35
+msgid "Images"
+msgstr "Изображения"
+
+#: .\templates\users\add_portfolio_work.html:39
+msgid ""
+"You can select multiple images at once. Each image will become a separate "
+"portfolio work."
+msgstr ""
+"Можно выбрать несколько изображений сразу. Каждое изображение станет "
+"отдельной работой в портфолио."
+
+#: .\templates\users\add_portfolio_work.html:46
+#: .\templates\users\report_problem.html:42 .\users\forms.py:268
+#: .\users\models.py:388
+msgid "Title"
+msgstr "Название"
+
+#: .\templates\users\add_portfolio_work.html:51
+msgid "Existing album"
+msgstr "Существующий альбом"
+
+#: .\templates\users\add_portfolio_work.html:56
+msgid "New album"
+msgstr "Новый альбом"
+
+#: .\templates\users\add_portfolio_work.html:61
+#: .\templates\users\edit_portfolio_album.html:37
+msgid "Style"
+msgstr "Стиль"
+
+#: .\templates\users\add_portfolio_work.html:66
+msgid "Body placement"
+msgstr "Место на теле"
+
+#: .\templates\users\add_portfolio_work.html:71
+#: .\templates\users\edit_portfolio_album.html:42
+msgid "Description"
+msgstr "Описание"
+
+#: .\templates\users\add_portfolio_work.html:82
+msgid "Save work"
+msgstr "Сохранить работу"
+
+#: .\templates\users\artist_portfolio.html:5
+#: .\templates\users\artist_portfolio.html:27
+#, python-format
+msgid "%(username)s's portfolio"
+msgstr "Портфолио %(username)s"
+
+#: .\templates\users\artist_portfolio.html:15
+#: .\templates\users\artist_portfolio_album.html:12
+msgid "Portfolio work"
+msgstr "Работа портфолио"
+
+#: .\templates\users\artist_portfolio.html:23
+#: .\templates\users\following_list.html:18
+msgid "Back to profile"
+msgstr "Назад к профилю"
+
+#: .\templates\users\artist_portfolio.html:31
+msgid "A curated collection of tattoo works, albums and styles."
+msgstr "Подборка тату-работ, альбомов и стилей."
+
+#: .\templates\users\artist_portfolio.html:37
+#: .\templates\users\artist_portfolio_album.html:44
+#: .\templates\users\artist_portfolio_album.html:114
+msgid "Add work"
+msgstr "Добавить работу"
+
+#: .\templates\users\artist_portfolio.html:52
+msgid "Create album"
+msgstr "Создать альбом"
+
+#: .\templates\users\artist_portfolio.html:53
+msgid "Group works by style, placement or project."
+msgstr "Группируйте работы по стилю, месту нанесения или проекту."
+
+#: .\templates\users\artist_portfolio.html:56
+msgid "Album name, e.g. Realism"
+msgstr "Название альбома, например Реализм"
+
+#: .\templates\users\artist_portfolio.html:57
+msgid "Style, optional"
+msgstr "Стиль, необязательно"
+
+#: .\templates\users\artist_portfolio.html:72
+msgid "Create"
+msgstr "Создать"
+
+#: .\templates\users\artist_portfolio.html:79
+msgid "Albums"
+msgstr "Альбомы"
+
+#: .\templates\users\artist_portfolio.html:96
+msgid "No cover"
+msgstr "Нет обложки"
+
+#: .\templates\users\artist_portfolio.html:107
+msgid "works"
+msgstr "работ"
+
+#: .\templates\users\artist_portfolio.html:117
+#: .\templates\users\edit_portfolio_album.html:4
+#: .\templates\users\edit_portfolio_album.html:20
+msgid "Edit album"
+msgstr "Редактировать альбом"
+
+#: .\templates\users\artist_portfolio.html:124
+msgid "Delete this album? Works will stay in All works."
+msgstr "Удалить этот альбом? Работы останутся в разделе Все работы."
+
+#: .\templates\users\artist_portfolio.html:127
+msgid "Delete album"
+msgstr "Удалить альбом"
+
+#: .\templates\users\artist_portfolio.html:140
+msgid "All works"
+msgstr "Все работы"
+
+#: .\templates\users\artist_portfolio.html:177
+#: .\templates\users\artist_portfolio_album.html:77
+msgid "Delete this portfolio work?"
+msgstr "Удалить эту работу из портфолио?"
+
+#: .\templates\users\artist_portfolio.html:180
+#: .\templates\users\artist_portfolio_album.html:80
+msgid "Delete work"
+msgstr "Удалить работу"
+
+#: .\templates\users\artist_portfolio.html:190
+msgid "No portfolio works yet"
+msgstr "Работ в портфолио пока нет"
+
+#: .\templates\users\artist_portfolio.html:193
+msgid "Add your best works to build a professional portfolio."
+msgstr "Добавьте свои лучшие работы, чтобы собрать профессиональное портфолио."
+
+#: .\templates\users\artist_portfolio.html:196
+msgid "Add first work"
+msgstr "Добавить первую работу"
+
+#: .\templates\users\artist_portfolio.html:199
+msgid "This artist has not added portfolio works yet."
+msgstr "Этот мастер пока не добавил работы в портфолио."
+
+#: .\templates\users\artist_portfolio.html:208
+#: .\templates\users\artist_portfolio_album.html:126
+msgid "Confirm deletion"
+msgstr "Подтверждение удаления"
+
+#: .\templates\users\artist_portfolio.html:211
+#: .\templates\users\artist_portfolio_album.html:129
+msgid "Delete this item?"
+msgstr "Удалить этот элемент?"
+
+#: .\templates\users\artist_portfolio_album.html:29
+#, python-format
+msgid ""
+"\n"
+"              %(style)s tattoo works by %(username)s.\n"
+"            "
+msgstr ""
+"\n"
+"              Тату-работы в стиле %(style)s от %(username)s.\n"
+"            "
+
+#: .\templates\users\artist_portfolio_album.html:35
+#, python-format
+msgid ""
+"\n"
+"              Portfolio album by %(username)s.\n"
+"            "
+msgstr ""
+"\n"
+"              Альбом портфолио от %(username)s.\n"
+"            "
+
+#: .\templates\users\artist_portfolio_album.html:51
+msgid "Works"
+msgstr "Работы"
+
+#: .\templates\users\artist_portfolio_album.html:108
+msgid "No works in this album yet"
+msgstr "В этом альбоме пока нет работ"
+
+#: .\templates\users\artist_portfolio_album.html:111
+msgid "Add works to this album to build a stronger portfolio."
+msgstr "Добавьте работы в этот альбом, чтобы усилить портфолио."
+
+#: .\templates\users\artist_portfolio_album.html:117
+msgid "This album has no works yet."
+msgstr "В этом альбоме пока нет работ."
+
+#: .\templates\users\chat_thread.html:5
+#, python-format
+msgid "Chat with %(username)s"
+msgstr "Чат с %(username)s"
+
+#: .\templates\users\chat_thread.html:21
+msgid "Back to chats"
+msgstr "Назад к чатам"
+
+#: .\templates\users\chat_thread.html:37
+#: .\templates\users\following_list.html:48 .\templates\users\profile.html:40
+#: .\templates\users\search.html:110
+msgid "Tattoo Artist"
+msgstr "Тату-мастер"
+
+#: .\templates\users\chat_thread.html:39
+#: .\templates\users\following_list.html:50 .\templates\users\profile.html:55
+msgid "Community profile"
+msgstr "Профиль пользователя"
+
+#: .\templates\users\chat_thread.html:52
+msgid "No messages yet"
+msgstr "Сообщений пока нет"
+
+#: .\templates\users\chat_thread.html:54
+#, python-format
+msgid ""
+"\n"
+"                Start the conversation with %(username)s.\n"
+"              "
+msgstr ""
+"\n"
+"                Начните переписку с %(username)s.\n"
+"              "
+
+#: .\templates\users\chat_thread.html:90
+msgid "Write a message..."
+msgstr "Напишите сообщение..."
+
+#: .\templates\users\chat_thread.html:111
+msgid "Chat media"
+msgstr "Медиа из чата"
+
+#: .\templates\users\chat_thread.html:112
+msgid "Message was not sent."
+msgstr "Сообщение не было отправлено."
+
+#: .\templates\users\chats_list.html:20
+msgid "Your conversations with artists and users."
+msgstr "Ваши переписки с тату-мастерами и пользователями."
+
+#: .\templates\users\chats_list.html:49
+msgid "You:"
+msgstr "Вы:"
+
+#: .\templates\users\chats_list.html:58
+msgid "No messages yet."
+msgstr "Сообщений пока нет."
+
+#: .\templates\users\chats_list.html:73
+msgid "No chats yet"
+msgstr "Пока нет чатов"
+
+#: .\templates\users\chats_list.html:74
+msgid "Open someone’s profile and click Message to start a conversation."
+msgstr ""
+"Откройте чей-нибудь профиль и нажмите «Написать», чтобы начать переписку."
+
+#: .\templates\users\coming_soon.html:30
+msgid ""
+"Your activity helps us prioritize new features. The more users interact with "
+"Tatzo, the faster these sections will grow."
+msgstr ""
+"Ваша активность помогает нам выбирать, какие функции добавлять раньше. Чем "
+"больше пользователи взаимодействуют с Tatzo, тем быстрее будут развиваться "
+"эти разделы."
+
+#: .\templates\users\coming_soon.html:34
+msgid "Back to feed"
+msgstr "Назад к ленте"
+
+#: .\templates\users\edit_portfolio_album.html:23
+msgid "Update album name, style, description or cover image."
+msgstr "Измените название альбома, стиль, описание или обложку."
+
+#: .\templates\users\edit_portfolio_album.html:32
+msgid "Album name"
+msgstr "Название альбома"
+
+#: .\templates\users\edit_portfolio_album.html:47
+msgid "Cover image"
+msgstr "Обложка"
+
+#: .\templates\users\edit_portfolio_album.html:58
+#: .\users\templates\users\edit_profile.html:184
+msgid "Save changes"
+msgstr "Сохранить изменения"
+
+#: .\templates\users\following_list.html:5
+#, python-format
+msgid "%(username)s following"
+msgstr "Подписки %(username)s"
+
+#: .\templates\users\following_list.html:22
+#, python-format
+msgid "%(username)s is following"
+msgstr "%(username)s подписан на"
+
+#: .\templates\users\following_list.html:25
+msgid "Profiles followed by this user."
+msgstr "Профили, на которые подписан этот пользователь."
+
+#: .\templates\users\following_list.html:57
+msgid "No following yet"
+msgstr "Подписок пока нет"
+
+#: .\templates\users\following_list.html:58
+msgid "This user is not following anyone yet."
+msgstr "Этот пользователь пока ни на кого не подписан."
+
+#: .\templates\users\moderation_dashboard.html:4
+#: .\templates\users\moderation_dashboard.html:20
+msgid "Moderation dashboard"
+msgstr "Панель модерации"
+
+#: .\templates\users\moderation_dashboard.html:17
+msgid "Back to Tatzo"
+msgstr "Назад в Tatzo"
+
+#: .\templates\users\moderation_dashboard.html:23
+msgid ""
+"Review artist verification requests, reports and platform safety issues."
+msgstr ""
+"Проверяйте заявки на верификацию мастеров, жалобы и вопросы безопасности "
+"платформы."
+
+#: .\templates\users\moderation_dashboard.html:30
+msgid "Document requests"
+msgstr "Заявки с документами"
+
+#: .\templates\users\moderation_dashboard.html:35
+msgid "Manual reviews"
+msgstr "Ручные проверки"
+
+#: .\templates\users\moderation_dashboard.html:40
+#: .\templates\users\moderation_dashboard.html:58
+#: .\templates\users\moderation_dashboard.html:278
+msgid "Post reports"
+msgstr "Жалобы на посты"
+
+#: .\templates\users\moderation_dashboard.html:45
+#: .\templates\users\moderation_dashboard.html:63
+#: .\templates\users\moderation_dashboard.html:356
+msgid "Comment reports"
+msgstr "Жалобы на комментарии"
+
+#: .\templates\users\moderation_dashboard.html:72
+msgid "Search by username, email, reason..."
+msgstr "Поиск по имени пользователя, email или причине..."
+
+#: .\templates\users\moderation_dashboard.html:81
+#: .\templates\users\moderation_dashboard.html:87
+msgid "Newest first"
+msgstr "Сначала новые"
+
+#: .\templates\users\moderation_dashboard.html:91
+msgid "Oldest first"
+msgstr "Сначала старые"
+
+#: .\templates\users\moderation_dashboard.html:98
+#: .\templates\users\moderation_dashboard.html:104
+#: .\templates\users\search.html:45
+msgid "All"
+msgstr "Все"
+
+#: .\templates\users\moderation_dashboard.html:108
+msgid "With reason"
+msgstr "С причиной"
+
+#: .\templates\users\moderation_dashboard.html:112
+msgid "No reason"
+msgstr "Без причины"
+
+#: .\templates\users\moderation_dashboard.html:122
+msgid "Artist document requests"
+msgstr "Заявки документов мастеров"
+
+#: .\templates\users\moderation_dashboard.html:147
+#, python-format
+msgid "Business: %(type)s"
+msgstr "Проф. документ: %(type)s"
+
+#: .\templates\users\moderation_dashboard.html:151
+#, python-format
+msgid "ID: %(type)s"
+msgstr "Документ личности: %(type)s"
+
+#: .\templates\users\moderation_dashboard.html:157
+msgid "Open business document"
+msgstr "Открыть профессиональный документ"
+
+#: .\templates\users\moderation_dashboard.html:161
+msgid "Open ID document"
+msgstr "Открыть документ личности"
+
+#: .\templates\users\moderation_dashboard.html:171
+#: .\templates\users\moderation_dashboard.html:253
+#: .\users\templates\users\admin_verification.html:41
+#: .\users\templates\users\pending_verifications.html:66
+#: .\users\templates\users\review_profile.html:29
+#: .\users\templates\users\review_verifications.html:16
+msgid "Approve"
+msgstr "Подтвердить"
+
+#: .\templates\users\moderation_dashboard.html:178
+#: .\templates\users\moderation_dashboard.html:260
+#: .\users\templates\users\admin_verification.html:45
+#: .\users\templates\users\pending_verifications.html:73
+#: .\users\templates\users\review_profile.html:33
+#: .\users\templates\users\review_verifications.html:20
+msgid "Reject"
+msgstr "Отклонить"
+
+#: .\templates\users\moderation_dashboard.html:187
+msgid "No pending document requests."
+msgstr "Нет заявок с документами на рассмотрении."
+
+#: .\templates\users\moderation_dashboard.html:194
+msgid "Manual review requests"
+msgstr "Заявки на ручную проверку"
+
+#: .\templates\users\moderation_dashboard.html:224
+#: .\templates\users\profile.html:142
+msgid "Portfolio"
+msgstr "Портфолио"
+
+#: .\templates\users\moderation_dashboard.html:230
+msgid "Social link"
+msgstr "Ссылка на соцсеть"
+
+#: .\templates\users\moderation_dashboard.html:242
+msgid "Open optional file"
+msgstr "Открыть дополнительный файл"
+
+#: .\templates\users\moderation_dashboard.html:269
+msgid "No pending manual reviews."
+msgstr "Нет заявок на ручную проверку."
+
+#: .\templates\users\moderation_dashboard.html:297
+#, python-format
+msgid "Post by %(username)s"
+msgstr "Пост от %(username)s"
+
+#: .\templates\users\moderation_dashboard.html:301
+#: .\templates\users\moderation_dashboard.html:379
+#, python-format
+msgid ""
+"\n"
+"                        Reported by %(username)s · %(date)s\n"
+"                      "
+msgstr ""
+"\n"
+"                        Жалоба от %(username)s · %(date)s\n"
+"                      "
+
+#: .\templates\users\moderation_dashboard.html:310
+#: .\templates\users\moderation_dashboard.html:388
+msgid "No reason provided."
+msgstr "Причина не указана."
+
+#: .\templates\users\moderation_dashboard.html:325
+msgid "View post"
+msgstr "Открыть пост"
+
+#: .\templates\users\moderation_dashboard.html:331
+#: .\templates\users\moderation_dashboard.html:409
+msgid "Resolve"
+msgstr "Закрыть"
+
+#: .\templates\users\moderation_dashboard.html:347
+msgid "No unresolved post reports."
+msgstr "Нет нерешённых жалоб на посты."
+
+#: .\templates\users\moderation_dashboard.html:375
+#, python-format
+msgid "Comment by %(username)s"
+msgstr "Комментарий от %(username)s"
+
+#: .\templates\users\moderation_dashboard.html:403
+msgid "View author"
+msgstr "Открыть автора"
+
+#: .\templates\users\moderation_dashboard.html:425
+msgid "No unresolved comment reports."
+msgstr "Нет нерешённых жалоб на комментарии."
+
+#: .\templates\users\profile.html:46 .\templates\users\profile.html:120
+msgid "Verified"
+msgstr "Подтверждён"
+
+#: .\templates\users\profile.html:53
+msgid "Professional portfolio"
+msgstr "Профессиональное портфолио"
+
+#: .\templates\users\profile.html:63
+#: .\users\templates\users\edit_profile.html:4
+#: .\users\templates\users\edit_profile.html:19
+msgid "Edit profile"
+msgstr "Редактировать профиль"
+
+#: .\templates\users\profile.html:72 .\templates\users\profile.html:346
+msgid "Following"
+msgstr "Вы подписаны"
+
+#: .\templates\users\profile.html:82 .\templates\users\report_problem.html:49
+#: .\templates\users\search.html:133 .\users\forms.py:269 .\users\models.py:389
+msgid "Message"
+msgstr "Написать"
+
+#: .\templates\users\profile.html:91
+msgid "posts"
+msgstr "постов"
+
+#: .\templates\users\profile.html:96
+msgid "followers"
+msgstr "подписчиков"
+
+#: .\templates\users\profile.html:101
+msgid "following"
+msgstr "подписок"
+
+#: .\templates\users\profile.html:109 .\templates\users\search.html:123
+msgid "No bio yet."
+msgstr "Биография пока не заполнена."
+
+#: .\templates\users\profile.html:122
+#: .\users\templates\users\verification_page.html:34
+msgid "Rejected"
+msgstr "Отклонено"
+
+#: .\templates\users\profile.html:124 .\templates\users\profile.html:126
+#: .\users\templates\users\verification_page.html:36
+#: .\users\templates\users\verification_page.html:38
+msgid "Pending"
+msgstr "На рассмотрении"
+
+#: .\templates\users\profile.html:128
+#: .\users\templates\users\verification_page.html:40
+msgid "Not submitted"
+msgstr "Не отправлено"
+
+#: .\templates\users\profile.html:136
+msgid "Start verification"
+msgstr "Начать верификацию"
+
+#: .\templates\users\profile.html:151
+msgid "Manage portfolio"
+msgstr "Управлять портфолио"
+
+#: .\templates\users\profile.html:153
+msgid "Add your works"
+msgstr "Добавить работы"
+
+#: .\templates\users\profile.html:157
+msgid "Take a look"
+msgstr "Посмотреть"
+
+#: .\templates\users\profile.html:159
+msgid "No works yet"
+msgstr "Работ пока нет"
+
+#: .\templates\users\profile.html:167
+msgid "Booking"
+msgstr "Бронирование"
+
+#: .\templates\users\profile.html:168
+msgid "Coming later"
+msgstr "Будет позже"
+
+#: .\templates\users\profile.html:177
+msgid "Posts"
+msgstr "Посты"
+
+#: .\templates\users\profile.html:181
+msgid "Liked"
+msgstr "Лайкнутые"
+
+#: .\templates\users\profile.html:198
+msgid "Post media"
+msgstr "Медиа поста"
+
+#: .\templates\users\profile.html:202 .\templates\users\profile.html:240
+msgid "No media"
+msgstr "Нет медиа"
+
+#: .\templates\users\profile.html:208
+msgid "No posts yet"
+msgstr "Постов пока нет"
+
+#: .\templates\users\profile.html:212
+msgid "Your posts will appear here."
+msgstr "Ваши посты появятся здесь."
+
+#: .\templates\users\profile.html:214
+msgid "This user has not published anything yet."
+msgstr "Этот пользователь ещё ничего не опубликовал."
+
+#: .\templates\users\profile.html:236
+msgid "Liked post media"
+msgstr "Медиа лайкнутого поста"
+
+#: .\templates\users\profile.html:246
+msgid "No liked posts yet"
+msgstr "Лайкнутых постов пока нет"
+
+#: .\templates\users\profile.html:250
+msgid "Liked posts will appear here."
+msgstr "Лайкнутые посты появятся здесь."
+
+#: .\templates\users\profile.html:252
+msgid "This user has no public liked posts yet."
+msgstr "У этого пользователя пока нет публичных лайкнутых постов."
+
+#: .\templates\users\profile.html:260
+msgid "Liked posts are hidden"
+msgstr "Лайкнутые посты скрыты"
+
+#: .\templates\users\profile.html:263
+msgid "This user decided to hide liked posts."
+msgstr "Этот пользователь решил скрыть лайкнутые посты."
+
+#: .\templates\users\profile.html:348
+msgid "Follow action failed."
+msgstr "Не удалось выполнить действие подписки."
+
+#: .\templates\users\report_problem.html:18
+msgid "Feedback"
+msgstr "Обратная связь"
+
+#: .\templates\users\report_problem.html:24
+msgid ""
+"Tell us what happened or suggest an improvement. Your feedback helps us make "
+"Tatzo better."
+msgstr ""
+"Расскажите, что произошло, или предложите улучшение. Ваш отзыв помогает нам "
+"делать Tatzo лучше."
+
+#: .\templates\users\report_problem.html:35
+msgid "Type"
+msgstr "Тип"
+
+#: .\templates\users\report_problem.html:59
+msgid "Optional. You can add a screenshot or file."
+msgstr "Необязательно. Вы можете добавить скриншот или файл."
+
+#: .\templates\users\search.html:20
+msgid "Find users and tattoo artists by username or @tag."
+msgstr "Находите пользователей и тату-мастеров по имени или @tag."
+
+#: .\templates\users\search.html:28
+msgid "Search by username or @tag..."
+msgstr "Поиск по имени пользователя или @tag..."
+
+#: .\templates\users\search.html:54
+msgid "Tattoo artists"
+msgstr "Тату-мастера"
+
+#: .\templates\users\search.html:63
+msgid "Users"
+msgstr "Пользователи"
+
+#: .\templates\users\search.html:70
+msgid "Results"
+msgstr "Результаты"
+
+#: .\templates\users\search.html:76
+#, python-format
+msgid ""
+"\n"
+"            Showing results for <strong>%(search_query)s</strong>\n"
+"          "
+msgstr ""
+"\n"
+"            Результаты по запросу <strong>%(search_query)s</strong>\n"
+"          "
+
+#: .\templates\users\search.html:129
+msgid "View profile"
+msgstr "Открыть профиль"
+
+#: .\templates\users\search.html:143
+msgid "No results found"
+msgstr "Ничего не найдено"
+
+#: .\templates\users\search.html:144
+msgid "Try another username, tag or account type."
+msgstr "Попробуйте другое имя, tag или тип аккаунта."
+
+#: .\templates\users\search.html:146
+msgid "Start searching"
+msgstr "Начните поиск"
+
+#: .\templates\users\search.html:147
+msgid "Type a username or @tag to find people on Tatzo."
+msgstr "Введите имя пользователя или @tag, чтобы найти людей на Tatzo."
+
+#: .\users\admin.py:107
+msgid "Report information"
+msgstr "Информация о жалобе"
+
+#: .\users\admin.py:117
+msgid "Moderation"
+msgstr "Модерация"
+
+#: .\users\forms.py:267 .\users\models.py:383
+msgid "Report type"
+msgstr "Тип обращения"
+
+#: .\users\forms.py:277
+msgid "Short title"
+msgstr "Короткий заголовок"
+
+#: .\users\forms.py:281
+msgid "Describe the problem or suggestion..."
+msgstr "Опишите проблему или предложение..."
+
+#: .\users\models.py:371
+msgid "Bug"
+msgstr "Ошибка"
+
+#: .\users\models.py:372
+msgid "Suggestion"
+msgstr "Предложение"
+
+#: .\users\models.py:373
+msgid "Other"
+msgstr "Другое"
+
+#: .\users\models.py:390
+msgid "Page URL"
+msgstr "URL страницы"
+
+#: .\users\models.py:397
+msgid "Created at"
+msgstr "Создано"
+
+#: .\users\models.py:398
+msgid "Resolved"
+msgstr "Решено"
+
+#: .\users\models.py:402
+msgid "User report"
+msgstr "Обращение пользователя"
+
+#: .\users\models.py:403
+msgid "User reports"
+msgstr "Обращения пользователей"
+
+#: .\users\templates\users\admin_verification.html:4
+msgid "Admin Verification"
+msgstr "Админская проверка"
+
+#: .\users\templates\users\admin_verification.html:9
+#, python-format
+msgid ""
+"\n"
+"            Verify Profile: %(username)s\n"
+"        "
+msgstr ""
+"\n"
+"            Проверка профиля: %(username)s\n"
+"        "
+
+#: .\users\templates\users\admin_verification.html:15
+#: .\users\templates\users\password_reset.html:29
+#: .\users\templates\users\pending_profiles.html:14
+#: .\users\templates\users\pending_verifications.html:14
+#: .\users\templates\users\review_profile.html:16
+#: .\users\templates\users\signup.html:49
+msgid "Email"
+msgstr "Email"
+
+#: .\users\templates\users\admin_verification.html:20
+#: .\users\templates\users\pending_profiles.html:15
+#: .\users\templates\users\pending_verifications.html:15
+#: .\users\templates\users\review_profile.html:21
+msgid "Account Type"
+msgstr "Тип аккаунта"
+
+#: .\users\templates\users\admin_verification.html:24
+#: .\users\templates\users\pending_verifications.html:16
+msgid "Documents"
+msgstr "Документы"
+
+#: .\users\templates\users\admin_verification.html:30
+msgid "Download"
+msgstr "Скачать"
+
+#: .\users\templates\users\admin_verification.html:34
+#: .\users\templates\users\pending_verifications.html:57
+msgid "No documents available"
+msgstr "Документы недоступны"
+
+#: .\users\templates\users\contests.html:15
+msgid "Tattoo artist contests"
+msgstr "Конкурсы тату-мастеров"
+
+#: .\users\templates\users\contests.html:19
+msgid "Here you will soon find:"
+msgstr "Скоро здесь появятся:"
+
+#: .\users\templates\users\contests.html:22
+msgid "Active competitions between artists"
+msgstr "Активные соревнования между мастерами"
+
+#: .\users\templates\users\contests.html:23
+msgid "User voting"
+msgstr "Голосование пользователей"
+
+#: .\users\templates\users\contests.html:24
+msgid "Winners and rewards"
+msgstr "Победители и награды"
+
+#: .\users\templates\users\edit_profile.html:20
+msgid "Update your public identity, privacy and avatar."
+msgstr "Обновите публичную информацию, настройки приватности и аватар."
+
+#: .\users\templates\users\edit_profile.html:42
+msgid "This is how other users will see you on Tatzo."
+msgstr "Так другие пользователи будут видеть вас на Tatzo."
+
+#: .\users\templates\users\edit_profile.html:53
+msgid "Tag"
+msgstr "Тег"
+
+#: .\users\templates\users\edit_profile.html:63
+msgid "Your unique tag helps people find you faster."
+msgstr "Ваш уникальный тег помогает людям быстрее вас находить."
+
+#: .\users\templates\users\edit_profile.html:74
+msgid "Bio"
+msgstr "Био"
+
+#: .\users\templates\users\edit_profile.html:85
+msgid "Tell others about yourself. You can use up to 300 characters."
+msgstr "Расскажите другим о себе. Можно использовать до 300 символов."
+
+#: .\users\templates\users\edit_profile.html:105
+msgid "Liked posts privacy"
+msgstr "Приватность лайкнутых постов"
+
+#: .\users\templates\users\edit_profile.html:106
+msgid "Choose who can see the posts you've liked."
+msgstr "Выберите, кто может видеть посты, которые вам понравились."
+
+#: .\users\templates\users\edit_profile.html:118
+msgid "Show my liked posts on my profile"
+msgstr "Показывать лайкнутые посты в моём профиле"
+
+#: .\users\templates\users\edit_profile.html:119
+msgid "If disabled, other users will see that your liked posts are hidden."
+msgstr ""
+"Если отключить, другие пользователи увидят, что ваши лайкнутые посты скрыты."
+
+#: .\users\templates\users\edit_profile.html:131
+msgid "Profile image"
+msgstr "Изображение профиля"
+
+#: .\users\templates\users\edit_profile.html:138
+msgid "Current avatar"
+msgstr "Текущий аватар"
+
+#: .\users\templates\users\edit_profile.html:153
+msgid "Avatar preview"
+msgstr "Предпросмотр аватара"
+
+#: .\users\templates\users\edit_profile.html:163
+msgid "Upload new avatar"
+msgstr "Загрузить новый аватар"
+
+#: .\users\templates\users\edit_profile.html:168
+msgid "JPG, PNG or WEBP"
+msgstr "JPG, PNG или WEBP"
+
+#: .\users\templates\users\edit_profile.html:169
+msgid "Max size 10MB"
+msgstr "Максимальный размер 10 МБ"
+
+#: .\users\templates\users\edit_profile.html:175
+msgid "Tip"
+msgstr "Совет"
+
+#: .\users\templates\users\edit_profile.html:176
+msgid "A clear profile picture helps others recognize you."
+msgstr "Чёткое фото профиля помогает другим быстрее вас узнавать."
+
+#: .\users\templates\users\edit_profile.html:202
+msgid "Adjust avatar"
+msgstr "Настроить аватар"
+
+#: .\users\templates\users\edit_profile.html:209
+msgid "Crop preview"
+msgstr "Предпросмотр обрезки"
+
+#: .\users\templates\users\edit_profile.html:215
+msgid "Zoom avatar"
+msgstr "Масштаб аватара"
+
+#: .\users\templates\users\password_reset.html:4
+msgid "Password reset — Tatzo"
+msgstr "Восстановление пароля — Tatzo"
+
+#: .\users\templates\users\password_reset.html:12
+#: .\users\templates\users\signup.html:13
+msgid "Enter your email"
+msgstr "Введите email"
+
+#: .\users\templates\users\password_reset.html:19
+#: .\users\templates\users\password_reset_confirm.html:14
+msgid "Password reset"
+msgstr "Восстановление пароля"
+
+#: .\users\templates\users\password_reset.html:22
+msgid "Enter your email and we will send you a password reset link."
+msgstr "Введите ваш email, и мы отправим вам ссылку для сброса пароля."
+
+#: .\users\templates\users\password_reset.html:40
+msgid "Send reset link"
+msgstr "Отправить ссылку"
+
+#: .\users\templates\users\password_reset_complete.html:4
+msgid "Password updated — Tatzo"
+msgstr "Пароль обновлён — Tatzo"
+
+#: .\users\templates\users\password_reset_complete.html:15
+msgid "Password updated successfully!"
+msgstr "Пароль успешно обновлён!"
+
+#: .\users\templates\users\password_reset_complete.html:19
+msgid "You can now log in to your account with your new password."
+msgstr "Теперь вы можете войти в аккаунт с новым паролем."
+
+#: .\users\templates\users\password_reset_complete.html:23
+msgid "Go to login"
+msgstr "Перейти ко входу"
+
+#: .\users\templates\users\password_reset_confirm.html:4
+msgid "New password — Tatzo"
+msgstr "Новый пароль — Tatzo"
+
+#: .\users\templates\users\password_reset_confirm.html:17
+msgid "Create a new password for your account."
+msgstr "Придумайте новый пароль для вашего аккаунта."
+
+#: .\users\templates\users\password_reset_done.html:4
+msgid "Reset link sent — Tatzo"
+msgstr "Ссылка отправлена — Tatzo"
+
+#: .\users\templates\users\password_reset_done.html:14
+msgid "Reset link sent"
+msgstr "Ссылка отправлена"
+
+#: .\users\templates\users\password_reset_done.html:17
+msgid ""
+"\n"
+"      If this email exists, you will receive a message with instructions to "
+"reset your password.\n"
+"    "
+msgstr ""
+"\n"
+"      Если этот email существует, вы получите письмо с инструкциями для "
+"сброса пароля.\n"
+"    "
+
+#: .\users\templates\users\password_reset_done.html:23
+msgid "Do not forget to check your Spam folder."
+msgstr "Не забудьте проверить папку «Спам»."
+
+#: .\users\templates\users\pending_profiles.html:4
+msgid "Pending Profiles"
+msgstr "Ожидающие профили"
+
+#: .\users\templates\users\pending_profiles.html:8
+msgid "Profiles Pending Verification"
+msgstr "Профили, ожидающие проверки"
+
+#: .\users\templates\users\pending_profiles.html:16
+#: .\users\templates\users\pending_verifications.html:17
+msgid "Actions"
+msgstr "Действия"
+
+#: .\users\templates\users\pending_profiles.html:28
+msgid "Review"
+msgstr "Проверить"
+
+#: .\users\templates\users\pending_profiles.html:35
+msgid "No pending profiles."
+msgstr "Нет профилей на проверку."
+
+#: .\users\templates\users\pending_verifications.html:4
+#: .\users\templates\users\pending_verifications.html:8
+msgid "Pending Verifications"
+msgstr "Ожидающие проверки"
+
+#: .\users\templates\users\pending_verifications.html:38
+msgid "View Document"
+msgstr "Посмотреть документ"
+
+#: .\users\templates\users\pending_verifications.html:44
+msgid "Identity Document"
+msgstr "Документ личности"
+
+#: .\users\templates\users\pending_verifications.html:49
+msgid "View Identity Document"
+msgstr "Посмотреть документ личности"
+
+#: .\users\templates\users\pending_verifications.html:81
+msgid "No pending verifications."
+msgstr "Нет заявок на проверку."
+
+#: .\users\templates\users\review_profile.html:4
+#: .\users\templates\users\review_profile.html:8
+msgid "Review Profile"
+msgstr "Проверка профиля"
+
+#: .\users\templates\users\review_verifications.html:4
+#: .\users\templates\users\review_verifications.html:8
+msgid "Review Verifications"
+msgstr "Проверка заявок"
+
+#: .\users\templates\users\review_verifications.html:24
+msgid "No verification documents to review."
+msgstr "Нет документов для проверки."
+
+#: .\users\templates\users\signup.html:12
+msgid "Choose a username"
+msgstr "Выберите имя пользователя"
+
+#: .\users\templates\users\signup.html:15
+msgid "Repeat your password"
+msgstr "Повторите пароль"
+
+#: .\users\templates\users\signup.html:16
+#: .\users\templates\users\signup.html:27
+msgid "Join our community and discover the world of tattoo!"
+msgstr "Присоединяйтесь к нашему сообществу и откройте для себя мир тату!"
+
+#: .\users\templates\users\signup.html:17
+msgid ""
+"Join our community! If you are a tattoo artist, make sure you provide "
+"documents to verify your status."
+msgstr ""
+"Присоединяйтесь к нашему сообществу! Если вы тату-мастер, убедитесь, что "
+"предоставили документы для подтверждения статуса."
+
+#: .\users\templates\users\signup.html:44
+msgid ""
+"Your unique @tag will be created automatically based on your username. You "
+"will be able to change it later in your profile settings."
+msgstr ""
+"Ваш уникальный @tag будет создан автоматически на основе имени пользователя. "
+"Позже вы сможете изменить его в настройках профиля."
+
+#: .\users\templates\users\signup.html:70
+msgid ""
+"Password must contain at least 8 characters, one uppercase letter and one "
+"number."
+msgstr ""
+"Пароль должен содержать не менее 8 символов, одну заглавную букву и одну "
+"цифру."
+
+#: .\users\templates\users\signup.html:75
+msgid "Confirm password"
+msgstr "Подтвердите пароль"
+
+#: .\users\templates\users\signup.html:86
+msgid "Account type"
+msgstr "Тип аккаунта"
+
+#: .\users\templates\users\signup.html:99
+msgid "Regular user"
+msgstr "Обычный пользователь"
+
+#: .\users\templates\users\signup.html:100
+msgid "Discover inspiration and book sessions with tattoo artists."
+msgstr "Находите вдохновение и бронируйте сеансы у тату-мастеров."
+
+#: .\users\templates\users\signup.html:113
+msgid "Tattoo artist"
+msgstr "Тату-мастер"
+
+#: .\users\templates\users\signup.html:114
+msgid "Publish your work and attract new clients."
+msgstr "Публикуйте свои работы и привлекайте новых клиентов."
+
+#: .\users\templates\users\signup.html:127
+msgid "Already have an account? Log in here!"
+msgstr "Уже есть аккаунт? Войдите здесь!"
+
+#: .\users\templates\users\signup.html:163
+msgid "Registration successful!"
+msgstr "Регистрация успешна!"
+
+#: .\users\templates\users\signup.html:166
+msgid ""
+"Confirm your email by clicking the link in the message we sent you. After "
+"that, you will be redirected to the right page."
+msgstr ""
+"Подтвердите почту, перейдя по ссылке в письме. После этого вы будете "
+"перенаправлены на нужную страницу."
+
+#: .\users\templates\users\verification_page.html:4
+#: .\users\templates\users\verification_page.html:18
+msgid "Artist verification"
+msgstr "Верификация мастера"
+
+#: .\users\templates\users\verification_page.html:21
+msgid ""
+"Verify your tattoo artist profile to build trust and unlock professional "
+"features."
+msgstr ""
+"Подтвердите профиль тату-мастера, чтобы повысить доверие и открыть "
+"профессиональные функции."
+
+#: .\users\templates\users\verification_page.html:27
+msgid "Status"
+msgstr "Статус"
+
+#: .\users\templates\users\verification_page.html:32
+msgid "Approved"
+msgstr "Подтверждено"
+
+#: .\users\templates\users\verification_page.html:55
+msgid "I have documents"
+msgstr "У меня есть документы"
+
+#: .\users\templates\users\verification_page.html:58
+msgid "Upload your professional document and identity document."
+msgstr ""
+"Загрузите профессиональный документ и документ, удостоверяющий личность."
+
+#: .\users\templates\users\verification_page.html:64
+msgid "Business document type"
+msgstr "Тип профессионального документа"
+
+#: .\users\templates\users\verification_page.html:71
+msgid "Business document file"
+msgstr "Файл профессионального документа"
+
+#: .\users\templates\users\verification_page.html:78
+msgid "Identity document type"
+msgstr "Тип документа личности"
+
+#: .\users\templates\users\verification_page.html:85
+msgid "Identity document file"
+msgstr "Файл документа личности"
+
+#: .\users\templates\users\verification_page.html:97
+msgid "Submit documents"
+msgstr "Отправить документы"
+
+#: .\users\templates\users\verification_page.html:106
+msgid "No official documents?"
+msgstr "Нет официальных документов?"
+
+#: .\users\templates\users\verification_page.html:109
+msgid ""
+"Request a manual review. Send your portfolio, social links and a short "
+"explanation."
+msgstr ""
+"Запросите ручную проверку. Отправьте портфолио, ссылки на соцсети и короткое "
+"объяснение."
+
+#: .\users\templates\users\verification_page.html:115
+msgid "Portfolio link"
+msgstr "Ссылка на портфолио"
+
+#: .\users\templates\users\verification_page.html:122
+msgid "Social media link"
+msgstr "Ссылка на соцсеть"
+
+#: .\users\templates\users\verification_page.html:129
+msgid "City / Country"
+msgstr "Город / Страна"
+
+#: .\users\templates\users\verification_page.html:136
+msgid "Explanation"
+msgstr "Объяснение"
+
+#: .\users\templates\users\verification_page.html:143
+msgid "Optional file"
+msgstr "Дополнительный файл"
+
+#: .\users\templates\users\verification_page.html:155
+msgid "Request manual review"
+msgstr "Запросить ручную проверку"
+
+#: .\users\views.py:1316
+msgid "Find tattoo artists near you and explore studios by location."
+msgstr ""
+"Находите тату-мастеров рядом с вами и изучайте студии по местоположению."
+
+#: .\users\views.py:1321
+msgid "Manage bookings, sessions and upcoming appointments."
+msgstr "Управляйте бронированиями, сеансами и предстоящими встречами."
+
+#: .\users\views.py:1326
+msgid "Discover tattoo removal resources, specialists and useful guides."
+msgstr "Изучайте материалы о удалении тату, специалистов и полезные гайды."
+
+#: .\users\views.py:1331
+msgid "Stay updated about likes, comments, replies and messages."
+msgstr "Получайте уведомления о лайках, комментариях, ответах и сообщениях."
+
+#: .\users\views.py:1336
+msgid ""
+"Vote for the best tattoo works, follow competitions and discover winners."
+msgstr ""
+"Голосуйте за лучшие тату-работы, следите за конкурсами и открывайте "
+"победителей."
+
+#: .\users\views.py:1343
+msgid "This feature is currently in development."
+msgstr "Эта функция сейчас находится в разработке."
+
+#: .\users\views.py:1363
+msgid "Thank you! Your report has been sent."
+msgstr "Спасибо! Ваше обращение отправлено."

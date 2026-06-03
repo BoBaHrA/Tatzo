@@ -1,3 +1,5 @@
+{% load i18n %}
+
 <div
   class="chat-message-row {% if message.sender == request.user %}is-own{% endif %}"
   data-message-id="{{ message.id }}"
@@ -10,38 +12,47 @@
     {% endif %}
 
     {% if message.attachments.all %}
-        <div class="chat-attachments">
-            {% for attachment in message.attachments.all %}
-            {% if attachment.is_image %}
-                <button
-                type="button"
-                class="chat-attachment-preview"
-                data-chat-media-type="image"
-                data-chat-media-url="{{ attachment.file.url }}"
-                data-chat-media-title="Image attachment"
-                >
-                <img src="{{ attachment.file.url }}" alt="Attachment">
-                </button>
+      <div class="chat-attachments">
+        {% for attachment in message.attachments.all %}
+          {% if attachment.is_image %}
+            {% trans "Image attachment" as image_attachment_title %}
+            {% trans "Attachment" as attachment_alt %}
 
-            {% elif attachment.is_video %}
-                <button
-                type="button"
-                class="chat-attachment-preview chat-attachment-video-preview"
-                data-chat-media-type="video"
-                data-chat-media-url="{{ attachment.file.url }}"
-                data-chat-media-title="Video attachment"
-                >
-                <video src="{{ attachment.file.url }}" muted playsinline preload="metadata"></video>
-                <span class="chat-video-play">▶</span>
-                </button>
+            <button
+              type="button"
+              class="chat-attachment-preview"
+              data-chat-media-type="image"
+              data-chat-media-url="{{ attachment.file.url }}"
+              data-chat-media-title="{{ image_attachment_title }}"
+              title="{{ image_attachment_title }}"
+              aria-label="{{ image_attachment_title }}"
+            >
+              <img src="{{ attachment.file.url }}" alt="{{ attachment_alt }}">
+            </button>
 
-            {% else %}
-                <a href="{{ attachment.file.url }}" target="_blank" class="chat-attachment-file">
-                📎 Open file
-                </a>
-            {% endif %}
-            {% endfor %}
-        </div>
+          {% elif attachment.is_video %}
+            {% trans "Video attachment" as video_attachment_title %}
+
+            <button
+              type="button"
+              class="chat-attachment-preview chat-attachment-video-preview"
+              data-chat-media-type="video"
+              data-chat-media-url="{{ attachment.file.url }}"
+              data-chat-media-title="{{ video_attachment_title }}"
+              title="{{ video_attachment_title }}"
+              aria-label="{{ video_attachment_title }}"
+            >
+              <video src="{{ attachment.file.url }}" muted playsinline preload="metadata"></video>
+              <span class="chat-video-play">▶</span>
+            </button>
+
+          {% else %}
+            <a href="{{ attachment.file.url }}" target="_blank" class="chat-attachment-file">
+              📎 {% trans "Open file" %}
+            </a>
+          {% endif %}
+        {% endfor %}
+      </div>
     {% endif %}
 
     <div class="chat-message-time">

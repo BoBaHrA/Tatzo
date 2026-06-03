@@ -1,5 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
+from .models import UserReport
 
 from .models import (
     BUSINESS_DOCUMENT_CHOICES,
@@ -255,3 +257,31 @@ class PortfolioWorkForm(forms.Form):
 
         if user:
             self.fields["album"].queryset = PortfolioAlbum.objects.filter(user=user)
+            
+class UserReportForm(forms.ModelForm):
+    class Meta:
+        model = UserReport
+        fields = ["report_type", "title", "message", "attachment"]
+
+        labels = {
+            "report_type": _("Report type"),
+            "title": _("Title"),
+            "message": _("Message"),
+            "attachment": _("Attachment"),
+        }
+
+        widgets = {
+            "report_type": forms.Select(attrs={"class": "report-field"}),
+            "title": forms.TextInput(attrs={
+                "class": "report-field",
+                "placeholder": _("Short title"),
+            }),
+            "message": forms.Textarea(attrs={
+                "class": "report-field report-textarea",
+                "placeholder": _("Describe the problem or suggestion..."),
+                "rows": 6,
+            }),
+            "attachment": forms.ClearableFileInput(attrs={
+                "class": "report-file",
+            }),
+        }

@@ -1,10 +1,10 @@
-{% load static %}
+{% load static i18n %}
 
 <div class="comment-thread">
   <div class="comment-item">
     <div class="comment-avatar">
       {% if comment.user.profile.profile_image %}
-        <img src="{{ comment.user.profile.profile_image.url }}" alt="User Avatar">
+        <img src="{{ comment.user.profile.profile_image.url }}" alt="{% trans 'User Avatar' %}">
       {% else %}
         <div class="comment-avatar-fallback">
           {{ comment.user.username|first|upper }}
@@ -21,30 +21,45 @@
       <div class="comment-content">{{ comment.content }}</div>
 
       <div class="comment-actions">
-        <button class="comment-like-btn {% if comment.id in liked_comment_ids %}liked{% endif %}" data-id="{{ comment.id }}">
+        <button
+          type="button"
+          class="comment-like-btn {% if comment.id in liked_comment_ids %}liked{% endif %}"
+          data-id="{{ comment.id }}"
+        >
           <img
             class="comment-like-icon"
             src="{% if comment.id in liked_comment_ids %}{% static 'icons/liked.svg' %}{% else %}{% static 'icons/heart-circle-svgrepo-com.svg' %}{% endif %}"
-            alt="Like"
+            alt="{% trans 'Like' %}"
           >
           <span class="like-count" title="{{ comment.likes.count }}">
             <span class="count-value">{{ comment.likes.count }}</span>
           </span>
         </button>
 
-        <button class="comment-reply-btn" data-id="{{ comment.id }}" data-user="{{ comment.user.username }}">
-          Reply
+        <button
+          type="button"
+          class="comment-reply-btn"
+          data-id="{{ comment.id }}"
+          data-user="{{ comment.user.username }}"
+        >
+          {% trans "Reply" %}
         </button>
 
         <div class="comment-menu-wrapper">
-          <button class="comment-menu-btn">⋯</button>
+          <button type="button" class="comment-menu-btn">⋯</button>
 
           <div class="comment-menu">
             {% if request.user == comment.user %}
-              <button class="comment-edit-btn" data-id="{{ comment.id }}">Edit</button>
-              <button class="comment-delete-btn" data-id="{{ comment.id }}">Delete</button>
+              <button type="button" class="comment-edit-btn" data-id="{{ comment.id }}">
+                {% trans "Edit" %}
+              </button>
+              <button type="button" class="comment-delete-btn" data-id="{{ comment.id }}">
+                {% trans "Delete" %}
+              </button>
             {% else %}
-              <button class="comment-report-btn" data-id="{{ comment.id }}">Report</button>
+              <button type="button" class="comment-report-btn" data-id="{{ comment.id }}">
+                {% trans "Report" %}
+              </button>
             {% endif %}
           </div>
         </div>
@@ -58,7 +73,11 @@
       type="button"
       data-comment-id="{{ comment.id }}"
     >
-      View replies ({{ comment.replies.count }})
+      {% blocktrans count reply_count=comment.replies.count %}
+        View reply ({{ reply_count }})
+      {% plural %}
+        View replies ({{ reply_count }})
+      {% endblocktrans %}
     </button>
 
     <div class="comment-replies" data-comment-id="{{ comment.id }}" hidden>
@@ -66,7 +85,7 @@
         <div class="comment-item comment-reply">
           <div class="comment-avatar">
             {% if reply.user.profile.profile_image %}
-              <img src="{{ reply.user.profile.profile_image.url }}" alt="User Avatar">
+              <img src="{{ reply.user.profile.profile_image.url }}" alt="{% trans 'User Avatar' %}">
             {% else %}
               <div class="comment-avatar-fallback">
                 {{ reply.user.username|first|upper }}
@@ -83,30 +102,45 @@
             <div class="comment-content">{{ reply.content }}</div>
 
             <div class="comment-actions">
-              <button class="comment-like-btn {% if reply.id in liked_comment_ids %}liked{% endif %}" data-id="{{ reply.id }}">
+              <button
+                type="button"
+                class="comment-like-btn {% if reply.id in liked_comment_ids %}liked{% endif %}"
+                data-id="{{ reply.id }}"
+              >
                 <img
                   class="comment-like-icon"
                   src="{% if reply.id in liked_comment_ids %}{% static 'icons/liked.svg' %}{% else %}{% static 'icons/heart-circle-svgrepo-com.svg' %}{% endif %}"
-                  alt="Like"
+                  alt="{% trans 'Like' %}"
                 >
                 <span class="like-count" title="{{ reply.likes.count }}">
                   <span class="count-value">{{ reply.likes.count }}</span>
                 </span>
               </button>
 
-              <button class="comment-reply-btn" data-id="{{ reply.id }}" data-user="{{ reply.user.username }}">
-                Reply
+              <button
+                type="button"
+                class="comment-reply-btn"
+                data-id="{{ reply.id }}"
+                data-user="{{ reply.user.username }}"
+              >
+                {% trans "Reply" %}
               </button>
 
               <div class="comment-menu-wrapper">
-                <button class="comment-menu-btn">⋯</button>
+                <button type="button" class="comment-menu-btn">⋯</button>
 
                 <div class="comment-menu">
                   {% if request.user == reply.user %}
-                    <button class="comment-edit-btn" data-id="{{ reply.id }}">Edit</button>
-                    <button class="comment-delete-btn" data-id="{{ reply.id }}">Delete</button>
+                    <button type="button" class="comment-edit-btn" data-id="{{ reply.id }}">
+                      {% trans "Edit" %}
+                    </button>
+                    <button type="button" class="comment-delete-btn" data-id="{{ reply.id }}">
+                      {% trans "Delete" %}
+                    </button>
                   {% else %}
-                    <button class="comment-report-btn" data-id="{{ reply.id }}">Report</button>
+                    <button type="button" class="comment-report-btn" data-id="{{ reply.id }}">
+                      {% trans "Report" %}
+                    </button>
                   {% endif %}
                 </div>
               </div>

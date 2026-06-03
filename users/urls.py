@@ -4,6 +4,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import include, path
 
 from users.forms_custom import CustomSetPasswordForm
+from users import views as users_views
 
 from . import views
 from .views import create_post
@@ -54,7 +55,7 @@ urlpatterns = [
         views.chat_new_messages,
         name="chat_new_messages",
     ),
-    
+    path("search/", views.search_page, name="search_page"),
     path(
     "profile/<str:username>/follow/",
     views.toggle_follow,
@@ -183,6 +184,9 @@ urlpatterns = [
     ),
     path("profile/<str:username>/", views.profile_view, name="profile"),
     # ... другие маршруты
+    
+    path("coming-soon/<str:feature>/", users_views.coming_soon, name="coming_soon"),
+    path("report-problem/", views.report_problem, name="report_problem"),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

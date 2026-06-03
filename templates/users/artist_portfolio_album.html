@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}{{ album.title }} — {{ profile_user.username }}{% endblock %}
 
@@ -8,13 +8,16 @@
 {% endblock %}
 
 {% block content %}
+
+{% trans "Portfolio work" as portfolio_work_label %}
+
 <div class="portfolio-page">
   <div class="portfolio-shell">
 
     <div class="portfolio-header portfolio-album-detail-header">
       <div>
         <a href="{% url 'artist_portfolio' profile_user.username %}" class="portfolio-back">
-          ← Back to portfolio
+          ← {% trans "Back to portfolio" %}
         </a>
 
         <h1>{{ album.title }}</h1>
@@ -22,22 +25,30 @@
         {% if album.description %}
           <p>{{ album.description }}</p>
         {% elif album.style %}
-          <p>{{ album.style }} tattoo works by {{ profile_user.username }}.</p>
+          <p>
+            {% blocktrans with style=album.style username=profile_user.username %}
+              {{ style }} tattoo works by {{ username }}.
+            {% endblocktrans %}
+          </p>
         {% else %}
-          <p>Portfolio album by {{ profile_user.username }}.</p>
+          <p>
+            {% blocktrans with username=profile_user.username %}
+              Portfolio album by {{ username }}.
+            {% endblocktrans %}
+          </p>
         {% endif %}
       </div>
 
       {% if is_owner %}
         <a href="{% url 'add_portfolio_work' profile_user.username %}" class="portfolio-btn">
-          + Add work
+          + {% trans "Add work" %}
         </a>
       {% endif %}
     </div>
 
     <section class="portfolio-section">
       <div class="portfolio-section-head">
-        <h2>Works</h2>
+        <h2>{% trans "Works" %}</h2>
         <span>{{ works_count }}</span>
       </div>
 
@@ -45,35 +56,34 @@
         <div class="portfolio-works-grid portfolio-works-grid-large">
           {% for work in works %}
             <article
-                class="portfolio-work-card portfolio-work-card-large portfolio-previewable"
-                data-full-image="{{ work.image.url }}"
-                data-title="{{ work.title|default:'Portfolio work' }}"
+              class="portfolio-work-card portfolio-work-card-large portfolio-previewable"
+              data-full-image="{{ work.image.url }}"
+              data-title="{{ work.title|default:portfolio_work_label }}"
             >
-                <img
-                    src="{{ work.image.url }}"
-                    alt="{{ work.title|default:'Portfolio work' }}"
-                >
+              <img
+                src="{{ work.image.url }}"
+                alt="{{ work.title|default:portfolio_work_label }}"
+              >
 
-                {% if is_owner %}
-                    <div class="portfolio-card-menu-wrap">
-                        <button type="button" class="portfolio-card-menu-btn">⋯</button>
+              {% if is_owner %}
+                <div class="portfolio-card-menu-wrap">
+                  <button type="button" class="portfolio-card-menu-btn">⋯</button>
 
-                        <div class="portfolio-card-menu">
-                        <form
-                            method="post"
-                            action="{% url 'delete_portfolio_work' profile_user.username work.id %}"
-                            class="portfolio-delete-form"
-                            data-confirm="Delete this portfolio work?"
-                        >
-                            {% csrf_token %}
-                            <button type="submit">Delete work</button>
-                        </form>
-                        </div>
-                    </div>
-                {% endif %}
+                  <div class="portfolio-card-menu">
+                    <form
+                      method="post"
+                      action="{% url 'delete_portfolio_work' profile_user.username work.id %}"
+                      class="portfolio-delete-form"
+                      data-confirm="{% trans 'Delete this portfolio work?' %}"
+                    >
+                      {% csrf_token %}
+                      <button type="submit">{% trans "Delete work" %}</button>
+                    </form>
+                  </div>
+                </div>
+              {% endif %}
 
-                <div class="portfolio-work-overlay">
-
+              <div class="portfolio-work-overlay">
                 {% if work.title %}
                   <strong>{{ work.title }}</strong>
                 {% endif %}
@@ -95,15 +105,16 @@
         </div>
       {% else %}
         <div class="portfolio-empty">
-          <h3>No works in this album yet</h3>
+          <h3>{% trans "No works in this album yet" %}</h3>
 
           {% if is_owner %}
-            <p>Add works to this album to build a stronger portfolio.</p>
+            <p>{% trans "Add works to this album to build a stronger portfolio." %}</p>
+
             <a href="{% url 'add_portfolio_work' profile_user.username %}" class="portfolio-btn">
-              Add work
+              {% trans "Add work" %}
             </a>
           {% else %}
-            <p>This album has no works yet.</p>
+            <p>{% trans "This album has no works yet." %}</p>
           {% endif %}
         </div>
       {% endif %}
@@ -111,8 +122,19 @@
 
   </div>
 </div>
+
+{% trans "Confirm deletion" as confirm_deletion_text %}
+{% trans "Cancel" as cancel_text %}
+{% trans "Delete" as delete_text %}
+{% trans "Delete this item?" as delete_this_item_text %}
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
+    const confirmDeletionText = "{{ confirm_deletion_text|escapejs }}";
+    const cancelText = "{{ cancel_text|escapejs }}";
+    const deleteText = "{{ delete_text|escapejs }}";
+    const deleteThisItemText = "{{ delete_this_item_text|escapejs }}";
+
     function closeAllPortfolioMenus() {
       document.querySelectorAll(".portfolio-card-menu-wrap.open").forEach((item) => {
         item.classList.remove("open");
@@ -129,17 +151,17 @@
 
           <div class="portfolio-confirm-icon">!</div>
 
-          <h3>Confirm deletion</h3>
+          <h3>${confirmDeletionText}</h3>
 
           <p>${message}</p>
 
           <div class="portfolio-confirm-actions">
             <button type="button" class="portfolio-confirm-cancel">
-              Cancel
+              ${cancelText}
             </button>
 
             <button type="button" class="portfolio-confirm-delete">
-              Delete
+              ${deleteText}
             </button>
           </div>
         </div>
@@ -254,7 +276,7 @@
       form.addEventListener("submit", (e) => {
         e.preventDefault();
 
-        const message = form.dataset.confirm || "Delete this item?";
+        const message = form.dataset.confirm || deleteThisItemText;
 
         openPortfolioConfirm(message, () => {
           form.submit();

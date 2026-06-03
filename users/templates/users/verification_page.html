@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Artist verification{% endblock %}
+{% block title %}{% trans "Artist verification" %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/verification.css' %}">
@@ -13,17 +13,36 @@
 
     <div class="verification-header">
       <div class="verification-icon">✓</div>
+
       <div>
-        <h1>Artist verification</h1>
+        <h1>{% trans "Artist verification" %}</h1>
+
         <p>
-          Verify your tattoo artist profile to build trust and unlock professional features.
+          {% trans "Verify your tattoo artist profile to build trust and unlock professional features." %}
         </p>
       </div>
     </div>
 
     <div class="verification-status-card">
-      <span>Status</span>
-      <strong>{{ verification_status|default:"not_submitted"|title }}</strong>
+      <span>{% trans "Status" %}</span>
+
+      <strong>
+        {% with status=verification_status|default:"not_submitted" %}
+          {% if status == "approved" %}
+            {% trans "Approved" %}
+          {% elif status == "rejected" %}
+            {% trans "Rejected" %}
+          {% elif status == "pending" %}
+            {% trans "Pending" %}
+          {% elif status == "pending_manual_review" %}
+            {% trans "Pending" %}
+          {% elif status == "not_submitted" %}
+            {% trans "Not submitted" %}
+          {% else %}
+            {{ status|title }}
+          {% endif %}
+        {% endwith %}
+      </strong>
     </div>
 
     <div class="verification-grid">
@@ -33,36 +52,37 @@
         <input type="hidden" name="verification_action" value="documents">
 
         <div class="verification-card-header">
-          <h2>I have documents</h2>
+          <h2>{% trans "I have documents" %}</h2>
+
           <p>
-            Upload your professional document and identity document.
+            {% trans "Upload your professional document and identity document." %}
           </p>
         </div>
 
         <div class="verification-field">
           <label for="{{ document_form.business_document_type.id_for_label }}">
-            Business document type
+            {% trans "Business document type" %}
           </label>
           {{ document_form.business_document_type }}
         </div>
 
         <div class="verification-field">
           <label for="{{ document_form.business_document_file.id_for_label }}">
-            Business document file
+            {% trans "Business document file" %}
           </label>
           {{ document_form.business_document_file }}
         </div>
 
         <div class="verification-field">
           <label for="{{ document_form.id_document_type.id_for_label }}">
-            Identity document type
+            {% trans "Identity document type" %}
           </label>
           {{ document_form.id_document_type }}
         </div>
 
         <div class="verification-field">
           <label for="{{ document_form.id_document_file.id_for_label }}">
-            Identity document file
+            {% trans "Identity document file" %}
           </label>
           {{ document_form.id_document_file }}
         </div>
@@ -74,7 +94,7 @@
         {% endif %}
 
         <button type="submit" class="verification-btn verification-btn-primary">
-          Submit documents
+          {% trans "Submit documents" %}
         </button>
       </form>
 
@@ -83,43 +103,44 @@
         <input type="hidden" name="verification_action" value="manual">
 
         <div class="verification-card-header">
-          <h2>No official documents?</h2>
+          <h2>{% trans "No official documents?" %}</h2>
+
           <p>
-            Request a manual review. Send your portfolio, social links and a short explanation.
+            {% trans "Request a manual review. Send your portfolio, social links and a short explanation." %}
           </p>
         </div>
 
         <div class="verification-field">
           <label for="{{ manual_form.portfolio_link.id_for_label }}">
-            Portfolio link
+            {% trans "Portfolio link" %}
           </label>
           {{ manual_form.portfolio_link }}
         </div>
 
         <div class="verification-field">
           <label for="{{ manual_form.social_link.id_for_label }}">
-            Social media link
+            {% trans "Social media link" %}
           </label>
           {{ manual_form.social_link }}
         </div>
 
         <div class="verification-field">
           <label for="{{ manual_form.city_country.id_for_label }}">
-            City / Country
+            {% trans "City / Country" %}
           </label>
           {{ manual_form.city_country }}
         </div>
 
         <div class="verification-field">
           <label for="{{ manual_form.explanation.id_for_label }}">
-            Explanation
+            {% trans "Explanation" %}
           </label>
           {{ manual_form.explanation }}
         </div>
 
         <div class="verification-field">
           <label for="{{ manual_form.extra_file.id_for_label }}">
-            Optional file
+            {% trans "Optional file" %}
           </label>
           {{ manual_form.extra_file }}
         </div>
@@ -131,7 +152,7 @@
         {% endif %}
 
         <button type="submit" class="verification-btn verification-btn-secondary">
-          Request manual review
+          {% trans "Request manual review" %}
         </button>
       </form>
 

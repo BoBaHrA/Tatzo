@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Moderation dashboard{% endblock %}
+{% block title %}{% trans "Moderation dashboard" %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/moderation.css' %}">
@@ -13,379 +13,424 @@
 
     <header class="moderation-header">
       <div>
-        <a href="{% url 'home' %}" class="moderation-back">← Back to Tatzo</a>
-        <h1>Moderation dashboard</h1>
-        <p>Review artist verification requests, reports and platform safety issues.</p>
+        <a href="{% url 'home' %}" class="moderation-back">
+          ← {% trans "Back to Tatzo" %}
+        </a>
+
+        <h1>{% trans "Moderation dashboard" %}</h1>
+
+        <p>
+          {% trans "Review artist verification requests, reports and platform safety issues." %}
+        </p>
       </div>
     </header>
 
     <section class="moderation-stats">
       <div class="moderation-stat-card">
-        <span>Document requests</span>
+        <span>{% trans "Document requests" %}</span>
         <strong>{{ document_count }}</strong>
       </div>
 
       <div class="moderation-stat-card">
-        <span>Manual reviews</span>
+        <span>{% trans "Manual reviews" %}</span>
         <strong>{{ manual_count }}</strong>
       </div>
 
       <div class="moderation-stat-card">
-        <span>Post reports</span>
+        <span>{% trans "Post reports" %}</span>
         <strong>{{ post_reports_count }}</strong>
       </div>
 
       <div class="moderation-stat-card">
-        <span>Comment reports</span>
+        <span>{% trans "Comment reports" %}</span>
         <strong>{{ comment_reports_count }}</strong>
       </div>
     </section>
 
     <div class="moderation-toolbar">
-        <div class="moderation-folder-tabs">
-            <button type="button" class="moderation-folder-tab active" data-folder-tab="verification">
-            Verification
-            <span>{{ document_count|add:manual_count }}</span>
+      <div class="moderation-folder-tabs">
+        <button type="button" class="moderation-folder-tab active" data-folder-tab="verification">
+          {% trans "Verification" %}
+          <span>{{ document_count|add:manual_count }}</span>
+        </button>
+
+        <button type="button" class="moderation-folder-tab" data-folder-tab="posts">
+          {% trans "Post reports" %}
+          <span>{{ post_reports_count }}</span>
+        </button>
+
+        <button type="button" class="moderation-folder-tab" data-folder-tab="comments">
+          {% trans "Comment reports" %}
+          <span>{{ comment_reports_count }}</span>
+        </button>
+      </div>
+
+      <div class="moderation-filters">
+        <input
+          type="text"
+          id="moderationSearch"
+          placeholder="{% trans 'Search by username, email, reason...' %}"
+          autocomplete="off"
+        >
+
+        <input type="hidden" id="moderationSort" value="newest">
+        <input type="hidden" id="moderationReasonFilter" value="all">
+
+        <div class="moderation-custom-select" data-custom-select>
+          <button type="button" class="moderation-custom-select-btn">
+            <span data-custom-select-label>{% trans "Newest first" %}</span>
+            <span class="moderation-custom-select-arrow"></span>
+          </button>
+
+          <div class="moderation-custom-select-menu">
+            <button type="button" data-select-target="moderationSort" data-select-value="newest">
+              {% trans "Newest first" %}
             </button>
 
-            <button type="button" class="moderation-folder-tab" data-folder-tab="posts">
-            Post reports
-            <span>{{ post_reports_count }}</span>
+            <button type="button" data-select-target="moderationSort" data-select-value="oldest">
+              {% trans "Oldest first" %}
             </button>
-
-            <button type="button" class="moderation-folder-tab" data-folder-tab="comments">
-            Comment reports
-            <span>{{ comment_reports_count }}</span>
-            </button>
+          </div>
         </div>
 
-        <div class="moderation-filters">
-            <input
-            type="text"
-            id="moderationSearch"
-            placeholder="Search by username, email, reason..."
-            autocomplete="off"
-            >
+        <div class="moderation-custom-select" data-custom-select>
+          <button type="button" class="moderation-custom-select-btn">
+            <span data-custom-select-label>{% trans "All" %}</span>
+            <span class="moderation-custom-select-arrow"></span>
+          </button>
 
-            <input type="hidden" id="moderationSort" value="newest">
-            <input type="hidden" id="moderationReasonFilter" value="all">
+          <div class="moderation-custom-select-menu">
+            <button type="button" data-select-target="moderationReasonFilter" data-select-value="all">
+              {% trans "All" %}
+            </button>
 
-            <div class="moderation-custom-select" data-custom-select>
-                <button type="button" class="moderation-custom-select-btn">
-                    <span data-custom-select-label>Newest first</span>
-                    <span class="moderation-custom-select-arrow"></span>
-                </button>
+            <button type="button" data-select-target="moderationReasonFilter" data-select-value="with-reason">
+              {% trans "With reason" %}
+            </button>
 
-                <div class="moderation-custom-select-menu">
-                    <button type="button" data-select-target="moderationSort" data-select-value="newest">
-                    Newest first
-                    </button>
-                    <button type="button" data-select-target="moderationSort" data-select-value="oldest">
-                    Oldest first
-                    </button>
-                </div>
-                </div>
-
-                <div class="moderation-custom-select" data-custom-select>
-                <button type="button" class="moderation-custom-select-btn">
-                    <span data-custom-select-label>All</span>
-                    <span class="moderation-custom-select-arrow"></span>
-                </button>
-
-                <div class="moderation-custom-select-menu">
-                    <button type="button" data-select-target="moderationReasonFilter" data-select-value="all">
-                    All
-                    </button>
-                    <button type="button" data-select-target="moderationReasonFilter" data-select-value="with-reason">
-                    With reason
-                    </button>
-                    <button type="button" data-select-target="moderationReasonFilter" data-select-value="no-reason">
-                    No reason
-                    </button>
-                </div>
-            </div>
+            <button type="button" data-select-target="moderationReasonFilter" data-select-value="no-reason">
+              {% trans "No reason" %}
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
     <div class="moderation-folder-panel active" data-folder-panel="verification">
-        <section class="moderation-section">
-            <div class="moderation-section-head">
-            <h2>Artist document requests</h2>
-            <span>{{ document_count }}</span>
-            </div>
-
-            {% if pending_document_requests %}
-            <div class="moderation-list">
-                {% for doc in pending_document_requests %}
-                <article
-                    class="moderation-card"
-                    data-moderation-card
-                    data-date="0"
-                    data-reason="with-reason"
-                    data-search="{{ doc.user.username }} {{ doc.user.email }} {{ doc.business_document_type }} {{ doc.id_document_type }}"
-                >
-                    <div class="moderation-card-main">
-                    <div class="moderation-avatar">
-                        {{ doc.user.username|first|upper }}
-                    </div>
-
-                    <div>
-                        <h3>{{ doc.user.username }}</h3>
-                        <p>{{ doc.user.email }}</p>
-
-                        <div class="moderation-meta">
-                        <span>Business: {{ doc.business_document_type }}</span>
-                        <span>ID: {{ doc.id_document_type }}</span>
-                        </div>
-
-                        <div class="moderation-file-links">
-                        <a href="{{ doc.business_document_file.url }}" target="_blank">
-                            Open business document
-                        </a>
-                        <a href="{{ doc.id_document_file.url }}" target="_blank">
-                            Open ID document
-                        </a>
-                        </div>
-                    </div>
-                    </div>
-
-                    <div class="moderation-actions">
-                    <form method="post" action="{% url 'moderation_approve_artist' doc.user.username %}">
-                        {% csrf_token %}
-                        <button type="submit" class="moderation-btn moderation-btn-approve">
-                        Approve
-                        </button>
-                    </form>
-
-                    <form method="post" action="{% url 'moderation_reject_artist' doc.user.username %}">
-                        {% csrf_token %}
-                        <button type="submit" class="moderation-btn moderation-btn-danger">
-                        Reject
-                        </button>
-                    </form>
-                    </div>
-                </article>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="moderation-empty">No pending document requests.</div>
-            {% endif %}
-        </section>
-
-        <section class="moderation-section">
-            <div class="moderation-section-head">
-            <h2>Manual review requests</h2>
-            <span>{{ manual_count }}</span>
-            </div>
-
-            {% if pending_manual_requests %}
-            <div class="moderation-list">
-                {% for item in pending_manual_requests %}
-                <article
-                    class="moderation-card"
-                    data-moderation-card
-                    data-date="{{ item.created_at|date:'U' }}"
-                    data-reason="with-reason"
-                    data-search="{{ item.user.username }} {{ item.user.email }} {{ item.city_country }} {{ item.portfolio_link }} {{ item.social_link }} {{ item.explanation }}"
-                >
-                    <div class="moderation-card-main">
-                    <div class="moderation-avatar moderation-avatar-pink">
-                        {{ item.user.username|first|upper }}
-                    </div>
-
-                    <div>
-                        <h3>{{ item.user.username }}</h3>
-                        <p>{{ item.user.email }}</p>
-
-                        <div class="moderation-meta">
-                        {% if item.city_country %}
-                            <span>{{ item.city_country }}</span>
-                        {% endif %}
-
-                        {% if item.portfolio_link %}
-                            <a href="{{ item.portfolio_link }}" target="_blank">Portfolio</a>
-                        {% endif %}
-
-                        {% if item.social_link %}
-                            <a href="{{ item.social_link }}" target="_blank">Social link</a>
-                        {% endif %}
-                        </div>
-
-                        <div class="moderation-explanation">
-                        {{ item.explanation }}
-                        </div>
-
-                        {% if item.extra_file %}
-                        <div class="moderation-file-links">
-                            <a href="{{ item.extra_file.url }}" target="_blank">
-                            Open optional file
-                            </a>
-                        </div>
-                        {% endif %}
-                    </div>
-                    </div>
-
-                    <div class="moderation-actions">
-                    <form method="post" action="{% url 'moderation_approve_artist' item.user.username %}">
-                        {% csrf_token %}
-                        <button type="submit" class="moderation-btn moderation-btn-approve">
-                        Approve
-                        </button>
-                    </form>
-
-                    <form method="post" action="{% url 'moderation_reject_artist' item.user.username %}">
-                        {% csrf_token %}
-                        <button type="submit" class="moderation-btn moderation-btn-danger">
-                        Reject
-                        </button>
-                    </form>
-                    </div>
-                </article>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="moderation-empty">No pending manual reviews.</div>
-            {% endif %}
-        </section>
+      <section class="moderation-section">
+        <div class="moderation-section-head">
+          <h2>{% trans "Artist document requests" %}</h2>
+          <span>{{ document_count }}</span>
         </div>
 
-        <div class="moderation-folder-panel" data-folder-panel="posts" hidden>
-        <section class="moderation-section">
-            <div class="moderation-section-head">
-            <h2>Post reports</h2>
-            <span>{{ post_reports_count }}</span>
-            </div>
+        {% if pending_document_requests %}
+          <div class="moderation-list">
+            {% for doc in pending_document_requests %}
+              <article
+                class="moderation-card"
+                data-moderation-card
+                data-date="0"
+                data-reason="with-reason"
+                data-search="{{ doc.user.username }} {{ doc.user.email }} {{ doc.business_document_type }} {{ doc.id_document_type }}"
+              >
+                <div class="moderation-card-main">
+                  <div class="moderation-avatar">
+                    {{ doc.user.username|first|upper }}
+                  </div>
 
-            {% if post_reports %}
-            <div class="moderation-list">
-                {% for report in post_reports %}
-                <article
-                    class="moderation-card moderation-report-card"
-                    data-moderation-card
-                    data-date="{{ report.created_at|date:'U' }}"
-                    data-reason="{% if report.reason %}with-reason{% else %}no-reason{% endif %}"
-                    data-search="{{ report.post.user.username }} {{ report.user.username }} {{ report.reason }} {{ report.post.content }}"
-                >
-                    <div class="moderation-card-main">
-                    <div class="moderation-report-icon">!</div>
+                  <div>
+                    <h3>{{ doc.user.username }}</h3>
+                    <p>{{ doc.user.email }}</p>
 
-                    <div>
-                        <h3>Post by {{ report.post.user.username }}</h3>
-                        <p>Reported by {{ report.user.username }} · {{ report.created_at|date:"d M Y H:i" }}</p>
+                    <div class="moderation-meta">
+                      <span>
+                        {% blocktrans with type=doc.business_document_type %}Business: {{ type }}{% endblocktrans %}
+                      </span>
 
-                        <div class="moderation-explanation">
-                        {% if report.reason %}
-                            {{ report.reason }}
-                        {% else %}
-                            No reason provided.
-                        {% endif %}
-                        </div>
-
-                        <div class="moderation-post-preview">
-                        {{ report.post.content|truncatechars:220 }}
-                        </div>
-                    </div>
+                      <span>
+                        {% blocktrans with type=doc.id_document_type %}ID: {{ type }}{% endblocktrans %}
+                      </span>
                     </div>
 
-                    <div class="moderation-actions">
-                    <a
-                      href="{% url 'profile' report.post.user.username %}?open_post={{ report.post.id }}"
-                      class="moderation-btn moderation-btn-neutral moderation-view-post-link"
-                    >
-                      View post
-                    </a>
+                    <div class="moderation-file-links">
+                      <a href="{{ doc.business_document_file.url }}" target="_blank">
+                        {% trans "Open business document" %}
+                      </a>
 
-                    <form method="post" action="{% url 'moderation_resolve_post_report' report.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="moderation-btn moderation-btn-approve">
-                        Resolve
-                        </button>
-                    </form>
-
-                    <form method="post" action="{% url 'moderation_delete_reported_post' report.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="moderation-btn moderation-btn-danger">
-                        Delete post
-                        </button>
-                    </form>
+                      <a href="{{ doc.id_document_file.url }}" target="_blank">
+                        {% trans "Open ID document" %}
+                      </a>
                     </div>
-                </article>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="moderation-empty">No unresolved post reports.</div>
-            {% endif %}
-        </section>
+                  </div>
+                </div>
+
+                <div class="moderation-actions">
+                  <form method="post" action="{% url 'moderation_approve_artist' doc.user.username %}">
+                    {% csrf_token %}
+                    <button type="submit" class="moderation-btn moderation-btn-approve">
+                      {% trans "Approve" %}
+                    </button>
+                  </form>
+
+                  <form method="post" action="{% url 'moderation_reject_artist' doc.user.username %}">
+                    {% csrf_token %}
+                    <button type="submit" class="moderation-btn moderation-btn-danger">
+                      {% trans "Reject" %}
+                    </button>
+                  </form>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="moderation-empty">
+            {% trans "No pending document requests." %}
+          </div>
+        {% endif %}
+      </section>
+
+      <section class="moderation-section">
+        <div class="moderation-section-head">
+          <h2>{% trans "Manual review requests" %}</h2>
+          <span>{{ manual_count }}</span>
         </div>
 
-        <div class="moderation-folder-panel" data-folder-panel="comments" hidden>
-        <section class="moderation-section">
-            <div class="moderation-section-head">
-            <h2>Comment reports</h2>
-            <span>{{ comment_reports_count }}</span>
-            </div>
+        {% if pending_manual_requests %}
+          <div class="moderation-list">
+            {% for item in pending_manual_requests %}
+              <article
+                class="moderation-card"
+                data-moderation-card
+                data-date="{{ item.created_at|date:'U' }}"
+                data-reason="with-reason"
+                data-search="{{ item.user.username }} {{ item.user.email }} {{ item.city_country }} {{ item.portfolio_link }} {{ item.social_link }} {{ item.explanation }}"
+              >
+                <div class="moderation-card-main">
+                  <div class="moderation-avatar moderation-avatar-pink">
+                    {{ item.user.username|first|upper }}
+                  </div>
 
-            {% if comment_reports %}
-            <div class="moderation-list">
-                {% for report in comment_reports %}
-                <article
-                    class="moderation-card moderation-report-card"
-                    data-moderation-card
-                    data-date="{{ report.created_at|date:'U' }}"
-                    data-reason="{% if report.reason %}with-reason{% else %}no-reason{% endif %}"
-                    data-search="{{ report.comment.user.username }} {{ report.user.username }} {{ report.reason }} {{ report.comment.content }}"
-                >
-                    <div class="moderation-card-main">
-                    <div class="moderation-report-icon">!</div>
+                  <div>
+                    <h3>{{ item.user.username }}</h3>
+                    <p>{{ item.user.email }}</p>
 
-                    <div>
-                        <h3>Comment by {{ report.comment.user.username }}</h3>
-                        <p>Reported by {{ report.user.username }} · {{ report.created_at|date:"d M Y H:i" }}</p>
+                    <div class="moderation-meta">
+                      {% if item.city_country %}
+                        <span>{{ item.city_country }}</span>
+                      {% endif %}
 
-                        <div class="moderation-explanation">
-                        {% if report.reason %}
-                            {{ report.reason }}
-                        {% else %}
-                            No reason provided.
-                        {% endif %}
-                        </div>
+                      {% if item.portfolio_link %}
+                        <a href="{{ item.portfolio_link }}" target="_blank">
+                          {% trans "Portfolio" %}
+                        </a>
+                      {% endif %}
 
-                        <div class="moderation-post-preview">
-                        {{ report.comment.content|truncatechars:220 }}
-                        </div>
+                      {% if item.social_link %}
+                        <a href="{{ item.social_link }}" target="_blank">
+                          {% trans "Social link" %}
+                        </a>
+                      {% endif %}
                     </div>
+
+                    <div class="moderation-explanation">
+                      {{ item.explanation }}
                     </div>
 
-                    <div class="moderation-actions">
-                    <a
-                        href="{% url 'profile' report.comment.user.username %}"
-                        class="moderation-btn moderation-btn-neutral"
-                    >
-                        View author
-                    </a>
+                    {% if item.extra_file %}
+                      <div class="moderation-file-links">
+                        <a href="{{ item.extra_file.url }}" target="_blank">
+                          {% trans "Open optional file" %}
+                        </a>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
 
-                    <form method="post" action="{% url 'moderation_resolve_comment_report' report.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="moderation-btn moderation-btn-approve">
-                        Resolve
-                        </button>
-                    </form>
+                <div class="moderation-actions">
+                  <form method="post" action="{% url 'moderation_approve_artist' item.user.username %}">
+                    {% csrf_token %}
+                    <button type="submit" class="moderation-btn moderation-btn-approve">
+                      {% trans "Approve" %}
+                    </button>
+                  </form>
 
-                    <form method="post" action="{% url 'moderation_delete_reported_comment' report.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="moderation-btn moderation-btn-danger">
-                        Delete comment
-                        </button>
-                    </form>
-                    </div>
-                </article>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="moderation-empty">No unresolved comment reports.</div>
-            {% endif %}
-        </section>
+                  <form method="post" action="{% url 'moderation_reject_artist' item.user.username %}">
+                    {% csrf_token %}
+                    <button type="submit" class="moderation-btn moderation-btn-danger">
+                      {% trans "Reject" %}
+                    </button>
+                  </form>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="moderation-empty">
+            {% trans "No pending manual reviews." %}
+          </div>
+        {% endif %}
+      </section>
     </div>
+
+    <div class="moderation-folder-panel" data-folder-panel="posts" hidden>
+      <section class="moderation-section">
+        <div class="moderation-section-head">
+          <h2>{% trans "Post reports" %}</h2>
+          <span>{{ post_reports_count }}</span>
+        </div>
+
+        {% if post_reports %}
+          <div class="moderation-list">
+            {% for report in post_reports %}
+              <article
+                class="moderation-card moderation-report-card"
+                data-moderation-card
+                data-date="{{ report.created_at|date:'U' }}"
+                data-reason="{% if report.reason %}with-reason{% else %}no-reason{% endif %}"
+                data-search="{{ report.post.user.username }} {{ report.user.username }} {{ report.reason }} {{ report.post.content }}"
+              >
+                <div class="moderation-card-main">
+                  <div class="moderation-report-icon">!</div>
+
+                  <div>
+                    <h3>
+                      {% blocktrans with username=report.post.user.username %}Post by {{ username }}{% endblocktrans %}
+                    </h3>
+
+                    <p>
+                      {% blocktrans with username=report.user.username date=report.created_at|date:"d M Y H:i" %}
+                        Reported by {{ username }} · {{ date }}
+                      {% endblocktrans %}
+                    </p>
+
+                    <div class="moderation-explanation">
+                      {% if report.reason %}
+                        {{ report.reason }}
+                      {% else %}
+                        {% trans "No reason provided." %}
+                      {% endif %}
+                    </div>
+
+                    <div class="moderation-post-preview">
+                      {{ report.post.content|truncatechars:220 }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="moderation-actions">
+                  <a
+                    href="{% url 'profile' report.post.user.username %}?open_post={{ report.post.id }}"
+                    class="moderation-btn moderation-btn-neutral moderation-view-post-link"
+                  >
+                    {% trans "View post" %}
+                  </a>
+
+                  <form method="post" action="{% url 'moderation_resolve_post_report' report.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="moderation-btn moderation-btn-approve">
+                      {% trans "Resolve" %}
+                    </button>
+                  </form>
+
+                  <form method="post" action="{% url 'moderation_delete_reported_post' report.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="moderation-btn moderation-btn-danger">
+                      {% trans "Delete post" %}
+                    </button>
+                  </form>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="moderation-empty">
+            {% trans "No unresolved post reports." %}
+          </div>
+        {% endif %}
+      </section>
+    </div>
+
+    <div class="moderation-folder-panel" data-folder-panel="comments" hidden>
+      <section class="moderation-section">
+        <div class="moderation-section-head">
+          <h2>{% trans "Comment reports" %}</h2>
+          <span>{{ comment_reports_count }}</span>
+        </div>
+
+        {% if comment_reports %}
+          <div class="moderation-list">
+            {% for report in comment_reports %}
+              <article
+                class="moderation-card moderation-report-card"
+                data-moderation-card
+                data-date="{{ report.created_at|date:'U' }}"
+                data-reason="{% if report.reason %}with-reason{% else %}no-reason{% endif %}"
+                data-search="{{ report.comment.user.username }} {{ report.user.username }} {{ report.reason }} {{ report.comment.content }}"
+              >
+                <div class="moderation-card-main">
+                  <div class="moderation-report-icon">!</div>
+
+                  <div>
+                    <h3>
+                      {% blocktrans with username=report.comment.user.username %}Comment by {{ username }}{% endblocktrans %}
+                    </h3>
+
+                    <p>
+                      {% blocktrans with username=report.user.username date=report.created_at|date:"d M Y H:i" %}
+                        Reported by {{ username }} · {{ date }}
+                      {% endblocktrans %}
+                    </p>
+
+                    <div class="moderation-explanation">
+                      {% if report.reason %}
+                        {{ report.reason }}
+                      {% else %}
+                        {% trans "No reason provided." %}
+                      {% endif %}
+                    </div>
+
+                    <div class="moderation-post-preview">
+                      {{ report.comment.content|truncatechars:220 }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="moderation-actions">
+                  <a
+                    href="{% url 'profile' report.comment.user.username %}"
+                    class="moderation-btn moderation-btn-neutral"
+                  >
+                    {% trans "View author" %}
+                  </a>
+
+                  <form method="post" action="{% url 'moderation_resolve_comment_report' report.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="moderation-btn moderation-btn-approve">
+                      {% trans "Resolve" %}
+                    </button>
+                  </form>
+
+                  <form method="post" action="{% url 'moderation_delete_reported_comment' report.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="moderation-btn moderation-btn-danger">
+                      {% trans "Delete comment" %}
+                    </button>
+                  </form>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="moderation-empty">
+            {% trans "No unresolved comment reports." %}
+          </div>
+        {% endif %}
+      </section>
+    </div>
+
+  </div>
+</div>
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const tabs = document.querySelectorAll("[data-folder-tab]");

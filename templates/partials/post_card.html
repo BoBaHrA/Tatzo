@@ -1,10 +1,17 @@
-{% load static %}
+{% load static i18n %}
+
+{% trans "User Avatar" as user_avatar_alt %}
+{% trans "Like" as like_alt %}
+{% trans "Comment" as comment_text %}
+{% trans "Share" as share_text %}
+{% trans "Bookmark" as bookmark_text %}
+{% trans "Bookmarked" as bookmarked_text %}
 
 <div class="post {% if post.user == request.user %}current-user{% else %}other-user{% endif %}" data-post-id="{{ post.id }}">
   <div class="avatar">
     <a href="{% url 'profile' post.user.username %}">
       {% if post.user.profile.profile_image %}
-        <img src="{{ post.user.profile.profile_image.url }}" alt="User Avatar">
+        <img src="{{ post.user.profile.profile_image.url }}" alt="{{ user_avatar_alt }}">
       {% else %}
         <div class="avatar-fallback">
           {{ post.user.username|first|upper }}
@@ -41,13 +48,17 @@
         </div>
 
         <div class="post-menu-wrapper">
-          <button class="post-menu-btn">⋯</button>
+          <button class="post-menu-btn" type="button">⋯</button>
 
           <div class="post-menu">
             {% if request.user == post.user %}
-              <button class="post-delete-btn" data-id="{{ post.id }}">Delete post</button>
+              <button class="post-delete-btn" data-id="{{ post.id }}" type="button">
+                {% trans "Delete post" %}
+              </button>
             {% else %}
-              <button class="post-report-btn" data-id="{{ post.id }}">Report post</button>
+              <button class="post-report-btn" data-id="{{ post.id }}" type="button">
+                {% trans "Report post" %}
+              </button>
             {% endif %}
           </div>
         </div>
@@ -57,7 +68,7 @@
     {% if post.is_ad or post.visibility != "public" %}
       <div class="post-badges">
         {% if post.is_ad %}
-          <span class="post-badge post-badge-ad">Ad</span>
+          <span class="post-badge post-badge-ad">{% trans "Ad" %}</span>
         {% endif %}
 
         {% if post.visibility != "public" %}
@@ -67,7 +78,7 @@
     {% endif %}
 
     <div class="post-media-shell">
-      <div 
+      <div
         class="post-media post-media-renderer"
         data-layout="{{ post.layout }}"
         data-post-id="{{ post.id }}"
@@ -89,11 +100,11 @@
 
   <div class="post-actions under-bubble">
     <div class="post-actions-left">
-      <button class="action-btn like-btn {% if post.id in liked_post_ids %}liked{% endif %}" data-post="{{ post.id }}">
+      <button class="action-btn like-btn {% if post.id in liked_post_ids %}liked{% endif %}" data-post="{{ post.id }}" type="button">
         <img
           class="like-icon"
           src="{% if post.id in liked_post_ids %}{% static 'icons/liked.svg' %}{% else %}{% static 'icons/heart-circle-svgrepo-com.svg' %}{% endif %}"
-          alt="Like"
+          alt="{{ like_alt }}"
         >
       </button>
 
@@ -105,9 +116,10 @@
         class="action-btn comment-btn {% if post.disable_comments %}comments-disabled{% endif %}"
         data-post="{{ post.id }}"
         data-comments-disabled="{% if post.disable_comments %}1{% else %}0{% endif %}"
-        title="Comment"
+        title="{{ comment_text }}"
+        type="button"
       >
-        <img src="{% static 'icons/comments-main.svg' %}" alt="Comment">
+        <img src="{% static 'icons/comments-main.svg' %}" alt="{{ comment_text }}">
       </button>
 
       {% if not post.disable_comments %}
@@ -116,8 +128,8 @@
         </span>
       {% endif %}
 
-      <button class="action-btn share-btn" data-post="{{ post.id }}" title="Share">
-        <img src="{% static 'icons/share-main.svg' %}" alt="Share">
+      <button class="action-btn share-btn" data-post="{{ post.id }}" title="{{ share_text }}" type="button">
+        <img src="{% static 'icons/share-main.svg' %}" alt="{{ share_text }}">
       </button>
     </div>
 
@@ -125,17 +137,18 @@
       <button
         class="action-btn bookmark-btn {% if post.id in bookmarked_post_ids %}bookmarked{% endif %}"
         data-post="{{ post.id }}"
-        title="Bookmark"
+        title="{{ bookmark_text }}"
+        type="button"
       >
         <img
           class="bookmark-icon not-bookmarked"
           src="{% static 'icons/bookmark-main.svg' %}"
-          alt="Bookmark"
+          alt="{{ bookmark_text }}"
         >
         <img
           class="bookmark-icon bookmarked"
           src="{% static 'icons/bookmarked.svg' %}"
-          alt="Bookmarked"
+          alt="{{ bookmarked_text }}"
         >
       </button>
     </div>

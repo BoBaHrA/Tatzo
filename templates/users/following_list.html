@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}{{ profile_user.username }} following{% endblock %}
+{% block title %}
+  {% blocktrans with username=profile_user.username %}{{ username }} following{% endblocktrans %}
+{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
@@ -13,11 +15,14 @@
 
     <div class="follow-header">
       <a href="{% url 'profile' profile_user.username %}" class="follow-back">
-        ← Back to profile
+        ← {% trans "Back to profile" %}
       </a>
 
-      <h1>{{ profile_user.username }} is following</h1>
-      <p>Profiles followed by this user.</p>
+      <h1>
+        {% blocktrans with username=profile_user.username %}{{ username }} is following{% endblocktrans %}
+      </h1>
+
+      <p>{% trans "Profiles followed by this user." %}</p>
     </div>
 
     <div class="follow-list">
@@ -40,17 +45,17 @@
               <strong>{{ user_item.username }}</strong>
 
               {% if user_item.profile.account_type == "tattoo_artist" %}
-                <span>Tattoo Artist</span>
+                <span>{% trans "Tattoo Artist" %}</span>
               {% else %}
-                <span>Community profile</span>
+                <span>{% trans "Community profile" %}</span>
               {% endif %}
             </div>
           </a>
         {% endwith %}
       {% empty %}
         <div class="follow-empty">
-          <h3>No following yet</h3>
-          <p>This user is not following anyone yet.</p>
+          <h3>{% trans "No following yet" %}</h3>
+          <p>{% trans "This user is not following anyone yet." %}</p>
         </div>
       {% endfor %}
     </div>

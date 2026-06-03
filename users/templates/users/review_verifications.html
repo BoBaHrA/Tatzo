@@ -1,17 +1,27 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}Review Verifications{% endblock %}
+{% block title %}{% trans "Review Verifications" %}{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h2>Review Verifications</h2>
+    <h2>{% trans "Review Verifications" %}</h2>
+
     <ul>
         {% for document in documents %}
             <li>
                 {{ document.user.username }} - {{ document.get_document_type_display }}
-                <a href="{% url 'approve_document' document.id %}">Approve</a>
-                <a href="{% url 'reject_document' document.id %}">Reject</a>
+
+                <a href="{% url 'approve_document' document.id %}">
+                    {% trans "Approve" %}
+                </a>
+
+                <a href="{% url 'reject_document' document.id %}">
+                    {% trans "Reject" %}
+                </a>
             </li>
+        {% empty %}
+            <li>{% trans "No verification documents to review." %}</li>
         {% endfor %}
     </ul>
 </div>

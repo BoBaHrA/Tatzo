@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}{{ profile_user.username }}{% endblock %}
 
@@ -10,6 +10,7 @@
 
 {% block content %}
 {% include "partials/sidebar.html" %}
+
 <div class="profile-page">
   <div class="profile-shell">
 
@@ -35,19 +36,23 @@
               <h1 class="profile-username">{{ profile_user.username }}</h1>
 
               {% if profile_user.profile.account_type == "tattoo_artist" %}
-                <span class="profile-badge profile-badge-artist">Tattoo Artist</span>
+                <span class="profile-badge profile-badge-artist">
+                  {% trans "Tattoo Artist" %}
+                </span>
               {% endif %}
 
               {% if profile_user.profile.verification_status == "approved" %}
-                <span class="profile-badge profile-badge-verified">Verified</span>
+                <span class="profile-badge profile-badge-verified">
+                  {% trans "Verified" %}
+                </span>
               {% endif %}
             </div>
 
             <div class="profile-subline">
               {% if profile_user.profile.account_type == "tattoo_artist" %}
-                Professional portfolio
+                {% trans "Professional portfolio" %}
               {% else %}
-                Community profile
+                {% trans "Community profile" %}
               {% endif %}
             </div>
           </div>
@@ -55,7 +60,7 @@
           <div class="profile-actions">
             {% if request.user == profile_user %}
               <a href="{% url 'edit_profile' %}" class="profile-btn profile-btn-primary">
-                Edit profile
+                {% trans "Edit profile" %}
               </a>
             {% else %}
               <button
@@ -64,9 +69,9 @@
                 data-username="{{ profile_user.username }}"
               >
                 {% if is_following %}
-                  Following
+                  {% trans "Following" %}
                 {% else %}
-                  Follow
+                  {% trans "Follow" %}
                 {% endif %}
               </button>
 
@@ -74,7 +79,7 @@
                 href="{% url 'start_chat' profile_user.username %}"
                 class="profile-btn profile-btn-secondary"
               >
-                Message
+                {% trans "Message" %}
               </a>
             {% endif %}
           </div>
@@ -83,15 +88,17 @@
         <div class="profile-stats">
           <div class="profile-stat">
             <span class="profile-stat-value">{{ posts_count }}</span>
-            <span class="profile-stat-label">posts</span>
+            <span class="profile-stat-label">{% trans "posts" %}</span>
           </div>
+
           <div class="profile-stat">
             <span class="profile-stat-value" id="followers-count">{{ followers_count }}</span>
-            <span class="profile-stat-label">followers</span>
+            <span class="profile-stat-label">{% trans "followers" %}</span>
           </div>
+
           <div class="profile-stat">
             <span class="profile-stat-value" id="following-count">{{ following_count }}</span>
-            <span class="profile-stat-label">following</span>
+            <span class="profile-stat-label">{% trans "following" %}</span>
           </div>
         </div>
 
@@ -99,28 +106,41 @@
           {% if profile_user.profile.bio %}
             {{ profile_user.profile.bio }}
           {% else %}
-            <span class="profile-muted">No bio yet.</span>
+            <span class="profile-muted">{% trans "No bio yet." %}</span>
           {% endif %}
         </div>
 
         {% if profile_user.profile.account_type == "tattoo_artist" %}
           <div class="artist-info-grid">
             <div class="artist-info-card">
-              <div class="artist-info-title">Verification</div>
+              <div class="artist-info-title">{% trans "Verification" %}</div>
 
               <div class="artist-info-value">
-                {{ profile_user.profile.public_verification_status }}
+                {% if profile_user.profile.verification_status == "approved" %}
+                  {% trans "Verified" %}
+                {% elif profile_user.profile.verification_status == "rejected" %}
+                  {% trans "Rejected" %}
+                {% elif profile_user.profile.verification_status == "pending" %}
+                  {% trans "Pending" %}
+                {% elif profile_user.profile.verification_status == "pending_manual_review" %}
+                  {% trans "Pending" %}
+                {% elif profile_user.profile.verification_status == "not_submitted" %}
+                  {% trans "Not submitted" %}
+                {% else %}
+                  {{ profile_user.profile.public_verification_status }}
+                {% endif %}
               </div>
 
               {% if request.user == profile_user and profile_user.profile.verification_status == "not_submitted" %}
                 <a href="{% url 'verification_page' %}" class="artist-info-link">
-                  Start verification
+                  {% trans "Start verification" %}
                 </a>
               {% endif %}
             </div>
 
             <div class="artist-info-card">
-              <div class="artist-info-title">Portfolio</div>
+              <div class="artist-info-title">{% trans "Portfolio" %}</div>
+
               <div class="artist-info-value">
                 <a
                   href="{% url 'artist_portfolio' profile_user.username %}"
@@ -128,15 +148,15 @@
                 >
                   {% if request.user == profile_user %}
                     {% if portfolio_works_count %}
-                      Manage portfolio
+                      {% trans "Manage portfolio" %}
                     {% else %}
-                      Add your works
+                      {% trans "Add your works" %}
                     {% endif %}
                   {% else %}
                     {% if portfolio_works_count %}
-                      Take a look
+                      {% trans "Take a look" %}
                     {% else %}
-                      No works yet
+                      {% trans "No works yet" %}
                     {% endif %}
                   {% endif %}
                 </a>
@@ -144,8 +164,8 @@
             </div>
 
             <div class="artist-info-card">
-              <div class="artist-info-title">Booking</div>
-              <div class="artist-info-value">Coming later</div>
+              <div class="artist-info-title">{% trans "Booking" %}</div>
+              <div class="artist-info-value">{% trans "Coming later" %}</div>
             </div>
           </div>
         {% endif %}
@@ -153,8 +173,13 @@
     </div>
 
     <div class="profile-tabs">
-      <button class="profile-tab active" type="button" data-profile-tab="posts">Posts</button>
-      <button class="profile-tab" type="button" data-profile-tab="liked">Liked</button>
+      <button class="profile-tab active" type="button" data-profile-tab="posts">
+        {% trans "Posts" %}
+      </button>
+
+      <button class="profile-tab" type="button" data-profile-tab="liked">
+        {% trans "Liked" %}
+      </button>
     </div>
 
     <div class="profile-tab-panel active" data-profile-panel="posts">
@@ -167,21 +192,26 @@
                   <video class="profile-post-media" src="{{ first_media.file.url }}" muted playsinline preload="metadata"></video>
                   <span class="profile-post-type">▶</span>
                 {% else %}
-                  <img class="profile-post-media" src="{{ first_media.file.url }}" alt="Post media">
+                  <img
+                    class="profile-post-media"
+                    src="{{ first_media.file.url }}"
+                    alt="{% trans 'Post media' %}"
+                  >
                 {% endif %}
               {% else %}
-                <div class="profile-post-empty">No media</div>
+                <div class="profile-post-empty">{% trans "No media" %}</div>
               {% endif %}
             {% endwith %}
           </div>
         {% empty %}
           <div class="profile-empty-state">
-            <div class="profile-empty-title">No posts yet</div>
+            <div class="profile-empty-title">{% trans "No posts yet" %}</div>
+
             <div class="profile-empty-text">
               {% if request.user == profile_user %}
-                Your posts will appear here.
+                {% trans "Your posts will appear here." %}
               {% else %}
-                This user has not published anything yet.
+                {% trans "This user has not published anything yet." %}
               {% endif %}
             </div>
           </div>
@@ -200,21 +230,26 @@
                     <video class="profile-post-media" src="{{ first_media.file.url }}" muted playsinline preload="metadata"></video>
                     <span class="profile-post-type">▶</span>
                   {% else %}
-                    <img class="profile-post-media" src="{{ first_media.file.url }}" alt="Liked post media">
+                    <img
+                      class="profile-post-media"
+                      src="{{ first_media.file.url }}"
+                      alt="{% trans 'Liked post media' %}"
+                    >
                   {% endif %}
                 {% else %}
-                  <div class="profile-post-empty">No media</div>
+                  <div class="profile-post-empty">{% trans "No media" %}</div>
                 {% endif %}
               {% endwith %}
             </div>
           {% empty %}
             <div class="profile-empty-state">
-              <div class="profile-empty-title">No liked posts yet</div>
+              <div class="profile-empty-title">{% trans "No liked posts yet" %}</div>
+
               <div class="profile-empty-text">
                 {% if request.user == profile_user %}
-                  Liked posts will appear here.
+                  {% trans "Liked posts will appear here." %}
                 {% else %}
-                  This user has no public liked posts yet.
+                  {% trans "This user has no public liked posts yet." %}
                 {% endif %}
               </div>
             </div>
@@ -222,9 +257,10 @@
         </div>
       {% else %}
         <div class="profile-empty-state">
-          <div class="profile-empty-title">Liked posts are hidden</div>
+          <div class="profile-empty-title">{% trans "Liked posts are hidden" %}</div>
+
           <div class="profile-empty-text">
-            This user decided to hide liked posts.
+            {% trans "This user decided to hide liked posts." %}
           </div>
         </div>
       {% endif %}
@@ -241,6 +277,7 @@
     </div>
   </div>
 </div>
+
 <div class="post-modal" id="post-modal">
   <div class="post-modal-inner">
     <button type="button" class="post-modal-close" id="post-modal-close">✖</button>
@@ -252,13 +289,16 @@
 
       <form class="modal-comment-form" id="modal-comment-form">
         {% csrf_token %}
+
+        {% trans "Write a comment..." as comment_placeholder %}
         <input
           type="text"
           id="modal-comment-input"
-          placeholder="Write a comment..."
+          placeholder="{{ comment_placeholder }}"
           autocomplete="off"
         >
-        <button type="submit">Send</button>
+
+        <button type="submit">{% trans "Send" %}</button>
       </form>
     </div>
   </div>
@@ -267,6 +307,7 @@
 
 {% block extra_js %}
 <script src="{% static 'js/home.js' %}"></script>
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const tabs = document.querySelectorAll("[data-profile-tab]");
@@ -301,11 +342,20 @@
     });
   });
 </script>
+
+{% trans "Following" as following_text %}
+{% trans "Follow" as follow_text %}
+{% trans "Follow action failed." as follow_action_failed_text %}
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const followBtn = document.querySelector(".profile-follow-btn");
 
     if (!followBtn) return;
+
+    const followingText = "{{ following_text|escapejs }}";
+    const followText = "{{ follow_text|escapejs }}";
+    const followActionFailedText = "{{ follow_action_failed_text|escapejs }}";
 
     function getCookie(name) {
       const cookie = document.cookie
@@ -316,7 +366,7 @@
     }
 
     function setFollowButtonState(isFollowing) {
-      followBtn.textContent = isFollowing ? "Following" : "Follow";
+      followBtn.textContent = isFollowing ? followingText : followText;
       followBtn.classList.toggle("is-following", isFollowing);
     }
 
@@ -340,7 +390,7 @@
         const data = await res.json();
 
         if (!res.ok || !data.ok) {
-          throw new Error(data.error || "Follow action failed.");
+          throw new Error(data.error || followActionFailedText);
         }
 
         setFollowButtonState(data.is_following);
@@ -364,6 +414,7 @@
     });
   });
 </script>
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);

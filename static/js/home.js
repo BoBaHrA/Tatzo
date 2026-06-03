@@ -79,6 +79,12 @@ document.addEventListener("DOMContentLoaded", () => {
     urlCache: new WeakMap(),
   };
 
+  const i18n = window.TATZO_I18N || {};
+
+  function t(key, fallback = "") {
+    return i18n[key] || fallback || key;
+  }
+
   const helpers = {
     getCookie(name) {
       const cookie = document.cookie
@@ -221,13 +227,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const title = document.createElement("strong");
       title.textContent =
         type === "success"
-          ? "Success"
+          ? t("success", "Success")
           : type === "error"
-            ? "Action failed"
-            : "Info";
+            ? t("actionFailed", "Action failed")
+            : t("info", "Info");
 
       const text = document.createElement("span");
-      text.textContent = message || "Done.";
+      text.textContent = message || t("done", "Done.");
 
       content.appendChild(title);
       content.appendChild(text);
@@ -320,7 +326,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (type === "image") {
         const img = document.createElement("img");
         img.src = url;
-        img.alt = isSaved ? "preview" : item.file?.name || "preview";
+        img.alt = isSaved ? t("preview", "Preview") : item.file?.name || t("preview", "Preview");
         els.lbBody.appendChild(img);
       } else if (type === "video") {
         const video = document.createElement("video");
@@ -334,7 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const box = document.createElement("div");
         box.style.padding = "18px";
         box.style.color = "#cde";
-        box.textContent = item.file?.name || "Unsupported file";
+        box.textContent = item.file?.name || t("unsupportedFile", "Unsupported file");
         els.lbBody.appendChild(box);
       }
 
@@ -532,7 +538,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (item.type === "image") {
             node = document.createElement("img");
             node.src = item.url;
-            node.alt = "media";
+            node.alt = t("media", "Media");
           } else if (item.type === "video") {
             node = document.createElement("video");
             node.src = item.url;
@@ -543,7 +549,7 @@ document.addEventListener("DOMContentLoaded", () => {
             node = document.createElement("div");
             node.style.padding = "18px";
             node.style.color = "#cde";
-            node.textContent = "Unsupported file";
+            node.textContent = t("unsupportedFile", "Unsupported file");
           }
 
           currentMedia = node;
@@ -793,7 +799,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const del = document.createElement("div");
       del.className = "preview-remove";
       del.textContent = "✖";
-      del.title = "Удалить файл";
+      del.title = t("removeFile", "Remove file");
       del.addEventListener("click", (e) => {
         e.stopPropagation();
         const removed = state.selectedFiles[index];
@@ -998,7 +1004,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const fullBtn = document.createElement("div");
       fullBtn.className = "car-full";
       fullBtn.textContent = "⤢";
-      fullBtn.title = "Открыть предпросмотр";
+      fullBtn.title = t("openPreview", "Open preview");
       fullBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         lightbox.open(state.carouselIndex);
@@ -1077,7 +1083,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!content && state.selectedFiles.length === 0) return;
 
       els.postBtn.disabled = true;
-      els.postBtn.textContent = "Posting...";
+      els.postBtn.textContent = t("posting", "Posting...");
 
       const fd = new FormData();
       fd.append("content", content);
@@ -1099,7 +1105,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         const data = await res.json();
-        if (!data.ok) throw new Error(data.error || "Ошибка создания поста");
+        if (!data.ok) throw new Error(data.error || t("postCreateFailed", "Post could not be created."));
 
         const feed = document.getElementById("feed");
         if (feed && data.html) {
@@ -1119,7 +1125,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alert(err.message);
       } finally {
         els.postBtn.disabled = false;
-        els.postBtn.textContent = "Post";
+        els.postBtn.textContent = t("post", "Post");
       }
     },
   };
@@ -1194,11 +1200,11 @@ document.addEventListener("DOMContentLoaded", () => {
     async deleteConfirmed() {
       if (!state.pendingDeletePostId) return;
 
-      const originalButtonText = els.postDeleteConfirm?.textContent || "Delete";
+      const originalButtonText = els.postDeleteConfirm?.textContent || t("delete", "Delete");
 
       if (els.postDeleteConfirm) {
         els.postDeleteConfirm.disabled = true;
-        els.postDeleteConfirm.textContent = "Deleting...";
+        els.postDeleteConfirm.textContent = t("deleting", "Deleting...");
       }
 
       try {
@@ -1212,7 +1218,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await res.json();
 
         if (!res.ok || !data.ok) {
-          throw new Error(data.error || "Delete failed.");
+          throw new Error(data.error || t("deleteFailed", "Delete failed."));
         }
 
         document
@@ -1222,12 +1228,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         postActions.closeDeleteModal();
 
-        helpers.showToast("Post deleted.", "success");
+        helpers.showToast(t("postDeleted", "Post deleted."), "success");
       } catch (err) {
         console.error("Delete post error:", err);
 
         helpers.showToast(
-          err.message || "Delete failed.",
+          err.message || t("deleteFailed", "Delete failed."),
           "error"
         );
       } finally {
@@ -1244,11 +1250,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const fd = new FormData();
       fd.append("reason", els.postReportText?.value?.trim() || "");
 
-      const originalButtonText = els.postReportConfirm?.textContent || "Send report";
+      const originalButtonText = els.postReportConfirm?.textContent || t("sendReport", "Send report");
 
       if (els.postReportConfirm) {
         els.postReportConfirm.disabled = true;
-        els.postReportConfirm.textContent = "Sending...";
+        els.postReportConfirm.textContent = t("sending", "Sending...");
       }
 
       try {
@@ -1261,20 +1267,20 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await res.json();
 
         if (!res.ok || !data.ok) {
-          throw new Error(data.error || "Report failed.");
+          throw new Error(data.error || t("reportFailed", "Report failed."));
         }
 
         postActions.closeReportModal();
 
         helpers.showToast(
-          data.message || "Report sent.",
+          data.message || t("reportSent", "Report sent."),
           data.created === false ? "info" : "success"
         );
       } catch (err) {
         console.error("Report post error:", err);
 
         helpers.showToast(
-          err.message || "Report failed.",
+          err.message || t("reportFailed", "Report failed."),
           "error"
         );
       } finally {
@@ -1383,7 +1389,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         els.modalCommentInput.value = "";
         delete els.modalCommentInput.dataset.replyTo;
-        els.modalCommentInput.placeholder = "Write a comment...";
+        els.modalCommentForm.innerHTML = `
+          <input
+            type="text"
+            id="modal-comment-input"
+            placeholder="${t("writeComment", "Write a comment...")}"
+            autocomplete="off"
+          >
+          <button type="submit">${t("send", "Send")}</button>
+        `;
       } catch (err) {
         console.error("Create comment error:", err);
       }
@@ -1460,11 +1474,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (isHidden) {
         repliesBlock.removeAttribute("hidden");
-        btn.textContent = "Hide replies";
+        btn.textContent = t("hideReplies", "Hide replies");
       } else {
         repliesBlock.setAttribute("hidden", "");
         const count = repliesBlock.querySelectorAll(".comment-reply").length;
-        btn.textContent = `View replies (${count})`;
+        btn.textContent = `${t("viewReplies", "View replies")} (${count})`;
       }
     },
 
@@ -1601,20 +1615,20 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await res.json();
 
         if (!res.ok || !data.ok) {
-          throw new Error(data.error || "Report failed.");
+          throw new Error(data.error || t("reportFailed", "Report failed."));
         }
 
         comments.closeReportModal();
 
         helpers.showToast(
-          data.message || "Report sent.",
+          data.message || t("reportSent", "Report sent."),
           data.created === false ? "info" : "success"
         );
       } catch (err) {
         console.error("Report comment error:", err);
 
         helpers.showToast(
-          err.message || "Report failed.",
+          err.message || t("reportFailed", "Report failed."),
           "error"
         );
       } finally {
@@ -1824,7 +1838,7 @@ document.addEventListener("DOMContentLoaded", () => {
             els.modalCommentForm.classList.add("is-disabled");
             els.modalCommentForm.innerHTML = `
               <div class="modal-comments-disabled">
-                Comments are disabled for this post.
+                ${t("commentsDisabled", "Comments are disabled for this post.")}
               </div>
             `;
           } else {
@@ -1952,7 +1966,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const newContent = prompt("Edit comment:", oldContent);
+      const newContent = prompt(t("editCommentPrompt", "Edit comment:"), oldContent);
       if (!newContent || !newContent.trim() || newContent.trim() === oldContent) return;
 
       const fd = new FormData();
@@ -1991,7 +2005,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      if (!confirm("Delete this comment?")) return;
+      if (!confirm(t("deleteCommentConfirm", "Delete this comment?"))) return;
 
       try {
         const res = await fetch(`/posts/comment/${commentId}/delete/`, {
@@ -2033,7 +2047,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         const data = await res.json();
-        alert(data.message || "Report sent.");
+        alert(data.message || t("reportSent", "Report sent."));
       } catch (err) {
         console.error("Report comment error:", err);
       }

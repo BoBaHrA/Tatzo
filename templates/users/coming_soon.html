@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ feature_data.title }} — {% trans "Coming soon" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+
+<div class="coming-soon-page">
+  <div class="coming-soon-card">
+    <div class="coming-soon-icon">
+      {{ feature_data.icon }}
+    </div>
+
+    <span class="coming-soon-label">
+      {% trans "Coming soon" %}
+    </span>
+
+    <h1>{{ feature_data.title }}</h1>
+
+    <p>
+      {{ feature_data.subtitle }}
+    </p>
+
+    <div class="coming-soon-note">
+      {% trans "Your activity helps us prioritize new features. The more users interact with Tatzo, the faster these sections will grow." %}
+    </div>
+
+    <a href="{% url 'home' %}" class="coming-soon-btn">
+      {% trans "Back to feed" %}
+    </a>
+  </div>
+</div>
+{% endblock %}

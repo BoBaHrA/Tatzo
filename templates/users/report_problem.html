@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Report a problem" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+
+<div class="report-page">
+  <div class="report-card">
+    <div class="report-icon">🛠️</div>
+
+    <span class="report-label">
+      {% trans "Feedback" %}
+    </span>
+
+    <h1>{% trans "Report a problem" %}</h1>
+
+    <p class="report-intro">
+      {% trans "Tell us what happened or suggest an improvement. Your feedback helps us make Tatzo better." %}
+    </p>
+
+    <form method="post" enctype="multipart/form-data" class="report-form">
+      {% csrf_token %}
+
+      <input type="hidden" name="page_url" value="{{ page_url }}">
+
+      <div class="report-form-grid">
+        <div class="report-form-field">
+          <label for="{{ form.report_type.id_for_label }}">
+            {% trans "Type" %}
+          </label>
+          {{ form.report_type }}
+        </div>
+
+        <div class="report-form-field">
+          <label for="{{ form.title.id_for_label }}">
+            {% trans "Title" %}
+          </label>
+          {{ form.title }}
+        </div>
+
+        <div class="report-form-field report-form-field-full">
+          <label for="{{ form.message.id_for_label }}">
+            {% trans "Message" %}
+          </label>
+          {{ form.message }}
+        </div>
+
+        <div class="report-form-field report-form-field-full">
+          <label for="{{ form.attachment.id_for_label }}">
+            {% trans "Attachment" %}
+          </label>
+          {{ form.attachment }}
+          <small>{% trans "Optional. You can add a screenshot or file." %}</small>
+        </div>
+      </div>
+
+      {% if form.errors %}
+        <div class="report-errors">
+          {{ form.errors }}
+        </div>
+      {% endif %}
+
+      <div class="report-actions">
+        <a href="{% url 'home' %}" class="report-cancel">
+          {% trans "Cancel" %}
+        </a>
+
+        <button type="submit" class="report-submit">
+          {% trans "Send report" %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

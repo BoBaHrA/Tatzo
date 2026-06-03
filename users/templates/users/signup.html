@@ -1,133 +1,195 @@
 {% extends 'base.html' %}
-{% load static %}  {# 🟢 Важно: static подключаем до любых блоков #}
+{% load static i18n %}
 
-{% block title %}Регистрация{% endblock %}
+{% block title %}{% trans "Sign up" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/signup.css' %}">
+{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/signup.css' %}">
+
+{% trans "Choose a username" as username_placeholder %}
+{% trans "Enter your email" as email_placeholder %}
+{% trans "Enter your password" as password_placeholder %}
+{% trans "Repeat your password" as password_confirm_placeholder %}
+{% trans "Join our community and discover the world of tattoo!" as regular_info_text %}
+{% trans "Join our community! If you are a tattoo artist, make sure you provide documents to verify your status." as artist_info_text %}
 
 <div class="login-container">
     <div class="logo">
-    <img src="{% static 'images/tatzo5.png' %}" alt="Tatzo">
-    <h1>Добро пожаловать</h1>
+        <img src="{% static 'images/tatzo5.png' %}" alt="Tatzo">
+    </div>
 
-    <!-- Текст, который изменяется в зависимости от типа аккаунта -->
+    <h1>{% trans "Welcome" %}</h1>
+
     <div class="form-info">
-        <p id="info-text">Присоединяйтесь к нашему сообществу и познайте мир тату!</p>
+        <p id="info-text">{% trans "Join our community and discover the world of tattoo!" %}</p>
     </div>
 
     <form method="post">
         {% csrf_token %}
+
         <div class="input-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="Выберите имя пользователя" required>
+            <label for="username">{% trans "Username" %}</label>
+            <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="{{ username_placeholder }}"
+                required
+            >
+
             <p class="signup-tag-hint">
-                Ваш уникальный @tag будет создан автоматически на основе имени пользователя.
-                Позже вы сможете изменить его в настройках профиля.
+                {% trans "Your unique @tag will be created automatically based on your username. You will be able to change it later in your profile settings." %}
             </p>
-        </div>
-        <div class="input-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" placeholder="Введите email" required>
-        </div>
-        <div class="input-group">
-            <label for="password1">Password</label>
-            <input type="password" id="password1" name="password1" placeholder="Введите пароль" required>
-            <p id="password-hint" class="password-hint" style="display: none;">
-                Пароль должен содержать не менее 8 символов, одну заглавную букву и одну цифру.
-            </p>
-             
-        </div>
-        <div class="input-group">
-            <label for="password2">Подтвердите пароль</label>
-            <input type="password" id="password2" name="password2" placeholder="Повторите пароль" required>
         </div>
 
-        <!-- Тип аккаунта -->
         <div class="input-group">
-            <label for="account_type">Тип аккаунта</label>
+            <label for="email">{% trans "Email" %}</label>
+            <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="{{ email_placeholder }}"
+                required
+            >
+        </div>
+
+        <div class="input-group">
+            <label for="password1">{% trans "Password" %}</label>
+            <input
+                type="password"
+                id="password1"
+                name="password1"
+                placeholder="{{ password_placeholder }}"
+                required
+            >
+
+            <p id="password-hint" class="password-hint" style="display: none;">
+                {% trans "Password must contain at least 8 characters, one uppercase letter and one number." %}
+            </p>
+        </div>
+
+        <div class="input-group">
+            <label for="password2">{% trans "Confirm password" %}</label>
+            <input
+                type="password"
+                id="password2"
+                name="password2"
+                placeholder="{{ password_confirm_placeholder }}"
+                required
+            >
+        </div>
+
+        <div class="input-group">
+            <label for="account_type">{% trans "Account type" %}</label>
+
             <div class="account-type-options">
                 <label class="account-type-option">
-                    <input type="radio" name="account_type" value="regular_user" checked onclick="updateText()">
+                    <input
+                        type="radio"
+                        name="account_type"
+                        value="regular_user"
+                        checked
+                        onclick="updateText()"
+                    >
+
                     <div class="option-content">
-                        <h3>Обычный пользователь</h3>
-                        <p>Открывайте для себя вдохновение и бронируйте сеансы с тату-мастерами.</p>
+                        <h3>{% trans "Regular user" %}</h3>
+                        <p>{% trans "Discover inspiration and book sessions with tattoo artists." %}</p>
                     </div>
                 </label>
+
                 <label class="account-type-option">
-                    <input type="radio" name="account_type" value="tattoo_artist" onclick="updateText()">
+                    <input
+                        type="radio"
+                        name="account_type"
+                        value="tattoo_artist"
+                        onclick="updateText()"
+                    >
+
                     <div class="option-content">
-                        <h3>Тату-мастер</h3>
-                        <p>Публикуйте свои работы и привлекайте новых клиентов.</p>
+                        <h3>{% trans "Tattoo artist" %}</h3>
+                        <p>{% trans "Publish your work and attract new clients." %}</p>
                     </div>
                 </label>
             </div>
         </div>
-        
-        <button type="submit" class="btn">Зарегистрироваться</button>
+
+        <button type="submit" class="btn">
+            {% trans "Sign up" %}
+        </button>
     </form>
-    
+
     <div class="links">
-        <a href="{% url 'login' %}">Уже есть аккаунт? Вам сюда!</a>
+        <a href="{% url 'login' %}">
+            {% trans "Already have an account? Log in here!" %}
+        </a>
     </div>
 
-    <!-- Ошибки формы -->
     {% if form.non_field_errors %}
-      <div class="errors">
-        <ul>
-          {% for error in form.non_field_errors %}
-            <li>{{ error }}</li>
-          {% endfor %}
-        </ul>
-      </div>
+        <div class="errors">
+            <ul>
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
     {% endif %}
 
     {% for field in form %}
-      {% for error in field.errors %}
-        <div class="errors">
-          <ul><li>{{ error }}</li></ul>
-        </div>
-      {% endfor %}
+        {% for error in field.errors %}
+            <div class="errors">
+                <ul>
+                    <li>{{ error }}</li>
+                </ul>
+            </div>
+        {% endfor %}
     {% endfor %}
-    </div>
 </div>
+
 {% if show_verification_modal %}
 <div id="emailModal" class="signup-verification-modal">
-  <div class="signup-verification-backdrop" onclick="closeModal()"></div>
+    <div class="signup-verification-backdrop" onclick="closeModal()"></div>
 
-  <div class="signup-verification-dialog">
-    <button type="button" class="signup-verification-close" onclick="closeModal()">
-      ×
-    </button>
+    <div class="signup-verification-dialog">
+        <button type="button" class="signup-verification-close" onclick="closeModal()">
+            ×
+        </button>
 
-    <div class="signup-verification-icon">🎉</div>
+        <div class="signup-verification-icon">🎉</div>
 
-    <h3>Регистрация успешна!</h3>
+        <h3>{% trans "Registration successful!" %}</h3>
 
-    <p>
-      Подтвердите свою почту, перейдя по ссылке в письме.
-      После этого вы будете перенаправлены на нужную страницу.
-    </p>
-  </div>
+        <p>
+            {% trans "Confirm your email by clicking the link in the message we sent you. After that, you will be redirected to the right page." %}
+        </p>
+    </div>
 </div>
 
 <script>
-  function closeModal() {
-    const modal = document.getElementById("emailModal");
-    if (modal) modal.style.display = "none";
-  }
+    function closeModal() {
+        const modal = document.getElementById("emailModal");
+        if (modal) modal.style.display = "none";
+    }
 </script>
 {% endif %}
 
 <script>
+    const regularInfoText = "{{ regular_info_text|escapejs }}";
+    const artistInfoText = "{{ artist_info_text|escapejs }}";
+
     function updateText() {
         const infoText = document.getElementById("info-text");
         const accountType = document.querySelector('input[name="account_type"]:checked').value;
-        
+
+        if (!infoText) return;
+
         if (accountType === "tattoo_artist") {
-            infoText.innerHTML = "Присоединяйтесь к нашему сообществу! Если вы тату-мастер, убедитесь, что вы предоставили документы для подтверждения статуса.";
+            infoText.textContent = artistInfoText;
         } else {
-            infoText.innerHTML = "Присоединяйтесь к нашему сообществу и познайте мир тату!";
+            infoText.textContent = regularInfoText;
         }
     }
 </script>

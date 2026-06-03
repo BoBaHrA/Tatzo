@@ -1,75 +1,197 @@
-{% load static %}
+{% load static i18n %}
 
 <div class="sidebar">
-  <ul>
+  <ul class="sidebar-main-menu">
     <li>
       {% if request.user.is_authenticated %}
         <a href="{% url 'profile' request.user.username %}"
           class="{% if request.resolver_match.url_name == 'profile' and request.resolver_match.kwargs.username == request.user.username %}active{% endif %}">
           {% if request.user.profile.profile_image %}
-            <img src="{{ request.user.profile.profile_image.url }}" alt="My Profile" class="sidebar-avatar">
+            <img src="{{ request.user.profile.profile_image.url }}" alt="{% trans 'My Profile' %}" class="sidebar-avatar">
           {% else %}
             <div class="sidebar-avatar sidebar-avatar-placeholder">
               {{ request.user.username|first|upper }}
             </div>
           {% endif %}
-          <span>My Profile</span>
+          <span>{% trans "My Profile" %}</span>
         </a>
       {% else %}
         <a href="{% url 'login' %}">
           <div class="sidebar-avatar sidebar-avatar-placeholder">?</div>
-          <span>My Profile</span>
+          <span>{% trans "My Profile" %}</span>
         </a>
       {% endif %}
     </li>
 
     <li>
       <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}">
-        <img src="{% static 'icons/house.svg' %}" alt="Home">
-        <span>Home</span>
+        <img src="{% static 'icons/house.svg' %}" alt="{% trans 'Home' %}">
+        <span>{% trans "Home" %}</span>
       </a>
     </li>
 
-    <li><a href="#"><img src="{% static 'icons/loupe.svg' %}" alt="Search"><span>Search</span></a></li>
-    <li><a href="#"><img src="{% static 'icons/maps.svg' %}" alt="Maps"><span>Maps</span></a></li>
+    <li>
+      <a
+        href="{% url 'search_page' %}"
+        class="{% if request.resolver_match.url_name == 'search_page' %}active{% endif %}"
+      >
+        <img src="{% static 'icons/loupe.svg' %}" alt="{% trans 'Search' %}">
+        <span>{% trans "Search" %}</span>
+      </a>
+    </li>
+
+    <li>
+      <a
+        href="{% url 'coming_soon' 'maps' %}"
+        class="{% if request.resolver_match.url_name == 'coming_soon' and request.resolver_match.kwargs.feature == 'maps' %}active{% endif %}"
+      >
+        <img src="{% static 'icons/maps.svg' %}" alt="{% trans 'Maps' %}">
+        <span>{% trans "Maps" %}</span>
+      </a>
+    </li>
+
     <li>
       <a
         href="{% url 'chats_list' %}"
         class="{% if request.resolver_match.url_name == 'chats_list' or request.resolver_match.url_name == 'chat_thread' %}active{% endif %}"
       >
-        <img src="{% static 'icons/chats.svg' %}" alt="Chats">
-        <span>Chats</span>
+        <img src="{% static 'icons/chats.svg' %}" alt="{% trans 'Chats' %}">
+        <span>{% trans "Chats" %}</span>
 
-        {% if unread_chat_messages_count %}
-          <span class="sidebar-badge">
-            {{ unread_chat_messages_count }}
-          </span>
+        {% if unread_chats_count and unread_chats_count > 0 %}
+          <span class="sidebar-badge">{{ unread_chats_count }}</span>
         {% endif %}
       </a>
     </li>
-    <li><a href="#"><img src="{% static 'icons/calendar.svg' %}" alt="Calendar"><span>Calendar</span></a></li>
+
+    <li>
+      <a
+        href="{% url 'coming_soon' 'calendar' %}"
+        class="{% if request.resolver_match.url_name == 'coming_soon' and request.resolver_match.kwargs.feature == 'calendar' %}active{% endif %}"
+      >
+        <img src="{% static 'icons/calendar.svg' %}" alt="{% trans 'Calendar' %}">
+        <span>{% trans "Calendar" %}</span>
+      </a>
+    </li>
+
     <li>
       <a
         href="{% url 'posts:bookmarks' %}"
         class="{% if request.resolver_match.app_name == 'posts' and request.resolver_match.url_name == 'bookmarks' %}active{% endif %}"
       >
-        <img src="{% static 'icons/bookmark.svg' %}" alt="Bookmarks">
-        <span>Bookmarks</span>
+        <img src="{% static 'icons/bookmark.svg' %}" alt="{% trans 'Bookmarks' %}">
+        <span>{% trans "Bookmarks" %}</span>
       </a>
     </li>
-    <li><a href="{% url 'contests_page' %}" class="{% if request.path == '/contests/' %}active{% endif %}">
-      <img src="{% static 'icons/trophy.svg' %}" alt="Contests"><span>Contests</span>
-    </a></li>
-    <li><a href="#"><img src="{% static 'icons/sprout.svg' %}" alt="Clean slate"><span>Clean slate</span></a></li>
-    <li><a href="#"><img src="{% static 'icons/notifications.svg' %}" alt="Notifications"><span>Notifications</span></a></li>
+
+    <li>
+      <a
+        href="{% url 'coming_soon' 'contests' %}"
+        class="{% if request.resolver_match.url_name == 'coming_soon' and request.resolver_match.kwargs.feature == 'contests' %}active{% endif %}"
+      >
+        <img src="{% static 'icons/trophy.svg' %}" alt="{% trans 'Contests' %}">
+        <span>{% trans "Contests" %}</span>
+      </a>
+    </li>
+
+    <li>
+      <a
+        href="{% url 'coming_soon' 'clean-slate' %}"
+        class="{% if request.resolver_match.url_name == 'coming_soon' and request.resolver_match.kwargs.feature == 'clean-slate' %}active{% endif %}"
+      >
+        <img src="{% static 'icons/sprout.svg' %}" alt="{% trans 'Clean slate' %}">
+        <span>{% trans "Clean slate" %}</span>
+      </a>
+    </li>
+
+    <li>
+      <a
+        href="{% url 'coming_soon' 'notifications' %}"
+        class="{% if request.resolver_match.url_name == 'coming_soon' and request.resolver_match.kwargs.feature == 'notifications' %}active{% endif %}"
+      >
+        <img src="{% static 'icons/notifications.svg' %}" alt="{% trans 'Notifications' %}">
+        <span>{% trans "Notifications" %}</span>
+      </a>
+    </li>
   </ul>
 
   <ul class="more">
-    <li>
-      <a href="#">
-        <img src="{% static 'icons/menu.svg' %}" alt="More">
-        <span>More</span>
-      </a>
+    <li class="sidebar-more-item">
+      <button type="button" class="sidebar-more-trigger" id="sidebar-more-trigger">
+        <img src="{% static 'icons/menu.svg' %}" alt="{% trans 'More' %}">
+        <span>{% trans "More" %}</span>
+      </button>
+
+      <div class="sidebar-more-menu" id="sidebar-more-menu">
+        <div class="sidebar-more-title">
+          {% trans "Settings" %}
+        </div>
+
+        <form action="{% url 'set_language' %}" method="post" class="sidebar-language-form">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+          <label for="sidebar-language-select">
+            {% trans "Language" %}
+          </label>
+
+          <select id="sidebar-language-select" name="language" onchange="this.form.submit()">
+            {% get_current_language as CURRENT_LANGUAGE %}
+            {% get_available_languages as AVAILABLE_LANGUAGES %}
+
+            {% for code, name in AVAILABLE_LANGUAGES %}
+              <option value="{{ code }}" {% if code == CURRENT_LANGUAGE %}selected{% endif %}>
+                {{ name }}
+              </option>
+            {% endfor %}
+          </select>
+        </form>
+
+        <a
+          href="{% url 'report_problem' %}?next={{ request.get_full_path|urlencode }}"
+          class="sidebar-more-link sidebar-report-problem-btn"
+        >
+          <span>{% trans "Report a problem" %}</span>
+        </a>
+
+        <div class="sidebar-more-note">
+          {% trans "Your activity helps us prioritize new features." %}
+        </div>
+      </div>
     </li>
   </ul>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const moreTrigger = document.getElementById("sidebar-more-trigger");
+    const moreMenu = document.getElementById("sidebar-more-menu");
+
+    if (!moreTrigger || !moreMenu) return;
+
+    moreTrigger.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      moreMenu.classList.toggle("open");
+      moreTrigger.classList.toggle("active");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (
+        !e.target.closest("#sidebar-more-menu") &&
+        !e.target.closest("#sidebar-more-trigger")
+      ) {
+        moreMenu.classList.remove("open");
+        moreTrigger.classList.remove("active");
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        moreMenu.classList.remove("open");
+        moreTrigger.classList.remove("active");
+      }
+    });
+  });
+</script>

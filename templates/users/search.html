@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Search" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/search.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+
+<div class="search-page">
+  <div class="search-shell">
+
+    <header class="search-header">
+      <div>
+        <h1>{% trans "Search" %}</h1>
+        <p>{% trans "Find users and tattoo artists by username or @tag." %}</p>
+      </div>
+    </header>
+
+    <form method="get" action="{% url 'search_page' %}" class="search-form">
+      <div class="search-input-wrap">
+        <img src="{% static 'icons/loupe.svg' %}" alt="">
+
+        {% trans "Search by username or @tag..." as search_placeholder %}
+        <input
+          type="text"
+          name="q"
+          value="{{ query }}"
+          placeholder="{{ search_placeholder }}"
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="search-filters">
+        <button
+          type="submit"
+          name="type"
+          value="all"
+          class="{% if account_filter == 'all' %}active{% endif %}"
+        >
+          {% trans "All" %}
+        </button>
+
+        <button
+          type="submit"
+          name="type"
+          value="artists"
+          class="{% if account_filter == 'artists' %}active{% endif %}"
+        >
+          {% trans "Tattoo artists" %}
+        </button>
+
+        <button
+          type="submit"
+          name="type"
+          value="users"
+          class="{% if account_filter == 'users' %}active{% endif %}"
+        >
+          {% trans "Users" %}
+        </button>
+      </div>
+    </form>
+
+    <section class="search-section">
+      <div class="search-section-head">
+        <h2>{% trans "Results" %}</h2>
+        <span>{{ results_count }}</span>
+      </div>
+
+      {% if query %}
+        <p class="search-query-label">
+          {% blocktrans with search_query=query %}
+            Showing results for <strong>{{ search_query }}</strong>
+          {% endblocktrans %}
+        </p>
+      {% endif %}
+
+      {% if results %}
+        <div class="search-results-grid">
+          {% for user in results %}
+            <article class="search-user-card">
+              <a href="{% url 'profile' user.username %}" class="search-user-avatar">
+                {% if user.profile.profile_image %}
+                  <img src="{{ user.profile.profile_image.url }}" alt="{{ user.username }}">
+                {% else %}
+                  <span>{{ user.username|first|upper }}</span>
+                {% endif %}
+              </a>
+
+              <div class="search-user-main">
+                <div class="search-user-top">
+                  <div>
+                    <a href="{% url 'profile' user.username %}" class="search-user-name">
+                      {{ user.username }}
+                    </a>
+
+                    {% if user.profile.tag %}
+                      <div class="search-user-tag">
+                        @{{ user.profile.tag }}
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  {% if user.profile.account_type == "tattoo_artist" %}
+                    <span class="search-badge search-badge-artist">
+                      {% trans "Tattoo Artist" %}
+                    </span>
+                  {% else %}
+                    <span class="search-badge search-badge-user">
+                      {% trans "User" %}
+                    </span>
+                  {% endif %}
+                </div>
+
+                <div class="search-user-bio">
+                  {% if user.profile.bio %}
+                    {{ user.profile.bio|truncatechars:130 }}
+                  {% else %}
+                    {% trans "No bio yet." %}
+                  {% endif %}
+                </div>
+
+                <div class="search-user-actions">
+                  <a href="{% url 'profile' user.username %}" class="search-btn search-btn-primary">
+                    {% trans "View profile" %}
+                  </a>
+
+                  <a href="{% url 'start_chat' user.username %}" class="search-btn search-btn-secondary">
+                    {% trans "Message" %}
+                  </a>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="search-empty">
+          {% if query %}
+            <h3>{% trans "No results found" %}</h3>
+            <p>{% trans "Try another username, tag or account type." %}</p>
+          {% else %}
+            <h3>{% trans "Start searching" %}</h3>
+            <p>{% trans "Type a username or @tag to find people on Tatzo." %}</p>
+          {% endif %}
+        </div>
+      {% endif %}
+    </section>
+
+  </div>
+</div>
+{% endblock %}

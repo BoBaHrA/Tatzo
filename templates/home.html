@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Home{% endblock %}
+{% block title %}{% trans "Home" %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
@@ -9,130 +9,157 @@
 
 {% block content %}
 
-<!-- Sidebar -->
+{% trans "Got something new? Share it!" as post_placeholder %}
+{% trans "Add file" as add_file_text %}
+{% trans "Write a comment..." as comment_placeholder %}
+{% trans "Update your comment..." as update_comment_placeholder %}
+{% trans "Describe the problem (optional)..." as report_placeholder %}
+
 {% include "partials/sidebar.html" %}
+
 <div class="main-content">
   {% if user.is_authenticated %}
-  <div class="create-post" id="create-post">
-    <div class="post-create-header" onclick="togglePostBox()">
-      <div class="textarea-wrapper">
-        <textarea id="post-textarea" placeholder="Got something new? Share it!"></textarea>
+    <div class="create-post" id="create-post">
+      <div class="post-create-header" onclick="togglePostBox()">
+        <div class="textarea-wrapper">
+          <textarea id="post-textarea" placeholder="{{ post_placeholder }}"></textarea>
+        </div>
+
+        <div
+          class="file-icon"
+          id="custom-file-trigger"
+          data-icon-url="{% static 'icons/plus.svg' %}"
+          onclick="event.stopPropagation();"
+        >
+          <img src="{% static 'icons/plus.svg' %}" alt="{{ add_file_text }}">
+        </div>
+
+        <input
+          type="file"
+          id="file-upload"
+          accept="image/png, image/jpeg, video/mp4, video/webm"
+          style="display: none;"
+          multiple
+        >
       </div>
 
-    <div class="file-icon" id="custom-file-trigger" data-icon-url="{% static 'icons/plus.svg' %}" onclick="event.stopPropagation();">
-    <img src="{% static 'icons/plus.svg' %}" alt="Add file">
-    </div>
-    <input type="file" id="file-upload" accept="image/png, image/jpeg, video/mp4, video/webm" style="display: none;" multiple>
+      <div class="preview-toolbar" id="preview-toolbar" style="display:none;">
+        <div class="preview-mode">
+          <button type="button" class="mode-btn active" data-mode="grid">
+            {% trans "Grid" %}
+          </button>
 
-</div>   
-    <!-- Панель управления предпросмотром -->
-<div class="preview-toolbar" id="preview-toolbar" style="display:none;">
-  <div class="preview-mode">
-    <button type="button" class="mode-btn active" data-mode="grid">Сетка</button>
-    <button type="button" class="mode-btn" data-mode="carousel">Карусель</button>
-  </div>
-</div>
+          <button type="button" class="mode-btn" data-mode="carousel">
+            {% trans "Carousel" %}
+          </button>
+        </div>
+      </div>
 
-<div id="file-preview" class="file-preview is-composer" data-mode="grid" data-count="0"></div>
-<!-- Lightbox для просмотра файлов -->
-<div class="media-lightbox" id="media-lightbox" aria-hidden="true">
-  <div class="lb-inner" role="dialog" aria-modal="true">
-    <div class="lb-close" id="lb-close">✖</div>
-    <div class="lb-nav lb-prev" id="lb-prev">‹</div>
-    <div class="lb-nav lb-next" id="lb-next">›</div>
-    <div class="lb-body" id="lb-body"></div>
-  </div>
-</div>
-    <div class="post-options" id="post-options">
-        <!-- Кнопки опций -->
+      <div id="file-preview" class="file-preview is-composer" data-mode="grid" data-count="0"></div>
+
+      <div class="media-lightbox" id="media-lightbox" aria-hidden="true">
+        <div class="lb-inner" role="dialog" aria-modal="true">
+          <div class="lb-close" id="lb-close">✖</div>
+          <div class="lb-nav lb-prev" id="lb-prev">‹</div>
+          <div class="lb-nav lb-next" id="lb-next">›</div>
+          <div class="lb-body" id="lb-body"></div>
+        </div>
+      </div>
+
+      <div class="post-options" id="post-options">
         <label class="custom-checkbox">
           <input type="checkbox" id="opt-disable-comments" name="disable_comments">
           <span class="checkmark"></span>
-          Disable comments
+          {% trans "Disable comments" %}
         </label>
 
         <label class="custom-checkbox">
           <input type="checkbox" id="opt-is-ad" name="is_ad">
           <span class="checkmark"></span>
-          Mark as Ad
+          {% trans "Mark as Ad" %}
         </label>
 
-  <!-- Кнопки с иконками -->
-  <button>
-    <img src="{% static 'icons/location.svg' %}" alt="Location" class="option-icon">
-    Add Location
-  </button>
+        <button type="button">
+          <img src="{% static 'icons/location.svg' %}" alt="{% trans 'Location' %}" class="option-icon">
+          {% trans "Add Location" %}
+        </button>
 
-  <button>
-    <img src="{% static 'icons/poll.svg' %}" alt="Poll" class="option-icon">
-    Create Poll
-  </button>
+        <button type="button">
+          <img src="{% static 'icons/poll.svg' %}" alt="{% trans 'Poll' %}" class="option-icon">
+          {% trans "Create Poll" %}
+        </button>
 
-  <button>
-    <img src="{% static 'icons/schedule.svg' %}" alt="Schedule" class="option-icon">
-    Schedule Post
-  </button>
+        <button type="button">
+          <img src="{% static 'icons/schedule.svg' %}" alt="{% trans 'Schedule' %}" class="option-icon">
+          {% trans "Schedule Post" %}
+        </button>
 
-  <div>
-    <button>
-      <img src="{% static 'icons/coauthors.svg' %}" alt="Co-authors" class="option-icon">
-      Invite Co-authors
-    </button>
+        <div>
+          <button type="button">
+            <img src="{% static 'icons/coauthors.svg' %}" alt="{% trans 'Co-authors' %}" class="option-icon">
+            {% trans "Invite Co-authors" %}
+          </button>
 
-    <button>
-      <img src="{% static 'icons/eye.svg' %}" alt="Who can see" class="option-icon">
-      Who can see this
-    </button>
+          <button type="button">
+            <img src="{% static 'icons/eye.svg' %}" alt="{% trans 'Who can see' %}" class="option-icon">
+            {% trans "Who can see this" %}
+          </button>
 
-    <button>
-      <img src="{% static 'icons/settings.svg' %}" alt="Settings" class="option-icon">
-      Additional options
-    </button>
+          <button type="button">
+            <img src="{% static 'icons/settings.svg' %}" alt="{% trans 'Settings' %}" class="option-icon">
+            {% trans "Additional options" %}
+          </button>
         </div>
-    </div>
+      </div>
+
       <div class="post-submit">
-    <button id="post-btn" class="post-btn">Post</button>
-  </div>
-  </div>
-{% endif %}
+        <button id="post-btn" class="post-btn" type="button">
+          {% trans "Post" %}
+        </button>
+      </div>
+    </div>
+  {% endif %}
+
   <div class="feed" id="feed">
     {% for post in posts %}
       {% include 'partials/post_card.html' with post=post liked_post_ids=liked_post_ids bookmarked_post_ids=bookmarked_post_ids %}
     {% empty %}
-      <p>No posts available.</p>
+      <p>{% trans "No posts available." %}</p>
     {% endfor %}
   </div>
 </div>
 
-<!-- Right sidebar: Recommendations -->
 <div class="suggestions">
-  <h3>Recommendations</h3>
+  <h3>{% trans "Recommendations" %}</h3>
+
   <div class="suggested-profile">
-    <img src="{% static 'icons/user.png' %}" alt="User" class="avatar">
+    <img src="{% static 'icons/user.png' %}" alt="{% trans 'User' %}" class="avatar">
+
     <div class="suggested-info">
       <span class="username">TattooStudio1</span>
-      <button>Follow</button>
+      <button type="button">{% trans "Follow" %}</button>
     </div>
   </div>
+
   <div class="suggested-profile">
-    <img src="{% static 'icons/user.png' %}" alt="User" class="avatar">
+    <img src="{% static 'icons/user.png' %}" alt="{% trans 'User' %}" class="avatar">
+
     <div class="suggested-info">
       <span class="username">TattooArtist2</span>
-      <button>Follow</button>
+      <button type="button">{% trans "Follow" %}</button>
     </div>
   </div>
 </div>
 
-<!-- Auth buttons -->
 <div class="auth-buttons">
   {% if user.is_authenticated %}
-  <form action="{% url 'logout' %}" method="post" style="display: inline;">
-    {% csrf_token %}
-    <button type="submit" class="btn">Logout</button>
-  </form>
+    <form action="{% url 'logout' %}" method="post" style="display: inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn">{% trans "Logout" %}</button>
+    </form>
   {% else %}
-  <a href="{% url 'login' %}" class="btn">Login</a>
-  <a href="{% url 'signup' %}" class="btn">Signup</a>
+    <a href="{% url 'login' %}" class="btn">{% trans "Login" %}</a>
+    <a href="{% url 'signup' %}" class="btn">{% trans "Sign up" %}</a>
   {% endif %}
 </div>
 
@@ -150,10 +177,10 @@
         <input
           type="text"
           id="modal-comment-input"
-          placeholder="Write a comment..."
+          placeholder="{{ comment_placeholder }}"
           autocomplete="off"
         >
-        <button type="submit">Send</button>
+        <button type="submit">{% trans "Send" %}</button>
       </form>
     </div>
   </div>
@@ -162,7 +189,7 @@
 <div class="comment-edit-modal" id="comment-edit-modal">
   <div class="comment-edit-modal-inner">
     <div class="comment-edit-modal-header">
-      <div class="comment-edit-modal-title">Edit comment</div>
+      <div class="comment-edit-modal-title">{% trans "Edit comment" %}</div>
       <button type="button" class="comment-edit-modal-close" id="comment-edit-modal-close">✖</button>
     </div>
 
@@ -170,13 +197,18 @@
       <textarea
         id="comment-edit-textarea"
         class="comment-edit-textarea"
-        placeholder="Update your comment..."
+        placeholder="{{ update_comment_placeholder }}"
       ></textarea>
     </div>
 
     <div class="comment-edit-modal-actions">
-      <button type="button" class="comment-edit-cancel" id="comment-edit-cancel">Cancel</button>
-      <button type="button" class="comment-edit-save" id="comment-edit-save">Save</button>
+      <button type="button" class="comment-edit-cancel" id="comment-edit-cancel">
+        {% trans "Cancel" %}
+      </button>
+
+      <button type="button" class="comment-edit-save" id="comment-edit-save">
+        {% trans "Save" %}
+      </button>
     </div>
   </div>
 </div>
@@ -184,19 +216,24 @@
 <div class="comment-edit-modal" id="comment-delete-modal">
   <div class="comment-edit-modal-inner">
     <div class="comment-edit-modal-header">
-      <div class="comment-edit-modal-title">Delete comment</div>
+      <div class="comment-edit-modal-title">{% trans "Delete comment" %}</div>
       <button type="button" class="comment-edit-modal-close" id="comment-delete-modal-close">✖</button>
     </div>
 
     <div class="comment-edit-modal-body">
       <p style="color:#e3f4f5; margin:0;">
-        Are you sure you want to delete this comment?
+        {% trans "Are you sure you want to delete this comment?" %}
       </p>
     </div>
 
     <div class="comment-edit-modal-actions">
-      <button type="button" class="comment-edit-cancel" id="comment-delete-cancel">Cancel</button>
-      <button type="button" class="comment-edit-save" id="comment-delete-confirm">Delete</button>
+      <button type="button" class="comment-edit-cancel" id="comment-delete-cancel">
+        {% trans "Cancel" %}
+      </button>
+
+      <button type="button" class="comment-edit-save" id="comment-delete-confirm">
+        {% trans "Delete" %}
+      </button>
     </div>
   </div>
 </div>
@@ -204,19 +241,24 @@
 <div class="comment-edit-modal" id="post-delete-modal">
   <div class="comment-edit-modal-inner">
     <div class="comment-edit-modal-header">
-      <div class="comment-edit-modal-title">Delete post</div>
+      <div class="comment-edit-modal-title">{% trans "Delete post" %}</div>
       <button type="button" class="comment-edit-modal-close" id="post-delete-modal-close">✖</button>
     </div>
 
     <div class="comment-edit-modal-body">
       <p style="color:#e3f4f5; margin:0;">
-        Are you sure you want to delete this post?
+        {% trans "Are you sure you want to delete this post?" %}
       </p>
     </div>
 
     <div class="comment-edit-modal-actions">
-      <button type="button" class="comment-edit-cancel" id="post-delete-cancel">Cancel</button>
-      <button type="button" class="comment-edit-save" id="post-delete-confirm">Delete</button>
+      <button type="button" class="comment-edit-cancel" id="post-delete-cancel">
+        {% trans "Cancel" %}
+      </button>
+
+      <button type="button" class="comment-edit-save" id="post-delete-confirm">
+        {% trans "Delete" %}
+      </button>
     </div>
   </div>
 </div>
@@ -224,7 +266,7 @@
 <div class="comment-edit-modal" id="post-report-modal">
   <div class="comment-edit-modal-inner">
     <div class="comment-edit-modal-header">
-      <div class="comment-edit-modal-title">Report post</div>
+      <div class="comment-edit-modal-title">{% trans "Report post" %}</div>
       <button type="button" class="comment-edit-modal-close" id="post-report-modal-close">✖</button>
     </div>
 
@@ -232,13 +274,18 @@
       <textarea
         id="post-report-text"
         class="comment-edit-textarea"
-        placeholder="Describe the problem (optional)..."
+        placeholder="{{ report_placeholder }}"
       ></textarea>
     </div>
 
     <div class="comment-edit-modal-actions">
-      <button type="button" class="comment-edit-cancel" id="post-report-cancel">Cancel</button>
-      <button type="button" class="comment-edit-save" id="post-report-confirm">Send report</button>
+      <button type="button" class="comment-edit-cancel" id="post-report-cancel">
+        {% trans "Cancel" %}
+      </button>
+
+      <button type="button" class="comment-edit-save" id="post-report-confirm">
+        {% trans "Send report" %}
+      </button>
     </div>
   </div>
 </div>
@@ -246,7 +293,7 @@
 <div class="comment-edit-modal" id="comment-report-modal">
   <div class="comment-edit-modal-inner">
     <div class="comment-edit-modal-header">
-      <div class="comment-edit-modal-title">Report comment</div>
+      <div class="comment-edit-modal-title">{% trans "Report comment" %}</div>
       <button type="button" class="comment-edit-modal-close" id="comment-report-modal-close">✖</button>
     </div>
 
@@ -254,13 +301,18 @@
       <textarea
         id="comment-report-text"
         class="comment-edit-textarea"
-        placeholder="Describe the problem (optional)..."
+        placeholder="{{ report_placeholder }}"
       ></textarea>
     </div>
 
     <div class="comment-edit-modal-actions">
-      <button type="button" class="comment-edit-cancel" id="comment-report-cancel">Cancel</button>
-      <button type="button" class="comment-edit-save" id="comment-report-confirm">Send report</button>
+      <button type="button" class="comment-edit-cancel" id="comment-report-cancel">
+        {% trans "Cancel" %}
+      </button>
+
+      <button type="button" class="comment-edit-save" id="comment-report-confirm">
+        {% trans "Send report" %}
+      </button>
     </div>
   </div>
 </div>
@@ -269,15 +321,14 @@
   <div class="share-soon-modal-inner">
     <button class="share-soon-close" id="share-soon-close" type="button">×</button>
 
-    <h3>Coming soon</h3>
+    <h3>{% trans "Coming soon" %}</h3>
 
     <p>
-      Sharing posts will be available soon.
-      We’re still working on this feature.
+      {% trans "Sharing posts will be available soon. We’re still working on this feature." %}
     </p>
 
     <button class="share-soon-ok" id="share-soon-ok" type="button">
-      Got it
+      {% trans "Got it" %}
     </button>
   </div>
 </div>
@@ -285,5 +336,42 @@
 {% endblock %}
 
 {% block extra_js %}
+<script>
+  window.TATZO_I18N = {
+    success: "{% trans 'Success' %}",
+    actionFailed: "{% trans 'Action failed' %}",
+    info: "{% trans 'Info' %}",
+    done: "{% trans 'Done.' %}",
+
+    unsupportedFile: "{% trans 'Unsupported file' %}",
+    removeFile: "{% trans 'Remove file' %}",
+    openPreview: "{% trans 'Open preview' %}",
+    preview: "{% trans 'Preview' %}",
+    media: "{% trans 'Media' %}",
+
+    posting: "{% trans 'Posting...' %}",
+    post: "{% trans 'Post' %}",
+    postCreateFailed: "{% trans 'Post could not be created.' %}",
+
+    delete: "{% trans 'Delete' %}",
+    deleting: "{% trans 'Deleting...' %}",
+    deleteFailed: "{% trans 'Delete failed.' %}",
+    postDeleted: "{% trans 'Post deleted.' %}",
+
+    sendReport: "{% trans 'Send report' %}",
+    send: "{% trans 'Send' %}",
+    sending: "{% trans 'Sending...' %}",
+    reportFailed: "{% trans 'Report failed.' %}",
+    reportSent: "{% trans 'Report sent.' %}",
+
+    writeComment: "{% trans 'Write a comment...' %}",
+    editCommentPrompt: "{% trans 'Edit comment:' %}",
+    deleteCommentConfirm: "{% trans 'Delete this comment?' %}",
+    commentsDisabled: "{% trans 'Comments are disabled for this post.' %}",
+
+    hideReplies: "{% trans 'Hide replies' %}",
+    viewReplies: "{% trans 'View replies' %}"
+  };
+</script>
 <script src="{% static 'js/home.js' %}"></script>
 {% endblock %}

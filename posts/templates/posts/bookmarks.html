@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Bookmarks{% endblock %}
+{% block title %}{% trans "Bookmarks" %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
@@ -10,10 +10,13 @@
 {% block content %}
 {% include "partials/sidebar.html" %}
 
+{% trans "Bookmarks" as bookmarks_alt %}
+{% trans "Write a comment..." as comment_placeholder %}
+
 <div class="bookmarks-page">
   <div class="bookmarks-header">
-    <h1>Bookmarks</h1>
-    <p>Your saved posts are stored here.</p>
+    <h1>{% trans "Bookmarks" %}</h1>
+    <p>{% trans "Your saved posts are stored here." %}</p>
   </div>
 
   {% if posts %}
@@ -23,16 +26,28 @@
       {% endfor %}
     </div>
   {% else %}
-    <div class="bookmarks-empty">
+    <div class="bookmarks-empty fancy-empty-card">
       <div class="bookmarks-empty-icon">
-      <img src="{% static 'icons/bookmark-main.svg' %}" alt="Bookmarks">
+        <img src="{% static 'icons/bookmark-main.svg' %}" alt="{{ bookmarks_alt }}">
       </div>
-      <h2>No bookmarks yet</h2>
-      <p>Save posts you like and they will appear here.</p>
-      <a href="{% url 'home' %}" class="bookmarks-empty-btn">Go to feed</a>
+
+      <div class="coming-soon-badge">
+        {% trans "Saved" %}
+      </div>
+
+      <h2>{% trans "No bookmarks yet" %}</h2>
+
+      <p>
+        {% trans "Save posts you like and they will appear here." %}
+      </p>
+
+      <a href="{% url 'home' %}" class="bookmarks-empty-btn">
+        {% trans "Go to feed" %}
+      </a>
     </div>
   {% endif %}
 </div>
+
 <div class="media-lightbox" id="media-lightbox" aria-hidden="true">
   <div class="lb-inner" role="dialog" aria-modal="true">
     <div class="lb-close" id="lb-close">✖</div>
@@ -56,10 +71,10 @@
         <input
           type="text"
           id="modal-comment-input"
-          placeholder="Write a comment..."
+          placeholder="{{ comment_placeholder }}"
           autocomplete="off"
         >
-        <button type="submit">Send</button>
+        <button type="submit">{% trans "Send" %}</button>
       </form>
     </div>
   </div>

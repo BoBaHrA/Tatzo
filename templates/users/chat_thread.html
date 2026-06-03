@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Chat with {{ other_user.username }}{% endblock %}
+{% block title %}
+  {% blocktrans with username=other_user.username %}Chat with {{ username }}{% endblocktrans %}
+{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
@@ -15,7 +17,9 @@
   <div class="chat-shell chat-thread-shell">
 
     <header class="chat-thread-header">
-      <a href="{% url 'chats_list' %}" class="chat-back">← Back to chats</a>
+      <a href="{% url 'chats_list' %}" class="chat-back">
+        ← {% trans "Back to chats" %}
+      </a>
 
       <a href="{% url 'profile' other_user.username %}" class="chat-user-head">
         <div class="chat-thread-avatar">
@@ -30,9 +34,9 @@
           <h1>{{ other_user.username }}</h1>
           <p>
             {% if other_user.profile.account_type == "tattoo_artist" %}
-              Tattoo Artist
+              {% trans "Tattoo Artist" %}
             {% else %}
-              Community profile
+              {% trans "Community profile" %}
             {% endif %}
           </p>
         </div>
@@ -42,57 +46,70 @@
     <section class="chat-thread-card">
       <div class="chat-messages" id="chatMessages">
         {% for message in chat_messages %}
-            {% include "partials/chat_message.html" with message=message %}
+          {% include "partials/chat_message.html" with message=message %}
         {% empty %}
-            <div class="chat-empty chat-empty-inside">
-                <h3>No messages yet</h3>
-                <p>Start the conversation with {{ other_user.username }}.</p>
-            </div>
+          <div class="chat-empty chat-empty-inside">
+            <h3>{% trans "No messages yet" %}</h3>
+            <p>
+              {% blocktrans with username=other_user.username %}
+                Start the conversation with {{ username }}.
+              {% endblocktrans %}
+            </p>
+          </div>
         {% endfor %}
       </div>
 
       <form
-            method="post"
-            action="{% url 'send_chat_message' thread.id %}"
-            class="chat-message-form"
-            id="chatMessageForm"
-            enctype="multipart/form-data"
-            data-new-url="{% url 'chat_new_messages' thread.id %}"
-            >
-            {% csrf_token %}
+        method="post"
+        action="{% url 'send_chat_message' thread.id %}"
+        class="chat-message-form"
+        id="chatMessageForm"
+        enctype="multipart/form-data"
+        data-new-url="{% url 'chat_new_messages' thread.id %}"
+      >
+        {% csrf_token %}
 
-            <label class="chat-file-btn" for="chatAttachments">
-                +
-            </label>
+        <label
+          class="chat-file-btn"
+          for="chatAttachments"
+          title="{% trans 'Add file' %}"
+          aria-label="{% trans 'Add file' %}"
+        >
+          +
+        </label>
 
-            <input
-                type="file"
-                id="chatAttachments"
-                name="attachments"
-                multiple
-                hidden
-            >
+        <input
+          type="file"
+          id="chatAttachments"
+          name="attachments"
+          multiple
+          hidden
+        >
 
-            <div class="chat-input-wrap">
-                <textarea
-                name="content"
-                id="chatMessageInput"
-                placeholder="Write a message..."
-                rows="1"
-                maxlength="2000"
-                ></textarea>
+        <div class="chat-input-wrap">
+          {% trans "Write a message..." as message_placeholder %}
+          <textarea
+            name="content"
+            id="chatMessageInput"
+            placeholder="{{ message_placeholder }}"
+            rows="1"
+            maxlength="2000"
+          ></textarea>
 
-                <div class="chat-selected-files" id="chatSelectedFiles"></div>
-            </div>
+          <div class="chat-selected-files" id="chatSelectedFiles"></div>
+        </div>
 
-            <button type="submit">
-                Send
-            </button>
+        <button type="submit">
+          {% trans "Send" %}
+        </button>
       </form>
     </section>
 
   </div>
 </div>
+
+{% trans "Chat media" as chat_media_alt %}
+{% trans "Message was not sent." as message_not_sent %}
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
@@ -101,6 +118,9 @@
     const input = document.getElementById("chatMessageInput");
     const fileInput = document.getElementById("chatAttachments");
     const selectedFilesBox = document.getElementById("chatSelectedFiles");
+
+    const chatMediaAlt = "{{ chat_media_alt|escapejs }}";
+    const messageNotSentText = "{{ message_not_sent|escapejs }}";
 
     let pollingTimer = null;
     let isPolling = false;
@@ -161,60 +181,60 @@
     }
 
     function openChatMediaModal(type, url, title = "") {
-        if (!type || !url) return;
+      if (!type || !url) return;
 
-        const modal = document.createElement("div");
-        modal.className = "chat-media-modal";
+      const modal = document.createElement("div");
+      modal.className = "chat-media-modal";
 
-        let mediaHtml = "";
+      let mediaHtml = "";
 
-        if (type === "image") {
-            mediaHtml = `<img src="${url}" alt="${title || "Chat media"}">`;
-        } else if (type === "video") {
-            mediaHtml = `
-            <video src="${url}" controls autoplay playsinline></video>
-            `;
-        }
-
-        modal.innerHTML = `
-            <button type="button" class="chat-media-modal-close">×</button>
-
-            <div class="chat-media-modal-content">
-            ${mediaHtml}
-            ${title ? `<div class="chat-media-modal-title">${title}</div>` : ""}
-            </div>
+      if (type === "image") {
+        mediaHtml = `<img src="${url}" alt="${title || chatMediaAlt}">`;
+      } else if (type === "video") {
+        mediaHtml = `
+          <video src="${url}" controls autoplay playsinline></video>
         `;
+      }
 
-        document.body.appendChild(modal);
-        document.body.style.overflow = "hidden";
+      modal.innerHTML = `
+        <button type="button" class="chat-media-modal-close">×</button>
 
-        function closeModal() {
-            const video = modal.querySelector("video");
+        <div class="chat-media-modal-content">
+          ${mediaHtml}
+          ${title ? `<div class="chat-media-modal-title">${title}</div>` : ""}
+        </div>
+      `;
 
-            if (video) {
-            video.pause();
-            video.src = "";
-            }
+      document.body.appendChild(modal);
+      document.body.style.overflow = "hidden";
 
-            modal.remove();
-            document.body.style.overflow = "";
+      function closeModal() {
+        const video = modal.querySelector("video");
+
+        if (video) {
+          video.pause();
+          video.src = "";
         }
 
-        modal.addEventListener("click", (event) => {
-            if (
-            event.target === modal ||
-            event.target.closest(".chat-media-modal-close")
-            ) {
-            closeModal();
-            }
-        });
+        modal.remove();
+        document.body.style.overflow = "";
+      }
 
-        document.addEventListener("keydown", function escHandler(event) {
-            if (event.key === "Escape") {
-            closeModal();
-            document.removeEventListener("keydown", escHandler);
-            }
-        });
+      modal.addEventListener("click", (event) => {
+        if (
+          event.target === modal ||
+          event.target.closest(".chat-media-modal-close")
+        ) {
+          closeModal();
+        }
+      });
+
+      document.addEventListener("keydown", function escHandler(event) {
+        if (event.key === "Escape") {
+          closeModal();
+          document.removeEventListener("keydown", escHandler);
+        }
+      });
     }
 
     async function pollNewMessages() {
@@ -255,16 +275,16 @@
     fileInput?.addEventListener("change", updateSelectedFiles);
 
     messagesBox?.addEventListener("click", (e) => {
-        const previewBtn = e.target.closest(".chat-attachment-preview");
-        if (!previewBtn) return;
+      const previewBtn = e.target.closest(".chat-attachment-preview");
+      if (!previewBtn) return;
 
-        e.preventDefault();
+      e.preventDefault();
 
-        openChatMediaModal(
-            previewBtn.dataset.chatMediaType,
-            previewBtn.dataset.chatMediaUrl,
-            previewBtn.dataset.chatMediaTitle || ""
-        );
+      openChatMediaModal(
+        previewBtn.dataset.chatMediaType,
+        previewBtn.dataset.chatMediaUrl,
+        previewBtn.dataset.chatMediaTitle || ""
+      );
     });
 
     input?.addEventListener("keydown", (e) => {
@@ -300,7 +320,7 @@
         const data = await res.json();
 
         if (!res.ok || !data.ok) {
-          throw new Error(data.error || "Message was not sent.");
+          throw new Error(data.error || messageNotSentText);
         }
 
         const emptyState = messagesBox.querySelector(".chat-empty-inside");

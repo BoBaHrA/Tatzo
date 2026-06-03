@@ -1,7 +1,8 @@
 from django.contrib import admin
 
 from posts.models import Post
-from .models import Profile, VerificationDocument
+from django.utils.translation import gettext_lazy as _
+from .models import Profile, VerificationDocument, UserReport
 
 
 # Действие для массового подтверждения профилей
@@ -67,3 +68,56 @@ class VerificationDocumentAdmin(admin.ModelAdmin):
 class PostAdmin(admin.ModelAdmin):
     list_display = ("user", "content", "created_at")  # Поля для отображения
     search_fields = ("user__username", "content")  # Поля для поиска
+
+@admin.register(UserReport)
+class UserReportAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "report_type",
+        "title",
+        "user",
+        "is_resolved",
+        "created_at",
+    )
+    list_filter = (
+        "report_type",
+        "is_resolved",
+        "created_at",
+    )
+    search_fields = (
+        "title",
+        "message",
+        "user__username",
+        "user__email",
+        "page_url",
+    )
+    readonly_fields = (
+        "user",
+        "report_type",
+        "title",
+        "message",
+        "page_url",
+        "attachment",
+        "created_at",
+    )
+    list_editable = ("is_resolved",)
+    ordering = ("-created_at",)
+
+    fieldsets = (
+        (_("Report information"), {
+            "fields": (
+                "user",
+                "report_type",
+                "title",
+                "message",
+                "page_url",
+                "attachment",
+            )
+        }),
+        (_("Moderation"), {
+            "fields": (
+                "is_resolved",
+                "created_at",
+            )
+        }),
+    )

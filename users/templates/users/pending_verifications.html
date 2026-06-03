@@ -1,55 +1,84 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}Pending Verifications{% endblock %}
+{% block title %}{% trans "Pending Verifications" %}{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h2>Pending Verifications</h2>
+    <h2>{% trans "Pending Verifications" %}</h2>
+
     <table>
         <thead>
             <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Account Type</th>
-                <th>Documents</th> <!-- Колонка для вывода документов -->
-                <th>Actions</th>
+                <th>{% trans "Username" %}</th>
+                <th>{% trans "Email" %}</th>
+                <th>{% trans "Account Type" %}</th>
+                <th>{% trans "Documents" %}</th>
+                <th>{% trans "Actions" %}</th>
             </tr>
         </thead>
+
         <tbody>
             {% for profile in pending_profiles %}
                 <tr>
                     <td>{{ profile.user.username }}</td>
                     <td>{{ profile.user.email }}</td>
                     <td>{{ profile.get_account_type_display }}</td>
+
                     <td>
                         {% with documents=profile.user.verificationdocument_set.all %}
                             {% if documents %}
                                 {% for document in documents %}
-                                    <p><strong>{{ document.get_document_type_display }}:</strong></p>
-                                    <p><a href="{{ document.document_file.url }}" target="_blank">View Document</a></p>
+                                    <p>
+                                        <strong>{{ document.get_document_type_display }}:</strong>
+                                    </p>
+
+                                    <p>
+                                        <a href="{{ document.document_file.url }}" target="_blank">
+                                            {% trans "View Document" %}
+                                        </a>
+                                    </p>
+
                                     {% if document.identity_document %}
-                                        <p><strong>Identity Document:</strong></p>
-                                        <p><a href="{{ document.identity_document.url }}" target="_blank">View Identity Document</a></p>
+                                        <p>
+                                            <strong>{% trans "Identity Document" %}:</strong>
+                                        </p>
+
+                                        <p>
+                                            <a href="{{ document.identity_document.url }}" target="_blank">
+                                                {% trans "View Identity Document" %}
+                                            </a>
+                                        </p>
                                     {% endif %}
+
                                     <hr>
                                 {% endfor %}
                             {% else %}
-                                <p>No documents available</p>
+                                <p>{% trans "No documents available" %}</p>
                             {% endif %}
                         {% endwith %}
                     </td>
+
                     <td>
-                        <!-- Форма для подтверждения профиля -->
                         <form method="POST" action="{% url 'approve_profile' profile.id %}">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-success">Approve</button>
+                            <button type="submit" class="btn btn-success">
+                                {% trans "Approve" %}
+                            </button>
                         </form>
-                        
-                        <!-- Форма для отклонения профиля -->
+
                         <form method="POST" action="{% url 'reject_profile' profile.id %}">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-danger">Reject</button>
+                            <button type="submit" class="btn btn-danger">
+                                {% trans "Reject" %}
+                            </button>
                         </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">
+                        {% trans "No pending verifications." %}
                     </td>
                 </tr>
             {% endfor %}

@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}{{ profile_user.username }} portfolio{% endblock %}
+{% block title %}
+  {% blocktrans with username=profile_user.username %}{{ username }}'s portfolio{% endblocktrans %}
+{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
@@ -10,25 +12,29 @@
 
 {% block content %}
 
+{% trans "Portfolio work" as portfolio_work_label %}
+
 <div class="portfolio-page">
   <div class="portfolio-shell">
 
     <div class="portfolio-header">
       <div>
         <a href="{% url 'profile' profile_user.username %}" class="portfolio-back">
-          ← Back to profile
+          ← {% trans "Back to profile" %}
         </a>
 
-        <h1>{{ profile_user.username }}'s portfolio</h1>
+        <h1>
+          {% blocktrans with username=profile_user.username %}{{ username }}'s portfolio{% endblocktrans %}
+        </h1>
 
         <p>
-          A curated collection of tattoo works, albums and styles.
+          {% trans "A curated collection of tattoo works, albums and styles." %}
         </p>
       </div>
 
       {% if is_owner %}
         <a href="{% url 'add_portfolio_work' profile_user.username %}" class="portfolio-btn">
-          + Add work
+          + {% trans "Add work" %}
         </a>
       {% endif %}
     </div>
@@ -43,81 +49,95 @@
         {% csrf_token %}
 
         <div>
-          <strong>Create album</strong>
-          <span>Group works by style, placement or project.</span>
+          <strong>{% trans "Create album" %}</strong>
+          <span>{% trans "Group works by style, placement or project." %}</span>
         </div>
 
-        <input type="text" name="title" placeholder="Album name, e.g. Realism" required>
-        <input type="text" name="style" placeholder="Style, optional">
-        <button type="submit">Create</button>
+        {% trans "Album name, e.g. Realism" as album_title_placeholder %}
+        {% trans "Style, optional" as album_style_placeholder %}
+
+        <input
+          type="text"
+          name="title"
+          placeholder="{{ album_title_placeholder }}"
+          required
+        >
+
+        <input
+          type="text"
+          name="style"
+          placeholder="{{ album_style_placeholder }}"
+        >
+
+        <button type="submit">{% trans "Create" %}</button>
       </form>
     {% endif %}
 
     {% if albums %}
-        <section class="portfolio-section">
-            <div class="portfolio-section-head">
-            <h2>Albums</h2>
-            <span>{{ albums|length }}</span>
-            </div>
+      <section class="portfolio-section">
+        <div class="portfolio-section-head">
+          <h2>{% trans "Albums" %}</h2>
+          <span>{{ albums|length }}</span>
+        </div>
 
-            <div class="portfolio-albums-grid">
-            {% for album in albums %}
-                <div class="portfolio-album-card portfolio-album-card-compact portfolio-card-with-menu">
-                <a
-                    href="{% url 'artist_portfolio_album' profile_user.username album.id %}"
-                    class="portfolio-album-open-link"
-                >
-                    <div class="portfolio-album-cover">
-                    {% if album.cover_image %}
-                        <img src="{{ album.cover_image.url }}" alt="{{ album.title }}">
-                    {% elif album.works.first %}
-                        <img src="{{ album.works.first.image.url }}" alt="{{ album.title }}">
-                    {% else %}
-                        <div class="portfolio-album-empty">No cover</div>
-                    {% endif %}
-                    </div>
-
-                    <div class="portfolio-album-info">
-                    <strong>{{ album.title }}</strong>
-
-                    {% if album.style %}
-                        <span>{{ album.style }}</span>
-                    {% endif %}
-
-                    <small>{{ album.works.count }} works</small>
-                    </div>
-                </a>
-
-                {% if is_owner %}
-                    <div class="portfolio-card-menu-wrap">
-                    <button type="button" class="portfolio-card-menu-btn">⋯</button>
-
-                    <div class="portfolio-card-menu">
-                        <a href="{% url 'edit_portfolio_album' profile_user.username album.id %}">
-                        Edit album
-                        </a>
-
-                        <form
-                        method="post"
-                        action="{% url 'delete_portfolio_album' profile_user.username album.id %}"
-                        class="portfolio-delete-form"
-                        data-confirm="Delete this album? Works will stay in All works."
-                        >
-                        {% csrf_token %}
-                        <button type="submit">Delete album</button>
-                        </form>
-                    </div>
-                    </div>
-                {% endif %}
+        <div class="portfolio-albums-grid">
+          {% for album in albums %}
+            <div class="portfolio-album-card portfolio-album-card-compact portfolio-card-with-menu">
+              <a
+                href="{% url 'artist_portfolio_album' profile_user.username album.id %}"
+                class="portfolio-album-open-link"
+              >
+                <div class="portfolio-album-cover">
+                  {% if album.cover_image %}
+                    <img src="{{ album.cover_image.url }}" alt="{{ album.title }}">
+                  {% elif album.works.first %}
+                    <img src="{{ album.works.first.image.url }}" alt="{{ album.title }}">
+                  {% else %}
+                    <div class="portfolio-album-empty">{% trans "No cover" %}</div>
+                  {% endif %}
                 </div>
-            {% endfor %}
+
+                <div class="portfolio-album-info">
+                  <strong>{{ album.title }}</strong>
+
+                  {% if album.style %}
+                    <span>{{ album.style }}</span>
+                  {% endif %}
+
+                  <small>{{ album.works.count }} {% trans "works" %}</small>
+                </div>
+              </a>
+
+              {% if is_owner %}
+                <div class="portfolio-card-menu-wrap">
+                  <button type="button" class="portfolio-card-menu-btn">⋯</button>
+
+                  <div class="portfolio-card-menu">
+                    <a href="{% url 'edit_portfolio_album' profile_user.username album.id %}">
+                      {% trans "Edit album" %}
+                    </a>
+
+                    <form
+                      method="post"
+                      action="{% url 'delete_portfolio_album' profile_user.username album.id %}"
+                      class="portfolio-delete-form"
+                      data-confirm="{% trans 'Delete this album? Works will stay in All works.' %}"
+                    >
+                      {% csrf_token %}
+                      <button type="submit">{% trans "Delete album" %}</button>
+                    </form>
+                  </div>
+                </div>
+              {% endif %}
             </div>
-        </section>
+          {% endfor %}
+        </div>
+      </section>
     {% endif %}
 
     <section class="portfolio-section">
       <div class="portfolio-section-head">
-        <h2>All works</h2>
+        <h2>{% trans "All works" %}</h2>
         <span>{{ works_count }}</span>
       </div>
 
@@ -125,11 +145,11 @@
         <div class="portfolio-works-grid">
           {% for work in works %}
             <article
-                class="portfolio-work-card portfolio-previewable"
-                data-full-image="{{ work.image.url }}"
-                data-title="{{ work.title|default:'Portfolio work' }}"
-                >
-                <img src="{{ work.image.url }}" alt="{{ work.title|default:'Portfolio work' }}">
+              class="portfolio-work-card portfolio-previewable"
+              data-full-image="{{ work.image.url }}"
+              data-title="{{ work.title|default:portfolio_work_label }}"
+            >
+              <img src="{{ work.image.url }}" alt="{{ work.title|default:portfolio_work_label }}">
 
               <div class="portfolio-work-overlay">
                 {% if work.title %}
@@ -147,19 +167,19 @@
 
               {% if is_owner %}
                 <div class="portfolio-card-menu-wrap">
-                    <button type="button" class="portfolio-card-menu-btn">⋯</button>
+                  <button type="button" class="portfolio-card-menu-btn">⋯</button>
 
-                    <div class="portfolio-card-menu">
+                  <div class="portfolio-card-menu">
                     <form
-                        method="post"
-                        action="{% url 'delete_portfolio_work' profile_user.username work.id %}"
-                        class="portfolio-delete-form"
-                        data-confirm="Delete this portfolio work?"
+                      method="post"
+                      action="{% url 'delete_portfolio_work' profile_user.username work.id %}"
+                      class="portfolio-delete-form"
+                      data-confirm="{% trans 'Delete this portfolio work?' %}"
                     >
-                        {% csrf_token %}
-                        <button type="submit">Delete work</button>
+                      {% csrf_token %}
+                      <button type="submit">{% trans "Delete work" %}</button>
                     </form>
-                    </div>
+                  </div>
                 </div>
               {% endif %}
             </article>
@@ -167,15 +187,16 @@
         </div>
       {% else %}
         <div class="portfolio-empty">
-          <h3>No portfolio works yet</h3>
+          <h3>{% trans "No portfolio works yet" %}</h3>
 
           {% if is_owner %}
-            <p>Add your best works to build a professional portfolio.</p>
+            <p>{% trans "Add your best works to build a professional portfolio." %}</p>
+
             <a href="{% url 'add_portfolio_work' profile_user.username %}" class="portfolio-btn">
-              Add first work
+              {% trans "Add first work" %}
             </a>
           {% else %}
-            <p>This artist has not added portfolio works yet.</p>
+            <p>{% trans "This artist has not added portfolio works yet." %}</p>
           {% endif %}
         </div>
       {% endif %}
@@ -183,8 +204,19 @@
 
   </div>
 </div>
+
+{% trans "Confirm deletion" as confirm_deletion_text %}
+{% trans "Cancel" as cancel_text %}
+{% trans "Delete" as delete_text %}
+{% trans "Delete this item?" as delete_this_item_text %}
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
+    const confirmDeletionText = "{{ confirm_deletion_text|escapejs }}";
+    const cancelText = "{{ cancel_text|escapejs }}";
+    const deleteText = "{{ delete_text|escapejs }}";
+    const deleteThisItemText = "{{ delete_this_item_text|escapejs }}";
+
     function closeAllPortfolioMenus() {
       document.querySelectorAll(".portfolio-card-menu-wrap.open").forEach((item) => {
         item.classList.remove("open");
@@ -201,17 +233,17 @@
 
           <div class="portfolio-confirm-icon">!</div>
 
-          <h3>Confirm deletion</h3>
+          <h3>${confirmDeletionText}</h3>
 
           <p>${message}</p>
 
           <div class="portfolio-confirm-actions">
             <button type="button" class="portfolio-confirm-cancel">
-              Cancel
+              ${cancelText}
             </button>
 
             <button type="button" class="portfolio-confirm-delete">
-              Delete
+              ${deleteText}
             </button>
           </div>
         </div>
@@ -326,7 +358,7 @@
       form.addEventListener("submit", (e) => {
         e.preventDefault();
 
-        const message = form.dataset.confirm || "Delete this item?";
+        const message = form.dataset.confirm || deleteThisItemText;
 
         openPortfolioConfirm(message, () => {
           form.submit();

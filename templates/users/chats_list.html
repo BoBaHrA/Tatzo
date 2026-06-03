@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Chats{% endblock %}
+{% block title %}{% trans "Chats" %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
@@ -16,8 +16,8 @@
 
     <header class="chat-header">
       <div>
-        <h1>Chats</h1>
-        <p>Your conversations with artists and users.</p>
+        <h1>{% trans "Chats" %}</h1>
+        <p>{% trans "Your conversations with artists and users." %}</p>
       </div>
     </header>
 
@@ -46,11 +46,16 @@
                 <div class="chat-list-preview">
                   {% if row.last_message %}
                     {% if row.last_message.sender == request.user %}
-                      <span class="chat-you">You:</span>
+                      <span class="chat-you">{% trans "You:" %}</span>
                     {% endif %}
-                    {{ row.last_message.content|truncatechars:90 }}
+
+                    {% if row.last_message.content %}
+                      {{ row.last_message.content|truncatechars:90 }}
+                    {% else %}
+                      {% trans "Attachment" %}
+                    {% endif %}
                   {% else %}
-                    No messages yet.
+                    {% trans "No messages yet." %}
                   {% endif %}
                 </div>
               </div>
@@ -65,8 +70,8 @@
         </div>
       {% else %}
         <div class="chat-empty">
-          <h3>No chats yet</h3>
-          <p>Open someone’s profile and click Message to start a conversation.</p>
+          <h3>{% trans "No chats yet" %}</h3>
+          <p>{% trans "Open someone’s profile and click Message to start a conversation." %}</p>
         </div>
       {% endif %}
     </section>

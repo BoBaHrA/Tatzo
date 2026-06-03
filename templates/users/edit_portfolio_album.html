@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Edit album{% endblock %}
+{% block title %}{% trans "Edit album" %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
@@ -14,13 +14,13 @@
     <div class="portfolio-header">
       <div>
         <a href="{% url 'artist_portfolio' request.user.username %}" class="portfolio-back">
-          ← Back to portfolio
+          ← {% trans "Back to portfolio" %}
         </a>
 
-        <h1>Edit album</h1>
+        <h1>{% trans "Edit album" %}</h1>
 
         <p>
-          Update album name, style, description or cover image.
+          {% trans "Update album name, style, description or cover image." %}
         </p>
       </div>
     </div>
@@ -29,22 +29,22 @@
       {% csrf_token %}
 
       <div class="portfolio-field">
-        <label for="{{ form.title.id_for_label }}">Album name</label>
+        <label for="{{ form.title.id_for_label }}">{% trans "Album name" %}</label>
         {{ form.title }}
       </div>
 
       <div class="portfolio-field">
-        <label for="{{ form.style.id_for_label }}">Style</label>
+        <label for="{{ form.style.id_for_label }}">{% trans "Style" %}</label>
         {{ form.style }}
       </div>
 
       <div class="portfolio-field">
-        <label for="{{ form.description.id_for_label }}">Description</label>
+        <label for="{{ form.description.id_for_label }}">{% trans "Description" %}</label>
         {{ form.description }}
       </div>
 
       <div class="portfolio-field">
-        <label for="{{ form.cover_image.id_for_label }}">Cover image</label>
+        <label for="{{ form.cover_image.id_for_label }}">{% trans "Cover image" %}</label>
         {{ form.cover_image }}
       </div>
 
@@ -55,7 +55,7 @@
       {% endif %}
 
       <button type="submit" class="portfolio-btn portfolio-btn-full">
-        Save changes
+        {% trans "Save changes" %}
       </button>
     </form>
 

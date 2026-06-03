@@ -1,0 +1,1807 @@
+# French translations for Tatzo.
+# Copyright (C) 2026 Tatzo
+# This file is distributed under the same license as the Tatzo package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Tatzo\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-03 17:53+0200\n"
+"PO-Revision-Date: 2026-05-27 09:40+0200\n"
+"Last-Translator: Vladimir Procopisin\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: .\mytattooapp\settings.py:101
+msgid "English"
+msgstr "English"
+
+#: .\mytattooapp\settings.py:102
+msgid "Français"
+msgstr "Français"
+
+#: .\mytattooapp\settings.py:103
+msgid "Русский"
+msgstr "Russe"
+
+#: .\posts\templates\posts\bookmarks.html:4
+#: .\posts\templates\posts\bookmarks.html:13
+#: .\posts\templates\posts\bookmarks.html:18
+#: .\templates\partials\sidebar.html:82 .\templates\partials\sidebar.html:83
+msgid "Bookmarks"
+msgstr "Favoris"
+
+#: .\posts\templates\posts\bookmarks.html:14 .\templates\home.html:14
+#: .\templates\home.html:367 .\templates\users\profile.html:293
+msgid "Write a comment..."
+msgstr "Écrire un commentaire..."
+
+#: .\posts\templates\posts\bookmarks.html:19
+msgid "Your saved posts are stored here."
+msgstr "Vos publications enregistrées sont stockées ici."
+
+#: .\posts\templates\posts\bookmarks.html:35
+msgid "Saved"
+msgstr "Enregistré"
+
+#: .\posts\templates\posts\bookmarks.html:38
+msgid "No bookmarks yet"
+msgstr "Aucun favori pour le moment"
+
+#: .\posts\templates\posts\bookmarks.html:41
+msgid "Save posts you like and they will appear here."
+msgstr "Enregistrez les publications que vous aimez et elles apparaîtront ici."
+
+#: .\posts\templates\posts\bookmarks.html:45
+msgid "Go to feed"
+msgstr "Aller au fil"
+
+#: .\posts\templates\posts\bookmarks.html:77 .\templates\home.html:183
+#: .\templates\home.html:362 .\templates\users\chat_thread.html:103
+#: .\templates\users\profile.html:301
+msgid "Send"
+msgstr "Envoyer"
+
+#: .\templates\home.html:4 .\templates\partials\sidebar.html:28
+#: .\templates\partials\sidebar.html:29
+msgid "Home"
+msgstr "Accueil"
+
+#: .\templates\home.html:12
+msgid "Got something new? Share it!"
+msgstr "Quelque chose de nouveau ? Partagez-le !"
+
+#: .\templates\home.html:13 .\templates\users\chat_thread.html:75
+#: .\templates\users\chat_thread.html:76
+msgid "Add file"
+msgstr "Ajouter un fichier"
+
+#: .\templates\home.html:15
+msgid "Update your comment..."
+msgstr "Modifiez votre commentaire..."
+
+#: .\templates\home.html:16
+msgid "Describe the problem (optional)..."
+msgstr "Décrivez le problème (optionnel)..."
+
+#: .\templates\home.html:49
+msgid "Grid"
+msgstr "Grille"
+
+#: .\templates\home.html:53
+msgid "Carousel"
+msgstr "Carrousel"
+
+#: .\templates\home.html:73
+msgid "Disable comments"
+msgstr "Désactiver les commentaires"
+
+#: .\templates\home.html:79
+msgid "Mark as Ad"
+msgstr "Marquer comme publicité"
+
+#: .\templates\home.html:83
+msgid "Location"
+msgstr "Localisation"
+
+#: .\templates\home.html:84
+msgid "Add Location"
+msgstr "Ajouter un lieu"
+
+#: .\templates\home.html:88
+msgid "Poll"
+msgstr "Sondage"
+
+#: .\templates\home.html:89
+msgid "Create Poll"
+msgstr "Créer un sondage"
+
+#: .\templates\home.html:93
+msgid "Schedule"
+msgstr "Planification"
+
+#: .\templates\home.html:94
+msgid "Schedule Post"
+msgstr "Programmer la publication"
+
+#: .\templates\home.html:99
+msgid "Co-authors"
+msgstr "Co-auteurs"
+
+#: .\templates\home.html:100
+msgid "Invite Co-authors"
+msgstr "Inviter des co-auteurs"
+
+#: .\templates\home.html:104
+msgid "Who can see"
+msgstr "Qui peut voir"
+
+#: .\templates\home.html:105
+msgid "Who can see this"
+msgstr "Qui peut voir ceci"
+
+#: .\templates\home.html:109 .\templates\partials\sidebar.html:127
+msgid "Settings"
+msgstr "Paramètres"
+
+#: .\templates\home.html:110
+msgid "Additional options"
+msgstr "Options supplémentaires"
+
+#: .\templates\home.html:117 .\templates\home.html:353
+msgid "Post"
+msgstr "Publier"
+
+#: .\templates\home.html:127
+msgid "No posts available."
+msgstr "Aucune publication disponible."
+
+#: .\templates\home.html:133
+msgid "Recommendations"
+msgstr "Recommandations"
+
+#: .\templates\home.html:136 .\templates\home.html:145
+#: .\templates\users\search.html:114 .\users\models.py:380
+msgid "User"
+msgstr "Utilisateur"
+
+#: .\templates\home.html:140 .\templates\home.html:149
+#: .\templates\users\profile.html:74 .\templates\users\profile.html:347
+msgid "Follow"
+msgstr "Suivre"
+
+#: .\templates\home.html:158
+msgid "Logout"
+msgstr "Se déconnecter"
+
+#: .\templates\home.html:161 .\templates\registration\login.html:4
+msgid "Login"
+msgstr "Connexion"
+
+#: .\templates\home.html:162 .\users\templates\users\signup.html:4
+#: .\users\templates\users\signup.html:121
+msgid "Sign up"
+msgstr "Inscription"
+
+#: .\templates\home.html:192
+msgid "Edit comment"
+msgstr "Modifier le commentaire"
+
+#: .\templates\home.html:206 .\templates\home.html:231
+#: .\templates\home.html:256 .\templates\home.html:283
+#: .\templates\home.html:310 .\templates\users\artist_portfolio.html:209
+#: .\templates\users\artist_portfolio_album.html:127
+#: .\templates\users\report_problem.html:71
+#: .\users\templates\users\edit_profile.html:188
+#: .\users\templates\users\edit_profile.html:222
+msgid "Cancel"
+msgstr "Annuler"
+
+#: .\templates\home.html:210 .\users\templates\users\edit_profile.html:226
+#: .\users\templates\users\password_reset_confirm.html:26
+msgid "Save"
+msgstr "Enregistrer"
+
+#: .\templates\home.html:219 .\templates\users\moderation_dashboard.html:416
+msgid "Delete comment"
+msgstr "Supprimer le commentaire"
+
+#: .\templates\home.html:225
+msgid "Are you sure you want to delete this comment?"
+msgstr "Voulez-vous vraiment supprimer ce commentaire ?"
+
+#: .\templates\home.html:235 .\templates\home.html:260
+#: .\templates\home.html:356 .\templates\partials\comment_item.html:57
+#: .\templates\partials\comment_item.html:138
+#: .\templates\users\artist_portfolio.html:210
+#: .\templates\users\artist_portfolio_album.html:128
+msgid "Delete"
+msgstr "Supprimer"
+
+#: .\templates\home.html:244 .\templates\partials\post_card.html:56
+#: .\templates\users\moderation_dashboard.html:338
+msgid "Delete post"
+msgstr "Supprimer la publication"
+
+#: .\templates\home.html:250
+msgid "Are you sure you want to delete this post?"
+msgstr "Voulez-vous vraiment supprimer cette publication ?"
+
+#: .\templates\home.html:269 .\templates\partials\post_card.html:60
+msgid "Report post"
+msgstr "Signaler la publication"
+
+#: .\templates\home.html:287 .\templates\home.html:314
+#: .\templates\home.html:361 .\templates\users\report_problem.html:75
+msgid "Send report"
+msgstr "Envoyer le signalement"
+
+#: .\templates\home.html:296
+msgid "Report comment"
+msgstr "Signaler le commentaire"
+
+#: .\templates\home.html:324 .\templates\users\coming_soon.html:4
+#: .\templates\users\coming_soon.html:20 .\users\views.py:1342
+msgid "Coming soon"
+msgstr "Bientôt disponible"
+
+#: .\templates\home.html:327
+msgid ""
+"Sharing posts will be available soon. We’re still working on this feature."
+msgstr ""
+"Le partage des publications sera bientôt disponible. Nous travaillons encore "
+"sur cette fonctionnalité."
+
+#: .\templates\home.html:331
+msgid "Got it"
+msgstr "Compris"
+
+#: .\templates\home.html:341
+msgid "Success"
+msgstr "Succès"
+
+#: .\templates\home.html:342
+msgid "Action failed"
+msgstr "Action échouée"
+
+#: .\templates\home.html:343
+msgid "Info"
+msgstr "Info"
+
+#: .\templates\home.html:344
+msgid "Done."
+msgstr "Terminé."
+
+#: .\templates\home.html:346
+msgid "Unsupported file"
+msgstr "Fichier non pris en charge"
+
+#: .\templates\home.html:347
+msgid "Remove file"
+msgstr "Supprimer le fichier"
+
+#: .\templates\home.html:348
+msgid "Open preview"
+msgstr "Ouvrir l’aperçu"
+
+#: .\templates\home.html:349
+msgid "Preview"
+msgstr "Aperçu"
+
+#: .\templates\home.html:350
+msgid "Media"
+msgstr "Média"
+
+#: .\templates\home.html:352
+msgid "Posting..."
+msgstr "Publication..."
+
+#: .\templates\home.html:354
+msgid "Post could not be created."
+msgstr "La publication n’a pas pu être créée."
+
+#: .\templates\home.html:357
+msgid "Deleting..."
+msgstr "Suppression..."
+
+#: .\templates\home.html:358
+msgid "Delete failed."
+msgstr "La suppression a échoué."
+
+#: .\templates\home.html:359
+msgid "Post deleted."
+msgstr "Publication supprimée."
+
+#: .\templates\home.html:363
+msgid "Sending..."
+msgstr "Envoi..."
+
+#: .\templates\home.html:364
+msgid "Report failed."
+msgstr "Le signalement a échoué."
+
+#: .\templates\home.html:365
+msgid "Report sent."
+msgstr "Signalement envoyé."
+
+#: .\templates\home.html:368
+msgid "Edit comment:"
+msgstr "Modifier le commentaire :"
+
+#: .\templates\home.html:369
+msgid "Delete this comment?"
+msgstr "Supprimer ce commentaire ?"
+
+#: .\templates\home.html:370
+msgid "Comments are disabled for this post."
+msgstr "Les commentaires sont désactivés pour cette publication."
+
+#: .\templates\home.html:372
+msgid "Hide replies"
+msgstr "Masquer les réponses"
+
+#: .\templates\home.html:373
+msgid "View replies"
+msgstr "Voir les réponses"
+
+#: .\templates\partials\chat_message.html:18
+msgid "Image attachment"
+msgstr "Image jointe"
+
+#: .\templates\partials\chat_message.html:19
+#: .\templates\users\chats_list.html:55
+#: .\templates\users\report_problem.html:56 .\users\forms.py:270
+#: .\users\models.py:392
+msgid "Attachment"
+msgstr "Pièce jointe"
+
+#: .\templates\partials\chat_message.html:34
+msgid "Video attachment"
+msgstr "Vidéo jointe"
+
+#: .\templates\partials\chat_message.html:51
+msgid "Open file"
+msgstr "Ouvrir le fichier"
+
+#: .\templates\partials\comment_item.html:7
+#: .\templates\partials\comment_item.html:88
+#: .\templates\partials\post_card.html:3
+msgid "User Avatar"
+msgstr "Avatar de l'utilisateur"
+
+#: .\templates\partials\comment_item.html:32
+#: .\templates\partials\comment_item.html:113
+#: .\templates\partials\post_card.html:4
+msgid "Like"
+msgstr "J'aime"
+
+#: .\templates\partials\comment_item.html:45
+#: .\templates\partials\comment_item.html:126
+msgid "Reply"
+msgstr "Répondre"
+
+#: .\templates\partials\comment_item.html:54
+#: .\templates\partials\comment_item.html:135
+msgid "Edit"
+msgstr "Modifier"
+
+#: .\templates\partials\comment_item.html:61
+#: .\templates\partials\comment_item.html:142
+msgid "Report"
+msgstr "Signaler"
+
+#: .\templates\partials\comment_item.html:76
+#, python-format
+msgid ""
+"\n"
+"        View reply (%(reply_count)s)\n"
+"      "
+msgid_plural ""
+"\n"
+"        View replies (%(reply_count)s)\n"
+"      "
+msgstr[0] ""
+"\n"
+"        Voir la réponse (%(reply_count)s)\n"
+"      "
+msgstr[1] ""
+"\n"
+"        Voir les réponses (%(reply_count)s)\n"
+"      "
+
+#: .\templates\partials\comments_list.html:6
+msgid "No comments yet."
+msgstr "Aucun commentaire pour le moment."
+
+#: .\templates\partials\post_card.html:5
+msgid "Comment"
+msgstr "Commentaire"
+
+#: .\templates\partials\post_card.html:6
+msgid "Share"
+msgstr "Partager"
+
+#: .\templates\partials\post_card.html:7
+msgid "Bookmark"
+msgstr "Ajouter aux favoris"
+
+#: .\templates\partials\post_card.html:8
+msgid "Bookmarked"
+msgstr "Ajouté aux favoris"
+
+#: .\templates\partials\post_card.html:71
+msgid "Ad"
+msgstr "Publicité"
+
+#: .\templates\partials\sidebar.html:10 .\templates\partials\sidebar.html:16
+#: .\templates\partials\sidebar.html:21
+msgid "My Profile"
+msgstr "Mon profil"
+
+#: .\templates\partials\sidebar.html:38 .\templates\partials\sidebar.html:39
+#: .\templates\users\search.html:4 .\templates\users\search.html:19
+msgid "Search"
+msgstr "Recherche"
+
+#: .\templates\partials\sidebar.html:48 .\templates\partials\sidebar.html:49
+#: .\users\views.py:1315
+msgid "Maps"
+msgstr "Cartes"
+
+#: .\templates\partials\sidebar.html:58 .\templates\partials\sidebar.html:59
+#: .\templates\users\chats_list.html:4 .\templates\users\chats_list.html:19
+msgid "Chats"
+msgstr "Messages"
+
+#: .\templates\partials\sidebar.html:72 .\templates\partials\sidebar.html:73
+#: .\users\views.py:1320
+msgid "Calendar"
+msgstr "Calendrier"
+
+#: .\templates\partials\sidebar.html:92 .\templates\partials\sidebar.html:93
+#: .\users\templates\users\contests.html:4 .\users\views.py:1335
+msgid "Contests"
+msgstr "Concours"
+
+#: .\templates\partials\sidebar.html:102 .\templates\partials\sidebar.html:103
+#: .\users\views.py:1325
+msgid "Clean slate"
+msgstr "Nouveau départ"
+
+#: .\templates\partials\sidebar.html:112 .\templates\partials\sidebar.html:113
+#: .\users\views.py:1330
+msgid "Notifications"
+msgstr "Notifications"
+
+#: .\templates\partials\sidebar.html:121 .\templates\partials\sidebar.html:122
+msgid "More"
+msgstr "Plus"
+
+#: .\templates\partials\sidebar.html:135
+msgid "Language"
+msgstr "Langue"
+
+#: .\templates\partials\sidebar.html:154
+#: .\templates\users\report_problem.html:4
+#: .\templates\users\report_problem.html:21
+msgid "Report a problem"
+msgstr "Signaler un problème"
+
+#: .\templates\partials\sidebar.html:158
+msgid "Your activity helps us prioritize new features."
+msgstr "Votre activité nous aide à prioriser les nouvelles fonctionnalités."
+
+#: .\templates\registration\logged_out.html:4
+msgid "Logged out"
+msgstr "Déconnexion"
+
+#: .\templates\registration\logged_out.html:7
+msgid "You have been logged out."
+msgstr "Vous avez été déconnecté."
+
+#: .\templates\registration\logged_out.html:8
+msgid "Return to Home"
+msgstr "Retour à l’accueil"
+
+#: .\templates\registration\login.html:12
+msgid "Enter your username"
+msgstr "Entrez votre nom d'utilisateur"
+
+#: .\templates\registration\login.html:13
+#: .\users\templates\users\signup.html:14
+msgid "Enter your password"
+msgstr "Entrez votre mot de passe"
+
+#: .\templates\registration\login.html:20
+#: .\users\templates\users\signup.html:24
+msgid "Welcome"
+msgstr "Bienvenue"
+
+#: .\templates\registration\login.html:26
+#: .\users\templates\users\edit_profile.html:32
+#: .\users\templates\users\pending_profiles.html:13
+#: .\users\templates\users\pending_verifications.html:13
+#: .\users\templates\users\review_profile.html:11
+#: .\users\templates\users\signup.html:34
+msgid "Username"
+msgstr "Nom d'utilisateur"
+
+#: .\templates\registration\login.html:37
+#: .\users\templates\users\signup.html:60
+msgid "Password"
+msgstr "Mot de passe"
+
+#: .\templates\registration\login.html:48
+msgid "Log in"
+msgstr "Se connecter"
+
+#: .\templates\registration\login.html:53
+msgid "Create account"
+msgstr "Créer un compte"
+
+#: .\templates\registration\login.html:55
+msgid "Forgot password?"
+msgstr "Mot de passe oublié ?"
+
+#: .\templates\users\add_portfolio_work.html:4
+#: .\templates\users\add_portfolio_work.html:23
+msgid "Add portfolio work"
+msgstr "Ajouter un travail au portfolio"
+
+#: .\templates\users\add_portfolio_work.html:12
+msgid "Preview image"
+msgstr "Aperçu de l'image"
+
+#: .\templates\users\add_portfolio_work.html:20
+#: .\templates\users\artist_portfolio_album.html:20
+#: .\templates\users\edit_portfolio_album.html:17
+msgid "Back to portfolio"
+msgstr "Retour au portfolio"
+
+#: .\templates\users\add_portfolio_work.html:26
+msgid "Upload a tattoo work and optionally organize it into an album."
+msgstr ""
+"Importez un travail de tatouage et organisez-le éventuellement dans un album."
+
+#: .\templates\users\add_portfolio_work.html:35
+msgid "Images"
+msgstr "Images"
+
+#: .\templates\users\add_portfolio_work.html:39
+msgid ""
+"You can select multiple images at once. Each image will become a separate "
+"portfolio work."
+msgstr ""
+"Vous pouvez sélectionner plusieurs images à la fois. Chaque image deviendra "
+"un travail de portfolio séparé."
+
+#: .\templates\users\add_portfolio_work.html:46
+#: .\templates\users\report_problem.html:42 .\users\forms.py:268
+#: .\users\models.py:388
+msgid "Title"
+msgstr "Titre"
+
+#: .\templates\users\add_portfolio_work.html:51
+msgid "Existing album"
+msgstr "Album existant"
+
+#: .\templates\users\add_portfolio_work.html:56
+msgid "New album"
+msgstr "Nouvel album"
+
+#: .\templates\users\add_portfolio_work.html:61
+#: .\templates\users\edit_portfolio_album.html:37
+msgid "Style"
+msgstr "Style"
+
+#: .\templates\users\add_portfolio_work.html:66
+msgid "Body placement"
+msgstr "Emplacement sur le corps"
+
+#: .\templates\users\add_portfolio_work.html:71
+#: .\templates\users\edit_portfolio_album.html:42
+msgid "Description"
+msgstr "Description"
+
+#: .\templates\users\add_portfolio_work.html:82
+msgid "Save work"
+msgstr "Enregistrer le travail"
+
+#: .\templates\users\artist_portfolio.html:5
+#: .\templates\users\artist_portfolio.html:27
+#, python-format
+msgid "%(username)s's portfolio"
+msgstr "Portfolio de %(username)s"
+
+#: .\templates\users\artist_portfolio.html:15
+#: .\templates\users\artist_portfolio_album.html:12
+msgid "Portfolio work"
+msgstr "Travail du portfolio"
+
+#: .\templates\users\artist_portfolio.html:23
+#: .\templates\users\following_list.html:18
+msgid "Back to profile"
+msgstr "Retour au profil"
+
+#: .\templates\users\artist_portfolio.html:31
+msgid "A curated collection of tattoo works, albums and styles."
+msgstr ""
+"Une collection sélectionnée de travaux de tatouage, d'albums et de styles."
+
+#: .\templates\users\artist_portfolio.html:37
+#: .\templates\users\artist_portfolio_album.html:44
+#: .\templates\users\artist_portfolio_album.html:114
+msgid "Add work"
+msgstr "Ajouter un travail"
+
+#: .\templates\users\artist_portfolio.html:52
+msgid "Create album"
+msgstr "Créer un album"
+
+#: .\templates\users\artist_portfolio.html:53
+msgid "Group works by style, placement or project."
+msgstr "Regroupez les travaux par style, emplacement ou projet."
+
+#: .\templates\users\artist_portfolio.html:56
+msgid "Album name, e.g. Realism"
+msgstr "Nom de l'album, par ex. Réalisme"
+
+#: .\templates\users\artist_portfolio.html:57
+msgid "Style, optional"
+msgstr "Style, optionnel"
+
+#: .\templates\users\artist_portfolio.html:72
+msgid "Create"
+msgstr "Créer"
+
+#: .\templates\users\artist_portfolio.html:79
+msgid "Albums"
+msgstr "Albums"
+
+#: .\templates\users\artist_portfolio.html:96
+msgid "No cover"
+msgstr "Aucune couverture"
+
+#: .\templates\users\artist_portfolio.html:107
+msgid "works"
+msgstr "travaux"
+
+#: .\templates\users\artist_portfolio.html:117
+#: .\templates\users\edit_portfolio_album.html:4
+#: .\templates\users\edit_portfolio_album.html:20
+msgid "Edit album"
+msgstr "Modifier l'album"
+
+#: .\templates\users\artist_portfolio.html:124
+msgid "Delete this album? Works will stay in All works."
+msgstr "Supprimer cet album ? Les travaux resteront dans Tous les travaux."
+
+#: .\templates\users\artist_portfolio.html:127
+msgid "Delete album"
+msgstr "Supprimer l'album"
+
+#: .\templates\users\artist_portfolio.html:140
+msgid "All works"
+msgstr "Tous les travaux"
+
+#: .\templates\users\artist_portfolio.html:177
+#: .\templates\users\artist_portfolio_album.html:77
+msgid "Delete this portfolio work?"
+msgstr "Supprimer ce travail du portfolio ?"
+
+#: .\templates\users\artist_portfolio.html:180
+#: .\templates\users\artist_portfolio_album.html:80
+msgid "Delete work"
+msgstr "Supprimer le travail"
+
+#: .\templates\users\artist_portfolio.html:190
+msgid "No portfolio works yet"
+msgstr "Aucun travail dans le portfolio pour le moment"
+
+#: .\templates\users\artist_portfolio.html:193
+msgid "Add your best works to build a professional portfolio."
+msgstr "Ajoutez vos meilleurs travaux pour créer un portfolio professionnel."
+
+#: .\templates\users\artist_portfolio.html:196
+msgid "Add first work"
+msgstr "Ajouter le premier travail"
+
+#: .\templates\users\artist_portfolio.html:199
+msgid "This artist has not added portfolio works yet."
+msgstr "Cet artiste n'a pas encore ajouté de travaux à son portfolio."
+
+#: .\templates\users\artist_portfolio.html:208
+#: .\templates\users\artist_portfolio_album.html:126
+msgid "Confirm deletion"
+msgstr "Confirmer la suppression"
+
+#: .\templates\users\artist_portfolio.html:211
+#: .\templates\users\artist_portfolio_album.html:129
+msgid "Delete this item?"
+msgstr "Supprimer cet élément ?"
+
+#: .\templates\users\artist_portfolio_album.html:29
+#, python-format
+msgid ""
+"\n"
+"              %(style)s tattoo works by %(username)s.\n"
+"            "
+msgstr ""
+"\n"
+"              Travaux de tatouage %(style)s par %(username)s.\n"
+"            "
+
+#: .\templates\users\artist_portfolio_album.html:35
+#, python-format
+msgid ""
+"\n"
+"              Portfolio album by %(username)s.\n"
+"            "
+msgstr ""
+"\n"
+"              Album de portfolio par %(username)s.\n"
+"            "
+
+#: .\templates\users\artist_portfolio_album.html:51
+msgid "Works"
+msgstr "Travaux"
+
+#: .\templates\users\artist_portfolio_album.html:108
+msgid "No works in this album yet"
+msgstr "Aucun travail dans cet album pour le moment"
+
+#: .\templates\users\artist_portfolio_album.html:111
+msgid "Add works to this album to build a stronger portfolio."
+msgstr "Ajoutez des travaux à cet album pour créer un portfolio plus solide."
+
+#: .\templates\users\artist_portfolio_album.html:117
+msgid "This album has no works yet."
+msgstr "Cet album ne contient aucun travail pour le moment."
+
+#: .\templates\users\chat_thread.html:5
+#, python-format
+msgid "Chat with %(username)s"
+msgstr "Conversation avec %(username)s"
+
+#: .\templates\users\chat_thread.html:21
+msgid "Back to chats"
+msgstr "Retour aux messages"
+
+#: .\templates\users\chat_thread.html:37
+#: .\templates\users\following_list.html:48 .\templates\users\profile.html:40
+#: .\templates\users\search.html:110
+msgid "Tattoo Artist"
+msgstr "Tatoueur"
+
+#: .\templates\users\chat_thread.html:39
+#: .\templates\users\following_list.html:50 .\templates\users\profile.html:55
+msgid "Community profile"
+msgstr "Profil communautaire"
+
+#: .\templates\users\chat_thread.html:52
+msgid "No messages yet"
+msgstr "Aucun message pour le moment"
+
+#: .\templates\users\chat_thread.html:54
+#, python-format
+msgid ""
+"\n"
+"                Start the conversation with %(username)s.\n"
+"              "
+msgstr ""
+"\n"
+"                Démarrez la conversation avec %(username)s.\n"
+"              "
+
+#: .\templates\users\chat_thread.html:90
+msgid "Write a message..."
+msgstr "Écrire un message..."
+
+#: .\templates\users\chat_thread.html:111
+msgid "Chat media"
+msgstr "Média du message"
+
+#: .\templates\users\chat_thread.html:112
+msgid "Message was not sent."
+msgstr "Le message n'a pas été envoyé."
+
+#: .\templates\users\chats_list.html:20
+msgid "Your conversations with artists and users."
+msgstr "Vos conversations avec les tatoueurs et les utilisateurs."
+
+#: .\templates\users\chats_list.html:49
+msgid "You:"
+msgstr "Vous :"
+
+#: .\templates\users\chats_list.html:58
+msgid "No messages yet."
+msgstr "Aucun message pour le moment."
+
+#: .\templates\users\chats_list.html:73
+msgid "No chats yet"
+msgstr "Aucune conversation pour le moment"
+
+#: .\templates\users\chats_list.html:74
+msgid "Open someone’s profile and click Message to start a conversation."
+msgstr ""
+"Ouvrez le profil d'une personne et cliquez sur Message pour démarrer une "
+"conversation."
+
+#: .\templates\users\coming_soon.html:30
+msgid ""
+"Your activity helps us prioritize new features. The more users interact with "
+"Tatzo, the faster these sections will grow."
+msgstr ""
+"Votre activité nous aide à prioriser les nouvelles fonctionnalités. Plus les "
+"utilisateurs interagissent avec Tatzo, plus ces sections se développeront "
+"rapidement."
+
+#: .\templates\users\coming_soon.html:34
+msgid "Back to feed"
+msgstr "Retour au fil"
+
+#: .\templates\users\edit_portfolio_album.html:23
+msgid "Update album name, style, description or cover image."
+msgstr ""
+"Modifiez le nom de l'album, le style, la description ou l'image de "
+"couverture."
+
+#: .\templates\users\edit_portfolio_album.html:32
+msgid "Album name"
+msgstr "Nom de l'album"
+
+#: .\templates\users\edit_portfolio_album.html:47
+msgid "Cover image"
+msgstr "Image de couverture"
+
+#: .\templates\users\edit_portfolio_album.html:58
+#: .\users\templates\users\edit_profile.html:184
+msgid "Save changes"
+msgstr "Enregistrer les modifications"
+
+#: .\templates\users\following_list.html:5
+#, python-format
+msgid "%(username)s following"
+msgstr "Abonnements de %(username)s"
+
+#: .\templates\users\following_list.html:22
+#, python-format
+msgid "%(username)s is following"
+msgstr "%(username)s suit"
+
+#: .\templates\users\following_list.html:25
+msgid "Profiles followed by this user."
+msgstr "Profils suivis par cet utilisateur."
+
+#: .\templates\users\following_list.html:57
+msgid "No following yet"
+msgstr "Aucun abonnement pour le moment"
+
+#: .\templates\users\following_list.html:58
+msgid "This user is not following anyone yet."
+msgstr "Cet utilisateur ne suit encore personne."
+
+#: .\templates\users\moderation_dashboard.html:4
+#: .\templates\users\moderation_dashboard.html:20
+msgid "Moderation dashboard"
+msgstr "Tableau de modération"
+
+#: .\templates\users\moderation_dashboard.html:17
+msgid "Back to Tatzo"
+msgstr "Retour à Tatzo"
+
+#: .\templates\users\moderation_dashboard.html:23
+msgid ""
+"Review artist verification requests, reports and platform safety issues."
+msgstr ""
+"Examinez les demandes de vérification des artistes, les signalements et les "
+"problèmes de sécurité de la plateforme."
+
+#: .\templates\users\moderation_dashboard.html:30
+msgid "Document requests"
+msgstr "Demandes avec documents"
+
+#: .\templates\users\moderation_dashboard.html:35
+msgid "Manual reviews"
+msgstr "Vérifications manuelles"
+
+#: .\templates\users\moderation_dashboard.html:40
+#: .\templates\users\moderation_dashboard.html:58
+#: .\templates\users\moderation_dashboard.html:278
+msgid "Post reports"
+msgstr "Signalements de publications"
+
+#: .\templates\users\moderation_dashboard.html:45
+#: .\templates\users\moderation_dashboard.html:63
+#: .\templates\users\moderation_dashboard.html:356
+msgid "Comment reports"
+msgstr "Signalements de commentaires"
+
+#: .\templates\users\moderation_dashboard.html:72
+msgid "Search by username, email, reason..."
+msgstr "Rechercher par nom d’utilisateur, e-mail ou raison..."
+
+#: .\templates\users\moderation_dashboard.html:81
+#: .\templates\users\moderation_dashboard.html:87
+msgid "Newest first"
+msgstr "Plus récents d’abord"
+
+#: .\templates\users\moderation_dashboard.html:91
+msgid "Oldest first"
+msgstr "Plus anciens d’abord"
+
+#: .\templates\users\moderation_dashboard.html:98
+#: .\templates\users\moderation_dashboard.html:104
+#: .\templates\users\search.html:45
+msgid "All"
+msgstr "Tous"
+
+#: .\templates\users\moderation_dashboard.html:108
+msgid "With reason"
+msgstr "Avec raison"
+
+#: .\templates\users\moderation_dashboard.html:112
+msgid "No reason"
+msgstr "Sans raison"
+
+#: .\templates\users\moderation_dashboard.html:122
+msgid "Artist document requests"
+msgstr "Demandes de documents des artistes"
+
+#: .\templates\users\moderation_dashboard.html:147
+#, python-format
+msgid "Business: %(type)s"
+msgstr "Document professionnel : %(type)s"
+
+#: .\templates\users\moderation_dashboard.html:151
+#, python-format
+msgid "ID: %(type)s"
+msgstr "Pièce d’identité : %(type)s"
+
+#: .\templates\users\moderation_dashboard.html:157
+msgid "Open business document"
+msgstr "Ouvrir le document professionnel"
+
+#: .\templates\users\moderation_dashboard.html:161
+msgid "Open ID document"
+msgstr "Ouvrir la pièce d’identité"
+
+#: .\templates\users\moderation_dashboard.html:171
+#: .\templates\users\moderation_dashboard.html:253
+#: .\users\templates\users\admin_verification.html:41
+#: .\users\templates\users\pending_verifications.html:66
+#: .\users\templates\users\review_profile.html:29
+#: .\users\templates\users\review_verifications.html:16
+msgid "Approve"
+msgstr "Approuver"
+
+#: .\templates\users\moderation_dashboard.html:178
+#: .\templates\users\moderation_dashboard.html:260
+#: .\users\templates\users\admin_verification.html:45
+#: .\users\templates\users\pending_verifications.html:73
+#: .\users\templates\users\review_profile.html:33
+#: .\users\templates\users\review_verifications.html:20
+msgid "Reject"
+msgstr "Refuser"
+
+#: .\templates\users\moderation_dashboard.html:187
+msgid "No pending document requests."
+msgstr "Aucune demande avec documents en attente."
+
+#: .\templates\users\moderation_dashboard.html:194
+msgid "Manual review requests"
+msgstr "Demandes de vérification manuelle"
+
+#: .\templates\users\moderation_dashboard.html:224
+#: .\templates\users\profile.html:142
+msgid "Portfolio"
+msgstr "Portfolio"
+
+#: .\templates\users\moderation_dashboard.html:230
+msgid "Social link"
+msgstr "Lien social"
+
+#: .\templates\users\moderation_dashboard.html:242
+msgid "Open optional file"
+msgstr "Ouvrir le fichier optionnel"
+
+#: .\templates\users\moderation_dashboard.html:269
+msgid "No pending manual reviews."
+msgstr "Aucune vérification manuelle en attente."
+
+#: .\templates\users\moderation_dashboard.html:297
+#, python-format
+msgid "Post by %(username)s"
+msgstr "Publication de %(username)s"
+
+#: .\templates\users\moderation_dashboard.html:301
+#: .\templates\users\moderation_dashboard.html:379
+#, python-format
+msgid ""
+"\n"
+"                        Reported by %(username)s · %(date)s\n"
+"                      "
+msgstr ""
+"\n"
+"                        Signalé par %(username)s · %(date)s\n"
+"                      "
+
+#: .\templates\users\moderation_dashboard.html:310
+#: .\templates\users\moderation_dashboard.html:388
+msgid "No reason provided."
+msgstr "Aucune raison indiquée."
+
+#: .\templates\users\moderation_dashboard.html:325
+msgid "View post"
+msgstr "Voir la publication"
+
+#: .\templates\users\moderation_dashboard.html:331
+#: .\templates\users\moderation_dashboard.html:409
+msgid "Resolve"
+msgstr "Résoudre"
+
+#: .\templates\users\moderation_dashboard.html:347
+msgid "No unresolved post reports."
+msgstr "Aucun signalement de publication non résolu."
+
+#: .\templates\users\moderation_dashboard.html:375
+#, python-format
+msgid "Comment by %(username)s"
+msgstr "Commentaire de %(username)s"
+
+#: .\templates\users\moderation_dashboard.html:403
+msgid "View author"
+msgstr "Voir l’auteur"
+
+#: .\templates\users\moderation_dashboard.html:425
+msgid "No unresolved comment reports."
+msgstr "Aucun signalement de commentaire non résolu."
+
+#: .\templates\users\profile.html:46 .\templates\users\profile.html:120
+msgid "Verified"
+msgstr "Vérifié"
+
+#: .\templates\users\profile.html:53
+msgid "Professional portfolio"
+msgstr "Portfolio professionnel"
+
+#: .\templates\users\profile.html:63
+#: .\users\templates\users\edit_profile.html:4
+#: .\users\templates\users\edit_profile.html:19
+msgid "Edit profile"
+msgstr "Modifier le profil"
+
+#: .\templates\users\profile.html:72 .\templates\users\profile.html:346
+msgid "Following"
+msgstr "Abonné"
+
+#: .\templates\users\profile.html:82 .\templates\users\report_problem.html:49
+#: .\templates\users\search.html:133 .\users\forms.py:269 .\users\models.py:389
+msgid "Message"
+msgstr "Message"
+
+#: .\templates\users\profile.html:91
+msgid "posts"
+msgstr "publications"
+
+#: .\templates\users\profile.html:96
+msgid "followers"
+msgstr "abonnés"
+
+#: .\templates\users\profile.html:101
+msgid "following"
+msgstr "abonnements"
+
+#: .\templates\users\profile.html:109 .\templates\users\search.html:123
+msgid "No bio yet."
+msgstr "Aucune bio pour le moment."
+
+#: .\templates\users\profile.html:122
+#: .\users\templates\users\verification_page.html:34
+msgid "Rejected"
+msgstr "Refusé"
+
+#: .\templates\users\profile.html:124 .\templates\users\profile.html:126
+#: .\users\templates\users\verification_page.html:36
+#: .\users\templates\users\verification_page.html:38
+msgid "Pending"
+msgstr "En attente"
+
+#: .\templates\users\profile.html:128
+#: .\users\templates\users\verification_page.html:40
+msgid "Not submitted"
+msgstr "Non envoyé"
+
+#: .\templates\users\profile.html:136
+msgid "Start verification"
+msgstr "Commencer la vérification"
+
+#: .\templates\users\profile.html:151
+msgid "Manage portfolio"
+msgstr "Gérer le portfolio"
+
+#: .\templates\users\profile.html:153
+msgid "Add your works"
+msgstr "Ajouter vos travaux"
+
+#: .\templates\users\profile.html:157
+msgid "Take a look"
+msgstr "Voir le portfolio"
+
+#: .\templates\users\profile.html:159
+msgid "No works yet"
+msgstr "Aucun travail pour le moment"
+
+#: .\templates\users\profile.html:167
+msgid "Booking"
+msgstr "Réservation"
+
+#: .\templates\users\profile.html:168
+msgid "Coming later"
+msgstr "Bientôt disponible"
+
+#: .\templates\users\profile.html:177
+msgid "Posts"
+msgstr "Publications"
+
+#: .\templates\users\profile.html:181
+msgid "Liked"
+msgstr "Aimés"
+
+#: .\templates\users\profile.html:198
+msgid "Post media"
+msgstr "Média de la publication"
+
+#: .\templates\users\profile.html:202 .\templates\users\profile.html:240
+msgid "No media"
+msgstr "Aucun média"
+
+#: .\templates\users\profile.html:208
+msgid "No posts yet"
+msgstr "Aucune publication pour le moment"
+
+#: .\templates\users\profile.html:212
+msgid "Your posts will appear here."
+msgstr "Vos publications apparaîtront ici."
+
+#: .\templates\users\profile.html:214
+msgid "This user has not published anything yet."
+msgstr "Cet utilisateur n'a encore rien publié."
+
+#: .\templates\users\profile.html:236
+msgid "Liked post media"
+msgstr "Média de la publication aimée"
+
+#: .\templates\users\profile.html:246
+msgid "No liked posts yet"
+msgstr "Aucune publication aimée pour le moment"
+
+#: .\templates\users\profile.html:250
+msgid "Liked posts will appear here."
+msgstr "Les publications aimées apparaîtront ici."
+
+#: .\templates\users\profile.html:252
+msgid "This user has no public liked posts yet."
+msgstr "Cet utilisateur n'a pas encore de publications aimées publiques."
+
+#: .\templates\users\profile.html:260
+msgid "Liked posts are hidden"
+msgstr "Les publications aimées sont masquées"
+
+#: .\templates\users\profile.html:263
+msgid "This user decided to hide liked posts."
+msgstr "Cet utilisateur a décidé de masquer ses publications aimées."
+
+#: .\templates\users\profile.html:348
+msgid "Follow action failed."
+msgstr "L'action de suivi a échoué."
+
+#: .\templates\users\report_problem.html:18
+msgid "Feedback"
+msgstr "Retour"
+
+#: .\templates\users\report_problem.html:24
+msgid ""
+"Tell us what happened or suggest an improvement. Your feedback helps us make "
+"Tatzo better."
+msgstr ""
+"Expliquez-nous ce qui s'est passé ou proposez une amélioration. Votre retour "
+"nous aide à améliorer Tatzo."
+
+#: .\templates\users\report_problem.html:35
+msgid "Type"
+msgstr "Type"
+
+#: .\templates\users\report_problem.html:59
+msgid "Optional. You can add a screenshot or file."
+msgstr "Optionnel. Vous pouvez ajouter une capture d'écran ou un fichier."
+
+#: .\templates\users\search.html:20
+msgid "Find users and tattoo artists by username or @tag."
+msgstr ""
+"Trouvez des utilisateurs et des tatoueurs par nom d'utilisateur ou @tag."
+
+#: .\templates\users\search.html:28
+msgid "Search by username or @tag..."
+msgstr "Rechercher par nom d'utilisateur ou @tag..."
+
+#: .\templates\users\search.html:54
+msgid "Tattoo artists"
+msgstr "Tatoueurs"
+
+#: .\templates\users\search.html:63
+msgid "Users"
+msgstr "Utilisateurs"
+
+#: .\templates\users\search.html:70
+msgid "Results"
+msgstr "Résultats"
+
+#: .\templates\users\search.html:76
+#, python-format
+msgid ""
+"\n"
+"            Showing results for <strong>%(search_query)s</strong>\n"
+"          "
+msgstr ""
+"\n"
+"            Résultats pour <strong>%(search_query)s</strong>\n"
+"          "
+
+#: .\templates\users\search.html:129
+msgid "View profile"
+msgstr "Voir le profil"
+
+#: .\templates\users\search.html:143
+msgid "No results found"
+msgstr "Aucun résultat trouvé"
+
+#: .\templates\users\search.html:144
+msgid "Try another username, tag or account type."
+msgstr "Essayez un autre nom d'utilisateur, tag ou type de compte."
+
+#: .\templates\users\search.html:146
+msgid "Start searching"
+msgstr "Commencez la recherche"
+
+#: .\templates\users\search.html:147
+msgid "Type a username or @tag to find people on Tatzo."
+msgstr ""
+"Tapez un nom d'utilisateur ou un @tag pour trouver des personnes sur Tatzo."
+
+#: .\users\admin.py:107
+msgid "Report information"
+msgstr "Informations du signalement"
+
+#: .\users\admin.py:117
+msgid "Moderation"
+msgstr "Modération"
+
+#: .\users\forms.py:267 .\users\models.py:383
+msgid "Report type"
+msgstr "Type de signalement"
+
+#: .\users\forms.py:277
+msgid "Short title"
+msgstr "Titre court"
+
+#: .\users\forms.py:281
+msgid "Describe the problem or suggestion..."
+msgstr "Décrivez le problème ou la suggestion..."
+
+#: .\users\models.py:371
+msgid "Bug"
+msgstr "Bug"
+
+#: .\users\models.py:372
+msgid "Suggestion"
+msgstr "Suggestion"
+
+#: .\users\models.py:373
+msgid "Other"
+msgstr "Autre"
+
+#: .\users\models.py:390
+msgid "Page URL"
+msgstr "URL de la page"
+
+#: .\users\models.py:397
+msgid "Created at"
+msgstr "Créé le"
+
+#: .\users\models.py:398
+msgid "Resolved"
+msgstr "Résolu"
+
+#: .\users\models.py:402
+msgid "User report"
+msgstr "Signalement utilisateur"
+
+#: .\users\models.py:403
+msgid "User reports"
+msgstr "Signalements utilisateurs"
+
+#: .\users\templates\users\admin_verification.html:4
+msgid "Admin Verification"
+msgstr "Vérification administrateur"
+
+#: .\users\templates\users\admin_verification.html:9
+#, python-format
+msgid ""
+"\n"
+"            Verify Profile: %(username)s\n"
+"        "
+msgstr ""
+"\n"
+"            Vérifier le profil : %(username)s\n"
+"        "
+
+#: .\users\templates\users\admin_verification.html:15
+#: .\users\templates\users\password_reset.html:29
+#: .\users\templates\users\pending_profiles.html:14
+#: .\users\templates\users\pending_verifications.html:14
+#: .\users\templates\users\review_profile.html:16
+#: .\users\templates\users\signup.html:49
+msgid "Email"
+msgstr "E-mail"
+
+#: .\users\templates\users\admin_verification.html:20
+#: .\users\templates\users\pending_profiles.html:15
+#: .\users\templates\users\pending_verifications.html:15
+#: .\users\templates\users\review_profile.html:21
+msgid "Account Type"
+msgstr "Type de compte"
+
+#: .\users\templates\users\admin_verification.html:24
+#: .\users\templates\users\pending_verifications.html:16
+msgid "Documents"
+msgstr "Documents"
+
+#: .\users\templates\users\admin_verification.html:30
+msgid "Download"
+msgstr "Télécharger"
+
+#: .\users\templates\users\admin_verification.html:34
+#: .\users\templates\users\pending_verifications.html:57
+msgid "No documents available"
+msgstr "Aucun document disponible"
+
+#: .\users\templates\users\contests.html:15
+msgid "Tattoo artist contests"
+msgstr "Concours de tatoueurs"
+
+#: .\users\templates\users\contests.html:19
+msgid "Here you will soon find:"
+msgstr "Vous trouverez bientôt ici :"
+
+#: .\users\templates\users\contests.html:22
+msgid "Active competitions between artists"
+msgstr "Des compétitions actives entre artistes"
+
+#: .\users\templates\users\contests.html:23
+msgid "User voting"
+msgstr "Le vote des utilisateurs"
+
+#: .\users\templates\users\contests.html:24
+msgid "Winners and rewards"
+msgstr "Les gagnants et les récompenses"
+
+#: .\users\templates\users\edit_profile.html:20
+msgid "Update your public identity, privacy and avatar."
+msgstr ""
+"Mettez à jour votre identité publique, votre confidentialité et votre avatar."
+
+#: .\users\templates\users\edit_profile.html:42
+msgid "This is how other users will see you on Tatzo."
+msgstr "C'est ainsi que les autres utilisateurs vous verront sur Tatzo."
+
+#: .\users\templates\users\edit_profile.html:53
+msgid "Tag"
+msgstr "Tag"
+
+#: .\users\templates\users\edit_profile.html:63
+msgid "Your unique tag helps people find you faster."
+msgstr "Votre tag unique aide les autres à vous trouver plus rapidement."
+
+#: .\users\templates\users\edit_profile.html:74
+msgid "Bio"
+msgstr "Bio"
+
+#: .\users\templates\users\edit_profile.html:85
+msgid "Tell others about yourself. You can use up to 300 characters."
+msgstr ""
+"Parlez de vous aux autres. Vous pouvez utiliser jusqu'à 300 caractères."
+
+#: .\users\templates\users\edit_profile.html:105
+msgid "Liked posts privacy"
+msgstr "Confidentialité des publications aimées"
+
+#: .\users\templates\users\edit_profile.html:106
+msgid "Choose who can see the posts you've liked."
+msgstr "Choisissez qui peut voir les publications que vous avez aimées."
+
+#: .\users\templates\users\edit_profile.html:118
+msgid "Show my liked posts on my profile"
+msgstr "Afficher mes publications aimées sur mon profil"
+
+#: .\users\templates\users\edit_profile.html:119
+msgid "If disabled, other users will see that your liked posts are hidden."
+msgstr ""
+"Si cette option est désactivée, les autres utilisateurs verront que vos "
+"publications aimées sont masquées."
+
+#: .\users\templates\users\edit_profile.html:131
+msgid "Profile image"
+msgstr "Image de profil"
+
+#: .\users\templates\users\edit_profile.html:138
+msgid "Current avatar"
+msgstr "Avatar actuel"
+
+#: .\users\templates\users\edit_profile.html:153
+msgid "Avatar preview"
+msgstr "Aperçu de l'avatar"
+
+#: .\users\templates\users\edit_profile.html:163
+msgid "Upload new avatar"
+msgstr "Importer un nouvel avatar"
+
+#: .\users\templates\users\edit_profile.html:168
+msgid "JPG, PNG or WEBP"
+msgstr "JPG, PNG ou WEBP"
+
+#: .\users\templates\users\edit_profile.html:169
+msgid "Max size 10MB"
+msgstr "Taille maximale 10 Mo"
+
+#: .\users\templates\users\edit_profile.html:175
+msgid "Tip"
+msgstr "Conseil"
+
+#: .\users\templates\users\edit_profile.html:176
+msgid "A clear profile picture helps others recognize you."
+msgstr "Une photo de profil claire aide les autres à vous reconnaître."
+
+#: .\users\templates\users\edit_profile.html:202
+msgid "Adjust avatar"
+msgstr "Ajuster l'avatar"
+
+#: .\users\templates\users\edit_profile.html:209
+msgid "Crop preview"
+msgstr "Aperçu du recadrage"
+
+#: .\users\templates\users\edit_profile.html:215
+msgid "Zoom avatar"
+msgstr "Zoom de l'avatar"
+
+#: .\users\templates\users\password_reset.html:4
+msgid "Password reset — Tatzo"
+msgstr "Réinitialisation du mot de passe — Tatzo"
+
+#: .\users\templates\users\password_reset.html:12
+#: .\users\templates\users\signup.html:13
+msgid "Enter your email"
+msgstr "Entrez votre e-mail"
+
+#: .\users\templates\users\password_reset.html:19
+#: .\users\templates\users\password_reset_confirm.html:14
+msgid "Password reset"
+msgstr "Réinitialisation du mot de passe"
+
+#: .\users\templates\users\password_reset.html:22
+msgid "Enter your email and we will send you a password reset link."
+msgstr ""
+"Entrez votre e-mail et nous vous enverrons un lien de réinitialisation du "
+"mot de passe."
+
+#: .\users\templates\users\password_reset.html:40
+msgid "Send reset link"
+msgstr "Envoyer le lien"
+
+#: .\users\templates\users\password_reset_complete.html:4
+msgid "Password updated — Tatzo"
+msgstr "Mot de passe mis à jour — Tatzo"
+
+#: .\users\templates\users\password_reset_complete.html:15
+msgid "Password updated successfully!"
+msgstr "Mot de passe mis à jour avec succès !"
+
+#: .\users\templates\users\password_reset_complete.html:19
+msgid "You can now log in to your account with your new password."
+msgstr ""
+"Vous pouvez maintenant vous connecter à votre compte avec votre nouveau mot "
+"de passe."
+
+#: .\users\templates\users\password_reset_complete.html:23
+msgid "Go to login"
+msgstr "Aller à la connexion"
+
+#: .\users\templates\users\password_reset_confirm.html:4
+msgid "New password — Tatzo"
+msgstr "Nouveau mot de passe — Tatzo"
+
+#: .\users\templates\users\password_reset_confirm.html:17
+msgid "Create a new password for your account."
+msgstr "Créez un nouveau mot de passe pour votre compte."
+
+#: .\users\templates\users\password_reset_done.html:4
+msgid "Reset link sent — Tatzo"
+msgstr "Lien envoyé — Tatzo"
+
+#: .\users\templates\users\password_reset_done.html:14
+msgid "Reset link sent"
+msgstr "Lien envoyé"
+
+#: .\users\templates\users\password_reset_done.html:17
+msgid ""
+"\n"
+"      If this email exists, you will receive a message with instructions to "
+"reset your password.\n"
+"    "
+msgstr ""
+"\n"
+"      Si cet e-mail existe, vous recevrez un message avec les instructions "
+"pour réinitialiser votre mot de passe.\n"
+"    "
+
+#: .\users\templates\users\password_reset_done.html:23
+msgid "Do not forget to check your Spam folder."
+msgstr "N'oubliez pas de vérifier votre dossier Spam."
+
+#: .\users\templates\users\pending_profiles.html:4
+msgid "Pending Profiles"
+msgstr "Profils en attente"
+
+#: .\users\templates\users\pending_profiles.html:8
+msgid "Profiles Pending Verification"
+msgstr "Profils en attente de vérification"
+
+#: .\users\templates\users\pending_profiles.html:16
+#: .\users\templates\users\pending_verifications.html:17
+msgid "Actions"
+msgstr "Actions"
+
+#: .\users\templates\users\pending_profiles.html:28
+msgid "Review"
+msgstr "Examiner"
+
+#: .\users\templates\users\pending_profiles.html:35
+msgid "No pending profiles."
+msgstr "Aucun profil en attente."
+
+#: .\users\templates\users\pending_verifications.html:4
+#: .\users\templates\users\pending_verifications.html:8
+msgid "Pending Verifications"
+msgstr "Vérifications en attente"
+
+#: .\users\templates\users\pending_verifications.html:38
+msgid "View Document"
+msgstr "Voir le document"
+
+#: .\users\templates\users\pending_verifications.html:44
+msgid "Identity Document"
+msgstr "Pièce d'identité"
+
+#: .\users\templates\users\pending_verifications.html:49
+msgid "View Identity Document"
+msgstr "Voir la pièce d'identité"
+
+#: .\users\templates\users\pending_verifications.html:81
+msgid "No pending verifications."
+msgstr "Aucune vérification en attente."
+
+#: .\users\templates\users\review_profile.html:4
+#: .\users\templates\users\review_profile.html:8
+msgid "Review Profile"
+msgstr "Examiner le profil"
+
+#: .\users\templates\users\review_verifications.html:4
+#: .\users\templates\users\review_verifications.html:8
+msgid "Review Verifications"
+msgstr "Vérification des demandes"
+
+#: .\users\templates\users\review_verifications.html:24
+msgid "No verification documents to review."
+msgstr "Aucun document de vérification à examiner."
+
+#: .\users\templates\users\signup.html:12
+msgid "Choose a username"
+msgstr "Choisissez un nom d'utilisateur"
+
+#: .\users\templates\users\signup.html:15
+msgid "Repeat your password"
+msgstr "Répétez votre mot de passe"
+
+#: .\users\templates\users\signup.html:16
+#: .\users\templates\users\signup.html:27
+msgid "Join our community and discover the world of tattoo!"
+msgstr "Rejoignez notre communauté et découvrez le monde du tatouage !"
+
+#: .\users\templates\users\signup.html:17
+msgid ""
+"Join our community! If you are a tattoo artist, make sure you provide "
+"documents to verify your status."
+msgstr ""
+"Rejoignez notre communauté ! Si vous êtes tatoueur, assurez-vous de fournir "
+"les documents nécessaires pour vérifier votre statut."
+
+#: .\users\templates\users\signup.html:44
+msgid ""
+"Your unique @tag will be created automatically based on your username. You "
+"will be able to change it later in your profile settings."
+msgstr ""
+"Votre @tag unique sera créé automatiquement à partir de votre nom "
+"d'utilisateur. Vous pourrez le modifier plus tard dans les paramètres de "
+"votre profil."
+
+#: .\users\templates\users\signup.html:70
+msgid ""
+"Password must contain at least 8 characters, one uppercase letter and one "
+"number."
+msgstr ""
+"Le mot de passe doit contenir au moins 8 caractères, une majuscule et un "
+"chiffre."
+
+#: .\users\templates\users\signup.html:75
+msgid "Confirm password"
+msgstr "Confirmer le mot de passe"
+
+#: .\users\templates\users\signup.html:86
+msgid "Account type"
+msgstr "Type de compte"
+
+#: .\users\templates\users\signup.html:99
+msgid "Regular user"
+msgstr "Utilisateur classique"
+
+#: .\users\templates\users\signup.html:100
+msgid "Discover inspiration and book sessions with tattoo artists."
+msgstr "Découvrez de l'inspiration et réservez des séances avec des tatoueurs."
+
+#: .\users\templates\users\signup.html:113
+msgid "Tattoo artist"
+msgstr "Tatoueur"
+
+#: .\users\templates\users\signup.html:114
+msgid "Publish your work and attract new clients."
+msgstr "Publiez vos travaux et attirez de nouveaux clients."
+
+#: .\users\templates\users\signup.html:127
+msgid "Already have an account? Log in here!"
+msgstr "Vous avez déjà un compte ? Connectez-vous ici !"
+
+#: .\users\templates\users\signup.html:163
+msgid "Registration successful!"
+msgstr "Inscription réussie !"
+
+#: .\users\templates\users\signup.html:166
+msgid ""
+"Confirm your email by clicking the link in the message we sent you. After "
+"that, you will be redirected to the right page."
+msgstr ""
+"Confirmez votre e-mail en cliquant sur le lien dans le message que nous vous "
+"avons envoyé. Ensuite, vous serez redirigé vers la bonne page."
+
+#: .\users\templates\users\verification_page.html:4
+#: .\users\templates\users\verification_page.html:18
+msgid "Artist verification"
+msgstr "Vérification artiste"
+
+#: .\users\templates\users\verification_page.html:21
+msgid ""
+"Verify your tattoo artist profile to build trust and unlock professional "
+"features."
+msgstr ""
+"Vérifiez votre profil de tatoueur pour inspirer confiance et débloquer les "
+"fonctionnalités professionnelles."
+
+#: .\users\templates\users\verification_page.html:27
+msgid "Status"
+msgstr "Statut"
+
+#: .\users\templates\users\verification_page.html:32
+msgid "Approved"
+msgstr "Approuvé"
+
+#: .\users\templates\users\verification_page.html:55
+msgid "I have documents"
+msgstr "J'ai des documents"
+
+#: .\users\templates\users\verification_page.html:58
+msgid "Upload your professional document and identity document."
+msgstr "Importez votre document professionnel et votre pièce d'identité."
+
+#: .\users\templates\users\verification_page.html:64
+msgid "Business document type"
+msgstr "Type de document professionnel"
+
+#: .\users\templates\users\verification_page.html:71
+msgid "Business document file"
+msgstr "Fichier du document professionnel"
+
+#: .\users\templates\users\verification_page.html:78
+msgid "Identity document type"
+msgstr "Type de pièce d'identité"
+
+#: .\users\templates\users\verification_page.html:85
+msgid "Identity document file"
+msgstr "Fichier de la pièce d'identité"
+
+#: .\users\templates\users\verification_page.html:97
+msgid "Submit documents"
+msgstr "Envoyer les documents"
+
+#: .\users\templates\users\verification_page.html:106
+msgid "No official documents?"
+msgstr "Pas de documents officiels ?"
+
+#: .\users\templates\users\verification_page.html:109
+msgid ""
+"Request a manual review. Send your portfolio, social links and a short "
+"explanation."
+msgstr ""
+"Demandez une vérification manuelle. Envoyez votre portfolio, vos liens "
+"sociaux et une courte explication."
+
+#: .\users\templates\users\verification_page.html:115
+msgid "Portfolio link"
+msgstr "Lien du portfolio"
+
+#: .\users\templates\users\verification_page.html:122
+msgid "Social media link"
+msgstr "Lien vers les réseaux sociaux"
+
+#: .\users\templates\users\verification_page.html:129
+msgid "City / Country"
+msgstr "Ville / Pays"
+
+#: .\users\templates\users\verification_page.html:136
+msgid "Explanation"
+msgstr "Explication"
+
+#: .\users\templates\users\verification_page.html:143
+msgid "Optional file"
+msgstr "Fichier optionnel"
+
+#: .\users\templates\users\verification_page.html:155
+msgid "Request manual review"
+msgstr "Demander une vérification manuelle"
+
+#: .\users\views.py:1316
+msgid "Find tattoo artists near you and explore studios by location."
+msgstr ""
+"Trouvez des tatoueurs près de chez vous et explorez les studios par "
+"localisation."
+
+#: .\users\views.py:1321
+msgid "Manage bookings, sessions and upcoming appointments."
+msgstr "Gérez vos réservations, vos séances et vos prochains rendez-vous."
+
+#: .\users\views.py:1326
+msgid "Discover tattoo removal resources, specialists and useful guides."
+msgstr ""
+"Découvrez des ressources sur le détatouage, des spécialistes et des guides "
+"utiles."
+
+#: .\users\views.py:1331
+msgid "Stay updated about likes, comments, replies and messages."
+msgstr "Restez informé des likes, commentaires, réponses et messages."
+
+#: .\users\views.py:1336
+msgid ""
+"Vote for the best tattoo works, follow competitions and discover winners."
+msgstr ""
+"Votez pour les meilleurs travaux de tatouage, suivez les concours et "
+"découvrez les gagnants."
+
+#: .\users\views.py:1343
+msgid "This feature is currently in development."
+msgstr "Cette fonctionnalité est actuellement en développement."
+
+#: .\users\views.py:1363
+msgid "Thank you! Your report has been sent."
+msgstr "Merci ! Votre signalement a été envoyé."

@@ -1,33 +1,59 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Вход{% endblock %}
+{% block title %}{% trans "Login" %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/login.css' %}">
 {% endblock %}
 
 {% block content %}
+
+{% trans "Enter your username" as username_placeholder %}
+{% trans "Enter your password" as password_placeholder %}
+
 <div class="login-container">
     <div class="logo">
         <img src="{% static 'images/tatzo5.png' %}" alt="Tatzo">
     </div>
-    <h1>Добро пожаловать</h1>
+
+    <h1>{% trans "Welcome" %}</h1>
+
     <form method="post">
         {% csrf_token %}
+
         <div class="input-group">
-            <label for="username">Имя пользователя</label>
-            <input type="text" id="username" name="username" placeholder="Введите имя пользователя" required>
+            <label for="username">{% trans "Username" %}</label>
+            <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="{{ username_placeholder }}"
+                required
+            >
         </div>
+
         <div class="input-group">
-            <label for="password">Пароль</label>
-            <input type="password" id="password" name="password" placeholder="Введите пароль" required>
+            <label for="password">{% trans "Password" %}</label>
+            <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="{{ password_placeholder }}"
+                required
+            >
         </div>
-        <button type="submit" class="btn">Войти</button>
+
+        <button type="submit" class="btn">
+            {% trans "Log in" %}
+        </button>
     </form>
+
     <div class="links">
-        <a href="{% url 'signup' %}">Создать аккаунт</a>
-        <a href="{% url 'password_reset' %}" class="small-link">Забыли пароль?</a>
+        <a href="{% url 'signup' %}">{% trans "Create account" %}</a>
+        <a href="{% url 'password_reset' %}" class="small-link">
+            {% trans "Forgot password?" %}
+        </a>
     </div>
 </div>
 

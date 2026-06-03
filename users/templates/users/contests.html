@@ -1,18 +1,28 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Contests{% endblock %}
+{% block title %}{% trans "Contests" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% include "partials/sidebar.html" %}
+
 <div class="page-container">
-    <h1 style="color: #ee0c6f;">🏆 Конкурсы тату-мастеров</h1>
-    <p style="color: #04c5bf;">Здесь в будущем будут показаны:
-        <ul style="color: white;">
-            <li>⚔️ Активные соревнования между мастерами</li>
-            <li>🗳️ Голосование пользователей</li>
-            <li>👑 Победители и награды</li>
-        </ul>
-    </p>
+  <h1 style="color: #ee0c6f;">
+    🏆 {% trans "Tattoo artist contests" %}
+  </h1>
+
+  <div style="color: #04c5bf;">
+    <p>{% trans "Here you will soon find:" %}</p>
+
+    <ul style="color: white;">
+      <li>⚔️ {% trans "Active competitions between artists" %}</li>
+      <li>🗳️ {% trans "User voting" %}</li>
+      <li>👑 {% trans "Winners and rewards" %}</li>
+    </ul>
+  </div>
 </div>
 {% endblock %}

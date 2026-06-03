@@ -3,9 +3,10 @@ import logging
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout as auth_logout
-from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
 from django.db.models import Q
 from django.http import JsonResponse
@@ -13,12 +14,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.encoding import force_str
+from django.utils.translation import gettext_lazy as _
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.http import require_POST
 from .models import Profile, VerificationDocument, ManualVerificationRequest, UserFollow, PortfolioAlbum, PortfolioWork, ChatThread, ChatMessage, ChatAttachment
 
 from posts.forms import PostForm, PostMediaUploadForm
-from .forms import ProfileForm, VerificationForm, UserEditForm, ManualVerificationForm, PortfolioWorkForm, PortfolioAlbumForm
+from .forms import ProfileForm, VerificationForm, UserEditForm, ManualVerificationForm, PortfolioWorkForm, PortfolioAlbumForm, UserReportForm
 
 from .forms_custom import CustomUserCreationForm
 from posts.models import Post, PostMedia,  PostLike, PostBookmark, PostReport, PostComment, CommentReport
@@ -1267,3 +1269,103 @@ def chat_new_messages(request, thread_id):
             "last_id": last_message_id,
         }
     )
+    
+@login_required
+def search_page(request):
+    query = (request.GET.get("q") or "").strip()
+    account_filter = request.GET.get("type") or "all"
+
+    clean_query = query.lstrip("@").strip()
+
+    users = (
+        User.objects
+        .select_related("profile")
+        .exclude(id=request.user.id)
+        .order_by("username")
+    )
+
+    if clean_query:
+        users = users.filter(
+            Q(username__icontains=clean_query) |
+            Q(profile__tag__icontains=clean_query)
+        )
+
+    if account_filter == "artists":
+        users = users.filter(profile__account_type="tattoo_artist")
+    elif account_filter == "users":
+        users = users.filter(profile__account_type="regular_user")
+
+    users = users[:40]
+
+    return render(
+        request,
+        "users/search.html",
+        {
+            "query": query,
+            "account_filter": account_filter,
+            "results": users,
+            "results_count": len(users),
+        },
+    )
+    
+@login_required
+def coming_soon(request, feature):
+    features = {
+        "maps": {
+            "title": _("Maps"),
+            "subtitle": _("Find tattoo artists near you and explore studios by location."),
+            "icon": "🗺️",
+        },
+        "calendar": {
+            "title": _("Calendar"),
+            "subtitle": _("Manage bookings, sessions and upcoming appointments."),
+            "icon": "📅",
+        },
+        "clean-slate": {
+            "title": _("Clean slate"),
+            "subtitle": _("Discover tattoo removal resources, specialists and useful guides."),
+            "icon": "🌱",
+        },
+        "notifications": {
+            "title": _("Notifications"),
+            "subtitle": _("Stay updated about likes, comments, replies and messages."),
+            "icon": "🔔",
+        },
+        "contests": {
+            "title": _("Contests"),
+            "subtitle": _("Vote for the best tattoo works, follow competitions and discover winners."),
+            "icon": "🏆",
+        },
+    }
+
+    feature_data = features.get(feature, {
+        "title": _("Coming soon"),
+        "subtitle": _("This feature is currently in development."),
+        "icon": "✨",
+    })
+
+    return render(request, "users/coming_soon.html", {
+        "feature": feature,
+        "feature_data": feature_data,
+    })
+    
+@login_required
+def report_problem(request):
+    if request.method == "POST":
+        form = UserReportForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.user = request.user
+            report.page_url = request.POST.get("page_url", "")[:500]
+            report.save()
+
+            messages.success(request, _("Thank you! Your report has been sent."))
+            return redirect("home")
+    else:
+        form = UserReportForm()
+
+    return render(request, "users/report_problem.html", {
+        "form": form,
+        "page_url": request.GET.get("next", ""),
+    })

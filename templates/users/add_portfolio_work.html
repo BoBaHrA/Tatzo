@@ -1,26 +1,29 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Add portfolio work{% endblock %}
+{% block title %}{% trans "Add portfolio work" %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
 {% endblock %}
 
 {% block content %}
+
+{% trans "Preview image" as preview_image_alt %}
+
 <div class="portfolio-page">
   <div class="portfolio-form-shell">
 
     <div class="portfolio-header">
       <div>
         <a href="{% url 'artist_portfolio' request.user.username %}" class="portfolio-back">
-          ← Back to portfolio
+          ← {% trans "Back to portfolio" %}
         </a>
 
-        <h1>Add portfolio work</h1>
+        <h1>{% trans "Add portfolio work" %}</h1>
 
         <p>
-          Upload a tattoo work and optionally organize it into an album.
+          {% trans "Upload a tattoo work and optionally organize it into an album." %}
         </p>
       </div>
     </div>
@@ -29,43 +32,43 @@
       {% csrf_token %}
 
       <div class="portfolio-field">
-        <label for="{{ form.images.id_for_label }}">Images</label>
+        <label for="{{ form.images.id_for_label }}">{% trans "Images" %}</label>
         {{ form.images }}
 
         <p class="portfolio-help">
-            You can select multiple images at once. Each image will become a separate portfolio work.
+          {% trans "You can select multiple images at once. Each image will become a separate portfolio work." %}
         </p>
 
         <div class="portfolio-upload-preview" id="portfolio-upload-preview"></div>
       </div>
 
       <div class="portfolio-field">
-        <label for="{{ form.title.id_for_label }}">Title</label>
+        <label for="{{ form.title.id_for_label }}">{% trans "Title" %}</label>
         {{ form.title }}
       </div>
 
       <div class="portfolio-field">
-        <label for="{{ form.album.id_for_label }}">Existing album</label>
+        <label for="{{ form.album.id_for_label }}">{% trans "Existing album" %}</label>
         {{ form.album }}
       </div>
 
       <div class="portfolio-field">
-        <label for="{{ form.new_album_title.id_for_label }}">New album</label>
+        <label for="{{ form.new_album_title.id_for_label }}">{% trans "New album" %}</label>
         {{ form.new_album_title }}
       </div>
 
       <div class="portfolio-field">
-        <label for="{{ form.style.id_for_label }}">Style</label>
+        <label for="{{ form.style.id_for_label }}">{% trans "Style" %}</label>
         {{ form.style }}
       </div>
 
       <div class="portfolio-field">
-        <label for="{{ form.body_placement.id_for_label }}">Body placement</label>
+        <label for="{{ form.body_placement.id_for_label }}">{% trans "Body placement" %}</label>
         {{ form.body_placement }}
       </div>
 
       <div class="portfolio-field">
-        <label for="{{ form.description.id_for_label }}">Description</label>
+        <label for="{{ form.description.id_for_label }}">{% trans "Description" %}</label>
         {{ form.description }}
       </div>
 
@@ -76,16 +79,18 @@
       {% endif %}
 
       <button type="submit" class="portfolio-btn portfolio-btn-full">
-        Save work
+        {% trans "Save work" %}
       </button>
     </form>
 
   </div>
 </div>
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const input = document.querySelector('input[name="images"]');
     const preview = document.getElementById("portfolio-upload-preview");
+    const previewImageAlt = "{{ preview_image_alt|escapejs }}";
 
     if (!input || !preview) return;
 
@@ -105,7 +110,7 @@
 
         const img = document.createElement("img");
         img.src = url;
-        img.alt = file.name;
+        img.alt = file.name || previewImageAlt;
 
         item.appendChild(img);
         preview.appendChild(item);
@@ -115,7 +120,7 @@
           modal.className = "portfolio-lightbox open";
           modal.innerHTML = `
             <button type="button" class="portfolio-lightbox-close">×</button>
-            <img src="${url}" alt="">
+            <img src="${url}" alt="${previewImageAlt}">
           `;
 
           document.body.appendChild(modal);
