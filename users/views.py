@@ -14,7 +14,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.encoding import force_str
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext as _, ngettext
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.http import require_POST
 from .models import Profile, VerificationDocument, ManualVerificationRequest, UserFollow, PortfolioAlbum, PortfolioWork, ChatThread, ChatMessage, ChatAttachment
@@ -38,13 +38,13 @@ def login_view(request):
             profile = Profile.objects.get(user=user)
             if not profile.is_email_verified:
                 messages.error(
-                    request, "Пожалуйста, подтвердите свою почту перед входом."
+                    request, _("Please verify your email before logging in.")
                 )
                 return redirect("login")  # Или просто вернём ту же страницу
             login(request, user)
             return redirect("home")
         else:
-            messages.error(request, "Неверные имя пользователя или пароль.")
+            messages.error(request, _("Invalid username or password."))
 
     return render(request, "users/login.html")
 
@@ -77,8 +77,6 @@ def home(request):
     }
 
     return render(request, "home.html", context)
-from django.contrib.auth import login
-
 
 def verify_email(request, uidb64, token):
     try:
@@ -102,7 +100,7 @@ def verify_email(request, uidb64, token):
         else:
             return redirect("home")
     else:
-        messages.error(request, "Ссылка недействительна или устарела.")
+        messages.error(request, _("This link is invalid or has expired."))
         return redirect("login")
 
 
@@ -133,7 +131,7 @@ def create_post(request):
 
     if not content and not files:
         return JsonResponse(
-            {"ok": False, "error": "Пост не может быть пустым."}, status=400
+            {"ok": False, "error": _("Post cannot be empty.")}, status=400
         )
 
     disable_comments = request.POST.get("disable_comments") == "1"
@@ -198,7 +196,7 @@ def edit_profile(request):
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
-            messages.success(request, "Profile updated successfully.")
+            messages.success(request, _("Profile updated successfully."))
             return redirect("profile", username=request.user.username)
     else:
         user_form = UserEditForm(instance=user_obj)
@@ -226,9 +224,9 @@ def delete_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     if post.user == request.user:  # Только автор поста может удалить его
         post.delete()
-        messages.success(request, "Ваш пост был удалён.")
+        messages.success(request, _("Your post has been deleted."))
     else:
-        messages.error(request, "Вы не можете удалить этот пост.")
+        messages.error(request, _("You cannot delete this post."))
     return redirect("home")
 
 
@@ -269,14 +267,14 @@ def edit_post(request, post_id):
     """
     post = get_object_or_404(Post, id=post_id)
     if post.user != request.user:
-        messages.error(request, "Вы не можете редактировать этот пост.")
+        messages.error(request, _("You cannot edit this post."))
         return redirect("home")
 
     if request.method == "POST":
         form = PostForm(request.POST, instance=post)
         if form.is_valid():
             form.save()
-            messages.success(request, "Ваш пост был успешно обновлен!")
+            messages.success(request, _("Your post has been updated successfully."))
             return redirect("home")
     else:
         form = PostForm(instance=post)
@@ -294,13 +292,17 @@ def admin_verification(request, profile_id):
             profile.verification_status = "approved"
             profile.save()
             messages.success(
-                request, f"Profile {profile.user.username} has been approved."
+                request,
+                _("Profile %(username)s has been approved.")
+                % {"username": profile.user.username},
             )
         elif action == "reject":
             profile.verification_status = "rejected"
             profile.save()
             messages.success(
-                request, f"Profile {profile.user.username} has been rejected."
+                request,
+                _("Profile %(username)s has been rejected.")
+                % {"username": profile.user.username},
             )
         return redirect("profile_list")
 
@@ -346,7 +348,7 @@ def verification_page(request):
 
                 messages.success(
                     request,
-                    "Your documents have been submitted for review.",
+                    _("Your documents have been submitted for review."),
                 )
                 return redirect("home")
 
@@ -368,20 +370,20 @@ def verification_page(request):
 
                 messages.success(
                     request,
-                    "Your manual review request has been submitted.",
+                    _("Your manual review request has been submitted."),
                 )
                 return redirect("home")
 
         else:
-            messages.error(request, "Invalid verification request.")
+            messages.error(request, _("Invalid verification request."))
 
     status_labels = {
-        "not_submitted": "Not submitted",
-        "pending_documents": "Pending documents review",
-        "pending_manual_review": "Pending manual review",
-        "pending": "Pending",
-        "approved": "Approved",
-        "rejected": "Rejected",
+        "not_submitted": _("Not submitted"),
+        "pending_documents": _("Pending documents review"),
+        "pending_manual_review": _("Pending manual review"),
+        "pending": _("Pending"),
+        "approved": _("Approved"),
+        "rejected": _("Rejected"),
     }
 
     context = {
@@ -418,7 +420,7 @@ def verify_document(request, document_id):
             document.is_verified = False
         document.save()
         return JsonResponse({"success": True, "status": document.is_verified})
-    return JsonResponse({"success": False, "error": "Invalid request"})
+    return JsonResponse({"success": False, "error": _("Invalid request.")})
 
 
 @user_passes_test(is_admin)
@@ -440,13 +442,13 @@ def review_profile(request, profile_id):
         if action == "approve":
             profile.verification_status = "approved"
             profile.save()
-            message = "Profile approved successfully."
+            message = _("Profile approved successfully.")
         elif action == "reject":
             profile.verification_status = "rejected"
             profile.save()
-            message = "Profile rejected successfully."
+            message = _("Profile rejected successfully.")
         else:
-            message = "Invalid action."
+            message = _("Invalid action.")
 
         return render(
             request,
@@ -474,7 +476,7 @@ def upload_verification_documents(request):
         verification_document.save()
 
         messages.success(
-            request, "Your documents have been submitted for verification."
+            request, _("Your documents have been submitted for verification.")
         )
         return redirect(
             "home"
@@ -492,7 +494,11 @@ def approve_profile(request, profile_id):
     profile.save()
 
     # Сообщение об успешном одобрении
-    messages.success(request, f"Profile '{profile.user.username}' has been approved.")
+    messages.success(
+        request,
+        _("Profile '%(username)s' has been approved.")
+        % {"username": profile.user.username},
+    )
 
     # Перенаправление обратно на список профилей или другую страницу
     return redirect("profile_list")  # Замените на ваш URL для списка профилей
@@ -508,7 +514,11 @@ def reject_profile(request, profile_id):
     profile.save()
 
     # Сообщение об успешном отклонении
-    messages.success(request, f"Profile '{profile.user.username}' has been rejected.")
+    messages.success(
+        request,
+        _("Profile '%(username)s' has been rejected.")
+        % {"username": profile.user.username},
+    )
 
     # Перенаправление обратно на список профилей или другую страницу
     return redirect("profile_list")  # Замените на ваш URL для списка профилей
@@ -597,7 +607,7 @@ def toggle_follow(request, username):
         return JsonResponse(
             {
                 "ok": False,
-                "error": "You cannot follow yourself.",
+                "error": _("You cannot follow yourself."),
             },
             status=400,
         )
@@ -622,7 +632,7 @@ def toggle_follow(request, username):
             "is_following": is_following,
             "followers_count": followers_count,
             "following_count": following_count,
-            "button_text": "Following" if is_following else "Follow",
+            "button_text": _("Following") if is_following else _("Follow"),
         }
     )
 
@@ -733,10 +743,14 @@ def add_portfolio_work(request, username):
 
                 created_count += 1
 
-            if created_count == 1:
-                messages.success(request, "Portfolio work added successfully.")
-            else:
-                messages.success(request, f"{created_count} portfolio works added successfully.")
+            messages.success(
+                request,
+                ngettext(
+                    "Portfolio work added successfully.",
+                    "%(count)s portfolio works added successfully.",
+                    created_count,
+                ) % {"count": created_count},
+            )
 
             return redirect("artist_portfolio", username=request.user.username)
     else:
@@ -758,7 +772,7 @@ def create_portfolio_album(request, username):
         album = form.save(commit=False)
         album.user = request.user
         album.save()
-        messages.success(request, "Portfolio album created.")
+        messages.success(request, _("Portfolio album created."))
 
     return redirect("artist_portfolio", username=request.user.username)
 
@@ -842,7 +856,7 @@ def edit_portfolio_album(request, username, album_id):
 
         if form.is_valid():
             form.save()
-            messages.success(request, "Album updated successfully.")
+            messages.success(request, _("Album updated successfully."))
             return redirect("artist_portfolio", username=request.user.username)
     else:
         form = PortfolioAlbumForm(instance=album)
@@ -871,7 +885,7 @@ def delete_portfolio_album(request, username, album_id):
     )
 
     album.delete()
-    messages.success(request, "Album deleted. Works were kept in All works.")
+    messages.success(request, _("Album deleted. Works were kept in All works."))
 
     return redirect("artist_portfolio", username=request.user.username)
 
@@ -892,7 +906,7 @@ def delete_portfolio_work(request, username, work_id):
     album = work.album
     work.delete()
 
-    messages.success(request, "Portfolio work deleted.")
+    messages.success(request, _("Portfolio work deleted."))
 
     if album:
         return redirect(
@@ -955,7 +969,11 @@ def moderation_approve_artist(request, username):
     VerificationDocument.objects.filter(user=user_obj).update(is_verified=True)
     ManualVerificationRequest.objects.filter(user=user_obj).update(is_reviewed=True)
 
-    messages.success(request, f"{user_obj.username} has been approved as a tattoo artist.")
+    messages.success(
+        request,
+        _("%(username)s has been approved as a tattoo artist.")
+        % {"username": user_obj.username},
+    )
     return redirect("moderation_dashboard")
 
 
@@ -970,7 +988,11 @@ def moderation_reject_artist(request, username):
     VerificationDocument.objects.filter(user=user_obj).update(is_verified=False)
     ManualVerificationRequest.objects.filter(user=user_obj).update(is_reviewed=True)
 
-    messages.success(request, f"{user_obj.username}'s verification has been rejected.")
+    messages.success(
+        request,
+        _("%(username)s's verification has been rejected.")
+        % {"username": user_obj.username},
+    )
     return redirect("moderation_dashboard")
 
 
@@ -983,7 +1005,7 @@ def moderation_resolve_post_report(request, report_id):
     report.resolved_at = timezone.now()
     report.save(update_fields=["is_resolved", "resolved_at"])
 
-    messages.success(request, "Post report resolved.")
+    messages.success(request, _("Post report resolved."))
     return redirect("moderation_dashboard")
 
 
@@ -1003,7 +1025,7 @@ def moderation_delete_reported_post(request, report_id):
         resolved_at=timezone.now(),
     )
 
-    messages.success(request, "Reported post deleted.")
+    messages.success(request, _("Reported post deleted."))
     return redirect("moderation_dashboard")
 
 
@@ -1016,7 +1038,7 @@ def moderation_resolve_comment_report(request, report_id):
     report.resolved_at = timezone.now()
     report.save(update_fields=["is_resolved", "resolved_at"])
 
-    messages.success(request, "Comment report resolved.")
+    messages.success(request, _("Comment report resolved."))
     return redirect("moderation_dashboard")
 
 
@@ -1036,7 +1058,7 @@ def moderation_delete_reported_comment(request, report_id):
         resolved_at=timezone.now(),
     )
 
-    messages.success(request, "Reported comment deleted.")
+    messages.success(request, _("Reported comment deleted."))
     return redirect("moderation_dashboard")
 
 @login_required
@@ -1093,7 +1115,7 @@ def start_chat(request, username):
     )
 
     if target_user == request.user:
-        messages.error(request, "You cannot start a chat with yourself.")
+        messages.error(request, _("You cannot start a chat with yourself."))
         return redirect("profile", username=username)
 
     thread = ChatThread.get_or_create_for_users(request.user, target_user)
@@ -1114,7 +1136,7 @@ def chat_thread(request, thread_id):
     )
 
     if not thread.has_user(request.user):
-        messages.error(request, "You cannot access this chat.")
+        messages.error(request, _("You cannot access this chat."))
         return redirect("chats_list")
 
     other_user = thread.get_other_user(request.user)
@@ -1151,7 +1173,7 @@ def send_chat_message(request, thread_id):
         return JsonResponse(
             {
                 "ok": False,
-                "error": "You cannot send messages in this chat.",
+                "error": _("You cannot send messages in this chat."),
             },
             status=403,
         )
@@ -1163,7 +1185,7 @@ def send_chat_message(request, thread_id):
         return JsonResponse(
             {
                 "ok": False,
-                "error": "Message cannot be empty.",
+                "error": _("Message cannot be empty."),
             },
             status=400,
         )
@@ -1217,7 +1239,7 @@ def chat_new_messages(request, thread_id):
         return JsonResponse(
             {
                 "ok": False,
-                "error": "You cannot access this chat.",
+                "error": _("You cannot access this chat."),
             },
             status=403,
         )
@@ -1313,34 +1335,34 @@ def coming_soon(request, feature):
     features = {
         "maps": {
             "title": _("Maps"),
-            "subtitle": _("Find tattoo artists near you and explore studios by location."),
+            "subtitle": _(_("Find tattoo artists near you and explore studios by location.")),
             "icon": "🗺️",
         },
         "calendar": {
             "title": _("Calendar"),
-            "subtitle": _("Manage bookings, sessions and upcoming appointments."),
+            "subtitle": _(_("Manage bookings, sessions and upcoming appointments.")),
             "icon": "📅",
         },
         "clean-slate": {
             "title": _("Clean slate"),
-            "subtitle": _("Discover tattoo removal resources, specialists and useful guides."),
+            "subtitle": _(_("Discover tattoo removal resources, specialists and useful guides.")),
             "icon": "🌱",
         },
         "notifications": {
             "title": _("Notifications"),
-            "subtitle": _("Stay updated about likes, comments, replies and messages."),
+            "subtitle": _(_("Stay updated about likes, comments, replies and messages.")),
             "icon": "🔔",
         },
         "contests": {
             "title": _("Contests"),
-            "subtitle": _("Vote for the best tattoo works, follow competitions and discover winners."),
+            "subtitle": _(_("Vote for the best tattoo works, follow competitions and discover winners.")),
             "icon": "🏆",
         },
     }
 
     feature_data = features.get(feature, {
         "title": _("Coming soon"),
-        "subtitle": _("This feature is currently in development."),
+        "subtitle": _(_("This feature is currently in development.")),
         "icon": "✨",
     })
 

@@ -67,7 +67,10 @@
         </div>
 
         <div class="verification-field">
-          <label for="{{ document_form.business_document_file.id_for_label }}">
+          <label
+            for="{{ document_form.business_document_file.id_for_label }}"
+            data-selected-text="{% trans 'File uploaded ✅' %}"
+          >
             {% trans "Business document file" %}
           </label>
           {{ document_form.business_document_file }}
@@ -81,7 +84,10 @@
         </div>
 
         <div class="verification-field">
-          <label for="{{ document_form.id_document_file.id_for_label }}">
+          <label
+            for="{{ document_form.id_document_file.id_for_label }}"
+            data-selected-text="{% trans 'File uploaded ✅' %}"
+          >
             {% trans "Identity document file" %}
           </label>
           {{ document_form.id_document_file }}
@@ -139,7 +145,10 @@
         </div>
 
         <div class="verification-field">
-          <label for="{{ manual_form.extra_file.id_for_label }}">
+          <label
+            for="{{ manual_form.extra_file.id_for_label }}"
+            data-selected-text="{% trans 'File uploaded ✅' %}"
+          >
             {% trans "Optional file" %}
           </label>
           {{ manual_form.extra_file }}

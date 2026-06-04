@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tatzo\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-03 19:10+0200\n"
+"POT-Creation-Date: 2026-06-04 15:08+0200\n"
 "PO-Revision-Date: 2026-05-27 09:40+0200\n"
 "Last-Translator: Vladimir Procopisin\n"
 "Language-Team: French\n"
@@ -99,6 +99,50 @@ msgstr "Enregistrer"
 #: .\posts\templates\posts\feed.html:53 .\templates\home.html:127
 msgid "No posts available."
 msgstr "Aucune publication disponible."
+
+#: .\posts\views.py:92 .\users\views.py:134
+msgid "Post cannot be empty."
+msgstr "La publication ne peut pas être vide."
+
+#: .\posts\views.py:135
+msgid "Form validation failed."
+msgstr "La validation du formulaire a échoué."
+
+#: .\posts\views.py:150 .\templates\home.html:370
+msgid "Comments are disabled for this post."
+msgstr "Les commentaires sont désactivés pour cette publication."
+
+#: .\posts\views.py:162 .\posts\views.py:274
+msgid "Comment cannot be empty."
+msgstr "Le commentaire ne peut pas être vide."
+
+#: .\posts\views.py:299
+msgid "You cannot report your own comment."
+msgstr "Vous ne pouvez pas signaler votre propre commentaire."
+
+#: .\posts\views.py:314 .\templates\home.html:365
+msgid "Report sent."
+msgstr "Signalement envoyé."
+
+#: .\posts\views.py:316
+msgid "You have already reported this comment."
+msgstr "Vous avez déjà signalé ce commentaire."
+
+#: .\posts\views.py:345
+msgid "You cannot report your own post."
+msgstr "Vous ne pouvez pas signaler votre propre publication."
+
+#: .\posts\views.py:367
+msgid "Post report sent."
+msgstr "Signalement de la publication envoyé."
+
+#: .\posts\views.py:369
+msgid "You have already reported this post."
+msgstr "Vous avez déjà signalé cette publication."
+
+#: .\posts\views.py:423
+msgid "Invalid method."
+msgstr "Méthode non autorisée."
 
 #: .\templates\home.html:4 .\templates\partials\sidebar.html:28
 #: .\templates\partials\sidebar.html:29
@@ -197,6 +241,7 @@ msgstr "Utilisateur"
 
 #: .\templates\home.html:140 .\templates\home.html:149
 #: .\templates\users\profile.html:74 .\templates\users\profile.html:347
+#: .\users\views.py:635
 msgid "Follow"
 msgstr "Suivre"
 
@@ -252,7 +297,7 @@ msgid "Report comment"
 msgstr "Signaler le commentaire"
 
 #: .\templates\home.html:324 .\templates\users\coming_soon.html:4
-#: .\templates\users\coming_soon.html:20 .\users\views.py:1342
+#: .\templates\users\coming_soon.html:20 .\users\views.py:1364
 msgid "Coming soon"
 msgstr "Bientôt disponible"
 
@@ -331,10 +376,6 @@ msgstr "Envoi..."
 msgid "Report failed."
 msgstr "Le signalement a échoué."
 
-#: .\templates\home.html:365
-msgid "Report sent."
-msgstr "Signalement envoyé."
-
 #: .\templates\home.html:368
 msgid "Edit comment:"
 msgstr "Modifier le commentaire :"
@@ -342,10 +383,6 @@ msgstr "Modifier le commentaire :"
 #: .\templates\home.html:369
 msgid "Delete this comment?"
 msgstr "Supprimer ce commentaire ?"
-
-#: .\templates\home.html:370
-msgid "Comments are disabled for this post."
-msgstr "Les commentaires sont désactivés pour cette publication."
 
 #: .\templates\home.html:372
 msgid "Hide replies"
@@ -455,7 +492,7 @@ msgid "Search"
 msgstr "Recherche"
 
 #: .\templates\partials\sidebar.html:48 .\templates\partials\sidebar.html:49
-#: .\users\views.py:1315
+#: .\users\views.py:1337
 msgid "Maps"
 msgstr "Cartes"
 
@@ -465,22 +502,22 @@ msgid "Chats"
 msgstr "Messages"
 
 #: .\templates\partials\sidebar.html:72 .\templates\partials\sidebar.html:73
-#: .\users\views.py:1320
+#: .\users\views.py:1342
 msgid "Calendar"
 msgstr "Calendrier"
 
 #: .\templates\partials\sidebar.html:92 .\templates\partials\sidebar.html:93
-#: .\users\templates\users\contests.html:4 .\users\views.py:1335
+#: .\users\templates\users\contests.html:4 .\users\views.py:1357
 msgid "Contests"
 msgstr "Concours"
 
 #: .\templates\partials\sidebar.html:102 .\templates\partials\sidebar.html:103
-#: .\users\views.py:1325
+#: .\users\views.py:1347
 msgid "Clean slate"
 msgstr "Nouveau départ"
 
 #: .\templates\partials\sidebar.html:112 .\templates\partials\sidebar.html:113
-#: .\users\views.py:1330
+#: .\users\views.py:1352
 msgid "Notifications"
 msgstr "Notifications"
 
@@ -1088,6 +1125,7 @@ msgid "Edit profile"
 msgstr "Modifier le profil"
 
 #: .\templates\users\profile.html:72 .\templates\users\profile.html:346
+#: .\users\views.py:635
 msgid "Following"
 msgstr "Abonné"
 
@@ -1113,18 +1151,18 @@ msgid "No bio yet."
 msgstr "Aucune bio pour le moment."
 
 #: .\templates\users\profile.html:122
-#: .\users\templates\users\verification_page.html:34
+#: .\users\templates\users\verification_page.html:34 .\users\views.py:386
 msgid "Rejected"
 msgstr "Refusé"
 
 #: .\templates\users\profile.html:124 .\templates\users\profile.html:126
 #: .\users\templates\users\verification_page.html:36
-#: .\users\templates\users\verification_page.html:38
+#: .\users\templates\users\verification_page.html:38 .\users\views.py:384
 msgid "Pending"
 msgstr "En attente"
 
 #: .\templates\users\profile.html:128
-#: .\users\templates\users\verification_page.html:40
+#: .\users\templates\users\verification_page.html:40 .\users\views.py:381
 msgid "Not submitted"
 msgstr "Non envoyé"
 
@@ -1698,6 +1736,48 @@ msgstr ""
 "Confirmez votre e-mail en cliquant sur le lien dans le message que nous vous "
 "avons envoyé. Ensuite, vous serez redirigé vers la bonne page."
 
+#: .\users\templates\users\upload_verification_documents.html:4
+#: .\users\templates\users\upload_verification_documents.html:8
+msgid "Upload verification documents"
+msgstr "Importer les documents de vérification"
+
+#: .\users\templates\users\upload_verification_documents.html:14
+msgid "Document type"
+msgstr "Type de document"
+
+#: .\users\templates\users\upload_verification_documents.html:16
+msgid "Certificate of qualification"
+msgstr "Certificat de qualification"
+
+#: .\users\templates\users\upload_verification_documents.html:17
+msgid "License"
+msgstr "Licence"
+
+#: .\users\templates\users\upload_verification_documents.html:18
+msgid "Registration document"
+msgstr "Document d’enregistrement"
+
+#: .\users\templates\users\upload_verification_documents.html:25
+#: .\users\templates\users\upload_verification_documents.html:35
+#: .\users\templates\users\verification_page.html:72
+#: .\users\templates\users\verification_page.html:89
+#: .\users\templates\users\verification_page.html:150
+msgid "File uploaded ✅"
+msgstr "Fichier ajouté ✅"
+
+#: .\users\templates\users\upload_verification_documents.html:27
+msgid "Upload document"
+msgstr "Importer le document"
+
+#: .\users\templates\users\upload_verification_documents.html:37
+msgid "Upload identity document (optional)"
+msgstr "Importer la pièce d’identité (optionnel)"
+
+#: .\users\templates\users\upload_verification_documents.html:42
+#: .\users\templates\users\verification_page.html:103
+msgid "Submit documents"
+msgstr "Envoyer les documents"
+
 #: .\users\templates\users\verification_page.html:4
 #: .\users\templates\users\verification_page.html:18
 msgid "Artist verification"
@@ -1715,7 +1795,7 @@ msgstr ""
 msgid "Status"
 msgstr "Statut"
 
-#: .\users\templates\users\verification_page.html:32
+#: .\users\templates\users\verification_page.html:32 .\users\views.py:385
 msgid "Approved"
 msgstr "Approuvé"
 
@@ -1731,27 +1811,23 @@ msgstr "Importez votre document professionnel et votre pièce d'identité."
 msgid "Business document type"
 msgstr "Type de document professionnel"
 
-#: .\users\templates\users\verification_page.html:71
+#: .\users\templates\users\verification_page.html:74
 msgid "Business document file"
 msgstr "Fichier du document professionnel"
 
-#: .\users\templates\users\verification_page.html:78
+#: .\users\templates\users\verification_page.html:81
 msgid "Identity document type"
 msgstr "Type de pièce d'identité"
 
-#: .\users\templates\users\verification_page.html:85
+#: .\users\templates\users\verification_page.html:91
 msgid "Identity document file"
 msgstr "Fichier de la pièce d'identité"
 
-#: .\users\templates\users\verification_page.html:97
-msgid "Submit documents"
-msgstr "Envoyer les documents"
-
-#: .\users\templates\users\verification_page.html:106
+#: .\users\templates\users\verification_page.html:112
 msgid "No official documents?"
 msgstr "Pas de documents officiels ?"
 
-#: .\users\templates\users\verification_page.html:109
+#: .\users\templates\users\verification_page.html:115
 msgid ""
 "Request a manual review. Send your portfolio, social links and a short "
 "explanation."
@@ -1759,61 +1835,222 @@ msgstr ""
 "Demandez une vérification manuelle. Envoyez votre portfolio, vos liens "
 "sociaux et une courte explication."
 
-#: .\users\templates\users\verification_page.html:115
+#: .\users\templates\users\verification_page.html:121
 msgid "Portfolio link"
 msgstr "Lien du portfolio"
 
-#: .\users\templates\users\verification_page.html:122
+#: .\users\templates\users\verification_page.html:128
 msgid "Social media link"
 msgstr "Lien vers les réseaux sociaux"
 
-#: .\users\templates\users\verification_page.html:129
+#: .\users\templates\users\verification_page.html:135
 msgid "City / Country"
 msgstr "Ville / Pays"
 
-#: .\users\templates\users\verification_page.html:136
+#: .\users\templates\users\verification_page.html:142
 msgid "Explanation"
 msgstr "Explication"
 
-#: .\users\templates\users\verification_page.html:143
+#: .\users\templates\users\verification_page.html:152
 msgid "Optional file"
 msgstr "Fichier optionnel"
 
-#: .\users\templates\users\verification_page.html:155
+#: .\users\templates\users\verification_page.html:164
 msgid "Request manual review"
 msgstr "Demander une vérification manuelle"
 
-#: .\users\views.py:1316
+#: .\users\views.py:41
+msgid "Please verify your email before logging in."
+msgstr "Veuillez confirmer votre e-mail avant de vous connecter."
+
+#: .\users\views.py:47
+msgid "Invalid username or password."
+msgstr "Nom d'utilisateur ou mot de passe incorrect."
+
+#: .\users\views.py:103
+msgid "This link is invalid or has expired."
+msgstr "Ce lien est invalide ou a expiré."
+
+#: .\users\views.py:199
+msgid "Profile updated successfully."
+msgstr "Profil mis à jour avec succès."
+
+#: .\users\views.py:227
+msgid "Your post has been deleted."
+msgstr "Votre publication a été supprimée."
+
+#: .\users\views.py:229
+msgid "You cannot delete this post."
+msgstr "Vous ne pouvez pas supprimer cette publication."
+
+#: .\users\views.py:270
+msgid "You cannot edit this post."
+msgstr "Vous ne pouvez pas modifier cette publication."
+
+#: .\users\views.py:277
+msgid "Your post has been updated successfully."
+msgstr "Votre publication a été mise à jour avec succès."
+
+#: .\users\views.py:296
+#, python-format
+msgid "Profile %(username)s has been approved."
+msgstr "Le profil %(username)s a été approuvé."
+
+#: .\users\views.py:304
+#, python-format
+msgid "Profile %(username)s has been rejected."
+msgstr "Le profil %(username)s a été refusé."
+
+#: .\users\views.py:351
+msgid "Your documents have been submitted for review."
+msgstr "Vos documents ont été envoyés pour vérification."
+
+#: .\users\views.py:373
+msgid "Your manual review request has been submitted."
+msgstr "Votre demande de vérification manuelle a été envoyée."
+
+#: .\users\views.py:378
+msgid "Invalid verification request."
+msgstr "Demande de vérification invalide."
+
+#: .\users\views.py:382
+msgid "Pending documents review"
+msgstr "Vérification des documents en attente"
+
+#: .\users\views.py:383
+msgid "Pending manual review"
+msgstr "Vérification manuelle en attente"
+
+#: .\users\views.py:423
+msgid "Invalid request."
+msgstr "Requête invalide."
+
+#: .\users\views.py:445
+msgid "Profile approved successfully."
+msgstr "Profil approuvé avec succès."
+
+#: .\users\views.py:449
+msgid "Profile rejected successfully."
+msgstr "Profil refusé avec succès."
+
+#: .\users\views.py:451
+msgid "Invalid action."
+msgstr "Action invalide."
+
+#: .\users\views.py:479
+msgid "Your documents have been submitted for verification."
+msgstr "Vos documents ont été envoyés pour vérification."
+
+#: .\users\views.py:499
+#, python-format
+msgid "Profile '%(username)s' has been approved."
+msgstr "Le profil « %(username)s » a été approuvé."
+
+#: .\users\views.py:519
+#, python-format
+msgid "Profile '%(username)s' has been rejected."
+msgstr "Le profil « %(username)s » a été refusé."
+
+#: .\users\views.py:610
+msgid "You cannot follow yourself."
+msgstr "Vous ne pouvez pas vous suivre vous-même."
+
+#: .\users\views.py:749
+#, python-format
+msgid "Portfolio work added successfully."
+msgid_plural "%(count)s portfolio works added successfully."
+msgstr[0] "Travail ajouté au portfolio."
+msgstr[1] "%(count)s travaux ajoutés au portfolio."
+
+#: .\users\views.py:775
+msgid "Portfolio album created."
+msgstr "Album de portfolio créé."
+
+#: .\users\views.py:859
+msgid "Album updated successfully."
+msgstr "Album mis à jour avec succès."
+
+#: .\users\views.py:888
+msgid "Album deleted. Works were kept in All works."
+msgstr "Album supprimé. Les travaux ont été conservés dans Tous les travaux."
+
+#: .\users\views.py:909
+msgid "Portfolio work deleted."
+msgstr "Travail supprimé du portfolio."
+
+#: .\users\views.py:974
+#, python-format
+msgid "%(username)s has been approved as a tattoo artist."
+msgstr "%(username)s a été approuvé comme tatoueur."
+
+#: .\users\views.py:993
+#, python-format
+msgid "%(username)s's verification has been rejected."
+msgstr "La vérification de %(username)s a été refusée."
+
+#: .\users\views.py:1008
+msgid "Post report resolved."
+msgstr "Signalement de publication traité."
+
+#: .\users\views.py:1028
+msgid "Reported post deleted."
+msgstr "Publication signalée supprimée."
+
+#: .\users\views.py:1041
+msgid "Comment report resolved."
+msgstr "Signalement de commentaire traité."
+
+#: .\users\views.py:1061
+msgid "Reported comment deleted."
+msgstr "Commentaire signalé supprimé."
+
+#: .\users\views.py:1118
+msgid "You cannot start a chat with yourself."
+msgstr "Vous ne pouvez pas démarrer une conversation avec vous-même."
+
+#: .\users\views.py:1139 .\users\views.py:1242
+msgid "You cannot access this chat."
+msgstr "Vous ne pouvez pas accéder à cette conversation."
+
+#: .\users\views.py:1176
+msgid "You cannot send messages in this chat."
+msgstr "Vous ne pouvez pas envoyer de messages dans cette conversation."
+
+#: .\users\views.py:1188
+msgid "Message cannot be empty."
+msgstr "Le message ne peut pas être vide."
+
+#: .\users\views.py:1338
 msgid "Find tattoo artists near you and explore studios by location."
 msgstr ""
 "Trouvez des tatoueurs près de chez vous et explorez les studios par "
 "localisation."
 
-#: .\users\views.py:1321
+#: .\users\views.py:1343
 msgid "Manage bookings, sessions and upcoming appointments."
 msgstr "Gérez vos réservations, vos séances et vos prochains rendez-vous."
 
-#: .\users\views.py:1326
+#: .\users\views.py:1348
 msgid "Discover tattoo removal resources, specialists and useful guides."
 msgstr ""
 "Découvrez des ressources sur le détatouage, des spécialistes et des guides "
 "utiles."
 
-#: .\users\views.py:1331
+#: .\users\views.py:1353
 msgid "Stay updated about likes, comments, replies and messages."
 msgstr "Restez informé des likes, commentaires, réponses et messages."
 
-#: .\users\views.py:1336
+#: .\users\views.py:1358
 msgid ""
 "Vote for the best tattoo works, follow competitions and discover winners."
 msgstr ""
 "Votez pour les meilleurs travaux de tatouage, suivez les concours et "
 "découvrez les gagnants."
 
-#: .\users\views.py:1343
+#: .\users\views.py:1365
 msgid "This feature is currently in development."
 msgstr "Cette fonctionnalité est actuellement en développement."
 
-#: .\users\views.py:1363
+#: .\users\views.py:1385
 msgid "Thank you! Your report has been sent."
 msgstr "Merci ! Votre signalement a été envoyé."

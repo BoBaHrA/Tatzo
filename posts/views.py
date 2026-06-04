@@ -1,13 +1,22 @@
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.shortcuts import redirect, render
-from django.views.decorators.http import require_POST
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.template.loader import render_to_string
+from django.utils.translation import gettext as _
+from django.views.decorators.http import require_POST
 
 from .forms import PostForm, PostMediaUploadForm
-from .models import Post, PostMedia, PostLike, PostComment, CommentLike, CommentReport, PostReport, PostBookmark
+from .models import (
+    CommentLike,
+    CommentReport,
+    Post,
+    PostBookmark,
+    PostComment,
+    PostLike,
+    PostMedia,
+    PostReport,
+)
 
 
 def feed(request):
@@ -27,7 +36,10 @@ def feed(request):
         )
 
         bookmarked_post_ids = set(
-            PostBookmark.objects.filter(user=request.user).values_list("post_id", flat=True)
+            PostBookmark.objects.filter(user=request.user).values_list(
+                "post_id",
+                flat=True,
+            )
         )
 
     context = {
@@ -39,6 +51,7 @@ def feed(request):
     }
 
     return render(request, "posts/feed.html", context)
+
 
 @login_required
 @require_POST
@@ -54,11 +67,14 @@ def toggle_like(request, post_id):
         PostLike.objects.create(post=post, user=request.user)
         liked = True
 
-    return JsonResponse({
-        "ok": True,
-        "liked": liked,
-        "likes_count": post.likes.count(),
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "liked": liked,
+            "likes_count": post.likes.count(),
+        }
+    )
+
 
 @login_required
 @require_POST
@@ -70,10 +86,13 @@ def create_post(request):
     content = request.POST.get("content", "").strip()
 
     if not content and not files:
-        return JsonResponse({
-            "ok": False,
-            "error": "Пост не может быть пустым."
-        }, status=400)
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": _("Post cannot be empty."),
+            },
+            status=400,
+        )
 
     if post_form.is_valid() and media_form.is_valid():
         with transaction.atomic():
@@ -102,25 +121,34 @@ def create_post(request):
             request=request,
         )
 
-        return JsonResponse({
-            "ok": True,
-            "post_id": post.id,
-            "html": html,
-        })
+        return JsonResponse(
+            {
+                "ok": True,
+                "post_id": post.id,
+                "html": html,
+            }
+        )
 
-    return JsonResponse({
-        "ok": False,
-        "error": "Ошибка валидации формы."
-    }, status=400)
-    
+    return JsonResponse(
+        {
+            "ok": False,
+            "error": _("Form validation failed."),
+        },
+        status=400,
+    )
+
+
 @login_required
 @require_POST
 def create_comment(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    
+
     if post.disable_comments:
         return JsonResponse(
-            {"ok": False, "error": "Комментарии для этого поста отключены."},
+            {
+                "ok": False,
+                "error": _("Comments are disabled for this post."),
+            },
             status=403,
         )
 
@@ -129,7 +157,10 @@ def create_comment(request, post_id):
 
     if not content:
         return JsonResponse(
-            {"ok": False, "error": "Комментарий не может быть пустым."},
+            {
+                "ok": False,
+                "error": _("Comment cannot be empty."),
+            },
             status=400,
         )
 
@@ -161,11 +192,13 @@ def create_comment(request, post_id):
             "comments_count": post.comments.count(),
         }
     )
-    
+
+
 def get_comments(request, post_id):
     post = get_object_or_404(Post, id=post_id)
 
     liked_comment_ids = set()
+
     if request.user.is_authenticated:
         liked_comment_ids = set(
             CommentLike.objects.filter(user=request.user, comment__post=post)
@@ -186,6 +219,7 @@ def get_comments(request, post_id):
 
     return JsonResponse({"html": html})
 
+
 @login_required
 @require_POST
 def toggle_comment_like(request, comment_id):
@@ -193,7 +227,7 @@ def toggle_comment_like(request, comment_id):
 
     like, created = CommentLike.objects.get_or_create(
         user=request.user,
-        comment=comment
+        comment=comment,
     )
 
     if not created:
@@ -202,12 +236,15 @@ def toggle_comment_like(request, comment_id):
     else:
         liked = True
 
-    return JsonResponse({
-        "ok": True,
-        "liked": liked,
-        "count": comment.likes.count(),
-    })
-    
+    return JsonResponse(
+        {
+            "ok": True,
+            "liked": liked,
+            "count": comment.likes.count(),
+        }
+    )
+
+
 @login_required
 @require_POST
 def delete_comment(request, comment_id):
@@ -215,31 +252,41 @@ def delete_comment(request, comment_id):
     post = comment.post
     comment.delete()
 
-    return JsonResponse({
-        "ok": True,
-        "comments_count": post.comments.count(),
-    })
-    
+    return JsonResponse(
+        {
+            "ok": True,
+            "comments_count": post.comments.count(),
+        }
+    )
+
+
 @login_required
 @require_POST
 def edit_comment(request, comment_id):
     comment = get_object_or_404(PostComment, id=comment_id, user=request.user)
 
     content = (request.POST.get("content") or "").strip()
+
     if not content:
         return JsonResponse(
-            {"ok": False, "error": "Комментарий не может быть пустым."},
+            {
+                "ok": False,
+                "error": _("Comment cannot be empty."),
+            },
             status=400,
         )
 
     comment.content = content
     comment.save(update_fields=["content"])
 
-    return JsonResponse({
-        "ok": True,
-        "content": comment.content,
-    })
-    
+    return JsonResponse(
+        {
+            "ok": True,
+            "content": comment.content,
+        }
+    )
+
+
 @login_required
 @require_POST
 def report_comment(request, comment_id):
@@ -247,7 +294,10 @@ def report_comment(request, comment_id):
 
     if comment.user == request.user:
         return JsonResponse(
-            {"ok": False, "error": "Нельзя пожаловаться на свой комментарий."},
+            {
+                "ok": False,
+                "error": _("You cannot report your own comment."),
+            },
             status=400,
         )
 
@@ -256,22 +306,31 @@ def report_comment(request, comment_id):
         user=request.user,
     )
 
-    return JsonResponse({
-        "ok": True,
-        "created": created,
-        "message": "Жалоба отправлена." if created else "Вы уже жаловались на этот комментарий.",
-    })
-    
+    return JsonResponse(
+        {
+            "ok": True,
+            "created": created,
+            "message": (
+                _("Report sent.")
+                if created
+                else _("You have already reported this comment.")
+            ),
+        }
+    )
+
+
 @login_required
 @require_POST
 def delete_post(request, post_id):
     post = get_object_or_404(Post, id=post_id, user=request.user)
     post.delete()
 
-    return JsonResponse({
-        "ok": True,
-        "post_id": post_id,
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "post_id": post_id,
+        }
+    )
 
 
 @login_required
@@ -281,7 +340,10 @@ def report_post(request, post_id):
 
     if post.user == request.user:
         return JsonResponse(
-            {"ok": False, "error": "Нельзя пожаловаться на свой пост."},
+            {
+                "ok": False,
+                "error": _("You cannot report your own post."),
+            },
             status=400,
         )
 
@@ -297,12 +359,19 @@ def report_post(request, post_id):
         report.reason = reason
         report.save(update_fields=["reason"])
 
-    return JsonResponse({
-        "ok": True,
-        "created": created,
-        "message": "Жалоба на пост отправлена." if created else "Вы уже жаловались на этот пост.",
-    })
-    
+    return JsonResponse(
+        {
+            "ok": True,
+            "created": created,
+            "message": (
+                _("Post report sent.")
+                if created
+                else _("You have already reported this post.")
+            ),
+        }
+    )
+
+
 def post_detail_fragment(request, post_id):
     post = get_object_or_404(
         Post.objects
@@ -320,7 +389,10 @@ def post_detail_fragment(request, post_id):
         )
 
         bookmarked_post_ids = set(
-            PostBookmark.objects.filter(user=request.user).values_list("post_id", flat=True)
+            PostBookmark.objects.filter(user=request.user).values_list(
+                "post_id",
+                flat=True,
+            )
         )
 
     html = render_to_string(
@@ -334,15 +406,24 @@ def post_detail_fragment(request, post_id):
         request=request,
     )
 
-    return JsonResponse({
-        "ok": True,
-        "html": html,
-    })
-    
+    return JsonResponse(
+        {
+            "ok": True,
+            "html": html,
+        }
+    )
+
+
 @login_required
 def toggle_bookmark(request, post_id):
     if request.method != "POST":
-        return JsonResponse({"ok": False, "error": "Invalid method"}, status=405)
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": _("Invalid method."),
+            },
+            status=405,
+        )
 
     post = get_object_or_404(Post, id=post_id)
 
@@ -357,10 +438,12 @@ def toggle_bookmark(request, post_id):
     else:
         bookmarked = True
 
-    return JsonResponse({
-        "ok": True,
-        "bookmarked": bookmarked,
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "bookmarked": bookmarked,
+        }
+    )
 
 
 @login_required
@@ -380,8 +463,12 @@ def bookmarks_page(request):
 
     bookmarked_post_ids = set(post.id for post in posts)
 
-    return render(request, "posts/bookmarks.html", {
-        "posts": posts,
-        "liked_post_ids": liked_post_ids,
-        "bookmarked_post_ids": bookmarked_post_ids,
-    })
+    return render(
+        request,
+        "posts/bookmarks.html",
+        {
+            "posts": posts,
+            "liked_post_ids": liked_post_ids,
+            "bookmarked_post_ids": bookmarked_post_ids,
+        },
+    )

@@ -984,7 +984,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const delMain = document.createElement("div");
       delMain.className = "preview-remove";
       delMain.textContent = "✖";
-      delMain.title = "Удалить файл";
+      delMain.title = t("removeFile", "Remove file");
       delMain.addEventListener("click", (e) => {
         e.stopPropagation();
         const removed = state.selectedFiles[state.carouselIndex];
@@ -1598,11 +1598,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const fd = new FormData();
       fd.append("reason", els.commentReportText?.value?.trim() || "");
 
-      const originalButtonText = els.commentReportConfirm?.textContent || "Send report";
+      const originalButtonText = els.commentReportConfirm?.textContent || t("sendReport", "Send report");
 
       if (els.commentReportConfirm) {
         els.commentReportConfirm.disabled = true;
-        els.commentReportConfirm.textContent = "Sending...";
+        els.commentReportConfirm.textContent = t("sending", "Sending...");
       }
 
       try {
@@ -1847,10 +1847,10 @@ document.addEventListener("DOMContentLoaded", () => {
               <input
                 type="text"
                 id="modal-comment-input"
-                placeholder="Write a comment..."
+                placeholder="${t("writeComment", "Write a comment...")}"
                 autocomplete="off"
               >
-              <button type="submit">Send</button>
+              <button type="submit">${t("send", "Send")}</button>
             `;
 
             els.modalCommentInput = document.getElementById("modal-comment-input");

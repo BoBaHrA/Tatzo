@@ -1,66 +1,71 @@
-console.log("✅ JS загружен и выполняется!");
-
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.querySelector(".verification-form");
     const submitButton = document.querySelector(".btn-submit");
     const verificationContainer = document.querySelector(".verification-container");
 
-    if (form) {
-        form.addEventListener("submit", function (event) {
-            console.log("📩 Форма отправлена, запускаем анимацию!");
+    if (!form || !submitButton || !verificationContainer) {
+        return;
+    }
 
-            event.preventDefault(); // Останавливаем стандартную отправку формы
-            submitButton.disabled = true;
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
 
-            // Отключаем кликабельность всей формы и скрываем кнопки
-            verificationContainer.style.pointerEvents = "none";
-            verificationContainer.classList.add("hide-during-animation");
+        submitButton.disabled = true;
+        verificationContainer.style.pointerEvents = "none";
+        verificationContainer.classList.add("hide-during-animation");
 
-            const confirmationBox = document.getElementById("confirmation-animation");
-            console.log("🖼️ Показываем контейнер анимации!");
+        const confirmationBox = document.getElementById("confirmation-animation");
+
+        if (confirmationBox) {
             confirmationBox.classList.remove("hidden");
             confirmationBox.style.opacity = "1";
             confirmationBox.classList.add("animate");
+        }
 
-            // Показываем бумагу
-            const paper = document.querySelector(".paper");
-            if (paper) {
-                console.log("📜 Бумага найдена! Запускаем анимацию.");
-                paper.classList.add("animate");
-            } else {
-                console.log("⚠️ Ошибка: бумага не найдена!");
-            }
+        const paper = document.querySelector(".paper");
 
-            const overlay = document.getElementById("dark-overlay");
+        if (paper) {
+            paper.classList.add("animate");
+        }
+
+        const overlay = document.getElementById("dark-overlay");
+
+        if (overlay) {
             overlay.classList.remove("hidden");
             overlay.classList.add("show");
+        }
 
-
-
-            // ⏳ Переадресация после завершения анимации
-            setTimeout(() => {
-                console.log("📤 Анимация завершена — можно перенаправлять пользователя.");
-                window.location.href = "/"; // или другая нужная страница
-            }, 3000); // Ожидание окончания анимации
-        });
-    } else {
-        console.log("⚠️ Ошибка: форма не найдена!");
-    }
+        setTimeout(() => {
+            window.location.href = "/";
+        }, 3000);
+    });
 });
 
 document.addEventListener("DOMContentLoaded", function () {
     const fileInputs = document.querySelectorAll('input[type="file"]');
-    fileInputs.forEach(input => {
+
+    fileInputs.forEach((input) => {
+        const label = input.previousElementSibling;
+
+        if (!label) {
+            return;
+        }
+
+        if (!label.dataset.defaultText) {
+            label.dataset.defaultText = label.textContent.trim();
+        }
+
         input.addEventListener("change", function () {
-            const label = this.previousElementSibling;
+            const selectedText = label.dataset.selectedText || "File uploaded ✅";
+            const defaultText = label.dataset.defaultText || "Choose file";
+
             if (this.files.length > 0) {
-                label.textContent = "Файл загружен ✅";
+                label.textContent = selectedText;
                 label.classList.add("file-selected");
             } else {
-                label.textContent = "Выберите файл";
+                label.textContent = defaultText;
                 label.classList.remove("file-selected");
             }
         });
     });
 });
-

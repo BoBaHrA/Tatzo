@@ -1,34 +1,45 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}Upload Verification Documents{% endblock %}
+{% block title %}{% trans "Upload verification documents" %}{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h2>Upload Verification Documents</h2>
+    <h2>{% trans "Upload verification documents" %}</h2>
 
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         
         <div class="input-group">
-            <label for="document_type">Document Type</label>
+            <label for="document_type">{% trans "Document type" %}</label>
             <select name="document_type" id="document_type" required>
-                <option value="certificate">Certificate of Qualification</option>
-                <option value="license">License</option>
-                <option value="registration">Registration Document</option>
+                <option value="certificate">{% trans "Certificate of qualification" %}</option>
+                <option value="license">{% trans "License" %}</option>
+                <option value="registration">{% trans "Registration document" %}</option>
             </select>
         </div>
 
         <div class="input-group">
-            <label for="document_file">Upload Document</label>
+            <label
+                for="document_file"
+                data-selected-text="{% trans 'File uploaded ✅' %}"
+            >
+                {% trans "Upload document" %}
+            </label>
             <input type="file" name="document_file" id="document_file" required>
         </div>
 
         <div class="input-group">
-            <label for="identity_document">Upload Identity Document (Optional)</label>
+            <label
+                for="identity_document"
+                data-selected-text="{% trans 'File uploaded ✅' %}"
+            >
+                {% trans "Upload identity document (optional)" %}
+            </label>
             <input type="file" name="identity_document" id="identity_document">
         </div>
 
-        <button type="submit" class="btn">Submit Documents</button>
+        <button type="submit" class="btn">{% trans "Submit documents" %}</button>
     </form>
 </div>
 {% endblock %}
