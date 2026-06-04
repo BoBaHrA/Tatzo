@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tatzo\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-04 15:16+0200\n"
+"POT-Creation-Date: 2026-06-04 15:39+0200\n"
 "PO-Revision-Date: 2026-05-27 09:40+0200\n"
 "Last-Translator: Vladimir Procopisin\n"
 "Language-Team: Russian\n"
@@ -17,15 +17,18 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: .\mytattooapp\settings.py:101
+#: .\mytattooapp\settings.py:101 .\users\templates\users\signup.html:30
+#: .\users\templates\users\signup.html:31
 msgid "English"
 msgstr "Английский"
 
-#: .\mytattooapp\settings.py:102
+#: .\mytattooapp\settings.py:102 .\users\templates\users\signup.html:41
+#: .\users\templates\users\signup.html:42
 msgid "Français"
 msgstr "Французский"
 
-#: .\mytattooapp\settings.py:103
+#: .\mytattooapp\settings.py:103 .\users\templates\users\signup.html:52
+#: .\users\templates\users\signup.html:53
 msgid "Русский"
 msgstr "Русский"
 
@@ -258,7 +261,7 @@ msgid "Login"
 msgstr "Вход"
 
 #: .\templates\home.html:162 .\users\templates\users\signup.html:4
-#: .\users\templates\users\signup.html:121
+#: .\users\templates\users\signup.html:161
 msgid "Sign up"
 msgstr "Регистрация"
 
@@ -566,12 +569,12 @@ msgid "Enter your username"
 msgstr "Введите имя пользователя"
 
 #: .\templates\registration\login.html:13
-#: .\users\templates\users\signup.html:14
+#: .\users\templates\users\signup.html:16
 msgid "Enter your password"
 msgstr "Введите пароль"
 
 #: .\templates\registration\login.html:20
-#: .\users\templates\users\signup.html:24
+#: .\users\templates\users\signup.html:64
 msgid "Welcome"
 msgstr "Добро пожаловать"
 
@@ -580,12 +583,12 @@ msgstr "Добро пожаловать"
 #: .\users\templates\users\pending_profiles.html:13
 #: .\users\templates\users\pending_verifications.html:13
 #: .\users\templates\users\review_profile.html:11
-#: .\users\templates\users\signup.html:34
+#: .\users\templates\users\signup.html:74
 msgid "Username"
 msgstr "Имя пользователя"
 
 #: .\templates\registration\login.html:37
-#: .\users\templates\users\signup.html:60
+#: .\users\templates\users\signup.html:100
 msgid "Password"
 msgstr "Пароль"
 
@@ -1400,7 +1403,7 @@ msgstr ""
 #: .\users\templates\users\pending_profiles.html:14
 #: .\users\templates\users\pending_verifications.html:14
 #: .\users\templates\users\review_profile.html:16
-#: .\users\templates\users\signup.html:49
+#: .\users\templates\users\signup.html:89
 msgid "Email"
 msgstr "Email"
 
@@ -1536,7 +1539,7 @@ msgid "Password reset — Tatzo"
 msgstr "Восстановление пароля — Tatzo"
 
 #: .\users\templates\users\password_reset.html:12
-#: .\users\templates\users\signup.html:13
+#: .\users\templates\users\signup.html:15
 msgid "Enter your email"
 msgstr "Введите email"
 
@@ -1660,7 +1663,42 @@ msgstr "Список профилей"
 msgid "No profiles found."
 msgstr "Профили не найдены."
 
-#: .\users\templates\users\signup.html:44
+#: .\users\templates\users\review_profile.html:4
+#: .\users\templates\users\review_profile.html:8
+msgid "Review Profile"
+msgstr "Проверка профиля"
+
+#: .\users\templates\users\review_verifications.html:4
+#: .\users\templates\users\review_verifications.html:8
+msgid "Review Verifications"
+msgstr "Проверка заявок"
+
+#: .\users\templates\users\review_verifications.html:24
+msgid "No verification documents to review."
+msgstr "Нет документов для проверки."
+
+#: .\users\templates\users\signup.html:14
+msgid "Choose a username"
+msgstr "Выберите имя пользователя"
+
+#: .\users\templates\users\signup.html:17
+msgid "Repeat your password"
+msgstr "Повторите пароль"
+
+#: .\users\templates\users\signup.html:18
+#: .\users\templates\users\signup.html:67
+msgid "Join our community and discover the world of tattoo!"
+msgstr "Присоединяйтесь к нашему сообществу и откройте для себя мир тату!"
+
+#: .\users\templates\users\signup.html:19
+msgid ""
+"Join our community! If you are a tattoo artist, make sure you provide "
+"documents to verify your status."
+msgstr ""
+"Присоединяйтесь к нашему сообществу! Если вы тату-мастер, обязательно "
+"предоставьте документы для подтверждения вашего статуса."
+
+#: .\users\templates\users\signup.html:84
 msgid ""
 "Your unique @tag will be created automatically based on your username. You "
 "will be able to change it later in your profile settings."
@@ -1668,7 +1706,7 @@ msgstr ""
 "Ваш уникальный @tag будет создан автоматически на основе имени пользователя. "
 "Позже вы сможете изменить его в настройках профиля."
 
-#: .\users\templates\users\signup.html:70
+#: .\users\templates\users\signup.html:110
 msgid ""
 "Password must contain at least 8 characters, one uppercase letter and one "
 "number."
@@ -1676,39 +1714,39 @@ msgstr ""
 "Пароль должен содержать не менее 8 символов, одну заглавную букву и одну "
 "цифру."
 
-#: .\users\templates\users\signup.html:75
+#: .\users\templates\users\signup.html:115
 msgid "Confirm password"
 msgstr "Подтвердите пароль"
 
-#: .\users\templates\users\signup.html:86
+#: .\users\templates\users\signup.html:126
 msgid "Account type"
 msgstr "Тип аккаунта"
 
-#: .\users\templates\users\signup.html:99
+#: .\users\templates\users\signup.html:139
 msgid "Regular user"
 msgstr "Обычный пользователь"
 
-#: .\users\templates\users\signup.html:100
+#: .\users\templates\users\signup.html:140
 msgid "Discover inspiration and book sessions with tattoo artists."
 msgstr "Находите вдохновение и бронируйте сеансы у тату-мастеров."
 
-#: .\users\templates\users\signup.html:113
+#: .\users\templates\users\signup.html:153
 msgid "Tattoo artist"
 msgstr "Тату-мастер"
 
-#: .\users\templates\users\signup.html:114
+#: .\users\templates\users\signup.html:154
 msgid "Publish your work and attract new clients."
 msgstr "Публикуйте свои работы и привлекайте новых клиентов."
 
-#: .\users\templates\users\signup.html:127
+#: .\users\templates\users\signup.html:167
 msgid "Already have an account? Log in here!"
 msgstr "Уже есть аккаунт? Войдите здесь!"
 
-#: .\users\templates\users\signup.html:163
+#: .\users\templates\users\signup.html:203
 msgid "Registration successful!"
 msgstr "Регистрация успешна!"
 
-#: .\users\templates\users\signup.html:166
+#: .\users\templates\users\signup.html:206
 msgid ""
 "Confirm your email by clicking the link in the message we sent you. After "
 "that, you will be redirected to the right page."

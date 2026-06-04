@@ -9,12 +9,52 @@
 
 {% block content %}
 
+{% get_current_language as CURRENT_LANGUAGE %}
+
 {% trans "Choose a username" as username_placeholder %}
 {% trans "Enter your email" as email_placeholder %}
 {% trans "Enter your password" as password_placeholder %}
 {% trans "Repeat your password" as password_confirm_placeholder %}
 {% trans "Join our community and discover the world of tattoo!" as regular_info_text %}
 {% trans "Join our community! If you are a tattoo artist, make sure you provide documents to verify your status." as artist_info_text %}
+
+<form action="{% url 'set_language' %}" method="post" class="signup-language-switcher">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+    <button
+        type="submit"
+        name="language"
+        value="en"
+        class="signup-language-btn {% if CURRENT_LANGUAGE == 'en' %}active{% endif %}"
+        title="{% trans 'English' %}"
+        aria-label="{% trans 'English' %}"
+    >
+        🇺🇸
+    </button>
+
+    <button
+        type="submit"
+        name="language"
+        value="fr"
+        class="signup-language-btn {% if CURRENT_LANGUAGE == 'fr' %}active{% endif %}"
+        title="{% trans 'Français' %}"
+        aria-label="{% trans 'Français' %}"
+    >
+        🇫🇷
+    </button>
+
+    <button
+        type="submit"
+        name="language"
+        value="ru"
+        class="signup-language-btn {% if CURRENT_LANGUAGE == 'ru' %}active{% endif %}"
+        title="{% trans 'Русский' %}"
+        aria-label="{% trans 'Русский' %}"
+    >
+        🇷🇺
+    </button>
+</form>
 
 <div class="login-container">
     <div class="logo">
