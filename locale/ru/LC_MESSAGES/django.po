@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tatzo\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-04 15:08+0200\n"
+"POT-Creation-Date: 2026-06-04 15:16+0200\n"
 "PO-Revision-Date: 2026-05-27 09:40+0200\n"
 "Last-Translator: Vladimir Procopisin\n"
 "Language-Team: Russian\n"
@@ -94,6 +94,7 @@ msgstr "Отмена"
 #: .\posts\templates\posts\feed.html:44 .\templates\home.html:210
 #: .\users\templates\users\edit_profile.html:226
 #: .\users\templates\users\password_reset_confirm.html:26
+#: .\users\templates\users\profile_form.html:18
 msgid "Save"
 msgstr "Сохранить"
 
@@ -147,6 +148,8 @@ msgstr "Недопустимый метод запроса."
 
 #: .\templates\home.html:4 .\templates\partials\sidebar.html:28
 #: .\templates\partials\sidebar.html:29
+#: .\users\templates\users\profile_form.html:10
+#: .\users\templates\users\user_profile.html:8
 msgid "Home"
 msgstr "Главная"
 
@@ -488,6 +491,8 @@ msgstr "Реклама"
 
 #: .\templates\partials\sidebar.html:10 .\templates\partials\sidebar.html:16
 #: .\templates\partials\sidebar.html:21
+#: .\users\templates\users\user_profile.html:4
+#: .\users\templates\users\user_profile.html:10
 msgid "My Profile"
 msgstr "Мой профиль"
 
@@ -1025,6 +1030,7 @@ msgstr "Открыть документ личности"
 #: .\users\templates\users\pending_verifications.html:66
 #: .\users\templates\users\review_profile.html:29
 #: .\users\templates\users\review_verifications.html:16
+#: .\users\templates\users\verify_document.html:24
 msgid "Approve"
 msgstr "Подтвердить"
 
@@ -1034,6 +1040,7 @@ msgstr "Подтвердить"
 #: .\users\templates\users\pending_verifications.html:73
 #: .\users\templates\users\review_profile.html:33
 #: .\users\templates\users\review_verifications.html:20
+#: .\users\templates\users\verify_document.html:27
 msgid "Reject"
 msgstr "Отклонить"
 
@@ -1480,6 +1487,7 @@ msgstr ""
 "Если отключить, другие пользователи увидят, что ваши лайкнутые посты скрыты."
 
 #: .\users\templates\users\edit_profile.html:131
+#: .\users\templates\users\user_profile.html:30
 msgid "Profile image"
 msgstr "Изображение профиля"
 
@@ -1635,40 +1643,22 @@ msgstr "Посмотреть документ личности"
 msgid "No pending verifications."
 msgstr "Нет заявок на проверку."
 
-#: .\users\templates\users\review_profile.html:4
-#: .\users\templates\users\review_profile.html:8
-msgid "Review Profile"
-msgstr "Проверка профиля"
+#: .\users\templates\users\profile_form.html:5
+#: .\users\templates\users\profile_form.html:13
+msgid "Profile form"
+msgstr "Форма профиля"
 
-#: .\users\templates\users\review_verifications.html:4
-#: .\users\templates\users\review_verifications.html:8
-msgid "Review Verifications"
-msgstr "Проверка заявок"
+#: .\users\templates\users\profile_list.html:5
+msgid "Profiles"
+msgstr "Профили"
 
-#: .\users\templates\users\review_verifications.html:24
-msgid "No verification documents to review."
-msgstr "Нет документов для проверки."
+#: .\users\templates\users\profile_list.html:10
+msgid "Profiles list"
+msgstr "Список профилей"
 
-#: .\users\templates\users\signup.html:12
-msgid "Choose a username"
-msgstr "Выберите имя пользователя"
-
-#: .\users\templates\users\signup.html:15
-msgid "Repeat your password"
-msgstr "Повторите пароль"
-
-#: .\users\templates\users\signup.html:16
-#: .\users\templates\users\signup.html:27
-msgid "Join our community and discover the world of tattoo!"
-msgstr "Присоединяйтесь к нашему сообществу и откройте для себя мир тату!"
-
-#: .\users\templates\users\signup.html:17
-msgid ""
-"Join our community! If you are a tattoo artist, make sure you provide "
-"documents to verify your status."
-msgstr ""
-"Присоединяйтесь к нашему сообществу! Если вы тату-мастер, убедитесь, что "
-"предоставили документы для подтверждения статуса."
+#: .\users\templates\users\profile_list.html:18
+msgid "No profiles found."
+msgstr "Профили не найдены."
 
 #: .\users\templates\users\signup.html:44
 msgid ""
@@ -1768,6 +1758,34 @@ msgstr "Загрузить документ личности (необязате
 msgid "Submit documents"
 msgstr "Отправить документы"
 
+#: .\users\templates\users\user_profile.html:12
+msgid "Username:"
+msgstr "Имя пользователя:"
+
+#: .\users\templates\users\user_profile.html:13
+msgid "Email:"
+msgstr "Email:"
+
+#: .\users\templates\users\user_profile.html:16
+msgid "Account type:"
+msgstr "Тип аккаунта:"
+
+#: .\users\templates\users\user_profile.html:23
+msgid "Bio:"
+msgstr "Описание:"
+
+#: .\users\templates\users\user_profile.html:25
+msgid "Profile image:"
+msgstr "Изображение профиля:"
+
+#: .\users\templates\users\user_profile.html:34
+msgid "No profile image uploaded."
+msgstr "Изображение профиля не загружено."
+
+#: .\users\templates\users\user_profile.html:37
+msgid "Edit Profile"
+msgstr "Редактировать профиль"
+
 #: .\users\templates\users\verification_page.html:4
 #: .\users\templates\users\verification_page.html:18
 msgid "Artist verification"
@@ -1849,6 +1867,31 @@ msgstr "Дополнительный файл"
 #: .\users\templates\users\verification_page.html:164
 msgid "Request manual review"
 msgstr "Запросить ручную проверку"
+
+#: .\users\templates\users\verify_document.html:4
+#: .\users\templates\users\verify_document.html:8
+msgid "Verify document"
+msgstr "Проверить документ"
+
+#: .\users\templates\users\verify_document.html:10
+msgid "User:"
+msgstr "Пользователь:"
+
+#: .\users\templates\users\verify_document.html:11
+msgid "Document type:"
+msgstr "Тип документа:"
+
+#: .\users\templates\users\verify_document.html:12
+msgid "Uploaded on:"
+msgstr "Загружено:"
+
+#: .\users\templates\users\verify_document.html:13
+msgid "Document:"
+msgstr "Документ:"
+
+#: .\users\templates\users\verify_document.html:17
+msgid "Document"
+msgstr "Документ"
 
 #: .\users\views.py:41
 msgid "Please verify your email before logging in."

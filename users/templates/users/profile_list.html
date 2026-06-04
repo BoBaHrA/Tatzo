@@ -1,19 +1,21 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}
-    Profiles
+    {% trans "Profiles" %}
 {% endblock %}
 
 {% block content %}
 <div>
-    <!-- Добавим ссылки на Home и My Profile -->
-    <nav>
-    </nav>
-    
-    <h2>Profiles List</h2>
+    <h2>{% trans "Profiles list" %}</h2>
+
     <ul>
         {% for profile in profiles %}
-            <li>{{ profile.user.username }} - {{ profile.get_account_type_display }}</li>
+            <li>
+                {{ profile.user.username }} - {{ profile.get_account_type_display }}
+            </li>
+        {% empty %}
+            <li>{% trans "No profiles found." %}</li>
         {% endfor %}
     </ul>
 </div>

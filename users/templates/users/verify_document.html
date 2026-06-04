@@ -1,20 +1,31 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}Verify Document{% endblock %}
+{% block title %}{% trans "Verify document" %}{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h2>Verify Document</h2>
-    <p><strong>User:</strong> {{ document.user.username }}</p>
-    <p><strong>Document Type:</strong> {{ document.get_document_type_display }}</p>
-    <p><strong>Uploaded On:</strong> {{ document.created_at }}</p>
-    <p><strong>Document:</strong></p>
-    <img src="{{ document.document_file.url }}" alt="Document" width="300">
+    <h2>{% trans "Verify document" %}</h2>
+
+    <p><strong>{% trans "User:" %}</strong> {{ document.user.username }}</p>
+    <p><strong>{% trans "Document type:" %}</strong> {{ document.get_document_type_display }}</p>
+    <p><strong>{% trans "Uploaded on:" %}</strong> {{ document.created_at }}</p>
+    <p><strong>{% trans "Document:" %}</strong></p>
+
+    <img
+        src="{{ document.document_file.url }}"
+        alt="{% trans 'Document' %}"
+        width="300"
+    >
     
     <form method="post" action="{% url 'verify_document' document.id %}">
         {% csrf_token %}
-        <button type="submit" name="action" value="approve">Approve</button>
-        <button type="submit" name="action" value="reject">Reject</button>
+        <button type="submit" name="action" value="approve">
+            {% trans "Approve" %}
+        </button>
+        <button type="submit" name="action" value="reject">
+            {% trans "Reject" %}
+        </button>
     </form>
 </div>
 {% endblock %}

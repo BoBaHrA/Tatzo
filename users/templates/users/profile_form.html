@@ -1,21 +1,21 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
-<html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
 <head>
-    <title>Profile Form</title>
+    <title>{% trans "Profile form" %}</title>
     <link rel="stylesheet" type="text/css" href="{% static 'users/styles.css' %}">
 </head>
 <body>
-    <!-- Добавляем кнопку Home для перехода на главную страницу -->
     <div class="navigation">
-        <a href="{% url 'home' %}" class="btn">Home</a>
+        <a href="{% url 'home' %}" class="btn">{% trans "Home" %}</a>
     </div>
     
-    <h1>Profile Form</h1>
+    <h1>{% trans "Profile form" %}</h1>
+
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Save</button>
+        <button type="submit">{% trans "Save" %}</button>
     </form>
 </body>
 </html>

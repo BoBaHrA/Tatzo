@@ -1,27 +1,39 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}My Profile{% endblock %}
+{% block title %}{% trans "My Profile" %}{% endblock %}
 
 {% block content %}
 <div class="container">
-    <!-- Кнопка для возврата на главную страницу -->
-    <a href="{% url 'home' %}" class="btn">Home</a>
+    <a href="{% url 'home' %}" class="btn">{% trans "Home" %}</a>
 
-    <h2>My Profile</h2>
-    <p><strong>Username:</strong> {{ user.username }}</p>
-    <p><strong>Email:</strong> {{ user.email }}</p>
-    <p><strong>Account Type:</strong> {{ profile.get_account_type_display }} 
+    <h2>{% trans "My Profile" %}</h2>
+
+    <p><strong>{% trans "Username:" %}</strong> {{ user.username }}</p>
+    <p><strong>{% trans "Email:" %}</strong> {{ user.email }}</p>
+
+    <p>
+        <strong>{% trans "Account type:" %}</strong> {{ profile.get_account_type_display }}
+
         {% if profile.account_type == 'tattoo_artist' and profile.verification_status == 'pending' %}
             - <span style="color: orange;">{{ profile.get_verification_status_display }}</span>
         {% endif %}
     </p>
-    <p><strong>Bio:</strong> {{ profile.bio }}</p>
-    <p><strong>Profile Image:</strong></p>
+
+    <p><strong>{% trans "Bio:" %}</strong> {{ profile.bio }}</p>
+
+    <p><strong>{% trans "Profile image:" %}</strong></p>
+
     {% if profile.profile_image %}
-        <img src="{{ profile.profile_image.url }}" alt="Profile Image" width="200">
+        <img
+            src="{{ profile.profile_image.url }}"
+            alt="{% trans 'Profile image' %}"
+            width="200"
+        >
     {% else %}
-        <p>No profile image uploaded.</p>
+        <p>{% trans "No profile image uploaded." %}</p>
     {% endif %}
-    <a href="{% url 'edit_profile' %}">Edit Profile</a>
+
+    <a href="{% url 'edit_profile' %}">{% trans "Edit Profile" %}</a>
 </div>
 {% endblock %}
