@@ -1,0 +1,50 @@
+﻿
+templates\home.html:139:      <span class="username">TattooStudio1</span>
+templates\home.html:148:      <span class="username">TattooArtist2</span>
+users\templates\users\password_reset_complete.html:12:  <div class="logo">Tatzo</div>
+users\templates\users\password_reset_confirm.html:12:  <div class="logo">Tatzo</div>
+users\templates\users\password_reset_done.html:12:  <div class="logo">Tatzo</div>
+users\templates\users\profile_form.html:5:    <title>Profile Form</title>
+users\templates\users\profile_form.html:11:        <a href="{% url 'home' %}" class="btn">Home</a>
+users\templates\users\profile_form.html:14:    <h1>Profile Form</h1>
+users\templates\users\profile_form.html:18:        <button type="submit">Save</button>
+users\templates\users\profile_list.html:13:    <h2>Profiles List</h2>
+users\templates\users\upload_verification_documents.html:7:    <h2>Upload Verification Documents</h2>
+users\templates\users\upload_verification_documents.html:13:            <label for="document_type">Document Type</label
+>
+users\templates\users\upload_verification_documents.html:15:                <option value="certificate">Certificate of 
+Qualification</option>
+users\templates\users\upload_verification_documents.html:16:                <option value="license">License</option>
+users\templates\users\upload_verification_documents.html:17:                <option value="registration">Registration D
+ocument</option>
+users\templates\users\upload_verification_documents.html:22:            <label for="document_file">Upload Document</lab
+el>
+users\templates\users\upload_verification_documents.html:27:            <label for="identity_document">Upload Identity 
+Document (Optional)</label>
+users\templates\users\upload_verification_documents.html:31:        <button type="submit" class="btn">Submit Documents<
+/button>
+users\templates\users\user_profile.html:8:    <a href="{% url 'home' %}" class="btn">Home</a>
+users\templates\users\user_profile.html:10:    <h2>My Profile</h2>
+users\templates\users\user_profile.html:11:    <p><strong>Username:</strong> {{ user.username }}</p>
+users\templates\users\user_profile.html:12:    <p><strong>Email:</strong> {{ user.email }}</p>
+users\templates\users\user_profile.html:13:    <p><strong>Account Type:</strong> {{ profile.get_account_type_display }}
+ 
+users\templates\users\user_profile.html:18:    <p><strong>Bio:</strong> {{ profile.bio }}</p>
+users\templates\users\user_profile.html:19:    <p><strong>Profile Image:</strong></p>
+users\templates\users\user_profile.html:23:        <p>No profile image uploaded.</p>
+users\templates\users\user_profile.html:25:    <a href="{% url 'edit_profile' %}">Edit Profile</a>
+users\templates\users\verify_document.html:7:    <h2>Verify Document</h2>
+users\templates\users\verify_document.html:8:    <p><strong>User:</strong> {{ document.user.username }}</p>
+users\templates\users\verify_document.html:9:    <p><strong>Document Type:</strong> {{ document.get_document_type_displ
+ay }}</p>
+users\templates\users\verify_document.html:10:    <p><strong>Uploaded On:</strong> {{ document.created_at }}</p>
+users\templates\users\verify_document.html:11:    <p><strong>Document:</strong></p>
+users\templates\users\verify_document.html:16:        <button type="submit" name="action" value="approve">Approve</butt
+on>
+users\templates\users\verify_document.html:17:        <button type="submit" name="action" value="reject">Reject</button
+>
+posts\templates\posts\feed.html:16:            <button type="submit">Post</button>
+posts\templates\posts\feed.html:26:      <div class="comment-edit-modal-title">Edit comment</div>
+posts\templates\posts\feed.html:52:    <p>No posts available.</p>
+
+

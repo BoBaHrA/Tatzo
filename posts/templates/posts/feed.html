@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block content %}
 
@@ -13,7 +14,7 @@
 
             <input type="file" name="media" multiple>
 
-            <button type="submit">Post</button>
+            <button type="submit">{% trans "Post" %}</button>
         </form>
     </div>
 
@@ -23,7 +24,7 @@
 <div class="comment-edit-modal" id="comment-edit-modal">
   <div class="comment-edit-modal-inner">
     <div class="comment-edit-modal-header">
-      <div class="comment-edit-modal-title">Edit comment</div>
+      <div class="comment-edit-modal-title">{% trans "Edit comment" %}</div>
       <button type="button" class="comment-edit-modal-close" id="comment-edit-modal-close">✕</button>
     </div>
 
@@ -31,16 +32,16 @@
       <textarea
         id="comment-edit-textarea"
         class="comment-edit-textarea"
-        placeholder="Edit your comment..."
+        placeholder="{% trans 'Edit your comment...' %}"
       ></textarea>
     </div>
 
     <div class="comment-edit-modal-actions">
       <button type="button" class="comment-edit-cancel" id="comment-edit-cancel">
-        Cancel
+        {% trans "Cancel" %}
       </button>
       <button type="button" class="comment-edit-save" id="comment-edit-save">
-        Save
+        {% trans "Save" %}
       </button>
     </div>
   </div>
@@ -49,7 +50,7 @@
   {% for post in posts %}
     {% include "partials/post_card.html" with post=post liked_post_ids=liked_post_ids bookmarked_post_ids=bookmarked_post_ids %}
   {% empty %}
-    <p>No posts available.</p>
+    <p>{% trans "No posts available." %}</p>
   {% endfor %}
 </div>
 {% endblock %}

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tatzo\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-03 17:53+0200\n"
+"POT-Creation-Date: 2026-06-03 19:10+0200\n"
 "PO-Revision-Date: 2026-05-27 09:40+0200\n"
 "Last-Translator: Vladimir Procopisin\n"
 "Language-Team: Russian\n"
@@ -66,6 +66,40 @@ msgstr "Перейти к ленте"
 #: .\templates\users\profile.html:301
 msgid "Send"
 msgstr "Отправить"
+
+#: .\posts\templates\posts\feed.html:17 .\templates\home.html:117
+#: .\templates\home.html:353
+msgid "Post"
+msgstr "Опубликовать"
+
+#: .\posts\templates\posts\feed.html:27 .\templates\home.html:192
+msgid "Edit comment"
+msgstr "Редактировать комментарий"
+
+#: .\posts\templates\posts\feed.html:35
+msgid "Edit your comment..."
+msgstr "Редактируйте комментарий..."
+
+#: .\posts\templates\posts\feed.html:41 .\templates\home.html:206
+#: .\templates\home.html:231 .\templates\home.html:256
+#: .\templates\home.html:283 .\templates\home.html:310
+#: .\templates\users\artist_portfolio.html:209
+#: .\templates\users\artist_portfolio_album.html:127
+#: .\templates\users\report_problem.html:71
+#: .\users\templates\users\edit_profile.html:188
+#: .\users\templates\users\edit_profile.html:222
+msgid "Cancel"
+msgstr "Отмена"
+
+#: .\posts\templates\posts\feed.html:44 .\templates\home.html:210
+#: .\users\templates\users\edit_profile.html:226
+#: .\users\templates\users\password_reset_confirm.html:26
+msgid "Save"
+msgstr "Сохранить"
+
+#: .\posts\templates\posts\feed.html:53 .\templates\home.html:127
+msgid "No posts available."
+msgstr "Постов пока нет."
 
 #: .\templates\home.html:4 .\templates\partials\sidebar.html:28
 #: .\templates\partials\sidebar.html:29
@@ -153,14 +187,6 @@ msgstr "Настройки"
 msgid "Additional options"
 msgstr "Дополнительные настройки"
 
-#: .\templates\home.html:117 .\templates\home.html:353
-msgid "Post"
-msgstr "Опубликовать"
-
-#: .\templates\home.html:127
-msgid "No posts available."
-msgstr "Постов пока нет."
-
 #: .\templates\home.html:133
 msgid "Recommendations"
 msgstr "Рекомендации"
@@ -187,25 +213,6 @@ msgstr "Вход"
 #: .\users\templates\users\signup.html:121
 msgid "Sign up"
 msgstr "Регистрация"
-
-#: .\templates\home.html:192
-msgid "Edit comment"
-msgstr "Редактировать комментарий"
-
-#: .\templates\home.html:206 .\templates\home.html:231
-#: .\templates\home.html:256 .\templates\home.html:283
-#: .\templates\home.html:310 .\templates\users\artist_portfolio.html:209
-#: .\templates\users\artist_portfolio_album.html:127
-#: .\templates\users\report_problem.html:71
-#: .\users\templates\users\edit_profile.html:188
-#: .\users\templates\users\edit_profile.html:222
-msgid "Cancel"
-msgstr "Отмена"
-
-#: .\templates\home.html:210 .\users\templates\users\edit_profile.html:226
-#: .\users\templates\users\password_reset_confirm.html:26
-msgid "Save"
-msgstr "Сохранить"
 
 #: .\templates\home.html:219 .\templates\users\moderation_dashboard.html:416
 msgid "Delete comment"
@@ -920,6 +927,11 @@ msgstr "Жалобы на посты"
 #: .\templates\users\moderation_dashboard.html:356
 msgid "Comment reports"
 msgstr "Жалобы на комментарии"
+
+#: .\templates\users\moderation_dashboard.html:53
+#: .\templates\users\profile.html:116
+msgid "Verification"
+msgstr "Верификация"
 
 #: .\templates\users\moderation_dashboard.html:72
 msgid "Search by username, email, reason..."
