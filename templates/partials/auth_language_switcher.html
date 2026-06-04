@@ -1,0 +1,38 @@
+{% load i18n %}
+
+{% get_current_language as CURRENT_LANGUAGE %}
+
+<form action="{% url 'set_language' %}" method="post" class="auth-language-switcher">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+    <button
+        type="submit"
+        name="language"
+        value="en"
+        class="auth-language-btn {% if CURRENT_LANGUAGE == 'en' %}active{% endif %}"
+        aria-label="{% trans 'English' %}"
+    >
+        US
+    </button>
+
+    <button
+        type="submit"
+        name="language"
+        value="fr"
+        class="auth-language-btn {% if CURRENT_LANGUAGE == 'fr' %}active{% endif %}"
+        aria-label="{% trans 'Français' %}"
+    >
+        FR
+    </button>
+
+    <button
+        type="submit"
+        name="language"
+        value="ru"
+        class="auth-language-btn {% if CURRENT_LANGUAGE == 'ru' %}active{% endif %}"
+        aria-label="{% trans 'Русский' %}"
+    >
+        RU
+    </button>
+</form>

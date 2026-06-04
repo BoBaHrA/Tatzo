@@ -52,11 +52,11 @@ body {
 }
 
 .logo img {
-    width: 160px;
+    width: 250px;
     height: auto;
     max-width: 100%;
     display: block;
-    margin: 0 auto;
+    margin: 0 auto 12px;
 }
 
 

@@ -1,0 +1,31 @@
+warning: in the working copy of 'static/css/login.css', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'static/css/password_reset.css', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'static/css/signup.css', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'static/css/verification.css', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'static/js/verification.js', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'users/models.py', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'users/templates/users/password_reset.html', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'users/templates/users/password_reset_complete.html', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'users/templates/users/password_reset_confirm.html', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'users/templates/users/password_reset_done.html', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'users/templates/users/signup.html', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'users/templates/users/upload_verification_documents.html', CRLF will be replaced by LF the next time Git touches it
+ locale/fr/LC_MESSAGES/django.mo                    | Bin [31m34817[m -> [32m36257[m bytes
+ locale/fr/LC_MESSAGES/django.po                    | 340 [32m+++++++++++++[m[31m--------[m
+ locale/ru/LC_MESSAGES/django.mo                    | Bin [31m42309[m -> [32m44170[m bytes
+ locale/ru/LC_MESSAGES/django.po                    | 340 [32m+++++++++++++[m[31m--------[m
+ static/css/login.css                               |  99 [32m+++++[m[31m-[m
+ static/css/password_reset.css                      |   2 [32m+[m[31m-[m
+ static/css/signup.css                              |   4 [32m+[m[31m-[m
+ static/css/verification.css                        | 116 [32m+++++++[m
+ static/js/verification.js                          |  33 [32m+[m[31m-[m
+ templates/registration/login.html                  |   8 [32m+[m[31m-[m
+ users/models.py                                    |  63 [32m++[m[31m--[m
+ users/templates/users/password_reset.html          |   6 [32m+[m[31m-[m
+ users/templates/users/password_reset_complete.html |   7 [32m+[m[31m-[m
+ users/templates/users/password_reset_confirm.html  |   7 [32m+[m[31m-[m
+ users/templates/users/password_reset_done.html     |   7 [32m+[m[31m-[m
+ users/templates/users/signup.html                  |  42 [32m+[m[31m--[m
+ .../users/upload_verification_documents.html       |   8 [32m+[m[31m-[m
+ users/templates/users/verification_page.html       |  81 [32m++++[m[31m-[m
+ 18 files changed, 806 insertions(+), 357 deletions(-)

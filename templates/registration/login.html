@@ -4,17 +4,23 @@
 {% block title %}{% trans "Login" %}{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth_language_switcher.css' %}">
 <link rel="stylesheet" href="{% static 'css/login.css' %}">
 {% endblock %}
 
 {% block content %}
 
+{% get_current_language as CURRENT_LANGUAGE %}
+
 {% trans "Enter your username" as username_placeholder %}
 {% trans "Enter your password" as password_placeholder %}
 
+{% include "partials/auth_language_switcher.html" %}
+{% include "partials/auth_home_link.html" %}
+
 <div class="login-container">
     <div class="logo">
-        <img src="{% static 'images/tatzo5.png' %}" alt="Tatzo">
+        <img src="{% static 'images/tatzo7.png' %}" alt="Tatzo">
     </div>
 
     <h1>{% trans "Welcome" %}</h1>

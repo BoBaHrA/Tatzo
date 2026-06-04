@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tatzo\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-04 15:39+0200\n"
+"POT-Creation-Date: 2026-06-04 16:41+0200\n"
 "PO-Revision-Date: 2026-05-27 09:40+0200\n"
 "Last-Translator: Vladimir Procopisin\n"
 "Language-Team: Russian\n"
@@ -17,18 +17,18 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: .\mytattooapp\settings.py:101 .\users\templates\users\signup.html:30
-#: .\users\templates\users\signup.html:31
+#: .\mytattooapp\settings.py:101
+#: .\templates\partials\auth_language_switcher.html:14
 msgid "English"
 msgstr "Английский"
 
-#: .\mytattooapp\settings.py:102 .\users\templates\users\signup.html:41
-#: .\users\templates\users\signup.html:42
+#: .\mytattooapp\settings.py:102
+#: .\templates\partials\auth_language_switcher.html:24
 msgid "Français"
 msgstr "Французский"
 
-#: .\mytattooapp\settings.py:103 .\users\templates\users\signup.html:52
-#: .\users\templates\users\signup.html:53
+#: .\mytattooapp\settings.py:103
+#: .\templates\partials\auth_language_switcher.html:34
 msgid "Русский"
 msgstr "Русский"
 
@@ -96,7 +96,7 @@ msgstr "Отмена"
 
 #: .\posts\templates\posts\feed.html:44 .\templates\home.html:210
 #: .\users\templates\users\edit_profile.html:226
-#: .\users\templates\users\password_reset_confirm.html:26
+#: .\users\templates\users\password_reset_confirm.html:31
 #: .\users\templates\users\profile_form.html:18
 msgid "Save"
 msgstr "Сохранить"
@@ -149,8 +149,9 @@ msgstr "Вы уже жаловались на этот пост."
 msgid "Invalid method."
 msgstr "Недопустимый метод запроса."
 
-#: .\templates\home.html:4 .\templates\partials\sidebar.html:28
-#: .\templates\partials\sidebar.html:29
+#: .\templates\home.html:4 .\templates\partials\auth_home_link.html:3
+#: .\templates\partials\auth_home_link.html:5
+#: .\templates\partials\sidebar.html:28 .\templates\partials\sidebar.html:29
 #: .\users\templates\users\profile_form.html:10
 #: .\users\templates\users\user_profile.html:8
 msgid "Home"
@@ -242,7 +243,7 @@ msgid "Recommendations"
 msgstr "Рекомендации"
 
 #: .\templates\home.html:136 .\templates\home.html:145
-#: .\templates\users\search.html:114 .\users\models.py:380
+#: .\templates\users\search.html:114 .\users\models.py:389
 msgid "User"
 msgstr "Пользователь"
 
@@ -261,7 +262,7 @@ msgid "Login"
 msgstr "Вход"
 
 #: .\templates\home.html:162 .\users\templates\users\signup.html:4
-#: .\users\templates\users\signup.html:161
+#: .\users\templates\users\signup.html:127
 msgid "Sign up"
 msgstr "Регистрация"
 
@@ -406,7 +407,7 @@ msgstr "Изображение"
 #: .\templates\partials\chat_message.html:19
 #: .\templates\users\chats_list.html:55
 #: .\templates\users\report_problem.html:56 .\users\forms.py:270
-#: .\users\models.py:392
+#: .\users\models.py:401
 msgid "Attachment"
 msgstr "Вложение"
 
@@ -564,43 +565,43 @@ msgstr "Вы вышли из аккаунта."
 msgid "Return to Home"
 msgstr "Вернуться на главную"
 
-#: .\templates\registration\login.html:12
+#: .\templates\registration\login.html:15
 msgid "Enter your username"
 msgstr "Введите имя пользователя"
 
-#: .\templates\registration\login.html:13
-#: .\users\templates\users\signup.html:16
+#: .\templates\registration\login.html:16
+#: .\users\templates\users\signup.html:17
 msgid "Enter your password"
 msgstr "Введите пароль"
 
-#: .\templates\registration\login.html:20
-#: .\users\templates\users\signup.html:64
+#: .\templates\registration\login.html:26
+#: .\users\templates\users\signup.html:30
 msgid "Welcome"
 msgstr "Добро пожаловать"
 
-#: .\templates\registration\login.html:26
+#: .\templates\registration\login.html:32
 #: .\users\templates\users\edit_profile.html:32
 #: .\users\templates\users\pending_profiles.html:13
 #: .\users\templates\users\pending_verifications.html:13
 #: .\users\templates\users\review_profile.html:11
-#: .\users\templates\users\signup.html:74
+#: .\users\templates\users\signup.html:40
 msgid "Username"
 msgstr "Имя пользователя"
 
-#: .\templates\registration\login.html:37
-#: .\users\templates\users\signup.html:100
+#: .\templates\registration\login.html:43
+#: .\users\templates\users\signup.html:66
 msgid "Password"
 msgstr "Пароль"
 
-#: .\templates\registration\login.html:48
+#: .\templates\registration\login.html:54
 msgid "Log in"
 msgstr "Войти"
 
-#: .\templates\registration\login.html:53
+#: .\templates\registration\login.html:59
 msgid "Create account"
 msgstr "Создать аккаунт"
 
-#: .\templates\registration\login.html:55
+#: .\templates\registration\login.html:61
 msgid "Forgot password?"
 msgstr "Забыли пароль?"
 
@@ -637,7 +638,7 @@ msgstr ""
 
 #: .\templates\users\add_portfolio_work.html:46
 #: .\templates\users\report_problem.html:42 .\users\forms.py:268
-#: .\users\models.py:388
+#: .\users\models.py:397
 msgid "Title"
 msgstr "Название"
 
@@ -1121,6 +1122,7 @@ msgid "No unresolved comment reports."
 msgstr "Нет нерешённых жалоб на комментарии."
 
 #: .\templates\users\profile.html:46 .\templates\users\profile.html:120
+#: .\users\models.py:122
 msgid "Verified"
 msgstr "Подтверждён"
 
@@ -1140,7 +1142,7 @@ msgid "Following"
 msgstr "Вы подписаны"
 
 #: .\templates\users\profile.html:82 .\templates\users\report_problem.html:49
-#: .\templates\users\search.html:133 .\users\forms.py:269 .\users\models.py:389
+#: .\templates\users\search.html:133 .\users\forms.py:269 .\users\models.py:398
 msgid "Message"
 msgstr "Написать"
 
@@ -1160,19 +1162,21 @@ msgstr "подписок"
 msgid "No bio yet."
 msgstr "Биография пока не заполнена."
 
-#: .\templates\users\profile.html:122
-#: .\users\templates\users\verification_page.html:34 .\users\views.py:386
+#: .\templates\users\profile.html:122 .\users\models.py:35
+#: .\users\templates\users\verification_page.html:37 .\users\views.py:386
 msgid "Rejected"
 msgstr "Отклонено"
 
 #: .\templates\users\profile.html:124 .\templates\users\profile.html:126
-#: .\users\templates\users\verification_page.html:36
-#: .\users\templates\users\verification_page.html:38 .\users\views.py:384
+#: .\users\models.py:33 .\users\models.py:60
+#: .\users\templates\users\verification_page.html:39
+#: .\users\templates\users\verification_page.html:41 .\users\views.py:384
 msgid "Pending"
 msgstr "На рассмотрении"
 
-#: .\templates\users\profile.html:128
-#: .\users\templates\users\verification_page.html:40 .\users\views.py:381
+#: .\templates\users\profile.html:128 .\users\models.py:30
+#: .\users\models.py:127 .\users\templates\users\verification_page.html:43
+#: .\users\views.py:381
 msgid "Not submitted"
 msgstr "Не отправлено"
 
@@ -1339,7 +1343,7 @@ msgstr "Информация о жалобе"
 msgid "Moderation"
 msgstr "Модерация"
 
-#: .\users\forms.py:267 .\users\models.py:383
+#: .\users\forms.py:267 .\users\models.py:392
 msgid "Report type"
 msgstr "Тип обращения"
 
@@ -1351,35 +1355,128 @@ msgstr "Короткий заголовок"
 msgid "Describe the problem or suggestion..."
 msgstr "Опишите проблему или предложение..."
 
-#: .\users\models.py:371
+#: .\users\models.py:11 .\users\templates\users\signup.html:105
+msgid "Regular user"
+msgstr "Обычный пользователь"
+
+#: .\users\models.py:12 .\users\templates\users\signup.html:119
+msgid "Tattoo artist"
+msgstr "Тату-мастер"
+
+#: .\users\models.py:18
+msgid "Congratulations, your tattoo artist account has been verified."
+msgstr "Поздравляем, ваш аккаунт тату-мастера подтверждён."
+
+#: .\users\models.py:23
+msgid ""
+"Unfortunately, your tattoo artist account has not been verified. Contact "
+"technical support for more information."
+msgstr ""
+"К сожалению, ваш аккаунт тату-мастера не был подтверждён. Свяжитесь с "
+"технической поддержкой для получения дополнительной информации."
+
+#: .\users\models.py:31 .\users\views.py:382
+msgid "Pending documents review"
+msgstr "Ожидает проверки документов"
+
+#: .\users\models.py:32 .\users\views.py:383
+msgid "Pending manual review"
+msgstr "Ожидает ручной проверки"
+
+#: .\users\models.py:34 .\users\templates\users\verification_page.html:35
+#: .\users\views.py:385
+msgid "Approved"
+msgstr "Подтверждено"
+
+#: .\users\models.py:40
+msgid "Business license"
+msgstr "Лицензия на деятельность"
+
+#: .\users\models.py:41
+msgid "Self-employed certificate"
+msgstr "Свидетельство самозанятого"
+
+#: .\users\models.py:42
+msgid "Tattoo studio registration"
+msgstr "Регистрация тату-салона"
+
+#: .\users\models.py:43
+msgid "Other (upload an official document)"
+msgstr "Другое — загрузите официальный документ"
+
+#: .\users\models.py:48
+msgid "Passport"
+msgstr "Паспорт"
+
+#: .\users\models.py:49
+msgid "Driver license"
+msgstr "Водительское удостоверение"
+
+#: .\users\models.py:50
+msgid "National ID"
+msgstr "Национальное удостоверение личности"
+
+#: .\users\models.py:60
+msgid "Active"
+msgstr "Активный"
+
+#: .\users\models.py:119
+msgid "Pending verification"
+msgstr "Ожидает верификации"
+
+#: .\users\models.py:125
+msgid "Verification rejected"
+msgstr "Верификация отклонена"
+
+#: .\users\models.py:137 .\users\templates\users\verification_page.html:67
+msgid "Business document type"
+msgstr "Тип профессионального документа"
+
+#: .\users\models.py:141
+msgid "Business document"
+msgstr "Профессиональный документ"
+
+#: .\users\models.py:148 .\users\templates\users\verification_page.html:100
+msgid "Identity document type"
+msgstr "Тип документа личности"
+
+#: .\users\models.py:152
+msgid "Identity document"
+msgstr "Документ личности"
+
+#: .\users\models.py:156
+msgid "Document verified"
+msgstr "Документ проверен"
+
+#: .\users\models.py:380
 msgid "Bug"
 msgstr "Ошибка"
 
-#: .\users\models.py:372
+#: .\users\models.py:381
 msgid "Suggestion"
 msgstr "Предложение"
 
-#: .\users\models.py:373
+#: .\users\models.py:382
 msgid "Other"
 msgstr "Другое"
 
-#: .\users\models.py:390
+#: .\users\models.py:399
 msgid "Page URL"
 msgstr "URL страницы"
 
-#: .\users\models.py:397
+#: .\users\models.py:406
 msgid "Created at"
 msgstr "Создано"
 
-#: .\users\models.py:398
+#: .\users\models.py:407
 msgid "Resolved"
 msgstr "Решено"
 
-#: .\users\models.py:402
+#: .\users\models.py:411
 msgid "User report"
 msgstr "Обращение пользователя"
 
-#: .\users\models.py:403
+#: .\users\models.py:412
 msgid "User reports"
 msgstr "Обращения пользователей"
 
@@ -1399,11 +1496,11 @@ msgstr ""
 "        "
 
 #: .\users\templates\users\admin_verification.html:15
-#: .\users\templates\users\password_reset.html:29
+#: .\users\templates\users\password_reset.html:33
 #: .\users\templates\users\pending_profiles.html:14
 #: .\users\templates\users\pending_verifications.html:14
 #: .\users\templates\users\review_profile.html:16
-#: .\users\templates\users\signup.html:89
+#: .\users\templates\users\signup.html:55
 msgid "Email"
 msgstr "Email"
 
@@ -1538,21 +1635,21 @@ msgstr "Масштаб аватара"
 msgid "Password reset — Tatzo"
 msgstr "Восстановление пароля — Tatzo"
 
-#: .\users\templates\users\password_reset.html:12
-#: .\users\templates\users\signup.html:15
+#: .\users\templates\users\password_reset.html:16
+#: .\users\templates\users\signup.html:16
 msgid "Enter your email"
 msgstr "Введите email"
 
-#: .\users\templates\users\password_reset.html:19
-#: .\users\templates\users\password_reset_confirm.html:14
+#: .\users\templates\users\password_reset.html:23
+#: .\users\templates\users\password_reset_confirm.html:19
 msgid "Password reset"
 msgstr "Восстановление пароля"
 
-#: .\users\templates\users\password_reset.html:22
+#: .\users\templates\users\password_reset.html:26
 msgid "Enter your email and we will send you a password reset link."
 msgstr "Введите ваш email, и мы отправим вам ссылку для сброса пароля."
 
-#: .\users\templates\users\password_reset.html:40
+#: .\users\templates\users\password_reset.html:44
 msgid "Send reset link"
 msgstr "Отправить ссылку"
 
@@ -1560,15 +1657,15 @@ msgstr "Отправить ссылку"
 msgid "Password updated — Tatzo"
 msgstr "Пароль обновлён — Tatzo"
 
-#: .\users\templates\users\password_reset_complete.html:15
+#: .\users\templates\users\password_reset_complete.html:20
 msgid "Password updated successfully!"
 msgstr "Пароль успешно обновлён!"
 
-#: .\users\templates\users\password_reset_complete.html:19
+#: .\users\templates\users\password_reset_complete.html:24
 msgid "You can now log in to your account with your new password."
 msgstr "Теперь вы можете войти в аккаунт с новым паролем."
 
-#: .\users\templates\users\password_reset_complete.html:23
+#: .\users\templates\users\password_reset_complete.html:28
 msgid "Go to login"
 msgstr "Перейти ко входу"
 
@@ -1576,7 +1673,7 @@ msgstr "Перейти ко входу"
 msgid "New password — Tatzo"
 msgstr "Новый пароль — Tatzo"
 
-#: .\users\templates\users\password_reset_confirm.html:17
+#: .\users\templates\users\password_reset_confirm.html:22
 msgid "Create a new password for your account."
 msgstr "Придумайте новый пароль для вашего аккаунта."
 
@@ -1584,11 +1681,11 @@ msgstr "Придумайте новый пароль для вашего акк�
 msgid "Reset link sent — Tatzo"
 msgstr "Ссылка отправлена — Tatzo"
 
-#: .\users\templates\users\password_reset_done.html:14
+#: .\users\templates\users\password_reset_done.html:19
 msgid "Reset link sent"
 msgstr "Ссылка отправлена"
 
-#: .\users\templates\users\password_reset_done.html:17
+#: .\users\templates\users\password_reset_done.html:22
 msgid ""
 "\n"
 "      If this email exists, you will receive a message with instructions to "
@@ -1600,7 +1697,7 @@ msgstr ""
 "сброса пароля.\n"
 "    "
 
-#: .\users\templates\users\password_reset_done.html:23
+#: .\users\templates\users\password_reset_done.html:28
 msgid "Do not forget to check your Spam folder."
 msgstr "Не забудьте проверить папку «Спам»."
 
@@ -1677,20 +1774,20 @@ msgstr "Проверка заявок"
 msgid "No verification documents to review."
 msgstr "Нет документов для проверки."
 
-#: .\users\templates\users\signup.html:14
+#: .\users\templates\users\signup.html:15
 msgid "Choose a username"
 msgstr "Выберите имя пользователя"
 
-#: .\users\templates\users\signup.html:17
+#: .\users\templates\users\signup.html:18
 msgid "Repeat your password"
 msgstr "Повторите пароль"
 
-#: .\users\templates\users\signup.html:18
-#: .\users\templates\users\signup.html:67
+#: .\users\templates\users\signup.html:19
+#: .\users\templates\users\signup.html:33
 msgid "Join our community and discover the world of tattoo!"
 msgstr "Присоединяйтесь к нашему сообществу и откройте для себя мир тату!"
 
-#: .\users\templates\users\signup.html:19
+#: .\users\templates\users\signup.html:20
 msgid ""
 "Join our community! If you are a tattoo artist, make sure you provide "
 "documents to verify your status."
@@ -1698,7 +1795,7 @@ msgstr ""
 "Присоединяйтесь к нашему сообществу! Если вы тату-мастер, обязательно "
 "предоставьте документы для подтверждения вашего статуса."
 
-#: .\users\templates\users\signup.html:84
+#: .\users\templates\users\signup.html:50
 msgid ""
 "Your unique @tag will be created automatically based on your username. You "
 "will be able to change it later in your profile settings."
@@ -1706,7 +1803,7 @@ msgstr ""
 "Ваш уникальный @tag будет создан автоматически на основе имени пользователя. "
 "Позже вы сможете изменить его в настройках профиля."
 
-#: .\users\templates\users\signup.html:110
+#: .\users\templates\users\signup.html:76
 msgid ""
 "Password must contain at least 8 characters, one uppercase letter and one "
 "number."
@@ -1714,39 +1811,31 @@ msgstr ""
 "Пароль должен содержать не менее 8 символов, одну заглавную букву и одну "
 "цифру."
 
-#: .\users\templates\users\signup.html:115
+#: .\users\templates\users\signup.html:81
 msgid "Confirm password"
 msgstr "Подтвердите пароль"
 
-#: .\users\templates\users\signup.html:126
+#: .\users\templates\users\signup.html:92
 msgid "Account type"
 msgstr "Тип аккаунта"
 
-#: .\users\templates\users\signup.html:139
-msgid "Regular user"
-msgstr "Обычный пользователь"
-
-#: .\users\templates\users\signup.html:140
+#: .\users\templates\users\signup.html:106
 msgid "Discover inspiration and book sessions with tattoo artists."
 msgstr "Находите вдохновение и бронируйте сеансы у тату-мастеров."
 
-#: .\users\templates\users\signup.html:153
-msgid "Tattoo artist"
-msgstr "Тату-мастер"
-
-#: .\users\templates\users\signup.html:154
+#: .\users\templates\users\signup.html:120
 msgid "Publish your work and attract new clients."
 msgstr "Публикуйте свои работы и привлекайте новых клиентов."
 
-#: .\users\templates\users\signup.html:167
+#: .\users\templates\users\signup.html:133
 msgid "Already have an account? Log in here!"
 msgstr "Уже есть аккаунт? Войдите здесь!"
 
-#: .\users\templates\users\signup.html:203
+#: .\users\templates\users\signup.html:169
 msgid "Registration successful!"
 msgstr "Регистрация успешна!"
 
-#: .\users\templates\users\signup.html:206
+#: .\users\templates\users\signup.html:172
 msgid ""
 "Confirm your email by clicking the link in the message we sent you. After "
 "that, you will be redirected to the right page."
@@ -1755,44 +1844,41 @@ msgstr ""
 "перенаправлены на нужную страницу."
 
 #: .\users\templates\users\upload_verification_documents.html:4
-#: .\users\templates\users\upload_verification_documents.html:8
+#: .\users\templates\users\upload_verification_documents.html:14
 msgid "Upload verification documents"
 msgstr "Загрузка документов для верификации"
 
-#: .\users\templates\users\upload_verification_documents.html:14
+#: .\users\templates\users\upload_verification_documents.html:20
 msgid "Document type"
 msgstr "Тип документа"
 
-#: .\users\templates\users\upload_verification_documents.html:16
+#: .\users\templates\users\upload_verification_documents.html:22
 msgid "Certificate of qualification"
 msgstr "Документ о квалификации"
 
-#: .\users\templates\users\upload_verification_documents.html:17
+#: .\users\templates\users\upload_verification_documents.html:23
 msgid "License"
 msgstr "Лицензия"
 
-#: .\users\templates\users\upload_verification_documents.html:18
+#: .\users\templates\users\upload_verification_documents.html:24
 msgid "Registration document"
 msgstr "Регистрационный документ"
 
-#: .\users\templates\users\upload_verification_documents.html:25
-#: .\users\templates\users\upload_verification_documents.html:35
-#: .\users\templates\users\verification_page.html:72
-#: .\users\templates\users\verification_page.html:89
-#: .\users\templates\users\verification_page.html:150
+#: .\users\templates\users\upload_verification_documents.html:31
+#: .\users\templates\users\upload_verification_documents.html:41
 msgid "File uploaded ✅"
 msgstr "Файл загружен ✅"
 
-#: .\users\templates\users\upload_verification_documents.html:27
+#: .\users\templates\users\upload_verification_documents.html:33
 msgid "Upload document"
 msgstr "Загрузить документ"
 
-#: .\users\templates\users\upload_verification_documents.html:37
+#: .\users\templates\users\upload_verification_documents.html:43
 msgid "Upload identity document (optional)"
 msgstr "Загрузить документ личности (необязательно)"
 
-#: .\users\templates\users\upload_verification_documents.html:42
-#: .\users\templates\users\verification_page.html:103
+#: .\users\templates\users\upload_verification_documents.html:48
+#: .\users\templates\users\verification_page.html:138
 msgid "Submit documents"
 msgstr "Отправить документы"
 
@@ -1825,11 +1911,11 @@ msgid "Edit Profile"
 msgstr "Редактировать профиль"
 
 #: .\users\templates\users\verification_page.html:4
-#: .\users\templates\users\verification_page.html:18
+#: .\users\templates\users\verification_page.html:21
 msgid "Artist verification"
 msgstr "Верификация мастера"
 
-#: .\users\templates\users\verification_page.html:21
+#: .\users\templates\users\verification_page.html:24
 msgid ""
 "Verify your tattoo artist profile to build trust and unlock professional "
 "features."
@@ -1837,44 +1923,56 @@ msgstr ""
 "Подтвердите профиль тату-мастера, чтобы повысить доверие и открыть "
 "профессиональные функции."
 
-#: .\users\templates\users\verification_page.html:27
+#: .\users\templates\users\verification_page.html:30
 msgid "Status"
 msgstr "Статус"
 
-#: .\users\templates\users\verification_page.html:32 .\users\views.py:385
-msgid "Approved"
-msgstr "Подтверждено"
-
-#: .\users\templates\users\verification_page.html:55
+#: .\users\templates\users\verification_page.html:58
 msgid "I have documents"
 msgstr "У меня есть документы"
 
-#: .\users\templates\users\verification_page.html:58
+#: .\users\templates\users\verification_page.html:61
 msgid "Upload your professional document and identity document."
 msgstr ""
 "Загрузите профессиональный документ и документ, удостоверяющий личность."
-
-#: .\users\templates\users\verification_page.html:64
-msgid "Business document type"
-msgstr "Тип профессионального документа"
 
 #: .\users\templates\users\verification_page.html:74
 msgid "Business document file"
 msgstr "Файл профессионального документа"
 
-#: .\users\templates\users\verification_page.html:81
-msgid "Identity document type"
-msgstr "Тип документа личности"
+#: .\users\templates\users\verification_page.html:83
+#: .\users\templates\users\verification_page.html:86
+#: .\users\templates\users\verification_page.html:116
+#: .\users\templates\users\verification_page.html:119
+#: .\users\templates\users\verification_page.html:193
+#: .\users\templates\users\verification_page.html:196
+msgid "Choose file"
+msgstr "Выберите файл"
+
+#: .\users\templates\users\verification_page.html:84
+#: .\users\templates\users\verification_page.html:117
+#: .\users\templates\users\verification_page.html:194
+msgid "File selected ✅"
+msgstr "Файл выбран ✅"
 
 #: .\users\templates\users\verification_page.html:91
+#: .\users\templates\users\verification_page.html:93
+#: .\users\templates\users\verification_page.html:124
+#: .\users\templates\users\verification_page.html:126
+#: .\users\templates\users\verification_page.html:201
+#: .\users\templates\users\verification_page.html:203
+msgid "No file selected"
+msgstr "Файл не выбран"
+
+#: .\users\templates\users\verification_page.html:107
 msgid "Identity document file"
 msgstr "Файл документа личности"
 
-#: .\users\templates\users\verification_page.html:112
+#: .\users\templates\users\verification_page.html:147
 msgid "No official documents?"
 msgstr "Нет официальных документов?"
 
-#: .\users\templates\users\verification_page.html:115
+#: .\users\templates\users\verification_page.html:150
 msgid ""
 "Request a manual review. Send your portfolio, social links and a short "
 "explanation."
@@ -1882,27 +1980,27 @@ msgstr ""
 "Запросите ручную проверку. Отправьте портфолио, ссылки на соцсети и короткое "
 "объяснение."
 
-#: .\users\templates\users\verification_page.html:121
+#: .\users\templates\users\verification_page.html:156
 msgid "Portfolio link"
 msgstr "Ссылка на портфолио"
 
-#: .\users\templates\users\verification_page.html:128
+#: .\users\templates\users\verification_page.html:163
 msgid "Social media link"
 msgstr "Ссылка на соцсеть"
 
-#: .\users\templates\users\verification_page.html:135
+#: .\users\templates\users\verification_page.html:170
 msgid "City / Country"
 msgstr "Город / Страна"
 
-#: .\users\templates\users\verification_page.html:142
+#: .\users\templates\users\verification_page.html:177
 msgid "Explanation"
 msgstr "Объяснение"
 
-#: .\users\templates\users\verification_page.html:152
+#: .\users\templates\users\verification_page.html:184
 msgid "Optional file"
 msgstr "Дополнительный файл"
 
-#: .\users\templates\users\verification_page.html:164
+#: .\users\templates\users\verification_page.html:215
 msgid "Request manual review"
 msgstr "Запросить ручную проверку"
 
@@ -1984,14 +2082,6 @@ msgstr "Ваша заявка на ручную проверку отправл�
 #: .\users\views.py:378
 msgid "Invalid verification request."
 msgstr "Недопустимая заявка на верификацию."
-
-#: .\users\views.py:382
-msgid "Pending documents review"
-msgstr "Ожидает проверки документов"
-
-#: .\users\views.py:383
-msgid "Pending manual review"
-msgstr "Ожидает ручной проверки"
 
 #: .\users\views.py:423
 msgid "Invalid request."

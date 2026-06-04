@@ -6,41 +6,48 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 # Определяем варианты выбора для типа пользователя
+# Определяем варианты выбора для типа пользователя
 USER_TYPE_CHOICES = [
-    ("regular", "Regular User"),
-    ("tattoo_artist", "Tattoo Artist"),
+    ("regular", _("Regular user")),
+    ("tattoo_artist", _("Tattoo artist")),
 ]
 
 NOTIFICATION_CHOICES = [
-    ("approved", "Congratulations, your tattoo artist account has been verified."),
+    (
+        "approved",
+        _("Congratulations, your tattoo artist account has been verified."),
+    ),
     (
         "rejected",
-        "Unfortunately, your tattoo artist account has not been verified. Contact tech. support for more information.",
+        _(
+            "Unfortunately, your tattoo artist account has not been verified. "
+            "Contact technical support for more information."
+        ),
     ),
 ]
 
 VERIFICATION_STATUS_CHOICES = [
-    ("not_submitted", "Not submitted"),
-    ("pending_documents", "Pending documents review"),
-    ("pending_manual_review", "Pending manual review"),
-    ("pending", "Pending"),  # legacy, чтобы старые аккаунты не сломались
-    ("approved", "Approved"),
-    ("rejected", "Rejected"),
+    ("not_submitted", _("Not submitted")),
+    ("pending_documents", _("Pending documents review")),
+    ("pending_manual_review", _("Pending manual review")),
+    ("pending", _("Pending")),
+    ("approved", _("Approved")),
+    ("rejected", _("Rejected")),
 ]
 
 # Варианты документов для подтверждения бизнеса
 BUSINESS_DOCUMENT_CHOICES = [
-    ("license", "Лицензия на деятельность"),
-    ("sole_proprietor", "Свидетельство самозанятого"),
-    ("business_registration", "Регистрация тату-салона"),
-    ("other", "Другой (Загрузите официальный документ)"),
+    ("license", _("Business license")),
+    ("sole_proprietor", _("Self-employed certificate")),
+    ("business_registration", _("Tattoo studio registration")),
+    ("other", _("Other (upload an official document)")),
 ]
 
 # Варианты удостоверений личности
 ID_DOCUMENT_CHOICES = [
-    ("passport", "Паспорт"),
-    ("driver_license", "Водительское удостоверение"),
-    ("national_id", "Национальное удостоверение личности"),
+    ("passport", _("Passport")),
+    ("driver_license", _("Driver license")),
+    ("national_id", _("National ID")),
 ]
 
 
@@ -50,7 +57,7 @@ class Profile(models.Model):
     status = models.CharField(
         max_length=20,
         default="pending",
-        choices=[("pending", "На проверке"), ("active", "Активный")],
+        choices=[("pending", _("Pending")), ("active", _("Active"))],
     )
     bio = models.TextField(blank=True, null=True)
     profile_image = models.ImageField(
@@ -109,15 +116,15 @@ class Profile(models.Model):
             "pending_documents",
             "pending_manual_review",
         ]:
-            return "Pending verification"
+            return _("Pending verification")
 
         if self.verification_status == "approved":
-            return "Verified"
+            return _("Verified")
 
         if self.verification_status == "rejected":
-            return "Verification rejected"
+            return _("Verification rejected")
 
-        return "Not submitted"
+        return _("Not submitted")
 
 
 class VerificationDocument(models.Model):
@@ -127,24 +134,26 @@ class VerificationDocument(models.Model):
     business_document_type = models.CharField(
         max_length=50,
         choices=BUSINESS_DOCUMENT_CHOICES,
-        verbose_name="Тип бизнес-документа",
+        verbose_name=_("Business document type"),
     )
     business_document_file = models.FileField(
-        upload_to="business_docs/", verbose_name="Документ о бизнесе"
+        upload_to="business_docs",
+        verbose_name=_("Business document"),
     )
 
     # Документ, удостоверяющий личность (обязательный)
     id_document_type = models.CharField(
         max_length=50,
         choices=ID_DOCUMENT_CHOICES,
-        verbose_name="Тип документа личности",
+        verbose_name=_("Identity document type"),
     )
     id_document_file = models.FileField(
-        upload_to="id_docs/", verbose_name="Документ удостоверяющий личность"
+        upload_to="id_docs",
+        verbose_name=_("Identity document"),
     )
 
     # Статус верификации
-    is_verified = models.BooleanField(default=False, verbose_name="Документ проверен")
+    is_verified = models.BooleanField(default=False, verbose_name=_("Document verified"))
 
     def __str__(self):
         return f"Verification for {self.user.username}"

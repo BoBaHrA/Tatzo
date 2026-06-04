@@ -5,9 +5,12 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/verification.css' %}">
+<link rel="stylesheet" href="{% static 'css/auth_language_switcher.css' %}">
 {% endblock %}
 
 {% block content %}
+{% include "partials/auth_language_switcher.html" %}
+{% include "partials/auth_home_link.html" %}
 <div class="verification-page">
   <div class="verification-shell">
 
@@ -67,13 +70,29 @@
         </div>
 
         <div class="verification-field">
-          <label
-            for="{{ document_form.business_document_file.id_for_label }}"
-            data-selected-text="{% trans 'File uploaded ✅' %}"
-          >
+          <label for="{{ document_form.business_document_file.id_for_label }}">
             {% trans "Business document file" %}
           </label>
-          {{ document_form.business_document_file }}
+
+          <div class="tatzo-file-upload">
+            {{ document_form.business_document_file }}
+
+            <label
+              for="{{ document_form.business_document_file.id_for_label }}"
+              class="tatzo-file-button"
+              data-default-text="{% trans 'Choose file' %}"
+              data-selected-text="{% trans 'File selected ✅' %}"
+            >
+              {% trans "Choose file" %}
+            </label>
+
+            <span
+              class="tatzo-file-name"
+              data-empty-text="{% trans 'No file selected' %}"
+            >
+              {% trans "No file selected" %}
+            </span>
+          </div>
         </div>
 
         <div class="verification-field">
@@ -84,13 +103,29 @@
         </div>
 
         <div class="verification-field">
-          <label
-            for="{{ document_form.id_document_file.id_for_label }}"
-            data-selected-text="{% trans 'File uploaded ✅' %}"
-          >
+          <label for="{{ document_form.id_document_file.id_for_label }}">
             {% trans "Identity document file" %}
           </label>
-          {{ document_form.id_document_file }}
+
+          <div class="tatzo-file-upload">
+            {{ document_form.id_document_file }}
+
+            <label
+              for="{{ document_form.id_document_file.id_for_label }}"
+              class="tatzo-file-button"
+              data-default-text="{% trans 'Choose file' %}"
+              data-selected-text="{% trans 'File selected ✅' %}"
+            >
+              {% trans "Choose file" %}
+            </label>
+
+            <span
+              class="tatzo-file-name"
+              data-empty-text="{% trans 'No file selected' %}"
+            >
+              {% trans "No file selected" %}
+            </span>
+          </div>
         </div>
 
         {% if document_form.errors %}
@@ -145,13 +180,29 @@
         </div>
 
         <div class="verification-field">
-          <label
-            for="{{ manual_form.extra_file.id_for_label }}"
-            data-selected-text="{% trans 'File uploaded ✅' %}"
-          >
+          <label for="{{ manual_form.extra_file.id_for_label }}">
             {% trans "Optional file" %}
           </label>
-          {{ manual_form.extra_file }}
+
+          <div class="tatzo-file-upload">
+            {{ manual_form.extra_file }}
+
+            <label
+              for="{{ manual_form.extra_file.id_for_label }}"
+              class="tatzo-file-button"
+              data-default-text="{% trans 'Choose file' %}"
+              data-selected-text="{% trans 'File selected ✅' %}"
+            >
+              {% trans "Choose file" %}
+            </label>
+
+            <span
+              class="tatzo-file-name"
+              data-empty-text="{% trans 'No file selected' %}"
+            >
+              {% trans "No file selected" %}
+            </span>
+          </div>
         </div>
 
         {% if manual_form.errors %}

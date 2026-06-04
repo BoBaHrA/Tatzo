@@ -1,9 +1,15 @@
 {% extends 'base.html' %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "Upload verification documents" %}{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth_language_switcher.css' %}">
+{% endblock %}
+
 {% block content %}
+{% include "partials/auth_language_switcher.html" %}
+{% include "partials/auth_home_link.html" %}
 <div class="container">
     <h2>{% trans "Upload verification documents" %}</h2>
 
