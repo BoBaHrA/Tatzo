@@ -1,0 +1,11 @@
+{% load i18n %}
+
+{% trans "Confirm your Tatzo account" %}
+
+{% blocktrans with username=username %}Hi {{ username }},{% endblocktrans %}
+
+{% trans "Welcome to Tatzo. Please confirm your email address to activate your account and start using the platform." %}
+
+{{ verification_link }}
+
+{% trans "If you did not create this account, you can safely ignore this email." %}

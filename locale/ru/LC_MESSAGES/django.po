@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tatzo\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-04 16:41+0200\n"
+"POT-Creation-Date: 2026-06-04 22:16+0200\n"
 "PO-Revision-Date: 2026-05-27 09:40+0200\n"
 "Last-Translator: Vladimir Procopisin\n"
 "Language-Team: Russian\n"
@@ -17,17 +17,17 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: .\mytattooapp\settings.py:101
+#: .\mytattooapp\settings.py:109
 #: .\templates\partials\auth_language_switcher.html:14
 msgid "English"
 msgstr "Английский"
 
-#: .\mytattooapp\settings.py:102
+#: .\mytattooapp\settings.py:110
 #: .\templates\partials\auth_language_switcher.html:24
 msgid "Français"
 msgstr "Французский"
 
-#: .\mytattooapp\settings.py:103
+#: .\mytattooapp\settings.py:111
 #: .\templates\partials\auth_language_switcher.html:34
 msgid "Русский"
 msgstr "Русский"
@@ -40,7 +40,7 @@ msgid "Bookmarks"
 msgstr "Закладки"
 
 #: .\posts\templates\posts\bookmarks.html:14 .\templates\home.html:14
-#: .\templates\home.html:367 .\templates\users\profile.html:293
+#: .\templates\home.html:403 .\templates\users\profile.html:293
 msgid "Write a comment..."
 msgstr "Напишите комментарий..."
 
@@ -64,18 +64,18 @@ msgstr "Сохраняйте понравившиеся посты, и они п
 msgid "Go to feed"
 msgstr "Перейти к ленте"
 
-#: .\posts\templates\posts\bookmarks.html:77 .\templates\home.html:183
-#: .\templates\home.html:362 .\templates\users\chat_thread.html:103
+#: .\posts\templates\posts\bookmarks.html:77 .\templates\home.html:219
+#: .\templates\home.html:398 .\templates\users\chat_thread.html:103
 #: .\templates\users\profile.html:301
 msgid "Send"
 msgstr "Отправить"
 
 #: .\posts\templates\posts\feed.html:17 .\templates\home.html:117
-#: .\templates\home.html:353
+#: .\templates\home.html:389
 msgid "Post"
 msgstr "Опубликовать"
 
-#: .\posts\templates\posts\feed.html:27 .\templates\home.html:192
+#: .\posts\templates\posts\feed.html:27 .\templates\home.html:228
 msgid "Edit comment"
 msgstr "Редактировать комментарий"
 
@@ -83,9 +83,9 @@ msgstr "Редактировать комментарий"
 msgid "Edit your comment..."
 msgstr "Редактируйте комментарий..."
 
-#: .\posts\templates\posts\feed.html:41 .\templates\home.html:206
-#: .\templates\home.html:231 .\templates\home.html:256
-#: .\templates\home.html:283 .\templates\home.html:310
+#: .\posts\templates\posts\feed.html:41 .\templates\home.html:242
+#: .\templates\home.html:267 .\templates\home.html:292
+#: .\templates\home.html:319 .\templates\home.html:346
 #: .\templates\users\artist_portfolio.html:209
 #: .\templates\users\artist_portfolio_album.html:127
 #: .\templates\users\report_problem.html:71
@@ -94,7 +94,7 @@ msgstr "Редактируйте комментарий..."
 msgid "Cancel"
 msgstr "Отмена"
 
-#: .\posts\templates\posts\feed.html:44 .\templates\home.html:210
+#: .\posts\templates\posts\feed.html:44 .\templates\home.html:246
 #: .\users\templates\users\edit_profile.html:226
 #: .\users\templates\users\password_reset_confirm.html:31
 #: .\users\templates\users\profile_form.html:18
@@ -105,7 +105,7 @@ msgstr "Сохранить"
 msgid "No posts available."
 msgstr "Постов пока нет."
 
-#: .\posts\views.py:92 .\users\views.py:134
+#: .\posts\views.py:92 .\users\views.py:174
 msgid "Post cannot be empty."
 msgstr "Пост не может быть пустым."
 
@@ -113,7 +113,7 @@ msgstr "Пост не может быть пустым."
 msgid "Form validation failed."
 msgstr "Ошибка валидации формы."
 
-#: .\posts\views.py:150 .\templates\home.html:370
+#: .\posts\views.py:150 .\templates\home.html:406
 msgid "Comments are disabled for this post."
 msgstr "Комментарии к этому посту отключены."
 
@@ -125,7 +125,7 @@ msgstr "Комментарий не может быть пустым."
 msgid "You cannot report your own comment."
 msgstr "Нельзя пожаловаться на свой комментарий."
 
-#: .\posts\views.py:314 .\templates\home.html:365
+#: .\posts\views.py:314 .\templates\home.html:401
 msgid "Report sent."
 msgstr "Жалоба отправлена."
 
@@ -148,6 +148,95 @@ msgstr "Вы уже жаловались на этот пост."
 #: .\posts\views.py:423
 msgid "Invalid method."
 msgstr "Недопустимый метод запроса."
+
+#: .\templates\emails\password_reset_email.html:7
+#: .\templates\emails\password_reset_email.txt:3
+#: .\templates\emails\password_reset_subject.txt:1
+msgid "Reset your Tatzo password"
+msgstr "Сброс пароля Tatzo"
+
+#: .\templates\emails\password_reset_email.html:22
+#: .\templates\emails\verify_email.html:22
+msgid "Your tattoo community starts here"
+msgstr "Ваше тату-сообщество начинается здесь"
+
+#: .\templates\emails\password_reset_email.html:30
+msgid "Reset your password"
+msgstr "Сброс пароля"
+
+#: .\templates\emails\password_reset_email.html:34
+#: .\templates\emails\verify_email.html:34
+#, python-format
+msgid ""
+"\n"
+"                Hi %(username)s,\n"
+"                "
+msgstr ""
+"\n"
+"                Привет, %(username)s,\n"
+"                "
+
+#: .\templates\emails\password_reset_email.html:40
+#: .\templates\emails\password_reset_email.txt:7
+msgid "We received a request to reset the password for your Tatzo account."
+msgstr "Мы получили запрос на сброс пароля для вашего аккаунта Tatzo."
+
+#: .\templates\emails\password_reset_email.html:44
+msgid "Click the button below to create a new password."
+msgstr "Нажмите на кнопку ниже, чтобы создать новый пароль."
+
+#: .\templates\emails\password_reset_email.html:52
+msgid "Create new password"
+msgstr "Создать новый пароль"
+
+#: .\templates\emails\password_reset_email.html:60
+#: .\templates\emails\verify_email.html:56
+msgid "If the button does not work, copy and paste this link into your browser:"
+msgstr "Если кнопка не работает, скопируйте и вставьте эту ссылку в браузер:"
+
+#: .\templates\emails\password_reset_email.html:72
+#: .\templates\emails\password_reset_email.txt:12
+msgid "If you did not request a password reset, you can safely ignore this email."
+msgstr "Если вы не запрашивали сброс пароля, просто проигнорируйте это письмо."
+
+#: .\templates\emails\password_reset_email.html:79
+#: .\templates\emails\verify_email.html:75
+msgid "Tattoo social platform"
+msgstr "Социальная платформа для тату"
+
+#: .\templates\emails\password_reset_email.txt:5
+#: .\templates\emails\verify_email.txt:5
+#, python-format
+msgid "Hi %(username)s,"
+msgstr "Привет, %(username)s,"
+
+#: .\templates\emails\password_reset_email.txt:9
+msgid "Use the link below to create a new password:"
+msgstr "Используйте ссылку ниже, чтобы создать новый пароль:"
+
+#: .\templates\emails\verify_email.html:7
+#: .\templates\emails\verify_email.txt:3
+#: .\users\utils.py:25
+msgid "Confirm your Tatzo account"
+msgstr "Подтверждение аккаунта Tatzo"
+
+#: .\templates\emails\verify_email.html:30
+msgid "Confirm your email"
+msgstr "Подтвердите email"
+
+#: .\templates\emails\verify_email.html:40
+#: .\templates\emails\verify_email.txt:7
+msgid "Welcome to Tatzo. Please confirm your email address to activate your account and start using the platform."
+msgstr "Добро пожаловать в Tatzo. Подтвердите ваш email, чтобы активировать аккаунт и начать пользоваться платформой."
+
+#: .\templates\emails\verify_email.html:48
+msgid "Confirm my account"
+msgstr "Подтвердить аккаунт"
+
+#: .\templates\emails\verify_email.html:68
+#: .\templates\emails\verify_email.txt:11
+msgid "If you did not create this account, you can safely ignore this email."
+msgstr "Если вы не создавали этот аккаунт, просто проигнорируйте это письмо."
 
 #: .\templates\home.html:4 .\templates\partials\auth_home_link.html:3
 #: .\templates\partials\auth_home_link.html:5
@@ -238,165 +327,185 @@ msgstr "Настройки"
 msgid "Additional options"
 msgstr "Дополнительные настройки"
 
-#: .\templates\home.html:133
+#: .\templates\home.html:134
+msgid "Discover"
+msgstr "Открывайте"
+
+#: .\templates\home.html:135
 msgid "Recommendations"
 msgstr "Рекомендации"
 
-#: .\templates\home.html:136 .\templates\home.html:145
-#: .\templates\users\search.html:114 .\users\models.py:389
-msgid "User"
-msgstr "Пользователь"
+#: .\templates\home.html:136
+msgid "Explore tattoo artists and find profiles worth following."
+msgstr ""
+"Изучайте тату-мастеров и находите профили, на которые стоит подписаться."
 
-#: .\templates\home.html:140 .\templates\home.html:149
-#: .\templates\users\profile.html:74 .\templates\users\profile.html:347
-#: .\users\views.py:635
-msgid "Follow"
-msgstr "Подписаться"
+#: .\templates\home.html:164 .\templates\home.html:171 .\users\models.py:12
+#: .\users\templates\users\signup.html:119
+msgid "Tattoo artist"
+msgstr "Тату-мастер"
 
-#: .\templates\home.html:158
+#: .\templates\home.html:169 .\templates\users\profile.html:46
+#: .\templates\users\profile.html:120 .\users\models.py:122
+msgid "Verified"
+msgstr "Подтверждён"
+
+#: .\templates\home.html:177 .\templates\users\search.html:129
+msgid "View profile"
+msgstr "Открыть профиль"
+
+#: .\templates\home.html:183
+msgid "No tattoo artists yet"
+msgstr "Тату-мастеров пока нет"
+
+#: .\templates\home.html:184
+msgid "Artist recommendations will appear here once profiles are available."
+msgstr "Рекомендации мастеров появятся здесь, когда будут доступны профили."
+
+#: .\templates\home.html:194
 msgid "Logout"
 msgstr "Выйти"
 
-#: .\templates\home.html:161 .\templates\registration\login.html:4
+#: .\templates\home.html:197 .\templates\registration\login.html:4
 msgid "Login"
 msgstr "Вход"
 
-#: .\templates\home.html:162 .\users\templates\users\signup.html:4
+#: .\templates\home.html:198 .\users\templates\users\signup.html:4
 #: .\users\templates\users\signup.html:127
 msgid "Sign up"
 msgstr "Регистрация"
 
-#: .\templates\home.html:219 .\templates\users\moderation_dashboard.html:416
+#: .\templates\home.html:255 .\templates\users\moderation_dashboard.html:416
 msgid "Delete comment"
 msgstr "Удалить комментарий"
 
-#: .\templates\home.html:225
+#: .\templates\home.html:261
 msgid "Are you sure you want to delete this comment?"
 msgstr "Вы уверены, что хотите удалить этот комментарий?"
 
-#: .\templates\home.html:235 .\templates\home.html:260
-#: .\templates\home.html:356 .\templates\partials\comment_item.html:57
+#: .\templates\home.html:271 .\templates\home.html:296
+#: .\templates\home.html:392 .\templates\partials\comment_item.html:57
 #: .\templates\partials\comment_item.html:138
 #: .\templates\users\artist_portfolio.html:210
 #: .\templates\users\artist_portfolio_album.html:128
 msgid "Delete"
 msgstr "Удалить"
 
-#: .\templates\home.html:244 .\templates\partials\post_card.html:56
+#: .\templates\home.html:280 .\templates\partials\post_card.html:56
 #: .\templates\users\moderation_dashboard.html:338
 msgid "Delete post"
 msgstr "Удалить пост"
 
-#: .\templates\home.html:250
+#: .\templates\home.html:286
 msgid "Are you sure you want to delete this post?"
 msgstr "Вы уверены, что хотите удалить этот пост?"
 
-#: .\templates\home.html:269 .\templates\partials\post_card.html:60
+#: .\templates\home.html:305 .\templates\partials\post_card.html:60
 msgid "Report post"
 msgstr "Пожаловаться на пост"
 
-#: .\templates\home.html:287 .\templates\home.html:314
-#: .\templates\home.html:361 .\templates\users\report_problem.html:75
+#: .\templates\home.html:323 .\templates\home.html:350
+#: .\templates\home.html:397 .\templates\users\report_problem.html:75
 msgid "Send report"
 msgstr "Отправить жалобу"
 
-#: .\templates\home.html:296
+#: .\templates\home.html:332
 msgid "Report comment"
 msgstr "Пожаловаться на комментарий"
 
-#: .\templates\home.html:324 .\templates\users\coming_soon.html:4
-#: .\templates\users\coming_soon.html:20 .\users\views.py:1364
+#: .\templates\home.html:360 .\templates\users\coming_soon.html:4
+#: .\templates\users\coming_soon.html:20
 msgid "Coming soon"
 msgstr "Скоро будет"
 
-#: .\templates\home.html:327
+#: .\templates\home.html:363
 msgid ""
 "Sharing posts will be available soon. We’re still working on this feature."
 msgstr ""
 "Возможность делиться постами скоро появится. Мы всё ещё работаем над этой "
 "функцией."
 
-#: .\templates\home.html:331
+#: .\templates\home.html:367
 msgid "Got it"
 msgstr "Понятно"
 
-#: .\templates\home.html:341
+#: .\templates\home.html:377
 msgid "Success"
 msgstr "Успешно"
 
-#: .\templates\home.html:342
+#: .\templates\home.html:378
 msgid "Action failed"
 msgstr "Действие не выполнено"
 
-#: .\templates\home.html:343
+#: .\templates\home.html:379
 msgid "Info"
 msgstr "Информация"
 
-#: .\templates\home.html:344
+#: .\templates\home.html:380
 msgid "Done."
 msgstr "Готово."
 
-#: .\templates\home.html:346
+#: .\templates\home.html:382
 msgid "Unsupported file"
 msgstr "Неподдерживаемый файл"
 
-#: .\templates\home.html:347
+#: .\templates\home.html:383
 msgid "Remove file"
 msgstr "Удалить файл"
 
-#: .\templates\home.html:348
+#: .\templates\home.html:384
 msgid "Open preview"
 msgstr "Открыть предпросмотр"
 
-#: .\templates\home.html:349
+#: .\templates\home.html:385
 msgid "Preview"
 msgstr "Предпросмотр"
 
-#: .\templates\home.html:350
+#: .\templates\home.html:386
 msgid "Media"
 msgstr "Медиа"
 
-#: .\templates\home.html:352
+#: .\templates\home.html:388
 msgid "Posting..."
 msgstr "Публикация..."
 
-#: .\templates\home.html:354
+#: .\templates\home.html:390
 msgid "Post could not be created."
 msgstr "Не удалось создать пост."
 
-#: .\templates\home.html:357
+#: .\templates\home.html:393
 msgid "Deleting..."
 msgstr "Удаление..."
 
-#: .\templates\home.html:358
+#: .\templates\home.html:394
 msgid "Delete failed."
 msgstr "Не удалось удалить."
 
-#: .\templates\home.html:359
+#: .\templates\home.html:395
 msgid "Post deleted."
 msgstr "Пост удалён."
 
-#: .\templates\home.html:363
+#: .\templates\home.html:399
 msgid "Sending..."
 msgstr "Отправка..."
 
-#: .\templates\home.html:364
+#: .\templates\home.html:400
 msgid "Report failed."
 msgstr "Не удалось отправить жалобу."
 
-#: .\templates\home.html:368
+#: .\templates\home.html:404
 msgid "Edit comment:"
 msgstr "Редактировать комментарий:"
 
-#: .\templates\home.html:369
+#: .\templates\home.html:405
 msgid "Delete this comment?"
 msgstr "Удалить этот комментарий?"
 
-#: .\templates\home.html:372
+#: .\templates\home.html:408
 msgid "Hide replies"
 msgstr "Скрыть ответы"
 
-#: .\templates\home.html:373
+#: .\templates\home.html:409
 msgid "View replies"
 msgstr "Показать ответы"
 
@@ -506,7 +615,7 @@ msgid "Search"
 msgstr "Поиск"
 
 #: .\templates\partials\sidebar.html:48 .\templates\partials\sidebar.html:49
-#: .\users\views.py:1337
+#: .\users\views.py:1381
 msgid "Maps"
 msgstr "Карты"
 
@@ -516,22 +625,22 @@ msgid "Chats"
 msgstr "Чаты"
 
 #: .\templates\partials\sidebar.html:72 .\templates\partials\sidebar.html:73
-#: .\users\views.py:1342
+#: .\users\views.py:1386
 msgid "Calendar"
 msgstr "Календарь"
 
 #: .\templates\partials\sidebar.html:92 .\templates\partials\sidebar.html:93
-#: .\users\templates\users\contests.html:4 .\users\views.py:1357
+#: .\users\templates\users\contests.html:4 .\users\views.py:1401
 msgid "Contests"
 msgstr "Конкурсы"
 
 #: .\templates\partials\sidebar.html:102 .\templates\partials\sidebar.html:103
-#: .\users\views.py:1347
+#: .\users\views.py:1391
 msgid "Clean slate"
 msgstr "Чистый лист"
 
 #: .\templates\partials\sidebar.html:112 .\templates\partials\sidebar.html:113
-#: .\users\views.py:1352
+#: .\users\views.py:1396
 msgid "Notifications"
 msgstr "Уведомления"
 
@@ -1121,11 +1230,6 @@ msgstr "Открыть автора"
 msgid "No unresolved comment reports."
 msgstr "Нет нерешённых жалоб на комментарии."
 
-#: .\templates\users\profile.html:46 .\templates\users\profile.html:120
-#: .\users\models.py:122
-msgid "Verified"
-msgstr "Подтверждён"
-
 #: .\templates\users\profile.html:53
 msgid "Professional portfolio"
 msgstr "Профессиональное портфолио"
@@ -1137,9 +1241,14 @@ msgid "Edit profile"
 msgstr "Редактировать профиль"
 
 #: .\templates\users\profile.html:72 .\templates\users\profile.html:346
-#: .\users\views.py:635
+#: .\users\views.py:675
 msgid "Following"
 msgstr "Вы подписаны"
+
+#: .\templates\users\profile.html:74 .\templates\users\profile.html:347
+#: .\users\views.py:675
+msgid "Follow"
+msgstr "Подписаться"
 
 #: .\templates\users\profile.html:82 .\templates\users\report_problem.html:49
 #: .\templates\users\search.html:133 .\users\forms.py:269 .\users\models.py:398
@@ -1163,20 +1272,20 @@ msgid "No bio yet."
 msgstr "Биография пока не заполнена."
 
 #: .\templates\users\profile.html:122 .\users\models.py:35
-#: .\users\templates\users\verification_page.html:37 .\users\views.py:386
+#: .\users\templates\users\verification_page.html:37 .\users\views.py:426
 msgid "Rejected"
 msgstr "Отклонено"
 
 #: .\templates\users\profile.html:124 .\templates\users\profile.html:126
 #: .\users\models.py:33 .\users\models.py:60
 #: .\users\templates\users\verification_page.html:39
-#: .\users\templates\users\verification_page.html:41 .\users\views.py:384
+#: .\users\templates\users\verification_page.html:41 .\users\views.py:424
 msgid "Pending"
 msgstr "На рассмотрении"
 
 #: .\templates\users\profile.html:128 .\users\models.py:30
 #: .\users\models.py:127 .\users\templates\users\verification_page.html:43
-#: .\users\views.py:381
+#: .\users\views.py:421
 msgid "Not submitted"
 msgstr "Не отправлено"
 
@@ -1315,9 +1424,9 @@ msgstr ""
 "            Результаты по запросу <strong>%(search_query)s</strong>\n"
 "          "
 
-#: .\templates\users\search.html:129
-msgid "View profile"
-msgstr "Открыть профиль"
+#: .\templates\users\search.html:114 .\users\models.py:389
+msgid "User"
+msgstr "Пользователь"
 
 #: .\templates\users\search.html:143
 msgid "No results found"
@@ -1359,10 +1468,6 @@ msgstr "Опишите проблему или предложение..."
 msgid "Regular user"
 msgstr "Обычный пользователь"
 
-#: .\users\models.py:12 .\users\templates\users\signup.html:119
-msgid "Tattoo artist"
-msgstr "Тату-мастер"
-
 #: .\users\models.py:18
 msgid "Congratulations, your tattoo artist account has been verified."
 msgstr "Поздравляем, ваш аккаунт тату-мастера подтверждён."
@@ -1375,16 +1480,16 @@ msgstr ""
 "К сожалению, ваш аккаунт тату-мастера не был подтверждён. Свяжитесь с "
 "технической поддержкой для получения дополнительной информации."
 
-#: .\users\models.py:31 .\users\views.py:382
+#: .\users\models.py:31 .\users\views.py:422
 msgid "Pending documents review"
 msgstr "Ожидает проверки документов"
 
-#: .\users\models.py:32 .\users\views.py:383
+#: .\users\models.py:32 .\users\views.py:423
 msgid "Pending manual review"
 msgstr "Ожидает ручной проверки"
 
 #: .\users\models.py:34 .\users\templates\users\verification_page.html:35
-#: .\users\views.py:385
+#: .\users\views.py:425
 msgid "Approved"
 msgstr "Подтверждено"
 
@@ -2029,95 +2134,95 @@ msgstr "Документ:"
 msgid "Document"
 msgstr "Документ"
 
-#: .\users\views.py:41
+#: .\users\views.py:42
 msgid "Please verify your email before logging in."
 msgstr "Пожалуйста, подтвердите email перед входом."
 
-#: .\users\views.py:47
+#: .\users\views.py:48
 msgid "Invalid username or password."
 msgstr "Неверное имя пользователя или пароль."
 
-#: .\users\views.py:103
+#: .\users\views.py:143
 msgid "This link is invalid or has expired."
 msgstr "Ссылка недействительна или устарела."
 
-#: .\users\views.py:199
+#: .\users\views.py:239
 msgid "Profile updated successfully."
 msgstr "Профиль успешно обновлён."
 
-#: .\users\views.py:227
+#: .\users\views.py:267
 msgid "Your post has been deleted."
 msgstr "Ваш пост был удалён."
 
-#: .\users\views.py:229
+#: .\users\views.py:269
 msgid "You cannot delete this post."
 msgstr "Вы не можете удалить этот пост."
 
-#: .\users\views.py:270
+#: .\users\views.py:310
 msgid "You cannot edit this post."
 msgstr "Вы не можете редактировать этот пост."
 
-#: .\users\views.py:277
+#: .\users\views.py:317
 msgid "Your post has been updated successfully."
 msgstr "Ваш пост был успешно обновлён."
 
-#: .\users\views.py:296
+#: .\users\views.py:336
 #, python-format
 msgid "Profile %(username)s has been approved."
 msgstr "Профиль %(username)s был одобрен."
 
-#: .\users\views.py:304
+#: .\users\views.py:344
 #, python-format
 msgid "Profile %(username)s has been rejected."
 msgstr "Профиль %(username)s был отклонён."
 
-#: .\users\views.py:351
+#: .\users\views.py:391
 msgid "Your documents have been submitted for review."
 msgstr "Ваши документы отправлены на проверку."
 
-#: .\users\views.py:373
+#: .\users\views.py:413
 msgid "Your manual review request has been submitted."
 msgstr "Ваша заявка на ручную проверку отправлена."
 
-#: .\users\views.py:378
+#: .\users\views.py:418
 msgid "Invalid verification request."
 msgstr "Недопустимая заявка на верификацию."
 
-#: .\users\views.py:423
+#: .\users\views.py:463
 msgid "Invalid request."
 msgstr "Недопустимый запрос."
 
-#: .\users\views.py:445
+#: .\users\views.py:485
 msgid "Profile approved successfully."
 msgstr "Профиль успешно одобрен."
 
-#: .\users\views.py:449
+#: .\users\views.py:489
 msgid "Profile rejected successfully."
 msgstr "Профиль успешно отклонён."
 
-#: .\users\views.py:451
+#: .\users\views.py:491
 msgid "Invalid action."
 msgstr "Недопустимое действие."
 
-#: .\users\views.py:479
+#: .\users\views.py:519
 msgid "Your documents have been submitted for verification."
 msgstr "Ваши документы отправлены на верификацию."
 
-#: .\users\views.py:499
+#: .\users\views.py:539
 #, python-format
 msgid "Profile '%(username)s' has been approved."
 msgstr "Профиль «%(username)s» был одобрен."
 
-#: .\users\views.py:519
+#: .\users\views.py:559
 #, python-format
 msgid "Profile '%(username)s' has been rejected."
 msgstr "Профиль «%(username)s» был отклонён."
 
-#: .\users\views.py:610
+#: .\users\views.py:650
 msgid "You cannot follow yourself."
 msgstr "Нельзя подписаться на самого себя."
 
-#: .\users\views.py:749
+#: .\users\views.py:789
 #, python-format
 msgid "Portfolio work added successfully."
 msgid_plural "%(count)s portfolio works added successfully."
@@ -2125,92 +2230,91 @@ msgstr[0] "Работа добавлена в портфолио."
 msgstr[1] "%(count)s работы добавлены в портфолио."
 msgstr[2] "%(count)s работ добавлено в портфолио."
 
-#: .\users\views.py:775
+#: .\users\views.py:815
 msgid "Portfolio album created."
 msgstr "Альбом портфолио создан."
 
-#: .\users\views.py:859
+#: .\users\views.py:899
 msgid "Album updated successfully."
 msgstr "Альбом успешно обновлён."
 
-#: .\users\views.py:888
+#: .\users\views.py:928
 msgid "Album deleted. Works were kept in All works."
 msgstr "Альбом удалён. Работы сохранены в разделе «Все работы»."
 
-#: .\users\views.py:909
+#: .\users\views.py:949
 msgid "Portfolio work deleted."
 msgstr "Работа из портфолио удалена."
 
-#: .\users\views.py:974
+#: .\users\views.py:1014
 #, python-format
 msgid "%(username)s has been approved as a tattoo artist."
 msgstr "%(username)s был одобрен как тату-мастер."
 
-#: .\users\views.py:993
+#: .\users\views.py:1033
 #, python-format
 msgid "%(username)s's verification has been rejected."
 msgstr "Верификация %(username)s была отклонена."
 
-#: .\users\views.py:1008
+#: .\users\views.py:1048
 msgid "Post report resolved."
 msgstr "Жалоба на пост обработана."
 
-#: .\users\views.py:1028
+#: .\users\views.py:1068
 msgid "Reported post deleted."
 msgstr "Пост из жалобы удалён."
 
-#: .\users\views.py:1041
+#: .\users\views.py:1081
 msgid "Comment report resolved."
 msgstr "Жалоба на комментарий обработана."
 
-#: .\users\views.py:1061
+#: .\users\views.py:1101
 msgid "Reported comment deleted."
 msgstr "Комментарий из жалобы удалён."
 
-#: .\users\views.py:1118
+#: .\users\views.py:1158
 msgid "You cannot start a chat with yourself."
 msgstr "Нельзя начать чат с самим собой."
 
-#: .\users\views.py:1139 .\users\views.py:1242
+#: .\users\views.py:1179 .\users\views.py:1282
 msgid "You cannot access this chat."
 msgstr "У вас нет доступа к этому чату."
 
-#: .\users\views.py:1176
+#: .\users\views.py:1216
 msgid "You cannot send messages in this chat."
 msgstr "Вы не можете отправлять сообщения в этом чате."
 
-#: .\users\views.py:1188
+#: .\users\views.py:1228
 msgid "Message cannot be empty."
 msgstr "Сообщение не может быть пустым."
 
-#: .\users\views.py:1338
+#: .\users\views.py:1382
 msgid "Find tattoo artists near you and explore studios by location."
 msgstr ""
 "Находите тату-мастеров рядом с вами и изучайте студии по местоположению."
 
-#: .\users\views.py:1343
+#: .\users\views.py:1387
 msgid "Manage bookings, sessions and upcoming appointments."
 msgstr "Управляйте бронированиями, сеансами и предстоящими встречами."
 
-#: .\users\views.py:1348
+#: .\users\views.py:1392
 msgid "Discover tattoo removal resources, specialists and useful guides."
 msgstr "Изучайте материалы о удалении тату, специалистов и полезные гайды."
 
-#: .\users\views.py:1353
+#: .\users\views.py:1397
 msgid "Stay updated about likes, comments, replies and messages."
 msgstr "Получайте уведомления о лайках, комментариях, ответах и сообщениях."
 
-#: .\users\views.py:1358
+#: .\users\views.py:1402
 msgid ""
 "Vote for the best tattoo works, follow competitions and discover winners."
 msgstr ""
 "Голосуйте за лучшие тату-работы, следите за конкурсами и открывайте "
 "победителей."
 
-#: .\users\views.py:1365
-msgid "This feature is currently in development."
-msgstr "Эта функция сейчас находится в разработке."
-
-#: .\users\views.py:1385
+#: .\users\views.py:1431
 msgid "Thank you! Your report has been sent."
 msgstr "Спасибо! Ваше обращение отправлено."
+
+#~ msgid "This feature is currently in development."
+#~ msgstr "Эта функция сейчас находится в разработке."

@@ -7,9 +7,10 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.views import redirect_to_login
 from django.db import transaction
-from django.db.models import Q
-from django.http import JsonResponse
+from django.db.models import Case, Count, Exists, IntegerField, OuterRef, Q, Value, When
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -70,10 +71,49 @@ def home(request):
             PostBookmark.objects.filter(user=request.user).values_list("post_id", flat=True)
         )
 
+    recommended_artists = (
+        User.objects
+        .select_related("profile")
+        .filter(profile__account_type="tattoo_artist")
+        .annotate(
+            is_verified_recommendation=Case(
+                When(profile__verification_status="approved", then=Value(1)),
+                default=Value(0),
+                output_field=IntegerField(),
+            ),
+            portfolio_works_count=Count("portfolio_works", distinct=True),
+            followers_count=Count("follower_relations", distinct=True),
+        )
+    )
+
+    if request.user.is_authenticated:
+        followed_artists = UserFollow.objects.filter(
+            follower=request.user,
+            following=OuterRef("pk"),
+        )
+
+        recommended_artists = (
+            recommended_artists
+            .exclude(id=request.user.id)
+            .annotate(is_already_followed=Exists(followed_artists))
+            .filter(is_already_followed=False)
+        )
+
+    recommended_artists = (
+        recommended_artists
+        .order_by(
+            "-is_verified_recommendation",
+            "-portfolio_works_count",
+            "-followers_count",
+            "-date_joined",
+        )[:5]
+    )
+
     context = {
         "posts": posts,
         "liked_post_ids": liked_post_ids,
         "bookmarked_post_ids": bookmarked_post_ids,
+        "recommended_artists": recommended_artists,
     }
 
     return render(request, "home.html", context)
@@ -1292,7 +1332,6 @@ def chat_new_messages(request, thread_id):
         }
     )
     
-@login_required
 def search_page(request):
     query = (request.GET.get("q") or "").strip()
     account_filter = request.GET.get("type") or "all"
@@ -1330,46 +1369,53 @@ def search_page(request):
         },
     )
     
-@login_required
 def coming_soon(request, feature):
+    public_features = {"maps", "clean-slate", "contests"}
+
+    if feature not in public_features and not request.user.is_authenticated:
+        return redirect_to_login(request.get_full_path())
+
     features = {
         "maps": {
-            "title": _("Maps"),
-            "subtitle": _(_("Find tattoo artists near you and explore studios by location.")),
             "icon": "🗺️",
+            "title": _("Maps"),
+            "subtitle": _("Find tattoo artists near you and explore studios by location."),
         },
         "calendar": {
-            "title": _("Calendar"),
-            "subtitle": _(_("Manage bookings, sessions and upcoming appointments.")),
             "icon": "📅",
+            "title": _("Calendar"),
+            "subtitle": _("Manage bookings, sessions and upcoming appointments."),
         },
         "clean-slate": {
-            "title": _("Clean slate"),
-            "subtitle": _(_("Discover tattoo removal resources, specialists and useful guides.")),
             "icon": "🌱",
+            "title": _("Clean slate"),
+            "subtitle": _("Discover tattoo removal resources, specialists and useful guides."),
         },
         "notifications": {
-            "title": _("Notifications"),
-            "subtitle": _(_("Stay updated about likes, comments, replies and messages.")),
             "icon": "🔔",
+            "title": _("Notifications"),
+            "subtitle": _("Stay updated about likes, comments, replies and messages."),
         },
         "contests": {
-            "title": _("Contests"),
-            "subtitle": _(_("Vote for the best tattoo works, follow competitions and discover winners.")),
             "icon": "🏆",
+            "title": _("Contests"),
+            "subtitle": _("Vote for the best tattoo works, follow competitions and discover winners."),
         },
     }
 
-    feature_data = features.get(feature, {
-        "title": _("Coming soon"),
-        "subtitle": _(_("This feature is currently in development.")),
-        "icon": "✨",
-    })
+    feature_data = features.get(feature)
 
-    return render(request, "users/coming_soon.html", {
-        "feature": feature,
-        "feature_data": feature_data,
-    })
+    if not feature_data:
+        raise Http404
+
+    return render(
+        request,
+        "users/coming_soon.html",
+        {
+            "feature": feature,
+            "feature_data": feature_data,
+        },
+    )
     
 @login_required
 def report_problem(request):

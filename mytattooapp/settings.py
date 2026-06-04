@@ -1,14 +1,22 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 from django.utils.translation import gettext_lazy as _
 
 # Базовая директория проекта
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 
 # Настройки безопасности
-SECRET_KEY = "django-insecure-your-secret-key"  # Обязательно замени на свой ключ!
-DEBUG = True
-ALLOWED_HOSTS = []
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-dev-only-change-me")
+
+DEBUG = os.getenv("DEBUG", "True") == "True"
+
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv("ALLOWED_HOSTS", "").split(",")
+    if host.strip()
+]
 
 # Установленные приложения
 INSTALLED_APPS = [
@@ -124,8 +132,27 @@ LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"  # Перенаправление после входа
 LOGOUT_REDIRECT_URL = "/"  # Перенаправление после выхода
 
-# ✅ Вывод писем в консоль
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# Email settings
+USE_CONSOLE_EMAIL = os.getenv("USE_CONSOLE_EMAIL", "True") == "True"
+
+if USE_CONSOLE_EMAIL:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+    EMAIL_HOST = os.getenv("EMAIL_HOST", "")
+    EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+    EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
+    EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False") == "True"
+
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+
+    DEFAULT_FROM_EMAIL = os.getenv(
+        "DEFAULT_FROM_EMAIL",
+        "Tatzo <vladimir.procopisin@gmail.com>",
+    )
+    SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 
 # Конец файла

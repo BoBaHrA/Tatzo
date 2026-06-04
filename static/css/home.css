@@ -480,46 +480,275 @@ input[type="file"] { display: none; }
   height: 28px;
 }
 
-/* ---------- Suggestions (правый сайдбар) ---------- */
+/* ---------- Suggestions / Recommendations ---------- */
+
 .suggestions {
   position: fixed;
   top: 80px;
   right: 20px;
-  width: 230px;
-  background: #000a12;
-  padding: 20px;
-  border-radius: 10px;
+
+  width: 260px;
+  padding: 18px;
+
+  border-radius: 24px;
+  border: 1px solid rgba(4, 197, 191, 0.18);
+
+  background:
+    radial-gradient(circle at top left, rgba(4, 197, 191, 0.12), transparent 34%),
+    rgba(0, 10, 18, 0.94);
+
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+
+  backdrop-filter: blur(10px);
+}
+
+.suggestions-header {
+  margin-bottom: 16px;
+}
+
+.suggestions-kicker {
+  display: inline-flex;
+  margin-bottom: 8px;
+  padding: 5px 10px;
+
+  border-radius: 999px;
+  border: 1px solid rgba(238, 12, 111, 0.34);
+  background: rgba(238, 12, 111, 0.08);
+
+  color: #ff2b86;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .suggestions h3 {
-  color: var(--header-color);
-  margin-bottom: 15px;
+  margin: 0 0 6px;
+
+  color: #eaffff;
+  font-family: "Poppins", Arial, sans-serif;
+  font-size: 20px;
+  font-weight: 900;
 }
 
-.suggested-profile {
+.suggestions-header p {
+  margin: 0;
+
+  color: rgba(223, 252, 255, 0.58);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.suggested-profile-card {
+  position: relative;
+
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 12px;
+
+  padding: 12px;
+
+  border-radius: 18px;
+  border: 1px solid rgba(4, 197, 191, 0.12);
+  background: rgba(0, 26, 46, 0.42);
+
+  color: inherit;
+  text-decoration: none;
+
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.suggested-profile-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(4, 197, 191, 0.38);
+  background: rgba(4, 197, 191, 0.08);
+  box-shadow: 0 12px 28px rgba(4, 197, 191, 0.08);
+}
+
+.suggested-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  overflow: hidden;
+
+  border: 1px solid rgba(4, 197, 191, 0.36);
+  background: rgba(4, 197, 191, 0.08);
+}
+
+.suggested-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.suggested-avatar-fallback {
+  width: 100%;
+  height: 100%;
+
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
+  justify-content: center;
+
+  color: #04c5bf;
+  font-family: "Poppins", Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 900;
 }
 
-.suggested-profile .avatar {
-  width: 40px;
-  height: 40px;
-  margin-right: 10px;
+.suggested-info {
+  min-width: 0;
 }
 
-.suggested-info .username { display: block; }
+.suggested-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 
-.suggested-info button {
-  margin-top: 5px;
-  padding: 5px 10px;
-  background: #007bff;
-  border: none;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
+  min-width: 0;
 }
-.suggested-info button:hover { background: #0056b3; }
+
+.suggested-username {
+  min-width: 0;
+
+  color: #eaffff;
+  font-size: 14px;
+  font-weight: 900;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.suggested-verified {
+  width: 17px;
+  height: 17px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: rgba(4, 197, 191, 0.16);
+  border: 1px solid rgba(4, 197, 191, 0.5);
+
+  color: #04c5bf;
+  font-size: 11px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.suggested-tag {
+  display: block;
+  margin-top: 3px;
+
+  color: rgba(223, 252, 255, 0.56);
+  font-size: 12px;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.suggested-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  margin-top: 8px;
+}
+
+.suggested-badges span {
+  display: inline-flex;
+  padding: 4px 8px;
+
+  border-radius: 999px;
+  background: rgba(4, 197, 191, 0.1);
+  border: 1px solid rgba(4, 197, 191, 0.18);
+
+  color: #48a8bc;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.suggested-view {
+  grid-column: 1 / -1;
+
+  margin-top: 2px;
+  padding-top: 9px;
+
+  border-top: 1px solid rgba(223, 252, 255, 0.06);
+
+  color: #04c5bf;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: right;
+}
+
+.suggestions-empty {
+  padding: 20px 14px;
+
+  border-radius: 18px;
+  border: 1px solid rgba(4, 197, 191, 0.12);
+  background: rgba(0, 26, 46, 0.32);
+
+  text-align: center;
+}
+
+.suggestions-empty-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 16px;
+  background: rgba(4, 197, 191, 0.08);
+  border: 1px solid rgba(4, 197, 191, 0.18);
+
+  color: #04c5bf;
+  font-size: 22px;
+}
+
+.suggestions-empty strong {
+  display: block;
+  margin-bottom: 6px;
+
+  color: #eaffff;
+  font-size: 14px;
+}
+
+.suggestions-empty p {
+  margin: 0;
+
+  color: rgba(223, 252, 255, 0.55);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+@media (max-width: 1100px) {
+  .suggestions {
+    display: none;
+  }
+
+  .main-content {
+    margin-right: 20px;
+  }
+}
 
 /* ---------- Auth buttons (верхний правый угол) ---------- */
 .auth-buttons {
@@ -4568,4 +4797,284 @@ html {
   border-color: rgba(238, 12, 111, 0.62);
   color: #ff4f9a;
   transform: none;
+}
+
+/* ==============================
+   RECOMMENDATIONS FINAL FIX
+============================== */
+
+.suggestions {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+
+  width: 260px;
+  padding: 18px;
+
+  border-radius: 24px;
+  border: 1px solid rgba(4, 197, 191, 0.18);
+
+  background:
+    radial-gradient(circle at top left, rgba(4, 197, 191, 0.12), transparent 34%),
+    rgba(0, 10, 18, 0.94);
+
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+
+  backdrop-filter: blur(10px);
+  box-sizing: border-box;
+}
+
+.suggestions-header {
+  margin-bottom: 16px;
+}
+
+.suggestions-kicker {
+  display: inline-flex;
+  margin-bottom: 8px;
+  padding: 5px 10px;
+
+  border-radius: 999px;
+  border: 1px solid rgba(238, 12, 111, 0.34);
+  background: rgba(238, 12, 111, 0.08);
+
+  color: #ff2b86;
+  font-family: "Poppins", Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.suggestions h3 {
+  margin: 0 0 6px;
+
+  color: #eaffff;
+  font-family: "Poppins", Arial, sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.suggestions-header p {
+  margin: 0;
+
+  color: rgba(223, 252, 255, 0.58);
+  font-family: "Poppins", Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.suggested-profile-card {
+  position: relative;
+
+  display: grid !important;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 12px;
+
+  padding: 12px;
+
+  border-radius: 18px;
+  border: 1px solid rgba(4, 197, 191, 0.12);
+  background: rgba(0, 26, 46, 0.42);
+
+  color: inherit !important;
+  text-decoration: none !important;
+
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.suggested-profile-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(4, 197, 191, 0.38);
+  background: rgba(4, 197, 191, 0.08);
+  box-shadow: 0 12px 28px rgba(4, 197, 191, 0.08);
+}
+
+.suggested-avatar {
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px;
+  min-height: 46px;
+
+  border-radius: 50%;
+  overflow: hidden;
+
+  border: 1px solid rgba(4, 197, 191, 0.36);
+  background: rgba(4, 197, 191, 0.08);
+}
+
+.suggested-avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.suggested-avatar-fallback {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #04c5bf;
+  font-family: "Poppins", Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.suggested-info {
+  min-width: 0;
+}
+
+.suggested-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.suggested-username {
+  min-width: 0;
+
+  color: #eaffff;
+  font-family: "Poppins", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.suggested-verified {
+  width: 17px;
+  height: 17px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: rgba(4, 197, 191, 0.16);
+  border: 1px solid rgba(4, 197, 191, 0.5);
+
+  color: #04c5bf;
+  font-size: 11px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.suggested-tag {
+  display: block;
+  margin-top: 3px;
+
+  color: rgba(223, 252, 255, 0.56);
+  font-size: 12px;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.suggested-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  margin-top: 8px;
+}
+
+.suggested-badges span {
+  display: inline-flex;
+  padding: 4px 8px;
+
+  border-radius: 999px;
+  background: rgba(4, 197, 191, 0.1);
+  border: 1px solid rgba(4, 197, 191, 0.18);
+
+  color: #48a8bc;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.suggested-view {
+  grid-column: 1 / -1;
+
+  margin-top: 2px;
+  padding-top: 9px;
+
+  border-top: 1px solid rgba(223, 252, 255, 0.06);
+
+  color: #04c5bf;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: right;
+}
+
+.suggestions-empty {
+  padding: 20px 14px;
+
+  border-radius: 18px;
+  border: 1px solid rgba(4, 197, 191, 0.12);
+  background: rgba(0, 26, 46, 0.32);
+
+  text-align: center;
+}
+
+.suggestions-empty-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 16px;
+  background: rgba(4, 197, 191, 0.08);
+  border: 1px solid rgba(4, 197, 191, 0.18);
+
+  color: #04c5bf;
+  font-size: 22px;
+}
+
+.suggestions-empty strong {
+  display: block;
+  margin-bottom: 6px;
+
+  color: #eaffff;
+  font-size: 14px;
+}
+
+.suggestions-empty p {
+  margin: 0;
+
+  color: rgba(223, 252, 255, 0.55);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+@media (max-width: 1100px) {
+  .suggestions {
+    display: none;
+  }
+
+  .main-content {
+    margin-right: 20px;
+  }
 }

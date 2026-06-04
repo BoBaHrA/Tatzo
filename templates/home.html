@@ -130,24 +130,60 @@
 </div>
 
 <div class="suggestions">
-  <h3>{% trans "Recommendations" %}</h3>
-
-  <div class="suggested-profile">
-    <img src="{% static 'icons/user.png' %}" alt="{% trans 'User' %}" class="avatar">
-
-    <div class="suggested-info">
-      <span class="username">TattooStudio1</span>
-      <button type="button">{% trans "Follow" %}</button>
-    </div>
+  <div class="suggestions-header">
+    <span class="suggestions-kicker">{% trans "Discover" %}</span>
+    <h3>{% trans "Recommendations" %}</h3>
+    <p>{% trans "Explore tattoo artists and find profiles worth following." %}</p>
   </div>
 
-  <div class="suggested-profile">
-    <img src="{% static 'icons/user.png' %}" alt="{% trans 'User' %}" class="avatar">
+  <div class="suggestions-list">
+    {% for artist in recommended_artists %}
+      <a href="{% url 'profile' username=artist.username %}" class="suggested-profile-card">
+        <div class="suggested-avatar">
+          {% if artist.profile.profile_image %}
+            <img src="{{ artist.profile.profile_image.url }}" alt="{{ artist.username }}">
+          {% else %}
+            <div class="suggested-avatar-fallback">
+              {{ artist.username|first|upper }}
+            </div>
+          {% endif %}
+        </div>
 
-    <div class="suggested-info">
-      <span class="username">TattooArtist2</span>
-      <button type="button">{% trans "Follow" %}</button>
-    </div>
+        <div class="suggested-info">
+          <div class="suggested-name-row">
+            <span class="suggested-username">{{ artist.username }}</span>
+
+            {% if artist.profile.verification_status == "approved" %}
+              <span class="suggested-verified">✓</span>
+            {% endif %}
+          </div>
+
+          {% if artist.profile.tag %}
+            <span class="suggested-tag">@{{ artist.profile.tag }}</span>
+          {% else %}
+            <span class="suggested-tag">{% trans "Tattoo artist" %}</span>
+          {% endif %}
+
+          <div class="suggested-badges">
+            {% if artist.profile.verification_status == "approved" %}
+              <span>{% trans "Verified" %}</span>
+            {% else %}
+              <span>{% trans "Tattoo artist" %}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <span class="suggested-view">
+          {% trans "View profile" %}
+        </span>
+      </a>
+    {% empty %}
+      <div class="suggestions-empty">
+        <div class="suggestions-empty-icon">✦</div>
+        <strong>{% trans "No tattoo artists yet" %}</strong>
+        <p>{% trans "Artist recommendations will appear here once profiles are available." %}</p>
+      </div>
+    {% endfor %}
   </div>
 </div>
 
