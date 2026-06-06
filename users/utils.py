@@ -51,6 +51,9 @@ def send_verification_email(request, user):
 
         logger.error("Tatzo email: sending verification email now...")
         result = email.send(fail_silently=False)
+        
+        if result != 1:
+            raise RuntimeError(f"Verification email was not sent. send() result={result}")
 
         logger.error(
             "Tatzo email: verification email sent result=%s for user=%s email=%s",

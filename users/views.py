@@ -278,12 +278,45 @@ def signup(request):
 
     if request.method == "POST":
         user_form = CustomUserCreationForm(request.POST)
-        if user_form.is_valid():
-            user = user_form.save()
-            send_verification_email(request, user)
-            show_verification_modal = True  # Показываем сообщение "подтвердите почту"
 
-            # 🔴 Не логиним! Ждём подтверждения
+        if user_form.is_valid():
+            user = None
+
+            try:
+                user = user_form.save()
+
+                # Аккаунт создан, но вход запрещён до подтверждения почты
+                user.is_active = False
+                user.save(update_fields=["is_active"])
+
+                send_verification_email(request, user)
+
+                show_verification_modal = True
+                messages.success(
+                    request,
+                    _("Account created. Please check your email to confirm your account."),
+                )
+
+            except Exception:
+                logger.exception(
+                    "Signup failed: verification email was not sent. Rolling back user creation."
+                )
+
+                if user and user.pk:
+                    username = user.username
+                    email = user.email
+                    user.delete()
+
+                    logger.error(
+                        "Signup rollback: deleted unverified user username=%s email=%s",
+                        username,
+                        email,
+                    )
+
+                messages.error(
+                    request,
+                    _("We could not send the confirmation email. Please try again later."),
+                )
 
     else:
         user_form = CustomUserCreationForm()
