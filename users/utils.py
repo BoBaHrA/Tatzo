@@ -13,27 +13,55 @@ logger = logging.getLogger(__name__)
 
 
 def send_verification_email(request, user):
-    logger.error("Tatzo email: preparing verification email for user=%s email=%s", user.username, user.email)
+    logger.error(
+        "Tatzo email: preparing verification email for user=%s email=%s",
+        user.username,
+        user.email,
+    )
 
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
+
     verification_link = request.build_absolute_uri(
         reverse("verify_email", kwargs={"uidb64": uid, "token": token})
     )
 
     logger.error("Tatzo email: verification link created: %s", verification_link)
 
+    context = {
+        "user": user,
+        "username": user.username,
+        "verification_link": verification_link,
+        "language_code": getattr(request, "LANGUAGE_CODE", "en"),
+    }
+
+    subject = str(_("Confirm your Tatzo account"))
+
+    text_body = render_to_string("emails/verify_email.txt", context)
+    html_body = render_to_string("emails/verify_email.html", context)
+
     try:
-        result = send_mail(
-            _("Confirm your Tatzo account"),
-            f"Hi {user.username},\n\nPlease confirm your email:\n{verification_link}",
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=False,
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=text_body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.email],
+        )
+        email.attach_alternative(html_body, "text/html")
+
+        result = email.send(fail_silently=False)
+
+        logger.error(
+            "Tatzo email: verification email sent result=%s for user=%s email=%s",
+            result,
+            user.username,
+            user.email,
         )
 
-        logger.error("Tatzo email: send_mail result=%s for user=%s", result, user.username)
-
     except Exception:
-        logger.exception("Tatzo email: FAILED to send verification email for user=%s email=%s", user.username, user.email)
+        logger.exception(
+            "Tatzo email: FAILED to send verification email for user=%s email=%s",
+            user.username,
+            user.email,
+        )
         raise
