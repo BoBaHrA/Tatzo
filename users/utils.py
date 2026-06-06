@@ -14,9 +14,8 @@ logger = logging.getLogger(__name__)
 
 def send_verification_email(request, user):
     logger.error(
-        "Tatzo email: preparing verification email for user=%s email=%s",
+        "Tatzo email: preparing verification email for user=%s",
         user.username,
-        user.email,
     )
 
     token = default_token_generator.make_token(user)
@@ -26,7 +25,11 @@ def send_verification_email(request, user):
         reverse("verify_email", kwargs={"uidb64": uid, "token": token})
     )
 
-    logger.error("Tatzo email: verification email sent result=%s for user=%s", result, user.username)
+    logger.error(
+        "Tatzo email: verification link created for user=%s",
+        user.username,
+    )
+
     context = {
         "user": user,
         "username": user.username,
@@ -49,22 +52,23 @@ def send_verification_email(request, user):
         email.attach_alternative(html_body, "text/html")
 
         logger.error("Tatzo email: sending verification email now...")
+
         result = email.send(fail_silently=False)
-        
+
         if result != 1:
-            raise RuntimeError(f"Verification email was not sent. send() result={result}")
+            raise RuntimeError(
+                f"Verification email was not sent. send() result={result}"
+            )
 
         logger.error(
-            "Tatzo email: verification email sent result=%s for user=%s email=%s",
+            "Tatzo email: verification email sent result=%s for user=%s",
             result,
             user.username,
-            user.email,
         )
 
     except Exception:
         logger.exception(
-            "Tatzo email: FAILED to send verification email for user=%s email=%s",
+            "Tatzo email: FAILED to send verification email for user=%s",
             user.username,
-            user.email,
         )
         raise
