@@ -165,44 +165,42 @@ else:
         "DEFAULT_FROM_EMAIL",
         "Tatzo <vladimir.procopisin@gmail.com>",
     )
-    SERVER_EMAIL = DEFAULT_FROM_EMAIL
     
-    CSRF_TRUSTED_ORIGINS = [
-        origin.strip()
-        for origin in os.getenv(
-            "CSRF_TRUSTED_ORIGINS",
-            "https://tatzo.eu,https://www.tatzo.eu",
-        ).split(",")
-        if origin.strip()
-    ]
     
-    LOGGING = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-            },
-        },
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "CSRF_TRUSTED_ORIGINS",
+        "https://tatzo.eu,https://www.tatzo.eu",
+    ).split(",")
+    if origin.strip()
+]
 
-        "loggers": {
-            "django.request": {
-                "handlers": ["console"],
-                "level": "ERROR",
-                "propagate": True,
-            },
-            "users": {
-                "handlers": ["console"],
-                "level": "ERROR",
-                "propagate": True,
-            },
-            "django": {
-                "handlers": ["console"],
-                "level": "ERROR",
-                "propagate": True,
-            },
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
         },
-    }
-
+    },
+    "loggers": {
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": True,
+        },
+        "users": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": True,
+        },
+        "django": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": True,
+        },
+    },
+}
 
 # Конец файла

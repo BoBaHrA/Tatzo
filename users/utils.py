@@ -49,6 +49,7 @@ def send_verification_email(request, user):
         )
         email.attach_alternative(html_body, "text/html")
 
+        logger.error("Tatzo email: sending verification email now...")
         result = email.send(fail_silently=False)
 
         logger.error(
