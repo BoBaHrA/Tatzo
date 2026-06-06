@@ -26,8 +26,7 @@ def send_verification_email(request, user):
         reverse("verify_email", kwargs={"uidb64": uid, "token": token})
     )
 
-    logger.error("Tatzo email: verification link created: %s", verification_link)
-
+    logger.error("Tatzo email: verification email sent result=%s for user=%s", result, user.username)
     context = {
         "user": user,
         "username": user.username,
