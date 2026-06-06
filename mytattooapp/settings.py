@@ -1,5 +1,7 @@
 import os
 from pathlib import Path
+
+import dj_database_url
 from dotenv import load_dotenv
 from django.utils.translation import gettext_lazy as _
 
@@ -10,11 +12,13 @@ load_dotenv(BASE_DIR / ".env")
 # Настройки безопасности
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-dev-only-change-me")
 
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.getenv("ALLOWED_HOSTS", "").split(",")
+    for host in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
     if host.strip()
 ]
 
@@ -33,6 +37,7 @@ INSTALLED_APPS = [
 # Настройки middleware
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -76,10 +81,10 @@ WSGI_APPLICATION = "mytattooapp.wsgi.application"
 
 # Настройки базы данных
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+    )
 }
 
 # Настройки паролей
@@ -120,6 +125,12 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 # settings.py
 SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Это по умолчанию для хранения сессий в базе данных
 
@@ -155,8 +166,12 @@ else:
     SERVER_EMAIL = DEFAULT_FROM_EMAIL
     
     CSRF_TRUSTED_ORIGINS = [
-        "https://tatzo.eu",
-        "https://www.tatzo.eu",
+        origin.strip()
+        for origin in os.getenv(
+            "CSRF_TRUSTED_ORIGINS",
+            "https://tatzo.eu,https://www.tatzo.eu",
+        ).split(",")
+        if origin.strip()
     ]
 
 
