@@ -153,6 +153,11 @@ else:
         "Tatzo <vladimir.procopisin@gmail.com>",
     )
     SERVER_EMAIL = DEFAULT_FROM_EMAIL
+    
+    CSRF_TRUSTED_ORIGINS = [
+        "https://tatzo.eu",
+        "https://www.tatzo.eu",
+    ]
 
 
 # Конец файла
