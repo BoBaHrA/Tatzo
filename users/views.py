@@ -187,19 +187,22 @@ def create_post(request):
         "video/webm",
         "video/quicktime",
         "video/x-msvideo",
+        "video/x-matroska",
     }
 
     allowed_types = allowed_image_types | allowed_video_types
 
-    for i, f in enumerate(files):
-        media_type = "video" if f.content_type in allowed_video_types else "image"
-
-        PostMedia.objects.create(
-            post=post,
-            file=f,
-            media_type=media_type,
-            order=i,
-        )
+    for f in files:
+        if f.content_type not in allowed_types:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": _(
+                        "Only image and video files are supported. Please upload JPG, PNG, WEBP, GIF, MP4, MOV or WEBM."
+                    ),
+                },
+                status=400,
+            )
 
     disable_comments = request.POST.get("disable_comments") == "1"
     is_ad = request.POST.get("is_ad") == "1"
@@ -223,10 +226,12 @@ def create_post(request):
             )
 
             for i, f in enumerate(files):
+                media_type = "video" if f.content_type in allowed_video_types else "image"
+
                 PostMedia.objects.create(
                     post=post,
                     file=f,
-                    media_type="image",
+                    media_type=media_type,
                     order=i,
                 )
 
@@ -240,18 +245,24 @@ def create_post(request):
             },
         )
 
-        return JsonResponse({"ok": True, "post_id": post.id, "html": html})
+        return JsonResponse(
+            {
+                "ok": True,
+                "post_id": post.id,
+                "html": html,
+            }
+        )
 
     except Exception:
         logger.exception("Post creation failed for user=%s", request.user.username)
+
         return JsonResponse(
             {
                 "ok": False,
-                "error": _("We could not create your post. Please try another image."),
+                "error": _("We could not create your post. Please try another file."),
             },
             status=500,
         )
-
 
 # Выход из системы
 @login_required
