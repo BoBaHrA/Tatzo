@@ -182,17 +182,24 @@ def create_post(request):
         "image/gif",
     }
 
-    for f in files:
-        if f.content_type not in allowed_image_types:
-            return JsonResponse(
-                {
-                    "ok": False,
-                    "error": _(
-                        "Only image files are supported for now. Please upload JPG, PNG, WEBP or GIF."
-                    ),
-                },
-                status=400,
-            )
+    allowed_video_types = {
+        "video/mp4",
+        "video/webm",
+        "video/quicktime",
+        "video/x-msvideo",
+    }
+
+    allowed_types = allowed_image_types | allowed_video_types
+
+    for i, f in enumerate(files):
+        media_type = "video" if f.content_type in allowed_video_types else "image"
+
+        PostMedia.objects.create(
+            post=post,
+            file=f,
+            media_type=media_type,
+            order=i,
+        )
 
     disable_comments = request.POST.get("disable_comments") == "1"
     is_ad = request.POST.get("is_ad") == "1"

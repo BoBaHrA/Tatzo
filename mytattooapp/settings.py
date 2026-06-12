@@ -138,7 +138,7 @@ CLOUDINARY_STORAGE = {
 STORAGES = {
     "default": {
         "BACKEND": (
-            "cloudinary_storage.storage.MediaCloudinaryStorage"
+            "mytattooapp.storage_backends.TatzoMediaCloudinaryStorage"
             if USE_CLOUDINARY
             else "django.core.files.storage.FileSystemStorage"
         ),
