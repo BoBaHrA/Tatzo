@@ -171,8 +171,28 @@ def create_post(request):
 
     if not content and not files:
         return JsonResponse(
-            {"ok": False, "error": _("Post cannot be empty.")}, status=400
+            {"ok": False, "error": _("Post cannot be empty.")},
+            status=400,
         )
+
+    allowed_image_types = {
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/gif",
+    }
+
+    for f in files:
+        if f.content_type not in allowed_image_types:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": _(
+                        "Only image files are supported for now. Please upload JPG, PNG, WEBP or GIF."
+                    ),
+                },
+                status=400,
+            )
 
     disable_comments = request.POST.get("disable_comments") == "1"
     is_ad = request.POST.get("is_ad") == "1"
@@ -183,30 +203,47 @@ def create_post(request):
     if layout not in ("grid", "carousel"):
         layout = "grid"
 
-    post = Post.objects.create(
-        user=request.user,
-        content=content,
-        disable_comments=disable_comments,
-        is_ad=is_ad,
-        visibility=visibility,
-        location=location,
-        layout=layout,
-    )
+    try:
+        with transaction.atomic():
+            post = Post.objects.create(
+                user=request.user,
+                content=content,
+                disable_comments=disable_comments,
+                is_ad=is_ad,
+                visibility=visibility,
+                location=location,
+                layout=layout,
+            )
 
-    for i, f in enumerate(files):
-        mt = "video" if (f.content_type or "").startswith("video/") else "image"
-        PostMedia.objects.create(post=post, file=f, media_type=mt, order=i)
+            for i, f in enumerate(files):
+                PostMedia.objects.create(
+                    post=post,
+                    file=f,
+                    media_type="image",
+                    order=i,
+                )
 
-    html = render_to_string(
-        "partials/post_card.html",
-        {
-            "post": post,
-            "request": request,
-            "liked_post_ids": set(),
-            "bookmarked_post_ids": set(),
-        }
-    )
-    return JsonResponse({"ok": True, "post_id": post.id, "html": html})
+        html = render_to_string(
+            "partials/post_card.html",
+            {
+                "post": post,
+                "request": request,
+                "liked_post_ids": set(),
+                "bookmarked_post_ids": set(),
+            },
+        )
+
+        return JsonResponse({"ok": True, "post_id": post.id, "html": html})
+
+    except Exception:
+        logger.exception("Post creation failed for user=%s", request.user.username)
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": _("We could not create your post. Please try another image."),
+            },
+            status=500,
+        )
 
 
 # Выход из системы
