@@ -5217,3 +5217,63 @@ video:-webkit-full-screen,
 .post-media-renderer[data-layout="carousel"] .thumb video {
   object-fit: cover !important;
 }
+
+/* =========================================================
+   Blur background for single saved media posts
+   ========================================================= */
+
+.post-media-renderer.single-media .blur-media-frame {
+  position: relative !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 260px;
+  overflow: hidden !important;
+  border-radius: 16px;
+  isolation: isolate;
+  background: transparent !important;
+}
+
+/* Blurred background layer */
+.post-media-renderer.single-media .media-blur-bg {
+  position: absolute !important;
+  inset: -24px !important;
+  width: calc(100% + 48px) !important;
+  height: calc(100% + 48px) !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  filter: blur(30px) brightness(0.72) saturate(1.1);
+  transform: scale(1.08);
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.95;
+}
+
+/* Main visible image/video */
+.post-media-renderer.single-media .media-main {
+  position: relative !important;
+  z-index: 2;
+  width: 100% !important;
+  height: auto !important;
+  max-height: 75vh !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  display: block !important;
+  background: transparent !important;
+}
+
+/* Single video should keep full frame */
+.post-media-renderer.single-video .media-main {
+  background: transparent !important;
+}
+
+/* Prevent old rules from forcing black background */
+.post-media-renderer.single-media .preview-item,
+.post-media-renderer.single-media img,
+.post-media-renderer.single-media video {
+  background-color: transparent !important;
+}
+
+/* Optional: make single media softer inside the bubble */
+.post-media-renderer.single-media .preview-item > .media-main {
+  border-radius: 14px;
+}

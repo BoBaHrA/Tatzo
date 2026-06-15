@@ -666,21 +666,54 @@ document.addEventListener("DOMContentLoaded", () => {
       wrapper.className = "preview-item";
       wrapper.dataset.index = String(index);
 
+      const isSingleMedia = allItems.length === 1;
+
+      if (isSingleMedia) {
+        wrapper.classList.add("blur-media-frame");
+      }
+
       wrapper.addEventListener("click", (e) => {
         if (e.target.closest("video")) return;
         lightbox.open(index, allItems, "saved");
       });
 
       if (item.type === "image") {
+        if (isSingleMedia) {
+          const bg = document.createElement("img");
+          bg.src = item.url;
+          bg.alt = "";
+          bg.className = "media-blur-bg";
+          bg.setAttribute("aria-hidden", "true");
+          wrapper.appendChild(bg);
+        }
+
         const img = document.createElement("img");
         img.src = item.url;
+        img.alt = t("media", "Media");
+        img.className = isSingleMedia ? "media-main" : "";
         wrapper.appendChild(img);
       } else if (item.type === "video") {
+        if (isSingleMedia) {
+          const bg = document.createElement("video");
+          bg.src = item.url;
+          bg.muted = true;
+          bg.loop = true;
+          bg.autoplay = true;
+          bg.playsInline = true;
+          bg.preload = "metadata";
+          bg.controls = false;
+          bg.className = "media-blur-bg";
+          bg.setAttribute("aria-hidden", "true");
+          bg.tabIndex = -1;
+          wrapper.appendChild(bg);
+        }
+
         const video = document.createElement("video");
         video.src = item.url;
         video.controls = placement !== "bottom";
         video.preload = "metadata";
         video.playsInline = true;
+        video.className = isSingleMedia ? "media-main" : "";
         wrapper.appendChild(video);
       }
 
