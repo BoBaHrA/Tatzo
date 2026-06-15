@@ -2,6 +2,8 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
+from cloudinary.utils import cloudinary_url
+
 # Create your models here.
 
 class Post(models.Model):
@@ -61,6 +63,22 @@ class PostMedia(models.Model):
 
     def __str__(self):
         return f"{self.media_type} for Post #{self.post.id}"
+    
+    @property
+    def media_url(self):
+        if not self.file:
+            return ""
+
+        if self.media_type == "video":
+            url, _ = cloudinary_url(
+                self.file.name,
+                resource_type="video",
+                format="mp4",
+                secure=True,
+            )
+            return url
+
+        return self.file.url
     
 class PostLike(models.Model):
     post = models.ForeignKey(
