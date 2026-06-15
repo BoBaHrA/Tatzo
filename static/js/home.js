@@ -428,9 +428,23 @@ document.addEventListener("DOMContentLoaded", () => {
         url: el.dataset.url,
       }));
 
-      container.dataset.items = JSON.stringify(items);
-      savedMedia.render(container, items, container.dataset.layout || "grid");
-    },
+      container.classList.remove("single-media", "single-image", "single-video");
+
+      if (items.length === 1) {
+        container.classList.add("single-media");
+
+        if (items[0].type === "video") {
+          container.classList.add("single-video");
+        }
+
+        if (items[0].type === "image") {
+          container.classList.add("single-image");
+        }
+      }
+
+        container.dataset.items = JSON.stringify(items);
+        savedMedia.render(container, items, container.dataset.layout || "grid");
+      },
 
     rehydrate(container) {
       const raw = container.dataset.items;

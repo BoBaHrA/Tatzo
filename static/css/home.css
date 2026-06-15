@@ -5150,3 +5150,70 @@ video:-webkit-full-screen,
   background: #000 !important;
   border-radius: 0 !important;
 }
+
+/* =========================================================
+   FIX: Single media posts keep natural proportions
+   ========================================================= */
+
+.post-media-renderer.single-media {
+  width: 100%;
+  height: auto !important;
+  max-height: none !important;
+  display: block !important;
+  overflow: visible !important;
+  background: transparent !important;
+}
+
+/* One media file wrapper */
+.post-media-renderer.single-media .preview-item {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: auto !important;
+  display: block !important;
+  overflow: hidden !important;
+  border-radius: 14px;
+  background: #000;
+}
+
+/* Single image: show full image */
+.post-media-renderer.single-image .preview-item > img {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 75vh !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  display: block !important;
+  background: #000;
+}
+
+/* Single video: show full video */
+.post-media-renderer.single-video .preview-item > video {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 75vh !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  display: block !important;
+  background: #000 !important;
+  border-radius: 14px;
+}
+
+/* Multiple media grid can stay cropped */
+.post-media-renderer:not(.single-media) .preview-item > img,
+.post-media-renderer:not(.single-media) .preview-item > video {
+  object-fit: cover;
+}
+
+/* Carousel main media: show full content */
+.post-media-renderer[data-layout="carousel"] .carousel-main img,
+.post-media-renderer[data-layout="carousel"] .carousel-main video {
+  object-fit: contain !important;
+  object-position: center !important;
+  background: #000 !important;
+}
+
+/* Carousel thumbnails: cropped is okay */
+.post-media-renderer[data-layout="carousel"] .thumb img,
+.post-media-renderer[data-layout="carousel"] .thumb video {
+  object-fit: cover !important;
+}
