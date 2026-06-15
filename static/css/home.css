@@ -5361,3 +5361,137 @@ video:-webkit-full-screen,
   transform: scale(1.12) !important;
   filter: blur(34px) brightness(0.68) saturate(1.14) !important;
 }
+
+/* =========================================================
+   FINAL POLISH: blur backgrounds for saved media
+   - single video frame not oversized
+   - carousel image/video has blur
+   - grid videos have blur
+   ========================================================= */
+
+/* Single video: use real aspect ratio instead of huge fixed frame */
+.post-media-renderer.single-video .blur-media-frame {
+  position: relative !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  aspect-ratio: var(--media-ratio, 4 / 5);
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  overflow: hidden !important;
+  border-radius: 16px !important;
+  isolation: isolate;
+  background: transparent !important;
+}
+
+/* Do not let very tall phone videos destroy the feed */
+.post-media-renderer.single-video .blur-media-frame.is-portrait {
+  max-height: 72vh !important;
+}
+
+/* Background blur layer — shared */
+.post-media-renderer .blur-media-frame > .media-blur-bg,
+.post-media-renderer[data-mode="carousel"] .carousel-main > .media-blur-bg {
+  position: absolute !important;
+  inset: -28px !important;
+
+  width: calc(100% + 56px) !important;
+  height: calc(100% + 56px) !important;
+
+  object-fit: cover !important;
+  object-position: center !important;
+
+  filter: blur(30px) brightness(0.72) saturate(1.12) !important;
+  transform: scale(1.08) !important;
+
+  z-index: 1 !important;
+  pointer-events: none !important;
+  opacity: 0.96 !important;
+
+  background: transparent !important;
+}
+
+/* Main media above blur */
+.post-media-renderer .blur-media-frame > .media-main,
+.post-media-renderer[data-mode="carousel"] .carousel-main > .media-main {
+  position: relative !important;
+  z-index: 2 !important;
+
+  max-width: 100% !important;
+  max-height: 100% !important;
+
+  object-fit: contain !important;
+  object-position: center !important;
+
+  display: block !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border-radius: 14px !important;
+}
+
+/* Single video sizing */
+.post-media-renderer.single-video .blur-media-frame.is-portrait > video.media-main {
+  width: auto !important;
+  height: 100% !important;
+}
+
+.post-media-renderer.single-video .blur-media-frame.is-landscape > video.media-main,
+.post-media-renderer.single-video .blur-media-frame:not(.is-portrait) > video.media-main {
+  width: 100% !important;
+  height: auto !important;
+}
+
+/* Grid video tiles: keep tile size, but replace black bars with blur */
+.post-media-renderer:not(.single-media) .preview-item.video-tile {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate;
+  background: transparent !important;
+}
+
+.post-media-renderer:not(.single-media) .preview-item.video-tile > .media-main {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  background: transparent !important;
+}
+
+/* Saved carousel main: blur for image and video */
+.post-media-renderer[data-mode="carousel"] .carousel-main {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate;
+  background: transparent !important;
+}
+
+/* Saved carousel main media should show fully, blur fills empty space */
+.post-media-renderer[data-mode="carousel"] .carousel-main > img.media-main,
+.post-media-renderer[data-mode="carousel"] .carousel-main > video.media-main {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  background: transparent !important;
+}
+
+/* Keep carousel controls above blur/media */
+.post-media-renderer[data-mode="carousel"] .carousel-main .car-nav {
+  z-index: 5 !important;
+}
+
+/* Thumbnails stay cropped */
+.post-media-renderer[data-mode="carousel"] .thumb img,
+.post-media-renderer[data-mode="carousel"] .thumb video {
+  object-fit: cover !important;
+}
+
+/* Kill old black backgrounds in all polished media cases */
+.post-media-renderer .blur-media-frame video,
+.post-media-renderer .blur-media-frame img,
+.post-media-renderer .blur-media-frame .media-main,
+.post-media-renderer[data-mode="carousel"] .carousel-main .media-main {
+  background: transparent !important;
+  background-color: transparent !important;
+}

@@ -528,6 +528,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let currentIndex = 0;
       let currentMedia = null;
+      let currentBg = null;
 
       const main = document.createElement("div");
       main.className = "carousel-main";
@@ -547,18 +548,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const swap = () => {
           if (currentMedia) currentMedia.remove();
+          if (currentBg) currentBg.remove();
 
+          let bg;
           let node;
+
           if (item.type === "image") {
+            bg = document.createElement("img");
+            bg.src = item.url;
+            bg.alt = "";
+            bg.className = "media-blur-bg";
+            bg.setAttribute("aria-hidden", "true");
+
             node = document.createElement("img");
             node.src = item.url;
             node.alt = t("media", "Media");
+            node.className = "media-main";
           } else if (item.type === "video") {
+            bg = document.createElement("video");
+            bg.src = item.url;
+            bg.muted = true;
+            bg.loop = true;
+            bg.autoplay = true;
+            bg.playsInline = true;
+            bg.preload = "metadata";
+            bg.controls = false;
+            bg.className = "media-blur-bg";
+            bg.setAttribute("aria-hidden", "true");
+            bg.tabIndex = -1;
+
             node = document.createElement("video");
             node.src = item.url;
             node.controls = true;
             node.playsInline = true;
             node.preload = "metadata";
+            node.className = "media-main";
           } else {
             node = document.createElement("div");
             node.style.padding = "18px";
@@ -566,8 +590,19 @@ document.addEventListener("DOMContentLoaded", () => {
             node.textContent = t("unsupportedFile", "Unsupported file");
           }
 
+          if (bg) {
+            currentBg = bg;
+            main.insertBefore(bg, main.firstChild);
+          }
+
           currentMedia = node;
-          main.insertBefore(node, main.firstChild);
+
+          if (bg) {
+            main.insertBefore(node, bg.nextSibling);
+          } else {
+            main.insertBefore(node, main.firstChild);
+          }
+
           main.classList.remove("fade-out");
 
           if (withFade) {
@@ -667,9 +702,14 @@ document.addEventListener("DOMContentLoaded", () => {
       wrapper.dataset.index = String(index);
 
       const isSingleMedia = allItems.length === 1;
+      const needsBlurFrame = isSingleMedia || item.type === "video";
 
-      if (isSingleMedia) {
+      if (needsBlurFrame) {
         wrapper.classList.add("blur-media-frame");
+      }
+
+      if (item.type === "video") {
+        wrapper.classList.add("video-tile");
       }
 
       wrapper.addEventListener("click", (e) => {
@@ -693,27 +733,25 @@ document.addEventListener("DOMContentLoaded", () => {
         img.className = isSingleMedia ? "media-main" : "";
         wrapper.appendChild(img);
       } else if (item.type === "video") {
-        if (isSingleMedia) {
-          const bg = document.createElement("video");
-          bg.src = item.url;
-          bg.muted = true;
-          bg.loop = true;
-          bg.autoplay = true;
-          bg.playsInline = true;
-          bg.preload = "metadata";
-          bg.controls = false;
-          bg.className = "media-blur-bg";
-          bg.setAttribute("aria-hidden", "true");
-          bg.tabIndex = -1;
-          wrapper.appendChild(bg);
-        }
+        const bg = document.createElement("video");
+        bg.src = item.url;
+        bg.muted = true;
+        bg.loop = true;
+        bg.autoplay = true;
+        bg.playsInline = true;
+        bg.preload = "metadata";
+        bg.controls = false;
+        bg.className = "media-blur-bg";
+        bg.setAttribute("aria-hidden", "true");
+        bg.tabIndex = -1;
+        wrapper.appendChild(bg);
 
         const video = document.createElement("video");
         video.src = item.url;
         video.controls = placement !== "bottom";
         video.preload = "metadata";
         video.playsInline = true;
-        video.className = isSingleMedia ? "media-main" : "";
+        video.className = "media-main";
 
         if (isSingleMedia) {
           video.addEventListener("loadedmetadata", () => {
