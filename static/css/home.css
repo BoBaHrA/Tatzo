@@ -5277,3 +5277,87 @@ video:-webkit-full-screen,
 .post-media-renderer.single-media .preview-item > .media-main {
   border-radius: 14px;
 }
+
+/* =========================================================
+   FINAL FIX: single video blur background without black bars
+   ========================================================= */
+
+.post-media-renderer.single-video .blur-media-frame {
+  position: relative !important;
+  width: 100% !important;
+  height: clamp(360px, 62vh, 620px) !important;
+  min-height: 360px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  overflow: hidden !important;
+  border-radius: 16px !important;
+  isolation: isolate;
+  background: transparent !important;
+}
+
+/* blurred video/image background fills the whole frame */
+.post-media-renderer.single-video .blur-media-frame > .media-blur-bg {
+  position: absolute !important;
+  inset: -32px !important;
+
+  width: calc(100% + 64px) !important;
+  height: calc(100% + 64px) !important;
+
+  object-fit: cover !important;
+  object-position: center !important;
+
+  filter: blur(34px) brightness(0.68) saturate(1.14) !important;
+  transform: scale(1.12) !important;
+
+  z-index: 1 !important;
+  pointer-events: none !important;
+  opacity: 0.96 !important;
+  background: transparent !important;
+}
+
+/* main video is above blur */
+.post-media-renderer.single-video .blur-media-frame > video.media-main {
+  position: relative !important;
+  z-index: 2 !important;
+
+  max-width: 100% !important;
+  max-height: 100% !important;
+
+  object-fit: contain !important;
+  object-position: center !important;
+
+  background: transparent !important;
+  background-color: transparent !important;
+
+  border-radius: 14px !important;
+  display: block !important;
+}
+
+/* portrait phone video: full height, natural width */
+.post-media-renderer.single-video .blur-media-frame.is-portrait > video.media-main {
+  width: auto !important;
+  height: 100% !important;
+}
+
+/* landscape/square video: full width, natural height */
+.post-media-renderer.single-video .blur-media-frame.is-landscape > video.media-main {
+  width: 100% !important;
+  height: auto !important;
+}
+
+/* kill old global black background rules for this exact case */
+.post-media-renderer.single-video .blur-media-frame video,
+.post-media-renderer.single-video .blur-media-frame video.media-main,
+.post-media-renderer.single-video .blur-media-frame .media-main {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* no hover zoom on the hidden blur layer */
+.post-media-renderer.single-video .media-blur-bg:hover {
+  transform: scale(1.12) !important;
+  filter: blur(34px) brightness(0.68) saturate(1.14) !important;
+}

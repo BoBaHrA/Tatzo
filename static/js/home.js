@@ -714,6 +714,18 @@ document.addEventListener("DOMContentLoaded", () => {
         video.preload = "metadata";
         video.playsInline = true;
         video.className = isSingleMedia ? "media-main" : "";
+
+        if (isSingleMedia) {
+          video.addEventListener("loadedmetadata", () => {
+            const w = video.videoWidth || 1;
+            const h = video.videoHeight || 1;
+
+            wrapper.classList.toggle("is-portrait", h > w);
+            wrapper.classList.toggle("is-landscape", w >= h);
+            wrapper.style.setProperty("--media-ratio", `${w} / ${h}`);
+          });
+        }
+
         wrapper.appendChild(video);
       }
 
