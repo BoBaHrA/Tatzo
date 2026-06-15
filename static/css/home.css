@@ -5078,3 +5078,75 @@ html {
     margin-right: 20px;
   }
 }
+
+/* =========================================================
+   FIX: Videos must stay fully visible, not cropped
+   Especially for vertical phone videos
+   ========================================================= */
+
+/* Feed / post videos */
+.post-media video,
+.post-media-renderer video,
+.post-media.media-layout video,
+.post-media-video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  background: #000 !important;
+  display: block !important;
+}
+
+/* Carousel main video inside posts */
+.post-media.media-layout[data-mode="carousel"] .carousel-main video,
+.post-media-renderer[data-layout="carousel"] .carousel-main video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  background: #000 !important;
+}
+
+/* Lightbox videos */
+.media-lightbox video,
+.media-lightbox .lb-body video {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  background: #000 !important;
+}
+
+/* Native browser fullscreen */
+video:fullscreen,
+.post-media video:fullscreen,
+.post-media-renderer video:fullscreen,
+.post-media-video:fullscreen,
+.media-lightbox video:fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  background: #000 !important;
+  border-radius: 0 !important;
+}
+
+/* WebKit fullscreen fallback */
+video:-webkit-full-screen,
+.post-media video:-webkit-full-screen,
+.post-media-renderer video:-webkit-full-screen,
+.post-media-video:-webkit-full-screen,
+.media-lightbox video:-webkit-full-screen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  background: #000 !important;
+  border-radius: 0 !important;
+}
