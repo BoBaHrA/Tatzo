@@ -64,6 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
     editingCommentContentEl: null,
     pendingDeleteCommentId: null,
     pendingReportCommentId: null,
+    commentSubmitting: false,
 
     selectedFiles: [],
     previewMode: "grid",
@@ -1462,10 +1463,24 @@ document.addEventListener("DOMContentLoaded", () => {
     async submit(e) {
       e.preventDefault();
 
-      if (!state.currentPostId || !els.modalCommentInput) return;
+      if (state.commentSubmitting) return;
+
+      if (!state.currentPostId || !els.modalCommentInput || !els.modalCommentForm) return;
 
       const content = els.modalCommentInput.value.trim();
       if (!content) return;
+
+      state.commentSubmitting = true;
+
+      const submitBtn = els.modalCommentForm.querySelector('button[type="submit"]');
+      const oldButtonText = submitBtn?.textContent || t("send", "Send");
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = t("sending", "Sending...");
+      }
+
+      els.modalCommentInput.disabled = true;
 
       const fd = new FormData();
       fd.append("content", content);
@@ -1479,13 +1494,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         const data = await res.json();
-        if (!data.ok) return;
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || t("commentCreateFailed", "Comment could not be created."));
+        }
 
         await comments.reloadCurrent();
         comments.updatePostCounter(data.comments_count);
 
-        els.modalCommentInput.value = "";
-        delete els.modalCommentInput.dataset.replyTo;
         els.modalCommentForm.innerHTML = `
           <input
             type="text"
@@ -1495,8 +1511,25 @@ document.addEventListener("DOMContentLoaded", () => {
           >
           <button type="submit">${t("send", "Send")}</button>
         `;
+
+        els.modalCommentInput = document.getElementById("modal-comment-input");
       } catch (err) {
         console.error("Create comment error:", err);
+        helpers.showToast(
+          err.message || t("commentCreateFailed", "Comment could not be created."),
+          "error"
+        );
+
+        if (els.modalCommentInput) {
+          els.modalCommentInput.disabled = false;
+        }
+
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = oldButtonText;
+        }
+      } finally {
+        state.commentSubmitting = false;
       }
     },
 
