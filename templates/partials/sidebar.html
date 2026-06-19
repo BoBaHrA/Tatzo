@@ -155,9 +155,12 @@
         </a>
 
         {% if request.user.is_authenticated and request.user.is_staff %}
-          <a href="{% url 'admin:index' %}" class="more-menu-item admin-panel-link" target="_blank" rel="noopener">
-            <span class="more-menu-icon">⚙️</span>
-            <span>Админ-панель</span>
+          <a href="{% url 'moderation_dashboard' %}" class="more-admin-link">
+            <span class="more-admin-icon">🛡️</span>
+            <span class="more-admin-content">
+              <span class="more-admin-title">{% trans "Moderation panel" %}</span>
+              <span class="more-admin-subtitle">{% trans "Verifications and reports" %}</span>
+            </span>
           </a>
         {% endif %}
 
