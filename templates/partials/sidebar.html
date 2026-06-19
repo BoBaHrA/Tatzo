@@ -154,6 +154,13 @@
           <span>{% trans "Report a problem" %}</span>
         </a>
 
+        {% if request.user.is_authenticated and request.user.is_staff %}
+          <a href="{% url 'admin:index' %}" class="more-menu-item admin-panel-link" target="_blank" rel="noopener">
+            <span class="more-menu-icon">⚙️</span>
+            <span>Админ-панель</span>
+          </a>
+        {% endif %}
+
         <div class="sidebar-more-note">
           {% trans "Your activity helps us prioritize new features." %}
         </div>
