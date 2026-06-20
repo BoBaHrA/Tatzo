@@ -124,6 +124,7 @@
 
     let pollingTimer = null;
     let isPolling = false;
+    let isSending = false;
 
     function getCookie(name) {
       const cookie = document.cookie
@@ -149,6 +150,38 @@
       if (force || distanceFromBottom < 160) {
         messagesBox.scrollTop = messagesBox.scrollHeight;
       }
+    }
+
+    function appendMessagesHtml(html, forceScroll = false) {
+      if (!messagesBox || !html) return false;
+
+      const template = document.createElement("template");
+      template.innerHTML = html.trim();
+
+      const rows = Array.from(template.content.querySelectorAll("[data-message-id]"));
+      let added = false;
+
+      rows.forEach((row) => {
+        const id = row.dataset.messageId;
+
+        const alreadyExists = Array.from(
+          messagesBox.querySelectorAll("[data-message-id]")
+        ).some((existing) => existing.dataset.messageId === id);
+
+        if (id && alreadyExists) return;
+
+        messagesBox.appendChild(row);
+        added = true;
+      });
+
+      if (added) {
+        const emptyState = messagesBox.querySelector(".chat-empty-inside");
+        if (emptyState) emptyState.remove();
+
+        scrollToBottom(forceScroll);
+      }
+
+      return added;
     }
 
     function autosizeTextarea() {
@@ -255,11 +288,7 @@
         const data = await res.json();
 
         if (data.ok && data.html) {
-          const emptyState = messagesBox.querySelector(".chat-empty-inside");
-          if (emptyState) emptyState.remove();
-
-          messagesBox.insertAdjacentHTML("beforeend", data.html);
-          scrollToBottom(false);
+          appendMessagesHtml(data.html, false);
         }
       } catch (err) {
         console.error("Chat polling error:", err);
@@ -297,6 +326,8 @@
     form?.addEventListener("submit", async (e) => {
       e.preventDefault();
 
+      if (isSending) return;
+
       const content = input.value.trim();
       const hasFiles = fileInput.files && fileInput.files.length > 0;
 
@@ -304,6 +335,8 @@
 
       const submitBtn = form.querySelector("button[type='submit']");
       submitBtn.disabled = true;
+
+      isSending = true;
 
       const fd = new FormData(form);
 
@@ -323,10 +356,7 @@
           throw new Error(data.error || messageNotSentText);
         }
 
-        const emptyState = messagesBox.querySelector(".chat-empty-inside");
-        if (emptyState) emptyState.remove();
-
-        messagesBox.insertAdjacentHTML("beforeend", data.html);
+        appendMessagesHtml(data.html, true);
 
         input.value = "";
         fileInput.value = "";
@@ -336,6 +366,7 @@
       } catch (err) {
         console.error("Chat send error:", err);
       } finally {
+        isSending = false;
         submitBtn.disabled = false;
       }
     });
