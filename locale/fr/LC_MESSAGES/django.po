@@ -666,7 +666,7 @@ msgid "Report a problem"
 msgstr "Signaler un problème"
 
 msgid "Moderation panel"
-msgstr "Panneau de modération"
+msgstr "Modération"
 
 msgid "Verifications and reports"
 msgstr "Vérifications et signalements"
