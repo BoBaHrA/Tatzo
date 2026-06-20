@@ -663,15 +663,9 @@ msgstr "Язык"
 msgid "Report a problem"
 msgstr "Сообщить о проблеме"
 
-#: .\templates\partials\sidebar.html:161
-#, fuzzy
-#| msgid "Moderation"
 msgid "Moderation panel"
 msgstr "Панель модерации"
 
-#: .\templates\partials\sidebar.html:162
-#, fuzzy
-#| msgid "Verification rejected"
 msgid "Verifications and reports"
 msgstr "Проверки и жалобы"
 
@@ -2168,10 +2162,12 @@ msgid ""
 "Only image and video files are supported. Please upload JPG, PNG, WEBP, GIF, "
 "MP4, MOV or WEBM."
 msgstr ""
+"Поддерживаются только изображения и видео. Загрузите JPG, PNG, WEBP, GIF, "
+"MP4, MOV или WEBM."
 
 #: .\users\views.py:262
 msgid "We could not create your post. Please try another file."
-msgstr ""
+msgstr "Не удалось создать пост. Попробуйте другой файл."
 
 #: .\users\views.py:294
 msgid "Profile updated successfully."
@@ -2187,11 +2183,11 @@ msgstr "Вы не можете удалить этот пост."
 
 #: .\users\views.py:352
 msgid "Account created. Please check your email to confirm your account."
-msgstr ""
+msgstr "Аккаунт создан. Проверьте почту, чтобы подтвердить аккаунт."
 
 #: .\users\views.py:373
 msgid "We could not send the confirmation email. Please try again later."
-msgstr ""
+msgstr "Не удалось отправить письмо подтверждения. Попробуйте позже."
 
 #: .\users\views.py:398
 msgid "You cannot edit this post."
