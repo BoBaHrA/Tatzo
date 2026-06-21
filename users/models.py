@@ -362,6 +362,12 @@ class ChatAttachment(models.Model):
         ("video", "Video"),
         ("file", "File"),
     ]
+    
+    media_type = models.CharField(
+        max_length=20,
+        choices=MEDIA_TYPE_CHOICES,
+        default="file",
+    )
 
     @classmethod
     def detect_media_type(cls, uploaded_file):
@@ -419,7 +425,7 @@ class ChatAttachment(models.Model):
 
     @property
     def is_image(self):
-        if self.media_type == "image":
+        if getattr(self, "media_type", "") == "image":
             return True
 
         if self.content_type.startswith("image/"):
@@ -438,7 +444,7 @@ class ChatAttachment(models.Model):
 
     @property
     def is_video(self):
-        if self.media_type == "video":
+        if getattr(self, "media_type", "") == "video":
             return True
 
         if self.content_type.startswith("video/"):
