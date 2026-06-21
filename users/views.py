@@ -1328,6 +1328,9 @@ def send_chat_message(request, thread_id):
         ChatAttachment.objects.create(
             message=message,
             file=file,
+            original_name=file.name,
+            content_type=file.content_type or "",
+            media_type=ChatAttachment.detect_media_type(file),
         )
 
     thread.updated_at = timezone.now()

@@ -22,12 +22,12 @@
               type="button"
               class="chat-attachment-preview"
               data-chat-media-type="image"
-              data-chat-media-url="{{ attachment.file.url }}"
+              data-chat-media-url="{{ attachment.media_url }}"
               data-chat-media-title="{{ image_attachment_title }}"
               title="{{ image_attachment_title }}"
               aria-label="{{ image_attachment_title }}"
             >
-              <img src="{{ attachment.file.url }}" alt="{{ attachment_alt }}">
+              <img src="{{ attachment.media_url }}" alt="{{ attachment_alt }}">
             </button>
 
           {% elif attachment.is_video %}
@@ -37,17 +37,17 @@
               type="button"
               class="chat-attachment-preview chat-attachment-video-preview"
               data-chat-media-type="video"
-              data-chat-media-url="{{ attachment.file.url }}"
+              data-chat-media-url="{{ attachment.media_url }}"
               data-chat-media-title="{{ video_attachment_title }}"
               title="{{ video_attachment_title }}"
               aria-label="{{ video_attachment_title }}"
             >
-              <video src="{{ attachment.file.url }}" muted playsinline preload="metadata"></video>
+              <video src="{{ attachment.media_url }}" muted playsinline preload="metadata"></video>
               <span class="chat-video-play">▶</span>
             </button>
 
           {% else %}
-            <a href="{{ attachment.file.url }}" target="_blank" class="chat-attachment-file">
+            <a href="{{ attachment.media_url }}" target="_blank" class="chat-attachment-file">
               📎 {% trans "Open file" %}
             </a>
           {% endif %}

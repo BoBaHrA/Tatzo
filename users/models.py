@@ -1,9 +1,11 @@
 import re
+import mimetypes
 
 from django.contrib.auth.models import User
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+from cloudinary.utils import cloudinary_url
 
 # Определяем варианты выбора для типа пользователя
 # Определяем варианты выбора для типа пользователя
@@ -354,26 +356,119 @@ class ChatMessage(models.Model):
         return f"Message from {self.sender.username} in chat {self.thread_id}"
     
 class ChatAttachment(models.Model):
+    
+    MEDIA_TYPE_CHOICES = [
+        ("image", "Image"),
+        ("video", "Video"),
+        ("file", "File"),
+    ]
+
+    @classmethod
+    def detect_media_type(cls, uploaded_file):
+        content_type = (getattr(uploaded_file, "content_type", "") or "").lower()
+        name = (getattr(uploaded_file, "name", "") or "").lower()
+
+        guessed_type, _ = mimetypes.guess_type(name)
+        guessed_type = (guessed_type or "").lower()
+
+        detected_type = content_type or guessed_type
+
+        if detected_type.startswith("image/"):
+            return "image"
+
+        if detected_type.startswith("video/"):
+            return "video"
+
+        if name.endswith(cls.IMAGE_EXTENSIONS):
+            return "image"
+
+        if name.endswith(cls.VIDEO_EXTENSIONS):
+            return "video"
+
+        return "file"    
+    
+    
     message = models.ForeignKey(
         ChatMessage,
         on_delete=models.CASCADE,
         related_name="attachments",
     )
     file = models.FileField(upload_to="chat_attachments/")
+    original_name = models.CharField(max_length=255, blank=True, default="")
+    content_type = models.CharField(max_length=120, blank=True, default="")
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp", ".gif")
+    VIDEO_EXTENSIONS = (".mp4", ".webm", ".mov", ".m4v", ".avi", ".mkv")
 
     def __str__(self):
         return f"Attachment for message {self.message_id}"
 
+    def _sources_for_detection(self):
+        sources = [
+            self.original_name or "",
+            self.file.name or "",
+        ]
+
+        try:
+            sources.append(self.file.url or "")
+        except Exception:
+            pass
+
+        return [source.lower().split("?")[0] for source in sources if source]
+
     @property
     def is_image(self):
-        name = self.file.name.lower()
-        return name.endswith((".jpg", ".jpeg", ".png", ".webp", ".gif"))
+        if self.media_type == "image":
+            return True
+
+        if self.content_type.startswith("image/"):
+            return True
+
+        for source in self._sources_for_detection():
+            guessed_type, _ = mimetypes.guess_type(source)
+
+            if guessed_type and guessed_type.startswith("image/"):
+                return True
+
+            if source.endswith(self.IMAGE_EXTENSIONS):
+                return True
+
+        return False
 
     @property
     def is_video(self):
-        name = self.file.name.lower()
-        return name.endswith((".mp4", ".webm", ".mov"))
+        if self.media_type == "video":
+            return True
+
+        if self.content_type.startswith("video/"):
+            return True
+
+        for source in self._sources_for_detection():
+            guessed_type, _ = mimetypes.guess_type(source)
+
+            if guessed_type and guessed_type.startswith("video/"):
+                return True
+
+            if source.endswith(self.VIDEO_EXTENSIONS):
+                return True
+
+        return False
+
+    @property
+    def media_url(self):
+        if not self.file:
+            return ""
+
+        if self.is_video and getattr(settings, "USE_CLOUDINARY", False):
+            url, _ = cloudinary_url(
+                self.file.name,
+                resource_type="video",
+                secure=True,
+            )
+            return url
+
+        return self.file.url
     
 class UserReport(models.Model):
     REPORT_TYPES = [
