@@ -152,36 +152,63 @@
       }
     }
 
-    function appendMessagesHtml(html, forceScroll = false) {
+    function appendMessagesHtml(html, forceScroll = false, replaceExisting = false) {
       if (!messagesBox || !html) return false;
 
       const template = document.createElement("template");
       template.innerHTML = html.trim();
 
       const rows = Array.from(template.content.querySelectorAll("[data-message-id]"));
-      let added = false;
+      let changed = false;
 
       rows.forEach((row) => {
         const id = row.dataset.messageId;
 
-        const alreadyExists = Array.from(
+        const existing = Array.from(
           messagesBox.querySelectorAll("[data-message-id]")
-        ).some((existing) => existing.dataset.messageId === id);
+        ).find((existingRow) => existingRow.dataset.messageId === id);
 
-        if (id && alreadyExists) return;
+        if (id && existing) {
+          if (replaceExisting) {
+            existing.replaceWith(row);
+            changed = true;
+          }
+
+          return;
+        }
 
         messagesBox.appendChild(row);
-        added = true;
+        changed = true;
       });
 
-      if (added) {
+      if (changed) {
         const emptyState = messagesBox.querySelector(".chat-empty-inside");
         if (emptyState) emptyState.remove();
 
         scrollToBottom(forceScroll);
       }
 
-      return added;
+      return changed;
+    }
+
+    async function fetchMessagesAfter(afterId, forceScroll = false, replaceExisting = false) {
+      if (!form || !messagesBox) return false;
+
+      const newUrl = form.dataset.newUrl;
+
+      const res = await fetch(`${newUrl}?after=${afterId || 0}`, {
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      });
+
+      const data = await res.json();
+
+      if (data.ok && data.html) {
+        return appendMessagesHtml(data.html, forceScroll, replaceExisting);
+      }
+
+      return false;
     }
 
     function autosizeTextarea() {
@@ -275,21 +302,8 @@
 
       isPolling = true;
 
-      const newUrl = form.dataset.newUrl;
-      const lastId = getLastMessageId();
-
       try {
-        const res = await fetch(`${newUrl}?after=${lastId}`, {
-          headers: {
-            "X-Requested-With": "XMLHttpRequest",
-          },
-        });
-
-        const data = await res.json();
-
-        if (data.ok && data.html) {
-          appendMessagesHtml(data.html, false);
-        }
+        await fetchMessagesAfter(getLastMessageId(), false, false);
       } catch (err) {
         console.error("Chat polling error:", err);
       } finally {
@@ -338,6 +352,7 @@
 
       isSending = true;
 
+      const previousLastId = getLastMessageId();
       const fd = new FormData(form);
 
       try {
@@ -356,7 +371,19 @@
           throw new Error(data.error || messageNotSentText);
         }
 
-        appendMessagesHtml(data.html, true);
+        appendMessagesHtml(data.html, true, true);
+
+        setTimeout(() => {
+          fetchMessagesAfter(previousLastId, true, true).catch((err) => {
+            console.error("Chat refresh after send error:", err);
+          });
+        }, 700);
+
+        setTimeout(() => {
+          fetchMessagesAfter(previousLastId, true, true).catch((err) => {
+            console.error("Chat refresh after send error:", err);
+          });
+        }, 1800);
 
         input.value = "";
         fileInput.value = "";
