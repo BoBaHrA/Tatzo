@@ -3,6 +3,7 @@
 <div
   class="chat-message-row {% if message.sender == request.user %}is-own{% endif %}"
   data-message-id="{{ message.id }}"
+  data-edit-url="{% url 'edit_chat_message' message.id %}"
 >
   <div class="chat-message-bubble">
     {% if message.content %}
@@ -22,6 +23,8 @@
               <button
                 type="button"
                 class="chat-attachment-preview"
+                data-attachment-id="{{ attachment.id }}"
+                data-attachment-name="{{ attachment.original_name|default:attachment.file.name }}"
                 data-chat-media-type="image"
                 data-chat-media-url="{{ attachment.media_url }}"
                 data-chat-media-title="{{ image_attachment_title }}"
@@ -39,6 +42,8 @@
                 class="chat-attachment-preview chat-attachment-video-preview"
                 data-chat-media-type="video"
                 data-chat-media-url="{{ attachment.media_url }}"
+                data-attachment-id="{{ attachment.id }}"
+                data-attachment-name="{{ attachment.original_name|default:attachment.file.name }}"
                 data-chat-media-title="{{ video_attachment_title }}"
                 title="{{ video_attachment_title }}"
                 aria-label="{{ video_attachment_title }}"
@@ -48,7 +53,7 @@
               </button>
 
             {% else %}
-              <a href="{{ attachment.media_url }}" target="_blank" class="chat-attachment-file">
+              <a href="{{ attachment.media_url }}" target="_blank" class="chat-attachment-file" data-attachment-id="{{ attachment.id }}" data-attachment-name="{{ attachment.original_name|default:attachment.file.name }}">
                 📎 {% trans "Open file" %}
               </a>
             {% endif %}
@@ -59,6 +64,15 @@
 
     <div class="chat-message-footer">
       {% if message.sender == request.user %}
+        <button
+          type="button"
+          class="chat-message-edit"
+          title="{% trans 'Edit message' %}"
+          aria-label="{% trans 'Edit message' %}"
+        >
+          {% trans "Edit" %}
+        </button>
+
         <button
           type="button"
           class="chat-message-delete"
@@ -72,6 +86,9 @@
 
       <div class="chat-message-time">
         {{ message.created_at|date:"d.m.Y H:i" }}
+        {% if message.is_edited %}
+          <span class="chat-message-edited"> · {% trans "edited" %}</span>
+        {% endif %}
       </div>
     </div>
   </div>

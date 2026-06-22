@@ -56,6 +56,11 @@ urlpatterns = [
         name="delete_chat_message",
     ),
     path(
+        "chats/messages/<int:message_id>/edit/",
+        views.edit_chat_message,
+        name="edit_chat_message",
+    ),
+    path(
         "chats/<int:thread_id>/new/",
         views.chat_new_messages,
         name="chat_new_messages",

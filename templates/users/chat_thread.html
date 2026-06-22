@@ -110,8 +110,81 @@
 
 {% trans "Chat media" as chat_media_alt %}
 {% trans "Message was not sent." as message_not_sent %}
-{% trans "Delete this message?" as delete_message_confirm %}
-{% trans "Message deleted." as message_deleted_text %}
+{% trans "Delete message?" as delete_modal_title %}
+{% trans "This action cannot be undone." as delete_modal_subtitle %}
+{% trans "Cancel" as cancel_text %}
+{% trans "Delete" as delete_text %}
+{% trans "Edit message" as edit_modal_title %}
+{% trans "Save changes" as save_changes_text %}
+{% trans "Add files" as add_files_text %}
+{% trans "Remove attachment" as remove_attachment_text %}
+
+<div class="chat-action-modal" id="chatDeleteModal" hidden>
+  <div class="chat-action-modal-backdrop" data-modal-close></div>
+
+  <div class="chat-action-modal-card chat-delete-card" role="dialog" aria-modal="true">
+    <div class="chat-action-icon danger">
+      🗑
+    </div>
+
+    <h3>{{ delete_modal_title }}</h3>
+    <p>{{ delete_modal_subtitle }}</p>
+
+    <div class="chat-action-modal-buttons">
+      <button type="button" class="chat-modal-btn secondary" data-modal-close>
+        {{ cancel_text }}
+      </button>
+
+      <button type="button" class="chat-modal-btn danger" id="confirmDeleteMessageBtn">
+        {{ delete_text }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="chat-action-modal" id="chatEditModal" hidden>
+  <div class="chat-action-modal-backdrop" data-edit-modal-close></div>
+
+  <form class="chat-action-modal-card chat-edit-card" id="chatEditForm" role="dialog" aria-modal="true">
+    <div class="chat-action-icon">
+      ✎
+    </div>
+
+    <h3>{{ edit_modal_title }}</h3>
+
+    <textarea
+      id="chatEditTextarea"
+      rows="4"
+      maxlength="2000"
+    ></textarea>
+
+    <div class="chat-edit-attachments" id="chatEditAttachments"></div>
+
+    <label class="chat-edit-file-btn" for="chatEditFiles">
+      + {{ add_files_text }}
+    </label>
+
+    <input
+      type="file"
+      id="chatEditFiles"
+      name="attachments"
+      multiple
+      hidden
+    >
+
+    <div class="chat-selected-files visible" id="chatEditSelectedFiles"></div>
+
+    <div class="chat-action-modal-buttons">
+      <button type="button" class="chat-modal-btn secondary" data-edit-modal-close>
+        {{ cancel_text }}
+      </button>
+
+      <button type="submit" class="chat-modal-btn primary">
+        {{ save_changes_text }}
+      </button>
+    </div>
+  </form>
+</div>
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
@@ -125,6 +198,26 @@
     const messageNotSentText = "{{ message_not_sent|escapejs }}";
     const deleteMessageConfirm = "{{ delete_message_confirm|escapejs }}";
     const messageDeletedText = "{{ message_deleted_text|escapejs }}";
+
+    const removeAttachmentText = "{{ remove_attachment_text|escapejs }}";
+
+    const deleteModal = document.getElementById("chatDeleteModal");
+    const confirmDeleteMessageBtn = document.getElementById("confirmDeleteMessageBtn");
+
+    const editModal = document.getElementById("chatEditModal");
+    const editForm = document.getElementById("chatEditForm");
+    const editTextarea = document.getElementById("chatEditTextarea");
+    const editAttachmentsBox = document.getElementById("chatEditAttachments");
+    const editFileInput = document.getElementById("chatEditFiles");
+    const editSelectedFilesBox = document.getElementById("chatEditSelectedFiles");
+
+    let pendingDeleteUrl = "";
+    let pendingDeleteRow = null;
+
+    let pendingEditUrl = "";
+    let pendingEditRow = null;
+    let selectedChatFiles = [];
+    let selectedEditFiles = [];
 
     let pollingTimer = null;
     let isPolling = false;
@@ -227,21 +320,48 @@
       input.style.overflowY = input.scrollHeight > maxHeight ? "auto" : "hidden";
     }
 
-    function updateSelectedFiles() {
-      if (!selectedFilesBox || !fileInput) return;
-
-      const files = Array.from(fileInput.files || []);
+    function renderSelectedFiles(files, box, removeClass) {
+      if (!box) return;
 
       if (!files.length) {
-        selectedFilesBox.innerHTML = "";
-        selectedFilesBox.classList.remove("visible");
+        box.innerHTML = "";
+        box.classList.remove("visible");
         return;
       }
 
-      selectedFilesBox.classList.add("visible");
-      selectedFilesBox.innerHTML = files
-        .map((file) => `<span>📎 ${file.name}</span>`)
+      box.classList.add("visible");
+      box.innerHTML = files
+        .map((file, index) => `
+          <span>
+            📎 ${file.name}
+            <button type="button" class="${removeClass}" data-index="${index}">×</button>
+          </span>
+        `)
         .join("");
+    }
+
+    function updateSelectedFiles() {
+      renderSelectedFiles(selectedChatFiles, selectedFilesBox, "chat-selected-file-remove");
+    }
+
+    function updateEditSelectedFiles() {
+      renderSelectedFiles(selectedEditFiles, editSelectedFilesBox, "chat-edit-selected-file-remove");
+    }
+
+    function addFilesToList(fileList, targetList) {
+      const incomingFiles = Array.from(fileList || []);
+
+      incomingFiles.forEach((file) => {
+        const alreadyExists = targetList.some((existingFile) => (
+          existingFile.name === file.name &&
+          existingFile.size === file.size &&
+          existingFile.lastModified === file.lastModified
+        ));
+
+        if (!alreadyExists) {
+          targetList.push(file);
+        }
+      });
     }
 
     function openChatMediaModal(type, url, title = "") {
@@ -319,41 +439,90 @@
     autosizeTextarea();
 
     input?.addEventListener("input", autosizeTextarea);
-    fileInput?.addEventListener("change", updateSelectedFiles);
+    fileInput?.addEventListener("change", () => {
+      addFilesToList(fileInput.files, selectedChatFiles);
+      fileInput.value = "";
+      selectedChatFiles = [];
+      updateSelectedFiles();
+    });
+
+    selectedFilesBox?.addEventListener("click", (e) => {
+      const removeBtn = e.target.closest(".chat-selected-file-remove");
+      if (!removeBtn) return;
+
+      const index = Number(removeBtn.dataset.index);
+      selectedChatFiles.splice(index, 1);
+      updateSelectedFiles();
+    });
+
+    editFileInput?.addEventListener("change", () => {
+      addFilesToList(editFileInput.files, selectedEditFiles);
+      editFileInput.value = "";
+      updateEditSelectedFiles();
+    });
+
+    editSelectedFilesBox?.addEventListener("click", (e) => {
+      const removeBtn = e.target.closest(".chat-edit-selected-file-remove");
+      if (!removeBtn) return;
+
+      const index = Number(removeBtn.dataset.index);
+      selectedEditFiles.splice(index, 1);
+      updateEditSelectedFiles();
+    });
 
     messagesBox?.addEventListener("click", async (e) => {
+      const editBtn = e.target.closest(".chat-message-edit");
+
+      if (editBtn) {
+        e.preventDefault();
+
+        const row = editBtn.closest("[data-message-id]");
+        if (!row) return;
+
+        pendingEditRow = row;
+        pendingEditUrl = row.dataset.editUrl || "";
+
+        const contentNode = row.querySelector(".chat-message-content");
+        editTextarea.value = contentNode ? contentNode.innerText.trim() : "";
+
+        selectedEditFiles = [];
+        updateEditSelectedFiles();
+
+        const attachments = Array.from(
+          row.querySelectorAll("[data-attachment-id]")
+        );
+
+        editAttachmentsBox.innerHTML = attachments.length
+          ? attachments.map((attachment) => `
+              <label class="chat-edit-attachment-row">
+                <input
+                  type="checkbox"
+                  name="delete_attachment_ids"
+                  value="${attachment.dataset.attachmentId}"
+                >
+                <span>${attachment.dataset.attachmentName || removeAttachmentText}</span>
+                <strong>${removeAttachmentText}</strong>
+              </label>
+            `).join("")
+          : "";
+
+        editModal.hidden = false;
+        document.body.style.overflow = "hidden";
+        editTextarea.focus();
+
+        return;
+      }
+
       const deleteBtn = e.target.closest(".chat-message-delete");
 
       if (deleteBtn) {
         e.preventDefault();
 
-        if (!confirm(deleteMessageConfirm)) return;
+        pendingDeleteRow = deleteBtn.closest("[data-message-id]");
+        pendingDeleteUrl = deleteBtn.dataset.deleteUrl || "";
 
-        const row = deleteBtn.closest("[data-message-id]");
-        const deleteUrl = deleteBtn.dataset.deleteUrl;
-
-        deleteBtn.disabled = true;
-
-        try {
-          const res = await fetch(deleteUrl, {
-            method: "POST",
-            headers: {
-              "X-CSRFToken": getCookie("csrftoken"),
-              "X-Requested-With": "XMLHttpRequest",
-            },
-          });
-
-          const data = await res.json();
-
-          if (!res.ok || !data.ok) {
-            throw new Error(data.error || "Delete failed");
-          }
-
-          if (row) row.remove();
-        } catch (err) {
-          console.error("Chat delete message error:", err);
-          deleteBtn.disabled = false;
-        }
+        deleteModal.hidden = false;
+        document.body.style.overflow = "hidden";
 
         return;
       }
@@ -370,6 +539,111 @@
       );
     });
 
+    function closeDeleteModal() {
+  deleteModal.hidden = true;
+  document.body.style.overflow = "";
+  pendingDeleteUrl = "";
+  pendingDeleteRow = null;
+}
+
+    function closeEditModal() {
+      editModal.hidden = true;
+      document.body.style.overflow = "";
+      pendingEditUrl = "";
+      pendingEditRow = null;
+      selectedEditFiles = [];
+      updateEditSelectedFiles();
+    }
+
+    deleteModal?.addEventListener("click", (e) => {
+      if (e.target.closest("[data-modal-close]")) {
+        closeDeleteModal();
+      }
+    });
+
+    editModal?.addEventListener("click", (e) => {
+      if (e.target.closest("[data-edit-modal-close]")) {
+        closeEditModal();
+      }
+    });
+
+    confirmDeleteMessageBtn?.addEventListener("click", async () => {
+      if (!pendingDeleteUrl || !pendingDeleteRow) return;
+
+      confirmDeleteMessageBtn.disabled = true;
+
+      try {
+        const res = await fetch(pendingDeleteUrl, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Delete failed");
+        }
+
+        pendingDeleteRow.remove();
+        closeDeleteModal();
+      } catch (err) {
+        console.error("Chat delete message error:", err);
+      } finally {
+        confirmDeleteMessageBtn.disabled = false;
+      }
+    });
+
+    editForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!pendingEditUrl || !pendingEditRow) return;
+
+      const fd = new FormData();
+      fd.append("content", editTextarea.value.trim());
+
+      editAttachmentsBox
+        .querySelectorAll("input[name='delete_attachment_ids']:checked")
+        .forEach((input) => {
+          fd.append("delete_attachment_ids", input.value);
+        });
+
+      selectedEditFiles.forEach((file) => {
+        fd.append("attachments", file);
+      });
+
+      try {
+        const res = await fetch(pendingEditUrl, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "X-Requested-With": "XMLHttpRequest",
+          },
+          body: fd,
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Edit failed");
+        }
+
+        appendMessagesHtml(data.html, true, true);
+        closeEditModal();
+      } catch (err) {
+        console.error("Chat edit message error:", err);
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+
+      if (!deleteModal.hidden) closeDeleteModal();
+      if (!editModal.hidden) closeEditModal();
+    });
+
     input?.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
@@ -383,7 +657,7 @@
       if (isSending) return;
 
       const content = input.value.trim();
-      const hasFiles = fileInput.files && fileInput.files.length > 0;
+      const hasFiles = selectedChatFiles.length > 0;
 
       if (!content && !hasFiles) return;
 
@@ -393,7 +667,12 @@
       isSending = true;
 
       const previousLastId = getLastMessageId();
-      const fd = new FormData(form);
+      const fd = new FormData();
+      fd.append("content", content);
+
+      selectedChatFiles.forEach((file) => {
+        fd.append("attachments", file);
+      });
 
       try {
         const res = await fetch(form.action, {
@@ -427,6 +706,7 @@
 
         input.value = "";
         fileInput.value = "";
+        selectedChatFiles = [];
         updateSelectedFiles();
         autosizeTextarea();
         scrollToBottom(true);

@@ -1417,6 +1417,87 @@ def delete_chat_message(request, message_id):
     return redirect("chat_thread", thread_id=thread.id)
 
 @login_required
+@require_POST
+def edit_chat_message(request, message_id):
+    message = get_object_or_404(
+        ChatMessage.objects.select_related("thread", "sender"),
+        id=message_id,
+        sender=request.user,
+        is_deleted=False,
+    )
+
+    content = (request.POST.get("content") or "").strip()
+    files = request.FILES.getlist("attachments")
+
+    delete_attachment_ids = request.POST.getlist("delete_attachment_ids")
+    attachments_to_delete = message.attachments.filter(id__in=delete_attachment_ids)
+
+    remaining_attachments_count = (
+        message.attachments.exclude(id__in=delete_attachment_ids).count()
+    )
+
+    if not content and not files and remaining_attachments_count == 0:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": _("Message cannot be empty."),
+            },
+            status=400,
+        )
+
+    try:
+        with transaction.atomic():
+            attachments_to_delete.delete()
+
+            message.content = content
+            message.is_edited = True
+            message.edited_at = timezone.now()
+            message.save(update_fields=["content", "is_edited", "edited_at"])
+
+            for file in files:
+                ChatAttachment.objects.create(
+                    message=message,
+                    file=file,
+                    original_name=file.name,
+                    content_type=file.content_type or "",
+                    media_type=ChatAttachment.detect_media_type(file),
+                )
+
+            message = (
+                ChatMessage.objects
+                .select_related("sender", "sender__profile")
+                .prefetch_related("attachments")
+                .get(id=message.id)
+            )
+
+            html = render_to_string(
+                "partials/chat_message.html",
+                {
+                    "message": message,
+                    "request": request,
+                },
+            )
+
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "message_id": message.id,
+                    "html": html,
+                }
+            )
+
+    except Exception:
+        logger.exception("Chat message edit failed for user=%s", request.user.username)
+
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": _("Message was not edited."),
+            },
+            status=500,
+        )
+
+@login_required
 def chat_new_messages(request, thread_id):
     thread = get_object_or_404(ChatThread, id=thread_id)
 

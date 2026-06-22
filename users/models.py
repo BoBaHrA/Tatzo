@@ -347,15 +347,17 @@ class ChatMessage(models.Model):
     )
     content = models.TextField(max_length=2000, blank=True)
     is_read = models.BooleanField(default=False)
+
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(blank=True, null=True)
+
+    is_edited = models.BooleanField(default=False)
+    edited_at = models.DateTimeField(blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ["created_at"]
-
-    def __str__(self):
-        return f"Message from {self.sender.username} in chat {self.thread_id}"
     
 class ChatAttachment(models.Model):
     
