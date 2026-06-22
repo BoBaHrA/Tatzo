@@ -18,7 +18,19 @@ from django.utils.encoding import force_str
 from django.utils.translation import gettext as _, ngettext
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.http import require_POST
-from .models import Profile, VerificationDocument, ManualVerificationRequest, UserFollow, PortfolioAlbum, PortfolioWork, ChatThread, ChatMessage, ChatAttachment
+from .models import (
+    Profile,
+    VerificationDocument,
+    ManualVerificationRequest,
+    UserFollow,
+    UserBlock,
+    PortfolioAlbum,
+    PortfolioWork,
+    ChatThread,
+    ChatMessage,
+    ChatAttachment,
+)
+
 
 from posts.forms import PostForm, PostMediaUploadForm
 from .forms import ProfileForm, VerificationForm, UserEditForm, ManualVerificationForm, PortfolioWorkForm, PortfolioAlbumForm, UserReportForm
@@ -764,6 +776,49 @@ def toggle_follow(request, username):
         }
     )
 
+@login_required
+@require_POST
+def toggle_user_block(request, username):
+    target_user = get_object_or_404(User, username=username)
+
+    if target_user == request.user:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": _("You cannot block yourself."),
+            },
+            status=400,
+        )
+
+    block_relation, created = UserBlock.objects.get_or_create(
+        blocker=request.user,
+        blocked=target_user,
+    )
+
+    if created:
+        is_blocked = True
+    else:
+        block_relation.delete()
+        is_blocked = False
+
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse(
+            {
+                "ok": True,
+                "is_blocked": is_blocked,
+                "button_text": _("Unblock") if is_blocked else _("Block"),
+            }
+        )
+
+    thread = ChatThread.objects.filter(
+        Q(participant_one=request.user, participant_two=target_user)
+        | Q(participant_one=target_user, participant_two=request.user)
+    ).first()
+
+    if thread:
+        return redirect("chat_thread", thread_id=thread.id)
+
+    return redirect("profile", username=target_user.username)
 
 def followers_list(request, username):
     profile_user = get_object_or_404(
@@ -1275,6 +1330,17 @@ def chat_thread(request, thread_id):
         return redirect("chats_list")
 
     other_user = thread.get_other_user(request.user)
+    is_blocked_by_me = UserBlock.objects.filter(
+        blocker=request.user,
+        blocked=other_user,
+    ).exists()
+
+    has_blocked_me = UserBlock.objects.filter(
+        blocker=other_user,
+        blocked=request.user,
+    ).exists()
+
+    chat_blocked = is_blocked_by_me or has_blocked_me
 
     thread.messages.filter(
         is_read=False
@@ -1297,6 +1363,9 @@ def chat_thread(request, thread_id):
             "thread": thread,
             "other_user": other_user,
             "chat_messages": chat_messages,
+            "is_blocked_by_me": is_blocked_by_me,
+            "has_blocked_me": has_blocked_me,
+            "chat_blocked": chat_blocked,
         },
     )
 
@@ -1314,6 +1383,22 @@ def send_chat_message(request, thread_id):
             },
             status=403,
         )
+        
+    other_user = thread.get_other_user(request.user)
+
+    is_chat_blocked = UserBlock.objects.filter(
+        Q(blocker=request.user, blocked=other_user)
+        | Q(blocker=other_user, blocked=request.user)
+    ).exists()
+
+    if is_chat_blocked:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": _("You cannot send messages to this user."),
+            },
+            status=403,
+        )
 
     content = (request.POST.get("content") or "").strip()
     files = request.FILES.getlist("attachments")
@@ -1327,23 +1412,36 @@ def send_chat_message(request, thread_id):
             status=400,
         )
 
-    message = ChatMessage.objects.create(
-        thread=thread,
-        sender=request.user,
-        content=content,
-    )
+    try:
+        with transaction.atomic():
+            message = ChatMessage.objects.create(
+                thread=thread,
+                sender=request.user,
+                content=content,
+            )
 
-    for file in files:
-        ChatAttachment.objects.create(
-            message=message,
-            file=file,
-            original_name=file.name,
-            content_type=file.content_type or "",
-            media_type=ChatAttachment.detect_media_type(file),
+            for file in files:
+                ChatAttachment.objects.create(
+                    message=message,
+                    file=file,
+                    original_name=file.name,
+                    content_type=file.content_type or "",
+                    media_type=ChatAttachment.detect_media_type(file),
+                )
+
+            thread.updated_at = timezone.now()
+            thread.save(update_fields=["updated_at"])
+
+    except Exception:
+        logger.exception("Chat message creation failed for user=%s", request.user.username)
+
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": _("Message was not sent."),
+            },
+            status=500,
         )
-
-    thread.updated_at = timezone.now()
-    thread.save(update_fields=["updated_at"])
 
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         message = (

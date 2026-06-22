@@ -41,6 +41,24 @@
           </p>
         </div>
       </a>
+      <form
+        method="post"
+        action="{% url 'toggle_user_block' other_user.username %}"
+        class="chat-block-form"
+      >
+        {% csrf_token %}
+
+        <button
+          type="submit"
+          class="chat-block-btn {% if is_blocked_by_me %}is-blocked{% endif %}"
+        >
+          {% if is_blocked_by_me %}
+            {% trans "Unblock" %}
+          {% else %}
+            {% trans "Block" %}
+          {% endif %}
+        </button>
+      </form>
     </header>
 
     <section class="chat-thread-card">
@@ -58,6 +76,17 @@
           </div>
         {% endfor %}
       </div>
+
+    {% if chat_blocked %}
+      <div class="chat-blocked-notice">
+        {% if is_blocked_by_me %}
+          {% trans "You blocked this user. Unblock them to send messages." %}
+        {% else %}
+          {% trans "This user has blocked you. You cannot send messages." %}
+        {% endif %}
+      </div>
+    {% else %}
+
 
       <form
         method="post"

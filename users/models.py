@@ -227,6 +227,28 @@ class UserFollow(models.Model):
     def __str__(self):
         return f"{self.follower.username} follows {self.following.username}"
 
+class UserBlock(models.Model):
+    blocker = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="blocking_relations",
+    )
+    blocked = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="blocked_by_relations",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("blocker", "blocked")
+        indexes = [
+            models.Index(fields=["blocker", "blocked"]),
+            models.Index(fields=["blocked"]),
+        ]
+
+    def __str__(self):
+        return f"{self.blocker.username} blocked {self.blocked.username}"
 
 class PortfolioAlbum(models.Model):
     user = models.ForeignKey(

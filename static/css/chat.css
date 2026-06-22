@@ -1180,3 +1180,124 @@ body {
   border-color: rgba(4, 197, 191, 0.35);
   color: #04c5bf;
 }
+
+/* =========================
+   CHAT COMPACT MESSAGE BUBBLES
+========================= */
+
+.chat-message-row {
+  align-items: flex-start;
+}
+
+.chat-message-row.is-own {
+  align-items: flex-end;
+}
+
+.chat-message-bubble {
+  width: fit-content !important;
+  min-width: 0 !important;
+  max-width: min(620px, 78%) !important;
+}
+
+.chat-message-content {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.chat-message-footer {
+  width: 100%;
+  min-width: 0;
+}
+
+.chat-message-time {
+  white-space: nowrap;
+}
+
+/* Если сообщение только с коротким текстом, не растягиваем пузырь */
+.chat-message-bubble:not(:has(.chat-attachments)) {
+  min-width: 0 !important;
+}
+
+/* Если внутри есть медиа — оставляем нормальную ширину под картинку/видео */
+.chat-message-bubble:has(.chat-attachments) {
+  min-width: min(280px, 100%);
+}
+
+/* =========================
+   CHAT BLOCK USER UI
+========================= */
+
+.chat-thread-header {
+  position: relative;
+}
+
+.chat-block-form {
+  position: absolute;
+  top: 22px;
+  right: 24px;
+}
+
+.chat-block-btn {
+  height: 38px;
+  padding: 0 15px;
+
+  border-radius: 999px;
+  border: 1px solid rgba(238, 12, 111, 0.42);
+  background: rgba(238, 12, 111, 0.08);
+
+  color: #ee0c6f;
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  font-weight: 900;
+
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.chat-block-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(238, 12, 111, 0.15);
+  border-color: rgba(238, 12, 111, 0.82);
+  color: #ff4c96;
+}
+
+.chat-block-btn.is-blocked {
+  border-color: rgba(4, 197, 191, 0.42);
+  background: rgba(4, 197, 191, 0.08);
+  color: #04c5bf;
+}
+
+.chat-block-btn.is-blocked:hover {
+  background: rgba(4, 197, 191, 0.15);
+  border-color: rgba(4, 197, 191, 0.82);
+  color: #18d5cf;
+}
+
+.chat-blocked-notice {
+  padding: 16px 18px;
+  border-top: 1px solid rgba(4, 197, 191, 0.12);
+
+  background:
+    linear-gradient(135deg, rgba(238, 12, 111, 0.08), rgba(4, 197, 191, 0.06)),
+    rgba(0, 13, 24, 0.88);
+
+  color: rgba(223, 252, 255, 0.78);
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+@media (max-width: 700px) {
+  .chat-block-form {
+    position: static;
+    margin-top: 14px;
+  }
+
+  .chat-block-btn {
+    width: 100%;
+  }
+}

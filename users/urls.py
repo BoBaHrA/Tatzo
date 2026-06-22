@@ -72,6 +72,11 @@ urlpatterns = [
     name="toggle_follow",
     ),
     path(
+        "profile/<str:username>/block/",
+        views.toggle_user_block,
+        name="toggle_user_block",
+    ),
+    path(
         "profile/<str:username>/portfolio/",
         views.artist_portfolio,
         name="artist_portfolio",
