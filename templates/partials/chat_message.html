@@ -12,47 +12,49 @@
     {% endif %}
 
     {% if message.attachments.all %}
-      <div class="chat-attachments">
-        {% for attachment in message.attachments.all %}
-          {% if attachment.is_image %}
-            {% trans "Image attachment" as image_attachment_title %}
-            {% trans "Attachment" as attachment_alt %}
+      {% with attachment_count=message.attachments.count %}
+        <div class="chat-attachments {% if attachment_count == 1 %}single-attachment{% endif %}">
+          {% for attachment in message.attachments.all %}
+            {% if attachment.is_image %}
+              {% trans "Image attachment" as image_attachment_title %}
+              {% trans "Attachment" as attachment_alt %}
 
-            <button
-              type="button"
-              class="chat-attachment-preview"
-              data-chat-media-type="image"
-              data-chat-media-url="{{ attachment.media_url }}"
-              data-chat-media-title="{{ image_attachment_title }}"
-              title="{{ image_attachment_title }}"
-              aria-label="{{ image_attachment_title }}"
-            >
-              <img src="{{ attachment.media_url }}" alt="{{ attachment_alt }}">
-            </button>
+              <button
+                type="button"
+                class="chat-attachment-preview"
+                data-chat-media-type="image"
+                data-chat-media-url="{{ attachment.media_url }}"
+                data-chat-media-title="{{ image_attachment_title }}"
+                title="{{ image_attachment_title }}"
+                aria-label="{{ image_attachment_title }}"
+              >
+                <img src="{{ attachment.media_url }}" alt="{{ attachment_alt }}">
+              </button>
 
-          {% elif attachment.is_video %}
-            {% trans "Video attachment" as video_attachment_title %}
+            {% elif attachment.is_video %}
+              {% trans "Video attachment" as video_attachment_title %}
 
-            <button
-              type="button"
-              class="chat-attachment-preview chat-attachment-video-preview"
-              data-chat-media-type="video"
-              data-chat-media-url="{{ attachment.media_url }}"
-              data-chat-media-title="{{ video_attachment_title }}"
-              title="{{ video_attachment_title }}"
-              aria-label="{{ video_attachment_title }}"
-            >
-              <video src="{{ attachment.media_url }}" muted playsinline preload="metadata"></video>
-              <span class="chat-video-play">▶</span>
-            </button>
+              <button
+                type="button"
+                class="chat-attachment-preview chat-attachment-video-preview"
+                data-chat-media-type="video"
+                data-chat-media-url="{{ attachment.media_url }}"
+                data-chat-media-title="{{ video_attachment_title }}"
+                title="{{ video_attachment_title }}"
+                aria-label="{{ video_attachment_title }}"
+              >
+                <video src="{{ attachment.media_url }}" muted playsinline preload="metadata"></video>
+                <span class="chat-video-play">▶</span>
+              </button>
 
-          {% else %}
-            <a href="{{ attachment.media_url }}" target="_blank" class="chat-attachment-file">
-              📎 {% trans "Open file" %}
-            </a>
-          {% endif %}
-        {% endfor %}
-      </div>
+            {% else %}
+              <a href="{{ attachment.media_url }}" target="_blank" class="chat-attachment-file">
+                📎 {% trans "Open file" %}
+              </a>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endwith %}
     {% endif %}
 
     <div class="chat-message-time">

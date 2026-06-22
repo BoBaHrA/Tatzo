@@ -813,3 +813,39 @@ body {
 .chat-messages {
   padding-right: 18px;
 }
+
+/* Single media in chat should not leave an empty second column */
+.chat-attachments.single-attachment {
+  grid-template-columns: minmax(0, 1fr) !important;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.chat-attachments.single-attachment .chat-attachment-preview {
+  width: auto;
+  max-width: 360px;
+}
+
+.chat-attachments.single-attachment .chat-attachment-preview img,
+.chat-attachments.single-attachment .chat-attachment-preview video {
+  width: auto;
+  max-width: 360px;
+  max-height: 320px;
+  object-fit: contain;
+}
+
+.chat-message-row.is-own .chat-attachments.single-attachment {
+  margin-left: auto;
+}
+
+.chat-message-row:not(.is-own) .chat-attachments.single-attachment {
+  margin-right: auto;
+}
+
+@media (max-width: 560px) {
+  .chat-attachments.single-attachment .chat-attachment-preview,
+  .chat-attachments.single-attachment .chat-attachment-preview img,
+  .chat-attachments.single-attachment .chat-attachment-preview video {
+    max-width: 100%;
+  }
+}
