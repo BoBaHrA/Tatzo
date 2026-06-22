@@ -118,6 +118,7 @@
 {% trans "Save changes" as save_changes_text %}
 {% trans "Add files" as add_files_text %}
 {% trans "Remove attachment" as remove_attachment_text %}
+{% trans "Keep attachment" as keep_attachment_text %}
 
 <div class="chat-action-modal" id="chatDeleteModal" hidden>
   <div class="chat-action-modal-backdrop" data-modal-close></div>
@@ -200,6 +201,7 @@
     const messageDeletedText = "{{ message_deleted_text|escapejs }}";
 
     const removeAttachmentText = "{{ remove_attachment_text|escapejs }}";
+    const keepAttachmentText = "{{ keep_attachment_text|escapejs }}";
 
     const deleteModal = document.getElementById("chatDeleteModal");
     const confirmDeleteMessageBtn = document.getElementById("confirmDeleteMessageBtn");
@@ -442,7 +444,6 @@
     fileInput?.addEventListener("change", () => {
       addFilesToList(fileInput.files, selectedChatFiles);
       fileInput.value = "";
-      selectedChatFiles = [];
       updateSelectedFiles();
     });
 
@@ -470,6 +471,20 @@
       updateEditSelectedFiles();
     });
 
+    editAttachmentsBox?.addEventListener("click", (e) => {
+      const removeBtn = e.target.closest(".chat-edit-remove-attachment");
+      if (!removeBtn) return;
+
+      const row = removeBtn.closest(".chat-edit-attachment-row");
+      if (!row) return;
+
+      row.classList.toggle("is-marked-for-delete");
+
+      removeBtn.textContent = row.classList.contains("is-marked-for-delete")
+        ? keepAttachmentText
+        : removeAttachmentText;
+    });
+
     messagesBox?.addEventListener("click", async (e) => {
       const editBtn = e.target.closest(".chat-message-edit");
 
@@ -494,15 +509,19 @@
 
         editAttachmentsBox.innerHTML = attachments.length
           ? attachments.map((attachment) => `
-              <label class="chat-edit-attachment-row">
-                <input
-                  type="checkbox"
-                  name="delete_attachment_ids"
-                  value="${attachment.dataset.attachmentId}"
-                >
+              <div
+                class="chat-edit-attachment-row"
+                data-delete-attachment-id="${attachment.dataset.attachmentId}"
+              >
                 <span>${attachment.dataset.attachmentName || removeAttachmentText}</span>
-                <strong>${removeAttachmentText}</strong>
-              </label>
+
+                <button
+                  type="button"
+                  class="chat-edit-remove-attachment"
+                >
+                  ${removeAttachmentText}
+                </button>
+              </div>
             `).join("")
           : "";
 
@@ -605,9 +624,9 @@
       fd.append("content", editTextarea.value.trim());
 
       editAttachmentsBox
-        .querySelectorAll("input[name='delete_attachment_ids']:checked")
-        .forEach((input) => {
-          fd.append("delete_attachment_ids", input.value);
+        .querySelectorAll(".chat-edit-attachment-row.is-marked-for-delete")
+        .forEach((row) => {
+          fd.append("delete_attachment_ids", row.dataset.deleteAttachmentId);
         });
 
       selectedEditFiles.forEach((file) => {
