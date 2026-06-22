@@ -110,6 +110,8 @@
 
 {% trans "Chat media" as chat_media_alt %}
 {% trans "Message was not sent." as message_not_sent %}
+{% trans "Delete this message?" as delete_message_confirm %}
+{% trans "Message deleted." as message_deleted_text %}
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
@@ -121,6 +123,8 @@
 
     const chatMediaAlt = "{{ chat_media_alt|escapejs }}";
     const messageNotSentText = "{{ message_not_sent|escapejs }}";
+    const deleteMessageConfirm = "{{ delete_message_confirm|escapejs }}";
+    const messageDeletedText = "{{ message_deleted_text|escapejs }}";
 
     let pollingTimer = null;
     let isPolling = false;
@@ -317,7 +321,43 @@
     input?.addEventListener("input", autosizeTextarea);
     fileInput?.addEventListener("change", updateSelectedFiles);
 
-    messagesBox?.addEventListener("click", (e) => {
+    messagesBox?.addEventListener("click", async (e) => {
+      const deleteBtn = e.target.closest(".chat-message-delete");
+
+      if (deleteBtn) {
+        e.preventDefault();
+
+        if (!confirm(deleteMessageConfirm)) return;
+
+        const row = deleteBtn.closest("[data-message-id]");
+        const deleteUrl = deleteBtn.dataset.deleteUrl;
+
+        deleteBtn.disabled = true;
+
+        try {
+          const res = await fetch(deleteUrl, {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": getCookie("csrftoken"),
+              "X-Requested-With": "XMLHttpRequest",
+            },
+          });
+
+          const data = await res.json();
+
+          if (!res.ok || !data.ok) {
+            throw new Error(data.error || "Delete failed");
+          }
+
+          if (row) row.remove();
+        } catch (err) {
+          console.error("Chat delete message error:", err);
+          deleteBtn.disabled = false;
+        }
+
+        return;
+      }
+
       const previewBtn = e.target.closest(".chat-attachment-preview");
       if (!previewBtn) return;
 

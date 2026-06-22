@@ -1197,6 +1197,8 @@ def chats_list(request):
             Q(participant_one=request.user) |
             Q(participant_two=request.user)
         )
+        .filter(messages__is_deleted=False)
+        .distinct()
         .select_related(
             "participant_one",
             "participant_one__profile",
@@ -1211,14 +1213,19 @@ def chats_list(request):
 
     for thread in threads:
         other_user = thread.get_other_user(request.user)
-        last_message = thread.messages.order_by("-created_at").first()
+        last_message = (
+            thread.messages
+            .filter(is_deleted=False)
+            .order_by("-created_at")
+            .first()
+        )
 
-        unread_count = thread.messages.filter(
-            is_read=False
-        ).exclude(
-            sender=request.user
-        ).count()
-
+        unread_count = (
+            thread.messages
+            .filter(is_read=False, is_deleted=False)
+            .exclude(sender=request.user)
+            .count()
+        )
         chat_rows.append({
             "thread": thread,
             "other_user": other_user,
@@ -1277,7 +1284,9 @@ def chat_thread(request, thread_id):
 
     chat_messages = (
         thread.messages
+        .filter(is_deleted=False)
         .select_related("sender", "sender__profile")
+        .prefetch_related("attachments")
         .order_by("created_at")
     )
 
@@ -1363,6 +1372,51 @@ def send_chat_message(request, thread_id):
     return redirect("chat_thread", thread_id=thread.id)
 
 @login_required
+@require_POST
+def delete_chat_message(request, message_id):
+    message = get_object_or_404(
+        ChatMessage.objects.select_related("thread", "sender"),
+        id=message_id,
+        sender=request.user,
+        is_deleted=False,
+    )
+
+    thread = message.thread
+
+    with transaction.atomic():
+        message.is_deleted = True
+        message.deleted_at = timezone.now()
+        message.content = ""
+        message.is_read = True
+        message.save(update_fields=["is_deleted", "deleted_at", "content", "is_read"])
+
+        message.attachments.all().delete()
+
+        last_visible_message = (
+            thread.messages
+            .filter(is_deleted=False)
+            .order_by("-created_at")
+            .first()
+        )
+
+        if last_visible_message:
+            thread.updated_at = last_visible_message.created_at
+        else:
+            thread.updated_at = timezone.now()
+
+        thread.save(update_fields=["updated_at"])
+
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse(
+            {
+                "ok": True,
+                "message_id": message.id,
+            }
+        )
+
+    return redirect("chat_thread", thread_id=thread.id)
+
+@login_required
 def chat_new_messages(request, thread_id):
     thread = get_object_or_404(ChatThread, id=thread_id)
 
@@ -1384,7 +1438,7 @@ def chat_new_messages(request, thread_id):
 
     new_messages = (
         thread.messages
-        .filter(id__gt=last_id)
+        .filter(id__gt=last_id, is_deleted=False)
         .select_related("sender", "sender__profile")
         .prefetch_related("attachments")
         .order_by("created_at")

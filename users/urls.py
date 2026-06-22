@@ -51,6 +51,11 @@ urlpatterns = [
     path("chats/<int:thread_id>/", views.chat_thread, name="chat_thread"),
     path("chats/<int:thread_id>/send/", views.send_chat_message, name="send_chat_message"),
     path(
+        "chats/messages/<int:message_id>/delete/",
+        views.delete_chat_message,
+        name="delete_chat_message",
+    ),
+    path(
         "chats/<int:thread_id>/new/",
         views.chat_new_messages,
         name="chat_new_messages",

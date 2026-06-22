@@ -57,8 +57,22 @@
       {% endwith %}
     {% endif %}
 
-    <div class="chat-message-time">
-      {{ message.created_at|date:"d.m.Y H:i" }}
+    <div class="chat-message-footer">
+      {% if message.sender == request.user %}
+        <button
+          type="button"
+          class="chat-message-delete"
+          data-delete-url="{% url 'delete_chat_message' message.id %}"
+          title="{% trans 'Delete message' %}"
+          aria-label="{% trans 'Delete message' %}"
+        >
+          {% trans "Delete" %}
+        </button>
+      {% endif %}
+
+      <div class="chat-message-time">
+        {{ message.created_at|date:"d.m.Y H:i" }}
+      </div>
     </div>
   </div>
 </div>

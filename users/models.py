@@ -347,8 +347,10 @@ class ChatMessage(models.Model):
     )
     content = models.TextField(max_length=2000, blank=True)
     is_read = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
+    
     class Meta:
         ordering = ["created_at"]
 
