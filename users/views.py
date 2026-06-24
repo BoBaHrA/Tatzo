@@ -1,5 +1,6 @@
 import logging
 
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout as auth_logout
@@ -31,6 +32,7 @@ from .models import (
     ChatAttachment,
 )
 
+from datetime import timedelta
 
 from posts.forms import PostForm, PostMediaUploadForm
 from .forms import ProfileForm, VerificationForm, UserEditForm, ManualVerificationForm, PortfolioWorkForm, PortfolioAlbumForm, UserReportForm
@@ -339,11 +341,63 @@ def delete_post(request, post_id):
 
 logger = logging.getLogger(__name__)
 
+def delete_expired_unverified_duplicate_users(username="", email=""):
+    username = (username or "").strip()
+    email = (email or "").strip().lower()
+
+    duplicate_filter = Q()
+
+    if username:
+        duplicate_filter |= Q(username__iexact=username)
+
+    if email:
+        duplicate_filter |= Q(email__iexact=email)
+
+    if not duplicate_filter:
+        return 0
+
+    expiration_delay = timedelta(hours=1)
+    cutoff = timezone.now() - expiration_delay
+
+    users_to_delete = (
+        User.objects
+        .filter(
+            duplicate_filter,
+            is_active=False,
+            is_staff=False,
+            is_superuser=False,
+            date_joined__lt=cutoff,
+        )
+        .filter(
+            Q(profile__is_email_verified=False) |
+            Q(profile__isnull=True)
+        )
+    )
+
+    deleted_count, _ = users_to_delete.delete()
+
+    if deleted_count:
+        logger.warning(
+            "Deleted %s expired unverified duplicate user(s) for username=%s email=%s",
+            deleted_count,
+            username,
+            email,
+        )
+
+    return deleted_count
+
 
 def signup(request):
     show_verification_modal = False
 
     if request.method == "POST":
+        delete_expired_unverified_duplicate_users(
+            username=request.POST.get("username"),
+            email=request.POST.get("email"),
+        )
+
+        user_form = CustomUserCreationForm(request.POST)
+
         user_form = CustomUserCreationForm(request.POST)
 
         if user_form.is_valid():
@@ -668,6 +722,10 @@ def profile_view(request, username):
         User.objects.select_related("profile"),
         username=username
     )
+    
+    if not user_obj.is_active or not user_obj.profile.is_email_verified:
+        if not (request.user.is_authenticated and request.user.is_staff):
+            raise Http404
 
     posts = (
         Post.objects
@@ -1300,7 +1358,12 @@ def chats_list(request):
 @login_required
 def start_chat(request, username):
     target_user = get_object_or_404(
-        User.objects.select_related("profile"),
+        User.objects
+        .select_related("profile")
+        .filter(
+            is_active=True,
+            profile__is_email_verified=True,
+        ),
         username=username,
     )
 
@@ -1665,6 +1728,10 @@ def search_page(request):
     users = (
         User.objects
         .select_related("profile")
+        .filter(
+            is_active=True,
+            profile__is_email_verified=True,
+        )
         .exclude(id=request.user.id)
         .order_by("username")
     )
