@@ -6849,64 +6849,6 @@ a.more-admin-link .more-admin-subtitle {
     height: 32px !important;
   }
 
-  .bubble-tail.left {
-    left: 33px !important;
-  }
-
-  .bubble-tail.right {
-    right: 33px !important;
-  }
-
-  .feed .post .message-bubble {
-    padding: 12px !important;
-    border-radius: 20px !important;
-  }
-
-  /* ---------- Mobile bubble tail FIX ---------- */
-
-  .feed .post .bubble-tail {
-    display: none !important;
-  }
-
-  .feed .post .message-bubble {
-    position: relative !important;
-    overflow: visible !important;
-  }
-
-  /* хвостик для чужого сообщения */
-  .feed .post.other-user .message-bubble::before {
-    content: "";
-    position: absolute;
-    top: 18px;
-    left: -12px;
-    width: 18px;
-    height: 22px;
-
-    background:
-      radial-gradient(circle at top right, rgba(4, 197, 191, 0.12), transparent 36%),
-      rgba(0, 31, 38, 0.95);
-
-    clip-path: polygon(100% 0, 100% 100%, 0 50%);
-    box-shadow: -1px 0 0 rgba(4, 197, 191, 0.32);
-  }
-
-  /* хвостик для своего сообщения */
-  .feed .post.current-user .message-bubble::before {
-    content: "";
-    position: absolute;
-    top: 18px;
-    right: -12px;
-    width: 18px;
-    height: 22px;
-
-    background:
-      radial-gradient(circle at top right, rgba(4, 197, 191, 0.12), transparent 36%),
-      rgba(0, 31, 38, 0.95);
-
-    clip-path: polygon(0 0, 100% 50%, 0 100%);
-    box-shadow: 1px 0 0 rgba(4, 197, 191, 0.32);
-  }
-
   .feed .post .username,
   .feed .post .post-username-link {
     font-size: 15px;
@@ -6918,11 +6860,11 @@ a.more-admin-link .more-admin-subtitle {
 }
 
 /* =========================
-   MOBILE CHAT-LIKE POST TAIL — REAL BUBBLE
+   MOBILE POST BUBBLE TAIL — CURVED CHAT STYLE
 ========================= */
 
 @media (max-width: 900px) {
-  /* Полностью убираем старый svg / старые хвостики */
+  /* Убиваем старый SVG-хвост */
   .feed .post .bubble-tail,
   .feed .post .bubble-tail.left,
   .feed .post .bubble-tail.right {
@@ -6933,112 +6875,130 @@ a.more-admin-link .more-admin-subtitle {
   }
 
   .feed .post .message-bubble {
-    --bubble-bg:
-      radial-gradient(circle at top right, rgba(4, 197, 191, 0.12), transparent 38%),
-      rgba(0, 31, 38, 0.96);
+    --bubble-solid: rgba(0, 31, 38, 0.96);
     --bubble-border: rgba(4, 197, 191, 0.34);
+    --page-bg: #000d18;
 
     position: relative !important;
     overflow: visible !important;
-    isolation: isolate;
+    isolation: auto !important;
 
-    background: var(--bubble-bg) !important;
-    border: 1px solid var(--bubble-border) !important;
     border-radius: 24px !important;
+    border: 1px solid var(--bubble-border) !important;
+
+    background:
+      radial-gradient(circle at top right, rgba(4, 197, 191, 0.12), transparent 38%),
+      var(--bubble-solid) !important;
   }
 
-  /* Контент выше хвостика */
   .feed .post .message-bubble > * {
     position: relative;
-    z-index: 3;
+    z-index: 2;
   }
 
-  /* Не обнуляем углы сверху */
+  /* Не режем верхний угол — хвост будет вытекать из него */
   .feed .post.other-user .message-bubble {
-    border-top-left-radius: 24px !important;
+    border-top-left-radius: 22px !important;
   }
 
   .feed .post.current-user .message-bubble {
-    border-top-right-radius: 24px !important;
+    border-top-right-radius: 22px !important;
   }
 
-  /* Сбрасываем старые before/after */
+  /* Сброс всех старых псевдо-хвостов */
   .feed .post .message-bubble::before,
   .feed .post .message-bubble::after {
     content: "";
     position: absolute;
-    z-index: 1;
     pointer-events: none;
   }
 
   /* =========================
-     ЧУЖОЙ ПОСТ — хвост слева
+     LEFT TAIL — как у чата
   ========================= */
 
-  /* сам хвост */
   .feed .post.other-user .message-bubble::before {
-    top: 18px;
-    left: -8px;
+    z-index: 0;
 
-    width: 18px;
-    height: 18px;
+    top: -1px;
+    left: -10px;
 
-    background: var(--bubble-bg);
+    width: 22px;
+    height: 24px;
+
+    background: var(--bubble-solid);
+    border-top: 1px solid var(--bubble-border);
     border-left: 1px solid var(--bubble-border);
-    border-bottom: 1px solid var(--bubble-border);
-    border-bottom-left-radius: 4px;
 
-    transform: rotate(45deg);
+    border-top-left-radius: 18px;
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 20px;
+
+    transform: skewX(-18deg);
   }
 
-  /* мостик между bubble и хвостом — чтобы не было шва */
+  /* вырез фона, который делает хвостик плавным, а не треугольным */
   .feed .post.other-user .message-bubble::after {
-    top: 10px;
-    left: 0;
+    z-index: 1;
 
-    width: 18px;
-    height: 30px;
+    top: -2px;
+    left: -23px;
 
-    background: var(--bubble-bg);
-    border-top-left-radius: 16px;
-    border-bottom-left-radius: 10px;
+    width: 22px;
+    height: 27px;
+
+    background: var(--page-bg);
+
+    border-top-right-radius: 18px;
+    border-bottom-right-radius: 18px;
   }
 
   /* =========================
-     СВОЙ ПОСТ — хвост справа
+     RIGHT TAIL — для своих постов
   ========================= */
 
-  /* сам хвост */
   .feed .post.current-user .message-bubble::before {
-    top: 18px;
-    right: -8px;
+    z-index: 0;
 
-    width: 18px;
-    height: 18px;
+    top: -1px;
+    right: -10px;
 
-    background: var(--bubble-bg);
-    border-right: 1px solid var(--bubble-border);
+    width: 22px;
+    height: 24px;
+
+    background: var(--bubble-solid);
     border-top: 1px solid var(--bubble-border);
-    border-top-right-radius: 4px;
+    border-right: 1px solid var(--bubble-border);
 
-    transform: rotate(45deg);
+    border-top-right-radius: 18px;
+    border-bottom-right-radius: 14px;
+    border-bottom-left-radius: 20px;
+
+    transform: skewX(18deg);
   }
 
-  /* мостик */
   .feed .post.current-user .message-bubble::after {
-    top: 10px;
-    right: 0;
+    z-index: 1;
 
-    width: 18px;
-    height: 30px;
+    top: -2px;
+    right: -23px;
 
-    background: var(--bubble-bg);
-    border-top-right-radius: 16px;
-    border-bottom-right-radius: 10px;
+    width: 22px;
+    height: 27px;
+
+    background: var(--page-bg);
+
+    border-top-left-radius: 18px;
+    border-bottom-left-radius: 18px;
   }
 
-  /* Чтобы хвостик не обрезался контейнером */
   .feed .post {
     overflow: visible !important;
+  }
+
+  .post-media-shell,
+  .post-media,
+  .post-media-renderer {
+    overflow: hidden !important;
   }
 }
