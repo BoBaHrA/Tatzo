@@ -443,18 +443,6 @@ input[type="file"] { display: none; }
   gap: 24px;
 }
 
-/* Tails */
-.bubble-tail {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  top: 20px;
-  z-index: 2;
-}
-
-.bubble-tail.left { left: -18px; transform: scaleY(-1); top: 0; } 
-.bubble-tail.right { right: -20px; transform: scale(-1, -1); top: 0; } /* цвета хвостиков через CSS, не внутри svg */ 
-.bubble-tail path { fill: #04c5bf; }
 .feed .post.current-user .bubble-tail path { fill: #04c5bf; }
 
 .post-actions {
@@ -6682,11 +6670,11 @@ a.more-admin-link .more-admin-subtitle {
   }
 
   .feed .post.other-user .message-bubble {
-    border-top-left-radius: 0 !important;
+    border-top-left-radius: 18px !important;
   }
 
   .feed .post.current-user .message-bubble {
-    border-top-right-radius: 0 !important;
+    border-top-right-radius: 18px !important;
   }
 
   .feed .post .post-header {
@@ -6872,6 +6860,51 @@ a.more-admin-link .more-admin-subtitle {
   .feed .post .message-bubble {
     padding: 12px !important;
     border-radius: 20px !important;
+  }
+
+  /* ---------- Mobile bubble tail FIX ---------- */
+
+  .feed .post .bubble-tail {
+    display: none !important;
+  }
+
+  .feed .post .message-bubble {
+    position: relative !important;
+    overflow: visible !important;
+  }
+
+  /* хвостик для чужого сообщения */
+  .feed .post.other-user .message-bubble::before {
+    content: "";
+    position: absolute;
+    top: 18px;
+    left: -12px;
+    width: 18px;
+    height: 22px;
+
+    background:
+      radial-gradient(circle at top right, rgba(4, 197, 191, 0.12), transparent 36%),
+      rgba(0, 31, 38, 0.95);
+
+    clip-path: polygon(100% 0, 100% 100%, 0 50%);
+    box-shadow: -1px 0 0 rgba(4, 197, 191, 0.32);
+  }
+
+  /* хвостик для своего сообщения */
+  .feed .post.current-user .message-bubble::before {
+    content: "";
+    position: absolute;
+    top: 18px;
+    right: -12px;
+    width: 18px;
+    height: 22px;
+
+    background:
+      radial-gradient(circle at top right, rgba(4, 197, 191, 0.12), transparent 36%),
+      rgba(0, 31, 38, 0.95);
+
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    box-shadow: 1px 0 0 rgba(4, 197, 191, 0.32);
   }
 
   .feed .post .username,
