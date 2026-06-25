@@ -5826,3 +5826,37 @@ a.more-admin-link .more-admin-subtitle {
     font-size: 10.5px !important;
   }
 }
+
+/* =========================
+   COMMENT REPLIES GROUP FIX
+========================= */
+
+/* Убираем линию снизу у самого комментария */
+.comment-item {
+  border-bottom: none !important;
+  padding-bottom: 12px;
+}
+
+/* Линию ставим только перед следующим отдельным комментарием */
+.comment-item + .comment-item {
+  border-top: 1px solid rgba(4, 197, 191, 0.08);
+  padding-top: 14px;
+}
+
+/* Если между комментариями есть блок ответов, линия должна быть после ответов */
+.comment-replies + .comment-item {
+  border-top: 1px solid rgba(4, 197, 191, 0.08);
+  padding-top: 14px;
+}
+
+/* Ответы визуально остаются внутри группы родительского коммента */
+.comment-replies {
+  margin-top: 8px !important;
+  margin-bottom: 14px;
+  padding-bottom: 2px;
+}
+
+/* Кнопка "Показать ответ" тоже относится к группе коммента */
+.comment-toggle-replies {
+  margin-bottom: 8px;
+}
