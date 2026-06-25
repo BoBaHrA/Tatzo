@@ -6378,3 +6378,508 @@ a.more-admin-link .more-admin-subtitle {
     font-size: 9px;
   }
 }
+
+/* =========================
+   MOBILE HOME FEED FIX — COMPOSER + POSTS
+========================= */
+
+@media (max-width: 900px) {
+  /* ---------- Mobile feed container ---------- */
+
+  .main-content {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .feed,
+  #feed {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 14px 0 0 !important;
+    gap: 18px !important;
+    box-sizing: border-box;
+  }
+
+  /* ---------- Mobile create post composer ---------- */
+
+  .create-post {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 12px 0 18px !important;
+
+    padding: 0 !important;
+    box-sizing: border-box;
+
+    border-radius: 24px !important;
+    border: 1px solid rgba(4, 197, 191, 0.18);
+
+    background:
+      radial-gradient(circle at top right, rgba(4, 197, 191, 0.12), transparent 34%),
+      rgba(0, 46, 48, 0.72) !important;
+
+    box-shadow:
+      0 16px 40px rgba(0, 0, 0, 0.24),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.015);
+
+    overflow: hidden !important;
+    max-height: 58px !important;
+  }
+
+  .create-post.expanded {
+    max-height: min(70dvh, 620px) !important;
+    overflow-y: auto !important;
+    padding: 12px !important;
+  }
+
+  .post-create-header {
+    min-height: 58px !important;
+    height: 58px !important;
+
+    padding: 0 12px !important;
+    box-sizing: border-box;
+
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+
+    border-radius: 999px;
+  }
+
+  .create-post.expanded .post-create-header {
+    height: auto !important;
+    min-height: 50px !important;
+    padding: 0 !important;
+    margin-bottom: 10px;
+  }
+
+  .textarea-wrapper {
+    min-width: 0;
+  }
+
+  #create-post textarea,
+  .create-post textarea,
+  #post-textarea {
+    width: 100% !important;
+    min-width: 0 !important;
+
+    font-size: 15px !important;
+    line-height: 1.35 !important;
+
+    color: #dffcff !important;
+
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .create-post:not(.expanded) #post-textarea {
+    height: 22px !important;
+    line-height: 22px !important;
+  }
+
+  .file-icon {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+
+    border-radius: 50% !important;
+    border: 1px solid rgba(4, 197, 191, 0.45);
+    background: rgba(0, 13, 24, 0.32);
+  }
+
+  .file-icon img,
+  .file-icon .plus-icon {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  /* Preview inside composer */
+  #file-preview {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+
+    margin: 8px 0 12px !important;
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  #file-preview .preview-item {
+    min-width: 0 !important;
+  }
+
+  #file-preview[data-mode="carousel"] .carousel-main {
+    height: clamp(190px, 58vw, 280px) !important;
+  }
+
+  #file-preview[data-mode="grid"] {
+    grid-auto-rows: clamp(130px, 42vw, 210px) !important;
+  }
+
+  #file-preview.l1 {
+    grid-auto-rows: clamp(180px, 58vw, 280px) !important;
+  }
+
+  .preview-toolbar {
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .preview-toolbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Options must never create horizontal overflow */
+  .post-options {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+
+    overflow: visible !important;
+  }
+
+  .create-post.expanded .post-options {
+    max-height: none !important;
+    opacity: 1 !important;
+    margin-top: 8px !important;
+  }
+
+  .post-options > div {
+    width: 100%;
+    max-width: 100%;
+
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .post-options button,
+  .post-options .custom-checkbox {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    box-sizing: border-box;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+
+    overflow: hidden;
+  }
+
+  .post-options button {
+    padding: 11px 13px !important;
+    border-radius: 15px !important;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .post-options .custom-checkbox {
+    min-height: 44px;
+    padding-left: 38px;
+    color: rgba(234, 255, 255, 0.88);
+    font-size: 14px;
+  }
+
+  .post-submit {
+    width: 100%;
+    justify-content: stretch !important;
+    margin-top: 12px !important;
+  }
+
+  .post-submit .post-btn,
+  #post-btn {
+    width: 100%;
+    justify-content: center;
+    border-radius: 16px;
+    padding: 13px 16px;
+  }
+
+  /* ---------- Mobile post card ---------- */
+
+  .feed .post {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 0 0 46px !important;
+    box-sizing: border-box;
+
+    border-radius: 0 !important;
+    background: transparent !important;
+
+    overflow: visible;
+  }
+
+  .feed .post.current-user {
+    padding-left: 0 !important;
+    padding-right: 46px !important;
+  }
+
+  .feed .post .avatar {
+    left: 0 !important;
+    top: 12px !important;
+
+    width: 36px !important;
+    height: 36px !important;
+
+    border: 1px solid rgba(4, 197, 191, 0.65);
+    box-shadow: 0 0 18px rgba(4, 197, 191, 0.14);
+  }
+
+  .feed .post.current-user .avatar {
+    left: auto !important;
+    right: 0 !important;
+  }
+
+  .bubble-tail {
+    width: 17px !important;
+    height: 17px !important;
+    top: 0 !important;
+  }
+
+  .bubble-tail.left {
+    left: 37px !important;
+  }
+
+  .bubble-tail.right {
+    right: 37px !important;
+  }
+
+  .bubble-tail path,
+  .feed .post.current-user .bubble-tail path {
+    fill: rgba(0, 38, 44, 0.96) !important;
+  }
+
+  .feed .post .message-bubble {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+    padding: 13px 13px 12px !important;
+    box-sizing: border-box;
+
+    border-radius: 22px !important;
+    border: 1px solid rgba(4, 197, 191, 0.32);
+
+    background:
+      radial-gradient(circle at top right, rgba(4, 197, 191, 0.12), transparent 36%),
+      rgba(0, 31, 38, 0.95) !important;
+
+    color: #eaffff !important;
+
+    box-shadow:
+      0 14px 38px rgba(0, 0, 0, 0.28),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.015) !important;
+
+    overflow: hidden;
+  }
+
+  .feed .post.other-user .message-bubble {
+    border-top-left-radius: 0 !important;
+  }
+
+  .feed .post.current-user .message-bubble {
+    border-top-right-radius: 0 !important;
+  }
+
+  .feed .post .post-header {
+    width: 100%;
+    max-width: 100%;
+
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-right: 0 !important;
+  }
+
+  .post-header-main {
+    min-width: 0;
+  }
+
+  .feed .post .username,
+  .feed .post .post-username-link {
+    max-width: 100%;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    color: #ee0c6f !important;
+    font-size: 16px;
+    font-weight: 900;
+  }
+
+  .post-meta-wrap {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .post-date {
+    color: #04c5bf;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .post-menu-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    font-size: 18px;
+  }
+
+  .post-media-shell,
+  .post-media,
+  .post-media-renderer,
+  .post-media.media-layout {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .post-media {
+    margin: 8px 0 8px !important;
+    border-radius: 17px !important;
+  }
+
+  .post-media.media-layout[data-mode="carousel"] .carousel-main {
+    height: clamp(190px, 58vw, 280px) !important;
+    border-radius: 17px !important;
+  }
+
+  .post-media.media-layout[data-mode="grid"] {
+    grid-auto-rows: clamp(140px, 42vw, 230px) !important;
+  }
+
+  .post-media.media-layout.l1 {
+    grid-auto-rows: clamp(190px, 58vw, 280px) !important;
+  }
+
+  .post-media img,
+  .post-media video,
+  .post-media.media-layout .preview-item > img,
+  .post-media.media-layout .preview-item > video {
+    max-width: 100% !important;
+    object-fit: cover;
+  }
+
+  .feed .post .content {
+    color: rgba(234, 255, 255, 0.9) !important;
+    font-size: 14px;
+    line-height: 1.45;
+
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* Actions already are outside bubble in template, just align them on mobile */
+  .post-actions.under-bubble {
+    width: auto !important;
+
+    margin: 8px 0 0 0 !important;
+    padding: 0 8px 0 10px !important;
+    box-sizing: border-box;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    gap: 10px !important;
+  }
+
+  .feed .post:not(.current-user) .post-actions.under-bubble {
+    margin-left: 0 !important;
+  }
+
+  .feed .post.current-user .post-actions.under-bubble {
+    margin-right: 0 !important;
+  }
+
+  .post-actions-left,
+  .post-actions-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+    min-width: 0;
+  }
+
+  .post-actions .action-btn {
+    width: 30px !important;
+    height: 30px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 0 !important;
+  }
+
+  .post-actions .action-btn img,
+  .like-btn .like-icon,
+  .bookmark-btn .bookmark-icon {
+    width: 23px !important;
+    height: 23px !important;
+  }
+
+  .action-count,
+  .like-count,
+  .comment-count {
+    min-width: 12px !important;
+    height: 16px !important;
+
+    color: #7fcfd0 !important;
+    font-size: 12px !important;
+    line-height: 16px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .feed .post {
+    padding-left: 42px !important;
+  }
+
+  .feed .post.current-user {
+    padding-right: 42px !important;
+  }
+
+  .feed .post .avatar {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .bubble-tail.left {
+    left: 33px !important;
+  }
+
+  .bubble-tail.right {
+    right: 33px !important;
+  }
+
+  .feed .post .message-bubble {
+    padding: 12px !important;
+    border-radius: 20px !important;
+  }
+
+  .feed .post .username,
+  .feed .post .post-username-link {
+    font-size: 15px;
+  }
+
+  .post-date {
+    font-size: 11px;
+  }
+}
