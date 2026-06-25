@@ -6937,3 +6937,48 @@ a.more-admin-link .more-admin-subtitle {
     right: 33px !important;
   }
 }
+
+/* =========================
+   MOBILE POST CARD — NO TAIL FINAL
+========================= */
+
+@media (max-width: 900px) {
+  .feed .post .bubble-tail,
+  .feed .post .bubble-tail-left,
+  .feed .post .bubble-tail-right,
+  .feed .post .bubble-tail.left,
+  .feed .post .bubble-tail.right {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  .feed .post .message-bubble::before,
+  .feed .post .message-bubble::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  .feed .post .message-bubble {
+    overflow: hidden !important;
+    border-radius: 24px !important;
+    border: 1px solid rgba(4, 197, 191, 0.34) !important;
+
+    background:
+      radial-gradient(circle at top right, rgba(4, 197, 191, 0.12), transparent 38%),
+      rgba(0, 31, 38, 0.96) !important;
+  }
+
+  .feed .post.other-user .message-bubble {
+    border-top-left-radius: 24px !important;
+  }
+
+  .feed .post.current-user .message-bubble {
+    border-top-right-radius: 24px !important;
+  }
+
+  .feed .post .avatar {
+    top: 14px !important;
+  }
+}
