@@ -172,35 +172,286 @@
   </ul>
 </div>
 
+<header class="mobile-app-topbar">
+  <div class="mobile-topbar-left">
+    {% if request.user.is_authenticated %}
+      <a
+        href="{% url 'profile' request.user.username %}"
+        class="mobile-topbar-avatar"
+        aria-label="{% trans 'My Profile' %}"
+      >
+        {% if request.user.profile.profile_image %}
+          <img src="{{ request.user.profile.profile_image.url }}" alt="{% trans 'My Profile' %}">
+        {% else %}
+          <span>{{ request.user.username|first|upper }}</span>
+        {% endif %}
+      </a>
+    {% else %}
+      <a href="{% url 'login' %}" class="mobile-topbar-avatar" aria-label="{% trans 'Login' %}">
+        <span>?</span>
+      </a>
+    {% endif %}
+
+    <div class="mobile-topbar-title">
+      {% if request.resolver_match.url_name == "home" %}
+        {% trans "Home" %}
+      {% elif request.resolver_match.url_name == "search_page" %}
+        {% trans "Search" %}
+      {% elif request.resolver_match.url_name == "chats_list" or request.resolver_match.url_name == "chat_thread" %}
+        {% trans "Chats" %}
+      {% elif request.resolver_match.url_name == "coming_soon" and request.resolver_match.kwargs.feature == "maps" %}
+        {% trans "Maps" %}
+      {% elif request.resolver_match.url_name == "coming_soon" and request.resolver_match.kwargs.feature == "calendar" %}
+        {% trans "Calendar" %}
+      {% else %}
+        Tatzo
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="mobile-topbar-actions">
+    <button
+      type="button"
+      class="mobile-topbar-icon mobile-recommendations-trigger"
+      id="mobile-recommendations-trigger"
+      data-fallback-url="{% url 'search_page' %}?type=artists"
+      aria-label="{% trans 'Recommendations' %}"
+      title="{% trans 'Recommendations' %}"
+    >
+      ✦
+    </button>
+
+    <a
+      href="{% url 'coming_soon' 'notifications' %}"
+      class="mobile-topbar-icon"
+      aria-label="{% trans 'Notifications' %}"
+      title="{% trans 'Notifications' %}"
+    >
+      <img src="{% static 'icons/notifications.svg' %}" alt="{% trans 'Notifications' %}">
+    </a>
+
+    <button
+      type="button"
+      class="mobile-topbar-icon"
+      id="mobile-menu-trigger"
+      aria-label="{% trans 'Menu' %}"
+      title="{% trans 'Menu' %}"
+    >
+      ☰
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-bottom-nav" aria-label="{% trans 'Mobile navigation' %}">
+  <a
+    href="{% url 'home' %}"
+    class="mobile-bottom-nav-item {% if request.path == '/' %}active{% endif %}"
+  >
+    <img src="{% static 'icons/house.svg' %}" alt="{% trans 'Home' %}">
+    <span>{% trans "Home" %}</span>
+  </a>
+
+  <a
+    href="{% url 'search_page' %}"
+    class="mobile-bottom-nav-item {% if request.resolver_match.url_name == 'search_page' %}active{% endif %}"
+  >
+    <img src="{% static 'icons/loupe.svg' %}" alt="{% trans 'Search' %}">
+    <span>{% trans "Search" %}</span>
+  </a>
+
+  <a
+    href="{% url 'coming_soon' 'maps' %}"
+    class="mobile-bottom-nav-item {% if request.resolver_match.url_name == 'coming_soon' and request.resolver_match.kwargs.feature == 'maps' %}active{% endif %}"
+  >
+    <img src="{% static 'icons/maps.svg' %}" alt="{% trans 'Maps' %}">
+    <span>{% trans "Maps" %}</span>
+  </a>
+
+  <a
+    href="{% url 'chats_list' %}"
+    class="mobile-bottom-nav-item {% if request.resolver_match.url_name == 'chats_list' or request.resolver_match.url_name == 'chat_thread' %}active{% endif %}"
+  >
+    <img src="{% static 'icons/chats.svg' %}" alt="{% trans 'Chats' %}">
+    <span>{% trans "Chats" %}</span>
+
+    {% if unread_chats_count and unread_chats_count > 0 %}
+      <span class="mobile-bottom-badge">{{ unread_chats_count }}</span>
+    {% endif %}
+  </a>
+
+  <a
+    href="{% url 'coming_soon' 'calendar' %}"
+    class="mobile-bottom-nav-item {% if request.resolver_match.url_name == 'coming_soon' and request.resolver_match.kwargs.feature == 'calendar' %}active{% endif %}"
+  >
+    <img src="{% static 'icons/calendar.svg' %}" alt="{% trans 'Calendar' %}">
+    <span>{% trans "Calendar" %}</span>
+  </a>
+</nav>
+
+<div class="mobile-menu-panel" id="mobile-menu-panel" aria-hidden="true">
+  <div class="mobile-menu-panel-head">
+    <strong>{% trans "Menu" %}</strong>
+    <button type="button" id="mobile-menu-close" aria-label="{% trans 'Close' %}">×</button>
+  </div>
+
+  <div class="mobile-menu-grid">
+    <a href="{% url 'posts:bookmarks' %}">
+      <img src="{% static 'icons/bookmark.svg' %}" alt="{% trans 'Bookmarks' %}">
+      <span>{% trans "Bookmarks" %}</span>
+    </a>
+
+    <a href="{% url 'coming_soon' 'contests' %}">
+      <img src="{% static 'icons/trophy.svg' %}" alt="{% trans 'Contests' %}">
+      <span>{% trans "Contests" %}</span>
+    </a>
+
+    <a href="{% url 'coming_soon' 'clean-slate' %}">
+      <img src="{% static 'icons/sprout.svg' %}" alt="{% trans 'Clean slate' %}">
+      <span>{% trans "Clean slate" %}</span>
+    </a>
+
+    <a href="{% url 'report_problem' %}?next={{ request.get_full_path|urlencode }}">
+      <span class="mobile-menu-emoji">⚠</span>
+      <span>{% trans "Report a problem" %}</span>
+    </a>
+  </div>
+
+  <form action="{% url 'set_language' %}" method="post" class="mobile-language-form">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+    <label for="mobile-language-select">
+      {% trans "Language" %}
+    </label>
+
+    <select id="mobile-language-select" name="language" onchange="this.form.submit()">
+      {% get_current_language as CURRENT_LANGUAGE %}
+      {% get_available_languages as AVAILABLE_LANGUAGES %}
+
+      {% for code, name in AVAILABLE_LANGUAGES %}
+        <option value="{{ code }}" {% if code == CURRENT_LANGUAGE %}selected{% endif %}>
+          {{ name }}
+        </option>
+      {% endfor %}
+    </select>
+  </form>
+
+  {% if request.user.is_authenticated and request.user.is_staff %}
+    <a href="{% url 'moderation_dashboard' %}" class="mobile-admin-link">
+      <span>🛡️</span>
+      <span>{% trans "Moderation panel" %}</span>
+    </a>
+  {% endif %}
+</div>
+
+<div class="mobile-ui-backdrop" id="mobile-ui-backdrop"></div>
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const moreTrigger = document.getElementById("sidebar-more-trigger");
     const moreMenu = document.getElementById("sidebar-more-menu");
 
-    if (!moreTrigger || !moreMenu) return;
+    const mobileMenuTrigger = document.getElementById("mobile-menu-trigger");
+    const mobileMenuPanel = document.getElementById("mobile-menu-panel");
+    const mobileMenuClose = document.getElementById("mobile-menu-close");
+    const mobileBackdrop = document.getElementById("mobile-ui-backdrop");
 
-    moreTrigger.addEventListener("click", (e) => {
+    const mobileRecommendationsTrigger = document.getElementById("mobile-recommendations-trigger");
+    const suggestions = document.querySelector(".suggestions");
+
+    function closeDesktopMore() {
+      moreMenu?.classList.remove("open");
+      moreTrigger?.classList.remove("active");
+    }
+
+    function openMobileMenu() {
+      mobileMenuPanel?.classList.add("open");
+      mobileMenuPanel?.setAttribute("aria-hidden", "false");
+      mobileBackdrop?.classList.add("open");
+      document.body.classList.add("mobile-panel-open");
+    }
+
+    function closeMobileMenu() {
+      mobileMenuPanel?.classList.remove("open");
+      mobileMenuPanel?.setAttribute("aria-hidden", "true");
+      mobileBackdrop?.classList.remove("open");
+      document.body.classList.remove("mobile-panel-open");
+    }
+
+    function closeMobileSuggestions() {
+      suggestions?.classList.remove("mobile-suggestions-open");
+      mobileBackdrop?.classList.remove("open");
+      document.body.classList.remove("mobile-panel-open");
+    }
+
+    function openMobileSuggestions() {
+      if (!suggestions) {
+        const fallbackUrl = mobileRecommendationsTrigger?.dataset.fallbackUrl;
+        if (fallbackUrl) window.location.href = fallbackUrl;
+        return;
+      }
+
+      if (!suggestions.querySelector(".mobile-suggestions-close")) {
+        const closeBtn = document.createElement("button");
+        closeBtn.type = "button";
+        closeBtn.className = "mobile-suggestions-close";
+        closeBtn.textContent = "×";
+        closeBtn.setAttribute("aria-label", "Close");
+
+        closeBtn.addEventListener("click", closeMobileSuggestions);
+        suggestions.prepend(closeBtn);
+      }
+
+      suggestions.classList.add("mobile-suggestions-open");
+      mobileBackdrop?.classList.add("open");
+      document.body.classList.add("mobile-panel-open");
+    }
+
+    moreTrigger?.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
 
-      moreMenu.classList.toggle("open");
+      moreMenu?.classList.toggle("open");
       moreTrigger.classList.toggle("active");
+    });
+
+    mobileMenuTrigger?.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeMobileSuggestions();
+      openMobileMenu();
+    });
+
+    mobileMenuClose?.addEventListener("click", closeMobileMenu);
+
+    mobileRecommendationsTrigger?.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeMobileMenu();
+      openMobileSuggestions();
+    });
+
+    mobileBackdrop?.addEventListener("click", () => {
+      closeMobileMenu();
+      closeMobileSuggestions();
     });
 
     document.addEventListener("click", (e) => {
       if (
+        moreMenu &&
+        moreTrigger &&
         !e.target.closest("#sidebar-more-menu") &&
         !e.target.closest("#sidebar-more-trigger")
       ) {
-        moreMenu.classList.remove("open");
-        moreTrigger.classList.remove("active");
+        closeDesktopMore();
       }
     });
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
-        moreMenu.classList.remove("open");
-        moreTrigger.classList.remove("active");
+        closeDesktopMore();
+        closeMobileMenu();
+        closeMobileSuggestions();
       }
     });
   });
