@@ -94,57 +94,112 @@
 
     if (!input || !preview) return;
 
-    input.addEventListener("change", () => {
-      preview.innerHTML = "";
+    let selectedPortfolioFiles = [];
 
-      const files = Array.from(input.files || []);
+    function getFileKey(file) {
+      return `${file.name}_${file.size}_${file.lastModified}`;
+    }
 
-      files.forEach((file) => {
+    function addPortfolioFiles(fileList) {
+      const incomingFiles = Array.from(fileList || []);
+
+      incomingFiles.forEach((file) => {
         if (!file.type.startsWith("image/")) return;
 
+        const alreadyExists = selectedPortfolioFiles.some((existingFile) => (
+          getFileKey(existingFile) === getFileKey(file)
+        ));
+
+        if (!alreadyExists) {
+          selectedPortfolioFiles.push(file);
+        }
+      });
+    }
+
+    function syncInputFiles() {
+      const dataTransfer = new DataTransfer();
+
+      selectedPortfolioFiles.forEach((file) => {
+        dataTransfer.items.add(file);
+      });
+
+      input.files = dataTransfer.files;
+    }
+
+    function openPortfolioPreview(url, title = "") {
+      const modal = document.createElement("div");
+      modal.className = "portfolio-lightbox open";
+      modal.innerHTML = `
+        <button type="button" class="portfolio-lightbox-close">×</button>
+        <img src="${url}" alt="${title || previewImageAlt}">
+      `;
+
+      document.body.appendChild(modal);
+      document.body.style.overflow = "hidden";
+
+      function close() {
+        modal.remove();
+        document.body.style.overflow = "";
+      }
+
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal || e.target.closest(".portfolio-lightbox-close")) {
+          close();
+        }
+      });
+
+      document.addEventListener("keydown", function escHandler(e) {
+        if (e.key === "Escape") {
+          close();
+          document.removeEventListener("keydown", escHandler);
+        }
+      });
+    }
+
+    function renderPortfolioPreview() {
+      preview.innerHTML = "";
+
+      selectedPortfolioFiles.forEach((file, index) => {
         const url = URL.createObjectURL(file);
 
-        const item = document.createElement("button");
-        item.type = "button";
+        const item = document.createElement("div");
         item.className = "portfolio-upload-preview-item";
+
+        const imgButton = document.createElement("button");
+        imgButton.type = "button";
+        imgButton.className = "portfolio-upload-preview-image";
 
         const img = document.createElement("img");
         img.src = url;
         img.alt = file.name || previewImageAlt;
 
-        item.appendChild(img);
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "portfolio-upload-remove";
+        removeBtn.textContent = "×";
+        removeBtn.setAttribute("aria-label", "Remove image");
+
+        imgButton.appendChild(img);
+        item.appendChild(imgButton);
+        item.appendChild(removeBtn);
         preview.appendChild(item);
 
-        item.addEventListener("click", () => {
-          const modal = document.createElement("div");
-          modal.className = "portfolio-lightbox open";
-          modal.innerHTML = `
-            <button type="button" class="portfolio-lightbox-close">×</button>
-            <img src="${url}" alt="${previewImageAlt}">
-          `;
+        imgButton.addEventListener("click", () => {
+          openPortfolioPreview(url, file.name);
+        });
 
-          document.body.appendChild(modal);
-          document.body.style.overflow = "hidden";
-
-          function close() {
-            modal.remove();
-            document.body.style.overflow = "";
-          }
-
-          modal.addEventListener("click", (e) => {
-            if (e.target === modal || e.target.closest(".portfolio-lightbox-close")) {
-              close();
-            }
-          });
-
-          document.addEventListener("keydown", function escHandler(e) {
-            if (e.key === "Escape") {
-              close();
-              document.removeEventListener("keydown", escHandler);
-            }
-          });
+        removeBtn.addEventListener("click", () => {
+          selectedPortfolioFiles.splice(index, 1);
+          syncInputFiles();
+          renderPortfolioPreview();
         });
       });
+    }
+
+    input.addEventListener("change", () => {
+      addPortfolioFiles(input.files);
+      syncInputFiles();
+      renderPortfolioPreview();
     });
   });
 </script>

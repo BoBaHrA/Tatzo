@@ -355,21 +355,55 @@
     function renderSelectedFiles(files, box, removeClass) {
       if (!box) return;
 
+      box.innerHTML = "";
+
       if (!files.length) {
-        box.innerHTML = "";
         box.classList.remove("visible");
         return;
       }
 
       box.classList.add("visible");
-      box.innerHTML = files
-        .map((file, index) => `
-          <span>
-            📎 ${file.name}
-            <button type="button" class="${removeClass}" data-index="${index}">×</button>
-          </span>
-        `)
-        .join("");
+
+      files.forEach((file, index) => {
+        const item = document.createElement("div");
+        item.className = "chat-selected-file-preview";
+
+        const media = document.createElement("div");
+        media.className = "chat-selected-file-media";
+
+        if (file.type.startsWith("image/")) {
+          const img = document.createElement("img");
+          img.src = URL.createObjectURL(file);
+          img.alt = file.name;
+          media.appendChild(img);
+        } else if (file.type.startsWith("video/")) {
+          const video = document.createElement("video");
+          video.src = URL.createObjectURL(file);
+          video.muted = true;
+          video.playsInline = true;
+          media.appendChild(video);
+        } else {
+          media.classList.add("is-file");
+          media.textContent = "📎";
+        }
+
+        const name = document.createElement("span");
+        name.className = "chat-selected-file-name";
+        name.textContent = file.name;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = removeClass;
+        removeBtn.dataset.index = index;
+        removeBtn.textContent = "×";
+        removeBtn.setAttribute("aria-label", "Remove file");
+
+        item.appendChild(media);
+        item.appendChild(name);
+        item.appendChild(removeBtn);
+
+        box.appendChild(item);
+      });
     }
 
     function updateSelectedFiles() {
