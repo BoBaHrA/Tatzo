@@ -21,12 +21,12 @@
   </div>
 
   {% if post.user != request.user %}
-    <svg class="bubble-tail left" viewBox="0 0 20 20" aria-hidden="true">
-      <path d="M0,20 Q30,5 20,-30 L20,20 Z"></path>
+    <svg class="bubble-tail bubble-tail-left" viewBox="0 0 32 26" aria-hidden="true" preserveAspectRatio="none">
+      <path d="M32 1 C22 1 17 7 13 13 C9 19 5 22 0 23 C9 27 23 25 32 16 Z"></path>
     </svg>
   {% else %}
-    <svg class="bubble-tail right" viewBox="0 0 20 20" aria-hidden="true">
-      <path d="M0,20 Q30,5 20,-30 L20,20 Z"></path>
+    <svg class="bubble-tail bubble-tail-right" viewBox="0 0 32 26" aria-hidden="true" preserveAspectRatio="none">
+      <path d="M0 1 C10 1 15 7 19 13 C23 19 27 22 32 23 C23 27 9 25 0 16 Z"></path>
     </svg>
   {% endif %}
 

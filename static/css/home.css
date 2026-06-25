@@ -6860,145 +6860,80 @@ a.more-admin-link .more-admin-subtitle {
 }
 
 /* =========================
-   MOBILE POST BUBBLE TAIL — CURVED CHAT STYLE
+   MOBILE POST BUBBLE TAIL — SVG FINAL
 ========================= */
 
 @media (max-width: 900px) {
-  /* Убиваем старый SVG-хвост */
-  .feed .post .bubble-tail,
-  .feed .post .bubble-tail.left,
-  .feed .post .bubble-tail.right {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-
-  .feed .post .message-bubble {
-    --bubble-solid: rgba(0, 31, 38, 0.96);
-    --bubble-border: rgba(4, 197, 191, 0.34);
-    --page-bg: #000d18;
-
-    position: relative !important;
-    overflow: visible !important;
-    isolation: auto !important;
-
-    border-radius: 24px !important;
-    border: 1px solid var(--bubble-border) !important;
-
-    background:
-      radial-gradient(circle at top right, rgba(4, 197, 191, 0.12), transparent 38%),
-      var(--bubble-solid) !important;
-  }
-
-  .feed .post .message-bubble > * {
-    position: relative;
-    z-index: 2;
-  }
-
-  /* Не режем верхний угол — хвост будет вытекать из него */
-  .feed .post.other-user .message-bubble {
-    border-top-left-radius: 22px !important;
-  }
-
-  .feed .post.current-user .message-bubble {
-    border-top-right-radius: 22px !important;
-  }
-
-  /* Сброс всех старых псевдо-хвостов */
-  .feed .post .message-bubble::before,
-  .feed .post .message-bubble::after {
-    content: "";
-    position: absolute;
-    pointer-events: none;
-  }
-
-  /* =========================
-     LEFT TAIL — как у чата
-  ========================= */
-
-  .feed .post.other-user .message-bubble::before {
-    z-index: 0;
-
-    top: -1px;
-    left: -10px;
-
-    width: 22px;
-    height: 24px;
-
-    background: var(--bubble-solid);
-    border-top: 1px solid var(--bubble-border);
-    border-left: 1px solid var(--bubble-border);
-
-    border-top-left-radius: 18px;
-    border-bottom-left-radius: 14px;
-    border-bottom-right-radius: 20px;
-
-    transform: skewX(-18deg);
-  }
-
-  /* вырез фона, который делает хвостик плавным, а не треугольным */
-  .feed .post.other-user .message-bubble::after {
-    z-index: 1;
-
-    top: -2px;
-    left: -23px;
-
-    width: 22px;
-    height: 27px;
-
-    background: var(--page-bg);
-
-    border-top-right-radius: 18px;
-    border-bottom-right-radius: 18px;
-  }
-
-  /* =========================
-     RIGHT TAIL — для своих постов
-  ========================= */
-
-  .feed .post.current-user .message-bubble::before {
-    z-index: 0;
-
-    top: -1px;
-    right: -10px;
-
-    width: 22px;
-    height: 24px;
-
-    background: var(--bubble-solid);
-    border-top: 1px solid var(--bubble-border);
-    border-right: 1px solid var(--bubble-border);
-
-    border-top-right-radius: 18px;
-    border-bottom-right-radius: 14px;
-    border-bottom-left-radius: 20px;
-
-    transform: skewX(18deg);
-  }
-
-  .feed .post.current-user .message-bubble::after {
-    z-index: 1;
-
-    top: -2px;
-    right: -23px;
-
-    width: 22px;
-    height: 27px;
-
-    background: var(--page-bg);
-
-    border-top-left-radius: 18px;
-    border-bottom-left-radius: 18px;
-  }
-
   .feed .post {
     overflow: visible !important;
   }
 
-  .post-media-shell,
-  .post-media,
-  .post-media-renderer {
+  .feed .post .message-bubble {
+    position: relative !important;
+    z-index: 2 !important;
     overflow: hidden !important;
+
+    border-radius: 24px !important;
+    border: 1px solid rgba(4, 197, 191, 0.34) !important;
+
+    background:
+      radial-gradient(circle at top right, rgba(4, 197, 191, 0.12), transparent 38%),
+      rgba(0, 31, 38, 0.96) !important;
+  }
+
+  .feed .post.other-user .message-bubble {
+    border-top-left-radius: 24px !important;
+  }
+
+  .feed .post.current-user .message-bubble {
+    border-top-right-radius: 24px !important;
+  }
+
+  .feed .post .bubble-tail {
+    position: absolute !important;
+    display: block !important;
+
+    width: 34px !important;
+    height: 28px !important;
+
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+
+    z-index: 1 !important;
+    overflow: visible !important;
+  }
+
+  .feed .post .bubble-tail path {
+    fill: rgba(0, 31, 38, 0.96) !important;
+    stroke: rgba(4, 197, 191, 0.34) !important;
+    stroke-width: 1.1px !important;
+    stroke-linejoin: round !important;
+  }
+
+  .feed .post .bubble-tail-left {
+    top: 0px !important;
+    left: 36px !important;
+  }
+
+  .feed .post .bubble-tail-right {
+    top: 0px !important;
+    right: 36px !important;
+  }
+
+  .feed .post .message-bubble::before,
+  .feed .post .message-bubble::after {
+    content: none !important;
+    display: none !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .feed .post .bubble-tail-left {
+    left: 33px !important;
+  }
+
+  .feed .post .bubble-tail-right {
+    right: 33px !important;
   }
 }
