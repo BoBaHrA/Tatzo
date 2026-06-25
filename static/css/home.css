@@ -6916,3 +6916,103 @@ a.more-admin-link .more-admin-subtitle {
     font-size: 11px;
   }
 }
+
+/* =========================
+   MOBILE POST BUBBLE TAIL — FINAL OVERRIDE
+========================= */
+
+@media (max-width: 900px) {
+  /* Полностью убиваем старый SVG-хвостик */
+  .feed .post .bubble-tail,
+  .feed .post .bubble-tail.left,
+  .feed .post .bubble-tail.right {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  /* Карточка должна быть самостоятельной bubble */
+  .feed .post .message-bubble {
+    position: relative !important;
+    overflow: visible !important;
+
+    border-radius: 24px !important;
+    border: 1px solid rgba(4, 197, 191, 0.34) !important;
+
+    background:
+      radial-gradient(circle at top right, rgba(4, 197, 191, 0.12), transparent 38%),
+      rgba(0, 31, 38, 0.96) !important;
+  }
+
+  /* У чужого поста верхний левый угол НЕ должен быть обнулён */
+  .feed .post.other-user .message-bubble {
+    border-top-left-radius: 24px !important;
+  }
+
+  /* У своего поста верхний правый угол НЕ должен быть обнулён */
+  .feed .post.current-user .message-bubble {
+    border-top-right-radius: 24px !important;
+  }
+
+  /* На всякий случай убираем старые псевдо-хвостики */
+  .feed .post .message-bubble::before,
+  .feed .post .message-bubble::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  /* Новый хвостик: маленький ромб, который выглядит как часть bubble */
+  .feed .post.other-user .message-bubble::after {
+    content: "" !important;
+    display: block !important;
+
+    position: absolute;
+    top: 18px;
+    left: -7px;
+
+    width: 14px;
+    height: 14px;
+
+    background: rgba(0, 31, 38, 0.96);
+    border-left: 1px solid rgba(4, 197, 191, 0.34);
+    border-bottom: 1px solid rgba(4, 197, 191, 0.34);
+
+    transform: rotate(45deg);
+    border-radius: 3px;
+
+    z-index: -1;
+  }
+
+  .feed .post.current-user .message-bubble::after {
+    content: "" !important;
+    display: block !important;
+
+    position: absolute;
+    top: 18px;
+    right: -7px;
+
+    width: 14px;
+    height: 14px;
+
+    background: rgba(0, 31, 38, 0.96);
+    border-right: 1px solid rgba(4, 197, 191, 0.34);
+    border-top: 1px solid rgba(4, 197, 191, 0.34);
+
+    transform: rotate(45deg);
+    border-radius: 3px;
+
+    z-index: -1;
+  }
+
+  /* Чтобы хвостик был виден, но не ломал карточку */
+  .feed .post {
+    overflow: visible !important;
+  }
+
+  .post-media-shell,
+  .post-media,
+  .post-media-renderer {
+    overflow: hidden !important;
+  }
+}
