@@ -7520,3 +7520,32 @@ a.more-admin-link .more-admin-subtitle {
     font-weight: 900 !important;
   }
 }
+
+/* =========================
+   FIX: Bookmark icon duplicate after desktop restyle
+========================= */
+
+.feed .post .bookmark-btn .bookmark-icon {
+  width: 24px !important;
+  height: 24px !important;
+  object-fit: contain !important;
+  flex-shrink: 0 !important;
+}
+
+/* По умолчанию показываем пустую закладку */
+.feed .post .bookmark-btn:not(.bookmarked) .bookmark-icon.not-bookmarked {
+  display: block !important;
+}
+
+.feed .post .bookmark-btn:not(.bookmarked) .bookmark-icon.bookmarked {
+  display: none !important;
+}
+
+/* Когда пост сохранён — показываем только filled/bookmarked */
+.feed .post .bookmark-btn.bookmarked .bookmark-icon.not-bookmarked {
+  display: none !important;
+}
+
+.feed .post .bookmark-btn.bookmarked .bookmark-icon.bookmarked {
+  display: block !important;
+}
