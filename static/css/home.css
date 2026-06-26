@@ -6982,3 +6982,541 @@ a.more-admin-link .more-admin-subtitle {
     top: 14px !important;
   }
 }
+
+/* =========================
+   DESKTOP FEED POSTS — PREMIUM TATZO STYLE
+========================= */
+
+@media (min-width: 901px) {
+  /* ---------- Feed layout ---------- */
+
+  .feed,
+  #feed {
+    width: min(100%, 860px) !important;
+    max-width: 860px !important;
+    margin: 26px auto 0 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 34px !important;
+  }
+
+  .feed .post {
+    position: relative !important;
+
+    width: min(100%, 720px) !important;
+    max-width: 720px !important;
+
+    margin: 0 auto !important;
+    padding: 0 !important;
+
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+
+    overflow: visible !important;
+    animation: chatPostIn 0.28s ease both;
+  }
+
+  .feed .post.current-user,
+  .feed .post.other-user {
+    align-self: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  /* ---------- Avatar ---------- */
+
+  .feed .post .avatar,
+  .feed .post.current-user .avatar,
+  .feed .post.other-user .avatar {
+    position: absolute !important;
+    left: -58px !important;
+    right: auto !important;
+    top: 18px !important;
+
+    width: 42px !important;
+    height: 42px !important;
+
+    border-radius: 50% !important;
+    overflow: hidden !important;
+
+    border: 1px solid rgba(4, 197, 191, 0.62) !important;
+    background: rgba(4, 197, 191, 0.08) !important;
+
+    box-shadow:
+      0 0 0 4px rgba(0, 13, 24, 0.86),
+      0 0 22px rgba(4, 197, 191, 0.12) !important;
+  }
+
+  .feed .post .avatar img,
+  .feed .post .avatar-fallback {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: flex !important;
+  }
+
+  /* ---------- Main card ---------- */
+
+  .feed .post .message-bubble,
+  .feed .post.current-user .message-bubble,
+  .feed .post.other-user .message-bubble {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+    padding: 18px 20px 20px !important;
+    box-sizing: border-box !important;
+
+    color: #eaffff !important;
+
+    border-radius: 26px !important;
+    border: 1px solid rgba(4, 197, 191, 0.28) !important;
+
+    background:
+      radial-gradient(circle at top right, rgba(4, 197, 191, 0.13), transparent 34%),
+      radial-gradient(circle at bottom left, rgba(238, 12, 111, 0.07), transparent 38%),
+      rgba(0, 22, 32, 0.94) !important;
+
+    box-shadow:
+      0 20px 56px rgba(0, 0, 0, 0.36),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.018),
+      0 0 26px rgba(4, 197, 191, 0.045) !important;
+
+    overflow: hidden !important;
+  }
+
+  .feed .post .message-bubble:hover {
+    border-color: rgba(4, 197, 191, 0.44) !important;
+    box-shadow:
+      0 24px 64px rgba(0, 0, 0, 0.42),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.022),
+      0 0 34px rgba(4, 197, 191, 0.075) !important;
+  }
+
+  .feed .post .message-bubble::before,
+  .feed .post .message-bubble::after,
+  .feed .post .bubble-tail {
+    display: none !important;
+    content: none !important;
+  }
+
+  /* ---------- Header ---------- */
+
+  .feed .post .post-header {
+    width: 100% !important;
+
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: start !important;
+    gap: 14px !important;
+
+    margin-bottom: 14px !important;
+    padding: 0 !important;
+  }
+
+  .feed .post .post-header-main {
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+  }
+
+  .feed .post .username,
+  .feed .post .post-username-link {
+    max-width: 100% !important;
+
+    color: #ee0c6f !important;
+    font-family: "Poppins", Arial, sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 900 !important;
+    line-height: 1.15 !important;
+
+    text-decoration: none !important;
+
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .feed .post .post-username-link:hover {
+    color: #ff2b86 !important;
+  }
+
+  .feed .post .post-location {
+    color: rgba(223, 252, 255, 0.58) !important;
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+  }
+
+  .feed .post .post-meta-wrap {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .feed .post .post-date {
+    color: rgba(4, 197, 191, 0.88) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+  }
+
+  .feed .post .post-menu-btn {
+    width: 28px !important;
+    height: 28px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 0 !important;
+    border-radius: 50% !important;
+
+    color: rgba(223, 252, 255, 0.42) !important;
+    background: transparent !important;
+
+    font-size: 20px !important;
+    line-height: 1 !important;
+    top: -2px !important;
+  }
+
+  .feed .post .post-menu-btn:hover {
+    color: #04c5bf !important;
+    background: rgba(4, 197, 191, 0.08) !important;
+  }
+
+  .feed .post .post-menu {
+    min-width: 160px !important;
+
+    border: 1px solid rgba(4, 197, 191, 0.26) !important;
+    background: rgba(0, 18, 28, 0.98) !important;
+    border-radius: 15px !important;
+
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.44) !important;
+  }
+
+  .feed .post .post-menu button {
+    color: #dffcff !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+  }
+
+  .feed .post .post-menu button:hover {
+    color: #04c5bf !important;
+    background: rgba(4, 197, 191, 0.1) !important;
+  }
+
+  .feed .post .post-menu .post-delete-btn:hover {
+    color: #ff4f91 !important;
+    background: rgba(238, 12, 111, 0.12) !important;
+  }
+
+  /* ---------- Badges / text ---------- */
+
+  .feed .post .post-badges {
+    margin: 0 0 12px !important;
+  }
+
+  .feed .post .post-badge {
+    color: #dffcff !important;
+    background: rgba(4, 197, 191, 0.09) !important;
+    border: 1px solid rgba(4, 197, 191, 0.18) !important;
+  }
+
+  .feed .post .post-badge-ad {
+    color: #ff8fbd !important;
+    background: rgba(238, 12, 111, 0.1) !important;
+    border-color: rgba(238, 12, 111, 0.22) !important;
+  }
+
+  .feed .post .content {
+    margin-top: 12px !important;
+
+    color: rgba(234, 255, 255, 0.9) !important;
+    font-size: 15px !important;
+    line-height: 1.55 !important;
+
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+  }
+
+  /* ---------- Media ---------- */
+
+  .feed .post .post-media-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    border-radius: 20px !important;
+  }
+
+  .feed .post .post-media,
+  .feed .post .post-media-renderer,
+  .feed .post .post-media.media-layout {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    margin: 0 !important;
+
+    border-radius: 20px !important;
+    overflow: hidden !important;
+
+    background: rgba(0, 8, 14, 0.92) !important;
+  }
+
+  .feed .post .post-media.media-layout[data-mode="carousel"] .carousel-main,
+  .feed .post .post-media-renderer[data-layout="carousel"] .carousel-main {
+    border-radius: 20px !important;
+  }
+
+  .feed .post .post-media img,
+  .feed .post .post-media video {
+    border-radius: 0 !important;
+  }
+
+  .feed .post .post-media img:hover,
+  .feed .post .post-media video:hover {
+    transform: none !important;
+    filter: brightness(1.03) !important;
+  }
+
+  /* ---------- Actions under card ---------- */
+
+  .feed .post .post-actions.under-bubble {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    margin: 12px 0 0 !important;
+    padding: 0 8px !important;
+    box-sizing: border-box !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    gap: 16px !important;
+  }
+
+  .feed .post .post-actions-left,
+  .feed .post .post-actions-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  .feed .post .post-actions .action-btn {
+    width: 34px !important;
+    height: 34px !important;
+
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 50% !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    background: rgba(4, 197, 191, 0.045) !important;
+
+    transition:
+      transform 0.16s ease,
+      background 0.16s ease,
+      box-shadow 0.16s ease,
+      opacity 0.16s ease !important;
+  }
+
+  .feed .post .post-actions .action-btn:hover {
+    transform: translateY(-1px) scale(1.04) !important;
+    background: rgba(4, 197, 191, 0.09) !important;
+    box-shadow: 0 0 18px rgba(4, 197, 191, 0.1) !important;
+    opacity: 1 !important;
+  }
+
+  .feed .post .post-actions .action-btn img,
+  .feed .post .like-btn .like-icon,
+  .feed .post .bookmark-btn .bookmark-icon {
+    width: 24px !important;
+    height: 24px !important;
+    display: block !important;
+  }
+
+  .feed .post .action-count,
+  .feed .post .like-count,
+  .feed .post .comment-count {
+    min-width: 14px !important;
+    height: 18px !important;
+
+    color: rgba(127, 207, 208, 0.82) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 18px !important;
+  }
+
+  .feed .post .action-count.is-empty {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    min-width: 0 !important;
+  }
+}
+
+/* =========================
+   DESKTOP CREATE POST — PREMIUM PILL/PANEL
+========================= */
+
+@media (min-width: 901px) {
+  .create-post {
+    width: min(100%, 720px) !important;
+    max-width: 720px !important;
+
+    margin: 18px auto 28px !important;
+    padding: 0 14px !important;
+    box-sizing: border-box !important;
+
+    min-height: 48px !important;
+    max-height: 48px !important;
+
+    border-radius: 999px !important;
+    border: 1px solid rgba(4, 197, 191, 0.22) !important;
+
+    background:
+      radial-gradient(circle at top right, rgba(4, 197, 191, 0.14), transparent 36%),
+      rgba(0, 42, 45, 0.78) !important;
+
+    box-shadow:
+      0 16px 42px rgba(0, 0, 0, 0.22),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.018) !important;
+
+    overflow: hidden !important;
+  }
+
+  .create-post:hover {
+    border-color: rgba(4, 197, 191, 0.38) !important;
+    box-shadow:
+      0 18px 48px rgba(0, 0, 0, 0.28),
+      0 0 24px rgba(4, 197, 191, 0.055) !important;
+  }
+
+  .create-post.expanded {
+    max-height: none !important;
+    min-height: 0 !important;
+
+    padding: 16px !important;
+
+    border-radius: 24px !important;
+    background:
+      radial-gradient(circle at top right, rgba(4, 197, 191, 0.13), transparent 34%),
+      rgba(0, 24, 32, 0.96) !important;
+
+    overflow: visible !important;
+  }
+
+  .post-create-header {
+    min-height: 48px !important;
+    height: 48px !important;
+
+    padding: 0 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  .create-post.expanded .post-create-header {
+    min-height: 44px !important;
+    height: auto !important;
+    margin-bottom: 12px !important;
+  }
+
+  .create-post textarea,
+  #create-post textarea,
+  #post-textarea {
+    color: #dffcff !important;
+    font-size: 14px !important;
+    line-height: 1.35 !important;
+  }
+
+  .create-post:not(.expanded) #post-textarea {
+    height: 22px !important;
+    line-height: 22px !important;
+  }
+
+  .create-post textarea::placeholder,
+  #post-textarea::placeholder {
+    color: rgba(223, 252, 255, 0.46) !important;
+  }
+
+  .file-icon {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+
+    border-radius: 50% !important;
+    border: 1px solid rgba(4, 197, 191, 0.38) !important;
+    background: rgba(0, 13, 24, 0.32) !important;
+  }
+
+  .file-icon:hover {
+    background: rgba(4, 197, 191, 0.1) !important;
+    box-shadow: 0 0 18px rgba(4, 197, 191, 0.12) !important;
+  }
+
+  .file-icon img,
+  .file-icon .plus-icon {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .create-post.expanded .post-options {
+    width: 100% !important;
+    max-height: none !important;
+
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+
+    margin-top: 12px !important;
+    opacity: 1 !important;
+  }
+
+  .create-post.expanded .post-options button {
+    min-height: 40px !important;
+    padding: 0 14px !important;
+
+    border-radius: 13px !important;
+    background: rgba(4, 197, 191, 0.92) !important;
+
+    color: #001014 !important;
+    font-weight: 900 !important;
+  }
+
+  .create-post.expanded .post-options button:hover {
+    background: #04c5bf !important;
+  }
+
+  .create-post.expanded .custom-checkbox {
+    min-height: 40px !important;
+    color: rgba(234, 255, 255, 0.86) !important;
+  }
+
+  .post-submit {
+    margin-top: 14px !important;
+  }
+
+  .post-submit .post-btn,
+  #post-btn {
+    min-height: 42px !important;
+    padding: 0 20px !important;
+
+    border-radius: 999px !important;
+
+    background: #04c5bf !important;
+    color: #001014 !important;
+
+    font-weight: 900 !important;
+  }
+}
