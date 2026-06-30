@@ -702,6 +702,12 @@ document.addEventListener("DOMContentLoaded", () => {
       wrapper.className = "preview-item";
       wrapper.dataset.index = String(index);
 
+      if (item.type === "image") {
+        wrapper.classList.add("preview-image-item");
+      } else if (item.type === "video") {
+        wrapper.classList.add("preview-video-item");
+      }
+
       const isSingleMedia = allItems.length === 1;
       const needsBlurFrame = isSingleMedia || item.type === "video";
 
@@ -824,8 +830,20 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         preview.syncFileInput();
+
+        els.createPost.classList.add("expanded");
+        els.createPost.classList.add("has-media");
+
         preview.render();
+        preview.autosizeTextarea();
         preview.updatePostButtonVisibility();
+
+        requestAnimationFrame(() => {
+          els.previewContainer?.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+          });
+        });
       });
 
       els.postBtn.addEventListener("click", preview.createPost);
@@ -915,12 +933,22 @@ document.addEventListener("DOMContentLoaded", () => {
     render() {
       if (!els.previewContainer) return;
 
+      const hasFiles = state.selectedFiles.length > 0;
+
+      els.createPost?.classList.toggle("has-media", hasFiles);
+
       if (els.previewToolbar) {
-        els.previewToolbar.style.display = state.selectedFiles.length > 0 ? "flex" : "none";
+        els.previewToolbar.style.display = hasFiles ? "flex" : "none";
       }
 
+      els.previewContainer.classList.toggle("is-empty", !hasFiles);
       els.previewContainer.setAttribute("data-mode", state.previewMode);
-      state.carouselIndex = Math.max(0, Math.min(state.carouselIndex, state.selectedFiles.length - 1));
+      els.previewContainer.setAttribute("data-count", String(state.selectedFiles.length));
+
+      state.carouselIndex = Math.max(
+        0,
+        Math.min(state.carouselIndex, state.selectedFiles.length - 1)
+      );
 
       if (state.previewMode === "carousel") {
         preview.renderCarousel();

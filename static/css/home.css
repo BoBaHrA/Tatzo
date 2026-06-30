@@ -7667,3 +7667,296 @@ a.more-admin-link .more-admin-subtitle {
     margin-top: 16px !important;
   }
 }
+
+/* =========================
+   MOBILE COMPOSER MEDIA PREVIEW FIX
+========================= */
+
+@media (max-width: 900px) {
+  .create-post.expanded {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: min(76dvh, 680px) !important;
+  }
+
+  .create-post.has-media {
+    padding: 12px !important;
+  }
+
+  /* toolbar Сетка / Карусель */
+  .create-post .preview-toolbar {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    display: none;
+    justify-content: center !important;
+
+    margin: 12px 0 10px !important;
+    padding: 0 !important;
+
+    overflow: visible !important;
+    box-sizing: border-box;
+  }
+
+  .create-post.has-media .preview-toolbar {
+    display: flex !important;
+  }
+
+  .create-post .preview-mode {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px !important;
+
+    padding: 4px !important;
+
+    border-radius: 999px !important;
+    border: 1px solid rgba(4, 197, 191, 0.24) !important;
+    background: rgba(0, 13, 24, 0.38) !important;
+
+    box-sizing: border-box;
+  }
+
+  .create-post .mode-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+
+    padding: 10px 8px !important;
+    border-radius: 999px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    color: rgba(223, 252, 255, 0.72) !important;
+    background: transparent !important;
+
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .create-post .mode-btn.active {
+    color: #001014 !important;
+    background: #04c5bf !important;
+    box-shadow: 0 8px 22px rgba(4, 197, 191, 0.18);
+  }
+
+  /* сам контейнер предпросмотра */
+  .create-post #file-preview {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    margin: 0 0 14px !important;
+    padding: 0 !important;
+
+    box-sizing: border-box;
+    overflow: visible !important;
+  }
+
+  .create-post #file-preview.is-empty,
+  .create-post #file-preview:empty {
+    display: none !important;
+  }
+
+  /* GRID mode */
+  .create-post #file-preview[data-mode="grid"]:not(:empty) {
+    display: grid !important;
+    gap: 8px !important;
+    grid-auto-rows: clamp(120px, 42vw, 210px) !important;
+  }
+
+  .create-post #file-preview[data-mode="grid"].l1 {
+    grid-template-columns: 1fr !important;
+    grid-auto-rows: clamp(190px, 58vw, 300px) !important;
+  }
+
+  .create-post #file-preview[data-mode="grid"].l2,
+  .create-post #file-preview[data-mode="grid"].l4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .create-post #file-preview[data-mode="grid"].l3,
+  .create-post #file-preview[data-mode="grid"].l5,
+  .create-post #file-preview[data-mode="grid"].l6,
+  .create-post #file-preview[data-mode="grid"].l8,
+  .create-post #file-preview[data-mode="grid"].l9 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .create-post #file-preview .preview-item {
+    position: relative !important;
+
+    min-width: 0 !important;
+    overflow: hidden !important;
+
+    border-radius: 16px !important;
+    border: 1px solid rgba(4, 197, 191, 0.22) !important;
+    background: rgba(0, 13, 24, 0.52) !important;
+
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+  }
+
+  .create-post #file-preview .preview-item > img,
+  .create-post #file-preview .preview-item > video {
+    width: 100% !important;
+    height: 100% !important;
+
+    display: block !important;
+    object-fit: cover !important;
+    object-position: center !important;
+  }
+
+  /* крестик удаления */
+  .create-post #file-preview .preview-remove {
+    position: absolute !important;
+    top: 7px !important;
+    right: 7px !important;
+
+    width: 26px !important;
+    height: 26px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    border-radius: 50% !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+
+    background: rgba(0, 13, 24, 0.82) !important;
+    color: #ffffff !important;
+
+    font-size: 13px !important;
+    line-height: 1 !important;
+
+    z-index: 20 !important;
+  }
+
+  /* CAROUSEL mode */
+  .create-post #file-preview[data-mode="carousel"]:not(:empty) {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .create-post #file-preview[data-mode="carousel"] .carousel-main {
+    width: 100% !important;
+    height: clamp(210px, 62vw, 330px) !important;
+
+    position: relative !important;
+    overflow: hidden !important;
+
+    border-radius: 18px !important;
+    border: 1px solid rgba(4, 197, 191, 0.24) !important;
+    background: rgba(0, 13, 24, 0.62) !important;
+  }
+
+  .create-post #file-preview[data-mode="carousel"] .carousel-main > img,
+  .create-post #file-preview[data-mode="carousel"] .carousel-main > video {
+    width: 100% !important;
+    height: 100% !important;
+
+    object-fit: contain !important;
+    object-position: center !important;
+    background: transparent !important;
+  }
+
+  .create-post #file-preview[data-mode="carousel"] .carousel-thumbs {
+    width: 100% !important;
+
+    display: flex !important;
+    gap: 8px !important;
+
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+
+    padding: 2px 0 4px !important;
+    scrollbar-width: none;
+  }
+
+  .create-post #file-preview[data-mode="carousel"] .carousel-thumbs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .create-post #file-preview[data-mode="carousel"] .thumb {
+    flex: 0 0 58px !important;
+
+    width: 58px !important;
+    height: 58px !important;
+
+    border-radius: 14px !important;
+    border: 1px solid rgba(4, 197, 191, 0.18) !important;
+
+    overflow: hidden !important;
+    opacity: 0.62;
+  }
+
+  .create-post #file-preview[data-mode="carousel"] .thumb.active {
+    flex-basis: 76px !important;
+
+    width: 76px !important;
+    height: 76px !important;
+
+    opacity: 1;
+    border-color: rgba(4, 197, 191, 0.72) !important;
+    box-shadow: 0 0 20px rgba(4, 197, 191, 0.16);
+  }
+
+  .create-post #file-preview[data-mode="carousel"] .thumb img,
+  .create-post #file-preview[data-mode="carousel"] .thumb video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  .create-post #file-preview[data-mode="carousel"] .car-nav {
+    width: 36px !important;
+    height: 36px !important;
+
+    border-radius: 50% !important;
+    background: rgba(0, 13, 24, 0.72) !important;
+    color: #ffffff !important;
+
+    font-size: 24px !important;
+    z-index: 12 !important;
+  }
+
+  .create-post #file-preview[data-mode="carousel"] .car-prev {
+    left: 8px !important;
+  }
+
+  .create-post #file-preview[data-mode="carousel"] .car-next {
+    right: 8px !important;
+  }
+
+  .create-post #file-preview[data-mode="carousel"] .carousel-main .preview-remove {
+    top: 9px !important;
+    right: 9px !important;
+  }
+
+  .create-post #file-preview[data-mode="carousel"] .carousel-main .car-full {
+    top: 9px !important;
+    right: 44px !important;
+
+    width: 30px !important;
+    height: 30px !important;
+
+    border-radius: 50% !important;
+    background: rgba(0, 13, 24, 0.72) !important;
+    color: #ffffff !important;
+
+    font-size: 15px !important;
+    z-index: 20 !important;
+  }
+
+  /* Options после preview */
+  .create-post.has-media .post-options {
+    margin-top: 6px !important;
+  }
+}
