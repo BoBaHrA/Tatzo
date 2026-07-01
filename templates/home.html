@@ -34,6 +34,16 @@
           <img src="{% static 'icons/plus.svg' %}" alt="{{ add_file_text }}">
         </div>
 
+        <button
+          type="button"
+          class="composer-close-btn"
+          id="composer-close-btn"
+          aria-label="{% trans 'Close composer' %}"
+          title="{% trans 'Close composer' %}"
+        >
+          ×
+        </button>
+
         <input
           type="file"
           id="file-upload"
@@ -79,33 +89,57 @@
           {% trans "Mark as Ad" %}
         </label>
 
-        <button type="button">
+        <button
+          type="button"
+          class="post-option-soon"
+          data-coming-soon="{% trans 'Location tools are coming soon. For now, you can mention the city in the post text.' %}"
+        >
           <img src="{% static 'icons/location.svg' %}" alt="{% trans 'Location' %}" class="option-icon">
           {% trans "Add Location" %}
         </button>
 
-        <button type="button">
+        <button
+          type="button"
+          class="post-option-soon"
+          data-coming-soon="{% trans 'Polls are coming soon. You will be able to create interactive polls inside posts.' %}"
+        >
           <img src="{% static 'icons/poll.svg' %}" alt="{% trans 'Poll' %}" class="option-icon">
           {% trans "Create Poll" %}
         </button>
 
-        <button type="button">
+        <button
+          type="button"
+          class="post-option-soon"
+          data-coming-soon="{% trans 'Scheduled posts are coming soon. You will be able to choose the date and time before publishing.' %}"
+        >
           <img src="{% static 'icons/schedule.svg' %}" alt="{% trans 'Schedule' %}" class="option-icon">
           {% trans "Schedule Post" %}
         </button>
 
         <div>
-          <button type="button">
+          <button
+            type="button"
+            class="post-option-soon"
+            data-coming-soon="{% trans 'Co-authors are coming soon. You will be able to invite other users to appear on the same post.' %}"
+          >
             <img src="{% static 'icons/coauthors.svg' %}" alt="{% trans 'Co-authors' %}" class="option-icon">
             {% trans "Invite Co-authors" %}
           </button>
 
-          <button type="button">
+          <button
+            type="button"
+            class="post-option-soon"
+            data-coming-soon="{% trans 'Audience settings are coming soon. You will be able to choose who can see each post.' %}"
+          >
             <img src="{% static 'icons/eye.svg' %}" alt="{% trans 'Who can see' %}" class="option-icon">
             {% trans "Who can see this" %}
           </button>
 
-          <button type="button">
+          <button
+            type="button"
+            class="post-option-soon"
+            data-coming-soon="{% trans 'Additional post options are coming soon. We are preparing more controls for creators.' %}"
+          >
             <img src="{% static 'icons/settings.svg' %}" alt="{% trans 'Settings' %}" class="option-icon">
             {% trans "Additional options" %}
           </button>
@@ -357,9 +391,9 @@
   <div class="share-soon-modal-inner">
     <button class="share-soon-close" id="share-soon-close" type="button">×</button>
 
-    <h3>{% trans "Coming soon" %}</h3>
+    <h3 id="share-soon-title">{% trans "Coming soon" %}</h3>
 
-    <p>
+    <p id="share-soon-text">
       {% trans "Sharing posts will be available soon. We’re still working on this feature." %}
     </p>
 
@@ -376,6 +410,9 @@
   window.TATZO_I18N = {
     success: "{% trans 'Success' %}",
     actionFailed: "{% trans 'Action failed' %}",
+    comingSoon: "{% trans 'Coming soon' %}",
+    shareComingSoon: "{% trans 'Sharing posts will be available soon. We’re still working on this feature.' %}",
+    postFeatureComingSoon: "{% trans 'This post feature is coming soon. We’re still working on it.' %}",
     info: "{% trans 'Info' %}",
     done: "{% trans 'Done.' %}",
 

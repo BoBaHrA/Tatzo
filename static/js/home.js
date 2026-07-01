@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
     previewContainer: document.getElementById("file-preview"),
     customFileTrigger: document.getElementById("custom-file-trigger"),
     previewToolbar: document.getElementById("preview-toolbar"),
+    composerClose: document.getElementById("composer-close-btn"),
+    postOptions: document.getElementById("post-options"),
 
     lightbox: document.getElementById("media-lightbox"),
     lbBody: document.getElementById("lb-body"),
@@ -54,6 +56,9 @@ document.addEventListener("DOMContentLoaded", () => {
     shareSoonModal: document.getElementById("share-soon-modal"),
     shareSoonClose: document.getElementById("share-soon-close"),
     shareSoonOk: document.getElementById("share-soon-ok"),
+    shareSoonTitle: document.getElementById("share-soon-title"),
+    shareSoonText: document.getElementById("share-soon-text"),
+
   };
 
   const state = {
@@ -797,19 +802,34 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       document.addEventListener("click", (e) => {
+        const clickedModal = e.target.closest(
+          ".share-soon-modal, .comment-edit-modal, .post-modal, .media-lightbox"
+        );
+
+        if (clickedModal) return;
+
         const isInside = els.createPost.contains(e.target);
         const isPreviewItem = e.target.closest("#file-preview");
         const isDeleteBtn = e.target.closest(".preview-remove");
 
         if (isInside || isPreviewItem || isDeleteBtn) {
           els.createPost.classList.add("expanded");
-        } else {
-          els.createPost.classList.remove("expanded");
+          return;
         }
+
+        preview.collapse();
+      });
+
+      els.composerClose?.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        preview.collapse();
       });
 
       els.textarea.addEventListener("input", preview.autosizeTextarea);
-      els.textarea.addEventListener("blur", preview.autosizeTextarea);
+      els.textarea.addEventListener("focus", () => {
+        els.createPost.classList.add("expanded");
+      });
 
       els.customFileTrigger.addEventListener("click", () => {
         els.fileUpload.click();
@@ -854,6 +874,14 @@ document.addEventListener("DOMContentLoaded", () => {
       preview.updatePostButtonVisibility();
     },
 
+    collapse() {
+      if (!els.createPost) return;
+
+      els.createPost.classList.remove("expanded");
+      els.textarea?.blur();
+      helpers.stopAndResetVideo(els.previewContainer);
+    },
+
     updatePostButtonVisibility() {
       const hasText = els.textarea.value.trim().length > 0;
       const hasFiles = state.selectedFiles.length > 0;
@@ -866,7 +894,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (isEmpty && !hasFiles) {
         els.textarea.style.removeProperty("height");
-        els.createPost.classList.remove("expanded");
       } else {
         els.textarea.style.height = "auto";
         els.textarea.style.height = `${Math.min(els.textarea.scrollHeight, 400)}px`;
@@ -1833,12 +1860,36 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function initPostEvents() {
-    function openShareSoonModal() {
+    function openShareSoonModal(message = "", title = "") {
       if (!els.shareSoonModal) return;
+
+      if (els.shareSoonTitle) {
+        els.shareSoonTitle.textContent = title || t("comingSoon", "Coming soon");
+      }
+
+      if (els.shareSoonText) {
+        els.shareSoonText.textContent =
+          message || t("shareComingSoon", "Sharing posts will be available soon. We’re still working on this feature.");
+      }
 
       els.shareSoonModal.classList.add("open");
       els.shareSoonModal.setAttribute("aria-hidden", "false");
       helpers.setBodyLocked(true);
+    }
+
+    const postOptionSoonBtn = e.target.closest(".post-option-soon");
+    if (postOptionSoonBtn) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      els.createPost?.classList.add("expanded");
+
+      openShareSoonModal(
+        postOptionSoonBtn.dataset.comingSoon || t("postFeatureComingSoon", "This post feature is coming soon. We’re still working on it."),
+        t("comingSoon", "Coming soon")
+      );
+
+      return;
     }
 
     function closeShareSoonModal() {
@@ -1894,7 +1945,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const shareBtn = e.target.closest(".share-btn");
       if (shareBtn) {
         e.preventDefault();
-        openShareSoonModal();
+
+        openShareSoonModal(
+          t("shareComingSoon", "Sharing posts will be available soon. We’re still working on this feature."),
+          t("comingSoon", "Coming soon")
+        );
+
         return;
       }
 

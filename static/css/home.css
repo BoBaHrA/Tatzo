@@ -7960,3 +7960,48 @@ a.more-admin-link .more-admin-subtitle {
     margin-top: 6px !important;
   }
 }
+
+/* =========================
+   MOBILE COMPOSER CLOSE BUTTON
+========================= */
+
+.composer-close-btn {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .create-post {
+    position: relative;
+  }
+
+  .composer-close-btn {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid rgba(238, 12, 111, 0.38);
+    border-radius: 50%;
+
+    background: rgba(238, 12, 111, 0.08);
+    color: #ff2b86;
+
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+
+    cursor: pointer;
+    box-shadow: 0 0 18px rgba(238, 12, 111, 0.08);
+  }
+
+  .create-post.expanded .composer-close-btn {
+    display: flex;
+  }
+
+  .composer-close-btn:active {
+    transform: scale(0.96);
+  }
+}
