@@ -2468,3 +2468,236 @@ body.edit-profile-no-scroll {
   margin: 8px 0 0;
   color: rgba(223, 252, 255, 0.64);
 }
+
+/* =========================
+   MOBILE PROFILE PAGE FINAL FIX
+========================= */
+
+@media (max-width: 900px) {
+  .profile-page {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 100dvh !important;
+
+    padding: 12px 10px calc(var(--mobile-bottom-nav-h, 76px) + 24px) !important;
+    box-sizing: border-box !important;
+
+    overflow-x: hidden !important;
+
+    background:
+      radial-gradient(circle at top left, rgba(4, 197, 191, 0.08), transparent 32%),
+      #000d18 !important;
+  }
+
+  .profile-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  .profile-header {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+
+    gap: 16px !important;
+
+    margin: 0 0 18px !important;
+    padding: 22px 14px !important;
+    box-sizing: border-box !important;
+
+    border-radius: 28px !important;
+    overflow: hidden !important;
+
+    background:
+      radial-gradient(circle at top right, rgba(4, 197, 191, 0.12), transparent 36%),
+      rgba(0, 18, 28, 0.96) !important;
+  }
+
+  .profile-avatar-wrap {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .profile-avatar {
+    width: 112px !important;
+    height: 112px !important;
+  }
+
+  .profile-main {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    text-align: center !important;
+  }
+
+  .profile-top-row {
+    width: 100% !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+
+    gap: 14px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .profile-name-row {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .profile-username {
+    max-width: 100% !important;
+
+    font-size: clamp(30px, 9vw, 42px) !important;
+    line-height: 1.02 !important;
+
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    text-align: center !important;
+  }
+
+  .profile-subline {
+    max-width: 100% !important;
+    margin-top: 6px !important;
+
+    font-size: 15px !important;
+    line-height: 1.35 !important;
+    text-align: center !important;
+  }
+
+  .profile-actions {
+    width: 100% !important;
+
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  .profile-actions .profile-btn,
+  .profile-actions a.profile-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+
+    display: flex !important;
+    justify-content: center !important;
+
+    box-sizing: border-box !important;
+    padding: 12px 10px !important;
+
+    border-radius: 16px !important;
+    font-size: 13px !important;
+
+    white-space: nowrap !important;
+  }
+
+  .profile-stats {
+    width: 100% !important;
+
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+
+    margin-bottom: 14px !important;
+  }
+
+  .profile-stat {
+    min-width: 0 !important;
+    padding: 12px 8px !important;
+    box-sizing: border-box !important;
+    border-radius: 16px !important;
+  }
+
+  .profile-stat-value {
+    font-size: 18px !important;
+  }
+
+  .profile-stat-label {
+    font-size: 11px !important;
+    line-height: 1.15 !important;
+
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .profile-bio-card {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+  }
+
+  .artist-info-grid {
+    width: 100% !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .profile-tabs {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+
+    margin: 0 0 14px !important;
+    box-sizing: border-box !important;
+  }
+
+  .profile-tab {
+    width: 100% !important;
+    padding: 11px 8px !important;
+    font-size: 13px !important;
+  }
+
+  .profile-posts-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+
+  .profile-post-card {
+    border-radius: 12px !important;
+  }
+
+  .profile-empty-state {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 28px 16px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .profile-page {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .profile-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  .profile-stat-label {
+    font-size: 10px !important;
+  }
+}

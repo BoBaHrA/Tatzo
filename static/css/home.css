@@ -8005,3 +8005,116 @@ a.more-admin-link .more-admin-subtitle {
     transform: scale(0.96);
   }
 }
+
+/* =========================
+   MOBILE BOOKMARKS PAGE FIX
+========================= */
+
+@media (max-width: 900px) {
+  .bookmarks-page {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 100dvh !important;
+
+    padding: 12px 10px calc(var(--mobile-bottom-nav-h, 76px) + 24px) !important;
+    box-sizing: border-box !important;
+
+    background:
+      radial-gradient(circle at top left, rgba(4, 197, 191, 0.08), transparent 32%),
+      #000d18 !important;
+
+    overflow-x: hidden !important;
+  }
+
+  .bookmarks-header {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 10px 0 18px !important;
+    padding: 0 4px !important;
+    box-sizing: border-box !important;
+  }
+
+  .bookmarks-header h1 {
+    margin: 0 0 6px !important;
+    color: #eaffff !important;
+    font-size: 28px !important;
+    line-height: 1.1 !important;
+    font-weight: 900 !important;
+  }
+
+  .bookmarks-header p {
+    margin: 0 !important;
+    color: rgba(223, 252, 255, 0.68) !important;
+    font-size: 14px !important;
+    line-height: 1.35 !important;
+  }
+
+  .bookmarks-feed {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .bookmarks-feed .feed,
+  .bookmarks-feed #feed {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .bookmarks-feed .post {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 18px !important;
+    box-sizing: border-box !important;
+  }
+
+  .bookmarks-empty,
+  .fancy-empty-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 34px 0 0 !important;
+    padding: 30px 22px !important;
+    box-sizing: border-box !important;
+  }
+
+  .fancy-empty-card h2,
+  .bookmarks-empty h2 {
+    font-size: 28px !important;
+  }
+
+  .fancy-empty-card p,
+  .bookmarks-empty p {
+    font-size: 15px !important;
+  }
+}
+
+/* =========================
+   MOBILE GLOBAL OVERFLOW SAFETY
+========================= */
+
+@media (max-width: 900px) {
+  html,
+  body {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  .content,
+  .content-area,
+  .main-content,
+  .chat-page,
+  .profile-page,
+  .bookmarks-page,
+  .coming-soon-page,
+  .report-page {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+}
