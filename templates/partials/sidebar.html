@@ -336,6 +336,29 @@
     </select>
   </form>
 
+  <div class="mobile-auth-actions">
+    {% if request.user.is_authenticated %}
+      <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{% url 'home' %}">
+        <button type="submit" class="mobile-auth-btn mobile-auth-logout">
+          <span>🚪</span>
+          <span>{% trans "Log out" %}</span>
+        </button>
+      </form>
+    {% else %}
+      <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}" class="mobile-auth-btn mobile-auth-login">
+        <span>🔐</span>
+        <span>{% trans "Log in" %}</span>
+      </a>
+
+      <a href="{% url 'signup' %}" class="mobile-auth-btn mobile-auth-signup">
+        <span>✨</span>
+        <span>{% trans "Sign up" %}</span>
+      </a>
+    {% endif %}
+  </div>
+
   {% if request.user.is_authenticated and request.user.is_staff %}
     <a href="{% url 'moderation_dashboard' %}" class="mobile-admin-link">
       <span>🛡️</span>

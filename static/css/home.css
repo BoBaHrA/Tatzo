@@ -8441,3 +8441,64 @@ a.more-admin-link .more-admin-subtitle {
     line-height: 1;
   }
 }
+
+/* =========================
+   MOBILE MENU AUTH ACTIONS
+========================= */
+
+.mobile-auth-actions {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(4, 197, 191, 0.16);
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mobile-auth-actions form {
+  margin: 0;
+}
+
+.mobile-auth-btn {
+  width: 100%;
+  min-height: 52px;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  padding: 0 16px;
+  border-radius: 16px;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  text-decoration: none;
+
+  cursor: pointer;
+}
+
+.mobile-auth-login,
+.mobile-auth-signup {
+  border: 1px solid rgba(4, 197, 191, 0.28);
+  background: rgba(4, 197, 191, 0.09);
+  color: #04c5bf;
+}
+
+.mobile-auth-login:hover,
+.mobile-auth-signup:hover {
+  background: rgba(4, 197, 191, 0.15);
+}
+
+.mobile-auth-logout {
+  border: 1px solid rgba(238, 12, 111, 0.38);
+  background: rgba(238, 12, 111, 0.1);
+  color: #ee0c6f;
+}
+
+.mobile-auth-logout:hover {
+  background: rgba(238, 12, 111, 0.16);
+}
