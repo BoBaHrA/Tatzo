@@ -942,6 +942,13 @@ def add_portfolio_work(request, username):
     if profile_user.profile.account_type != "tattoo_artist":
         return redirect("profile", username=profile_user.username)
 
+    if not profile_user.profile.is_verified_artist:
+        messages.warning(
+            request,
+            _("Portfolio tools unlock after your artist verification is approved.")
+        )
+        return redirect("artist_portfolio", username=profile_user.username)
+
     if request.method == "POST":
         form = PortfolioWorkForm(request.POST, request.FILES, user=request.user)
 
@@ -1008,6 +1015,13 @@ def create_portfolio_album(request, username):
         return redirect("artist_portfolio", username=profile_user.username)
 
     form = PortfolioAlbumForm(request.POST, request.FILES)
+    
+    if not profile_user.profile.is_verified_artist:
+        messages.warning(
+            request,
+            _("Portfolio tools unlock after your artist verification is approved.")
+        )
+        return redirect("artist_portfolio", username=profile_user.username)
 
     if form.is_valid():
         album = form.save(commit=False)
@@ -1025,6 +1039,16 @@ def artist_portfolio(request, username):
 
     if profile_user.profile.account_type != "tattoo_artist":
         return redirect("profile", username=profile_user.username)
+
+    portfolio_unlocked = profile_user.profile.is_verified_artist
+
+    has_uploaded_documents = VerificationDocument.objects.filter(
+        user=profile_user
+    ).exists()
+
+    has_manual_request = ManualVerificationRequest.objects.filter(
+        user=profile_user
+    ).exists()
 
     albums = (
         PortfolioAlbum.objects
@@ -1046,6 +1070,9 @@ def artist_portfolio(request, username):
         "works": works,
         "works_count": works.count(),
         "is_owner": request.user.is_authenticated and request.user == profile_user,
+        "portfolio_unlocked": portfolio_unlocked,
+        "has_uploaded_documents": has_uploaded_documents,
+        "has_manual_request": has_manual_request,
     }
 
     return render(request, "users/artist_portfolio.html", context)
@@ -1058,6 +1085,9 @@ def artist_portfolio_album(request, username, album_id):
 
     if profile_user.profile.account_type != "tattoo_artist":
         return redirect("profile", username=profile_user.username)
+    
+    if not profile_user.profile.is_verified_artist:
+        return redirect("artist_portfolio", username=profile_user.username)
 
     album = get_object_or_404(
         PortfolioAlbum.objects.filter(user=profile_user),
@@ -1083,6 +1113,13 @@ def artist_portfolio_album(request, username, album_id):
 @login_required
 def edit_portfolio_album(request, username, album_id):
     profile_user = get_object_or_404(User, username=username)
+    
+    if not profile_user.profile.is_verified_artist:
+        messages.warning(
+            request,
+            _("Portfolio tools unlock after your artist verification is approved.")
+        )
+        return redirect("artist_portfolio", username=profile_user.username)
 
     if request.user != profile_user:
         return redirect("artist_portfolio", username=profile_user.username)
@@ -1116,6 +1153,13 @@ def edit_portfolio_album(request, username, album_id):
 @require_POST
 def delete_portfolio_album(request, username, album_id):
     profile_user = get_object_or_404(User, username=username)
+    
+    if not profile_user.profile.is_verified_artist:
+        messages.warning(
+            request,
+            _("Portfolio tools unlock after your artist verification is approved.")
+        )
+        return redirect("artist_portfolio", username=profile_user.username)
 
     if request.user != profile_user:
         return redirect("artist_portfolio", username=profile_user.username)
@@ -1135,6 +1179,13 @@ def delete_portfolio_album(request, username, album_id):
 @require_POST
 def delete_portfolio_work(request, username, work_id):
     profile_user = get_object_or_404(User, username=username)
+    
+    if not profile_user.profile.is_verified_artist:
+        messages.warning(
+            request,
+            _("Portfolio tools unlock after your artist verification is approved.")
+        )
+        return redirect("artist_portfolio", username=profile_user.username)
 
     if request.user != profile_user:
         return redirect("artist_portfolio", username=profile_user.username)

@@ -33,11 +33,50 @@
       </div>
 
       {% if is_owner %}
-        <a href="{% url 'add_portfolio_work' profile_user.username %}" class="portfolio-btn">
-          + {% trans "Add work" %}
-        </a>
+        {% if portfolio_unlocked %}
+          <a href="{% url 'add_portfolio_work' profile_user.username %}" class="portfolio-btn">
+            + {% trans "Add work" %}
+          </a>
+        {% else %}
+          <button type="button" class="portfolio-btn portfolio-btn-locked" disabled>
+            🔒 {% trans "Portfolio locked" %}
+          </button>
+        {% endif %}
       {% endif %}
     </div>
+
+    {% if not portfolio_unlocked %}
+      <section class="portfolio-locked-card">
+        <div class="portfolio-locked-icon">🔒</div>
+
+        <h2>{% trans "Portfolio unlocks after verification" %}</h2>
+
+        {% if profile_user.profile.verification_status == "not_submitted" %}
+          <p>{% trans "To use artist tools, upload your verification documents first." %}</p>
+
+          {% if is_owner %}
+            <a href="{% url 'verification_page' %}" class="portfolio-btn">
+              {% trans "Start verification" %}
+            </a>
+          {% endif %}
+        {% elif profile_user.profile.verification_status == "rejected" %}
+          <p>{% trans "Your verification was rejected. Please contact support or submit new documents." %}</p>
+        {% else %}
+          <p>{% trans "Your documents are currently under review. Once approved, you will be able to upload works, create albums and use artist tools." %}</p>
+
+          <div class="portfolio-status-pill">
+            ⏳ {% trans "Waiting for verification" %}
+          </div>
+        {% endif %}
+
+        <div class="portfolio-unlock-list">
+          <span>✓ {% trans "Upload tattoo works" %}</span>
+          <span>✓ {% trans "Organize portfolio albums" %}</span>
+          <span>✓ {% trans "Receive bookings later" %}</span>
+          <span>✓ {% trans "Appear as a verified tattoo artist" %}</span>
+        </div>
+      </section>
+    {% else %}
 
     {% if is_owner %}
       <form
@@ -201,6 +240,8 @@
         </div>
       {% endif %}
     </section>
+
+    {% endif %}
 
   </div>
 </div>

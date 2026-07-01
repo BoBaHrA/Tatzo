@@ -127,6 +127,13 @@ class Profile(models.Model):
             return _("Verification rejected")
 
         return _("Not submitted")
+    
+    @property
+    def is_verified_artist(self):
+        return (
+            self.account_type == "tattoo_artist"
+            and self.verification_status == "approved"
+        )
 
 
 class VerificationDocument(models.Model):

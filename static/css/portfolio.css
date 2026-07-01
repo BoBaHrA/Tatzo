@@ -977,3 +977,95 @@ body {
 .portfolio-upload-remove:hover {
   background: #ff4c96;
 }
+
+/* =========================
+   PORTFOLIO VERIFICATION LOCK
+========================= */
+
+.portfolio-btn-locked {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background: rgba(238, 12, 111, 0.14);
+  color: #ff4f9a;
+  border: 1px solid rgba(238, 12, 111, 0.35);
+  box-shadow: none;
+}
+
+.portfolio-locked-card {
+  padding: 42px 28px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(4, 197, 191, 0.14), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(238, 12, 111, 0.12), transparent 34%),
+    rgba(0, 18, 28, 0.96);
+  border: 1px solid rgba(4, 197, 191, 0.22);
+  text-align: center;
+}
+
+.portfolio-locked-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 24px;
+  background: rgba(4, 197, 191, 0.1);
+  border: 1px solid rgba(4, 197, 191, 0.28);
+  font-size: 34px;
+}
+
+.portfolio-locked-card h2 {
+  margin: 0 0 12px;
+  color: #ffffff;
+  font-size: 30px;
+}
+
+.portfolio-locked-card p {
+  max-width: 620px;
+  margin: 0 auto 22px;
+  color: rgba(223, 252, 255, 0.74);
+  line-height: 1.55;
+}
+
+.portfolio-status-pill {
+  display: inline-flex;
+  margin-bottom: 24px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(238, 12, 111, 0.1);
+  border: 1px solid rgba(238, 12, 111, 0.34);
+  color: #ff4f9a;
+  font-weight: 900;
+}
+
+.portfolio-unlock-list {
+  width: min(620px, 100%);
+  margin: 26px auto 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.portfolio-unlock-list span {
+  padding: 13px 14px;
+  border-radius: 16px;
+  background: rgba(4, 197, 191, 0.07);
+  border: 1px solid rgba(4, 197, 191, 0.14);
+  color: #dffcff;
+  font-weight: 700;
+}
+
+@media (max-width: 620px) {
+  .portfolio-unlock-list {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-locked-card {
+    padding: 34px 20px;
+  }
+
+  .portfolio-locked-card h2 {
+    font-size: 24px;
+  }
+}
