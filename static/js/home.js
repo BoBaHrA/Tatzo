@@ -826,6 +826,10 @@ document.addEventListener("DOMContentLoaded", () => {
         preview.collapse();
       });
 
+      els.createPost.addEventListener("click", () => {
+        els.createPost.classList.add("expanded");
+      });
+
       els.textarea.addEventListener("input", preview.autosizeTextarea);
       els.textarea.addEventListener("focus", () => {
         els.createPost.classList.add("expanded");
@@ -1877,21 +1881,6 @@ document.addEventListener("DOMContentLoaded", () => {
       helpers.setBodyLocked(true);
     }
 
-    const postOptionSoonBtn = e.target.closest(".post-option-soon");
-    if (postOptionSoonBtn) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-
-      els.createPost?.classList.add("expanded");
-
-      openShareSoonModal(
-        postOptionSoonBtn.dataset.comingSoon || t("postFeatureComingSoon", "This post feature is coming soon. We’re still working on it."),
-        t("comingSoon", "Coming soon")
-      );
-
-      return;
-    }
-
     function closeShareSoonModal() {
       if (!els.shareSoonModal) return;
 
@@ -1907,6 +1896,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.addEventListener("click", async (e) => {
+      const postOptionSoonBtn = e.target.closest(".post-option-soon");
+      if (postOptionSoonBtn) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        els.createPost?.classList.add("expanded");
+
+        openShareSoonModal(
+          postOptionSoonBtn.dataset.comingSoon || t("postFeatureComingSoon", "This post feature is coming soon. We’re still working on it."),
+          t("comingSoon", "Coming soon")
+        );
+
+        return;
+      }
+
       const likeBtn = e.target.closest(".like-btn");
       if (likeBtn) {
         e.preventDefault();
