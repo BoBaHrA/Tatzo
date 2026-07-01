@@ -951,6 +951,12 @@ msgstr "Conversation avec %(username)s"
 msgid "Back to chats"
 msgstr "Retour aux messages"
 
+msgid "Block"
+msgstr "Bloquer"
+
+msgid "Unblock"
+msgstr "Débloquer"
+
 #: .\templates\users\chat_thread.html:37
 #: .\templates\users\following_list.html:48 .\templates\users\profile.html:40
 #: .\templates\users\search.html:110

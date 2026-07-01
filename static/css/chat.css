@@ -1850,3 +1850,249 @@ body {
     height: 22px !important;
   }
 }
+
+
+/* =========================
+   CHAT DESKTOP POLISH
+========================= */
+
+.chat-page,
+.chat-thread-page {
+  width: min(980px, calc(100vw - 40px));
+  margin: 14px auto 0;
+}
+
+/* Верхняя карточка профиля */
+.chat-thread-profile-card,
+.chat-thread-user-card,
+.chat-peer-card {
+  min-height: 132px;
+  padding: 24px 24px !important;
+  box-sizing: border-box;
+}
+
+.chat-thread-profile-card h1,
+.chat-thread-user-card h1,
+.chat-peer-card h1 {
+  font-size: clamp(34px, 4vw, 46px);
+  line-height: 1.05;
+  margin: 0 0 8px;
+}
+
+/* Кнопка Block */
+.chat-block-btn,
+.block-user-btn {
+  min-width: 76px;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+/* Основной блок сообщений */
+.chat-thread-shell,
+.chat-messages-shell,
+.chat-conversation-card {
+  min-height: 690px;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+/* Зона сообщений */
+.chat-messages,
+.chat-thread-messages,
+.messages-box {
+  padding: 24px 28px 28px !important;
+  box-sizing: border-box;
+}
+
+/* Ряд сообщения */
+.chat-message-row {
+  width: 100%;
+  display: flex;
+  margin-bottom: 14px;
+}
+
+.chat-message-row.is-own {
+  justify-content: flex-end;
+}
+
+.chat-message-row:not(.is-own) {
+  justify-content: flex-start;
+}
+
+/* Сам bubble */
+.chat-message-bubble,
+.message-bubble.chat-message-bubble {
+  min-width: 220px;
+  max-width: min(68%, 560px);
+  padding: 16px 18px 14px !important;
+
+  border-radius: 18px !important;
+  background:
+    radial-gradient(circle at top right, rgba(4, 197, 191, 0.12), transparent 36%),
+    rgba(0, 58, 62, 0.92) !important;
+
+  border: 1px solid rgba(4, 197, 191, 0.25) !important;
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(255,255,255,0.015);
+
+  color: #eaffff;
+  box-sizing: border-box;
+}
+
+/* Своё сообщение чуть правее визуально, но не липнет к краю */
+.chat-message-row.is-own .chat-message-bubble {
+  margin-right: 0;
+}
+
+/* Текст сообщения */
+.chat-message-text,
+.chat-message-content {
+  font-size: 16px;
+  line-height: 1.45;
+  color: #ffffff;
+  word-break: break-word;
+}
+
+/* Footer внутри bubble: дата / edit / delete */
+.chat-message-footer {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.chat-message-time {
+  color: rgba(143, 202, 205, 0.78);
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.chat-message-edit,
+.chat-message-delete {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.chat-message-edit {
+  color: #04c5bf;
+}
+
+.chat-message-delete {
+  color: #ee0c6f;
+}
+
+.chat-message-edit:hover,
+.chat-message-delete:hover {
+  text-decoration: underline;
+}
+
+/* Нижний composer */
+.chat-composer,
+.chat-message-form {
+  min-height: 84px;
+  padding: 16px !important;
+  gap: 12px;
+  box-sizing: border-box;
+  align-items: center;
+}
+
+.chat-message-input,
+.chat-composer textarea,
+.chat-composer input[type="text"] {
+  height: 48px;
+  border-radius: 16px;
+  padding: 0 16px !important;
+  font-size: 14px;
+}
+
+.chat-attach-btn,
+.chat-send-btn {
+  width: 54px;
+  height: 54px;
+  min-width: 54px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 17px;
+}
+
+.chat-send-btn img {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+/* Mobile: чтобы не ломать то, что уже починили */
+@media (max-width: 900px) {
+  .chat-page,
+  .chat-thread-page {
+    width: 100%;
+    margin: 0;
+  }
+
+  .chat-thread-profile-card,
+  .chat-thread-user-card,
+  .chat-peer-card {
+    min-height: auto;
+    padding: 18px !important;
+  }
+
+  .chat-thread-profile-card h1,
+  .chat-thread-user-card h1,
+  .chat-peer-card h1 {
+    font-size: 34px;
+  }
+
+  .chat-thread-shell,
+  .chat-messages-shell,
+  .chat-conversation-card {
+    min-height: calc(100dvh - 320px);
+    border-radius: 22px;
+  }
+
+  .chat-messages,
+  .chat-thread-messages,
+  .messages-box {
+    padding: 18px 14px 22px !important;
+  }
+
+  .chat-message-bubble,
+  .message-bubble.chat-message-bubble {
+    min-width: 0;
+    max-width: 82%;
+    padding: 14px 15px 12px !important;
+  }
+
+  .chat-message-text,
+  .chat-message-content {
+    font-size: 15px;
+  }
+
+  .chat-composer,
+  .chat-message-form {
+    min-height: 76px;
+    padding: 12px !important;
+  }
+
+  .chat-attach-btn,
+  .chat-send-btn {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+  }
+}

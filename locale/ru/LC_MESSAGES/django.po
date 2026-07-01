@@ -947,6 +947,12 @@ msgstr "Чат с %(username)s"
 msgid "Back to chats"
 msgstr "Назад к чатам"
 
+msgid "Block"
+msgstr "Заблокировать"
+
+msgid "Unlock"
+msgstr "Разблокировать"
+
 #: .\templates\users\chat_thread.html:37
 #: .\templates\users\following_list.html:48 .\templates\users\profile.html:40
 #: .\templates\users\search.html:110
