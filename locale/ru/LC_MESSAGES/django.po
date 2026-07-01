@@ -330,7 +330,7 @@ msgstr "Настройки"
 
 #: .\templates\home.html:110
 msgid "Additional options"
-msgstr "Дополнительные настройки"
+msgstr "Доп. настройки"
 
 #: .\templates\home.html:134
 msgid "Discover"
@@ -421,7 +421,7 @@ msgstr "Пожаловаться на комментарий"
 #: .\templates\home.html:360 .\templates\users\coming_soon.html:4
 #: .\templates\users\coming_soon.html:20
 msgid "Coming soon"
-msgstr "Скоро будет"
+msgstr "Скоро"
 
 #: .\templates\home.html:363
 msgid ""
@@ -2426,3 +2426,32 @@ msgstr "Спасибо! Ваше обращение отправлено."
 
 #~ msgid "This feature is currently in development."
 #~ msgstr "Эта функция сейчас находится в разработке."
+
+#: .\templates\home.html
+msgid "This post feature is coming soon. We’re still working on it."
+msgstr "Эта функция поста скоро появится. Мы ещё работаем над ней."
+
+#: .\templates\home.html
+msgid "Location tools are coming soon. For now, you can mention the city in the post text."
+msgstr "Места скоро появятся. Пока можно указать город прямо в тексте поста."
+
+#: .\templates\home.html
+msgid "Polls are coming soon. You will be able to create interactive polls inside posts."
+msgstr "Опросы скоро появятся. Можно будет создавать интерактивные опросы внутри постов."
+
+#: .\templates\home.html
+msgid "Scheduled posts are coming soon. You will be able to choose the date and time before publishing."
+msgstr "Запланированные посты скоро появятся. Можно будет выбрать дату и время публикации."
+
+#: .\templates\home.html
+msgid "Co-authors are coming soon. You will be able to invite other users to appear on the same post."
+msgstr "Соавторы скоро появятся. Можно будет приглашать других пользователей в общий пост."
+
+#: .\templates\home.html
+msgid "Audience settings are coming soon. You will be able to choose who can see each post."
+msgstr "Настройки аудитории скоро появятся. Можно будет выбирать, кто увидит пост."
+
+#: .\templates\home.html
+msgid "Additional post options are coming soon. We are preparing more controls for creators."
+msgstr "Доп. настройки скоро появятся. Мы готовим больше инструментов для авторов."
+

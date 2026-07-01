@@ -2444,3 +2444,32 @@ msgstr "Merci ! Votre signalement a été envoyé."
 
 #~ msgid "This feature is currently in development."
 #~ msgstr "Cette fonctionnalité est actuellement en développement."
+
+#: .\templates\home.html
+msgid "This post feature is coming soon. We’re still working on it."
+msgstr "Cette fonctionnalité de publication sera bientôt disponible. Nous travaillons encore dessus."
+
+#: .\templates\home.html
+msgid "Location tools are coming soon. For now, you can mention the city in the post text."
+msgstr "Les outils de localisation seront bientôt disponibles. Pour l’instant, vous pouvez mentionner la ville dans le texte de la publication."
+
+#: .\templates\home.html
+msgid "Polls are coming soon. You will be able to create interactive polls inside posts."
+msgstr "Les sondages seront bientôt disponibles. Vous pourrez créer des sondages interactifs dans les publications."
+
+#: .\templates\home.html
+msgid "Scheduled posts are coming soon. You will be able to choose the date and time before publishing."
+msgstr "Les publications programmées seront bientôt disponibles. Vous pourrez choisir la date et l’heure avant de publier."
+
+#: .\templates\home.html
+msgid "Co-authors are coming soon. You will be able to invite other users to appear on the same post."
+msgstr "Les co-auteurs seront bientôt disponibles. Vous pourrez inviter d’autres utilisateurs à apparaître sur la même publication."
+
+#: .\templates\home.html
+msgid "Audience settings are coming soon. You will be able to choose who can see each post."
+msgstr "Les paramètres d’audience seront bientôt disponibles. Vous pourrez choisir qui peut voir chaque publication."
+
+#: .\templates\home.html
+msgid "Additional post options are coming soon. We are preparing more controls for creators."
+msgstr "Des options supplémentaires de publication seront bientôt disponibles. Nous préparons plus de contrôles pour les créateurs."
+
