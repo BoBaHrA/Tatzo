@@ -600,3 +600,145 @@ h1 {
     font-size: 19px;
   }
 }
+
+/* =========================
+   AUTH MOBILE LAYOUT HOTFIX
+========================= */
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  display: block !important;
+  min-height: 100dvh !important;
+  height: auto !important;
+  padding: 88px 16px 34px !important;
+  box-sizing: border-box !important;
+}
+
+.login-container,
+.register-container {
+  position: relative !important;
+  left: auto !important;
+  transform: none !important;
+
+  width: min(100%, 440px) !important;
+  max-width: 440px !important;
+
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
+}
+
+.login-container form,
+.register-container form {
+  width: 100% !important;
+}
+
+.input-group input,
+.login-container input,
+.register-container input {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.logo {
+  margin-top: 0 !important;
+}
+
+.logo img {
+  max-width: min(260px, 80vw) !important;
+  height: auto !important;
+}
+
+/* language switcher не должен вылезать за экран */
+.signup-language-switcher {
+  max-width: calc(100vw - 24px) !important;
+  overflow-x: auto !important;
+  scrollbar-width: none;
+}
+
+.signup-language-switcher::-webkit-scrollbar {
+  display: none;
+}
+
+/* кнопка Home */
+.auth-home-link,
+.auth-back-home,
+.back-home-link {
+  max-width: calc(100vw - 32px) !important;
+}
+
+@media (max-width: 700px) {
+  body {
+    padding: 96px 10px 28px !important;
+  }
+
+  .login-container,
+  .register-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 18px 14px !important;
+    border-radius: 18px !important;
+  }
+
+  h1 {
+    font-size: 32px !important;
+    line-height: 1.1 !important;
+    margin: 12px 0 20px !important;
+  }
+
+  .form-info p {
+    font-size: 15px !important;
+    line-height: 1.35 !important;
+  }
+
+  .account-type-options {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+
+  .account-type-option {
+    width: 100% !important;
+    height: 150px !important;
+  }
+
+  .option-content {
+    padding: 12px 8px !important;
+  }
+
+  .option-content h3 {
+    font-size: 18px !important;
+  }
+
+  .option-content p {
+    font-size: 14px !important;
+  }
+
+  .signup-verification-modal {
+    padding: 14px !important;
+  }
+
+  .signup-verification-dialog,
+  .modal-content {
+    width: 100% !important;
+    max-width: 420px !important;
+    box-sizing: border-box !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .account-type-options {
+    grid-template-columns: 1fr !important;
+  }
+
+  .account-type-option {
+    height: auto !important;
+    min-height: 126px !important;
+  }
+}
