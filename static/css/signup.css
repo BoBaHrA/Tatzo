@@ -742,3 +742,53 @@ body {
     min-height: 126px !important;
   }
 }
+
+/* =========================
+   SIGNUP ACCOUNT TYPE MOBILE FIX
+========================= */
+
+@media (max-width: 700px) {
+  .account-type-options {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    align-items: stretch !important;
+  }
+
+  .account-type-option {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 170px !important;
+    display: flex !important;
+  }
+
+  .account-type-option .option-content {
+    height: 100% !important;
+    min-height: 170px !important;
+    padding: 14px 10px !important;
+  }
+
+  .option-content h3 {
+    font-size: clamp(16px, 4.6vw, 20px) !important;
+    line-height: 1.15 !important;
+  }
+
+  .option-content p {
+    font-size: clamp(13px, 3.6vw, 15px) !important;
+    line-height: 1.35 !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .account-type-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .account-type-option {
+    min-height: 158px !important;
+  }
+
+  .account-type-option .option-content {
+    min-height: 158px !important;
+  }
+}
