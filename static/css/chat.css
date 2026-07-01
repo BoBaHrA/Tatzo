@@ -1783,3 +1783,70 @@ body {
     width: min(190px, 100%) !important;
   }
 }
+
+/* =========================
+   CHAT SEND ICON BUTTON
+========================= */
+
+.chat-send-btn {
+  width: 52px !important;
+  min-width: 52px !important;
+  height: 52px !important;
+  min-height: 52px !important;
+
+  padding: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border-radius: 18px !important;
+}
+
+.chat-send-btn img {
+  width: 24px !important;
+  height: 24px !important;
+
+  display: block !important;
+  object-fit: contain !important;
+
+  pointer-events: none !important;
+}
+
+/* если svg чёрный/тёмный — перекрашиваем в фон кнопки */
+.chat-send-btn img {
+  filter: brightness(0) saturate(100%) invert(5%) sepia(20%) saturate(1250%) hue-rotate(155deg) brightness(95%) contrast(100%);
+}
+
+@media (max-width: 900px) {
+  .chat-message-form {
+    grid-template-columns: 52px minmax(0, 1fr) 52px !important;
+    align-items: start !important;
+  }
+
+  .chat-send-btn {
+    grid-column: auto !important;
+    justify-self: auto !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .chat-message-form {
+    grid-template-columns: 48px minmax(0, 1fr) 48px !important;
+    gap: 8px !important;
+  }
+
+  .chat-file-btn,
+  .chat-send-btn {
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    border-radius: 16px !important;
+  }
+
+  .chat-send-btn img {
+    width: 22px !important;
+    height: 22px !important;
+  }
+}

@@ -128,8 +128,12 @@
           <div class="chat-selected-files" id="chatSelectedFiles"></div>
         </div>
 
-        <button type="submit">
-          {% trans "Send" %}
+        <button type="submit" class="chat-send-btn" aria-label="{% trans 'Send message' %}">
+          <img
+            src="{% static 'icons/send-message.svg' %}"
+            alt=""
+            aria-hidden="true"
+          >
         </button>
       </form>
     {% endif %}
