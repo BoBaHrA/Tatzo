@@ -950,7 +950,7 @@ msgstr "Назад к чатам"
 msgid "Block"
 msgstr "Заблокировать"
 
-msgid "Unlock"
+msgid "Unblock"
 msgstr "Разблокировать"
 
 #: .\templates\users\chat_thread.html:37
