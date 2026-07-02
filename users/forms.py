@@ -1,3 +1,5 @@
+import os
+
 from django import forms
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
@@ -16,6 +18,51 @@ from .models import (
 
 User = get_user_model()
 
+MAX_VERIFICATION_FILE_SIZE = int(9.5 * 1024 * 1024)
+
+ALLOWED_VERIFICATION_EXTENSIONS = {
+    ".pdf",
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+    ".heic",
+    ".heif",
+}
+
+ALLOWED_VERIFICATION_CONTENT_TYPES = {
+    "application/pdf",
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/heic",
+    "image/heif",
+}
+
+
+def validate_verification_file(uploaded_file):
+    if not uploaded_file:
+        return uploaded_file
+
+    extension = os.path.splitext(uploaded_file.name or "")[1].lower()
+    content_type = getattr(uploaded_file, "content_type", "") or ""
+
+    if extension not in ALLOWED_VERIFICATION_EXTENSIONS:
+        raise forms.ValidationError(
+            _("Only PDF or image files are allowed. Please upload PDF, JPG, PNG, WEBP or HEIC.")
+        )
+
+    if content_type and content_type not in ALLOWED_VERIFICATION_CONTENT_TYPES:
+        raise forms.ValidationError(
+            _("Only PDF or image files are allowed. Please upload PDF, JPG, PNG, WEBP or HEIC.")
+        )
+
+    if uploaded_file.size > MAX_VERIFICATION_FILE_SIZE:
+        raise forms.ValidationError(
+            _("This file is too large. Please upload a file under 10 MB.")
+        )
+
+    return uploaded_file
 
 class UserEditForm(forms.ModelForm):
     class Meta:
@@ -94,6 +141,9 @@ class VerificationForm(forms.ModelForm):
     business_document_file = forms.FileField(
         label="Файл бизнес-документа",
         required=True,
+        widget=forms.ClearableFileInput(attrs={
+            "accept": ".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,image/*,application/pdf",
+        }),
     )
     id_document_type = forms.ChoiceField(
         choices=ID_DOCUMENT_CHOICES,
@@ -103,6 +153,9 @@ class VerificationForm(forms.ModelForm):
     id_document_file = forms.FileField(
         label="Файл документа личности",
         required=True,
+        widget=forms.ClearableFileInput(attrs={
+            "accept": ".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,image/*,application/pdf",
+        }),
     )
 
     class Meta:
@@ -113,6 +166,16 @@ class VerificationForm(forms.ModelForm):
             "id_document_type",
             "id_document_file",
         ]
+        
+        def clean_business_document_file(self):
+            return validate_verification_file(
+                self.cleaned_data.get("business_document_file")
+            )
+
+        def clean_id_document_file(self):
+            return validate_verification_file(
+                self.cleaned_data.get("id_document_file")
+            )
         
 class ManualVerificationForm(forms.ModelForm):
     class Meta:
@@ -144,8 +207,14 @@ class ManualVerificationForm(forms.ModelForm):
             }),
             "extra_file": forms.ClearableFileInput(attrs={
                 "class": "verification-file",
+                "accept": ".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,image/*,application/pdf",
             }),
         }
+    
+        def clean_extra_file(self):
+            return validate_verification_file(
+                self.cleaned_data.get("extra_file")
+            )
         
 class PortfolioAlbumForm(forms.ModelForm):
     class Meta:

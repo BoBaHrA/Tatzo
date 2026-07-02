@@ -632,19 +632,30 @@ def verification_page(request):
             )
 
             if document_form.is_valid():
-                verification_document = document_form.save(commit=False)
-                verification_document.user = request.user
-                verification_document.is_verified = False
-                verification_document.save()
+                try:
+                    verification_document = document_form.save(commit=False)
+                    verification_document.user = request.user
+                    verification_document.is_verified = False
+                    verification_document.save()
 
-                profile.verification_status = "pending_documents"
-                profile.save(update_fields=["verification_status"])
+                    profile.verification_status = "pending_documents"
+                    profile.save(update_fields=["verification_status"])
 
-                messages.success(
-                    request,
-                    _("Your documents have been submitted for review."),
-                )
-                return redirect("home")
+                    messages.success(
+                        request,
+                        _("Your documents have been submitted for review."),
+                    )
+                    return redirect("home")
+
+                except Exception:
+                    logger.exception(
+                        "Verification document submission failed for user=%s",
+                        request.user.username,
+                    )
+                    messages.error(
+                        request,
+                        _("We could not submit your documents. Please try another file or a smaller file."),
+                    )
 
         elif verification_action == "manual":
             manual_form = ManualVerificationForm(
@@ -654,19 +665,30 @@ def verification_page(request):
             )
 
             if manual_form.is_valid():
-                manual_request = manual_form.save(commit=False)
-                manual_request.user = request.user
-                manual_request.is_reviewed = False
-                manual_request.save()
+                try:
+                    manual_request = manual_form.save(commit=False)
+                    manual_request.user = request.user
+                    manual_request.is_reviewed = False
+                    manual_request.save()
 
-                profile.verification_status = "pending_manual_review"
-                profile.save(update_fields=["verification_status"])
+                    profile.verification_status = "pending_manual_review"
+                    profile.save(update_fields=["verification_status"])
 
-                messages.success(
-                    request,
-                    _("Your manual review request has been submitted."),
-                )
-                return redirect("home")
+                    messages.success(
+                        request,
+                        _("Your manual review request has been submitted."),
+                    )
+                    return redirect("home")
+
+                except Exception:
+                    logger.exception(
+                        "Manual verification submission failed for user=%s",
+                        request.user.username,
+                    )
+                    messages.error(
+                        request,
+                        _("We could not submit your request. Please try another file or a smaller file."),
+                    )
 
         else:
             messages.error(request, _("Invalid verification request."))

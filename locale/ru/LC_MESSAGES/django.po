@@ -2560,3 +2560,15 @@ msgstr "Правила безопасного сообщества."
 
 msgid "Publisher and hosting information."
 msgstr "Информация об издателе и хостинге."
+
+msgid "Only PDF or image files are allowed. Please upload PDF, JPG, PNG, WEBP or HEIC."
+msgstr "Разрешены только PDF или изображения. Загрузите PDF, JPG, PNG, WEBP или HEIC."
+
+msgid "This file is too large. Please upload a file under 10 MB."
+msgstr "Файл слишком большой. Загрузите файл меньше 10 МБ."
+
+msgid "We could not submit your documents. Please try another file or a smaller file."
+msgstr "Не удалось отправить документы. Попробуйте другой файл или файл меньшего размера."
+
+msgid "We could not submit your request. Please try another file or a smaller file."
+msgstr "Не удалось отправить заявку. Попробуйте другой файл или файл меньшего размера."

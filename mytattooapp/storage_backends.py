@@ -13,10 +13,21 @@ class TatzoMediaCloudinaryStorage(MediaCloudinaryStorage):
         ".mkv",
     }
 
+    RAW_EXTENSIONS = {
+        ".pdf",
+        ".doc",
+        ".docx",
+        ".txt",
+        ".rtf",
+    }
+
     def _get_resource_type(self, name):
         extension = os.path.splitext(name)[1].lower()
 
         if extension in self.VIDEO_EXTENSIONS:
             return RESOURCE_TYPES["VIDEO"]
+
+        if extension in self.RAW_EXTENSIONS:
+            return RESOURCE_TYPES["RAW"]
 
         return RESOURCE_TYPES["IMAGE"]
