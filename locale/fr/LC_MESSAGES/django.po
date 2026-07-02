@@ -2553,3 +2553,28 @@ msgstr "Vous devez accepter les conditions et la politique de confidentialité p
 
 msgid "Legal"
 msgstr "Juridique"
+
+
+msgid "Legal center"
+msgstr "Centre juridique"
+
+msgid "Back to legal center"
+msgstr "Retour au centre juridique"
+
+msgid "Find all legal information about Tatzo in one place."
+msgstr "Retrouvez toutes les informations juridiques de Tatzo au même endroit."
+
+msgid "Rules for using Tatzo."
+msgstr "Règles d’utilisation de Tatzo."
+
+msgid "How we handle personal data."
+msgstr "Comment nous traitons les données personnelles."
+
+msgid "Cookies used by the platform."
+msgstr "Cookies utilisés par la plateforme."
+
+msgid "Rules for a safe community."
+msgstr "Règles pour une communauté sûre."
+
+msgid "Publisher and hosting information."
+msgstr "Informations sur l’éditeur et l’hébergement."

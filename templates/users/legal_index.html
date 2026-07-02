@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Legal" %} | Tatzo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/legal.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="legal-page-shell">
+  <div class="legal-page-card legal-index-card">
+    <a href="{% url 'home' %}" class="legal-back-link">← {% trans "Back to Tatzo" %}</a>
+
+    <p class="legal-eyebrow">Tatzo</p>
+    <h1>{% trans "Legal" %}</h1>
+
+    <p class="legal-index-intro">
+      {% trans "Find all legal information about Tatzo in one place." %}
+    </p>
+
+    <div class="legal-index-grid">
+      <a href="{% url 'terms' %}" class="legal-index-link">
+        <span class="legal-index-icon">📄</span>
+        <span>
+          <strong>{% trans "Terms" %}</strong>
+          <small>{% trans "Rules for using Tatzo." %}</small>
+        </span>
+      </a>
+
+      <a href="{% url 'privacy' %}" class="legal-index-link">
+        <span class="legal-index-icon">🔐</span>
+        <span>
+          <strong>{% trans "Privacy" %}</strong>
+          <small>{% trans "How we handle personal data." %}</small>
+        </span>
+      </a>
+
+      <a href="{% url 'cookies' %}" class="legal-index-link">
+        <span class="legal-index-icon">🍪</span>
+        <span>
+          <strong>{% trans "Cookies" %}</strong>
+          <small>{% trans "Cookies used by the platform." %}</small>
+        </span>
+      </a>
+
+      <a href="{% url 'community_guidelines' %}" class="legal-index-link">
+        <span class="legal-index-icon">🛡️</span>
+        <span>
+          <strong>{% trans "Community Guidelines" %}</strong>
+          <small>{% trans "Rules for a safe community." %}</small>
+        </span>
+      </a>
+
+      <a href="{% url 'legal_notice' %}" class="legal-index-link">
+        <span class="legal-index-icon">⚖️</span>
+        <span>
+          <strong>{% trans "Legal notice" %}</strong>
+          <small>{% trans "Publisher and hosting information." %}</small>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

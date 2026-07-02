@@ -2034,3 +2034,13 @@ def legal_page(request, page):
             "page_key": page,
         },
     )
+    
+    
+def legal_index(request):
+    return render(
+        request,
+        "users/legal_index.html",
+        {
+            "legal_pages": LEGAL_PAGES,
+        },
+    )

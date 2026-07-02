@@ -2535,3 +2535,28 @@ msgstr "Чтобы создать аккаунт, необходимо прин�
 
 msgid "Legal"
 msgstr "Юридическое"
+
+
+msgid "Legal center"
+msgstr "Юридический центр"
+
+msgid "Back to legal center"
+msgstr "Назад в юридический центр"
+
+msgid "Find all legal information about Tatzo in one place."
+msgstr "Вся юридическая информация о Tatzo в одном месте."
+
+msgid "Rules for using Tatzo."
+msgstr "Правила использования Tatzo."
+
+msgid "How we handle personal data."
+msgstr "Как мы обрабатываем персональные данные."
+
+msgid "Cookies used by the platform."
+msgstr "Cookies, используемые платформой."
+
+msgid "Rules for a safe community."
+msgstr "Правила безопасного сообщества."
+
+msgid "Publisher and hosting information."
+msgstr "Информация об издателе и хостинге."

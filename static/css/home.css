@@ -8546,3 +8546,18 @@ a.more-admin-link .more-admin-subtitle {
   color: #04c5bf;
   background: rgba(4, 197, 191, 0.1);
 }
+
+.mobile-legal-links a {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(4, 197, 191, 0.06);
+  border: 1px solid rgba(4, 197, 191, 0.12);
+  color: #dffcff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 800;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

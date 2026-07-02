@@ -158,24 +158,8 @@
           {% trans "Legal" %}
         </div>
 
-        <a href="{% url 'terms' %}" class="sidebar-more-link">
-          <span>{% trans "Terms" %}</span>
-        </a>
-
-        <a href="{% url 'privacy' %}" class="sidebar-more-link">
-          <span>{% trans "Privacy" %}</span>
-        </a>
-
-        <a href="{% url 'cookies' %}" class="sidebar-more-link">
-          <span>{% trans "Cookies" %}</span>
-        </a>
-
-        <a href="{% url 'community_guidelines' %}" class="sidebar-more-link">
-          <span>{% trans "Community Guidelines" %}</span>
-        </a>
-
-        <a href="{% url 'legal_notice' %}" class="sidebar-more-link">
-          <span>{% trans "Legal notice" %}</span>
+        <a href="{% url 'legal_index' %}" class="sidebar-more-link">
+          <span>{% trans "Legal center" %}</span>
         </a>
 
         {% if request.user.is_authenticated and request.user.is_staff %}
@@ -343,11 +327,10 @@
   <div class="mobile-legal-links">
     <p>{% trans "Legal" %}</p>
 
-    <a href="{% url 'terms' %}">{% trans "Terms" %}</a>
-    <a href="{% url 'privacy' %}">{% trans "Privacy" %}</a>
-    <a href="{% url 'cookies' %}">{% trans "Cookies" %}</a>
-    <a href="{% url 'community_guidelines' %}">{% trans "Community Guidelines" %}</a>
-    <a href="{% url 'legal_notice' %}">{% trans "Legal notice" %}</a>
+    <a href="{% url 'legal_index' %}">
+      <span>⚖️</span>
+      <span>{% trans "Legal center" %}</span>
+    </a>
   </div>
 
   <form action="{% url 'set_language' %}" method="post" class="mobile-language-form">

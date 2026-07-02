@@ -67,6 +67,7 @@ urlpatterns = [
         name="chat_new_messages",
     ),
     path("search/", views.search_page, name="search_page"),
+    path("legal/", views.legal_index, name="legal_index"),
     path("terms/", views.legal_page, {"page": "terms"}, name="terms"),
     path("privacy/", views.legal_page, {"page": "privacy"}, name="privacy"),
     path("cookies/", views.legal_page, {"page": "cookies"}, name="cookies"),
