@@ -2195,6 +2195,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     els.modalCommentForm?.addEventListener("submit", comments.submit);
     els.modalCommentsList?.addEventListener("click", async (e) => {
+      const profileLink = e.target.closest(".comment-profile-link");
+
+      if (profileLink) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        window.location.href = profileLink.href;
+        return;
+      }
+
     const likeBtn = e.target.closest(".comment-like-btn");
     if (likeBtn) {
       e.preventDefault();

@@ -2,7 +2,7 @@
 
 <div class="comment-thread">
   <div class="comment-item">
-    <div class="comment-avatar">
+    <a href="{% url 'profile' comment.user.username %}" class="comment-avatar comment-profile-link">
       {% if comment.user.profile.profile_image %}
         <img src="{{ comment.user.profile.profile_image.url }}" alt="{% trans 'User Avatar' %}">
       {% else %}
@@ -10,11 +10,13 @@
           {{ comment.user.username|first|upper }}
         </div>
       {% endif %}
-    </div>
+    </a>
 
     <div class="comment-body">
       <div class="comment-top">
-        <span class="comment-username">{{ comment.user.username }}</span>
+        <a href="{% url 'profile' comment.user.username %}" class="comment-username comment-profile-link">
+          {{ comment.user.username }}
+        </a>
         <span class="comment-date">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
       </div>
 
@@ -83,7 +85,7 @@
     <div class="comment-replies" data-comment-id="{{ comment.id }}" hidden>
       {% for reply in comment.replies.all %}
         <div class="comment-item comment-reply">
-          <div class="comment-avatar">
+          <a href="{% url 'profile' reply.user.username %}" class="comment-avatar comment-profile-link">
             {% if reply.user.profile.profile_image %}
               <img src="{{ reply.user.profile.profile_image.url }}" alt="{% trans 'User Avatar' %}">
             {% else %}
@@ -91,11 +93,13 @@
                 {{ reply.user.username|first|upper }}
               </div>
             {% endif %}
-          </div>
+          </a>
 
           <div class="comment-body">
             <div class="comment-top">
-              <span class="comment-username">{{ reply.user.username }}</span>
+              <a href="{% url 'profile' reply.user.username %}" class="comment-username comment-profile-link">
+                {{ reply.user.username }}
+              </a>
               <span class="comment-date">{{ reply.created_at|date:"d.m.Y H:i" }}</span>
             </div>
 
