@@ -44,6 +44,27 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", function () {
     const fileInputs = document.querySelectorAll('.tatzo-file-upload input[type="file"]');
 
+    function getMaxFileNameLength() {
+        return window.matchMedia("(max-width: 700px)").matches ? 28 : 44;
+    }
+
+    function truncateFileName(name, maxLength = 34) {
+        if (!name || name.length <= maxLength) {
+            return name;
+        }
+
+        const dotIndex = name.lastIndexOf(".");
+        const extension = dotIndex > 0 ? name.slice(dotIndex) : "";
+
+        const availableLength = maxLength - extension.length - 3;
+
+        if (availableLength <= 8) {
+            return `${name.slice(0, maxLength - 3)}...`;
+        }
+
+        return `${name.slice(0, availableLength)}...${extension}`;
+    }
+
     fileInputs.forEach((input) => {
         const wrapper = input.closest(".tatzo-file-upload");
         const button = wrapper?.querySelector(".tatzo-file-button");
@@ -60,17 +81,23 @@ document.addEventListener("DOMContentLoaded", function () {
         input.addEventListener("change", function () {
             if (this.files.length > 0) {
                 const names = Array.from(this.files).map((file) => file.name);
+                const firstName = truncateFileName(names[0], getMaxFileNameLength());
 
                 button.textContent = selectedButtonText;
+
                 fileName.textContent =
                     names.length === 1
-                        ? names[0]
-                        : `${names[0]} +${names.length - 1}`;
+                        ? firstName
+                        : `${firstName} +${names.length - 1}`;
+
+                fileName.title = names.join(", ");
 
                 wrapper.classList.add("file-selected");
             } else {
                 button.textContent = defaultButtonText;
                 fileName.textContent = emptyFileText;
+                fileName.removeAttribute("title");
+
                 wrapper.classList.remove("file-selected");
             }
         });

@@ -494,3 +494,42 @@ body {
     text-overflow: ellipsis;
   }
 }
+
+/* =========================
+   VERIFICATION FILE NAME FINAL FIX
+========================= */
+
+.verification-page .tatzo-file-upload {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.verification-page .tatzo-file-name {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 700px) {
+  .verification-page .tatzo-file-upload {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .verification-page .tatzo-file-button,
+  .verification-page .tatzo-file-name {
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+}
