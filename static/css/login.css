@@ -515,3 +515,35 @@ body, .container {
   pointer-events: none !important;
   opacity: 0.95 !important;
 }
+
+/* =========================
+   LOGIN INPUT ALIGNMENT FIX
+========================= */
+
+.login-container form {
+  width: 100% !important;
+}
+
+.login-container .input-group {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.login-container .input-group > input,
+.login-container .password-input-wrap,
+.login-container .password-input-wrap input {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.login-container .input-group > input,
+.login-container .password-input-wrap input {
+  min-height: 42px !important;
+  margin: 0 !important;
+}
+
+.login-container .password-input-wrap input {
+  padding-right: 52px !important;
+}
