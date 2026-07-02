@@ -251,6 +251,24 @@ msgstr "Если вы не создавали этот аккаунт, прос�
 msgid "Home"
 msgstr "Главная"
 
+msgid "Images compressed"
+msgstr "Изображения сжаты"
+
+msgid "Compressing..."
+msgstr "Сжатие..."
+
+msgid "Space saved"
+msgstr "Сэкономлено"
+
+msgid "Image is still too large after compression."
+msgstr "Изображение всё ещё слишком большое после сжатия."
+
+msgid "Compressing images..."
+msgstr "Сжатие изображений..."
+
+msgid "Portfolio image is still too large after compression. Please choose a smaller image."
+msgstr "Изображение портфолио всё ещё слишком большое после сжатия. Выберите изображение поменьше."
+
 #: .\templates\home.html:12
 msgid "Got something new? Share it!"
 msgstr "Есть что-то новое? Поделитесь!"

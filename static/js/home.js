@@ -915,7 +915,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           if (compressedCount > 0 && compressor) {
             helpers.showToast(
-              `${t("imagesCompressed", "Images compressed")}: ${compressedCount}. ${t("saved", "Saved")} ${compressor.formatMB(savedBytes)}.`,
+              `${t("imagesCompressed", "Images compressed")}: ${compressedCount}. ${t("spaceSaved", "Space saved")}: ${compressor.formatMB(savedBytes)}.`,
               "success"
             );
           }
