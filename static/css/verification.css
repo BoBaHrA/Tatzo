@@ -446,3 +446,51 @@ body {
     text-align: center;
   }
 }
+
+/* =========================
+   VERIFICATION FILE NAME ELLIPSIS FIX
+========================= */
+
+.tatzo-file-upload {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.tatzo-file-name {
+  display: block;
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 700px) {
+  .tatzo-file-upload {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .tatzo-file-button {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .tatzo-file-name {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
