@@ -8744,3 +8744,29 @@ a.more-admin-link .more-admin-subtitle {
 .comment-username.comment-profile-link:hover {
   color: #04c5bf;
 }
+
+/* =========================
+   COMMENT USERNAME LINK COLOR FIX
+========================= */
+
+.comment-username.comment-profile-link,
+.comment-top .comment-username.comment-profile-link {
+  color: #04c5bf !important;
+  font-weight: 900 !important;
+  text-decoration: none !important;
+}
+
+.comment-username.comment-profile-link:visited,
+.comment-top .comment-username.comment-profile-link:visited {
+  color: #04c5bf !important;
+}
+
+.comment-username.comment-profile-link:hover,
+.comment-top .comment-username.comment-profile-link:hover {
+  color: #27fff6 !important;
+  text-decoration: none !important;
+}
+
+.comment-avatar.comment-profile-link {
+  text-decoration: none !important;
+}
