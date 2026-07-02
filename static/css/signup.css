@@ -793,51 +793,54 @@ body {
   }
 }
 
-.signup-legal-consent {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin: 18px 0;
-  color: rgba(234, 255, 255, 0.76);
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.signup-legal-consent input {
-  width: 18px;
-  height: 18px;
-  margin-top: 2px;
-  accent-color: #04c5bf;
-  flex: 0 0 auto;
-}
-
-.signup-legal-consent a {
-  color: #04c5bf;
-  font-weight: 800;
-  text-decoration: none;
-}
-
-.signup-legal-consent a:hover {
-  color: #ee0c6f;
-}
+/* =========================
+   SIGNUP LEGAL CONSENT
+========================= */
 
 .signup-legal-consent {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: start;
+  column-gap: 12px;
+
   margin: 18px 0 20px;
-  color: rgba(234, 255, 255, 0.78);
-  font-size: 13px;
-  line-height: 1.45;
+  padding: 14px;
+
+  border-radius: 16px;
+  border: 1px solid rgba(4, 197, 191, 0.18);
+  background: rgba(4, 197, 191, 0.055);
+
+  color: rgba(234, 255, 255, 0.82);
   font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left;
+
+  cursor: pointer;
 }
 
-.signup-legal-consent input {
-  width: 18px;
-  height: 18px;
-  margin-top: 2px;
+.signup-legal-consent input[type="checkbox"] {
+  width: 18px !important;
+  min-width: 18px !important;
+  max-width: 18px !important;
+
+  height: 18px !important;
+  min-height: 18px !important;
+  max-height: 18px !important;
+
+  margin: 2px 0 0 !important;
+  padding: 0 !important;
+
   accent-color: #04c5bf;
-  flex: 0 0 auto;
+  cursor: pointer;
+}
+
+.signup-legal-consent span {
+  display: block;
+  min-width: 0;
 }
 
 .signup-legal-consent a {
@@ -848,4 +851,21 @@ body {
 
 .signup-legal-consent a:hover {
   color: #ee0c6f;
+}
+
+@media (max-width: 700px) {
+  .signup-legal-consent {
+    grid-template-columns: 22px minmax(0, 1fr);
+    padding: 13px;
+    font-size: 12.5px;
+    line-height: 1.45;
+  }
+}
+
+/* =========================
+   AUTH LEGAL FOOTER HOTFIX
+========================= */
+
+.tatzo-legal-footer {
+    display: none !important;
 }

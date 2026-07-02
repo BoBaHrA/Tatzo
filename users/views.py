@@ -435,6 +435,22 @@ def signup(request):
     if request.method == "POST":
         user_form = CustomUserCreationForm(request.POST)
 
+        if request.POST.get("accept_terms") != "1":
+            messages.error(
+                request,
+                _("You must accept the Terms and Privacy Policy to create an account."),
+            )
+
+            return render(
+                request,
+                "signup.html",
+                {
+                    "form": user_form,
+                    "show_verification_modal": False,
+                },
+                status=400,
+            )
+
         email = (request.POST.get("email") or "").strip().lower()
 
         signup_checks = [
@@ -519,22 +535,6 @@ def signup(request):
                     request,
                     _("We could not send the confirmation email. Please try again later."),
                 )
-                
-    if request.POST.get("accept_terms") != "1":
-        messages.error(
-            request,
-            _("You must accept the Terms and Privacy Policy to create an account."),
-        )
-
-        return render(
-            request,
-            "signup.html",
-            {
-                "form": CustomUserCreationForm(request.POST),
-                "show_verification_modal": False,
-            },
-            status=400,
-        )
 
     else:
         user_form = CustomUserCreationForm()
