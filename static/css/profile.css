@@ -2701,3 +2701,293 @@ body.edit-profile-no-scroll {
     font-size: 10px !important;
   }
 }
+
+/* =========================
+   EDIT PROFILE MOBILE HOTFIX
+========================= */
+
+@media (max-width: 980px) {
+  body.edit-profile-no-scroll {
+    overflow: auto !important;
+  }
+
+  .edit-profile-page {
+    display: block !important;
+    height: auto !important;
+    min-height: 100dvh !important;
+    padding: 16px 12px 96px !important;
+    overflow: visible !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+  }
+
+  .edit-profile-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    margin: 0 auto !important;
+    padding: 20px 16px 22px !important;
+    overflow: visible !important;
+    border-radius: 24px !important;
+    transform: none !important;
+    box-sizing: border-box !important;
+  }
+
+  .edit-profile-hero {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    margin-bottom: 22px !important;
+  }
+
+  .edit-profile-title-icon {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    border-radius: 16px !important;
+  }
+
+  .edit-profile-title-icon img {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  .edit-profile-header h1 {
+    font-size: clamp(34px, 10vw, 44px) !important;
+    line-height: 0.98 !important;
+    letter-spacing: -0.04em !important;
+    max-width: 100% !important;
+  }
+
+  .edit-profile-header p {
+    font-size: 15px !important;
+    line-height: 1.45 !important;
+    max-width: 100% !important;
+  }
+
+  .edit-profile-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 22px !important;
+    width: 100% !important;
+  }
+
+  .edit-profile-left,
+  .edit-profile-right {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    align-items: stretch !important;
+  }
+
+  .edit-profile-left {
+    gap: 16px !important;
+  }
+
+  .edit-profile-field,
+  .edit-profile-clean-field,
+  .edit-profile-avatar-card,
+  .edit-profile-right .edit-profile-field {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .edit-profile-field-title {
+    margin-bottom: 8px !important;
+  }
+
+  .edit-profile-field label {
+    font-size: 14px !important;
+  }
+
+  .edit-profile-input-wrap,
+  .edit-profile-textarea-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .edit-profile-input-wrap input,
+  .edit-profile-tag-wrap input,
+  .edit-profile-textarea-wrap textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .edit-profile-input-wrap input {
+    min-height: 52px !important;
+  }
+
+  .edit-profile-textarea-wrap textarea {
+    min-height: 140px !important;
+    resize: vertical !important;
+  }
+
+  .edit-profile-clean-field .edit-profile-help {
+    margin-top: 7px !important;
+    max-width: 100% !important;
+    text-align: left !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+  }
+
+  .edit-profile-help-row {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    margin-top: 8px !important;
+  }
+
+  .bio-counter {
+    flex: 0 0 auto !important;
+    min-width: auto !important;
+    font-size: 12px !important;
+  }
+
+  .edit-profile-privacy-field {
+    margin-top: 8px !important;
+    padding: 16px !important;
+  }
+
+  .privacy-main-row {
+    grid-template-columns: 44px minmax(0, 1fr) 54px !important;
+    gap: 12px !important;
+  }
+
+  .privacy-icon-circle {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  .privacy-icon-circle img {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  .privacy-copy strong,
+  .privacy-inner-card strong {
+    font-size: 14px !important;
+  }
+
+  .privacy-copy small,
+  .privacy-inner-card small {
+    font-size: 12px !important;
+  }
+
+  .privacy-inner-card {
+    margin-top: 12px !important;
+    padding: 14px !important;
+  }
+
+  .edit-profile-avatar-card {
+    padding: 20px 16px !important;
+  }
+
+  .edit-profile-avatar-card > label {
+    text-align: center !important;
+    margin-bottom: 14px !important;
+  }
+
+  .avatar-upload-preview,
+  .avatar-upload-placeholder {
+    width: 132px !important;
+    height: 132px !important;
+    flex-basis: 132px !important;
+  }
+
+  .avatar-upload-btn.avatar-upload-btn-outline {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 48px !important;
+    font-size: 14px !important;
+  }
+
+  .avatar-info-card {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .avatar-info-dashed {
+    min-height: 94px !important;
+  }
+
+  .avatar-tip-card {
+    min-height: auto !important;
+  }
+
+  .edit-profile-actions-right {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    margin-top: 14px !important;
+  }
+
+  .edit-profile-actions-right .profile-btn,
+  .edit-profile-actions-right a.profile-btn {
+    width: 100% !important;
+    height: 46px !important;
+    min-height: 46px !important;
+  }
+
+  .avatar-crop-modal__dialog {
+    width: calc(100vw - 24px) !important;
+    margin: 24px auto !important;
+    padding: 18px !important;
+    box-sizing: border-box !important;
+  }
+
+  .avatar-crop-stage {
+    width: min(300px, calc(100vw - 64px)) !important;
+    height: min(300px, calc(100vw - 64px)) !important;
+  }
+
+  .avatar-crop-modal__actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .edit-profile-card {
+    padding: 18px 14px 20px !important;
+  }
+
+  .edit-profile-header h1 {
+    font-size: clamp(30px, 9.5vw, 38px) !important;
+  }
+
+  .edit-profile-header p {
+    font-size: 14px !important;
+  }
+
+  .edit-profile-title-icon {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+  }
+
+  .edit-profile-input-wrap img,
+  .edit-profile-textarea-wrap img {
+    left: 16px !important;
+  }
+
+  .edit-profile-input-wrap input,
+  .edit-profile-textarea-wrap textarea {
+    padding-left: 54px !important;
+  }
+
+  .edit-profile-tag-wrap input {
+    padding-left: 52px !important;
+  }
+
+  .edit-profile-tag-wrap .tag-prefix {
+    left: 18px !important;
+  }
+}
