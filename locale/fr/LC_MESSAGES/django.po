@@ -2550,3 +2550,6 @@ msgstr "et"
 
 msgid "You must accept the Terms and Privacy Policy to create an account."
 msgstr "Vous devez accepter les conditions et la politique de confidentialité pour créer un compte."
+
+msgid "Legal"
+msgstr "Juridique"

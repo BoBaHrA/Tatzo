@@ -8502,3 +8502,47 @@ a.more-admin-link .more-admin-subtitle {
 .mobile-auth-logout:hover {
   background: rgba(238, 12, 111, 0.16);
 }
+
+/* =========================
+   LEGAL LINKS
+========================= */
+
+.sidebar-more-title-secondary {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(4, 197, 191, 0.14);
+}
+
+.mobile-legal-links {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(4, 197, 191, 0.16);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.mobile-legal-links p {
+  margin: 0 0 4px;
+  color: rgba(234, 255, 255, 0.54);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.mobile-legal-links a {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(4, 197, 191, 0.06);
+  border: 1px solid rgba(4, 197, 191, 0.12);
+  color: #dffcff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.mobile-legal-links a:hover {
+  color: #04c5bf;
+  background: rgba(4, 197, 191, 0.1);
+}

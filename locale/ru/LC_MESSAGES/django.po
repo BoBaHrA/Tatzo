@@ -2532,3 +2532,6 @@ msgstr "и"
 
 msgid "You must accept the Terms and Privacy Policy to create an account."
 msgstr "Чтобы создать аккаунт, необходимо принять условия и политику конфиденциальности."
+
+msgid "Legal"
+msgstr "Юридическое"
