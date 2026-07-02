@@ -1,5 +1,6 @@
 import logging
 
+from .legal_content import LEGAL_PAGES
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
@@ -518,6 +519,22 @@ def signup(request):
                     request,
                     _("We could not send the confirmation email. Please try again later."),
                 )
+                
+    if request.POST.get("accept_terms") != "1":
+        messages.error(
+            request,
+            _("You must accept the Terms and Privacy Policy to create an account."),
+        )
+
+        return render(
+            request,
+            "signup.html",
+            {
+                "form": CustomUserCreationForm(request.POST),
+                "show_verification_modal": False,
+            },
+            status=400,
+        )
 
     else:
         user_form = CustomUserCreationForm()
@@ -2002,3 +2019,18 @@ def report_problem(request):
         "form": form,
         "page_url": request.GET.get("next", ""),
     })
+    
+def legal_page(request, page):
+    legal_data = LEGAL_PAGES.get(page)
+
+    if not legal_data:
+        raise Http404
+
+    return render(
+        request,
+        "users/legal_page.html",
+        {
+            "legal_page": legal_data,
+            "page_key": page,
+        },
+    )

@@ -792,3 +792,60 @@ body {
     min-height: 158px !important;
   }
 }
+
+.signup-legal-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 18px 0;
+  color: rgba(234, 255, 255, 0.76);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.signup-legal-consent input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: #04c5bf;
+  flex: 0 0 auto;
+}
+
+.signup-legal-consent a {
+  color: #04c5bf;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.signup-legal-consent a:hover {
+  color: #ee0c6f;
+}
+
+.signup-legal-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 18px 0 20px;
+  color: rgba(234, 255, 255, 0.78);
+  font-size: 13px;
+  line-height: 1.45;
+  font-family: "Poppins", sans-serif;
+}
+
+.signup-legal-consent input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: #04c5bf;
+  flex: 0 0 auto;
+}
+
+.signup-legal-consent a {
+  color: #04c5bf;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.signup-legal-consent a:hover {
+  color: #ee0c6f;
+}
