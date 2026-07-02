@@ -67,6 +67,21 @@ urlpatterns = [
         name="chat_new_messages",
     ),
     path("search/", views.search_page, name="search_page"),
+    path("terms/", views.legal_page, {"page": "terms"}, name="terms"),
+    path("privacy/", views.legal_page, {"page": "privacy"}, name="privacy"),
+    path("cookies/", views.legal_page, {"page": "cookies"}, name="cookies"),
+    path(
+        "community-guidelines/",
+        views.legal_page,
+        {"page": "community-guidelines"},
+        name="community_guidelines",
+    ),
+    path(
+        "legal-notice/",
+        views.legal_page,
+        {"page": "legal-notice"},
+        name="legal_notice",
+    ),
     path(
     "profile/<str:username>/follow/",
     views.toggle_follow,

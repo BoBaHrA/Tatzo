@@ -1,0 +1,83 @@
+.legal-page-shell {
+  min-height: 100vh;
+  padding: 48px 18px;
+  background:
+    radial-gradient(circle at top left, rgba(4, 197, 191, 0.14), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(238, 12, 111, 0.12), transparent 34%),
+    #000d18;
+  color: #eaffff;
+  font-family: "Poppins", sans-serif;
+}
+
+.legal-page-card {
+  width: min(980px, 100%);
+  margin: 0 auto;
+  padding: 38px;
+  border-radius: 30px;
+  background: rgba(0, 18, 28, 0.94);
+  border: 1px solid rgba(4, 197, 191, 0.18);
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.38),
+    0 0 34px rgba(4, 197, 191, 0.1);
+}
+
+.legal-back-link {
+  display: inline-flex;
+  margin-bottom: 24px;
+  color: #04c5bf;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.legal-eyebrow {
+  margin: 0 0 8px;
+  color: #04c5bf;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.legal-page-card h1 {
+  margin: 0;
+  color: #ee0c6f;
+  font-size: clamp(32px, 5vw, 54px);
+  line-height: 1.05;
+}
+
+.legal-updated {
+  margin: 14px 0 34px;
+  color: rgba(234, 255, 255, 0.62);
+}
+
+.legal-section {
+  padding: 26px 0;
+  border-top: 1px solid rgba(4, 197, 191, 0.12);
+}
+
+.legal-section h2 {
+  margin: 0 0 14px;
+  color: #04c5bf;
+  font-size: 22px;
+}
+
+.legal-section p {
+  margin: 0 0 12px;
+  color: rgba(234, 255, 255, 0.82);
+  line-height: 1.75;
+  font-size: 15px;
+}
+
+@media (max-width: 640px) {
+  .legal-page-shell {
+    padding: 24px 12px;
+  }
+
+  .legal-page-card {
+    padding: 26px 18px;
+    border-radius: 24px;
+  }
+
+  .legal-section {
+    padding: 22px 0;
+  }
+}

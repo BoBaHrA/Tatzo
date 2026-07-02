@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ legal_page.title }} | Tatzo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/legal.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="legal-page-shell">
+  <div class="legal-page-card">
+    <a href="{% url 'home' %}" class="legal-back-link">← {% trans "Back to Tatzo" %}</a>
+
+    <p class="legal-eyebrow">Tatzo</p>
+    <h1>{{ legal_page.title }}</h1>
+
+    <p class="legal-updated">
+      {% trans "Last updated:" %} {{ legal_page.updated }}
+    </p>
+
+    {% for section in legal_page.sections %}
+      <section class="legal-section">
+        <h2>{{ section.heading }}</h2>
+
+        {% for paragraph in section.paragraphs %}
+          <p>{{ paragraph }}</p>
+        {% endfor %}
+      </section>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
