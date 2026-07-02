@@ -86,6 +86,8 @@
   </div>
 </div>
 
+<script src="{% static 'js/image_compression.js' %}"></script>
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const input = document.querySelector('input[name="images"]');
@@ -97,23 +99,88 @@
     let selectedPortfolioFiles = [];
 
     function getFileKey(file) {
-      return `${file.name}_${file.size}_${file.lastModified}`;
+      return file._tatzoOriginalKey || `${file.name}_${file.size}_${file.lastModified}`;
     }
 
-    function addPortfolioFiles(fileList) {
+    async function addPortfolioFiles(fileList) {
       const incomingFiles = Array.from(fileList || []);
+      const compressor = window.TatzoImageCompression;
+      const maxImageBytes = 9.5 * 1024 * 1024;
 
-      incomingFiles.forEach((file) => {
-        if (!file.type.startsWith("image/")) return;
+      const submitBtn = document.querySelector(".portfolio-form .portfolio-btn-full");
+      const originalSubmitText = submitBtn ? submitBtn.textContent : "";
 
-        const alreadyExists = selectedPortfolioFiles.some((existingFile) => (
-          getFileKey(existingFile) === getFileKey(file)
-        ));
+      let compressedCount = 0;
+      let savedBytes = 0;
 
-        if (!alreadyExists) {
-          selectedPortfolioFiles.push(file);
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Compressing images...";
+      }
+
+      try {
+        for (const file of incomingFiles) {
+          if (!file.type.startsWith("image/")) continue;
+
+          const originalKey = `${file.name}_${file.size}_${file.lastModified}`;
+          let fileToAdd = file;
+
+          if (compressor) {
+            try {
+              const result = await compressor.compressImage(file, {
+                maxWidthOrHeight: 2000,
+                maxSizeMB: 1.8,
+                hardLimitMB: 9.5,
+                initialQuality: 0.84,
+                minQuality: 0.6,
+              });
+
+              fileToAdd = result.file;
+
+              if (result.compressed) {
+                compressedCount += 1;
+                savedBytes += Math.max(0, result.originalSize - result.compressedSize);
+              }
+            } catch (err) {
+              console.error("Portfolio image compression failed:", err);
+              fileToAdd = file;
+            }
+          }
+
+          if (fileToAdd.size > maxImageBytes) {
+            alert(`${file.name} is still too large after compression. Please choose a smaller image.`);
+            continue;
+          }
+
+          try {
+            Object.defineProperty(fileToAdd, "_tatzoOriginalKey", {
+              value: originalKey,
+              configurable: true,
+            });
+          } catch (_) {
+            fileToAdd._tatzoOriginalKey = originalKey;
+          }
+
+          const alreadyExists = selectedPortfolioFiles.some((existingFile) => (
+            getFileKey(existingFile) === getFileKey(fileToAdd)
+          ));
+
+          if (!alreadyExists) {
+            selectedPortfolioFiles.push(fileToAdd);
+          }
         }
-      });
+
+        if (compressedCount > 0 && compressor) {
+          console.log(
+            `Portfolio images compressed: ${compressedCount}. Saved ${compressor.formatMB(savedBytes)}.`
+          );
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalSubmitText || "Save work";
+        }
+      }
     }
 
     function syncInputFiles() {
@@ -196,8 +263,8 @@
       });
     }
 
-    input.addEventListener("change", () => {
-      addPortfolioFiles(input.files);
+    input.addEventListener("change", async () => {
+      await addPortfolioFiles(input.files);
       syncInputFiles();
       renderPortfolioPreview();
     });

@@ -258,6 +258,26 @@ class PortfolioWorkForm(forms.Form):
         if user:
             self.fields["album"].queryset = PortfolioAlbum.objects.filter(user=user)
             
+            
+    def clean_images(self):
+        images = self.cleaned_data.get("images") or []
+        max_image_upload_size = int(9.5 * 1024 * 1024)
+
+        for image in images:
+            content_type = getattr(image, "content_type", "") or ""
+
+            if not content_type.startswith("image/"):
+                raise forms.ValidationError(
+                    _("Only image files are allowed.")
+                )
+
+            if image.size > max_image_upload_size:
+                raise forms.ValidationError(
+                    _("Each portfolio image must be under 10 MB.")
+                )
+
+        return images
+            
 class UserReportForm(forms.ModelForm):
     class Meta:
         model = UserReport

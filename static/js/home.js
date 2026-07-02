@@ -839,35 +839,106 @@ document.addEventListener("DOMContentLoaded", () => {
         els.fileUpload.click();
       });
 
-      els.fileUpload.addEventListener("change", () => {
+      els.fileUpload.addEventListener("change", async () => {
         const maxFiles = 12;
-        const newFiles = Array.from(els.fileUpload.files);
+        const maxImageBytes = 9.5 * 1024 * 1024;
+        const newFiles = Array.from(els.fileUpload.files || []);
 
-        newFiles.forEach((newFile) => {
-          if (state.selectedFiles.length >= maxFiles) return;
+        if (!newFiles.length) return;
 
-          const exists = state.selectedFiles.some((file) => {
-            return file.name === newFile.name && file.size === newFile.size;
+        const originalPostButtonText = els.postBtn.textContent;
+        const compressor = window.TatzoImageCompression;
+
+        let compressedCount = 0;
+        let savedBytes = 0;
+
+        els.postBtn.disabled = true;
+        els.postBtn.textContent = t("compressingImages", "Compressing...");
+
+        try {
+          for (const newFile of newFiles) {
+            if (state.selectedFiles.length >= maxFiles) break;
+
+            const originalKey = `${newFile.name}_${newFile.size}_${newFile.lastModified}`;
+            let fileToAdd = newFile;
+
+            if (compressor && newFile.type.startsWith("image/")) {
+              try {
+                const result = await compressor.compressImage(newFile, {
+                  maxWidthOrHeight: 1800,
+                  maxSizeMB: 1.6,
+                  hardLimitMB: 9.5,
+                  initialQuality: 0.82,
+                  minQuality: 0.58,
+                });
+
+                fileToAdd = result.file;
+
+                if (result.compressed) {
+                  compressedCount += 1;
+                  savedBytes += Math.max(0, result.originalSize - result.compressedSize);
+                }
+              } catch (err) {
+                console.error("Image compression failed:", err);
+                fileToAdd = newFile;
+              }
+            }
+
+            if (fileToAdd.type.startsWith("image/") && fileToAdd.size > maxImageBytes) {
+              helpers.showToast(
+                `${newFile.name}: ${t("imageTooLarge", "Image is still too large after compression.")}`,
+                "error"
+              );
+              continue;
+            }
+
+            try {
+              Object.defineProperty(fileToAdd, "_tatzoOriginalKey", {
+                value: originalKey,
+                configurable: true,
+              });
+            } catch (_) {
+              fileToAdd._tatzoOriginalKey = originalKey;
+            }
+
+            const exists = state.selectedFiles.some((file) => {
+              return (
+                file._tatzoOriginalKey === originalKey ||
+                (file.name === fileToAdd.name && file.size === fileToAdd.size)
+              );
+            });
+
+            if (!exists) {
+              state.selectedFiles.push(fileToAdd);
+            }
+          }
+
+          if (compressedCount > 0 && compressor) {
+            helpers.showToast(
+              `${t("imagesCompressed", "Images compressed")}: ${compressedCount}. ${t("saved", "Saved")} ${compressor.formatMB(savedBytes)}.`,
+              "success"
+            );
+          }
+
+          preview.syncFileInput();
+
+          els.createPost.classList.add("expanded");
+          els.createPost.classList.add("has-media");
+
+          preview.render();
+          preview.autosizeTextarea();
+          preview.updatePostButtonVisibility();
+
+          requestAnimationFrame(() => {
+            els.previewContainer?.scrollIntoView({
+              behavior: "smooth",
+              block: "nearest",
+            });
           });
-
-          if (!exists) state.selectedFiles.push(newFile);
-        });
-
-        preview.syncFileInput();
-
-        els.createPost.classList.add("expanded");
-        els.createPost.classList.add("has-media");
-
-        preview.render();
-        preview.autosizeTextarea();
-        preview.updatePostButtonVisibility();
-
-        requestAnimationFrame(() => {
-          els.previewContainer?.scrollIntoView({
-            behavior: "smooth",
-            block: "nearest",
-          });
-        });
+        } finally {
+          els.postBtn.disabled = false;
+          els.postBtn.textContent = originalPostButtonText || t("post", "Post");
+        }
       });
 
       els.postBtn.addEventListener("click", preview.createPost);

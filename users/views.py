@@ -205,6 +205,8 @@ def create_post(request):
     }
 
     allowed_types = allowed_image_types | allowed_video_types
+    max_image_upload_size = int(9.5 * 1024 * 1024)
+    max_video_upload_size = int(95 * 1024 * 1024)
 
     for f in files:
         if f.content_type not in allowed_types:
@@ -217,6 +219,28 @@ def create_post(request):
                 },
                 status=400,
             )
+            
+        if f.content_type in allowed_image_types and f.size > max_image_upload_size:
+                return JsonResponse(
+                    {
+                        "ok": False,
+                        "error": _(
+                            "This image is too large. Please upload an image under 10 MB."
+                        ),
+                    },
+                    status=400,
+                )
+
+        if f.content_type in allowed_video_types and f.size > max_video_upload_size:
+                return JsonResponse(
+                    {
+                        "ok": False,
+                        "error": _(
+                            "This video is too large. Please upload a video under 100 MB."
+                        ),
+                    },
+                    status=400,
+                )
 
     disable_comments = request.POST.get("disable_comments") == "1"
     is_ad = request.POST.get("is_ad") == "1"
