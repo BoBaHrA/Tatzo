@@ -451,3 +451,67 @@ body, .container {
 .password-toggle.is-visible .password-toggle-icon {
   opacity: 1;
 }
+
+/* =========================
+   LOGIN PASSWORD TOGGLE FIX
+========================= */
+
+.login-container .password-input-wrap {
+  position: relative !important;
+  width: 100% !important;
+}
+
+.login-container .password-input-wrap input {
+  width: 100% !important;
+  padding-right: 52px !important;
+  box-sizing: border-box !important;
+}
+
+.login-container button.password-toggle {
+  position: absolute !important;
+  top: 50% !important;
+  right: 8px !important;
+  transform: translateY(-50%) !important;
+
+  width: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  border: none !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+
+  color: #04c5bf !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  cursor: pointer !important;
+  z-index: 5 !important;
+  appearance: none !important;
+}
+
+.login-container button.password-toggle:hover {
+  background: rgba(4, 197, 191, 0.08) !important;
+}
+
+.login-container button.password-toggle.is-visible {
+  background: rgba(238, 12, 111, 0.08) !important;
+}
+
+.login-container .password-toggle-icon {
+  width: 21px !important;
+  height: 21px !important;
+  display: block !important;
+  pointer-events: none !important;
+  opacity: 0.95 !important;
+}
