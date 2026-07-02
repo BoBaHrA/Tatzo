@@ -86,6 +86,10 @@
   </div>
 </div>
 
+{% trans "Compressing images..." as portfolio_compressing_text %}
+{% trans "Save work" as portfolio_save_work_text %}
+{% trans "Portfolio image is still too large after compression. Please choose a smaller image." as portfolio_image_too_large_text %}
+
 <script src="{% static 'js/image_compression.js' %}"></script>
 
 <script>
@@ -93,6 +97,10 @@
     const input = document.querySelector('input[name="images"]');
     const preview = document.getElementById("portfolio-upload-preview");
     const previewImageAlt = "{{ preview_image_alt|escapejs }}";
+
+    const portfolioCompressingText = "{{ portfolio_compressing_text|escapejs }}";
+    const portfolioSaveWorkText = "{{ portfolio_save_work_text|escapejs }}";
+    const portfolioImageTooLargeText = "{{ portfolio_image_too_large_text|escapejs }}";
 
     if (!input || !preview) return;
 
@@ -115,7 +123,7 @@
 
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.textContent = "Compressing images...";
+        submitBtn.textContent = portfolioCompressingText;
       }
 
       try {
@@ -148,7 +156,7 @@
           }
 
           if (fileToAdd.size > maxImageBytes) {
-            alert(`${file.name} is still too large after compression. Please choose a smaller image.`);
+            alert(`${file.name}: ${portfolioImageTooLargeText}`);
             continue;
           }
 
@@ -178,7 +186,7 @@
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.textContent = originalSubmitText || "Save work";
+          submitBtn.textContent = originalSubmitText || portfolioSaveWorkText;
         }
       }
     }
