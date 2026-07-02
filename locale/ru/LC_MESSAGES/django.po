@@ -2502,3 +2502,33 @@ msgstr "Вы отправляете сообщения слишком быстр
 
 msgid "You are sending reports too quickly. Please wait a bit."
 msgstr "Вы отправляете жалобы слишком быстро. Подождите немного."
+
+msgid "Last updated:"
+msgstr "Последнее обновление:"
+
+msgid "Terms"
+msgstr "Условия"
+
+msgid "Privacy"
+msgstr "Конфиденциальность"
+
+msgid "Cookies"
+msgstr "Cookies"
+
+msgid "Community Guidelines"
+msgstr "Правила сообщества"
+
+msgid "Legal notice"
+msgstr "Правовая информация"
+
+msgid "Privacy Policy"
+msgstr "Политику конфиденциальности"
+
+msgid "I accept the"
+msgstr "Я принимаю"
+
+msgid "and"
+msgstr "и"
+
+msgid "You must accept the Terms and Privacy Policy to create an account."
+msgstr "Чтобы создать аккаунт, необходимо принять условия и политику конфиденциальности."

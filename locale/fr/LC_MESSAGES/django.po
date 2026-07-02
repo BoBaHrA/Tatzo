@@ -2520,3 +2520,33 @@ msgstr "Vous envoyez des messages trop rapidement. Veuillez patienter un peu."
 
 msgid "You are sending reports too quickly. Please wait a bit."
 msgstr "Vous envoyez des signalements trop rapidement. Veuillez patienter un peu."
+
+msgid "Last updated:"
+msgstr "Dernière mise à jour :"
+
+msgid "Terms"
+msgstr "Conditions"
+
+msgid "Privacy"
+msgstr "Confidentialité"
+
+msgid "Cookies"
+msgstr "Cookies"
+
+msgid "Community Guidelines"
+msgstr "Règles de la communauté"
+
+msgid "Legal notice"
+msgstr "Mentions légales"
+
+msgid "Privacy Policy"
+msgstr "Politique de confidentialité"
+
+msgid "I accept the"
+msgstr "J’accepte les"
+
+msgid "and"
+msgstr "et"
+
+msgid "You must accept the Terms and Privacy Policy to create an account."
+msgstr "Vous devez accepter les conditions et la politique de confidentialité pour créer un compte."
