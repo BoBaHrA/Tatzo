@@ -171,3 +171,20 @@
     padding: 18px;
   }
 }
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #000d18;
+  min-height: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.legal-page-shell,
+.legal-page-shell * {
+  box-sizing: border-box;
+}

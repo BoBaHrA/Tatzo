@@ -1,6 +1,6 @@
 import logging
 
-from .legal_content import LEGAL_PAGES
+from .legal_content import get_legal_page, get_legal_pages
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
@@ -2020,8 +2020,19 @@ def report_problem(request):
         "page_url": request.GET.get("next", ""),
     })
     
+    
+def legal_index(request):
+    return render(
+        request,
+        "users/legal_index.html",
+        {
+            "legal_pages": get_legal_pages(),
+        },
+    )
+
+
 def legal_page(request, page):
-    legal_data = LEGAL_PAGES.get(page)
+    legal_data = get_legal_page(page)
 
     if not legal_data:
         raise Http404
@@ -2032,15 +2043,5 @@ def legal_page(request, page):
         {
             "legal_page": legal_data,
             "page_key": page,
-        },
-    )
-    
-    
-def legal_index(request):
-    return render(
-        request,
-        "users/legal_index.html",
-        {
-            "legal_pages": LEGAL_PAGES,
         },
     )
