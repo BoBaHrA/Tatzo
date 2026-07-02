@@ -15,14 +15,6 @@
     <link rel="apple-touch-icon" href="{% static 'images/tatzo-icon.png' %}">
 </head>
 
-<footer class="tatzo-legal-footer">
-  <a href="{% url 'terms' %}">{% trans "Terms" %}</a>
-  <a href="{% url 'privacy' %}">{% trans "Privacy" %}</a>
-  <a href="{% url 'cookies' %}">{% trans "Cookies" %}</a>
-  <a href="{% url 'community_guidelines' %}">{% trans "Community Guidelines" %}</a>
-  <a href="{% url 'legal_notice' %}">{% trans "Legal notice" %}</a>
-</footer>
-
 <body>
 
     {% if messages %}
@@ -40,14 +32,6 @@
         {% block content %}
         {% endblock %}
     </div>
-
-    <footer class="tatzo-legal-footer">
-        <a href="{% url 'terms' %}">{% trans "Terms" %}</a>
-        <a href="{% url 'privacy' %}">{% trans "Privacy" %}</a>
-        <a href="{% url 'cookies' %}">{% trans "Cookies" %}</a>
-        <a href="{% url 'community_guidelines' %}">{% trans "Community Guidelines" %}</a>
-        <a href="{% url 'legal_notice' %}">{% trans "Legal notice" %}</a>
-    </footer>
 
     <style>
         .flash-stack {
@@ -130,29 +114,6 @@
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-        .tatzo-legal-footer {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 18px 16px 92px;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 14px;
-            background: #000d18;
-            font-family: "Poppins", sans-serif;
-        }
-
-        .tatzo-legal-footer a {
-            color: rgba(234, 255, 255, 0.52);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .tatzo-legal-footer a:hover {
-            color: #04c5bf;
         }
     </style>
 
