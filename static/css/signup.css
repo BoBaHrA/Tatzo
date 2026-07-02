@@ -869,3 +869,50 @@ body {
 .tatzo-legal-footer {
     display: none !important;
 }
+
+.password-input-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.password-input-wrap input {
+  width: 100%;
+  padding-right: 58px !important;
+  box-sizing: border-box;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.password-toggle-icon {
+  width: 22px;
+  height: 22px;
+  display: block;
+  opacity: 0.92;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.password-toggle:hover .password-toggle-icon {
+  transform: scale(1.06);
+  opacity: 1;
+}
+
+.password-toggle.is-visible .password-toggle-icon {
+  opacity: 1;
+}

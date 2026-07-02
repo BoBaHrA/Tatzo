@@ -64,13 +64,32 @@
 
         <div class="input-group">
             <label for="password1">{% trans "Password" %}</label>
-            <input
-                type="password"
-                id="password1"
-                name="password1"
-                placeholder="{{ password_placeholder }}"
-                required
-            >
+            <div class="password-input-wrap">
+                <input
+                    type="password"
+                    id="password1"
+                    name="password1"
+                    placeholder="{{ password_placeholder }}"
+                    required
+                >
+
+                <button
+                    type="button"
+                    class="password-toggle"
+                    data-password-toggle
+                    data-show-label="{% trans 'Show password' %}"
+                    data-hide-label="{% trans 'Hide password' %}"
+                    data-open-icon="{% static 'icons/eye-open.svg' %}"
+                    data-closed-icon="{% static 'icons/eye-closed.svg' %}"
+                    aria-label="{% trans 'Show password' %}"
+                >
+                    <img
+                        src="{% static 'icons/eye-open.svg' %}"
+                        alt="{% trans 'Show password' %}"
+                        class="password-toggle-icon"
+                    >
+                </button>
+            </div>
 
             <p id="password-hint" class="password-hint" style="display: none;">
                 {% trans "Password must contain at least 8 characters, one uppercase letter and one number." %}
@@ -79,13 +98,32 @@
 
         <div class="input-group">
             <label for="password2">{% trans "Confirm password" %}</label>
-            <input
-                type="password"
-                id="password2"
-                name="password2"
-                placeholder="{{ password_confirm_placeholder }}"
-                required
-            >
+            <div class="password-input-wrap">
+                <input
+                    type="password"
+                    id="password2"
+                    name="password2"
+                    placeholder="{{ password_confirm_placeholder }}"
+                    required
+                >
+
+                <button
+                    type="button"
+                    class="password-toggle"
+                    data-password-toggle
+                    data-show-label="{% trans 'Show password' %}"
+                    data-hide-label="{% trans 'Hide password' %}"
+                    data-open-icon="{% static 'icons/eye-open.svg' %}"
+                    data-closed-icon="{% static 'icons/eye-closed.svg' %}"
+                    aria-label="{% trans 'Show password' %}"
+                >
+                    <img
+                        src="{% static 'icons/eye-open.svg' %}"
+                        alt="{% trans 'Show password' %}"
+                        class="password-toggle-icon"
+                    >
+                </button>
+            </div>
         </div>
 
         <div class="input-group">
@@ -227,4 +265,5 @@
 
 {% block scripts %}
 <script src="{% static 'js/signup.js' %}"></script>
+<script src="{% static 'js/password_toggle.js' %}"></script>
 {% endblock %}

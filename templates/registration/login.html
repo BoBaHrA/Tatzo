@@ -41,13 +41,33 @@
 
         <div class="input-group">
             <label for="password">{% trans "Password" %}</label>
-            <input
-                type="password"
-                id="password"
-                name="password"
-                placeholder="{{ password_placeholder }}"
-                required
-            >
+
+            <div class="password-input-wrap">
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="{{ password_placeholder }}"
+                    required
+                >
+
+                <button
+                    type="button"
+                    class="password-toggle"
+                    data-password-toggle
+                    data-show-label="{% trans 'Show password' %}"
+                    data-hide-label="{% trans 'Hide password' %}"
+                    data-open-icon="{% static 'icons/eye-open.svg' %}"
+                    data-closed-icon="{% static 'icons/eye-closed.svg' %}"
+                    aria-label="{% trans 'Show password' %}"
+                >
+                    <img
+                        src="{% static 'icons/eye-open.svg' %}"
+                        alt="{% trans 'Show password' %}"
+                        class="password-toggle-icon"
+                    >
+                </button>
+            </div>
         </div>
 
         <button type="submit" class="btn">
@@ -72,4 +92,5 @@
         </ul>
     </div>
 {% endif %}
+<script src="{% static 'js/password_toggle.js' %}"></script>
 {% endblock %}

@@ -2572,3 +2572,9 @@ msgstr "Не удалось отправить документы. Попроб�
 
 msgid "We could not submit your request. Please try another file or a smaller file."
 msgstr "Не удалось отправить заявку. Попробуйте другой файл или файл меньшего размера."
+
+msgid "Show password"
+msgstr "Показать пароль"
+
+msgid "Hide password"
+msgstr "Скрыть пароль"
