@@ -19,6 +19,7 @@ from django.utils.encoding import force_str
 from django.utils.translation import gettext as _, ngettext
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.http import require_POST
+from .security import check_rate_limit, is_new_account, rate_limited_json
 from .models import (
     Profile,
     VerificationDocument,
@@ -182,6 +183,22 @@ def news_feed(request):
 def create_post(request):
     content = (request.POST.get("content") or "").strip()
     files = request.FILES.getlist("media")
+        
+    post_limit = 5 if is_new_account(request.user) else 20
+
+    allowed, retry_after = check_rate_limit(
+        request,
+        scope="posts:create",
+        limit=post_limit,
+        window_seconds=60 * 60,
+        identity="user",
+    )
+
+    if not allowed:
+        return rate_limited_json(
+            retry_after,
+            _("You are posting too quickly. Please wait a bit."),
+        )
 
     if not content and not files:
         return JsonResponse(
@@ -415,14 +432,54 @@ def signup(request):
     show_verification_modal = False
 
     if request.method == "POST":
+        user_form = CustomUserCreationForm(request.POST)
+
+        email = (request.POST.get("email") or "").strip().lower()
+
+        signup_checks = [
+            check_rate_limit(
+                request,
+                scope="auth:signup:ip:hour",
+                limit=3,
+                window_seconds=60 * 60,
+                identity="ip",
+            ),
+            check_rate_limit(
+                request,
+                scope="auth:signup:ip:day",
+                limit=8,
+                window_seconds=24 * 60 * 60,
+                identity="ip",
+            ),
+            check_rate_limit(
+                request,
+                scope="auth:signup:email",
+                limit=3,
+                window_seconds=60 * 60,
+                value=email,
+            ),
+        ]
+
+        if not all(ok for ok, _ in signup_checks):
+            messages.error(
+                request,
+                _("Too many signup attempts. Please wait a bit and try again."),
+            )
+
+            return render(
+                request,
+                "signup.html",
+                {
+                    "form": user_form,
+                    "show_verification_modal": show_verification_modal,
+                },
+                status=429,
+            )
+
         delete_expired_unverified_duplicate_users(
             username=request.POST.get("username"),
             email=request.POST.get("email"),
         )
-
-        user_form = CustomUserCreationForm(request.POST)
-
-        user_form = CustomUserCreationForm(request.POST)
 
         if user_form.is_valid():
             user = None
@@ -430,7 +487,6 @@ def signup(request):
             try:
                 user = user_form.save()
 
-                # Аккаунт создан, но вход запрещён до подтверждения почты
                 user.is_active = False
                 user.save(update_fields=["is_active"])
 
@@ -469,7 +525,10 @@ def signup(request):
     return render(
         request,
         "signup.html",
-        {"form": user_form, "show_verification_modal": show_verification_modal},
+        {
+            "form": user_form,
+            "show_verification_modal": show_verification_modal,
+        },
     )
 
 
@@ -1537,6 +1596,22 @@ def send_chat_message(request, thread_id):
             },
             status=403,
         )
+        
+    chat_limit = 10 if is_new_account(request.user) else 40
+
+    allowed, retry_after = check_rate_limit(
+        request,
+        scope="chat:send",
+        limit=chat_limit,
+        window_seconds=10 * 60,
+        identity="user",
+    )
+
+    if not allowed:
+        return rate_limited_json(
+            retry_after,
+            _("You are sending messages too quickly. Please wait a bit."),
+        )
 
     content = (request.POST.get("content") or "").strip()
     files = request.FILES.getlist("attachments")
@@ -1887,6 +1962,30 @@ def coming_soon(request, feature):
 def report_problem(request):
     if request.method == "POST":
         form = UserReportForm(request.POST, request.FILES)
+
+        allowed, retry_after = check_rate_limit(
+            request,
+            scope="reports:problem",
+            limit=5,
+            window_seconds=60 * 60,
+            identity="user",
+        )
+
+        if not allowed:
+            messages.error(
+                request,
+                _("You are sending reports too quickly. Please wait a bit."),
+            )
+
+            return render(
+                request,
+                "users/report_problem.html",
+                {
+                    "form": form,
+                    "page_url": request.POST.get("page_url", ""),
+                },
+                status=429,
+            )
 
         if form.is_valid():
             report = form.save(commit=False)

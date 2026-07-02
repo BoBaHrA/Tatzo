@@ -2479,3 +2479,26 @@ msgstr "Настройки аудитории скоро появятся. Мо�
 msgid "Additional post options are coming soon. We are preparing more controls for creators."
 msgstr "Доп. настройки скоро появятся. Мы готовим больше инструментов для авторов."
 
+msgid "Too many actions. Please wait a bit and try again."
+msgstr "Слишком много действий. Подождите немного и попробуйте снова."
+
+msgid "Too many login attempts. Please wait a bit and try again."
+msgstr "Слишком много попыток входа. Подождите немного и попробуйте снова."
+
+msgid "Too many password reset requests. Please wait a bit and try again."
+msgstr "Слишком много запросов на сброс пароля. Подождите немного и попробуйте снова."
+
+msgid "Too many signup attempts. Please wait a bit and try again."
+msgstr "Слишком много попыток регистрации. Подождите немного и попробуйте снова."
+
+msgid "You are posting too quickly. Please wait a bit."
+msgstr "Вы публикуете слишком быстро. Подождите немного."
+
+msgid "You are commenting too quickly. Please wait a bit."
+msgstr "Вы комментируете слишком быстро. Подождите немного."
+
+msgid "You are sending messages too quickly. Please wait a bit."
+msgstr "Вы отправляете сообщения слишком быстро. Подождите немного."
+
+msgid "You are sending reports too quickly. Please wait a bit."
+msgstr "Вы отправляете жалобы слишком быстро. Подождите немного."

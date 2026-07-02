@@ -89,6 +89,18 @@ DATABASES = {
     )
 }
 
+TATZO_RATE_LIMIT_ENABLED = os.getenv("TATZO_RATE_LIMIT_ENABLED", "True") == "True"
+
+CACHES = {
+    "default": {
+        "BACKEND": os.getenv(
+            "DJANGO_CACHE_BACKEND",
+            "django.core.cache.backends.locmem.LocMemCache",
+        ),
+        "LOCATION": os.getenv("DJANGO_CACHE_LOCATION", "tatzo-rate-limit-cache"),
+    }
+}
+
 # Настройки паролей
 AUTH_PASSWORD_VALIDATORS = [
     # {

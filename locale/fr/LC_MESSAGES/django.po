@@ -2497,3 +2497,26 @@ msgstr "Les paramètres d’audience seront bientôt disponibles. Vous pourrez c
 msgid "Additional post options are coming soon. We are preparing more controls for creators."
 msgstr "Des options supplémentaires de publication seront bientôt disponibles. Nous préparons plus de contrôles pour les créateurs."
 
+msgid "Too many actions. Please wait a bit and try again."
+msgstr "Trop d’actions. Veuillez patienter un peu puis réessayer."
+
+msgid "Too many login attempts. Please wait a bit and try again."
+msgstr "Trop de tentatives de connexion. Veuillez patienter un peu puis réessayer."
+
+msgid "Too many password reset requests. Please wait a bit and try again."
+msgstr "Trop de demandes de réinitialisation du mot de passe. Veuillez patienter un peu puis réessayer."
+
+msgid "Too many signup attempts. Please wait a bit and try again."
+msgstr "Trop de tentatives d’inscription. Veuillez patienter un peu puis réessayer."
+
+msgid "You are posting too quickly. Please wait a bit."
+msgstr "Vous publiez trop rapidement. Veuillez patienter un peu."
+
+msgid "You are commenting too quickly. Please wait a bit."
+msgstr "Vous commentez trop rapidement. Veuillez patienter un peu."
+
+msgid "You are sending messages too quickly. Please wait a bit."
+msgstr "Vous envoyez des messages trop rapidement. Veuillez patienter un peu."
+
+msgid "You are sending reports too quickly. Please wait a bit."
+msgstr "Vous envoyez des signalements trop rapidement. Veuillez patienter un peu."

@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, render
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
+from users.security import check_rate_limit, is_new_account, rate_limited_json
 
 from .forms import PostForm, PostMediaUploadForm
 from .models import (
@@ -142,6 +143,22 @@ def create_post(request):
 @require_POST
 def create_comment(request, post_id):
     post = get_object_or_404(Post, id=post_id)
+    
+    comment_limit = 20 if is_new_account(request.user) else 60
+
+    allowed, retry_after = check_rate_limit(
+        request,
+        scope="comments:create",
+        limit=comment_limit,
+        window_seconds=60 * 60,
+        identity="user",
+    )
+
+    if not allowed:
+        return rate_limited_json(
+            retry_after,
+            _("You are commenting too quickly. Please wait a bit."),
+        )
 
     if post.disable_comments:
         return JsonResponse(
@@ -291,6 +308,20 @@ def edit_comment(request, comment_id):
 @require_POST
 def report_comment(request, comment_id):
     comment = get_object_or_404(PostComment, id=comment_id)
+    
+    allowed, retry_after = check_rate_limit(
+        request,
+        scope="reports:comment",
+        limit=10,
+        window_seconds=60 * 60,
+        identity="user",
+    )
+
+    if not allowed:
+        return rate_limited_json(
+            retry_after,
+            _("You are sending reports too quickly. Please wait a bit."),
+        )
 
     if comment.user == request.user:
         return JsonResponse(
@@ -337,6 +368,20 @@ def delete_post(request, post_id):
 @require_POST
 def report_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
+    
+    allowed, retry_after = check_rate_limit(
+        request,
+        scope="reports:post",
+        limit=10,
+        window_seconds=60 * 60,
+        identity="user",
+    )
+
+    if not allowed:
+        return rate_limited_json(
+            retry_after,
+            _("You are sending reports too quickly. Please wait a bit."),
+        )
 
     if post.user == request.user:
         return JsonResponse(

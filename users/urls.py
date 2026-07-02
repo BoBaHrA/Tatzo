@@ -8,6 +8,7 @@ from users import views as users_views
 
 from . import views
 from .views import create_post
+from users.security_views import TatzoLoginView, TatzoPasswordResetView
 
 urlpatterns = [
     path("signup/", views.signup, name="signup"),
@@ -161,7 +162,7 @@ urlpatterns = [
     ),
     path(
         "login/",
-        auth_views.LoginView.as_view(template_name="registration/login.html"),
+        TatzoLoginView.as_view(template_name="registration/login.html"),
         name="login",
     ),
     path(
@@ -172,7 +173,7 @@ urlpatterns = [
     path("verify-email/<uidb64>/<token>/", views.verify_email, name="verify_email"),
     path(
         "password-reset/",
-        auth_views.PasswordResetView.as_view(
+        TatzoPasswordResetView.as_view(
             template_name="users/password_reset.html",
             email_template_name="emails/password_reset_email.txt",
             html_email_template_name="emails/password_reset_email.html",
