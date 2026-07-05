@@ -8770,3 +8770,103 @@ a.more-admin-link .more-admin-subtitle {
 .comment-avatar.comment-profile-link {
   text-decoration: none !important;
 }
+
+/* =========================
+   REPORT PROBLEM MOBILE OVERLAP FIX
+========================= */
+
+@media (max-width: 900px) {
+  .report-page {
+    height: auto !important;
+    min-height: 100dvh !important;
+    padding: 18px 12px 128px !important;
+    overflow: visible !important;
+
+    display: block !important;
+    box-sizing: border-box !important;
+  }
+
+  .report-card {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    margin: 0 auto !important;
+    padding: 22px 16px 24px !important;
+
+    overflow: visible !important;
+    box-sizing: border-box !important;
+  }
+
+  .report-form {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+
+  .report-form-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .report-form-field {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .report-form-field small {
+    display: block !important;
+    margin-top: 6px !important;
+    line-height: 1.35 !important;
+  }
+
+  .report-file,
+  .report-form-field input[type="file"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .report-actions {
+    position: static !important;
+    bottom: auto !important;
+    z-index: auto !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+
+    margin-top: 18px !important;
+    padding-top: 0 !important;
+
+    background: transparent !important;
+  }
+
+  .report-cancel,
+  .report-submit {
+    width: 100% !important;
+    min-height: 52px !important;
+    box-sizing: border-box !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .report-page {
+    padding: 14px 10px 126px !important;
+  }
+
+  .report-card {
+    padding: 20px 14px 22px !important;
+    border-radius: 24px !important;
+  }
+
+  .report-textarea {
+    min-height: 132px !important;
+  }
+}
