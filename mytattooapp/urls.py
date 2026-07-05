@@ -1,10 +1,17 @@
 from django.contrib import admin
-from django.urls import include, path  # Подключаем include для маршрутов приложений
-from django.conf.urls.i18n import i18n_patterns
+from django.http import HttpResponse
+from django.urls import include, path
+
+
+def healthz(request):
+    return HttpResponse("ok", content_type="text/plain")
+
 
 urlpatterns = [
-    path("admin/", admin.site.urls),  # Стандартный маршрут для админки
-    path("", include("users.urls")),  # Подключаем маршруты приложения "users"
+    path("healthz/", healthz, name="healthz"),
+    path("admin/", admin.site.urls),
+    path("", include("users.urls")),
     path("posts/", include("posts.urls")),
+    path("appointments/", include("appointments.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
 ]
