@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Book appointment" %} | Tatzo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/appointments.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+
+<div class="booking-page">
+  <div class="booking-shell">
+    <a href="{% url 'profile' artist.username %}" class="booking-back">
+      ← {% trans "Back to profile" %}
+    </a>
+
+    <div class="booking-artist-card">
+      {% if artist.profile.profile_image %}
+        <img src="{{ artist.profile.profile_image.url }}" alt="{{ artist.username }}">
+      {% else %}
+        <div class="booking-avatar-fallback">
+          {{ artist.username|first|upper }}
+        </div>
+      {% endif %}
+
+      <div>
+        <p class="booking-eyebrow">Tatzo Booking</p>
+        <h1>{% blocktrans with username=artist.username %}Book with {{ username }}{% endblocktrans %}</h1>
+        <p>{% trans "Choose a date, describe your tattoo project and send a request to the artist." %}</p>
+      </div>
+    </div>
+
+    <form
+      method="post"
+      enctype="multipart/form-data"
+      action="{% url 'create_appointment' artist.username %}"
+      class="booking-form"
+      id="booking-form"
+    >
+      {% csrf_token %}
+
+      <input type="hidden" name="date" id="booking-date">
+      <input type="hidden" name="start_time" id="booking-time">
+      <input type="hidden" name="session_length_minutes" id="booking-duration" value="60">
+      <input type="hidden" name="booking_type" id="booking-type" value="tattoo_session">
+      <input type="hidden" name="styles" id="booking-styles">
+      <input type="hidden" name="placement" id="booking-placement">
+      <input type="hidden" name="size" id="booking-size">
+      <input type="hidden" name="budget" id="booking-budget">
+      <input type="hidden" name="client_comfort_limit" id="booking-comfort">
+
+      <div class="booking-progress">
+        <button type="button" class="booking-step-dot is-active" data-booking-step="1">1</button>
+        <button type="button" class="booking-step-dot" data-booking-step="2">2</button>
+        <button type="button" class="booking-step-dot" data-booking-step="3">3</button>
+        <button type="button" class="booking-step-dot" data-booking-step="4">4</button>
+      </div>
+
+      <section class="booking-step is-active" data-booking-panel="1">
+        <h2>{% trans "Date and time" %}</h2>
+
+        <div class="booking-calendar-head">
+          <button type="button" id="booking-prev">‹</button>
+          <strong id="booking-month-label"></strong>
+          <button type="button" id="booking-next">›</button>
+        </div>
+
+        <div class="booking-weekdays">
+          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+
+        <div class="booking-calendar-grid" id="booking-calendar-grid"></div>
+
+        <h3>{% trans "Available time" %}</h3>
+        <div class="booking-slots" id="booking-slots"></div>
+
+        <div class="booking-session-grid">
+          <button type="button" class="booking-choice is-active" data-duration="60">1h</button>
+          <button type="button" class="booking-choice" data-duration="120">2h</button>
+          <button type="button" class="booking-choice" data-duration="180">3h</button>
+          <button type="button" class="booking-choice" data-duration="480">{% trans "Full day" %}</button>
+        </div>
+      </section>
+
+      <section class="booking-step" data-booking-panel="2">
+        <h2>{% trans "Tattoo project" %}</h2>
+
+        <label>{% trans "Style" %}</label>
+        <div class="booking-choice-grid" data-choice-group="styles">
+            {% for style in active_styles %}
+                <button type="button" data-value="{{ style }}">{{ style }}</button>
+            {% endfor %}
+        </div>
+
+        <label>{% trans "Placement" %}</label>
+        <input class="booking-input" type="text" id="booking-placement-text" placeholder="{% trans 'Arm, back, leg...' %}">
+
+        <label>{% trans "Size" %}</label>
+        <div class="booking-choice-grid" data-choice-group="size">
+          <button type="button" data-value="Coin">{% trans "Coin" %}</button>
+          <button type="button" data-value="Smartphone">{% trans "Smartphone" %}</button>
+          <button type="button" data-value="A5">A5</button>
+          <button type="button" data-value="A4">A4</button>
+          <button type="button" data-value="Half sleeve">{% trans "Half sleeve" %}</button>
+          <button type="button" data-value="Full sleeve">{% trans "Full sleeve" %}</button>
+        </div>
+
+        <label>{% trans "Budget" %}</label>
+        <div class="booking-choice-grid" data-choice-group="budget">
+          <button type="button" data-value="€100–300">€100–300</button>
+          <button type="button" data-value="€300–600">€300–600</button>
+          <button type="button" data-value="€600–1000">€600–1000</button>
+          <button type="button" data-value="€1000+">€1000+</button>
+          <button type="button" data-value="No budget">{% trans "No budget" %}</button>
+        </div>
+
+        <label for="booking-description">{% trans "Describe your idea" %}</label>
+        <textarea
+          class="booking-textarea"
+          name="description"
+          id="booking-description"
+          placeholder="{% trans 'Tell the artist what you want, style, idea, meaning, references...' %}"
+        ></textarea>
+      </section>
+
+      <section class="booking-step" data-booking-panel="3">
+        <h2>{% trans "References" %}</h2>
+
+        <label class="booking-upload-zone" for="booking-references">
+          <span>＋</span>
+          <strong>{% trans "Upload reference images" %}</strong>
+          <small>{% trans "You can add screenshots, sketches or inspiration images." %}</small>
+        </label>
+
+        <input
+          type="file"
+          id="booking-references"
+          name="references"
+          accept="image/*"
+          multiple
+          hidden
+        >
+
+        <div class="booking-reference-grid" id="booking-reference-grid"></div>
+      </section>
+
+      <section class="booking-step" data-booking-panel="4">
+        <h2>{% trans "Review and send" %}</h2>
+
+        <div class="booking-review-card" id="booking-review-card"></div>
+
+        <p class="booking-review-note">
+          {% trans "The artist will review your request and confirm or decline the appointment." %}
+        </p>
+      </section>
+
+      <div class="booking-actions">
+        <button type="button" class="booking-btn-secondary" id="booking-back-btn">
+          {% trans "Back" %}
+        </button>
+
+        <button type="button" class="booking-btn-primary" id="booking-next-btn">
+          {% trans "Next" %}
+        </button>
+
+        <button type="submit" class="booking-btn-primary" id="booking-submit-btn" hidden>
+          {% trans "Send request" %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script id="booking-data" type="application/json">{{ booking_data_json|safe }}</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/appointments.js' %}"></script>
+{% endblock %}

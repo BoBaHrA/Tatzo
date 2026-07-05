@@ -1,0 +1,561 @@
+.booking-page {
+  min-height: 100dvh;
+  margin-left: 260px;
+  padding: 32px 18px 96px;
+  background:
+    radial-gradient(circle at top left, rgba(4, 197, 191, 0.12), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(238, 12, 111, 0.10), transparent 34%),
+    #000d18;
+  color: #eaffff;
+  font-family: "Poppins", sans-serif;
+  box-sizing: border-box;
+}
+
+.booking-shell {
+  width: min(980px, 100%);
+  margin: 0 auto;
+}
+
+.booking-back {
+  display: inline-flex;
+  margin-bottom: 18px;
+  color: #04c5bf;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.booking-artist-card,
+.booking-form {
+  border: 1px solid rgba(4, 197, 191, 0.18);
+  background: rgba(0, 13, 24, 0.86);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
+  border-radius: 28px;
+}
+
+.booking-artist-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px;
+  margin-bottom: 18px;
+}
+
+.booking-artist-card img,
+.booking-avatar-fallback {
+  width: 92px;
+  height: 92px;
+  border-radius: 24px;
+  object-fit: cover;
+  border: 1px solid rgba(4, 197, 191, 0.32);
+}
+
+.booking-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #04c5bf;
+  font-size: 34px;
+  font-weight: 900;
+  background: rgba(4, 197, 191, 0.08);
+}
+
+.booking-eyebrow {
+  margin: 0 0 6px;
+  color: #04c5bf;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.booking-artist-card h1 {
+  margin: 0;
+  color: #ee0c6f;
+  font-size: clamp(30px, 5vw, 52px);
+  line-height: 1;
+}
+
+.booking-artist-card p:last-child {
+  color: rgba(234, 255, 255, 0.68);
+}
+
+.booking-form {
+  padding: 22px;
+}
+
+.booking-progress {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.booking-step-dot {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid rgba(4, 197, 191, 0.22);
+  background: rgba(4, 197, 191, 0.07);
+  color: #04c5bf;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.booking-step-dot.is-active {
+  background: linear-gradient(135deg, #04c5bf, #ee0c6f);
+  color: #001014;
+}
+
+.booking-step {
+  display: none;
+}
+
+.booking-step.is-active {
+  display: block;
+}
+
+.booking-step h2 {
+  margin: 0 0 18px;
+  color: #ffffff;
+  font-size: 28px;
+}
+
+.booking-calendar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.booking-calendar-head button {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(4, 197, 191, 0.22);
+  background: rgba(4, 197, 191, 0.08);
+  color: #04c5bf;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+.booking-weekdays,
+.booking-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.booking-weekdays {
+  margin-bottom: 8px;
+  color: rgba(234, 255, 255, 0.52);
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.booking-day {
+  min-height: 58px;
+  border-radius: 16px;
+  border: 1px solid rgba(4, 197, 191, 0.12);
+  background: rgba(4, 197, 191, 0.05);
+  color: #eaffff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.booking-day[disabled] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.booking-day.is-selected {
+  background: #04c5bf;
+  color: #001014;
+}
+
+.booking-slots,
+.booking-session-grid,
+.booking-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+  margin: 12px 0 22px;
+}
+
+.booking-slots button,
+.booking-choice,
+.booking-choice-grid button {
+  min-height: 46px;
+  border-radius: 16px;
+  border: 1px solid rgba(4, 197, 191, 0.22);
+  background: rgba(4, 197, 191, 0.07);
+  color: #eaffff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.booking-slots button.is-selected,
+.booking-choice.is-active,
+.booking-choice-grid button.is-selected {
+  background: #04c5bf;
+  color: #001014;
+}
+
+.booking-step label {
+  display: block;
+  margin: 16px 0 8px;
+  color: #04c5bf;
+  font-weight: 900;
+}
+
+.booking-input,
+.booking-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 16px;
+  border: 1px solid rgba(4, 197, 191, 0.28);
+  background: rgba(0, 24, 34, 0.88);
+  color: #eaffff;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+}
+
+.booking-input {
+  min-height: 50px;
+  padding: 0 14px;
+}
+
+.booking-textarea {
+  min-height: 140px;
+  padding: 14px;
+  resize: vertical;
+}
+
+.booking-upload-zone {
+  min-height: 180px;
+  border: 2px dashed rgba(4, 197, 191, 0.24);
+  border-radius: 24px;
+  background: rgba(4, 197, 191, 0.05);
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.booking-upload-zone span {
+  font-size: 38px;
+  color: #04c5bf;
+}
+
+.booking-upload-zone small {
+  color: rgba(234, 255, 255, 0.56);
+}
+
+.booking-reference-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.booking-reference-grid img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 18px;
+  border: 1px solid rgba(4, 197, 191, 0.18);
+}
+
+.booking-review-card {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(4, 197, 191, 0.06);
+  border: 1px solid rgba(4, 197, 191, 0.16);
+}
+
+.booking-review-card div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  color: rgba(234, 255, 255, 0.78);
+}
+
+.booking-review-card strong {
+  color: #04c5bf;
+}
+
+.booking-review-note {
+  color: rgba(234, 255, 255, 0.62);
+}
+
+.booking-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.booking-btn-primary,
+.booking-btn-secondary {
+  min-height: 50px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.booking-btn-primary {
+  border: none;
+  background: #ee0c6f;
+  color: #ffffff;
+}
+
+.booking-btn-secondary {
+  border: 1px solid rgba(4, 197, 191, 0.22);
+  background: rgba(4, 197, 191, 0.06);
+  color: #04c5bf;
+}
+
+@media (max-width: 900px) {
+  .booking-page {
+    margin-left: 0;
+    padding: calc(var(--mobile-topbar-h, 88px) + 16px) 12px 116px;
+  }
+
+  .booking-artist-card {
+    align-items: flex-start;
+    padding: 18px;
+  }
+
+  .booking-artist-card img,
+  .booking-avatar-fallback {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+  }
+
+  .booking-form {
+    padding: 18px 14px;
+  }
+
+  .booking-weekdays,
+  .booking-calendar-grid {
+    gap: 5px;
+  }
+
+  .booking-day {
+    min-height: 48px;
+    border-radius: 13px;
+    font-size: 13px;
+  }
+
+  .booking-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .booking-btn-primary,
+  .booking-btn-secondary {
+    width: 100%;
+  }
+}
+
+.appointments-title {
+  color: #ee0c6f;
+  font-size: clamp(36px, 6vw, 64px);
+  margin: 0 0 20px;
+}
+
+.appointment-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 0;
+  color: #eaffff;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(4, 197, 191, 0.12);
+}
+
+.appointment-row strong {
+  color: #04c5bf;
+}
+
+.appointment-row span {
+  color: rgba(234, 255, 255, 0.68);
+}
+
+.appointment-row em {
+  color: #ee0c6f;
+  font-style: normal;
+  font-weight: 900;
+}
+
+@media (max-width: 700px) {
+  .appointment-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+.booking-settings-head {
+  margin-bottom: 24px;
+}
+
+.artist-settings-section {
+  padding: 20px 0;
+  border-top: 1px solid rgba(4, 197, 191, 0.12);
+}
+
+.artist-settings-section h2 {
+  margin: 0 0 16px;
+  color: #ffffff;
+  font-size: 24px;
+}
+
+.artist-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.artist-setting-toggle,
+.artist-setting-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(4, 197, 191, 0.14);
+  background: rgba(4, 197, 191, 0.05);
+  color: #eaffff;
+  box-sizing: border-box;
+}
+
+.artist-setting-toggle {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.artist-setting-toggle span,
+.artist-setting-field span {
+  font-weight: 900;
+  color: #04c5bf;
+}
+
+.artist-setting-toggle input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  accent-color: #04c5bf;
+  flex: 0 0 auto;
+}
+
+.artist-setting-field input,
+.artist-setting-field select {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(4, 197, 191, 0.24);
+  background: rgba(0, 24, 34, 0.88);
+  color: #eaffff;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.artist-setting-field small {
+  color: rgba(234, 255, 255, 0.52);
+}
+
+.artist-week-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.artist-week-row {
+  display: grid;
+  grid-template-columns: 160px repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(4, 197, 191, 0.12);
+  background: rgba(4, 197, 191, 0.04);
+}
+
+.artist-week-row input[type="time"] {
+  min-height: 42px;
+  border-radius: 12px;
+  border: 1px solid rgba(4, 197, 191, 0.22);
+  background: rgba(0, 24, 34, 0.88);
+  color: #eaffff;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+.artist-day-open {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #eaffff;
+}
+
+.artist-day-open input {
+  width: 20px;
+  height: 20px;
+  accent-color: #04c5bf;
+}
+
+.artist-style-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.artist-style-chip input {
+  display: none;
+}
+
+.artist-style-chip span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(4, 197, 191, 0.22);
+  background: rgba(4, 197, 191, 0.06);
+  color: #eaffff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.artist-style-chip input:checked + span {
+  background: rgba(238, 12, 111, 0.16);
+  border-color: rgba(238, 12, 111, 0.62);
+  color: #ff69a8;
+}
+
+@media (max-width: 900px) {
+  .artist-settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .artist-week-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .artist-day-open {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 520px) {
+  .artist-week-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -165,7 +165,28 @@
 
             <div class="artist-info-card">
               <div class="artist-info-title">{% trans "Booking" %}</div>
-              <div class="artist-info-value">{% trans "Coming later" %}</div>
+
+              <div class="artist-info-value">
+                {% if profile_user.profile.verification_status == "approved" %}
+                  {% if request.user == profile_user %}
+                    <a href="{% url 'appointments_list' %}" class="artist-info-link">
+                      {% trans "Manage appointments" %}
+                    </a>
+
+                    <br>
+
+                    <a href="{% url 'artist_booking_settings' %}" class="artist-info-link">
+                      {% trans "Booking settings" %}
+                    </a>
+                  {% else %}
+                    <a href="{% url 'booking_wizard' profile_user.username %}" class="artist-info-link">
+                      {% trans "Book appointment" %}
+                    </a>
+                  {% endif %}
+                {% else %}
+                  {% trans "Available after verification" %}
+                {% endif %}
+              </div>
             </div>
           </div>
         {% endif %}
