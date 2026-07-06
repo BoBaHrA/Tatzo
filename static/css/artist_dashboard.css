@@ -1196,25 +1196,20 @@ body {
 /* Dashboard brand logo: horizontal Tatzo logo */
 .artist-dashboard-page .artist-dash-brand {
   justify-content: center !important;
-  height: 54px !important;
-  margin-bottom: 30px !important;
-}
-
-.artist-dashboard-page .artist-dash-brand {
-  justify-content: center !important;
   align-items: center !important;
-  height: 58px !important;
+  height: 64px !important;
   margin-bottom: 30px !important;
 }
 
 .artist-dashboard-page .artist-dash-brand img.artist-dash-brand-icon {
-  width: 112px !important;
+  width: 128px !important;
   height: auto !important;
-  min-width: 112px !important;
+  min-width: 128px !important;
   min-height: 0 !important;
-  max-width: 112px !important;
+  max-width: 128px !important;
   max-height: none !important;
   flex: 0 0 auto !important;
   object-fit: contain !important;
   display: block !important;
+  transform: translateX(-8px);
 }
