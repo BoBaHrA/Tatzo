@@ -1,6 +1,10 @@
 import json
 from datetime import datetime, timedelta, time
 
+from django.db.models import Count, Q
+
+from users.models import ChatMessage, PortfolioWork
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -406,6 +410,28 @@ def _ensure_default_artist_availability(artist):
             },
         )
         
+def _save_artist_availability_from_post(artist, post_data):
+    for weekday in range(7):
+        is_open = post_data.get(f"weekday_{weekday}_open") == "on"
+
+def _save_artist_blocked_dates_from_post(artist, post_data):
+    raw_dates = post_data.getlist("blocked_dates")
+    clean_dates = []
+
+    for raw_date in raw_dates:
+        try:
+            clean_dates.append(datetime.strptime(raw_date, "%Y-%m-%d").date())
+        except (TypeError, ValueError):
+            continue
+
+    ArtistTimeOff.objects.filter(artist=artist).delete()
+
+    for blocked_date in sorted(set(clean_dates)):
+        ArtistTimeOff.objects.create(
+            artist=artist,
+            date=blocked_date,
+            reason=_("Blocked from artist dashboard"),
+        )
         
 @login_required
 def artist_booking_settings(request):
@@ -430,92 +456,273 @@ def artist_booking_settings(request):
     _ensure_default_artist_availability(request.user)
 
     if request.method == "POST":
-        booking_settings.bookings_enabled = request.POST.get("bookings_enabled") == "on"
+        form_kind = request.POST.get("dashboard_form", "settings")
 
-        booking_settings.consultation_required_before_booking = (
-            request.POST.get("consultation_required_before_booking") == "on"
-        )
-        booking_settings.consultation_enabled = request.POST.get("consultation_enabled") == "on"
-        booking_settings.online_consultation_enabled = (
-            request.POST.get("online_consultation_enabled") == "on"
-        )
-        booking_settings.studio_consultation_enabled = (
-            request.POST.get("studio_consultation_enabled") == "on"
-        )
-        booking_settings.phone_consultation_enabled = (
-            request.POST.get("phone_consultation_enabled") == "on"
-        )
+        if form_kind == "settings":
+            booking_settings.bookings_enabled = request.POST.get("bookings_enabled") == "on"
 
-        booking_settings.reference_images_required = (
-            request.POST.get("reference_images_required") == "on"
-        )
-        booking_settings.deposit_required = request.POST.get("deposit_required") == "on"
-
-        booking_settings.booking_workflow = request.POST.get("booking_workflow", "manual")
-
-        booking_settings.minimum_notice_hours = int(
-            request.POST.get("minimum_notice_hours") or 24
-        )
-        booking_settings.maximum_booking_window_days = int(
-            request.POST.get("maximum_booking_window_days") or 60
-        )
-        booking_settings.maximum_session_hours = int(
-            request.POST.get("maximum_session_hours") or 6
-        )
-        booking_settings.minimum_reference_images = int(
-            request.POST.get("minimum_reference_images") or 1
-        )
-        booking_settings.maximum_reference_images = int(
-            request.POST.get("maximum_reference_images") or 10
-        )
-
-        booking_settings.consultation_price = request.POST.get("consultation_price") or 0
-        booking_settings.online_consultation_price = (
-            request.POST.get("online_consultation_price") or 0
-        )
-        booking_settings.deposit_amount = request.POST.get("deposit_amount") or 0
-
-        booking_settings.active_styles = request.POST.getlist("active_styles")
-
-        booking_settings.save()
-
-        for weekday in range(7):
-            is_open = request.POST.get(f"weekday_{weekday}_open") == "on"
-
-            ArtistAvailability.objects.update_or_create(
-                artist=request.user,
-                weekday=weekday,
-                defaults={
-                    "is_closed": not is_open,
-                    "open_time": _parse_time_or_none(
-                        request.POST.get(f"weekday_{weekday}_open_time")
-                    )
-                    if is_open
-                    else None,
-                    "close_time": _parse_time_or_none(
-                        request.POST.get(f"weekday_{weekday}_close_time")
-                    )
-                    if is_open
-                    else None,
-                    "break_start": _parse_time_or_none(
-                        request.POST.get(f"weekday_{weekday}_break_start")
-                    )
-                    if is_open
-                    else None,
-                    "break_end": _parse_time_or_none(
-                        request.POST.get(f"weekday_{weekday}_break_end")
-                    )
-                    if is_open
-                    else None,
-                },
+            booking_settings.consultation_required_before_booking = (
+                request.POST.get("consultation_required_before_booking") == "on"
+            )
+            booking_settings.consultation_enabled = (
+                request.POST.get("consultation_enabled") == "on"
+            )
+            booking_settings.online_consultation_enabled = (
+                request.POST.get("online_consultation_enabled") == "on"
+            )
+            booking_settings.studio_consultation_enabled = (
+                request.POST.get("studio_consultation_enabled") == "on"
+            )
+            booking_settings.phone_consultation_enabled = (
+                request.POST.get("phone_consultation_enabled") == "on"
             )
 
-        messages.success(request, _("Booking settings saved."))
-        return redirect("artist_booking_settings")
+            booking_settings.reference_images_required = (
+                request.POST.get("reference_images_required") == "on"
+            )
+            booking_settings.deposit_required = (
+                request.POST.get("deposit_required") == "on"
+            )
+
+            booking_settings.booking_workflow = request.POST.get(
+                "booking_workflow",
+                "manual",
+            )
+
+            booking_settings.minimum_notice_hours = int(
+                request.POST.get("minimum_notice_hours") or 24
+            )
+            booking_settings.maximum_booking_window_days = int(
+                request.POST.get("maximum_booking_window_days") or 60
+            )
+            booking_settings.maximum_session_hours = int(
+                request.POST.get("maximum_session_hours") or 6
+            )
+            booking_settings.minimum_reference_images = int(
+                request.POST.get("minimum_reference_images") or 1
+            )
+            booking_settings.maximum_reference_images = int(
+                request.POST.get("maximum_reference_images") or 10
+            )
+
+            booking_settings.consultation_price = (
+                request.POST.get("consultation_price") or 0
+            )
+            booking_settings.online_consultation_price = (
+                request.POST.get("online_consultation_price") or 0
+            )
+            booking_settings.deposit_amount = request.POST.get("deposit_amount") or 0
+            booking_settings.active_styles = request.POST.getlist("active_styles")
+
+            booking_settings.save()
+
+        if form_kind == "calendar":
+            _save_artist_availability_from_post(request.user, request.POST)
+            _save_artist_blocked_dates_from_post(request.user, request.POST)
+
+            messages.success(request, _("Calendar settings saved."))
+            return redirect("artist_dashboard")
+
+        messages.error(request, _("Unknown dashboard form."))
+        return redirect("artist_dashboard")
 
     availability_rows = ArtistAvailability.objects.filter(
         artist=request.user,
     ).order_by("weekday")
+
+    today = timezone.localdate()
+    month_start = today.replace(day=1)
+
+    artist_appointments = (
+        Appointment.objects
+        .filter(artist=request.user)
+        .select_related("client", "client__profile")
+        .prefetch_related("reference_images")
+    )
+
+    today_appointments_count = artist_appointments.filter(
+        date=today,
+        status=Appointment.STATUS_ACCEPTED,
+    ).count()
+
+    upcoming_consultations_count = artist_appointments.filter(
+        date__gte=today,
+        booking_type__in=[
+            Appointment.TYPE_CONSULTATION,
+            Appointment.TYPE_ONLINE_CONSULTATION,
+        ],
+        status__in=[
+            Appointment.STATUS_PENDING,
+            Appointment.STATUS_ACCEPTED,
+        ],
+    ).count()
+
+    pending_requests_count = artist_appointments.filter(
+        status=Appointment.STATUS_PENDING,
+    ).count()
+
+    unread_messages_count = (
+        ChatMessage.objects
+        .filter(is_read=False, is_deleted=False)
+        .exclude(sender=request.user)
+        .filter(
+            Q(thread__participant_one=request.user)
+            | Q(thread__participant_two=request.user)
+        )
+        .count()
+    )
+
+    references_waiting_count = (
+        artist_appointments
+        .filter(status=Appointment.STATUS_PENDING, reference_images__isnull=True)
+        .distinct()
+        .count()
+    )
+
+    accepted_this_month_count = artist_appointments.filter(
+        date__gte=month_start,
+        status=Appointment.STATUS_ACCEPTED,
+    ).count()
+
+    estimated_revenue = (
+        accepted_this_month_count * booking_settings.deposit_amount
+        if booking_settings.deposit_required
+        else 0
+    )
+
+    profile_checks = [
+        bool(getattr(request.user.profile, "profile_image", None)),
+        bool(request.user.profile.bio),
+        bool(booking_settings.active_styles),
+        availability_rows.filter(is_closed=False).exists(),
+        request.user.profile.verification_status == "approved",
+    ]
+
+    profile_score = round(
+        sum(1 for item in profile_checks if item) / len(profile_checks) * 100
+    )
+
+    next_appointment = (
+        artist_appointments
+        .filter(
+            date__gte=today,
+            status=Appointment.STATUS_ACCEPTED,
+        )
+        .order_by("date", "start_time")
+        .first()
+    )
+
+    pending_appointments = (
+        artist_appointments
+        .filter(status=Appointment.STATUS_PENDING)
+        .order_by("date", "start_time")[:6]
+    )
+
+    upcoming_appointments = (
+        artist_appointments
+        .filter(date__gte=today)
+        .order_by("date", "start_time")[:6]
+    )
+
+    clients = (
+        User.objects
+        .filter(client_appointments__artist=request.user)
+        .annotate(artist_sessions_count=Count("client_appointments"))
+        .distinct()
+        .order_by("-artist_sessions_count")[:6]
+    )
+
+    portfolio_preview = (
+        PortfolioWork.objects
+        .filter(user=request.user)
+        .order_by("-created_at")[:4]
+    )
+
+    unread_messages_preview = (
+        ChatMessage.objects
+        .filter(is_read=False, is_deleted=False)
+        .exclude(sender=request.user)
+        .filter(
+            Q(thread__participant_one=request.user)
+            | Q(thread__participant_two=request.user)
+        )
+        .select_related("sender")
+        .order_by("-created_at")[:5]
+    )
+
+    dashboard_stats = [
+        {
+            "icon": "calendar-check",
+            "value": today_appointments_count,
+            "label": _("Today's appointments"),
+        },
+        {
+            "icon": "video",
+            "value": upcoming_consultations_count,
+            "label": _("Upcoming consultations"),
+        },
+        {
+            "icon": "bell-dot",
+            "value": pending_requests_count,
+            "label": _("Pending booking requests"),
+            "accent": True,
+        },
+        {
+            "icon": "mail",
+            "value": unread_messages_count,
+            "label": _("Unread messages"),
+            "accent": True,
+        },
+        {
+            "icon": "images",
+            "value": references_waiting_count,
+            "label": _("Projects waiting for references"),
+        },
+        {
+            "icon": "euro",
+            "value": f"€{estimated_revenue:.0f}",
+            "label": _("Estimated deposits this month"),
+            "strong": True,
+        },
+        {
+            "icon": "timer",
+            "value": "—",
+            "label": _("Average response time"),
+        },
+        {
+            "icon": "badge-check",
+            "value": f"{profile_score}%",
+            "label": _("Profile completeness"),
+            "accent": True,
+        },
+    ]
+
+    stats_bars = [
+        {
+            "label": _("Monthly bookings"),
+            "value": accepted_this_month_count,
+            "percent": min(100, accepted_this_month_count * 12),
+        },
+        {
+            "label": _("Pending requests"),
+            "value": pending_requests_count,
+            "percent": min(100, pending_requests_count * 15),
+        },
+        {
+            "label": _("Unread messages"),
+            "value": unread_messages_count,
+            "percent": min(100, unread_messages_count * 12),
+        },
+        {
+            "label": _("Profile completeness"),
+            "value": f"{profile_score}%",
+            "percent": profile_score,
+        },
+    ]
+
+    blocked_dates = ArtistTimeOff.objects.filter(
+        artist=request.user,
+    ).order_by("date")
 
     return render(
         request,
@@ -523,6 +730,21 @@ def artist_booking_settings(request):
         {
             "booking_settings": booking_settings,
             "availability_rows": availability_rows,
+            "blocked_dates": blocked_dates,
             "default_styles": DEFAULT_TATTOO_STYLES,
+            "dashboard_stats": dashboard_stats,
+            "stats_bars": stats_bars,
+            "today": today,
+            "next_appointment": next_appointment,
+            "pending_appointments": pending_appointments,
+            "upcoming_appointments": upcoming_appointments,
+            "clients": clients,
+            "portfolio_preview": portfolio_preview,
+            "unread_messages_preview": unread_messages_preview,
+            "current_status": (
+                _("Accepting bookings")
+                if booking_settings.bookings_enabled
+                else _("Bookings paused")
+            ),
         },
     )
