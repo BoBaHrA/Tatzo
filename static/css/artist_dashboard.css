@@ -834,18 +834,6 @@ body {
   display: block !important;
 }
 
-.artist-dashboard-page .artist-dash-brand img.artist-dash-brand-icon {
-  width: 40px !important;
-  height: 40px !important;
-  min-width: 40px !important;
-  min-height: 40px !important;
-  max-width: 40px !important;
-  max-height: 40px !important;
-  flex: 0 0 40px !important;
-  object-fit: contain !important;
-  display: block !important;
-}
-
 .artist-section-title {
   margin: 28px 0 14px;
   font-weight: 900;
@@ -1020,9 +1008,13 @@ body {
   }
 }
 
-.artist-dash-brand {
-  justify-content: center;
-  margin-bottom: 28px;
+.artist-dash-brand-icon {
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  min-height: 42px !important;
+  max-width: 42px !important;
+  max-height: 42px !important;
 }
 
 .artist-portfolio-cover {
@@ -1194,4 +1186,35 @@ body {
 .artist-quick-action:hover i,
 .artist-quick-action:hover svg {
   color: #04c5bf;
+}
+
+.artist-dash-brand {
+  justify-content: center !important;
+  margin-bottom: 34px !important;
+}
+
+/* Dashboard brand logo: horizontal Tatzo logo */
+.artist-dashboard-page .artist-dash-brand {
+  justify-content: center !important;
+  height: 54px !important;
+  margin-bottom: 30px !important;
+}
+
+.artist-dashboard-page .artist-dash-brand {
+  justify-content: center !important;
+  align-items: center !important;
+  height: 58px !important;
+  margin-bottom: 30px !important;
+}
+
+.artist-dashboard-page .artist-dash-brand img.artist-dash-brand-icon {
+  width: 112px !important;
+  height: auto !important;
+  min-width: 112px !important;
+  min-height: 0 !important;
+  max-width: 112px !important;
+  max-height: none !important;
+  flex: 0 0 auto !important;
+  object-fit: contain !important;
+  display: block !important;
 }
