@@ -1,0 +1,740 @@
+html,
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100%;
+  min-height: 100%;
+  background: #000d18 !important;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: "DM Sans", "Poppins", sans-serif !important;
+  color: #dbe6ee;
+}
+
+.content {
+  margin: 0 !important;
+  padding: 0 !important;
+  max-width: none !important;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.artist-dashboard-page {
+  --bg: #000d18;
+  --bg2: #000a12;
+  --primary: #04c5bf;
+  --accent: #ee0c6f;
+
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 300px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(4, 197, 191, 0.12), transparent 34%),
+    #000d18;
+  color: #dbe6ee;
+}
+
+.artist-dash-sidebar,
+.artist-dash-context {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  background: rgba(0, 10, 18, 0.92);
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 24px 16px;
+}
+
+.artist-dash-context {
+  border-right: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.artist-dash-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.artist-dash-brand-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.artist-dash-nav {
+  display: grid;
+  gap: 6px;
+}
+
+.artist-dash-nav-item {
+  width: 100%;
+  min-height: 42px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: rgba(219, 230, 238, 0.76);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 14px;
+  cursor: pointer;
+  text-align: left;
+  font-weight: 800;
+  transition: 0.2s;
+}
+
+.artist-dash-nav-item svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.2;
+  flex: 0 0 auto;
+}
+
+.artist-dash-nav-item:hover,
+.artist-dash-nav-item.is-active {
+  background: linear-gradient(90deg, rgba(4, 197, 191, 0.18), rgba(4, 197, 191, 0.02));
+  color: #04c5bf;
+  box-shadow: inset 2px 0 0 #04c5bf;
+}
+
+.artist-dash-profile-mini {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #dbe6ee;
+  text-decoration: none;
+}
+
+.artist-dash-profile-mini img,
+.artist-dash-profile-mini > span {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: rgba(4, 197, 191, 0.12);
+  display: grid;
+  place-items: center;
+  color: #04c5bf;
+  font-weight: 900;
+}
+
+.artist-dash-profile-mini small {
+  display: block;
+  color: rgba(219, 230, 238, 0.55);
+}
+
+.artist-dash-main {
+  min-width: 0;
+  padding: 26px 34px 90px;
+}
+
+.artist-dash-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 26px;
+}
+
+.artist-dash-header h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 30px;
+}
+
+.artist-dash-header p {
+  margin: 4px 0 0;
+  color: rgba(219, 230, 238, 0.55);
+}
+
+.artist-dash-plus {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: #04c5bf;
+  color: #001014;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.artist-dash-panel {
+  display: none;
+  animation: artistFade 0.24s ease;
+}
+
+.artist-dash-panel.is-active {
+  display: block;
+}
+
+@keyframes artistFade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.artist-card,
+.artist-context-card,
+.artist-stat-card,
+.artist-insight-card,
+.artist-blocked-card {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 18px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18);
+}
+
+.artist-card {
+  padding: 22px;
+}
+
+.artist-card + .artist-card,
+.artist-blocked-card {
+  margin-top: 22px;
+}
+
+.artist-card h2,
+.artist-context-card h3 {
+  margin: 0 0 16px;
+  color: #ffffff;
+}
+
+.artist-card-head,
+.artist-section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.artist-section-title-row {
+  justify-content: flex-start;
+}
+
+.artist-section-title-row svg {
+  width: 18px;
+  height: 18px;
+  color: #04c5bf;
+}
+
+.artist-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.artist-stat-card {
+  min-height: 128px;
+  padding: 18px;
+}
+
+.artist-stat-card strong {
+  display: block;
+  margin-top: 18px;
+  font-size: 30px;
+  color: #ffffff;
+}
+
+.artist-stat-card small {
+  color: rgba(219, 230, 238, 0.52);
+}
+
+.artist-stat-icon {
+  color: #04c5bf;
+}
+
+.artist-stat-icon.is-accent {
+  color: #ee0c6f;
+}
+
+.artist-settings-stack {
+  display: grid;
+  gap: 22px;
+}
+
+.artist-settings-two-col,
+.artist-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.artist-settings-col {
+  display: grid;
+  gap: 14px;
+}
+
+.artist-setting-row {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.artist-setting-row span,
+.artist-setting-field > span,
+.artist-profile-grid span,
+.artist-auto-list span {
+  color: #dbe6ee;
+  font-weight: 700;
+}
+
+.artist-switch-input {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+
+.artist-switch-input input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.artist-switch-input > span,
+.artist-switch-button {
+  width: 44px;
+  height: 24px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  position: relative;
+  display: block;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.artist-switch-input > span::after,
+.artist-switch-button span {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: 3px;
+  left: 3px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: 0.25s;
+}
+
+.artist-switch-input input:checked + span,
+.artist-switch-button.is-on {
+  background: #04c5bf;
+}
+
+.artist-switch-input input:checked + span::after,
+.artist-switch-button.is-on span {
+  left: 23px;
+}
+
+.artist-setting-field,
+.artist-profile-grid label,
+.artist-auto-list label {
+  display: grid;
+  gap: 8px;
+}
+
+.artist-setting-field input,
+.artist-setting-field select,
+.artist-profile-grid input,
+.artist-auto-list input,
+.artist-calendar-row input,
+.artist-blocked-add input {
+  width: 100%;
+  min-height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.045);
+  color: #dbe6ee;
+  padding: 0 12px;
+  outline: none;
+}
+
+.artist-setting-field input:focus,
+.artist-setting-field select:focus,
+.artist-profile-grid input:focus,
+.artist-auto-list input:focus,
+.artist-calendar-row input:focus,
+.artist-blocked-add input:focus {
+  border-color: #04c5bf;
+  box-shadow: 0 0 0 3px rgba(4, 197, 191, 0.15);
+}
+
+.artist-setting-field div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.artist-setting-field small {
+  color: rgba(219, 230, 238, 0.55);
+}
+
+.artist-styles-section {
+  margin-top: 24px;
+}
+
+.artist-styles-section p {
+  color: rgba(219, 230, 238, 0.68);
+  margin: 0 0 12px;
+}
+
+.artist-style-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.artist-style-chip input {
+  display: none;
+}
+
+.artist-style-chip span,
+.artist-chip {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #dbe6ee;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.artist-style-chip input:checked + span,
+.artist-chip.is-selected {
+  background: rgba(238, 12, 111, 0.15);
+  border-color: #ee0c6f;
+  color: #ff69a8;
+}
+
+.artist-save-btn {
+  margin-top: 24px;
+  min-height: 46px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #04c5bf, #03a29d);
+  color: #00252a;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.artist-rules-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.artist-rule-card {
+  min-height: 86px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.055);
+  color: #dbe6ee;
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding: 14px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.artist-rule-card.is-active,
+.artist-rule-card:hover {
+  border-color: #04c5bf;
+}
+
+.artist-rule-card svg {
+  width: 20px;
+  height: 20px;
+  color: #04c5bf;
+}
+
+.artist-auto-list {
+  display: grid;
+  gap: 12px;
+}
+
+.artist-calendar-form {
+  display: block;
+}
+
+.artist-calendar-vacation {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(219, 230, 238, 0.7);
+}
+
+.artist-calendar-list {
+  display: grid;
+  gap: 10px;
+}
+
+.artist-calendar-row {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 54px 160px minmax(190px, 260px) minmax(150px, 220px) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.artist-calendar-row strong {
+  color: #ffffff;
+}
+
+.artist-calendar-time-fields,
+.artist-calendar-break-fields {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.artist-calendar-row em {
+  color: rgba(219, 230, 238, 0.55);
+  font-style: normal;
+  justify-self: end;
+  display: none;
+}
+
+.artist-calendar-row.is-closed .artist-calendar-time-fields,
+.artist-calendar-row.is-closed .artist-calendar-break-fields {
+  display: none;
+}
+
+.artist-calendar-row.is-closed em {
+  display: block;
+}
+
+.artist-blocked-card {
+  padding: 22px;
+}
+
+.artist-blocked-add {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.artist-blocked-add button {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 12px;
+  background: #04c5bf;
+  color: #001014;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.artist-blocked-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.artist-list,
+.artist-calendar-list,
+.artist-stats-bars {
+  display: grid;
+  gap: 12px;
+}
+
+.artist-list-row,
+.artist-client-row {
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #dbe6ee;
+  text-decoration: none;
+}
+
+.artist-list-row small,
+.artist-client-row small {
+  display: block;
+  color: rgba(219, 230, 238, 0.5);
+}
+
+.artist-status-pill {
+  border-radius: 999px;
+  padding: 8px 14px;
+  border: 1px solid rgba(4, 197, 191, 0.44);
+  color: #04c5bf;
+  font-weight: 900;
+}
+
+.artist-status-pill.is-pending {
+  color: #f5b301;
+  border-color: rgba(245, 179, 1, 0.55);
+}
+
+.artist-context-card {
+  padding: 18px;
+}
+
+.artist-context-card button {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.045);
+  color: #dbe6ee;
+  cursor: pointer;
+  font-weight: 800;
+  text-align: left;
+  padding: 0 14px;
+}
+
+.artist-next-box {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(4, 197, 191, 0.22);
+  background: rgba(4, 197, 191, 0.08);
+}
+
+.artist-next-box small,
+.artist-status-card strong {
+  color: #04c5bf;
+}
+
+.artist-status-card {
+  margin-top: auto;
+}
+
+.artist-status-card span {
+  color: rgba(219, 230, 238, 0.48);
+}
+
+.artist-empty {
+  margin: 0;
+  color: rgba(219, 230, 238, 0.55);
+}
+
+@media (max-width: 1180px) {
+  .artist-dashboard-page {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .artist-dash-context {
+    display: none;
+  }
+
+  .artist-stat-grid,
+  .artist-rules-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .artist-calendar-row {
+    grid-template-columns: 54px 1fr;
+  }
+
+  .artist-calendar-time-fields,
+  .artist-calendar-break-fields,
+  .artist-calendar-row em {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 820px) {
+  .artist-dashboard-page {
+    display: block;
+    padding-bottom: 90px;
+  }
+
+  .artist-dash-sidebar {
+    position: static;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .artist-dash-nav {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .artist-dash-nav-item {
+    width: auto;
+    flex: 0 0 auto;
+  }
+
+  .artist-dash-nav-item span {
+    display: none;
+  }
+
+  .artist-dash-profile-mini {
+    display: none;
+  }
+
+  .artist-dash-main {
+    padding: 20px 14px 110px;
+  }
+
+  .artist-settings-two-col,
+  .artist-profile-grid,
+  .artist-stat-grid,
+  .artist-rules-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .artist-card-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .artist-blocked-add {
+    width: 100%;
+  }
+}

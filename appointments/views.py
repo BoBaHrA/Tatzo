@@ -412,7 +412,44 @@ def _ensure_default_artist_availability(artist):
         
 def _save_artist_availability_from_post(artist, post_data):
     for weekday in range(7):
+        row, created = ArtistAvailability.objects.get_or_create(
+            artist=artist,
+            weekday=weekday,
+            defaults={
+                "is_closed": True,
+                "open_time": None,
+                "close_time": None,
+            },
+        )
+
         is_open = post_data.get(f"weekday_{weekday}_open") == "on"
+        row.is_closed = not is_open
+
+        if is_open:
+            row.open_time = (
+                _parse_time_or_none(post_data.get(f"weekday_{weekday}_open_time"))
+                or time(10, 0)
+            )
+            row.close_time = (
+                _parse_time_or_none(post_data.get(f"weekday_{weekday}_close_time"))
+                or time(18, 0)
+            )
+            row.break_start = _parse_time_or_none(
+                post_data.get(f"weekday_{weekday}_break_start")
+            )
+            row.break_end = _parse_time_or_none(
+                post_data.get(f"weekday_{weekday}_break_end")
+            )
+
+            if row.close_time <= row.open_time:
+                row.close_time = time(23, 0) if row.open_time >= time(18, 0) else time(18, 0)
+        else:
+            row.open_time = None
+            row.close_time = None
+            row.break_start = None
+            row.break_end = None
+
+        row.save()
 
 def _save_artist_blocked_dates_from_post(artist, post_data):
     raw_dates = post_data.getlist("blocked_dates")
@@ -515,16 +552,19 @@ def artist_booking_settings(request):
             booking_settings.active_styles = request.POST.getlist("active_styles")
 
             booking_settings.save()
+            
+            messages.success(request, _("Booking settings saved."))
+            return redirect("artist_booking_settings")
 
         if form_kind == "calendar":
             _save_artist_availability_from_post(request.user, request.POST)
             _save_artist_blocked_dates_from_post(request.user, request.POST)
 
             messages.success(request, _("Calendar settings saved."))
-            return redirect("artist_dashboard")
+            return redirect("artist_booking_settings")
 
         messages.error(request, _("Unknown dashboard form."))
-        return redirect("artist_dashboard")
+        return redirect("artist_booking_settings")
 
     availability_rows = ArtistAvailability.objects.filter(
         artist=request.user,
@@ -657,24 +697,24 @@ def artist_booking_settings(request):
             "label": _("Today's appointments"),
         },
         {
-            "icon": "video",
+            "icon": "camera",
             "value": upcoming_consultations_count,
             "label": _("Upcoming consultations"),
         },
         {
-            "icon": "bell-dot",
+            "icon": "bell",
             "value": pending_requests_count,
             "label": _("Pending booking requests"),
             "accent": True,
         },
         {
-            "icon": "mail",
+            "icon": "letter",
             "value": unread_messages_count,
             "label": _("Unread messages"),
             "accent": True,
         },
         {
-            "icon": "images",
+            "icon": "image",
             "value": references_waiting_count,
             "label": _("Projects waiting for references"),
         },
@@ -690,7 +730,7 @@ def artist_booking_settings(request):
             "label": _("Average response time"),
         },
         {
-            "icon": "badge-check",
+            "icon": "verified",
             "value": f"{profile_score}%",
             "label": _("Profile completeness"),
             "accent": True,
@@ -723,6 +763,13 @@ def artist_booking_settings(request):
     blocked_dates = ArtistTimeOff.objects.filter(
         artist=request.user,
     ).order_by("date")
+    
+    reviews_preview = (
+        artist_appointments
+        .filter(status=Appointment.STATUS_COMPLETED)
+        .select_related("client")
+        .order_by("-date", "-start_time")[:5]
+    )
 
     return render(
         request,
@@ -741,6 +788,7 @@ def artist_booking_settings(request):
             "clients": clients,
             "portfolio_preview": portfolio_preview,
             "unread_messages_preview": unread_messages_preview,
+            "reviews_preview": reviews_preview,
             "current_status": (
                 _("Accepting bookings")
                 if booking_settings.bookings_enabled
