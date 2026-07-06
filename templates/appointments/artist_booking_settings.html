@@ -1,110 +1,317 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "Booking settings" %} | Tatzo{% endblock %}
+{% block title %}{% trans "Artist dashboard" %} | Tatzo{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/home.css' %}">
 <link rel="stylesheet" href="{% static 'css/appointments.css' %}">
 {% endblock %}
 
 {% block content %}
-{% include "partials/sidebar.html" %}
-
-<div class="booking-page">
-  <div class="booking-shell">
-    <a href="{% url 'appointments_list' %}" class="booking-back">
-      ← {% trans "Back to appointments" %}
+<div class="artist-dashboard-page">
+  <aside class="artist-dash-sidebar">
+    <a href="{% url 'home' %}" class="artist-dash-brand">
+      <span class="artist-dash-logo">T</span>
+      <strong>Tatzo</strong>
     </a>
 
-    <form method="post" class="booking-form artist-settings-form">
-      {% csrf_token %}
+    <nav class="artist-dash-nav">
+      <button type="button" class="artist-dash-nav-item is-active" data-artist-panel-target="dashboard">▦ <span>{% trans "Dashboard" %}</span></button>
+      <button type="button" class="artist-dash-nav-item" data-artist-panel-target="calendar">▣ <span>{% trans "Calendar" %}</span></button>
+      <button type="button" class="artist-dash-nav-item" data-artist-panel-target="bookings">▤ <span>{% trans "Bookings" %}</span></button>
+      <button type="button" class="artist-dash-nav-item" data-artist-panel-target="projects">◉ <span>{% trans "Projects" %}</span></button>
+      <button type="button" class="artist-dash-nav-item" data-artist-panel-target="messages">□ <span>{% trans "Messages" %}</span></button>
+      <button type="button" class="artist-dash-nav-item" data-artist-panel-target="portfolio">▧ <span>{% trans "Portfolio" %}</span></button>
+      <button type="button" class="artist-dash-nav-item" data-artist-panel-target="clients">♙ <span>{% trans "Clients" %}</span></button>
+      <button type="button" class="artist-dash-nav-item" data-artist-panel-target="statistics">▥ <span>{% trans "Statistics" %}</span></button>
+      <button type="button" class="artist-dash-nav-item" data-artist-panel-target="settings">⚙ <span>{% trans "Settings" %}</span></button>
+    </nav>
 
-      <div class="booking-settings-head">
-        <p class="booking-eyebrow">Tatzo Artist Control Center</p>
-        <h1 class="appointments-title">{% trans "Booking settings" %}</h1>
-        <p class="booking-review-note">
-          {% trans "Control how clients can book appointments with you." %}
-        </p>
+    <a href="{% url 'user_profile' %}" class="artist-dash-profile-mini">
+      {% if request.user.profile.profile_image %}
+        <img src="{{ request.user.profile.profile_image.url }}" alt="{{ request.user.username }}">
+      {% else %}
+        <span>{{ request.user.username|first|upper }}</span>
+      {% endif %}
+
+      <div>
+        <strong>{{ request.user.username }}</strong>
+        <small>{% trans "Tattoo Artist" %}</small>
+      </div>
+    </a>
+  </aside>
+
+  <main class="artist-dash-main">
+    <header class="artist-dash-header">
+      <div>
+        <h1>{% blocktrans with username=request.user.username %}Good evening, {{ username }}{% endblocktrans %}</h1>
+        <p>{{ today|date:"l j F" }}</p>
       </div>
 
-      <section class="artist-settings-section">
-        <h2>{% trans "Booking rules" %}</h2>
+      <a href="{% url 'appointments_list' %}" class="artist-dash-plus">+</a>
+    </header>
+
+    <section class="artist-dash-panel is-active" data-artist-panel="dashboard">
+      <div class="artist-stat-grid">
+        {% for stat in dashboard_stats %}
+          <article class="artist-stat-card {% if stat.strong %}is-strong{% endif %}">
+            <span class="artist-stat-icon {% if stat.accent %}is-accent{% endif %}">{{ stat.icon }}</span>
+            <strong>{{ stat.value }}</strong>
+            <small>{{ stat.label }}</small>
+          </article>
+        {% endfor %}
+      </div>
+
+      <div class="artist-section-title">✦ {% trans "Smart insights" %}</div>
+
+      <div class="artist-insight-grid">
+        <div class="artist-insight-card is-accent">
+          {% trans "Your booking settings are now connected to the client booking wizard." %}
+        </div>
+        <div class="artist-insight-card">
+          {% trans "Active styles selected here are shown directly in your public booking form." %}
+        </div>
+        <div class="artist-insight-card is-accent">
+          {% trans "Pending requests should be answered quickly to improve conversion." %}
+        </div>
+        <div class="artist-insight-card">
+          {% trans "Add portfolio works to make your booking page more convincing." %}
+        </div>
+      </div>
+    </section>
+
+    <section class="artist-dash-panel" data-artist-panel="calendar">
+      <div class="artist-card">
+        <div class="artist-card-head">
+          <h2>{% trans "Weekly schedule" %}</h2>
+          <small>{% trans "Managed in Settings" %}</small>
+        </div>
+
+        <div class="artist-calendar-list">
+          {% for row in availability_rows %}
+            <div class="artist-calendar-row">
+              <span class="artist-switch {% if not row.is_closed %}is-on{% endif %}"></span>
+              <strong>{{ row.get_weekday_display }}</strong>
+
+              {% if row.is_closed %}
+                <em>{% trans "Closed" %}</em>
+              {% else %}
+                <em>{{ row.open_time|time:"H:i" }} — {{ row.close_time|time:"H:i" }}</em>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="artist-dash-panel" data-artist-panel="bookings">
+      <div class="artist-card">
+        <h2>{% trans "Booking requests" %}</h2>
+
+        <div class="artist-list">
+          {% for appointment in upcoming_appointments %}
+            <a href="{% url 'appointment_detail' appointment.id %}" class="artist-list-row">
+              <div>
+                <strong>{{ appointment.client.username }}</strong>
+                <small>{{ appointment.get_booking_type_display }} · {{ appointment.date }} {{ appointment.start_time|time:"H:i" }}</small>
+              </div>
+
+              <span class="artist-status-pill is-{{ appointment.status }}">
+                {{ appointment.get_status_display }}
+              </span>
+            </a>
+          {% empty %}
+            <p class="artist-empty">{% trans "No booking requests yet." %}</p>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="artist-dash-panel" data-artist-panel="projects">
+      <div class="artist-card">
+        <h2>{% trans "Tattoo projects" %}</h2>
+
+        <div class="artist-list">
+          {% for appointment in upcoming_appointments %}
+            <a href="{% url 'appointment_detail' appointment.id %}" class="artist-list-row">
+              <div>
+                <strong>
+                  {{ appointment.client.username }}
+                  {% if appointment.placement %} — {{ appointment.placement }}{% endif %}
+                </strong>
+                <small>{{ appointment.styles|join:", "|default:appointment.get_booking_type_display }}</small>
+              </div>
+
+              <span class="artist-status-pill is-{{ appointment.status }}">
+                {{ appointment.get_status_display }}
+              </span>
+            </a>
+          {% empty %}
+            <p class="artist-empty">{% trans "No active tattoo projects yet." %}</p>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="artist-dash-panel" data-artist-panel="messages">
+      <div class="artist-card">
+        <h2>{% trans "Messages" %}</h2>
+
+        <div class="artist-list">
+          {% for message in unread_messages_preview %}
+            <div class="artist-list-row">
+              <div>
+                <strong>{{ message.sender.username }}</strong>
+                <small>{{ message.content|truncatechars:90 }}</small>
+              </div>
+              <span class="artist-dot"></span>
+            </div>
+          {% empty %}
+            <p class="artist-empty">{% trans "No unread messages." %}</p>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="artist-dash-panel" data-artist-panel="portfolio">
+      <div class="artist-portfolio-cover">
+        <h2>{% trans "Portfolio" %}</h2>
+      </div>
+
+      <div class="artist-portfolio-grid">
+        {% for work in portfolio_preview %}
+          <a href="{% url 'artist_portfolio' request.user.username %}" class="artist-portfolio-tile">
+            <img src="{{ work.image.url }}" alt="{{ work.title|default:'Portfolio work' }}">
+          </a>
+        {% empty %}
+          <div class="artist-empty-card">
+            {% trans "No portfolio works yet." %}
+            <a href="{% url 'add_portfolio_work' request.user.username %}">
+              {% trans "Add your first work" %}
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="artist-dash-panel" data-artist-panel="clients">
+      <div class="artist-card">
+        <h2>{% trans "Clients" %}</h2>
+
+        <div class="artist-list">
+          {% for client in clients %}
+            <div class="artist-client-row">
+              {% if client.profile.profile_image %}
+                <img src="{{ client.profile.profile_image.url }}" alt="{{ client.username }}">
+              {% else %}
+                <span>{{ client.username|first|upper }}</span>
+              {% endif %}
+
+              <div>
+                <strong>{{ client.username }}</strong>
+                <small>
+                  {% blocktrans count count=client.artist_sessions_count %}
+                    {{ count }} session
+                  {% plural %}
+                    {{ count }} sessions
+                  {% endblocktrans %}
+                </small>
+              </div>
+            </div>
+          {% empty %}
+            <p class="artist-empty">{% trans "No clients yet." %}</p>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="artist-dash-panel" data-artist-panel="statistics">
+      <div class="artist-card">
+        <h2>{% trans "Statistics" %}</h2>
+
+        <div class="artist-stats-bars">
+          {% for item in stats_bars %}
+            <div class="artist-bar-row">
+              <div>
+                <span>{{ item.label }}</span>
+                <strong>{{ item.value }}</strong>
+              </div>
+
+              <div class="artist-bar-track">
+                    <span
+                        class="artist-bar-fill"
+                        data-percent="{{ item.percent|default:0 }}"
+                    ></span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="artist-dash-panel" data-artist-panel="settings">
+      <form method="post" class="artist-card artist-settings-form">
+        {% csrf_token %}
+
+        <h2>{% trans "Booking settings" %}</h2>
 
         <div class="artist-settings-grid">
-          <label class="artist-setting-toggle">
+          <label class="artist-setting-line">
             <span>{% trans "Accept new clients" %}</span>
             <input type="checkbox" name="bookings_enabled" {% if booking_settings.bookings_enabled %}checked{% endif %}>
           </label>
 
-          <label class="artist-setting-toggle">
+          <label class="artist-setting-line">
+            <span>{% trans "Consultations enabled" %}</span>
+            <input type="checkbox" name="consultation_enabled" {% if booking_settings.consultation_enabled %}checked{% endif %}>
+          </label>
+
+          <label class="artist-setting-line">
             <span>{% trans "Consultation required" %}</span>
             <input type="checkbox" name="consultation_required_before_booking" {% if booking_settings.consultation_required_before_booking %}checked{% endif %}>
           </label>
 
-          <label class="artist-setting-toggle">
+          <label class="artist-setting-line">
             <span>{% trans "Reference images required" %}</span>
             <input type="checkbox" name="reference_images_required" {% if booking_settings.reference_images_required %}checked{% endif %}>
           </label>
 
-          <label class="artist-setting-toggle">
+          <label class="artist-setting-line">
             <span>{% trans "Deposit required" %}</span>
             <input type="checkbox" name="deposit_required" {% if booking_settings.deposit_required %}checked{% endif %}>
           </label>
-        </div>
-      </section>
 
-      <section class="artist-settings-section">
-        <h2>{% trans "Consultations" %}</h2>
-
-        <div class="artist-settings-grid">
-          <label class="artist-setting-toggle">
-            <span>{% trans "Studio consultation" %}</span>
-            <input type="checkbox" name="studio_consultation_enabled" {% if booking_settings.studio_consultation_enabled %}checked{% endif %}>
-          </label>
-
-          <label class="artist-setting-toggle">
+          <label class="artist-setting-line">
             <span>{% trans "Online consultation" %}</span>
             <input type="checkbox" name="online_consultation_enabled" {% if booking_settings.online_consultation_enabled %}checked{% endif %}>
           </label>
 
-          <label class="artist-setting-toggle">
+          <label class="artist-setting-line">
+            <span>{% trans "Studio consultation" %}</span>
+            <input type="checkbox" name="studio_consultation_enabled" {% if booking_settings.studio_consultation_enabled %}checked{% endif %}>
+          </label>
+
+          <label class="artist-setting-line">
             <span>{% trans "Phone consultation" %}</span>
             <input type="checkbox" name="phone_consultation_enabled" {% if booking_settings.phone_consultation_enabled %}checked{% endif %}>
           </label>
 
           <label class="artist-setting-field">
-            <span>{% trans "Studio consultation price" %}</span>
+            <span>{% trans "Consultation price" %}</span>
             <input type="number" name="consultation_price" min="0" step="1" value="{{ booking_settings.consultation_price }}">
+            <small>€</small>
           </label>
 
           <label class="artist-setting-field">
             <span>{% trans "Online consultation price" %}</span>
             <input type="number" name="online_consultation_price" min="0" step="1" value="{{ booking_settings.online_consultation_price }}">
-          </label>
-        </div>
-      </section>
-
-      <section class="artist-settings-section">
-        <h2>{% trans "Limits" %}</h2>
-
-        <div class="artist-settings-grid">
-          <label class="artist-setting-field">
-            <span>{% trans "Minimum booking notice" %}</span>
-            <input type="number" name="minimum_notice_hours" min="0" value="{{ booking_settings.minimum_notice_hours }}">
-            <small>{% trans "hours" %}</small>
+            <small>€</small>
           </label>
 
           <label class="artist-setting-field">
-            <span>{% trans "Maximum booking window" %}</span>
-            <input type="number" name="maximum_booking_window_days" min="1" value="{{ booking_settings.maximum_booking_window_days }}">
-            <small>{% trans "days" %}</small>
-          </label>
-
-          <label class="artist-setting-field">
-            <span>{% trans "Maximum session duration" %}</span>
-            <input type="number" name="maximum_session_hours" min="1" value="{{ booking_settings.maximum_session_hours }}">
-            <small>{% trans "hours" %}</small>
+            <span>{% trans "Deposit amount" %}</span>
+            <input type="number" name="deposit_amount" min="0" step="1" value="{{ booking_settings.deposit_amount }}">
+            <small>€</small>
           </label>
 
           <label class="artist-setting-field">
@@ -118,13 +325,25 @@
           </label>
 
           <label class="artist-setting-field">
-            <span>{% trans "Deposit amount" %}</span>
-            <input type="number" name="deposit_amount" min="0" step="1" value="{{ booking_settings.deposit_amount }}">
-            <small>€</small>
+            <span>{% trans "Maximum session duration" %}</span>
+            <input type="number" name="maximum_session_hours" min="1" value="{{ booking_settings.maximum_session_hours }}">
+            <small>{% trans "hrs" %}</small>
           </label>
 
           <label class="artist-setting-field">
-            <span>{% trans "Booking workflow" %}</span>
+            <span>{% trans "Minimum booking notice" %}</span>
+            <input type="number" name="minimum_notice_hours" min="0" value="{{ booking_settings.minimum_notice_hours }}">
+            <small>{% trans "hrs" %}</small>
+          </label>
+
+          <label class="artist-setting-field">
+            <span>{% trans "Maximum booking window" %}</span>
+            <input type="number" name="maximum_booking_window_days" min="1" value="{{ booking_settings.maximum_booking_window_days }}">
+            <small>{% trans "days" %}</small>
+          </label>
+
+          <label class="artist-setting-field">
+            <span>{% trans "Preferred booking workflow" %}</span>
             <select name="booking_workflow">
               <option value="manual" {% if booking_settings.booking_workflow == "manual" %}selected{% endif %}>
                 {% trans "Manual approval" %}
@@ -135,10 +354,24 @@
             </select>
           </label>
         </div>
-      </section>
 
-      <section class="artist-settings-section">
-        <h2>{% trans "Working hours" %}</h2>
+        <h3>{% trans "Tattoo styles offered" %}</h3>
+
+        <div class="artist-style-grid">
+          {% for style in default_styles %}
+            <label class="artist-style-chip">
+              <input
+                type="checkbox"
+                name="active_styles"
+                value="{{ style }}"
+                {% if style in booking_settings.active_styles %}checked{% endif %}
+              >
+              <span>{{ style }}</span>
+            </label>
+          {% endfor %}
+        </div>
+
+        <h3>{% trans "Weekly schedule" %}</h3>
 
         <div class="artist-week-grid">
           {% for row in availability_rows %}
@@ -156,39 +389,64 @@
           {% endfor %}
         </div>
 
-        <p class="booking-review-note">
-          {% trans "Columns: open day, opening time, closing time, break start, break end." %}
-        </p>
-      </section>
-
-      <section class="artist-settings-section">
-        <h2>{% trans "Active styles" %}</h2>
-
-        <div class="artist-style-grid">
-          {% for style in default_styles %}
-            <label class="artist-style-chip">
-              <input
-                type="checkbox"
-                name="active_styles"
-                value="{{ style }}"
-                {% if style in booking_settings.active_styles %}checked{% endif %}
-              >
-              <span>{{ style }}</span>
-            </label>
-          {% endfor %}
-        </div>
-      </section>
-
-      <div class="booking-actions">
-        <a href="{% url 'appointments_list' %}" class="booking-btn-secondary">
-          {% trans "Cancel" %}
-        </a>
-
-        <button type="submit" class="booking-btn-primary">
+        <button type="submit" class="artist-save-btn">
           {% trans "Save booking settings" %}
         </button>
-      </div>
-    </form>
-  </div>
+      </form>
+    </section>
+  </main>
+
+  <aside class="artist-dash-context">
+    <div class="artist-context-card">
+      <h3>{% trans "Next appointment" %}</h3>
+
+      {% if next_appointment %}
+        <div class="artist-next-box">
+          <strong>{{ next_appointment.client.username }}</strong>
+          <span>{{ next_appointment.date }} · {{ next_appointment.start_time|time:"H:i" }}</span>
+          <small>{{ next_appointment.styles|join:", "|default:next_appointment.get_booking_type_display }}</small>
+        </div>
+      {% else %}
+        <p class="artist-empty">{% trans "No upcoming accepted appointments." %}</p>
+      {% endif %}
+    </div>
+
+    <div class="artist-context-card">
+      <h3>{% trans "Quick actions" %}</h3>
+
+      <button type="button" data-artist-panel-target="bookings">+ {% trans "New booking" %}</button>
+      <button type="button" data-artist-panel-target="calendar">▣ {% trans "Block a date" %}</button>
+      <button type="button" data-artist-panel-target="settings">Ⅱ {% trans "Pause bookings" %}</button>
+    </div>
+
+    <div class="artist-context-card artist-status-card">
+      <span>{% trans "Current status" %}</span>
+      <strong>{{ current_status }}</strong>
+    </div>
+  </aside>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener("click", (event) => {
+    const trigger = event.target.closest("[data-artist-panel-target]");
+
+    if (!trigger) {
+      return;
+    }
+
+    const target = trigger.dataset.artistPanelTarget;
+
+    document.querySelectorAll("[data-artist-panel]").forEach((panel) => {
+      panel.classList.toggle("is-active", panel.dataset.artistPanel === target);
+    });
+
+    document.querySelectorAll(".artist-dash-nav-item").forEach((item) => {
+      item.classList.toggle("is-active", item.dataset.artistPanelTarget === target);
+    });
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+</script>
 {% endblock %}
