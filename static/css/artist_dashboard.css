@@ -808,3 +808,40 @@ body {
 .artist-stat-card img {
   pointer-events: none;
 }
+
+/* FIX: dashboard icons are SVG files rendered as <img>, not inline <svg> */
+.artist-dashboard-page .artist-dash-nav-item img.artist-dash-icon {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  max-width: 18px !important;
+  max-height: 18px !important;
+  flex: 0 0 18px !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+.artist-dashboard-page .artist-stat-card img.artist-stat-icon {
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px !important;
+  min-height: 22px !important;
+  max-width: 22px !important;
+  max-height: 22px !important;
+  flex: 0 0 22px !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+.artist-dashboard-page .artist-dash-brand img.artist-dash-brand-icon {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  flex: 0 0 40px !important;
+  object-fit: contain !important;
+  display: block !important;
+}
