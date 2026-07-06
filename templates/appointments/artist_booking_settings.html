@@ -13,9 +13,8 @@
 {% block content %}
 <div class="artist-dashboard-page">
   <aside class="artist-dash-sidebar">
-    <a href="{% url 'home' %}" class="artist-dash-brand">
+    <a href="{% url 'home' %}" class="artist-dash-brand" aria-label="Tatzo">
       <img src="{% static 'images/tatzo7.png' %}" alt="Tatzo" class="artist-dash-brand-icon">
-      <strong>Tatzo</strong>
     </a>
 
     <nav class="artist-dash-nav">
@@ -155,10 +154,25 @@
                 <strong>{{ row.get_weekday_display }}</strong>
               </label>
 
-              <input type="time" name="weekday_{{ row.weekday }}_open_time" value="{{ row.open_time|time:'H:i' }}" {% if row.is_closed %}disabled{% endif %}>
-              <input type="time" name="weekday_{{ row.weekday }}_close_time" value="{{ row.close_time|time:'H:i' }}" {% if row.is_closed %}disabled{% endif %}>
-              <input type="time" name="weekday_{{ row.weekday }}_break_start" value="{{ row.break_start|time:'H:i' }}" {% if row.is_closed %}disabled{% endif %}>
-              <input type="time" name="weekday_{{ row.weekday }}_break_end" value="{{ row.break_end|time:'H:i' }}" {% if row.is_closed %}disabled{% endif %}>
+              <div class="artist-time-field">
+                <small>{% trans "Open" %}</small>
+                <input type="time" name="weekday_{{ row.weekday }}_open_time" value="{{ row.open_time|time:'H:i' }}" {% if row.is_closed %}disabled{% endif %}>
+              </div>
+
+              <div class="artist-time-field">
+                <small>{% trans "Close" %}</small>
+                <input type="time" name="weekday_{{ row.weekday }}_close_time" value="{{ row.close_time|time:'H:i' }}" {% if row.is_closed %}disabled{% endif %}>
+              </div>
+
+              <div class="artist-time-field">
+                <small>{% trans "Break from" %}</small>
+                <input type="time" name="weekday_{{ row.weekday }}_break_start" value="{{ row.break_start|time:'H:i' }}" {% if row.is_closed %}disabled{% endif %}>
+              </div>
+
+              <div class="artist-time-field">
+                <small>{% trans "Break to" %}</small>
+                <input type="time" name="weekday_{{ row.weekday }}_break_end" value="{{ row.break_end|time:'H:i' }}" {% if row.is_closed %}disabled{% endif %}>
+              </div>
             </div>
           {% endfor %}
         </div>
@@ -516,32 +530,32 @@
           <h2>{% trans "Booking rules" %}</h2>
 
           <div class="artist-rules-grid">
-            <button type="button" class="artist-rule-card is-active">
+            <button type="button" class="artist-rule-card is-active tone-green">
               <i data-lucide="check-circle"></i>
               <span>{% trans "Booking allowed" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card">
+            <button type="button" class="artist-rule-card tone-cyan">
               <i data-lucide="pause-circle"></i>
               <span>{% trans "Booking paused" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card">
+            <button type="button" class="artist-rule-card tone-pink">
               <i data-lucide="palmtree"></i>
               <span>{% trans "Vacation" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card">
+            <button type="button" class="artist-rule-card tone-violet">
               <i data-lucide="layers"></i>
               <span>{% trans "Fully booked" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card">
+            <button type="button" class="artist-rule-card tone-orange">
               <i data-lucide="message-circle"></i>
               <span>{% trans "Consultation only" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card">
+            <button type="button" class="artist-rule-card tone-red">
               <i data-lucide="alert-triangle"></i>
               <span>{% trans "Emergency closure" %}</span>
             </button>
@@ -636,9 +650,20 @@
     <div class="artist-context-card">
       <h3>{% trans "Quick actions" %}</h3>
 
-      <button type="button" data-artist-panel-target="bookings">+ {% trans "New booking" %}</button>
-      <button type="button" data-artist-panel-target="calendar">▣ {% trans "Block a date" %}</button>
-      <button type="button" data-artist-panel-target="settings">Ⅱ {% trans "Pause bookings" %}</button>
+      <button type="button" class="artist-quick-action" data-artist-panel-target="bookings">
+        <i data-lucide="circle-plus"></i>
+        <span>{% trans "New booking" %}</span>
+      </button>
+
+      <button type="button" class="artist-quick-action" data-artist-panel-target="calendar">
+        <i data-lucide="calendar-plus-2"></i>
+        <span>{% trans "Block a date" %}</span>
+      </button>
+
+      <button type="button" class="artist-quick-action" data-artist-panel-target="settings">
+        <i data-lucide="pause"></i>
+        <span>{% trans "Pause bookings" %}</span>
+      </button>
     </div>
 
     <div class="artist-context-card artist-status-card">
