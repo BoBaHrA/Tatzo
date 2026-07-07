@@ -42,8 +42,8 @@
 
     <li>
       <a
-        href="{% url 'coming_soon' 'maps' %}"
-        class="{% if request.resolver_match.url_name == 'coming_soon' and request.resolver_match.kwargs.feature == 'maps' %}active{% endif %}"
+        href="{% url 'maps_page' %}"
+        class="{% if request.resolver_match.url_name == 'maps_page' %}active{% endif %}"
       >
         <img src="{% static 'icons/maps.svg' %}" alt="{% trans 'Maps' %}">
         <span>{% trans "Maps" %}</span>
@@ -268,8 +268,8 @@
   </a>
 
   <a
-    href="{% url 'coming_soon' 'maps' %}"
-    class="mobile-bottom-nav-item {% if request.resolver_match.url_name == 'coming_soon' and request.resolver_match.kwargs.feature == 'maps' %}active{% endif %}"
+    href="{% url 'maps_page' %}"
+    class="mobile-bottom-nav-item {% if request.resolver_match.url_name == 'maps_page' %}active{% endif %}"
   >
     <img src="{% static 'icons/maps.svg' %}" alt="{% trans 'Maps' %}">
     <span>{% trans "Maps" %}</span>
