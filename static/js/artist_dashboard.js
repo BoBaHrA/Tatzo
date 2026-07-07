@@ -18,55 +18,189 @@ function showArtistPanel(target) {
 }
 
 function syncCalendarRows() {
-  document.querySelectorAll("[data-calendar-row]").forEach((row) => {
-    const checkbox = row.querySelector("[data-day-open]");
+  document.querySelectorAll("[data-calendar-row], [data-week-row]").forEach((row) => {
+    const checkbox = row.querySelector("[data-day-open], .artist-switch-input");
 
     if (!checkbox) {
       return;
     }
 
-    row.classList.toggle("is-closed", !checkbox.checked);
+    const isOpen = checkbox.checked;
+    row.classList.toggle("is-closed", !isOpen);
+
+    if (row.matches("[data-week-row]")) {
+      row.querySelectorAll('input[type="time"]').forEach((input) => {
+        input.disabled = !isOpen;
+      });
+    }
   });
 }
 
-function rebuildBlockedHiddenFields() {
-  const hiddenWrap = document.getElementById("artist-blocked-hidden-fields");
+function getBlockedDates() {
+  return new Set(
+    Array.from(document.querySelectorAll('input[name="blocked_dates"]'))
+      .map((input) => input.value)
+      .filter(Boolean)
+  );
+}
 
-  if (!hiddenWrap) {
+function syncBlockedEmptyState() {
+  const list = document.getElementById("artist-blocked-list");
+
+  if (!list) {
     return;
   }
 
-  hiddenWrap.innerHTML = "";
+  const hasChips = Boolean(list.querySelector("[data-blocked-chip]"));
+  let empty = list.querySelector("[data-empty-blocked]");
 
-  document.querySelectorAll("[data-blocked-chip]").forEach((chip) => {
-    const value = chip.dataset.date;
+  if (hasChips) {
+    empty?.remove();
+    return;
+  }
 
-    if (!value) {
-      return;
-    }
+  if (!empty) {
+    const form = document.querySelector(".artist-blocked-period-form");
+    empty = document.createElement("p");
+    empty.className = "artist-empty";
+    empty.dataset.emptyBlocked = "";
+    empty.textContent = form?.dataset.emptyMessage || "No blocked periods yet.";
+    list.appendChild(empty);
+  }
+}
 
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = "blocked_dates";
-    input.value = value;
+function setBlockedError(message) {
+  const error = document.getElementById("artist-blocked-error");
 
-    hiddenWrap.appendChild(input);
-  });
+  if (!error) {
+    return;
+  }
+
+  error.textContent = message || "";
+  error.hidden = !message;
+}
+
+function padDatePart(value) {
+  return String(value).padStart(2, "0");
+}
+
+function parseISODateValue(value) {
+  const parts = String(value || "").split("-").map(Number);
+
+  if (parts.length !== 3 || parts.some((part) => Number.isNaN(part))) {
+    return null;
+  }
+
+  const [year, month, day] = parts;
+  return new Date(year, month - 1, day);
+}
+
+function formatISODateValue(date) {
+  const year = date.getFullYear();
+  const month = padDatePart(date.getMonth() + 1);
+  const day = padDatePart(date.getDate());
+
+  return `${year}-${month}-${day}`;
+}
+
+function addDays(value, days) {
+  const date = parseISODateValue(value);
+
+  if (!date) {
+    return value;
+  }
+
+  date.setDate(date.getDate() + days);
+  return formatISODateValue(date);
+}
+
+function expandDateRange(startValue, endValue) {
+  const dates = [];
+  const startDate = parseISODateValue(startValue);
+  const endDate = parseISODateValue(endValue);
+
+  if (!startDate || !endDate) {
+    return dates;
+  }
+
+  const cursor = new Date(startDate);
+  const maxDays = 370;
+
+  while (cursor <= endDate && dates.length < maxDays) {
+    dates.push(formatISODateValue(cursor));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return dates;
+}
+
+function createHiddenInput(name, value) {
+  const input = document.createElement("input");
+  input.type = "hidden";
+  input.name = name;
+  input.value = value;
+  return input;
 }
 
 function formatBlockedDate(value) {
-  const date = new Date(`${value}T00:00:00`);
+  const date = parseISODateValue(value);
+
+  if (!date) {
+    return value;
+  }
 
   return date.toLocaleDateString(undefined, {
     day: "numeric",
     month: "short",
+    year: "numeric",
   });
+}
+
+function formatBlockedLabel(startValue, endValue, reason) {
+  const range = startValue === endValue
+    ? formatBlockedDate(startValue)
+    : `${formatBlockedDate(startValue)} — ${formatBlockedDate(endValue)}`;
+
+  return reason ? `${range} · ${reason}` : range;
+}
+
+function addBlockedPeriodChip(startValue, endValue, dates, reason) {
+  const list = document.getElementById("artist-blocked-list");
+
+  if (!list) {
+    return;
+  }
+
+  list.querySelector("[data-empty-blocked]")?.remove();
+
+  const chip = document.createElement("div");
+  chip.className = "artist-blocked-chip";
+  chip.dataset.blockedChip = "";
+  chip.dataset.startDate = startValue;
+  chip.dataset.endDate = endValue;
+
+  dates.forEach((dateValue) => {
+    chip.appendChild(createHiddenInput("blocked_dates", dateValue));
+    chip.appendChild(createHiddenInput("blocked_reasons", reason));
+  });
+
+  const label = document.createElement("span");
+  label.textContent = formatBlockedLabel(startValue, endValue, reason);
+  chip.appendChild(label);
+
+  const removeButton = document.createElement("button");
+  removeButton.type = "button";
+  removeButton.setAttribute("aria-label", "Remove blocked period");
+  removeButton.textContent = "×";
+  chip.appendChild(removeButton);
+
+  list.appendChild(chip);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   refreshArtistIcons();
   syncCalendarRows();
-  rebuildBlockedHiddenFields();
+  syncBlockedEmptyState();
 
   document.addEventListener("click", (event) => {
     const panelTrigger = event.target.closest("[data-artist-panel-target]");
@@ -77,23 +211,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const blockedChip = event.target.closest("[data-blocked-chip]");
+    const removeBlockedButton = event.target.closest("[data-blocked-chip] button");
 
-    if (blockedChip) {
-      blockedChip.remove();
-      rebuildBlockedHiddenFields();
-
-      const list = document.getElementById("artist-blocked-list");
-      const existing = list?.querySelector("[data-blocked-chip]");
-
-      if (list && !existing) {
-        const empty = document.createElement("p");
-        empty.className = "artist-empty";
-        empty.dataset.emptyBlocked = "";
-        empty.textContent = "No blocked dates yet.";
-        list.appendChild(empty);
-      }
-
+    if (removeBlockedButton) {
+      removeBlockedButton.closest("[data-blocked-chip]")?.remove();
+      syncBlockedEmptyState();
+      setBlockedError("");
       return;
     }
 
@@ -113,44 +236,61 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.addEventListener("change", (event) => {
-    if (event.target.matches("[data-day-open]")) {
+    if (event.target.matches("[data-day-open], .artist-switch-input")) {
       syncCalendarRows();
     }
   });
 
-  const addBlockedButton = document.getElementById("artist-add-blocked-date");
-  const blockedDateInput = document.getElementById("artist-blocked-date-input");
-  const blockedList = document.getElementById("artist-blocked-list");
+  const addBlockedButton = document.getElementById("artist-add-blocked-period");
+  const blockedStartInput = document.getElementById("artist-blocked-start-date");
+  const blockedEndInput = document.getElementById("artist-blocked-end-date");
+  const blockedReasonInput = document.getElementById("artist-blocked-reason");
+  const blockedForm = document.querySelector(".artist-blocked-period-form");
 
   addBlockedButton?.addEventListener("click", () => {
-    if (!blockedDateInput || !blockedList || !blockedDateInput.value) {
+    if (!blockedStartInput) {
       return;
     }
 
-    const value = blockedDateInput.value;
+    const startValue = blockedStartInput.value;
+    const endValue = blockedEndInput?.value || startValue;
+    const reason = (blockedReasonInput?.value || "").trim().slice(0, 160);
 
-    const exists = Array.from(
-      blockedList.querySelectorAll("[data-blocked-chip]")
-    ).some((chip) => chip.dataset.date === value);
-
-    if (exists) {
-      blockedDateInput.value = "";
+    if (!startValue) {
+      setBlockedError(blockedForm?.dataset.missingStartMessage || "Choose a start date first.");
+      blockedStartInput.focus();
       return;
     }
 
-    blockedList.querySelector("[data-empty-blocked]")?.remove();
+    if (endValue < startValue) {
+      setBlockedError(blockedForm?.dataset.invalidRangeMessage || "End date cannot be before start date.");
+      blockedEndInput?.focus();
+      return;
+    }
 
-    const chip = document.createElement("button");
-    chip.type = "button";
-    chip.className = "artist-chip is-selected";
-    chip.dataset.blockedChip = "";
-    chip.dataset.date = value;
-    chip.innerHTML = `${formatBlockedDate(value)} <span>×</span>`;
+    const existingDates = getBlockedDates();
+    const dates = expandDateRange(startValue, endValue).filter(
+      (dateValue) => !existingDates.has(dateValue)
+    );
 
-    blockedList.appendChild(chip);
-    blockedDateInput.value = "";
+    if (!dates.length) {
+      setBlockedError(blockedForm?.dataset.duplicateMessage || "Those dates are already blocked.");
+      return;
+    }
 
-    rebuildBlockedHiddenFields();
+    addBlockedPeriodChip(dates[0], dates[dates.length - 1], dates, reason);
+    setBlockedError("");
+    blockedStartInput.value = "";
+
+    if (blockedEndInput) {
+      blockedEndInput.value = "";
+    }
+
+    if (blockedReasonInput) {
+      blockedReasonInput.value = "";
+    }
+
+    syncBlockedEmptyState();
   });
 
   document.querySelectorAll(".artist-bar-fill[data-percent]").forEach((bar) => {
