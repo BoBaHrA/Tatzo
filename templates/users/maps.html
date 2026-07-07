@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Maps" %} | Tatzo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/maps.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+
+<main class="maps-shell" data-verified-count="{{ imported_count }}" data-unclaimed-count="{{ unclaimed_count }}">
+  <section class="maps-hero">
+    <div>
+      <p class="maps-kicker">Tatzo Maps</p>
+      <h1>{% trans "Find verified tattoo artists and studios" %}</h1>
+      <p>{% trans "The map separates verified profiles from unclaimed locations, checks duplicate additions and keeps booking actions only for approved artists." %}</p>
+    </div>
+    <button class="maps-add-location" type="button" data-open-add-location>{% trans "Add new location" %}</button>
+  </section>
+
+  <section class="maps-layout">
+    <aside class="maps-panel">
+      <div class="maps-search-card">
+        <label for="maps-search">{% trans "Search by artist or city" %}</label>
+        <input id="maps-search" type="search" placeholder="Berlin, fine line, @artist" data-map-search>
+        <div class="maps-filter-row" role="group" aria-label="{% trans 'Map filters' %}">
+          <button class="is-active" type="button" data-map-filter="all">{% trans "All" %}</button>
+          <button type="button" data-map-filter="verified">{% trans "Verified" %}</button>
+          <button type="button" data-map-filter="unclaimed">{% trans "Unclaimed" %}</button>
+        </div>
+      </div>
+
+      <div class="maps-stats">
+        <article><strong>{{ imported_count }}</strong><span>{% trans "Imported / verified" %}</span></article>
+        <article><strong>{{ unclaimed_count }}</strong><span>{% trans "Unclaimed" %}</span></article>
+        <article><strong>{{ artist_cards|length }}</strong><span>{% trans "Mock match scored" %}</span></article>
+      </div>
+
+      <div class="maps-results" data-map-results>
+        {% for artist in artist_cards %}
+          <article class="maps-artist-card" data-location-card data-source="{{ artist.source }}" data-search="{{ artist.user.username }} {{ artist.location }} {{ artist.user.profile.tag }}">
+            <div class="maps-card-top">
+              <div class="maps-avatar">
+                {% if artist.user.profile.profile_image %}
+                  <img src="{{ artist.user.profile.profile_image.url }}" alt="{{ artist.user.username }}">
+                {% else %}
+                  {{ artist.user.username|first|upper }}
+                {% endif %}
+              </div>
+              <div>
+                <h2>{{ artist.user.username }}</h2>
+                <p>@{{ artist.user.profile.tag|default:artist.user.username }}</p>
+              </div>
+              <span class="maps-status maps-status-{{ artist.source }}">{% if artist.source == "verified" %}{% trans "Verified" %}{% else %}{% trans "Unclaimed" %}{% endif %}</span>
+            </div>
+            <p class="maps-location">📍 {{ artist.location }}</p>
+            <div class="maps-score"><span>{% trans "Match score" %}</span><strong>{{ artist.match_score }}%</strong></div>
+            <div class="maps-actions">
+              <a href="{% url 'profile' artist.user.username %}">{% trans "Profile" %}</a>
+              <a href="{% url 'booking_wizard' artist.user.username %}">{% trans "Book" %}</a>
+            </div>
+          </article>
+        {% empty %}
+          <div class="maps-empty">{% trans "No verified artists are ready for the map yet." %}</div>
+        {% endfor %}
+      </div>
+    </aside>
+
+    <section class="maps-canvas" aria-label="{% trans 'Tatzo artist map preview' %}">
+      <div class="maps-grid"></div>
+      {% for artist in artist_cards %}
+        <button class="maps-pin maps-pin-{{ artist.source }}" style="left: {{ artist.x }}%; top: {{ artist.y }}%;" type="button" data-pin-source="{{ artist.source }}" data-pin-search="{{ artist.user.username }} {{ artist.location }}">
+          <span>{{ artist.match_score }}</span>
+        </button>
+      {% endfor %}
+      <div class="maps-legend">
+        <span><i class="verified"></i>{% trans "Imported / verified artist" %}</span>
+        <span><i class="unclaimed"></i>{% trans "Unclaimed location" %}</span>
+      </div>
+    </section>
+  </section>
+
+  <dialog class="maps-dialog" data-add-location-dialog>
+    <form method="dialog" class="maps-dialog-card">
+      <button class="maps-dialog-close" value="cancel" aria-label="{% trans 'Close' %}">×</button>
+      <h2>{% trans "Add new location" %}</h2>
+      <p>{% trans "Prototype duplicate check: enter a studio or city and Tatzo will compare it with visible locations." %}</p>
+      <input type="text" data-new-location-input placeholder="Black Ink Studio, Paris">
+      <output data-location-check>{% trans "Waiting for location…" %}</output>
+      <button type="button" data-check-location>{% trans "Check duplicates" %}</button>
+    </form>
+  </dialog>
+</main>
+
+<script src="{% static 'js/maps.js' %}" defer></script>
+{% endblock %}

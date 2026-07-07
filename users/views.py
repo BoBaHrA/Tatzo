@@ -1949,6 +1949,79 @@ def search_page(request):
         },
     )
     
+
+def maps_page(request):
+    """Interactive public map built from verified artist profiles."""
+    verified_artists = (
+        User.objects
+        .filter(
+            is_active=True,
+            profile__account_type="tattoo_artist",
+            profile__verification_status="approved",
+            profile__is_email_verified=True,
+        )
+        .select_related("profile")
+        .prefetch_related("portfolio_works", "manualverificationrequest")
+        .annotate(
+            portfolio_count=Count("portfolio_works", distinct=True),
+            public_post_count=Count(
+                "post",
+                filter=Q(post__visibility="public"),
+                distinct=True,
+            ),
+        )
+        .order_by("username")
+    )
+
+    artist_cards = []
+    for index, artist in enumerate(verified_artists[:36]):
+        manual_request = getattr(artist, "manualverificationrequest", None)
+        location = ""
+        if manual_request:
+            location = (manual_request.city_country or "").strip()
+
+        if not location:
+            location = (
+                Post.objects
+                .filter(user=artist, visibility="public")
+                .exclude(location="")
+                .values_list("location", flat=True)
+                .first()
+                or "Location pending"
+            )
+
+        match_score = min(
+            98,
+            72 + (artist.portfolio_count * 4) + (artist.public_post_count * 2),
+        )
+        source = "verified" if location != "Location pending" else "unclaimed"
+
+        artist_cards.append({
+            "user": artist,
+            "location": location,
+            "source": source,
+            "match_score": match_score,
+            "portfolio_count": artist.portfolio_count,
+            "post_count": artist.public_post_count,
+            "x": 18 + ((index * 23) % 66),
+            "y": 20 + ((index * 31) % 54),
+        })
+
+    imported_count = sum(
+        1 for artist in artist_cards if artist["source"] == "verified"
+    )
+    unclaimed_count = len(artist_cards) - imported_count
+
+    return render(
+        request,
+        "users/maps.html",
+        {
+            "artist_cards": artist_cards,
+            "imported_count": imported_count,
+            "unclaimed_count": unclaimed_count,
+        },
+    )
+
 def coming_soon(request, feature):
     public_features = {"maps", "clean-slate", "contests"}
 
