@@ -618,3 +618,143 @@
   padding: 14px 16px;
   text-align: center;
 }
+
+/* Critical scoped Leaflet layout fallback in case CDN CSS is delayed/blocked or global CSS interferes. */
+.maps-canvas .leaflet-container {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  touch-action: pan-x pan-y;
+}
+
+.maps-canvas .leaflet-pane,
+.maps-canvas .leaflet-map-pane,
+.maps-canvas .leaflet-tile-pane,
+.maps-canvas .leaflet-overlay-pane,
+.maps-canvas .leaflet-shadow-pane,
+.maps-canvas .leaflet-marker-pane,
+.maps-canvas .leaflet-tooltip-pane,
+.maps-canvas .leaflet-popup-pane {
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+.maps-canvas .leaflet-map-pane {
+  z-index: 1;
+}
+
+.maps-canvas .leaflet-tile-pane {
+  z-index: 200;
+}
+
+.maps-canvas .leaflet-overlay-pane {
+  z-index: 400;
+}
+
+.maps-canvas .leaflet-shadow-pane {
+  z-index: 500;
+}
+
+.maps-canvas .leaflet-marker-pane {
+  z-index: 600;
+}
+
+.maps-canvas .leaflet-tooltip-pane {
+  z-index: 650;
+}
+
+.maps-canvas .leaflet-popup-pane {
+  z-index: 700;
+}
+
+.maps-canvas .leaflet-tile,
+.maps-canvas .leaflet-marker-icon,
+.maps-canvas .leaflet-marker-shadow {
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+.maps-canvas .leaflet-container img,
+.maps-canvas .leaflet-container .leaflet-tile {
+  max-height: none !important;
+  max-width: none !important;
+}
+
+.maps-canvas .leaflet-tile-container {
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+.maps-canvas .leaflet-control-container {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 800;
+}
+
+.maps-canvas .leaflet-top,
+.maps-canvas .leaflet-bottom {
+  pointer-events: none;
+  position: absolute;
+  z-index: 1000;
+}
+
+.maps-canvas .leaflet-top {
+  top: 12px;
+}
+
+.maps-canvas .leaflet-bottom {
+  bottom: 12px;
+}
+
+.maps-canvas .leaflet-left {
+  left: 12px;
+}
+
+.maps-canvas .leaflet-right {
+  right: 12px;
+}
+
+.maps-canvas .leaflet-control {
+  clear: both;
+  float: left;
+  pointer-events: auto;
+}
+
+.maps-canvas .leaflet-right .leaflet-control {
+  float: right;
+}
+
+.maps-canvas .leaflet-control-zoom {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+
+.maps-canvas .leaflet-control-zoom a {
+  display: block;
+  height: 32px;
+  line-height: 32px;
+  text-align: center;
+  text-decoration: none;
+  width: 32px;
+}
+
+.maps-canvas .leaflet-control-zoom-in,
+.maps-canvas .leaflet-control-zoom-out {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.maps-canvas .leaflet-control-attribution {
+  border-radius: 999px;
+  font-size: 10px;
+  line-height: 1.4;
+  max-width: min(80vw, 460px);
+  padding: 4px 9px;
+}
