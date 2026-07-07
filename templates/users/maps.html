@@ -35,12 +35,12 @@
       <div class="maps-stats">
         <article><strong>{{ imported_count }}</strong><span>{% trans "Imported / verified" %}</span></article>
         <article><strong>{{ unclaimed_count }}</strong><span>{% trans "Unclaimed" %}</span></article>
-        <article><strong>{{ artist_cards|length }}</strong><span>{% trans "Mock match scored" %}</span></article>
+        <article><strong>{{ artist_cards|length }}</strong><span>{% trans "Location confidence" %}</span></article>
       </div>
 
       <div class="maps-results" data-map-results>
         {% for artist in artist_cards %}
-          <article class="maps-artist-card" data-location-card data-source="{{ artist.source }}" data-search="{{ artist.user.username }} {{ artist.location }} {{ artist.user.profile.tag }}">
+          <article class="maps-artist-card" data-location-card data-source="{{ artist.source }}" data-location="{{ artist.location }}" data-city="{{ artist.location_city }}" data-country="{{ artist.location_country }}" data-artist="{{ artist.user.username }}" data-tag="{{ artist.user.profile.tag|default:artist.user.username }}" data-search="{{ artist.user.username }} {{ artist.location }} {{ artist.user.profile.tag }}">
             <div class="maps-card-top">
               <div class="maps-avatar">
                 {% if artist.user.profile.profile_image %}
@@ -56,7 +56,7 @@
               <span class="maps-status maps-status-{{ artist.source }}">{% if artist.source == "verified" %}{% trans "Verified" %}{% else %}{% trans "Unclaimed" %}{% endif %}</span>
             </div>
             <p class="maps-location">📍 {{ artist.location }}</p>
-            <div class="maps-score"><span>{% trans "Match score" %}</span><strong>{{ artist.match_score }}%</strong></div>
+            <div class="maps-score"><span>{% trans "Data confidence" %}</span><strong>{{ artist.confidence_score }}%</strong></div>
             <div class="maps-actions">
               <a href="{% url 'profile' artist.user.username %}">{% trans "Profile" %}</a>
               <a href="{% url 'booking_wizard' artist.user.username %}">{% trans "Book" %}</a>
@@ -72,7 +72,7 @@
       <div class="maps-grid"></div>
       {% for artist in artist_cards %}
         <button class="maps-pin maps-pin-{{ artist.source }}" style="left: {{ artist.x }}%; top: {{ artist.y }}%;" type="button" data-pin-source="{{ artist.source }}" data-pin-search="{{ artist.user.username }} {{ artist.location }}">
-          <span>{{ artist.match_score }}</span>
+          <span>{{ artist.confidence_score }}</span>
         </button>
       {% endfor %}
       <div class="maps-legend">

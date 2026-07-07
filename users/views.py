@@ -1948,7 +1948,35 @@ def search_page(request):
             "results_count": len(users),
         },
     )
-    
+
+
+def _map_location_parts(location):
+    parts = [part.strip() for part in (location or "").split(",") if part.strip()]
+    return {
+        "city": parts[0] if parts else "",
+        "country": parts[-1] if len(parts) > 1 else "",
+    }
+
+
+def _artist_map_confidence_score(artist, location):
+    """Score data completeness for the map without implying user compatibility."""
+    if location == "Location pending":
+        return 35
+
+    location_parts = _map_location_parts(location)
+    score = 45
+
+    if location_parts["city"]:
+        score += 20
+    if location_parts["country"]:
+        score += 10
+    if artist.portfolio_count:
+        score += min(15, artist.portfolio_count * 3)
+    if artist.public_post_count:
+        score += min(10, artist.public_post_count * 2)
+
+    return min(100, score)
+
 
 def maps_page(request):
     """Interactive public map built from verified artist profiles."""
@@ -1990,17 +2018,17 @@ def maps_page(request):
                 or "Location pending"
             )
 
-        match_score = min(
-            98,
-            72 + (artist.portfolio_count * 4) + (artist.public_post_count * 2),
-        )
         source = "verified" if location != "Location pending" else "unclaimed"
+        location_parts = _map_location_parts(location)
+        confidence_score = _artist_map_confidence_score(artist, location)
 
         artist_cards.append({
             "user": artist,
             "location": location,
+            "location_city": location_parts["city"],
+            "location_country": location_parts["country"],
             "source": source,
-            "match_score": match_score,
+            "confidence_score": confidence_score,
             "portfolio_count": artist.portfolio_count,
             "post_count": artist.public_post_count,
             "x": 18 + ((index * 23) % 66),
