@@ -132,10 +132,12 @@ class LocationAdmin(admin.ModelAdmin):
         "source",
         "status",
         "linked_user",
+        "latitude",
+        "longitude",
         "verified_at",
         "updated_at",
     )
-    list_filter = ("source", "status", "country", "created_at", "verified_at")
+    list_filter = ("source", "status", "city", "country", "created_at", "verified_at")
     search_fields = (
         "name",
         "address",
@@ -143,6 +145,7 @@ class LocationAdmin(admin.ModelAdmin):
         "city",
         "country",
         "source_place_id",
+        "status",
         "linked_user__username",
         "linked_user__email",
     )

@@ -103,11 +103,17 @@
         actionButton = `<button class="tatzo-map-popup-action tatzo-map-popup-claim" type="button" data-open-claim data-claim-location="${escapeHtml(card.dataset.location)}" data-claim-artist="${escapeHtml(card.dataset.artist)}" data-claim-kind="${source}">${escapeHtml(card.dataset.actionLabel || "Claim this location")}</button>`;
       }
 
+      const contactDetails = [card.dataset.phone, card.dataset.website]
+        .filter(Boolean)
+        .map((value) => `<p>${escapeHtml(value)}</p>`)
+        .join("");
+
       marker.bindPopup(`
         <div class="tatzo-map-popup">
           <strong>${escapeHtml(card.dataset.artist)}</strong>
           <span>${escapeHtml(card.dataset.locationKind || card.dataset.source)}</span>
           <p>${escapeHtml(card.dataset.location)}</p>
+          ${contactDetails}
           <div class="tatzo-map-popup-actions">
             <a class="tatzo-map-popup-action" href="${card.dataset.profileUrl}">Profile</a>
             ${actionButton}

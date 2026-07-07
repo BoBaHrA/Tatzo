@@ -605,10 +605,10 @@
 
 .maps-empty-map {
   position: absolute;
-  left: 18px;
+  right: 18px;
   top: 18px;
   z-index: 3;
-  width: min(74%, 260px);
+  width: min(68%, 260px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   background: rgba(0, 0, 0, 0.42);
