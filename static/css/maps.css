@@ -758,3 +758,16 @@
   max-width: min(80vw, 460px);
   padding: 4px 9px;
 }
+
+.maps-canvas .leaflet-control-attribution {
+  opacity: 0.74;
+  transform: scale(0.92);
+  transform-origin: bottom right;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.maps-canvas .leaflet-control-attribution:hover,
+.maps-canvas .leaflet-control-attribution:focus-within {
+  opacity: 1;
+  transform: scale(1);
+}

@@ -65,6 +65,10 @@
 
     // Development tile layer only. Production should use an approved tile provider,
     // API key/configuration when required, and comply with provider usage policies.
+    // TODO: Future POI imports must use official APIs only (Google Places API,
+    // Apple Maps API, Geoapify/OSM, or Foursquare). Do not scrape public maps.
+    // Imported POIs should be saved as Location records with source, source_place_id,
+    // name, address, latitude, longitude, and status="imported" or "unclaimed".
     const tileUrl = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
     L.tileLayer(tileUrl, {
       maxZoom: 19,
@@ -73,8 +77,12 @@
 
     const bounds = [];
     cards.forEach((card) => {
-      const lat = Number(card.dataset.lat);
-      const lng = Number(card.dataset.lng);
+      const rawLat = (card.dataset.lat || "").trim();
+      const rawLng = (card.dataset.lng || "").trim();
+      if (!rawLat || !rawLng) return;
+
+      const lat = Number(rawLat);
+      const lng = Number(rawLng);
       if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
       const source = card.dataset.source || "verified";
