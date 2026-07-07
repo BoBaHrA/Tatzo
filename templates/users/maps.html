@@ -5,13 +5,14 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ1LXf6PtHLjvwvqgCZC+eyJSE7R2B8=" crossorigin="">
 <link rel="stylesheet" href="{% static 'css/maps.css' %}">
 {% endblock %}
 
 {% block content %}
 {% include "partials/sidebar.html" %}
 
-<main class="maps-shell" data-verified-count="{{ imported_count }}" data-unclaimed-count="{{ unclaimed_count }}">
+<main class="maps-shell" data-verified-count="{{ imported_count }}" data-unclaimed-count="{{ unclaimed_count }}" data-default-lat="46.8" data-default-lng="2.5" data-default-zoom="5">
   <section class="maps-hero">
     <div>
       <p class="maps-kicker">Tatzo Maps</p>
@@ -57,18 +58,18 @@
 
       <div class="maps-results" data-map-results>
         {% for artist in artist_cards %}
-          <article class="maps-artist-card" data-location-card data-source="{{ artist.source }}" data-location="{{ artist.location }}" data-city="{{ artist.location_city }}" data-country="{{ artist.location_country }}" data-artist="{{ artist.user.username }}" data-tag="{{ artist.user.profile.tag|default:artist.user.username }}" data-styles="{{ artist.style_tags|join:' ' }}" data-booking="{{ artist.booking_modes|join:' ' }}" data-search="{{ artist.user.username }} {{ artist.location }} {{ artist.user.profile.tag }} {{ artist.style_tags|join:' ' }} {{ artist.booking_modes|join:' ' }}">
+          <article class="maps-artist-card" data-location-card data-source="{{ artist.source }}" data-location="{{ artist.location }}" data-location-status="{% if artist.has_map_pin %}confirmed{% else %}pending{% endif %}" data-location-kind="{{ artist.location_kind }}" data-lat="{{ artist.latitude|default:'' }}" data-lng="{{ artist.longitude|default:'' }}" data-city="{{ artist.location_city }}" data-country="{{ artist.location_country }}" data-artist="{{ artist.display_name }}" data-tag="{{ artist.tag }}" data-styles="{{ artist.style_tags|join:' ' }}" data-booking="{{ artist.booking_modes|join:' ' }}" data-profile-url="{{ artist.profile_url }}" data-book-url="{{ artist.book_url }}" data-can-book="{% if artist.is_registered and artist.source == 'verified' and artist.can_book %}true{% else %}false{% endif %}" data-action-label="{% if not artist.is_registered %}{% trans 'Claim this location' %}{% elif not artist.has_map_pin %}{% trans 'Add location request' %}{% endif %}" data-search="{{ artist.display_name }} {{ artist.location }} {{ artist.tag }} {{ artist.style_tags|join:' ' }} {{ artist.booking_modes|join:' ' }}">
             <div class="maps-card-top">
               <div class="maps-avatar">
-                {% if artist.user.profile.profile_image %}
-                  <img src="{{ artist.user.profile.profile_image.url }}" alt="{{ artist.user.username }}">
+                {% if artist.profile_image %}
+                  <img src="{{ artist.profile_image.url }}" alt="{{ artist.display_name }}">
                 {% else %}
-                  <span>{{ artist.user.username|first|upper }}</span>
+                  <span>{{ artist.display_name|first|upper }}</span>
                 {% endif %}
               </div>
               <div class="maps-card-title">
-                <h2>{{ artist.user.username }}</h2>
-                <p>@{{ artist.user.profile.tag|default:artist.user.username }}</p>
+                <h2>{{ artist.display_name }}</h2>
+                <p>{% if artist.is_registered %}@{{ artist.tag }}{% else %}{{ artist.tag }}{% endif %}</p>
               </div>
               <span class="maps-status maps-status-{{ artist.source }}">{% if artist.source == "verified" %}{% trans "Verified" %}{% else %}{% trans "Needs claim" %}{% endif %}</span>
             </div>
@@ -85,11 +86,13 @@
               <span>{% trans "Data" %}: <strong>{{ artist.confidence_score }}%</strong></span>
             </div>
             <div class="maps-actions">
-              <a href="{% url 'profile' artist.user.username %}">{% trans "Profile" %}</a>
-              {% if artist.source == "verified" and artist.can_book %}
-                <a href="{% url 'booking_wizard' artist.user.username %}">{% trans "Book" %}</a>
-              {% else %}
-                <button type="button" data-open-claim data-claim-location="{{ artist.location }}" data-claim-artist="{{ artist.user.username }}" data-claim-kind="{{ artist.source }}">{% if artist.has_map_pin %}{% trans "Claim this location" %}{% else %}{% trans "Add location request" %}{% endif %}</button>
+              {% if artist.is_registered %}<a href="{{ artist.profile_url }}">{% trans "Profile" %}</a>{% endif %}
+              {% if artist.is_registered and artist.source == "verified" and artist.can_book %}
+                <a href="{{ artist.book_url }}">{% trans "Book" %}</a>
+              {% elif not artist.is_registered %}
+                <button type="button" data-open-claim data-claim-location="{{ artist.location }}" data-claim-artist="{{ artist.display_name }}" data-location-id="{{ artist.location_id }}" data-claim-kind="{{ artist.source }}">{% trans "Claim this location" %}</button>
+              {% elif not artist.has_map_pin %}
+                <button type="button" data-open-claim data-claim-location="{{ artist.location }}" data-claim-artist="{{ artist.display_name }}" data-location-id="{{ artist.location_id }}" data-claim-kind="{{ artist.source }}">{% trans "Add location request" %}</button>
               {% endif %}
             </div>
           </article>
@@ -99,18 +102,9 @@
       </div>
     </aside>
 
-    {# Preview-only map layers until latitude/longitude/provider data exist. Do not scrape public maps. #}
-    <section class="maps-canvas" aria-label="{% trans 'Tatzo artist map preview' %}">
-      <div class="maps-district district-a"></div><div class="maps-district district-b"></div><div class="maps-district district-c"></div>
-      <div class="maps-road road-main"></div><div class="maps-road road-cross"></div><div class="maps-road road-curve"></div>
-      <div class="maps-grid"></div>
-      {% for artist in artist_cards %}
-        {% if artist.has_map_pin %}
-          <button class="maps-pin maps-pin-{{ artist.source }}" style="left: {{ artist.x }}%; top: {{ artist.y }}%;" type="button" data-pin-source="{{ artist.source }}" data-pin-artist="{{ artist.user.username }}" data-pin-search="{{ artist.user.username }} {{ artist.location }}">
-            <span>{{ artist.confidence_score }}</span>
-          </button>
-        {% endif %}
-      {% endfor %}
+    <section class="maps-canvas" aria-label="{% trans 'Tatzo artist map' %}">
+      <div id="tatzo-map" class="tatzo-leaflet-map" data-map-container></div>
+      <div class="maps-empty-map" data-empty-map-message hidden>{% trans "Locations will appear here after address verification." %}</div>
       <div class="maps-legend">
         <span><i class="verified"></i>{% trans "Verified/imported artist" %}</span>
         <span><i class="unclaimed"></i>{% trans "Claim required" %}</span>
@@ -145,5 +139,6 @@
   </dialog>
 </main>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
 <script src="{% static 'js/maps.js' %}" defer></script>
 {% endblock %}

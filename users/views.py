@@ -25,6 +25,7 @@ from .models import (
     Profile,
     VerificationDocument,
     ManualVerificationRequest,
+    Location,
     UserFollow,
     UserBlock,
     PortfolioAlbum,
@@ -1978,6 +1979,16 @@ def _artist_map_confidence_score(artist, location):
     return min(100, score)
 
 
+def _optional_location_coordinate(*objects, field_name):
+    for obj in objects:
+        if obj is None:
+            continue
+        value = getattr(obj, field_name, None)
+        if value not in (None, ""):
+            return value
+    return None
+
+
 def maps_page(request):
     """Interactive public map built from verified artist profiles."""
     verified_artists = (
@@ -2004,8 +2015,16 @@ def maps_page(request):
     artist_cards = []
     for index, artist in enumerate(verified_artists[:36]):
         manual_request = getattr(artist, "manualverificationrequest", None)
-        location = ""
-        if manual_request:
+        location_obj = (
+            Location.objects
+            .filter(linked_user=artist, status__in=["verified", "claimed"])
+            .exclude(latitude__isnull=True)
+            .exclude(longitude__isnull=True)
+            .order_by("-verified_at", "-updated_at")
+            .first()
+        )
+        location = location_obj.display_address if location_obj else ""
+        if not location and manual_request:
             location = (manual_request.city_country or "").strip()
 
         if not location:
@@ -2018,9 +2037,12 @@ def maps_page(request):
                 or "Location pending"
             )
 
-        has_confirmed_location = location != "Location pending"
+        has_confirmed_location = bool(location_obj)
         source = "verified" if has_confirmed_location else "unclaimed"
-        location_parts = _map_location_parts(location)
+        location_parts = {
+            "city": location_obj.city,
+            "country": location_obj.country,
+        } if location_obj else _map_location_parts(location)
         confidence_score = _artist_map_confidence_score(artist, location)
         booking_settings = getattr(artist, "booking_settings", None)
         style_tags = []
@@ -2052,14 +2074,36 @@ def maps_page(request):
             else "Registered artist without confirmed address"
         )
 
-        # Preview-only deterministic coordinates until location latitude/longitude exist.
+        latitude = _optional_location_coordinate(
+            location_obj,
+            manual_request,
+            artist.profile,
+            field_name="latitude",
+        )
+        longitude = _optional_location_coordinate(
+            location_obj,
+            manual_request,
+            artist.profile,
+            field_name="longitude",
+        )
+        has_map_marker = bool(has_confirmed_location and latitude and longitude)
+
         artist_cards.append({
             "user": artist,
+            "is_registered": True,
+            "display_name": artist.username,
+            "tag": artist.profile.tag or artist.username,
+            "profile_image": artist.profile.profile_image,
+            "profile_url": f"/profile/{artist.username}/",
+            "book_url": f"/appointments/artist/{artist.username}/book/",
+            "location_id": location_obj.id if location_obj else "",
             "location": location,
             "location_city": location_parts["city"],
             "location_country": location_parts["country"],
             "location_kind": location_kind,
-            "has_map_pin": has_confirmed_location,
+            "has_map_pin": has_map_marker,
+            "latitude": latitude,
+            "longitude": longitude,
             "source": source,
             "confidence_score": confidence_score,
             "portfolio_count": artist.portfolio_count,
@@ -2067,8 +2111,49 @@ def maps_page(request):
             "style_tags": style_tags,
             "booking_modes": booking_modes,
             "can_book": can_book,
-            "x": 18 + ((index * 23) % 66),
-            "y": 20 + ((index * 31) % 54),
+        })
+
+
+    external_locations = (
+        Location.objects
+        .filter(
+            linked_user__isnull=True,
+            status__in=["imported", "unclaimed", "pending_claim"],
+            latitude__isnull=False,
+            longitude__isnull=False,
+        )
+        .order_by("name")[:80]
+    )
+
+    for location_obj in external_locations:
+        location = location_obj.display_address or "Location pending"
+        location_parts = {
+            "city": location_obj.city,
+            "country": location_obj.country,
+        }
+        artist_cards.append({
+            "user": None,
+            "is_registered": False,
+            "display_name": location_obj.name,
+            "tag": "Imported location",
+            "profile_image": None,
+            "profile_url": "",
+            "book_url": "",
+            "location_id": location_obj.id,
+            "location": location,
+            "location_city": location_parts["city"],
+            "location_country": location_parts["country"],
+            "location_kind": "Imported/unclaimed location",
+            "has_map_pin": True,
+            "latitude": location_obj.latitude,
+            "longitude": location_obj.longitude,
+            "source": "unclaimed",
+            "confidence_score": 80,
+            "portfolio_count": 0,
+            "post_count": 0,
+            "style_tags": [],
+            "booking_modes": [],
+            "can_book": False,
         })
 
     imported_count = sum(

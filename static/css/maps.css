@@ -492,3 +492,129 @@
   padding: 11px 14px;
   text-align: center;
 }
+
+.tatzo-leaflet-map {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #071317;
+}
+
+.maps-canvas .leaflet-container {
+  background: #071317;
+  font-family: Poppins, Arial, sans-serif;
+}
+
+.maps-canvas .leaflet-control-zoom a {
+  background: rgba(7, 19, 23, 0.9);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--map-text);
+}
+
+.maps-canvas .leaflet-control-attribution {
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(239, 255, 255, 0.62);
+}
+
+.maps-canvas .leaflet-control-attribution a {
+  color: var(--map-accent);
+}
+
+.tatzo-map-marker {
+  border: 3px solid rgba(255, 255, 255, 0.86);
+  border-radius: 50%;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.36), 0 0 0 6px rgba(4, 197, 191, 0.12);
+  display: grid;
+  place-items: center;
+}
+
+.tatzo-map-marker span {
+  color: #001316;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.tatzo-map-marker-verified {
+  background: var(--map-accent);
+}
+
+.tatzo-map-marker-unclaimed {
+  background: var(--map-pink);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.36), 0 0 0 6px rgba(238, 12, 111, 0.16);
+}
+
+.tatzo-map-marker-unclaimed span {
+  color: #fff;
+}
+
+.maps-canvas .leaflet-popup-content-wrapper,
+.maps-canvas .leaflet-popup-tip {
+  background: rgba(7, 19, 23, 0.96);
+  color: var(--map-text);
+  border: 1px solid rgba(4, 197, 191, 0.2);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+}
+
+.tatzo-map-popup {
+  min-width: 210px;
+}
+
+.tatzo-map-popup strong,
+.tatzo-map-popup span,
+.tatzo-map-popup p {
+  display: block;
+  margin: 0 0 6px;
+}
+
+.tatzo-map-popup span,
+.tatzo-map-popup p {
+  color: var(--map-muted);
+  font-size: 12px;
+}
+
+.tatzo-map-popup-actions {
+  display: flex;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.tatzo-map-popup-action {
+  border: 0;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--map-text);
+  cursor: pointer;
+  flex: 1;
+  font: inherit;
+  font-weight: 800;
+  padding: 8px 9px;
+  text-align: center;
+  text-decoration: none;
+}
+
+.tatzo-map-popup-book {
+  background: var(--map-accent);
+  color: #001316;
+}
+
+.tatzo-map-popup-claim {
+  background: linear-gradient(135deg, var(--map-pink), #ff6aa9);
+  color: #fff;
+}
+
+.maps-empty-map {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  transform: translate(-50%, -50%);
+  width: min(84%, 360px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.58);
+  color: var(--map-text);
+  font-weight: 700;
+  padding: 14px 16px;
+  text-align: center;
+}

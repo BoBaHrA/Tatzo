@@ -6,6 +6,8 @@
   const styleFilters = Array.from(document.querySelectorAll("[data-draft-filter]"));
   const bookingFilters = Array.from(document.querySelectorAll("[data-booking-filter]"));
   let activeFilter = "all";
+  let leafletMap = null;
+  const leafletMarkersByArtist = new Map();
   const activeStyleFilters = new Set();
   const activeBookingFilters = new Set();
 
@@ -40,6 +42,90 @@
     return [...activeTokens].some((token) => normalizedValue.includes(normalizeText(token)));
   }
 
+
+  function escapeHtml(value) {
+    const div = document.createElement("div");
+    div.textContent = value || "";
+    return div.innerHTML;
+  }
+
+  function initializeLeafletMap() {
+    const mapContainer = document.querySelector("[data-map-container]");
+    if (!mapContainer || !window.L) return;
+
+    const shell = document.querySelector(".maps-shell");
+    const defaultLat = Number(shell?.dataset.defaultLat || 46.8);
+    const defaultLng = Number(shell?.dataset.defaultLng || 2.5);
+    const defaultZoom = Number(shell?.dataset.defaultZoom || 5);
+    const map = L.map(mapContainer, {
+      scrollWheelZoom: true,
+      zoomControl: true,
+    }).setView([defaultLat, defaultLng], defaultZoom);
+    leafletMap = map;
+
+    // Development tile layer only. Production should use an approved tile provider,
+    // API key/configuration when required, and comply with provider usage policies.
+    const tileUrl = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+    L.tileLayer(tileUrl, {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    }).addTo(map);
+
+    const bounds = [];
+    cards.forEach((card) => {
+      const lat = Number(card.dataset.lat);
+      const lng = Number(card.dataset.lng);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+      const source = card.dataset.source || "verified";
+      const marker = L.marker([lat, lng], {
+        icon: L.divIcon({
+          className: `tatzo-map-marker tatzo-map-marker-${source}`,
+          html: `<span>${source === "verified" ? "✓" : "!"}</span>`,
+          iconSize: [34, 34],
+          iconAnchor: [17, 17],
+          popupAnchor: [0, -18],
+        }),
+      });
+
+      let actionButton = "";
+      if (card.dataset.canBook === "true") {
+        actionButton = `<a class="tatzo-map-popup-action tatzo-map-popup-book" href="${card.dataset.bookUrl}">Book</a>`;
+      } else if (source !== "verified") {
+        actionButton = `<button class="tatzo-map-popup-action tatzo-map-popup-claim" type="button" data-open-claim data-claim-location="${escapeHtml(card.dataset.location)}" data-claim-artist="${escapeHtml(card.dataset.artist)}" data-claim-kind="${source}">${escapeHtml(card.dataset.actionLabel || "Claim this location")}</button>`;
+      }
+
+      marker.bindPopup(`
+        <div class="tatzo-map-popup">
+          <strong>${escapeHtml(card.dataset.artist)}</strong>
+          <span>${escapeHtml(card.dataset.locationKind || card.dataset.source)}</span>
+          <p>${escapeHtml(card.dataset.location)}</p>
+          <div class="tatzo-map-popup-actions">
+            <a class="tatzo-map-popup-action" href="${card.dataset.profileUrl}">Profile</a>
+            ${actionButton}
+          </div>
+        </div>
+      `);
+
+      marker.addTo(map);
+      leafletMarkersByArtist.set(card.dataset.artist, marker);
+      marker.on("click", () => {
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+      bounds.push([lat, lng]);
+    });
+
+    const emptyMessage = document.querySelector("[data-empty-map-message]");
+    if (bounds.length) {
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
+      emptyMessage?.setAttribute("hidden", "");
+    } else {
+      emptyMessage?.removeAttribute("hidden");
+    }
+
+    setTimeout(() => map.invalidateSize(), 120);
+  }
+
   function applyFilters() {
     const query = normalizeText(search?.value || "");
     cards.forEach((card, index) => {
@@ -52,6 +138,15 @@
       pins
         .filter((pin) => pin.dataset.pinArtist === card.dataset.artist)
         .forEach((pin) => pin.classList.toggle("is-hidden", hidden));
+
+      const marker = leafletMarkersByArtist.get(card.dataset.artist);
+      if (leafletMap && marker) {
+        if (hidden && leafletMap.hasLayer(marker)) {
+          leafletMap.removeLayer(marker);
+        } else if (!hidden && !leafletMap.hasLayer(marker)) {
+          marker.addTo(leafletMap);
+        }
+      }
     });
   }
 
@@ -82,16 +177,7 @@
   bindChipFilters(styleFilters, activeStyleFilters, "draftFilter");
   bindChipFilters(bookingFilters, activeBookingFilters, "bookingFilter");
 
-  pins.forEach((pin) => {
-    pin.addEventListener("click", () => {
-      const card = cards.find((item) => item.dataset.artist === pin.dataset.pinArtist);
-      card?.scrollIntoView({ behavior: "smooth", block: "center" });
-      card?.animate(
-        [{ transform: "scale(1)" }, { transform: "scale(1.02)" }, { transform: "scale(1)" }],
-        { duration: 420 }
-      );
-    });
-  });
+  initializeLeafletMap();
 
   const dialog = document.querySelector("[data-add-location-dialog]");
   document.querySelector("[data-open-add-location]")?.addEventListener("click", () => dialog?.showModal());
@@ -131,16 +217,17 @@
   const claimDialog = document.querySelector("[data-claim-dialog]");
   const claimSummary = document.querySelector("[data-claim-summary]");
   const claimTitle = document.querySelector("[data-claim-title]");
-  document.querySelectorAll("[data-open-claim]").forEach((button) => {
-    button.addEventListener("click", () => {
-      if (claimSummary) {
-        const isLocationPending = button.dataset.claimKind === "unclaimed";
-        const title = isLocationPending ? "Request location verification" : "Claim this location";
-        const actionLabel = isLocationPending ? "Location verification request" : "Claim draft";
-        if (claimTitle) claimTitle.textContent = title;
-        claimSummary.textContent = `${actionLabel} for ${button.dataset.claimLocation || "this location"} (${button.dataset.claimArtist || "artist/studio"}). Address verification is required and nothing is claimed instantly.`;
-      }
-      claimDialog?.showModal();
-    });
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-open-claim]");
+    if (!button) return;
+
+    if (claimSummary) {
+      const isLocationPending = button.dataset.claimKind === "unclaimed";
+      const title = isLocationPending ? "Request location verification" : "Claim this location";
+      const actionLabel = isLocationPending ? "Location verification request" : "Claim draft";
+      if (claimTitle) claimTitle.textContent = title;
+      claimSummary.textContent = `${actionLabel} for ${button.dataset.claimLocation || "this location"} (${button.dataset.claimArtist || "artist/studio"}). Address verification is required and nothing is claimed instantly.`;
+    }
+    claimDialog?.showModal();
   });
 })();
