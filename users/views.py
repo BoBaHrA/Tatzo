@@ -2018,7 +2018,8 @@ def maps_page(request):
                 or "Location pending"
             )
 
-        source = "verified" if location != "Location pending" else "unclaimed"
+        has_confirmed_location = location != "Location pending"
+        source = "verified" if has_confirmed_location else "unclaimed"
         location_parts = _map_location_parts(location)
         confidence_score = _artist_map_confidence_score(artist, location)
         booking_settings = getattr(artist, "booking_settings", None)
@@ -2058,6 +2059,7 @@ def maps_page(request):
             "location_city": location_parts["city"],
             "location_country": location_parts["country"],
             "location_kind": location_kind,
+            "has_map_pin": has_confirmed_location,
             "source": source,
             "confidence_score": confidence_score,
             "portfolio_count": artist.portfolio_count,

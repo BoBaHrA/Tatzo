@@ -49,7 +49,9 @@
       const bookingMatch = matchesActiveTokens(card.dataset.booking || "", activeBookingFilters);
       const hidden = !(sourceMatch && textMatch && styleMatch && bookingMatch);
       card.classList.toggle("is-hidden", hidden);
-      pins[index]?.classList.toggle("is-hidden", hidden);
+      pins
+        .filter((pin) => pin.dataset.pinArtist === card.dataset.artist)
+        .forEach((pin) => pin.classList.toggle("is-hidden", hidden));
     });
   }
 
@@ -80,10 +82,11 @@
   bindChipFilters(styleFilters, activeStyleFilters, "draftFilter");
   bindChipFilters(bookingFilters, activeBookingFilters, "bookingFilter");
 
-  pins.forEach((pin, index) => {
+  pins.forEach((pin) => {
     pin.addEventListener("click", () => {
-      cards[index]?.scrollIntoView({ behavior: "smooth", block: "center" });
-      cards[index]?.animate(
+      const card = cards.find((item) => item.dataset.artist === pin.dataset.pinArtist);
+      card?.scrollIntoView({ behavior: "smooth", block: "center" });
+      card?.animate(
         [{ transform: "scale(1)" }, { transform: "scale(1.02)" }, { transform: "scale(1)" }],
         { duration: 420 }
       );
@@ -130,7 +133,9 @@
   document.querySelectorAll("[data-open-claim]").forEach((button) => {
     button.addEventListener("click", () => {
       if (claimSummary) {
-        claimSummary.textContent = `Claim draft for ${button.dataset.claimLocation || "this location"} (${button.dataset.claimArtist || "artist/studio"}). Verification request backend required before submission.`;
+        const isLocationPending = button.dataset.claimKind === "unclaimed";
+        const actionLabel = isLocationPending ? "Location verification request" : "Claim draft";
+        claimSummary.textContent = `${actionLabel} for ${button.dataset.claimLocation || "this location"} (${button.dataset.claimArtist || "artist/studio"}). Verification backend required before submission; nothing is claimed instantly.`;
       }
       claimDialog?.showModal();
     });

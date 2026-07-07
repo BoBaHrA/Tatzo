@@ -444,3 +444,38 @@
   .maps-hero h1 { font-size: 32px; }
   .maps-panel, .maps-canvas { border-radius: 22px; }
 }
+
+.maps-panel {
+  scrollbar-color: rgba(4, 197, 191, 0.75) rgba(2, 10, 14, 0.85);
+  scrollbar-width: thin;
+}
+
+.maps-panel::-webkit-scrollbar {
+  width: 10px;
+}
+
+.maps-panel::-webkit-scrollbar-track {
+  background: rgba(2, 10, 14, 0.88);
+  border-radius: 999px;
+}
+
+.maps-panel::-webkit-scrollbar-thumb {
+  border: 2px solid rgba(2, 10, 14, 0.88);
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--map-accent), var(--map-pink));
+}
+
+.maps-panel::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #42fff6, #ff4f9a);
+}
+
+.maps-actions a,
+.maps-actions button {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  min-height: 38px;
+  min-width: 0;
+  padding: 8px 10px;
+  line-height: 1.15;
+}

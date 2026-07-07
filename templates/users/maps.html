@@ -42,7 +42,7 @@
       {# Draft-only filters: disabled chips require backend fields for availability, distance, rating and price. #}
       <section class="maps-filter-panel" aria-label="{% trans 'Detailed filters' %}">
         <div class="maps-chip-group" data-placeholder-filters>
-          <p>{% trans "Frontend draft filters — real filtering needs style, availability, distance, rating and price fields." %}</p>
+          {# Frontend-only until backend fields exist for availability, distance, rating and price. #}
           <div class="maps-chip-row">
             <button type="button" data-draft-filter="Fine Line">Fine Line</button><button type="button" data-draft-filter="Blackwork">Blackwork</button><button type="button" data-draft-filter="Realism">Realism</button><button type="button" data-draft-filter="Japanese">Japanese</button><button type="button" data-draft-filter="Traditional">Traditional</button><button type="button" data-draft-filter="Neo Traditional">Neo Traditional</button><button type="button" data-draft-filter="Minimalist">Minimalist</button><button type="button" data-draft-filter="Lettering">Lettering</button><button type="button" data-draft-filter="Geometric">Geometric</button><button type="button" data-draft-filter="Watercolor">Watercolor</button><button type="button" data-draft-filter="Black & Grey">Black & Grey</button><button type="button" data-draft-filter="Color">Color</button>
           </div>
@@ -89,7 +89,7 @@
               {% if artist.source == "verified" and artist.can_book %}
                 <a href="{% url 'booking_wizard' artist.user.username %}">{% trans "Book" %}</a>
               {% else %}
-                <button type="button" data-open-claim data-claim-location="{{ artist.location }}" data-claim-artist="{{ artist.user.username }}">{% trans "Claim this location" %}</button>
+                <button type="button" data-open-claim data-claim-location="{{ artist.location }}" data-claim-artist="{{ artist.user.username }}" data-claim-kind="{{ artist.source }}">{% if artist.has_map_pin %}{% trans "Claim this location" %}{% else %}{% trans "Add location request" %}{% endif %}</button>
               {% endif %}
             </div>
           </article>
@@ -105,9 +105,11 @@
       <div class="maps-road road-main"></div><div class="maps-road road-cross"></div><div class="maps-road road-curve"></div>
       <div class="maps-grid"></div>
       {% for artist in artist_cards %}
-        <button class="maps-pin maps-pin-{{ artist.source }}" style="left: {{ artist.x }}%; top: {{ artist.y }}%;" type="button" data-pin-source="{{ artist.source }}" data-pin-search="{{ artist.user.username }} {{ artist.location }}">
-          <span>{{ artist.confidence_score }}</span>
-        </button>
+        {% if artist.has_map_pin %}
+          <button class="maps-pin maps-pin-{{ artist.source }}" style="left: {{ artist.x }}%; top: {{ artist.y }}%;" type="button" data-pin-source="{{ artist.source }}" data-pin-artist="{{ artist.user.username }}" data-pin-search="{{ artist.user.username }} {{ artist.location }}">
+            <span>{{ artist.confidence_score }}</span>
+          </button>
+        {% endif %}
       {% endfor %}
       <div class="maps-legend">
         <span><i class="verified"></i>{% trans "Verified/imported artist" %}</span>
