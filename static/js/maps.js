@@ -3,7 +3,11 @@
   const pins = Array.from(document.querySelectorAll(".maps-pin"));
   const search = document.querySelector("[data-map-search]");
   const filters = Array.from(document.querySelectorAll("[data-map-filter]"));
+  const styleFilters = Array.from(document.querySelectorAll("[data-draft-filter]"));
+  const bookingFilters = Array.from(document.querySelectorAll("[data-booking-filter]"));
   let activeFilter = "all";
+  const activeStyleFilters = new Set();
+  const activeBookingFilters = new Set();
 
   function normalizeText(value) {
     return (value || "")
@@ -30,12 +34,20 @@
     return intersection / union;
   }
 
+  function matchesActiveTokens(cardValue, activeTokens) {
+    if (!activeTokens.size) return true;
+    const normalizedValue = normalizeText(cardValue);
+    return [...activeTokens].some((token) => normalizedValue.includes(normalizeText(token)));
+  }
+
   function applyFilters() {
     const query = normalizeText(search?.value || "");
     cards.forEach((card, index) => {
       const sourceMatch = activeFilter === "all" || card.dataset.source === activeFilter;
       const textMatch = !query || normalizeText(card.dataset.search || "").includes(query);
-      const hidden = !(sourceMatch && textMatch);
+      const styleMatch = matchesActiveTokens(card.dataset.styles || "", activeStyleFilters);
+      const bookingMatch = matchesActiveTokens(card.dataset.booking || "", activeBookingFilters);
+      const hidden = !(sourceMatch && textMatch && styleMatch && bookingMatch);
       card.classList.toggle("is-hidden", hidden);
       pins[index]?.classList.toggle("is-hidden", hidden);
     });
@@ -49,6 +61,24 @@
       applyFilters();
     });
   });
+
+  function bindChipFilters(buttons, activeSet, datasetKey) {
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const value = button.dataset[datasetKey];
+        if (activeSet.has(value)) {
+          activeSet.delete(value);
+        } else {
+          activeSet.add(value);
+        }
+        button.classList.toggle("is-active", activeSet.has(value));
+        applyFilters();
+      });
+    });
+  }
+
+  bindChipFilters(styleFilters, activeStyleFilters, "draftFilter");
+  bindChipFilters(bookingFilters, activeBookingFilters, "bookingFilter");
 
   pins.forEach((pin, index) => {
     pin.addEventListener("click", () => {
@@ -92,6 +122,17 @@
       ? "Enter a location first."
       : duplicate
         ? "Possible duplicate found from existing artist/location data. Review before adding."
-        : "No duplicate in current verified artist/location data. Ready to create a claim draft.";
+        : "No duplicate in current verified artist/location data. Backend is required to save it.";
+  });
+
+  const claimDialog = document.querySelector("[data-claim-dialog]");
+  const claimSummary = document.querySelector("[data-claim-summary]");
+  document.querySelectorAll("[data-open-claim]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (claimSummary) {
+        claimSummary.textContent = `Claim draft for ${button.dataset.claimLocation || "this location"} (${button.dataset.claimArtist || "artist/studio"}). Verification request backend required before submission.`;
+      }
+      claimDialog?.showModal();
+    });
   });
 })();
