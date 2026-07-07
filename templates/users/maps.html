@@ -132,15 +132,15 @@
   <dialog class="maps-dialog" data-claim-dialog>
     <form method="dialog" class="maps-dialog-card maps-claim-card">
       <button class="maps-dialog-close" value="cancel" aria-label="{% trans 'Close' %}">×</button>
-      <h2>{% trans "Claim this location" %}</h2>
-      <p data-claim-summary>{% trans "Claiming requires artist/studio verification. This draft is not submitted yet." %}</p>
+      <h2 data-claim-title>{% trans "Request location verification" %}</h2>
+      <p data-claim-summary>{% trans "This artist/location needs address verification. Nothing is claimed instantly." %}</p>
       <input type="text" placeholder="Claimant name" disabled>
       <input type="email" placeholder="Contact email" disabled>
       <input type="text" placeholder="Relation to studio/location" disabled>
       <input type="url" placeholder="Proof document or portfolio link" disabled>
       <textarea placeholder="Message" disabled></textarea>
       <output>{% trans "Verification request backend required before claims can be submitted." %}</output>
-      <button type="button" disabled>{% trans "Submit claim — backend required" %}</button>
+      <button type="button" class="maps-disabled-submit" disabled>{% trans "Submit disabled — backend required" %}</button>
     </form>
   </dialog>
 </main>

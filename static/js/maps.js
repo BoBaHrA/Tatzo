@@ -130,12 +130,15 @@
 
   const claimDialog = document.querySelector("[data-claim-dialog]");
   const claimSummary = document.querySelector("[data-claim-summary]");
+  const claimTitle = document.querySelector("[data-claim-title]");
   document.querySelectorAll("[data-open-claim]").forEach((button) => {
     button.addEventListener("click", () => {
       if (claimSummary) {
         const isLocationPending = button.dataset.claimKind === "unclaimed";
+        const title = isLocationPending ? "Request location verification" : "Claim this location";
         const actionLabel = isLocationPending ? "Location verification request" : "Claim draft";
-        claimSummary.textContent = `${actionLabel} for ${button.dataset.claimLocation || "this location"} (${button.dataset.claimArtist || "artist/studio"}). Verification backend required before submission; nothing is claimed instantly.`;
+        if (claimTitle) claimTitle.textContent = title;
+        claimSummary.textContent = `${actionLabel} for ${button.dataset.claimLocation || "this location"} (${button.dataset.claimArtist || "artist/studio"}). Address verification is required and nothing is claimed instantly.`;
       }
       claimDialog?.showModal();
     });

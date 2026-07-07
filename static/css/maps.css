@@ -479,3 +479,16 @@
   padding: 8px 10px;
   line-height: 1.15;
 }
+
+.maps-disabled-submit,
+.maps-disabled-submit:disabled {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(239, 255, 255, 0.52);
+  cursor: not-allowed;
+  font-weight: 800;
+  padding: 11px 14px;
+  text-align: center;
+}
