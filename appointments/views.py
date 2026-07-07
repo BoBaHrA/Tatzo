@@ -247,6 +247,10 @@ def create_appointment(request, username):
         messages.error(request, _("This date is too far in the future."))
         return redirect("booking_wizard", username=artist.username)
 
+    if ArtistTimeOff.objects.filter(artist=artist, date=date_value).exists():
+        messages.error(request, _("This date is blocked by the artist."))
+        return redirect("booking_wizard", username=artist.username)
+
     if start_dt < minimum_start:
         messages.error(request, _("This time slot is no longer available."))
         return redirect("booking_wizard", username=artist.username)
@@ -453,23 +457,30 @@ def _save_artist_availability_from_post(artist, post_data):
 
 def _save_artist_blocked_dates_from_post(artist, post_data):
     raw_dates = post_data.getlist("blocked_dates")
-    clean_dates = []
+    raw_reasons = post_data.getlist("blocked_reasons")
+    blocked_dates = {}
+    default_reason = _("Blocked from artist dashboard")
 
-    for raw_date in raw_dates:
+    for index, raw_date in enumerate(raw_dates):
         try:
-            clean_dates.append(datetime.strptime(raw_date, "%Y-%m-%d").date())
+            blocked_date = datetime.strptime(raw_date, "%Y-%m-%d").date()
         except (TypeError, ValueError):
             continue
 
+        raw_reason = raw_reasons[index] if index < len(raw_reasons) else ""
+        reason = raw_reason.strip()[:160] if raw_reason else ""
+        blocked_dates.setdefault(blocked_date, reason or default_reason)
+
     ArtistTimeOff.objects.filter(artist=artist).delete()
 
-    for blocked_date in sorted(set(clean_dates)):
+    for blocked_date, reason in sorted(blocked_dates.items()):
         ArtistTimeOff.objects.create(
             artist=artist,
             date=blocked_date,
-            reason=_("Blocked from artist dashboard"),
+            reason=reason,
         )
-        
+
+
 @login_required
 def artist_booking_settings(request):
     if not _is_verified_artist(request.user):
