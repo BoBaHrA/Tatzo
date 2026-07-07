@@ -36,14 +36,6 @@ function syncCalendarRows() {
   });
 }
 
-function getBlockedDates() {
-  return new Set(
-    Array.from(document.querySelectorAll('input[name="blocked_dates"]'))
-      .map((input) => input.value)
-      .filter(Boolean)
-  );
-}
-
 function syncBlockedEmptyState() {
   const list = document.getElementById("artist-blocked-list");
 
@@ -164,28 +156,80 @@ function formatBlockedLabel(startValue, endValue, reason) {
   return reason ? `${range} · ${reason}` : range;
 }
 
-function addBlockedPeriodChip(startValue, endValue, dates, reason) {
-  const list = document.getElementById("artist-blocked-list");
+function isDefaultBlockedReason(reason) {
+  return reason === "Blocked from artist dashboard";
+}
 
-  if (!list) {
-    return;
-  }
+function readBlockedEntries() {
+  const dateInputs = Array.from(document.querySelectorAll('input[name="blocked_dates"]'));
+  const reasonInputs = Array.from(document.querySelectorAll('input[name="blocked_reasons"]'));
+  const entriesByDate = new Map();
 
-  list.querySelector("[data-empty-blocked]")?.remove();
+  dateInputs.forEach((input, index) => {
+    const dateValue = input.value;
 
+    if (!dateValue || !parseISODateValue(dateValue)) {
+      return;
+    }
+
+    const reason = (reasonInputs[index]?.value || "").trim().slice(0, 160);
+    const existingReason = entriesByDate.get(dateValue);
+
+    if (
+      existingReason === undefined
+      || (!existingReason && reason)
+      || (isDefaultBlockedReason(existingReason) && reason)
+    ) {
+      entriesByDate.set(dateValue, reason);
+    }
+  });
+
+  return Array.from(entriesByDate, ([date, reason]) => ({ date, reason }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function normalizeBlockedRanges(entries) {
+  const ranges = [];
+
+  entries.forEach((entry) => {
+    const previous = ranges[ranges.length - 1];
+
+    if (
+      previous
+      && previous.reason === entry.reason
+      && addDays(previous.endDate, 1) === entry.date
+    ) {
+      previous.endDate = entry.date;
+      previous.dates.push(entry.date);
+      return;
+    }
+
+    ranges.push({
+      startDate: entry.date,
+      endDate: entry.date,
+      reason: entry.reason,
+      dates: [entry.date],
+    });
+  });
+
+  return ranges;
+}
+
+function createBlockedPeriodChip(range) {
   const chip = document.createElement("div");
   chip.className = "artist-blocked-chip";
   chip.dataset.blockedChip = "";
-  chip.dataset.startDate = startValue;
-  chip.dataset.endDate = endValue;
+  chip.dataset.startDate = range.startDate;
+  chip.dataset.endDate = range.endDate;
+  chip.dataset.reason = range.reason;
 
-  dates.forEach((dateValue) => {
+  range.dates.forEach((dateValue) => {
     chip.appendChild(createHiddenInput("blocked_dates", dateValue));
-    chip.appendChild(createHiddenInput("blocked_reasons", reason));
+    chip.appendChild(createHiddenInput("blocked_reasons", range.reason));
   });
 
   const label = document.createElement("span");
-  label.textContent = formatBlockedLabel(startValue, endValue, reason);
+  label.textContent = formatBlockedLabel(range.startDate, range.endDate, range.reason);
   chip.appendChild(label);
 
   const removeButton = document.createElement("button");
@@ -194,13 +238,63 @@ function addBlockedPeriodChip(startValue, endValue, dates, reason) {
   removeButton.textContent = "×";
   chip.appendChild(removeButton);
 
-  list.appendChild(chip);
+  return chip;
+}
+
+function renderBlockedEntries(entries) {
+  const list = document.getElementById("artist-blocked-list");
+
+  if (!list) {
+    return;
+  }
+
+  list.innerHTML = "";
+
+  normalizeBlockedRanges(entries).forEach((range) => {
+    list.appendChild(createBlockedPeriodChip(range));
+  });
+
+  syncBlockedEmptyState();
+}
+
+function rebuildBlockedChips() {
+  renderBlockedEntries(readBlockedEntries());
+}
+
+function upsertBlockedDates(dates, reason) {
+  const entriesByDate = new Map(
+    readBlockedEntries().map((entry) => [entry.date, entry.reason])
+  );
+  let changed = false;
+
+  dates.forEach((dateValue) => {
+    const existingReason = entriesByDate.get(dateValue);
+
+    if (existingReason === undefined) {
+      entriesByDate.set(dateValue, reason);
+      changed = true;
+      return;
+    }
+
+    if (reason && (!existingReason || isDefaultBlockedReason(existingReason))) {
+      entriesByDate.set(dateValue, reason);
+      changed = true;
+    }
+  });
+
+  return {
+    changed,
+    entries: Array.from(entriesByDate, ([date, entryReason]) => ({
+      date,
+      reason: entryReason,
+    })).sort((a, b) => a.date.localeCompare(b.date)),
+  };
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   refreshArtistIcons();
   syncCalendarRows();
-  syncBlockedEmptyState();
+  rebuildBlockedChips();
 
   document.addEventListener("click", (event) => {
     const panelTrigger = event.target.closest("[data-artist-panel-target]");
@@ -215,7 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (removeBlockedButton) {
       removeBlockedButton.closest("[data-blocked-chip]")?.remove();
-      syncBlockedEmptyState();
+      rebuildBlockedChips();
       setBlockedError("");
       return;
     }
@@ -268,17 +362,15 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const existingDates = getBlockedDates();
-    const dates = expandDateRange(startValue, endValue).filter(
-      (dateValue) => !existingDates.has(dateValue)
-    );
+    const dates = expandDateRange(startValue, endValue);
+    const result = upsertBlockedDates(dates, reason);
 
-    if (!dates.length) {
+    if (!result.changed) {
       setBlockedError(blockedForm?.dataset.duplicateMessage || "Those dates are already blocked.");
       return;
     }
 
-    addBlockedPeriodChip(dates[0], dates[dates.length - 1], dates, reason);
+    renderBlockedEntries(result.entries);
     setBlockedError("");
     blockedStartInput.value = "";
 
@@ -290,7 +382,6 @@ document.addEventListener("DOMContentLoaded", () => {
       blockedReasonInput.value = "";
     }
 
-    syncBlockedEmptyState();
   });
 
   document.querySelectorAll(".artist-bar-fill[data-percent]").forEach((bar) => {
