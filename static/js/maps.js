@@ -7,6 +7,7 @@
   const bookingFilters = Array.from(document.querySelectorAll("[data-booking-filter]"));
   let activeFilter = "all";
   let leafletMap = null;
+  let leafletMarkerLayer = null;
   const leafletMarkersByArtist = new Map();
   const activeStyleFilters = new Set();
   const activeBookingFilters = new Set();
@@ -49,6 +50,41 @@
     return div.innerHTML;
   }
 
+
+  function createClusterIcon(cluster) {
+    const markers = cluster.getAllChildMarkers();
+    const hasVerified = markers.some((marker) => marker.options.tatzoSource === "verified");
+    const hasUnclaimed = markers.some((marker) => marker.options.tatzoSource !== "verified");
+    const clusterType = hasVerified && hasUnclaimed
+      ? "mixed"
+      : hasVerified
+        ? "verified"
+        : "unclaimed";
+
+    return L.divIcon({
+      className: `tatzo-cluster tatzo-cluster-${clusterType}`,
+      html: `<span>${cluster.getChildCount()}</span>`,
+      iconSize: [42, 42],
+      iconAnchor: [21, 21],
+    });
+  }
+
+  function addMarkerToLayer(marker) {
+    if (leafletMarkerLayer?.addLayer) {
+      leafletMarkerLayer.addLayer(marker);
+    } else {
+      marker.addTo(leafletMap);
+    }
+  }
+
+  function removeMarkerFromLayer(marker) {
+    if (leafletMarkerLayer?.removeLayer) {
+      leafletMarkerLayer.removeLayer(marker);
+    } else if (leafletMap?.hasLayer(marker)) {
+      leafletMap.removeLayer(marker);
+    }
+  }
+
   function initializeLeafletMap() {
     const mapContainer = document.querySelector("[data-map-container]");
     if (!mapContainer || !window.L) return;
@@ -75,8 +111,19 @@
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
     }).addTo(map);
 
+    leafletMarkerLayer = window.L.markerClusterGroup
+      ? L.markerClusterGroup({
+          showCoverageOnHover: false,
+          spiderfyOnMaxZoom: true,
+          zoomToBoundsOnClick: true,
+          maxClusterRadius: 46,
+          iconCreateFunction: createClusterIcon,
+        })
+      : L.layerGroup();
+    leafletMarkerLayer.addTo(map);
+
     const bounds = [];
-    // TODO: add marker clustering or viewport-based loading before scaling to thousands of points.
+    // TODO: add viewport-based API loading before scaling to very large datasets.
     cards.forEach((card) => {
       const rawLat = (card.dataset.lat || "").trim();
       const rawLng = (card.dataset.lng || "").trim();
@@ -90,12 +137,17 @@
       const marker = L.marker([lat, lng], {
         icon: L.divIcon({
           className: `tatzo-map-marker tatzo-map-marker-${source}`,
-          html: `<span>${source === "verified" ? "✓" : "!"}</span>`,
+          html: `<span>${source === "verified" ? "✓" : "•"}</span>`,
           iconSize: [34, 34],
           iconAnchor: [17, 17],
           popupAnchor: [0, -18],
         }),
+        tatzoSource: source,
       });
+
+      const profileButton = card.dataset.profileUrl
+        ? `<a class="tatzo-map-popup-action" href="${card.dataset.profileUrl}">Profile</a>`
+        : "";
 
       let actionButton = "";
       if (card.dataset.canBook === "true") {
@@ -116,13 +168,13 @@
           <p>${escapeHtml(card.dataset.location)}</p>
           ${contactDetails}
           <div class="tatzo-map-popup-actions">
-            <a class="tatzo-map-popup-action" href="${card.dataset.profileUrl}">Profile</a>
+            ${profileButton}
             ${actionButton}
           </div>
         </div>
       `);
 
-      marker.addTo(map);
+      addMarkerToLayer(marker);
       leafletMarkersByArtist.set(card.dataset.artist, marker);
       marker.on("click", () => {
         card.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -156,10 +208,10 @@
 
       const marker = leafletMarkersByArtist.get(card.dataset.artist);
       if (leafletMap && marker) {
-        if (hidden && leafletMap.hasLayer(marker)) {
-          leafletMap.removeLayer(marker);
-        } else if (!hidden && !leafletMap.hasLayer(marker)) {
-          marker.addTo(leafletMap);
+        if (hidden) {
+          removeMarkerFromLayer(marker);
+        } else {
+          addMarkerToLayer(marker);
         }
       }
     });

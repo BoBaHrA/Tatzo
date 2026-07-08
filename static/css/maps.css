@@ -787,3 +787,35 @@
   opacity: 0.96;
   transform: scale(0.96);
 }
+
+.tatzo-cluster {
+  border: 3px solid rgba(255, 255, 255, 0.82);
+  border-radius: 50%;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.38), 0 0 0 7px rgba(255, 255, 255, 0.05);
+  display: grid;
+  place-items: center;
+}
+
+.tatzo-cluster span {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.tatzo-cluster-verified {
+  background: radial-gradient(circle at 35% 28%, #8ffefa, var(--map-accent));
+}
+
+.tatzo-cluster-unclaimed {
+  background: radial-gradient(circle at 35% 28%, #ff9bc5, var(--map-pink));
+}
+
+.tatzo-cluster-mixed {
+  background: linear-gradient(135deg, var(--map-accent), var(--map-pink));
+}
+
+.tatzo-map-marker-unclaimed span {
+  font-size: 20px;
+  line-height: 0.8;
+}
