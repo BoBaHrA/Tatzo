@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from posts.models import Post
 from django.utils.translation import gettext_lazy as _
-from .models import Profile, VerificationDocument, UserReport
+from .models import Location, LocationClaim, Profile, VerificationDocument, UserReport
 
 
 # Действие для массового подтверждения профилей
@@ -121,3 +121,59 @@ class UserReportAdmin(admin.ModelAdmin):
             )
         }),
     )
+
+
+@admin.register(Location)
+class LocationAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "city",
+        "country",
+        "source",
+        "status",
+        "linked_user",
+        "latitude",
+        "longitude",
+        "verified_at",
+        "updated_at",
+    )
+    list_filter = ("source", "status", "city", "country", "created_at", "verified_at")
+    search_fields = (
+        "name",
+        "address",
+        "formatted_address",
+        "city",
+        "country",
+        "source_place_id",
+        "status",
+        "linked_user__username",
+        "linked_user__email",
+    )
+    readonly_fields = ("created_at", "updated_at")
+    autocomplete_fields = ("linked_user",)
+    list_editable = ("status",)
+    ordering = ("name",)
+
+
+@admin.register(LocationClaim)
+class LocationClaimAdmin(admin.ModelAdmin):
+    list_display = (
+        "location",
+        "claimant_name",
+        "contact_email",
+        "claimant_user",
+        "status",
+        "created_at",
+    )
+    list_filter = ("status", "created_at", "updated_at")
+    search_fields = (
+        "location__name",
+        "claimant_name",
+        "contact_email",
+        "claimant_user__username",
+        "relation_to_location",
+    )
+    readonly_fields = ("created_at", "updated_at")
+    autocomplete_fields = ("location", "claimant_user")
+    list_editable = ("status",)
+    ordering = ("-created_at",)
