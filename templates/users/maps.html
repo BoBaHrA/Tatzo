@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Maps" %} | Tatzo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ1LXf6PtHLjvwvqgCZC+eyJSE7R2B8=" crossorigin="">
+<link rel="stylesheet" href="{% static 'css/maps.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+
+<main class="maps-shell" data-verified-count="{{ imported_count }}" data-unclaimed-count="{{ unclaimed_count }}" data-default-lat="46.8" data-default-lng="2.5" data-default-zoom="5">
+  <section class="maps-hero">
+    <div>
+      <p class="maps-kicker">Tatzo Maps</p>
+      <h1>{% trans "Find verified tattoo artists and studios" %}</h1>
+      <p>{% trans "Preview map for verified Tatzo artists and locations awaiting confirmation." %}</p>
+    </div>
+    <button class="maps-add-location" type="button" data-open-add-location>{% trans "Add new location" %}</button>
+  </section>
+
+  <section class="maps-layout">
+    <aside class="maps-panel">
+      <div class="maps-search-card">
+        <label for="maps-search">{% trans "Search by artist, style or city" %}</label>
+        <input id="maps-search" type="search" placeholder="Berlin, fine line, @artist" data-map-search>
+        <div class="maps-filter-row" role="group" aria-label="{% trans 'Map filters' %}">
+          <button class="is-active" type="button" data-map-filter="all">{% trans "All" %}</button>
+          <button type="button" data-map-filter="verified">{% trans "Verified" %}</button>
+          <button type="button" data-map-filter="unclaimed">{% trans "Needs claim" %}</button>
+        </div>
+      </div>
+
+      <div class="maps-stats">
+        <article><strong>{{ verified_location_count }}</strong><span>{% trans "Verified Tatzo locations" %}</span></article>
+        <article><strong>{{ imported_location_count }}</strong><span>{% trans "Imported / unclaimed" %}</span></article>
+        <article><strong>{{ pending_location_count }}</strong><span>{% trans "Location requests pending" %}</span></article>
+      </div>
+
+      {# Draft-only filters: disabled chips require backend fields for availability, distance, rating and price. #}
+      <section class="maps-filter-panel" aria-label="{% trans 'Detailed filters' %}">
+        <div class="maps-chip-group" data-placeholder-filters>
+          {# Frontend-only until backend fields exist for availability, distance, rating and price. #}
+          <div class="maps-chip-row">
+            <button type="button" data-draft-filter="Fine Line">Fine Line</button><button type="button" data-draft-filter="Blackwork">Blackwork</button><button type="button" data-draft-filter="Realism">Realism</button><button type="button" data-draft-filter="Japanese">Japanese</button><button type="button" data-draft-filter="Traditional">Traditional</button><button type="button" data-draft-filter="Neo Traditional">Neo Traditional</button><button type="button" data-draft-filter="Minimalist">Minimalist</button><button type="button" data-draft-filter="Lettering">Lettering</button><button type="button" data-draft-filter="Geometric">Geometric</button><button type="button" data-draft-filter="Watercolor">Watercolor</button><button type="button" data-draft-filter="Black & Grey">Black & Grey</button><button type="button" data-draft-filter="Color">Color</button>
+          </div>
+          <div class="maps-chip-row maps-chip-row-muted">
+            <button type="button" disabled>Available today</button><button type="button" disabled>This week</button><button type="button" disabled>This month</button><button type="button" disabled>5 km</button><button type="button" disabled>10 km</button><button type="button" disabled>25 km</button><button type="button" disabled>50 km</button><button type="button" disabled>100 km</button><button type="button" disabled>4.5+</button><button type="button" disabled>4.8+</button><button type="button" disabled>Most reviewed</button><button type="button" disabled>Budget friendly</button><button type="button" disabled>Mid range</button><button type="button" disabled>Premium</button><button type="button" disabled>Luxury</button>
+          </div>
+          <div class="maps-chip-row">
+            <button type="button" data-booking-filter="Accepting new clients">Accepting new clients</button><button type="button" data-booking-filter="Online consult">Online consult</button><button type="button" data-booking-filter="In-person">In-person</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="maps-results" data-map-results>
+        {% for artist in artist_cards %}
+          <article class="maps-artist-card" data-location-card data-source="{{ artist.source }}" data-location="{{ artist.location }}" data-location-status="{{ artist.location_status }}" data-location-kind="{{ artist.location_kind_code }}" data-location-label="{{ artist.location_kind }}" data-phone="{{ artist.phone }}" data-website="{{ artist.website }}" data-lat="{{ artist.latitude|default:'' }}" data-lng="{{ artist.longitude|default:'' }}" data-city="{{ artist.location_city }}" data-country="{{ artist.location_country }}" data-artist="{{ artist.display_name }}" data-tag="{{ artist.tag }}" data-styles="{{ artist.style_tags|join:' ' }}" data-booking="{{ artist.booking_modes|join:' ' }}" data-profile-url="{{ artist.profile_url }}" data-book-url="{{ artist.book_url }}" data-can-book="{% if artist.is_registered and artist.source == 'verified' and artist.can_book %}true{% else %}false{% endif %}" data-action-label="{% if not artist.is_registered %}{% trans 'Claim this location' %}{% elif not artist.has_map_pin %}{% trans 'Add location request' %}{% endif %}" data-search="{{ artist.display_name }} {{ artist.location }} {{ artist.tag }} {{ artist.style_tags|join:' ' }} {{ artist.booking_modes|join:' ' }}">
+            <div class="maps-card-top">
+              <div class="maps-avatar">
+                {% if artist.profile_image %}
+                  <img src="{{ artist.profile_image.url }}" alt="{{ artist.display_name }}">
+                {% else %}
+                  <span>{{ artist.display_name|first|upper }}</span>
+                {% endif %}
+              </div>
+              <div class="maps-card-title">
+                <h2>{{ artist.display_name }}</h2>
+                <p>{% if artist.is_registered %}@{{ artist.tag }}{% else %}{{ artist.tag }}{% endif %}</p>
+              </div>
+              <span class="maps-status maps-status-{{ artist.source }}">{% if artist.source == "verified" %}{% trans "Verified" %}{% else %}{% trans "Needs claim" %}{% endif %}</span>
+            </div>
+            <p class="maps-kind">{{ artist.location_kind }}</p>
+            <p class="maps-location">📍 {{ artist.location }}</p>
+            {% if artist.style_tags %}
+              <div class="maps-tags">{% for style in artist.style_tags %}<span>{{ style }}</span>{% endfor %}</div>
+            {% else %}
+              <div class="maps-tags maps-tags-muted"><span>{% trans "Styles pending" %}</span></div>
+            {% endif %}
+            {% if artist.phone or artist.website %}
+              <div class="maps-tags maps-contact-tags">{% if artist.phone %}<span>{{ artist.phone }}</span>{% endif %}{% if artist.website %}<span>{{ artist.website }}</span>{% endif %}</div>
+            {% endif %}
+            <div class="maps-card-metrics">
+              <span>{% trans "Portfolio" %}: <strong>{{ artist.portfolio_count }}</strong></span>
+              <span>{% trans "Posts" %}: <strong>{{ artist.post_count }}</strong></span>
+              <span>{% trans "Data" %}: <strong>{{ artist.confidence_score }}%</strong></span>
+            </div>
+            <div class="maps-actions">
+              {% if artist.is_registered %}<a href="{{ artist.profile_url }}">{% trans "Profile" %}</a>{% endif %}
+              {% if artist.is_registered and artist.source == "verified" and artist.can_book %}
+                <a href="{{ artist.book_url }}">{% trans "Book" %}</a>
+              {% elif not artist.is_registered %}
+                <button type="button" data-open-claim data-claim-location="{{ artist.location }}" data-claim-artist="{{ artist.display_name }}" data-location-id="{{ artist.location_id }}" data-claim-kind="{{ artist.source }}">{% trans "Claim this location" %}</button>
+              {% elif not artist.has_map_pin %}
+                <button type="button" data-open-claim data-claim-location="{{ artist.location }}" data-claim-artist="{{ artist.display_name }}" data-location-id="{{ artist.location_id }}" data-claim-kind="{{ artist.source }}">{% trans "Add location request" %}</button>
+              {% endif %}
+            </div>
+          </article>
+        {% empty %}
+          <div class="maps-empty">{% trans "No verified artists are ready for the map yet." %}</div>
+        {% endfor %}
+      </div>
+    </aside>
+
+    <section class="maps-canvas" aria-label="{% trans 'Tatzo artist map' %}">
+      <div id="tatzo-map" class="tatzo-leaflet-map" data-map-container></div>
+      <div class="maps-empty-map" data-empty-map-message hidden><strong>{% trans "No verified locations yet" %}</strong><span>{% trans "Locations appear after address confirmation." %}</span></div>
+      <div class="maps-legend">
+        <span><i class="verified"></i>{% trans "Verified/imported artist" %}</span>
+        <span><i class="unclaimed"></i>{% trans "Claim required" %}</span>
+      </div>
+    </section>
+  </section>
+
+  <dialog class="maps-dialog" data-add-location-dialog>
+    <form method="dialog" class="maps-dialog-card">
+      <button class="maps-dialog-close" value="cancel" aria-label="{% trans 'Close' %}">×</button>
+      <h2>{% trans "Add new location" %}</h2>
+      <p>{% trans "Draft duplicate check only. A production backend is required before a location can be saved." %}</p>
+      <input type="text" data-new-location-input placeholder="Studio or city">
+      <output data-location-check>{% trans "Waiting for location…" %}</output>
+      <button type="button" data-check-location>{% trans "Check duplicates" %}</button>
+    </form>
+  </dialog>
+
+  <dialog class="maps-dialog" data-claim-dialog>
+    <form method="dialog" class="maps-dialog-card maps-claim-card">
+      <button class="maps-dialog-close" value="cancel" aria-label="{% trans 'Close' %}">×</button>
+      <h2 data-claim-title>{% trans "Request location verification" %}</h2>
+      <p data-claim-summary>{% trans "This artist/location needs address verification. Nothing is claimed instantly." %}</p>
+      <input type="text" placeholder="Claimant name" disabled>
+      <input type="email" placeholder="Contact email" disabled>
+      <input type="text" placeholder="Relation to studio/location" disabled>
+      <input type="url" placeholder="Proof document or portfolio link" disabled>
+      <textarea placeholder="Message" disabled></textarea>
+      <output>{% trans "Verification request backend required before claims can be submitted." %}</output>
+      <button type="button" class="maps-disabled-submit" disabled>{% trans "Submit disabled — backend required" %}</button>
+    </form>
+  </dialog>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+<script src="{% static 'js/maps.js' %}" defer></script>
+{% endblock %}
