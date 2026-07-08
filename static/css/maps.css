@@ -1686,3 +1686,95 @@
     padding: 10px 16px calc(20px + env(safe-area-inset-bottom));
   }
 }
+
+/* Final mobile modal centering fix */
+@media (max-width: 560px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .maps-dialog {
+    width: calc(100dvw - 24px) !important;
+    max-width: calc(100dvw - 24px) !important;
+    min-width: 0 !important;
+    margin: auto !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-sizing: border-box !important;
+    inset: 0 !important;
+    overflow: visible !important;
+  }
+
+  .maps-dialog[open] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .maps-dialog-card,
+  .maps-modal,
+  .maps-modal-card {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    max-height: calc(100dvh - 120px) !important;
+    overflow-y: auto !important;
+    padding: 28px 22px 32px !important;
+    border-radius: 28px !important;
+  }
+
+  .maps-dialog-card *,
+  .maps-modal *,
+  .maps-modal-card * {
+    box-sizing: border-box !important;
+    max-width: 100%;
+  }
+
+  .maps-dialog-card input,
+  .maps-dialog-card textarea,
+  .maps-dialog-card select,
+  .maps-dialog-card button,
+  .maps-modal input,
+  .maps-modal textarea,
+  .maps-modal select,
+  .maps-modal button {
+    max-width: 100% !important;
+  }
+
+  .maps-modal-header,
+  .maps-dialog-header {
+    position: relative !important;
+    padding-right: 58px !important;
+  }
+
+  .maps-modal-title,
+  .maps-dialog-title,
+  .maps-dialog-card h2,
+  .maps-modal h2 {
+    padding-right: 58px !important;
+    font-size: clamp(34px, 10vw, 46px) !important;
+    line-height: 1.08 !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+  }
+
+  .maps-dialog-close,
+  .maps-modal-close {
+    position: absolute !important;
+    top: 22px !important;
+    right: 22px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    z-index: 5 !important;
+    margin: 0 !important;
+  }
+}
