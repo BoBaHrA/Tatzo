@@ -3,6 +3,8 @@ import mimetypes
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from cloudinary.utils import cloudinary_url
@@ -46,6 +48,16 @@ BUSINESS_DOCUMENT_CHOICES = [
 ]
 
 # Варианты удостоверений личности
+
+
+MAX_LOCATION_UPLOAD_SIZE = 10 * 1024 * 1024
+LOCATION_UPLOAD_EXTENSIONS = ["pdf", "jpg", "jpeg", "png", "webp"]
+
+
+def validate_location_upload_size(file_obj):
+    if file_obj and file_obj.size > MAX_LOCATION_UPLOAD_SIZE:
+        raise ValidationError(_("Uploaded proof files must be 10 MB or smaller."))
+
 ID_DOCUMENT_CHOICES = [
     ("passport", _("Passport")),
     ("driver_license", _("Driver license")),
@@ -640,6 +652,16 @@ class LocationClaim(models.Model):
     contact_email = models.EmailField()
     relation_to_location = models.CharField(max_length=160)
     proof = models.TextField(blank=True)
+    # TODO: Production deployments should use persistent/private media storage
+    # (for example S3 or private Cloudinary delivery) for verification documents.
+    proof_document = models.FileField(
+        upload_to="location_claim_proofs/",
+        blank=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=LOCATION_UPLOAD_EXTENSIONS),
+            validate_location_upload_size,
+        ],
+    )
     message = models.TextField(blank=True)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="draft")
     admin_notes = models.TextField(blank=True)
@@ -671,6 +693,14 @@ class LocationRequest(models.Model):
     full_address = models.TextField()
     website_or_map_link = models.URLField(max_length=500, blank=True)
     phone = models.CharField(max_length=60, blank=True)
+    supporting_file = models.FileField(
+        upload_to="location_request_supporting_files/",
+        blank=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=LOCATION_UPLOAD_EXTENSIONS),
+            validate_location_upload_size,
+        ],
+    )
     contact_email = models.EmailField()
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)

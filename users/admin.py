@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from posts.models import Post
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from .models import Location, LocationClaim, LocationRequest, Profile, VerificationDocument, UserReport
 
@@ -162,6 +163,7 @@ class LocationClaimAdmin(admin.ModelAdmin):
         "claimant_name",
         "contact_email",
         "relation_to_location",
+        "has_proof_document",
         "claimant_user",
         "status",
         "created_at",
@@ -174,10 +176,20 @@ class LocationClaimAdmin(admin.ModelAdmin):
         "claimant_user__username",
         "relation_to_location",
     )
-    readonly_fields = ("created_at", "updated_at")
+    readonly_fields = ("proof_document_link", "created_at", "updated_at")
     autocomplete_fields = ("location", "claimant_user")
     list_editable = ("status",)
     ordering = ("-created_at",)
+
+    @admin.display(boolean=True, description="Proof document")
+    def has_proof_document(self, obj):
+        return bool(obj.proof_document)
+
+    @admin.display(description="Proof document")
+    def proof_document_link(self, obj):
+        if not obj.proof_document:
+            return "—"
+        return format_html('<a href="{}" target="_blank" rel="noopener noreferrer">Open proof document</a>', obj.proof_document.url)
 
 
 @admin.register(LocationRequest)
@@ -189,11 +201,22 @@ class LocationRequestAdmin(admin.ModelAdmin):
         "contact_email",
         "latitude",
         "longitude",
+        "has_supporting_file",
         "status",
         "created_at",
     )
     list_filter = ("status", "city", "country", "created_at")
     search_fields = ("name", "city", "country", "full_address", "website_or_map_link", "contact_email")
-    readonly_fields = ("created_at", "updated_at")
+    readonly_fields = ("supporting_file_link", "created_at", "updated_at")
     list_editable = ("status",)
     ordering = ("-created_at",)
+
+    @admin.display(boolean=True, description="Supporting file")
+    def has_supporting_file(self, obj):
+        return bool(obj.supporting_file)
+
+    @admin.display(description="Supporting file")
+    def supporting_file_link(self, obj):
+        if not obj.supporting_file:
+            return "—"
+        return format_html('<a href="{}" target="_blank" rel="noopener noreferrer">Open supporting file</a>', obj.supporting_file.url)

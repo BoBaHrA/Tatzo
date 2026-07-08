@@ -31,6 +31,8 @@ from .models import (
     Location,
     LocationClaim,
     LocationRequest,
+    LOCATION_UPLOAD_EXTENSIONS,
+    MAX_LOCATION_UPLOAD_SIZE,
     UserFollow,
     UserBlock,
     PortfolioAlbum,
@@ -1956,6 +1958,17 @@ def search_page(request):
     )
 
 
+def _validate_location_upload(uploaded_file):
+    if not uploaded_file:
+        return True
+
+    extension = uploaded_file.name.rsplit(".", 1)[-1].lower() if "." in uploaded_file.name else ""
+    if extension not in LOCATION_UPLOAD_EXTENSIONS:
+        return False
+
+    return uploaded_file.size <= MAX_LOCATION_UPLOAD_SIZE
+
+
 @require_POST
 def submit_location_claim(request, location_id):
     location = get_object_or_404(
@@ -1969,6 +1982,7 @@ def submit_location_claim(request, location_id):
     contact_email = (request.POST.get("contact_email") or "").strip()
     relation = (request.POST.get("relation_to_location") or "").strip()
     proof = (request.POST.get("proof") or "").strip()
+    proof_document = request.FILES.get("proof_document")
     message = (request.POST.get("message") or "").strip()
 
     if not claimant_name or not contact_email or not relation:
@@ -1982,6 +1996,10 @@ def submit_location_claim(request, location_id):
         validate_email(contact_email)
     except ValidationError:
         messages.error(request, _("Please enter a valid contact email."))
+        return redirect("maps_page")
+
+    if proof_document and not _validate_location_upload(proof_document):
+        messages.error(request, _("Upload a PDF, JPG, PNG or WEBP file up to 10 MB."))
         return redirect("maps_page")
 
     active_statuses = ["submitted", "under_review"]
@@ -2011,6 +2029,7 @@ def submit_location_claim(request, location_id):
         contact_email=contact_email,
         relation_to_location=relation,
         proof=proof,
+        proof_document=proof_document,
         message=message,
         status="submitted",
     )
@@ -2032,6 +2051,7 @@ def submit_location_request(request):
     full_address = (request.POST.get("full_address") or "").strip()
     website_or_map_link = (request.POST.get("website_or_map_link") or "").strip()
     phone = (request.POST.get("phone") or "").strip()
+    supporting_file = request.FILES.get("supporting_file")
     contact_email = (request.POST.get("contact_email") or "").strip()
     latitude = (request.POST.get("latitude") or "").strip()
     longitude = (request.POST.get("longitude") or "").strip()
@@ -2048,6 +2068,10 @@ def submit_location_request(request):
         validate_email(contact_email)
     except ValidationError:
         messages.error(request, _("Please enter a valid contact email."))
+        return redirect("maps_page")
+
+    if supporting_file and not _validate_location_upload(supporting_file):
+        messages.error(request, _("Upload a PDF, JPG, PNG or WEBP file up to 10 MB."))
         return redirect("maps_page")
 
     latitude_value = None
@@ -2089,6 +2113,7 @@ def submit_location_request(request):
         full_address=full_address,
         website_or_map_link=website_or_map_link,
         phone=phone,
+        supporting_file=supporting_file,
         contact_email=contact_email,
         latitude=latitude_value,
         longitude=longitude_value,

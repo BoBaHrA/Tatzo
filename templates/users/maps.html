@@ -132,7 +132,7 @@
   <div class="maps-mobile-sheet-backdrop" data-mobile-sheet-backdrop hidden></div>
 
   <dialog class="maps-dialog" data-add-location-dialog>
-    <form method="post" action="{% url 'submit_location_request' %}" class="maps-dialog-card maps-location-request-card">
+    <form method="post" action="{% url 'submit_location_request' %}" enctype="multipart/form-data" class="maps-dialog-card maps-location-request-card">
       {% csrf_token %}
       <button class="maps-dialog-close" type="button" value="cancel" aria-label="{% trans 'Close' %}" data-close-add-location>×</button>
       <h2>{% trans "Add a tattoo location" %}</h2>
@@ -144,6 +144,11 @@
       <input type="text" name="full_address" placeholder="{% trans 'Full street address' %}" required>
       <input type="url" name="website_or_map_link" placeholder="{% trans 'Website or Google/Apple Maps link' %}">
       <input type="tel" name="phone" placeholder="{% trans 'Phone' %}">
+      <label class="maps-file-upload">
+        <span>{% trans "Attach supporting document or photo" %}</span>
+        <input type="file" name="supporting_file" accept=".pdf,.jpg,.jpeg,.png,.webp">
+        <small>{% trans "Optional. Helps Tatzo verify the location faster." %}</small>
+      </label>
       <input type="email" name="contact_email" placeholder="{% trans 'Contact email' %}" required>
       <input type="hidden" name="latitude" data-location-latitude>
       <input type="hidden" name="longitude" data-location-longitude>
@@ -156,7 +161,7 @@
   </dialog>
 
   <dialog class="maps-dialog" data-claim-dialog>
-    <form method="post" class="maps-dialog-card maps-claim-card" data-claim-form>
+    <form method="post" enctype="multipart/form-data" class="maps-dialog-card maps-claim-card" data-claim-form>
       {% csrf_token %}
       <button class="maps-dialog-close" type="button" value="cancel" aria-label="{% trans 'Close' %}" data-close-claim>×</button>
       <h2 data-claim-title>{% trans "Request location verification" %}</h2>
@@ -164,7 +169,12 @@
       <input type="text" name="claimant_name" placeholder="Claimant name" required>
       <input type="email" name="contact_email" placeholder="Contact email" required>
       <input type="text" name="relation_to_location" placeholder="Relation to studio/location" required>
-      <input type="url" name="proof" placeholder="Proof document or portfolio link">
+      <input type="url" name="proof" placeholder="Portfolio or proof link">
+      <label class="maps-file-upload">
+        <span>{% trans "Attach proof document" %}</span>
+        <input type="file" name="proof_document" accept=".pdf,.jpg,.jpeg,.png,.webp">
+        <small>{% trans "PDF, JPG, PNG or WEBP. Max 10 MB." %}</small>
+      </label>
       <textarea name="message" placeholder="Message"></textarea>
       <output>{% trans "Admin review is required before anything changes on Tatzo." %}</output>
       <button type="submit" class="maps-disabled-submit maps-claim-submit">{% trans "Submit claim request" %}</button>

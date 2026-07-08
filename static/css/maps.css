@@ -1482,3 +1482,81 @@
     width: 100%;
   }
 }
+
+.maps-dialog-card h2 {
+  padding-right: 54px;
+  overflow-wrap: anywhere;
+}
+
+.maps-dialog-close {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.24);
+  z-index: 4;
+}
+
+.maps-file-upload {
+  display: block;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--map-text);
+  margin-bottom: 10px;
+  padding: 11px 13px;
+}
+
+.maps-file-upload span,
+.maps-file-upload small {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.maps-file-upload span {
+  font-weight: 800;
+  margin-bottom: 7px;
+}
+
+.maps-file-upload small {
+  color: var(--map-muted);
+  font-size: 11px;
+  margin-top: 6px;
+}
+
+.maps-file-upload input {
+  width: 100%;
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .maps-dialog[open] {
+    inset-inline: 0;
+  }
+
+  .maps-dialog-card {
+    width: min(calc(100vw - 24px), 520px);
+    max-width: calc(100vw - 24px);
+    transform: none;
+  }
+
+  .maps-dialog-close {
+    right: 12px;
+    top: 12px;
+  }
+
+  .maps-dialog-card h2 {
+    padding-right: 48px;
+  }
+}
