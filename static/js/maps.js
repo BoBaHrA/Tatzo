@@ -5,12 +5,46 @@
   const filters = Array.from(document.querySelectorAll("[data-map-filter]"));
   const styleFilters = Array.from(document.querySelectorAll("[data-draft-filter]"));
   const bookingFilters = Array.from(document.querySelectorAll("[data-booking-filter]"));
+  const shell = document.querySelector(".maps-shell");
+  const mobileSheetButtons = Array.from(document.querySelectorAll("[data-mobile-sheet]"));
+  const mobileSheetBackdrop = document.querySelector("[data-mobile-sheet-backdrop]");
+  const mobileSheetClose = document.querySelector("[data-mobile-sheet-close]");
+  const mobileMediaQuery = window.matchMedia("(max-width: 760px)");
   let activeFilter = "all";
   let leafletMap = null;
   let leafletMarkerLayer = null;
   const leafletMarkersByArtist = new Map();
   const activeStyleFilters = new Set();
   const activeBookingFilters = new Set();
+
+
+  function isMobileMapLayout() {
+    return mobileMediaQuery.matches;
+  }
+
+  function refreshMapSize() {
+    if (!leafletMap) return;
+    window.setTimeout(() => leafletMap.invalidateSize(), 120);
+  }
+
+  function closeMobileSheet() {
+    shell?.classList.remove("is-mobile-sheet-open");
+    shell?.removeAttribute("data-mobile-sheet-mode");
+    document.body.classList.remove("maps-mobile-sheet-active");
+    mobileSheetBackdrop?.setAttribute("hidden", "");
+    cards.forEach((card) => card.classList.remove("is-mobile-selected"));
+    refreshMapSize();
+  }
+
+  function openMobileSheet(mode, selectedCard = null) {
+    if (!isMobileMapLayout() || !shell) return;
+    cards.forEach((card) => card.classList.toggle("is-mobile-selected", card === selectedCard));
+    shell.dataset.mobileSheetMode = mode;
+    shell.classList.add("is-mobile-sheet-open");
+    document.body.classList.add("maps-mobile-sheet-active");
+    mobileSheetBackdrop?.removeAttribute("hidden");
+    refreshMapSize();
+  }
 
   function normalizeText(value) {
     return (value || "")
@@ -99,7 +133,6 @@
     const mapContainer = document.querySelector("[data-map-container]");
     if (!mapContainer || !window.L) return;
 
-    const shell = document.querySelector(".maps-shell");
     const defaultLat = Number(shell?.dataset.defaultLat || 46.8);
     const defaultLng = Number(shell?.dataset.defaultLng || 2.5);
     const defaultZoom = Number(shell?.dataset.defaultZoom || 5);
@@ -208,6 +241,12 @@
       addMarkerToLayer(marker);
       leafletMarkersByArtist.set(card.dataset.artist, marker);
       marker.on("click", () => {
+        if (isMobileMapLayout()) {
+          map.closePopup();
+          openMobileSheet("selected", card);
+          return;
+        }
+
         card.scrollIntoView({ behavior: "smooth", block: "center" });
       });
       bounds.push([lat, lng]);
@@ -277,8 +316,22 @@
 
   initializeLeafletMap();
 
+  mobileSheetButtons.forEach((button) => {
+    button.addEventListener("click", () => openMobileSheet(button.dataset.mobileSheet || "list"));
+  });
+  mobileSheetClose?.addEventListener("click", closeMobileSheet);
+  mobileSheetBackdrop?.addEventListener("click", closeMobileSheet);
+  mobileMediaQuery.addEventListener?.("change", () => {
+    closeMobileSheet();
+    refreshMapSize();
+  });
+  window.addEventListener("orientationchange", refreshMapSize);
+  window.addEventListener("resize", refreshMapSize);
+
   const dialog = document.querySelector("[data-add-location-dialog]");
-  document.querySelector("[data-open-add-location]")?.addEventListener("click", () => dialog?.showModal());
+  document.querySelectorAll("[data-open-add-location]").forEach((button) => {
+    button.addEventListener("click", () => dialog?.showModal());
+  });
   document.querySelector("[data-check-location]")?.addEventListener("click", () => {
     const input = document.querySelector("[data-new-location-input]");
     const output = document.querySelector("[data-location-check]");
