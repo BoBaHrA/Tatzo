@@ -655,3 +655,34 @@ class LocationClaim(models.Model):
 
     def __str__(self):
         return f"{self.claimant_name} — {self.location.name}"
+
+
+class LocationRequest(models.Model):
+    STATUS_CHOICES = [
+        ("submitted", _("Submitted")),
+        ("under_review", _("Under review")),
+        ("approved", _("Approved")),
+        ("rejected", _("Rejected")),
+    ]
+
+    name = models.CharField(max_length=160)
+    city = models.CharField(max_length=120)
+    country = models.CharField(max_length=120)
+    address_or_link = models.TextField()
+    contact_email = models.EmailField()
+    message = models.TextField(blank=True)
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="submitted")
+    admin_notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["status", "created_at"]),
+            models.Index(fields=["city", "country"]),
+            models.Index(fields=["contact_email", "status"]),
+        ]
+
+    def __str__(self):
+        return f"{self.name} — {self.city}"

@@ -132,13 +132,19 @@
   <div class="maps-mobile-sheet-backdrop" data-mobile-sheet-backdrop hidden></div>
 
   <dialog class="maps-dialog" data-add-location-dialog>
-    <form method="dialog" class="maps-dialog-card">
-      <button class="maps-dialog-close" value="cancel" aria-label="{% trans 'Close' %}">×</button>
-      <h2>{% trans "Add new location" %}</h2>
-      <p>{% trans "Draft duplicate check only. A production backend is required before a location can be saved." %}</p>
-      <input type="text" data-new-location-input placeholder="Studio or city">
-      <output data-location-check>{% trans "Waiting for location…" %}</output>
-      <button type="button" data-check-location>{% trans "Check duplicates" %}</button>
+    <form method="post" action="{% url 'submit_location_request' %}" class="maps-dialog-card maps-location-request-card">
+      {% csrf_token %}
+      <button class="maps-dialog-close" type="button" value="cancel" aria-label="{% trans 'Close' %}" data-close-add-location>×</button>
+      <h2>{% trans "Add a tattoo location" %}</h2>
+      <p>{% trans "Tell us about a tattoo studio or artist location that should appear on Tatzo. We’ll review it before it appears on the map." %}</p>
+      <input type="text" name="name" data-new-location-input placeholder="{% trans 'Studio or artist name' %}" required>
+      <input type="text" name="city" placeholder="{% trans 'City' %}" required>
+      <input type="text" name="country" placeholder="{% trans 'Country' %}" required>
+      <input type="text" name="address_or_link" placeholder="{% trans 'Address or Google/website link' %}" required>
+      <input type="email" name="contact_email" placeholder="{% trans 'Contact email' %}" required>
+      <textarea name="message" placeholder="{% trans 'Message / extra details' %}"></textarea>
+      <output data-location-check>{% trans "Requests are reviewed before anything appears publicly." %}</output>
+      <button type="submit" class="maps-location-request-submit">{% trans "Submit location request" %}</button>
     </form>
   </dialog>
 

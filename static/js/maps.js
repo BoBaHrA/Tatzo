@@ -344,47 +344,38 @@
 
   const dialog = document.querySelector("[data-add-location-dialog]");
   document.querySelectorAll("[data-open-add-location]").forEach((button) => {
-    button.addEventListener("click", () => dialog?.showModal());
-  });
-  document.querySelector("[data-check-location]")?.addEventListener("click", () => {
-    const input = document.querySelector("[data-new-location-input]");
-    const output = document.querySelector("[data-location-check]");
-    const value = normalizeText(input?.value || "");
-
-    const duplicate = value && cards.some((card) => {
-      const knownLocation = normalizeText(card.dataset.location || "");
-      const knownCity = normalizeText(card.dataset.city || "");
-      const knownCountry = normalizeText(card.dataset.country || "");
-      const knownArtist = normalizeText(card.dataset.artist || "");
-      const knownTag = normalizeText(card.dataset.tag || "");
-      const combinedKnownData = [knownLocation, knownCity, knownCountry, knownArtist, knownTag]
-        .filter(Boolean)
-        .join(" ");
-
-      const locationMatches = Boolean(
-        knownLocation && (
-          knownLocation === value ||
-          knownLocation.includes(value) ||
-          value.includes(knownLocation)
-        )
-      );
-
-      return locationMatches || tokenSimilarity(value, combinedKnownData) >= 0.55;
+    button.addEventListener("click", () => {
+      closeMobileSheet();
+      dialog?.showModal();
+      refreshMapSize();
     });
-
-    output.textContent = !value
-      ? "Enter a location first."
-      : duplicate
-        ? "Possible duplicate found from existing artist/location data. Review before adding."
-        : "No duplicate in current verified artist/location data. Backend is required to save it.";
   });
+  document.querySelector("[data-close-add-location]")?.addEventListener("click", () => {
+    dialog?.close();
+    refreshMapSize();
+  });
+  dialog?.addEventListener("close", refreshMapSize);
+
 
   const claimDialog = document.querySelector("[data-claim-dialog]");
   const claimForm = document.querySelector("[data-claim-form]");
   const claimSummary = document.querySelector("[data-claim-summary]");
   const claimTitle = document.querySelector("[data-claim-title]");
   const claimSubmit = claimForm?.querySelector("[type='submit']");
-  document.querySelector("[data-close-claim]")?.addEventListener("click", () => claimDialog?.close());
+  document.querySelector("[data-close-claim]")?.addEventListener("click", () => {
+    claimDialog?.close();
+    refreshMapSize();
+  });
+  claimDialog?.addEventListener("close", refreshMapSize);
+
+  document.querySelectorAll(".maps-dialog form[method='post']").forEach((form) => {
+    form.addEventListener("submit", () => {
+      const submitButton = form.querySelector("button[type='submit']");
+      if (!submitButton) return;
+      submitButton.disabled = true;
+      submitButton.textContent = "Submitting…";
+    });
+  });
   document.addEventListener("click", (event) => {
     const button = event.target.closest("[data-open-claim]");
     if (!button) return;
@@ -400,15 +391,19 @@
       claimSubmit.disabled = !isImportedLocation;
       claimSubmit.textContent = isImportedLocation
         ? "Submit claim request"
-        : "Backend required for location requests";
+        : "Use Add location for address review";
     }
 
     if (claimSummary) {
       const title = isImportedLocation ? "Claim this location" : "Request location verification";
-      const actionLabel = isImportedLocation ? "Claim request" : "Location verification request";
+      const summary = isImportedLocation
+        ? "Submit a verification request for this studio. Tatzo will review it before anything changes."
+        : "Submit your address details for review. Nothing is published until Tatzo verifies it.";
       if (claimTitle) claimTitle.textContent = title;
-      claimSummary.textContent = `${actionLabel} for ${button.dataset.claimLocation || "this location"} (${button.dataset.claimArtist || "artist/studio"}). Admin review is required and nothing is changed instantly.`;
+      claimSummary.textContent = summary;
     }
+    closeMobileSheet();
     claimDialog?.showModal();
+    refreshMapSize();
   });
 })();

@@ -29,6 +29,7 @@ from .models import (
     ManualVerificationRequest,
     Location,
     LocationClaim,
+    LocationRequest,
     UserFollow,
     UserBlock,
     PortfolioAlbum,
@@ -2018,6 +2019,60 @@ def submit_location_claim(request, location_id):
         _(
             "Your claim request was submitted. Tatzo will review it before anything changes."
         ),
+    )
+    return redirect("maps_page")
+
+
+@require_POST
+def submit_location_request(request):
+    name = (request.POST.get("name") or "").strip()
+    city = (request.POST.get("city") or "").strip()
+    country = (request.POST.get("country") or "").strip()
+    address_or_link = (request.POST.get("address_or_link") or "").strip()
+    contact_email = (request.POST.get("contact_email") or "").strip()
+    message = (request.POST.get("message") or "").strip()
+
+    if not name or not city or not country or not address_or_link or not contact_email:
+        messages.error(
+            request,
+            _("Please provide the location name, city, country, address or link, and contact email."),
+        )
+        return redirect("maps_page")
+
+    try:
+        validate_email(contact_email)
+    except ValidationError:
+        messages.error(request, _("Please enter a valid contact email."))
+        return redirect("maps_page")
+
+    active_statuses = ["submitted", "under_review"]
+    duplicate_request = LocationRequest.objects.filter(
+        name__iexact=name,
+        city__iexact=city,
+        contact_email__iexact=contact_email,
+        status__in=active_statuses,
+    ).exists()
+
+    if duplicate_request:
+        messages.warning(
+            request,
+            _("A location request for this studio is already under review."),
+        )
+        return redirect("maps_page")
+
+    LocationRequest.objects.create(
+        name=name,
+        city=city,
+        country=country,
+        address_or_link=address_or_link,
+        contact_email=contact_email,
+        message=message,
+        status="submitted",
+    )
+
+    messages.success(
+        request,
+        _("Your location request was submitted. Tatzo will review it before it appears on the map."),
     )
     return redirect("maps_page")
 

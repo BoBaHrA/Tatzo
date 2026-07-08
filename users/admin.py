@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from posts.models import Post
 from django.utils.translation import gettext_lazy as _
-from .models import Location, LocationClaim, Profile, VerificationDocument, UserReport
+from .models import Location, LocationClaim, LocationRequest, Profile, VerificationDocument, UserReport
 
 
 # Действие для массового подтверждения профилей
@@ -176,5 +176,22 @@ class LocationClaimAdmin(admin.ModelAdmin):
     )
     readonly_fields = ("created_at", "updated_at")
     autocomplete_fields = ("location", "claimant_user")
+    list_editable = ("status",)
+    ordering = ("-created_at",)
+
+
+@admin.register(LocationRequest)
+class LocationRequestAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "city",
+        "country",
+        "contact_email",
+        "status",
+        "created_at",
+    )
+    list_filter = ("status", "city", "country", "created_at")
+    search_fields = ("name", "city", "country", "address_or_link", "contact_email")
+    readonly_fields = ("created_at", "updated_at")
     list_editable = ("status",)
     ordering = ("-created_at",)
