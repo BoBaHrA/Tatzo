@@ -132,52 +132,60 @@
   <div class="maps-mobile-sheet-backdrop" data-mobile-sheet-backdrop hidden></div>
 
   <dialog class="maps-dialog" data-add-location-dialog>
-    <form method="post" action="{% url 'submit_location_request' %}" enctype="multipart/form-data" class="maps-dialog-card maps-location-request-card">
+    <form method="post" action="{% url 'submit_location_request' %}" enctype="multipart/form-data" class="maps-dialog-card maps-modal maps-location-request-card">
       {% csrf_token %}
-      <button class="maps-dialog-close" type="button" value="cancel" aria-label="{% trans 'Close' %}" data-close-add-location>×</button>
-      <h2>{% trans "Add a tattoo location" %}</h2>
-      <p>{% trans "Tell us about a tattoo studio or artist location that should appear on Tatzo. We’ll review it before it appears on the map." %}</p>
-      <p class="maps-dialog-help">{% trans "For best accuracy, add the full address. Tatzo will verify it before it appears on the map." %}</p>
-      <input type="text" name="name" data-new-location-input placeholder="{% trans 'Studio or artist name' %}" required>
-      <input type="text" name="country" placeholder="{% trans 'Country' %}" required>
-      <input type="text" name="city" placeholder="{% trans 'City' %}" required>
-      <input type="text" name="full_address" placeholder="{% trans 'Full street address' %}" required>
-      <input type="url" name="website_or_map_link" placeholder="{% trans 'Website or Google/Apple Maps link' %}">
-      <input type="tel" name="phone" placeholder="{% trans 'Phone' %}">
-      <label class="maps-file-upload">
-        <span>{% trans "Attach supporting document or photo" %}</span>
-        <input type="file" name="supporting_file" accept=".pdf,.jpg,.jpeg,.png,.webp">
-        <small>{% trans "Optional. Helps Tatzo verify the location faster." %}</small>
-      </label>
-      <input type="email" name="contact_email" placeholder="{% trans 'Contact email' %}" required>
-      <input type="hidden" name="latitude" data-location-latitude>
-      <input type="hidden" name="longitude" data-location-longitude>
-      <button type="button" class="maps-pin-picker-button" data-pick-location-pin>{% trans "Use map pin" %}</button>
-      <output data-location-pin-output>{% trans "No map pin selected yet." %}</output>
-      <textarea name="message" placeholder="{% trans 'Message / extra details' %}"></textarea>
-      <output data-location-check>{% trans "Requests are reviewed before anything appears publicly." %}</output>
-      <button type="submit" class="maps-location-request-submit">{% trans "Submit location request" %}</button>
+      <div class="maps-modal-header">
+        <h2 class="maps-modal-title">{% trans "Add a tattoo location" %}</h2>
+        <button class="maps-dialog-close maps-modal-close" type="button" value="cancel" aria-label="{% trans 'Close' %}" data-close-add-location>×</button>
+      </div>
+      <div class="maps-modal-body">
+        <p>{% trans "Tell us about a tattoo studio or artist location that should appear on Tatzo. We’ll review it before it appears on the map." %}</p>
+        <p class="maps-dialog-help">{% trans "For best accuracy, add the full address. Tatzo will verify it before it appears on the map." %}</p>
+        <input type="text" name="name" data-new-location-input placeholder="{% trans 'Studio or artist name' %}" required>
+        <input type="text" name="country" placeholder="{% trans 'Country' %}" required>
+        <input type="text" name="city" placeholder="{% trans 'City' %}" required>
+        <input type="text" name="full_address" placeholder="{% trans 'Full street address' %}" required>
+        <input type="url" name="website_or_map_link" placeholder="{% trans 'Website or Google/Apple Maps link' %}">
+        <input type="tel" name="phone" placeholder="{% trans 'Phone' %}">
+        <label class="maps-file-upload">
+          <span>{% trans "Attach supporting document or photo" %}</span>
+          <input type="file" name="supporting_file" accept=".pdf,.jpg,.jpeg,.png,.webp">
+          <small>{% trans "Optional. Helps Tatzo verify the location faster." %}</small>
+        </label>
+        <input type="email" name="contact_email" placeholder="{% trans 'Contact email' %}" required>
+        <input type="hidden" name="latitude" data-location-latitude>
+        <input type="hidden" name="longitude" data-location-longitude>
+        <button type="button" class="maps-pin-picker-button" data-pick-location-pin>{% trans "Use map pin" %}</button>
+        <output data-location-pin-output>{% trans "No map pin selected yet." %}</output>
+        <textarea name="message" placeholder="{% trans 'Message / extra details' %}"></textarea>
+        <output data-location-check>{% trans "Requests are reviewed before anything appears publicly." %}</output>
+        <button type="submit" class="maps-location-request-submit">{% trans "Submit location request" %}</button>
+      </div>
     </form>
   </dialog>
 
   <dialog class="maps-dialog" data-claim-dialog>
-    <form method="post" enctype="multipart/form-data" class="maps-dialog-card maps-claim-card" data-claim-form>
+    <form method="post" enctype="multipart/form-data" class="maps-dialog-card maps-modal maps-claim-card" data-claim-form>
       {% csrf_token %}
-      <button class="maps-dialog-close" type="button" value="cancel" aria-label="{% trans 'Close' %}" data-close-claim>×</button>
-      <h2 data-claim-title>{% trans "Request location verification" %}</h2>
-      <p data-claim-summary>{% trans "This artist/location needs address verification. Nothing is claimed instantly." %}</p>
-      <input type="text" name="claimant_name" placeholder="Claimant name" required>
-      <input type="email" name="contact_email" placeholder="Contact email" required>
-      <input type="text" name="relation_to_location" placeholder="Relation to studio/location" required>
-      <input type="url" name="proof" placeholder="Portfolio or proof link">
-      <label class="maps-file-upload">
-        <span>{% trans "Attach proof document" %}</span>
-        <input type="file" name="proof_document" accept=".pdf,.jpg,.jpeg,.png,.webp">
-        <small>{% trans "PDF, JPG, PNG or WEBP. Max 10 MB." %}</small>
-      </label>
-      <textarea name="message" placeholder="Message"></textarea>
-      <output>{% trans "Admin review is required before anything changes on Tatzo." %}</output>
-      <button type="submit" class="maps-disabled-submit maps-claim-submit">{% trans "Submit claim request" %}</button>
+      <div class="maps-modal-header">
+        <h2 class="maps-modal-title" data-claim-title>{% trans "Request location verification" %}</h2>
+        <button class="maps-dialog-close maps-modal-close" type="button" value="cancel" aria-label="{% trans 'Close' %}" data-close-claim>×</button>
+      </div>
+      <div class="maps-modal-body">
+        <p data-claim-summary>{% trans "This artist/location needs address verification. Nothing is claimed instantly." %}</p>
+        <input type="text" name="claimant_name" placeholder="Claimant name" required>
+        <input type="email" name="contact_email" placeholder="Contact email" required>
+        <input type="text" name="relation_to_location" placeholder="Relation to studio/location" required>
+        <input type="url" name="proof" placeholder="Portfolio or proof link">
+        <label class="maps-file-upload">
+          <span>{% trans "Attach proof document" %}</span>
+          <input type="file" name="proof_document" accept=".pdf,.jpg,.jpeg,.png,.webp">
+          <small>{% trans "PDF, JPG, PNG or WEBP. Max 10 MB." %}</small>
+        </label>
+        <textarea name="message" placeholder="Message"></textarea>
+        <output>{% trans "Admin review is required before anything changes on Tatzo." %}</output>
+        <button type="submit" class="maps-disabled-submit maps-claim-submit">{% trans "Submit claim request" %}</button>
+      </div>
     </form>
   </dialog>
 </main>

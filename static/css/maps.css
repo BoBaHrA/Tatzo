@@ -1560,3 +1560,129 @@
     padding-right: 48px;
   }
 }
+
+/* Structural mobile-safe modal layout. Keep the native <dialog> as the overlay,
+   but make the card/header/body layout explicit so the close button cannot overlap titles. */
+.maps-dialog[open] {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 16px 12px calc(var(--maps-mobile-nav-offset, 92px) + env(safe-area-inset-bottom) + 16px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.maps-modal {
+  position: relative;
+  width: min(calc(100vw - 24px), 520px);
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - var(--maps-mobile-nav-offset, 92px) - env(safe-area-inset-bottom) - 32px);
+  margin: 0 auto;
+  padding: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.maps-modal,
+.maps-modal * {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.maps-modal-header {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: start;
+  gap: 12px;
+  padding: 22px 22px 8px;
+}
+
+.maps-modal-title {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.maps-modal-close,
+.maps-modal-close.maps-dialog-close {
+  position: static !important;
+  justify-self: end;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+}
+
+.maps-modal-body {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px 22px 22px;
+}
+
+.maps-modal-body p,
+.maps-modal-body output,
+.maps-modal-body label,
+.maps-modal-body button,
+.maps-modal-body input,
+.maps-modal-body textarea {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.maps-modal-body input,
+.maps-modal-body textarea,
+.maps-modal-body button,
+.maps-modal-body output,
+.maps-modal-body .maps-file-upload {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 760px) {
+  .maps-shell,
+  .maps-layout,
+  .maps-canvas {
+    overflow-x: hidden;
+  }
+
+  .maps-dialog[open] {
+    align-items: flex-start;
+    padding: 16px 12px calc(var(--maps-mobile-nav-offset, 92px) + env(safe-area-inset-bottom) + 16px);
+  }
+
+  .maps-modal {
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - var(--maps-mobile-nav-offset, 92px) - env(safe-area-inset-bottom) - 32px);
+  }
+
+  .maps-modal-header {
+    grid-template-columns: minmax(0, 1fr) 44px;
+    padding: 20px 16px 8px;
+  }
+
+  .maps-modal-body {
+    padding: 10px 16px calc(20px + env(safe-area-inset-bottom));
+  }
+}
