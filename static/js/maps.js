@@ -14,6 +14,9 @@
   let activeFilter = "all";
   let leafletMap = null;
   let leafletMarkerLayer = null;
+  let isPickingLocationPin = false;
+  let pickedLocationMarker = null;
+  let addLocationDialog = null;
   const leafletMarkersByArtist = new Map();
   const activeStyleFilters = new Set();
   const activeBookingFilters = new Set();
@@ -177,6 +180,35 @@
         })
       : L.layerGroup();
     leafletMarkerLayer.addTo(map);
+
+    map.on("click", (event) => {
+      if (!isPickingLocationPin) return;
+      isPickingLocationPin = false;
+      const lat = event.latlng.lat.toFixed(6);
+      const lng = event.latlng.lng.toFixed(6);
+      const latInput = document.querySelector("[data-location-latitude]");
+      const lngInput = document.querySelector("[data-location-longitude]");
+      const output = document.querySelector("[data-location-pin-output]");
+      if (latInput) latInput.value = lat;
+      if (lngInput) lngInput.value = lng;
+      if (output) output.textContent = `Pin selected: ${lat}, ${lng}`;
+
+      if (pickedLocationMarker) {
+        pickedLocationMarker.setLatLng(event.latlng);
+      } else {
+        pickedLocationMarker = L.marker(event.latlng, {
+          icon: L.divIcon({
+            className: "tatzo-map-marker tatzo-map-marker-unclaimed",
+            html: "<span>⌖</span>",
+            iconSize: [34, 34],
+            iconAnchor: [17, 17],
+          }),
+        }).addTo(map);
+      }
+
+      addLocationDialog?.showModal();
+      refreshMapSize();
+    });
 
     const bounds = [];
     // TODO: add viewport-based API loading before scaling to very large datasets.
@@ -342,19 +374,25 @@
   window.addEventListener("orientationchange", refreshMapSize);
   window.addEventListener("resize", refreshMapSize);
 
-  const dialog = document.querySelector("[data-add-location-dialog]");
+  addLocationDialog = document.querySelector("[data-add-location-dialog]");
   document.querySelectorAll("[data-open-add-location]").forEach((button) => {
     button.addEventListener("click", () => {
       closeMobileSheet();
-      dialog?.showModal();
+      addLocationDialog?.showModal();
       refreshMapSize();
     });
   });
   document.querySelector("[data-close-add-location]")?.addEventListener("click", () => {
-    dialog?.close();
+    addLocationDialog?.close();
     refreshMapSize();
   });
-  dialog?.addEventListener("close", refreshMapSize);
+  document.querySelector("[data-pick-location-pin]")?.addEventListener("click", () => {
+    isPickingLocationPin = true;
+    addLocationDialog?.close();
+    closeMobileSheet();
+    refreshMapSize();
+  });
+  addLocationDialog?.addEventListener("close", refreshMapSize);
 
 
   const claimDialog = document.querySelector("[data-claim-dialog]");

@@ -1,4 +1,5 @@
 import logging
+from decimal import Decimal, InvalidOperation
 
 from .legal_content import get_legal_page, get_legal_pages
 
@@ -2028,14 +2029,18 @@ def submit_location_request(request):
     name = (request.POST.get("name") or "").strip()
     city = (request.POST.get("city") or "").strip()
     country = (request.POST.get("country") or "").strip()
-    address_or_link = (request.POST.get("address_or_link") or "").strip()
+    full_address = (request.POST.get("full_address") or "").strip()
+    website_or_map_link = (request.POST.get("website_or_map_link") or "").strip()
+    phone = (request.POST.get("phone") or "").strip()
     contact_email = (request.POST.get("contact_email") or "").strip()
+    latitude = (request.POST.get("latitude") or "").strip()
+    longitude = (request.POST.get("longitude") or "").strip()
     message = (request.POST.get("message") or "").strip()
 
-    if not name or not city or not country or not address_or_link or not contact_email:
+    if not name or not city or not country or not full_address or not contact_email:
         messages.error(
             request,
-            _("Please provide the location name, city, country, address or link, and contact email."),
+            _("Please provide the location name, city, country, full street address, and contact email."),
         )
         return redirect("maps_page")
 
@@ -2045,10 +2050,27 @@ def submit_location_request(request):
         messages.error(request, _("Please enter a valid contact email."))
         return redirect("maps_page")
 
+    latitude_value = None
+    longitude_value = None
+    if latitude or longitude:
+        try:
+            latitude_value = Decimal(latitude)
+            longitude_value = Decimal(longitude)
+        except (InvalidOperation, TypeError):
+            messages.error(request, _("Please enter valid latitude and longitude values."))
+            return redirect("maps_page")
+
+        if not (Decimal("-90") <= latitude_value <= Decimal("90")) or not (
+            Decimal("-180") <= longitude_value <= Decimal("180")
+        ):
+            messages.error(request, _("Latitude or longitude is outside the valid range."))
+            return redirect("maps_page")
+
     active_statuses = ["submitted", "under_review"]
     duplicate_request = LocationRequest.objects.filter(
         name__iexact=name,
         city__iexact=city,
+        full_address__iexact=full_address,
         contact_email__iexact=contact_email,
         status__in=active_statuses,
     ).exists()
@@ -2064,8 +2086,12 @@ def submit_location_request(request):
         name=name,
         city=city,
         country=country,
-        address_or_link=address_or_link,
+        full_address=full_address,
+        website_or_map_link=website_or_map_link,
+        phone=phone,
         contact_email=contact_email,
+        latitude=latitude_value,
+        longitude=longitude_value,
         message=message,
         status="submitted",
     )

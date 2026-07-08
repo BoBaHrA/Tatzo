@@ -187,11 +187,13 @@ class LocationRequestAdmin(admin.ModelAdmin):
         "city",
         "country",
         "contact_email",
+        "latitude",
+        "longitude",
         "status",
         "created_at",
     )
     list_filter = ("status", "city", "country", "created_at")
-    search_fields = ("name", "city", "country", "address_or_link", "contact_email")
+    search_fields = ("name", "city", "country", "full_address", "website_or_map_link", "contact_email")
     readonly_fields = ("created_at", "updated_at")
     list_editable = ("status",)
     ordering = ("-created_at",)

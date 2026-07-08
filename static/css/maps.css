@@ -1419,3 +1419,66 @@
     display: grid;
   }
 }
+
+.maps-dialog-help {
+  border: 1px solid rgba(4, 197, 191, 0.14);
+  border-radius: 14px;
+  background: rgba(4, 197, 191, 0.08);
+  padding: 10px 12px;
+}
+
+.maps-pin-picker-button {
+  width: 100%;
+  border: 1px solid rgba(4, 197, 191, 0.24);
+  border-radius: 15px;
+  background: rgba(4, 197, 191, 0.11);
+  color: #9ffdfa;
+  cursor: pointer;
+  font-weight: 900;
+  padding: 12px 14px;
+}
+
+@media (max-width: 760px) {
+  .maps-dialog {
+    width: 100vw;
+    max-width: 100vw;
+    margin: auto;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .maps-dialog[open] {
+    padding: 12px 12px calc(var(--maps-mobile-nav-offset, 78px) + 18px + env(safe-area-inset-bottom));
+  }
+
+  .maps-dialog-card {
+    box-sizing: border-box;
+    width: calc(100vw - 24px);
+    max-width: 520px;
+    margin-inline: auto;
+    overflow-x: hidden;
+  }
+
+  .maps-dialog-card,
+  .maps-dialog-card * {
+    box-sizing: border-box;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .maps-dialog-card h2,
+  .maps-dialog-card p,
+  .maps-dialog-card output,
+  .maps-dialog-card label,
+  .maps-dialog-card button {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .maps-dialog input,
+  .maps-dialog textarea,
+  .maps-dialog button,
+  .maps-dialog output {
+    width: 100%;
+  }
+}

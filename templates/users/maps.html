@@ -137,11 +137,18 @@
       <button class="maps-dialog-close" type="button" value="cancel" aria-label="{% trans 'Close' %}" data-close-add-location>×</button>
       <h2>{% trans "Add a tattoo location" %}</h2>
       <p>{% trans "Tell us about a tattoo studio or artist location that should appear on Tatzo. We’ll review it before it appears on the map." %}</p>
+      <p class="maps-dialog-help">{% trans "For best accuracy, add the full address. Tatzo will verify it before it appears on the map." %}</p>
       <input type="text" name="name" data-new-location-input placeholder="{% trans 'Studio or artist name' %}" required>
-      <input type="text" name="city" placeholder="{% trans 'City' %}" required>
       <input type="text" name="country" placeholder="{% trans 'Country' %}" required>
-      <input type="text" name="address_or_link" placeholder="{% trans 'Address or Google/website link' %}" required>
+      <input type="text" name="city" placeholder="{% trans 'City' %}" required>
+      <input type="text" name="full_address" placeholder="{% trans 'Full street address' %}" required>
+      <input type="url" name="website_or_map_link" placeholder="{% trans 'Website or Google/Apple Maps link' %}">
+      <input type="tel" name="phone" placeholder="{% trans 'Phone' %}">
       <input type="email" name="contact_email" placeholder="{% trans 'Contact email' %}" required>
+      <input type="hidden" name="latitude" data-location-latitude>
+      <input type="hidden" name="longitude" data-location-longitude>
+      <button type="button" class="maps-pin-picker-button" data-pick-location-pin>{% trans "Use map pin" %}</button>
+      <output data-location-pin-output>{% trans "No map pin selected yet." %}</output>
       <textarea name="message" placeholder="{% trans 'Message / extra details' %}"></textarea>
       <output data-location-check>{% trans "Requests are reviewed before anything appears publicly." %}</output>
       <button type="submit" class="maps-location-request-submit">{% trans "Submit location request" %}</button>
