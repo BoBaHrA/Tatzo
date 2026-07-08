@@ -178,19 +178,48 @@
         </div>
 
         <div class="artist-blocked-card">
-          <h3>{% trans "Blocked dates" %}</h3>
-
-          <div id="artist-blocked-dates" class="artist-blocked-list">
-            {% for blocked in blocked_dates %}
-              <input type="date" name="blocked_dates" value="{{ blocked.date|date:'Y-m-d' }}">
-            {% empty %}
-              <input type="date" name="blocked_dates">
-            {% endfor %}
+          <div class="artist-blocked-head">
+            <h3>{% trans "Blocked periods" %}</h3>
+            <p>{% trans "Prevent clients from booking specific days or date ranges." %}</p>
           </div>
 
-          <button type="button" id="add-blocked-date" class="artist-ghost-btn">
-            + {% trans "Add blocked date" %}
-          </button>
+          <div
+            class="artist-blocked-period-form"
+            data-empty-message="{% trans 'No blocked periods yet.' %}"
+            data-missing-start-message="{% trans 'Choose a start date first.' %}"
+            data-invalid-range-message="{% trans 'End date cannot be before start date.' %}"
+            data-duplicate-message="{% trans 'Those dates are already blocked.' %}"
+          >
+            <label>
+              <span>{% trans "Start date" %}</span>
+              <input type="date" id="artist-blocked-start-date">
+            </label>
+            <label>
+              <span>{% trans "End date" %} <small>{% trans "optional" %}</small></span>
+              <input type="date" id="artist-blocked-end-date">
+            </label>
+            <label>
+              <span>{% trans "Reason" %} <small>{% trans "optional" %}</small></span>
+              <input type="text" id="artist-blocked-reason" maxlength="160" placeholder="{% trans 'Vacation, convention, studio closure…' %}">
+            </label>
+            <button type="button" id="artist-add-blocked-period" class="artist-ghost-btn">
+              + {% trans "Add period" %}
+            </button>
+          </div>
+          <p id="artist-blocked-error" class="artist-form-error" hidden></p>
+
+          <div id="artist-blocked-list" class="artist-blocked-period-list">
+            {% for blocked in blocked_dates %}
+              <div class="artist-blocked-chip" data-blocked-chip data-start-date="{{ blocked.date|date:'Y-m-d' }}" data-end-date="{{ blocked.date|date:'Y-m-d' }}">
+                <input type="hidden" name="blocked_dates" value="{{ blocked.date|date:'Y-m-d' }}">
+                <input type="hidden" name="blocked_reasons" value="{{ blocked.reason|default:'' }}">
+                <span>{{ blocked.date|date:"j M Y" }}{% if blocked.reason %} · {{ blocked.reason }}{% endif %}</span>
+                <button type="button" aria-label="{% trans 'Remove blocked period' %}">×</button>
+              </div>
+            {% empty %}
+              <p class="artist-empty" data-empty-blocked>{% trans "No blocked periods yet." %}</p>
+            {% endfor %}
+          </div>
         </div>
       </form>
     </section>
@@ -694,15 +723,6 @@
     syncRow();
   });
 
-  document.getElementById("add-blocked-date")?.addEventListener("click", () => {
-    const wrap = document.getElementById("artist-blocked-dates");
-    const input = document.createElement("input");
-
-    input.type = "date";
-    input.name = "blocked_dates";
-
-    wrap.appendChild(input);
-  });
 </script>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
