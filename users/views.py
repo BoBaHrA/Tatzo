@@ -2016,7 +2016,7 @@ def submit_location_claim(request, location_id):
     messages.success(
         request,
         _(
-            "Your location claim request was submitted. Tatzo will review it before anything is changed."
+            "Your claim request was submitted. Tatzo will review it before anything changes."
         ),
     )
     return redirect("maps_page")

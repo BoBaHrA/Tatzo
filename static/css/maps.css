@@ -557,38 +557,121 @@
 }
 
 .tatzo-map-popup {
-  min-width: 210px;
+  max-width: min(280px, 72vw);
+  min-width: 230px;
+  overflow: hidden;
 }
 
-.tatzo-map-popup strong,
-.tatzo-map-popup span,
-.tatzo-map-popup p {
+.tatzo-map-popup-head {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tatzo-map-popup-icon {
+  align-items: center;
+  border-radius: 50%;
+  color: #fff;
+  display: inline-flex;
+  flex: 0 0 34px;
+  font-size: 17px;
+  font-weight: 900;
+  height: 34px;
+  justify-content: center;
+}
+
+.tatzo-map-popup-verified .tatzo-map-popup-icon {
+  background: var(--map-accent);
+  box-shadow: 0 0 0 5px rgba(4, 197, 191, 0.14);
+  color: #001316;
+}
+
+.tatzo-map-popup-unclaimed .tatzo-map-popup-icon {
+  background: radial-gradient(circle at 34% 24%, #ff9bc5, var(--map-pink));
+  box-shadow: 0 0 0 5px rgba(238, 12, 111, 0.16);
+}
+
+.tatzo-map-popup strong {
+  color: var(--map-text);
   display: block;
-  margin: 0 0 6px;
+  font-size: 15px;
+  line-height: 1.2;
+  margin: 0 0 4px;
 }
 
-.tatzo-map-popup span,
-.tatzo-map-popup p {
+.tatzo-map-popup-status,
+.tatzo-map-popup-address {
   color: var(--map-muted);
+  display: block;
   font-size: 12px;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.tatzo-map-popup-meta,
+.tatzo-map-popup-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.tatzo-map-popup-meta span,
+.tatzo-map-popup-pill {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 6px 8px;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tatzo-map-popup-verified .tatzo-map-popup-meta span,
+.tatzo-map-popup-verified .tatzo-map-popup-pill {
+  background: rgba(4, 197, 191, 0.12);
+  border: 1px solid rgba(4, 197, 191, 0.18);
+  color: #9ffdfa;
+}
+
+.tatzo-map-popup-unclaimed .tatzo-map-popup-meta span,
+.tatzo-map-popup-unclaimed .tatzo-map-popup-pill {
+  background: rgba(238, 12, 111, 0.12);
+  border: 1px solid rgba(238, 12, 111, 0.18);
+  color: #ffc4dc;
+}
+
+.tatzo-map-popup-address {
+  margin-top: 9px;
 }
 
 .tatzo-map-popup-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 7px;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 .tatzo-map-popup-action {
+  align-items: center;
   border: 0;
   border-radius: 11px;
   background: rgba(255, 255, 255, 0.08);
   color: var(--map-text);
   cursor: pointer;
-  flex: 1;
+  display: inline-flex;
+  flex: 1 1 95px;
   font: inherit;
-  font-weight: 800;
-  padding: 8px 9px;
+  font-size: 12px;
+  font-weight: 900;
+  justify-content: center;
+  min-height: 34px;
+  padding: 8px 10px;
   text-align: center;
   text-decoration: none;
 }
