@@ -60,13 +60,13 @@
 
       <div class="maps-results" data-map-results>
         {% for artist in artist_cards %}
-          <article class="maps-artist-card" data-location-card data-name="{{ artist.display_name }}" data-source="{{ artist.source }}" data-location="{{ artist.location }}" data-location-status="{{ artist.location_status }}" data-location-kind="{{ artist.location_kind_code }}" data-location-label="{{ artist.location_kind }}" data-phone="{{ artist.phone }}" data-website="{{ artist.website }}" data-lat="{{ artist.latitude|default:''|unlocalize }}" data-lng="{{ artist.longitude|default:''|unlocalize }}" data-city="{{ artist.location_city }}" data-country="{{ artist.location_country }}" data-artist="{{ artist.display_name }}" data-tag="{{ artist.tag }}" data-styles="{{ artist.style_tags|join:' ' }}" data-booking="{{ artist.booking_modes|join:' ' }}" data-profile-url="{{ artist.profile_url }}" data-book-url="{{ artist.book_url }}" data-can-book="{% if artist.is_registered and artist.source == 'verified' and artist.can_book %}true{% else %}false{% endif %}" data-action-label="{% if not artist.is_registered %}{% trans 'Claim this location' %}{% elif not artist.has_map_pin %}{% trans 'Add location request' %}{% endif %}" data-search="{{ artist.display_name }} {{ artist.location }} {{ artist.tag }} {{ artist.style_tags|join:' ' }} {{ artist.booking_modes|join:' ' }}">
+          <article class="maps-artist-card {% if not artist.is_registered %}maps-artist-card-imported{% elif artist.source == 'verified' %}maps-artist-card-verified{% endif %}" data-location-card data-location-id="{{ artist.location_id }}" data-name="{{ artist.display_name }}" data-source="{{ artist.source }}" data-location="{{ artist.location }}" data-location-status="{{ artist.location_status }}" data-location-kind="{{ artist.location_kind_code }}" data-location-label="{{ artist.location_kind }}" data-phone="{{ artist.phone }}" data-website="{{ artist.website }}" data-lat="{{ artist.latitude|default:''|unlocalize }}" data-lng="{{ artist.longitude|default:''|unlocalize }}" data-city="{{ artist.location_city }}" data-country="{{ artist.location_country }}" data-artist="{{ artist.display_name }}" data-tag="{{ artist.tag }}" data-styles="{{ artist.style_tags|join:' ' }}" data-booking="{{ artist.booking_modes|join:' ' }}" data-profile-url="{{ artist.profile_url }}" data-book-url="{{ artist.book_url }}" data-can-book="{% if artist.is_registered and artist.source == 'verified' and artist.can_book %}true{% else %}false{% endif %}" data-action-label="{% if not artist.is_registered %}{% trans 'Claim this location' %}{% elif not artist.has_map_pin %}{% trans 'Add location request' %}{% endif %}" data-search="{{ artist.display_name }} {{ artist.location }} {{ artist.tag }} {{ artist.style_tags|join:' ' }} {{ artist.booking_modes|join:' ' }}">
             <div class="maps-card-top">
               <div class="maps-avatar">
                 {% if artist.profile_image %}
                   <img src="{{ artist.profile_image.url }}" alt="{{ artist.display_name }}">
                 {% else %}
-                  <span>{{ artist.display_name|first|upper }}</span>
+                  <span>{% if artist.is_registered %}{{ artist.display_name|first|upper }}{% else %}⌖{% endif %}</span>
                 {% endif %}
               </div>
               <div class="maps-card-title">
@@ -95,7 +95,7 @@
               {% if artist.is_registered and artist.source == "verified" and artist.can_book %}
                 <a href="{{ artist.book_url }}">{% trans "Book" %}</a>
               {% elif not artist.is_registered %}
-                <button type="button" data-open-claim data-claim-location="{{ artist.location }}" data-claim-artist="{{ artist.display_name }}" data-location-id="{{ artist.location_id }}" data-claim-kind="{{ artist.source }}">{% trans "Claim this location" %}</button>
+                <button type="button" data-open-claim data-claim-url="{% url 'submit_location_claim' artist.location_id %}" data-claim-location="{{ artist.location }}" data-claim-artist="{{ artist.display_name }}" data-location-id="{{ artist.location_id }}" data-claim-kind="{{ artist.source }}">{% trans "Claim this location" %}</button>
               {% elif not artist.has_map_pin %}
                 <button type="button" data-open-claim data-claim-location="{{ artist.location }}" data-claim-artist="{{ artist.display_name }}" data-location-id="{{ artist.location_id }}" data-claim-kind="{{ artist.source }}">{% trans "Add location request" %}</button>
               {% endif %}
@@ -129,17 +129,18 @@
   </dialog>
 
   <dialog class="maps-dialog" data-claim-dialog>
-    <form method="dialog" class="maps-dialog-card maps-claim-card">
-      <button class="maps-dialog-close" value="cancel" aria-label="{% trans 'Close' %}">×</button>
+    <form method="post" class="maps-dialog-card maps-claim-card" data-claim-form>
+      {% csrf_token %}
+      <button class="maps-dialog-close" type="button" value="cancel" aria-label="{% trans 'Close' %}" data-close-claim>×</button>
       <h2 data-claim-title>{% trans "Request location verification" %}</h2>
       <p data-claim-summary>{% trans "This artist/location needs address verification. Nothing is claimed instantly." %}</p>
-      <input type="text" placeholder="Claimant name" disabled>
-      <input type="email" placeholder="Contact email" disabled>
-      <input type="text" placeholder="Relation to studio/location" disabled>
-      <input type="url" placeholder="Proof document or portfolio link" disabled>
-      <textarea placeholder="Message" disabled></textarea>
-      <output>{% trans "Verification request backend required before claims can be submitted." %}</output>
-      <button type="button" class="maps-disabled-submit" disabled>{% trans "Submit disabled — backend required" %}</button>
+      <input type="text" name="claimant_name" placeholder="Claimant name" required>
+      <input type="email" name="contact_email" placeholder="Contact email" required>
+      <input type="text" name="relation_to_location" placeholder="Relation to studio/location" required>
+      <input type="url" name="proof" placeholder="Proof document or portfolio link">
+      <textarea name="message" placeholder="Message"></textarea>
+      <output>{% trans "Admin review is required before anything changes on Tatzo." %}</output>
+      <button type="submit" class="maps-disabled-submit maps-claim-submit">{% trans "Submit claim request" %}</button>
     </form>
   </dialog>
 </main>

@@ -10,6 +10,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import redirect_to_login
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db import transaction
 from django.db.models import Case, Count, Exists, IntegerField, OuterRef, Q, Value, When
 from django.http import Http404, JsonResponse
@@ -26,6 +28,7 @@ from .models import (
     VerificationDocument,
     ManualVerificationRequest,
     Location,
+    LocationClaim,
     UserFollow,
     UserBlock,
     PortfolioAlbum,
@@ -1949,6 +1952,74 @@ def search_page(request):
             "results_count": len(users),
         },
     )
+
+
+@require_POST
+def submit_location_claim(request, location_id):
+    location = get_object_or_404(
+        Location,
+        id=location_id,
+        linked_user__isnull=True,
+        status__in=["imported", "unclaimed", "pending_claim"],
+    )
+
+    claimant_name = (request.POST.get("claimant_name") or "").strip()
+    contact_email = (request.POST.get("contact_email") or "").strip()
+    relation = (request.POST.get("relation_to_location") or "").strip()
+    proof = (request.POST.get("proof") or "").strip()
+    message = (request.POST.get("message") or "").strip()
+
+    if not claimant_name or not contact_email or not relation:
+        messages.error(
+            request,
+            _("Please provide your name, contact email and relation to this location."),
+        )
+        return redirect("maps_page")
+
+    try:
+        validate_email(contact_email)
+    except ValidationError:
+        messages.error(request, _("Please enter a valid contact email."))
+        return redirect("maps_page")
+
+    active_statuses = ["submitted", "under_review"]
+    duplicate_claims = LocationClaim.objects.filter(
+        location=location,
+        status__in=active_statuses,
+    )
+
+    if request.user.is_authenticated:
+        duplicate_claims = duplicate_claims.filter(
+            Q(claimant_user=request.user) | Q(contact_email__iexact=contact_email)
+        )
+    else:
+        duplicate_claims = duplicate_claims.filter(contact_email__iexact=contact_email)
+
+    if duplicate_claims.exists():
+        messages.warning(
+            request,
+            _("A claim request for this location is already under review."),
+        )
+        return redirect("maps_page")
+
+    LocationClaim.objects.create(
+        location=location,
+        claimant_user=request.user if request.user.is_authenticated else None,
+        claimant_name=claimant_name,
+        contact_email=contact_email,
+        relation_to_location=relation,
+        proof=proof,
+        message=message,
+        status="submitted",
+    )
+
+    messages.success(
+        request,
+        _(
+            "Your location claim request was submitted. Tatzo will review it before anything is changed."
+        ),
+    )
+    return redirect("maps_page")
 
 
 def _map_location_parts(location):

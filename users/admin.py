@@ -161,6 +161,7 @@ class LocationClaimAdmin(admin.ModelAdmin):
         "location",
         "claimant_name",
         "contact_email",
+        "relation_to_location",
         "claimant_user",
         "status",
         "created_at",

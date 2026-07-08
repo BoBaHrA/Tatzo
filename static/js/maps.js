@@ -153,7 +153,7 @@
       if (card.dataset.canBook === "true") {
         actionButton = `<a class="tatzo-map-popup-action tatzo-map-popup-book" href="${card.dataset.bookUrl}">Book</a>`;
       } else if (source !== "verified") {
-        actionButton = `<button class="tatzo-map-popup-action tatzo-map-popup-claim" type="button" data-open-claim data-claim-location="${escapeHtml(card.dataset.location)}" data-claim-artist="${escapeHtml(card.dataset.artist)}" data-claim-kind="${source}">${escapeHtml(card.dataset.actionLabel || "Claim this location")}</button>`;
+        actionButton = `<button class="tatzo-map-popup-action tatzo-map-popup-claim" type="button" data-open-claim data-claim-url="/maps/location/${card.dataset.locationId}/claim/" data-claim-location="${escapeHtml(card.dataset.location)}" data-claim-artist="${escapeHtml(card.dataset.artist)}" data-claim-kind="${source}">${escapeHtml(card.dataset.actionLabel || "Claim this location")}</button>`;
       }
 
       const contactDetails = [card.dataset.phone, card.dataset.website]
@@ -282,18 +282,34 @@
   });
 
   const claimDialog = document.querySelector("[data-claim-dialog]");
+  const claimForm = document.querySelector("[data-claim-form]");
   const claimSummary = document.querySelector("[data-claim-summary]");
   const claimTitle = document.querySelector("[data-claim-title]");
+  const claimSubmit = claimForm?.querySelector("[type='submit']");
+  document.querySelector("[data-close-claim]")?.addEventListener("click", () => claimDialog?.close());
   document.addEventListener("click", (event) => {
     const button = event.target.closest("[data-open-claim]");
     if (!button) return;
 
+    const claimUrl = button.dataset.claimUrl || "";
+    const isImportedLocation = Boolean(claimUrl);
+
+    if (claimForm) {
+      claimForm.action = claimUrl || window.location.href;
+    }
+
+    if (claimSubmit) {
+      claimSubmit.disabled = !isImportedLocation;
+      claimSubmit.textContent = isImportedLocation
+        ? "Submit claim request"
+        : "Backend required for location requests";
+    }
+
     if (claimSummary) {
-      const isLocationPending = button.dataset.claimKind === "unclaimed";
-      const title = isLocationPending ? "Request location verification" : "Claim this location";
-      const actionLabel = isLocationPending ? "Location verification request" : "Claim draft";
+      const title = isImportedLocation ? "Claim this location" : "Request location verification";
+      const actionLabel = isImportedLocation ? "Claim request" : "Location verification request";
       if (claimTitle) claimTitle.textContent = title;
-      claimSummary.textContent = `${actionLabel} for ${button.dataset.claimLocation || "this location"} (${button.dataset.claimArtist || "artist/studio"}). Address verification is required and nothing is claimed instantly.`;
+      claimSummary.textContent = `${actionLabel} for ${button.dataset.claimLocation || "this location"} (${button.dataset.claimArtist || "artist/studio"}). Admin review is required and nothing is changed instantly.`;
     }
     claimDialog?.showModal();
   });

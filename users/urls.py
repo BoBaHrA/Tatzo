@@ -68,6 +68,7 @@ urlpatterns = [
     ),
     path("search/", views.search_page, name="search_page"),
     path("maps/", views.maps_page, name="maps_page"),
+    path("maps/location/<int:location_id>/claim/", views.submit_location_claim, name="submit_location_claim"),
     path("legal/", views.legal_index, name="legal_index"),
     path("terms/", views.legal_page, {"page": "terms"}, name="terms"),
     path("privacy/", views.legal_page, {"page": "privacy"}, name="privacy"),
