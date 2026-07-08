@@ -10,6 +10,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import redirect_to_login
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db import transaction
 from django.db.models import Case, Count, Exists, IntegerField, OuterRef, Q, Value, When
 from django.http import Http404, JsonResponse
@@ -25,6 +27,8 @@ from .models import (
     Profile,
     VerificationDocument,
     ManualVerificationRequest,
+    Location,
+    LocationClaim,
     UserFollow,
     UserBlock,
     PortfolioAlbum,
@@ -89,7 +93,7 @@ def home(request):
 
     recommended_artists = (
         User.objects
-        .select_related("profile")
+        .select_related("profile", "booking_settings")
         .filter(profile__account_type="tattoo_artist")
         .annotate(
             is_verified_recommendation=Case(
@@ -841,7 +845,7 @@ def reject_profile(request, profile_id):
 
 def profile_view(request, username):
     user_obj = get_object_or_404(
-        User.objects.select_related("profile"),
+        User.objects.select_related("profile", "booking_settings"),
         username=username
     )
     
@@ -1002,7 +1006,7 @@ def toggle_user_block(request, username):
 
 def followers_list(request, username):
     profile_user = get_object_or_404(
-        User.objects.select_related("profile"),
+        User.objects.select_related("profile", "booking_settings"),
         username=username,
     )
 
@@ -1028,7 +1032,7 @@ def followers_list(request, username):
 
 def following_list(request, username):
     profile_user = get_object_or_404(
-        User.objects.select_related("profile"),
+        User.objects.select_related("profile", "booking_settings"),
         username=username,
     )
 
@@ -1054,7 +1058,7 @@ def following_list(request, username):
 @login_required
 def add_portfolio_work(request, username):
     profile_user = get_object_or_404(
-        User.objects.select_related("profile"),
+        User.objects.select_related("profile", "booking_settings"),
         username=username,
     )
 
@@ -1155,7 +1159,7 @@ def create_portfolio_album(request, username):
 
 def artist_portfolio(request, username):
     profile_user = get_object_or_404(
-        User.objects.select_related("profile"),
+        User.objects.select_related("profile", "booking_settings"),
         username=username,
     )
 
@@ -1201,7 +1205,7 @@ def artist_portfolio(request, username):
 
 def artist_portfolio_album(request, username, album_id):
     profile_user = get_object_or_404(
-        User.objects.select_related("profile"),
+        User.objects.select_related("profile", "booking_settings"),
         username=username,
     )
 
@@ -1375,7 +1379,7 @@ def moderation_dashboard(request):
 @user_passes_test(is_admin)
 @require_POST
 def moderation_approve_artist(request, username):
-    user_obj = get_object_or_404(User.objects.select_related("profile"), username=username)
+    user_obj = get_object_or_404(User.objects.select_related("profile", "booking_settings"), username=username)
 
     user_obj.profile.verification_status = "approved"
     user_obj.profile.save(update_fields=["verification_status"])
@@ -1394,7 +1398,7 @@ def moderation_approve_artist(request, username):
 @user_passes_test(is_admin)
 @require_POST
 def moderation_reject_artist(request, username):
-    user_obj = get_object_or_404(User.objects.select_related("profile"), username=username)
+    user_obj = get_object_or_404(User.objects.select_related("profile", "booking_settings"), username=username)
 
     user_obj.profile.verification_status = "rejected"
     user_obj.profile.save(update_fields=["verification_status"])
@@ -1532,7 +1536,7 @@ def chats_list(request):
 def start_chat(request, username):
     target_user = get_object_or_404(
         User.objects
-        .select_related("profile")
+        .select_related("profile", "booking_settings")
         .filter(
             is_active=True,
             profile__is_email_verified=True,
@@ -1916,7 +1920,7 @@ def search_page(request):
 
     users = (
         User.objects
-        .select_related("profile")
+        .select_related("profile", "booking_settings")
         .filter(
             is_active=True,
             profile__is_email_verified=True,
@@ -1948,7 +1952,317 @@ def search_page(request):
             "results_count": len(users),
         },
     )
-    
+
+
+@require_POST
+def submit_location_claim(request, location_id):
+    location = get_object_or_404(
+        Location,
+        id=location_id,
+        linked_user__isnull=True,
+        status__in=["imported", "unclaimed", "pending_claim"],
+    )
+
+    claimant_name = (request.POST.get("claimant_name") or "").strip()
+    contact_email = (request.POST.get("contact_email") or "").strip()
+    relation = (request.POST.get("relation_to_location") or "").strip()
+    proof = (request.POST.get("proof") or "").strip()
+    message = (request.POST.get("message") or "").strip()
+
+    if not claimant_name or not contact_email or not relation:
+        messages.error(
+            request,
+            _("Please provide your name, contact email and relation to this location."),
+        )
+        return redirect("maps_page")
+
+    try:
+        validate_email(contact_email)
+    except ValidationError:
+        messages.error(request, _("Please enter a valid contact email."))
+        return redirect("maps_page")
+
+    active_statuses = ["submitted", "under_review"]
+    duplicate_claims = LocationClaim.objects.filter(
+        location=location,
+        status__in=active_statuses,
+    )
+
+    if request.user.is_authenticated:
+        duplicate_claims = duplicate_claims.filter(
+            Q(claimant_user=request.user) | Q(contact_email__iexact=contact_email)
+        )
+    else:
+        duplicate_claims = duplicate_claims.filter(contact_email__iexact=contact_email)
+
+    if duplicate_claims.exists():
+        messages.warning(
+            request,
+            _("A claim request for this location is already under review."),
+        )
+        return redirect("maps_page")
+
+    LocationClaim.objects.create(
+        location=location,
+        claimant_user=request.user if request.user.is_authenticated else None,
+        claimant_name=claimant_name,
+        contact_email=contact_email,
+        relation_to_location=relation,
+        proof=proof,
+        message=message,
+        status="submitted",
+    )
+
+    messages.success(
+        request,
+        _(
+            "Your claim request was submitted. Tatzo will review it before anything changes."
+        ),
+    )
+    return redirect("maps_page")
+
+
+def _map_location_parts(location):
+    parts = [part.strip() for part in (location or "").split(",") if part.strip()]
+    return {
+        "city": parts[0] if parts else "",
+        "country": parts[-1] if len(parts) > 1 else "",
+    }
+
+
+def _artist_map_confidence_score(artist, location):
+    """Score data completeness for the map without implying user compatibility."""
+    if location == "Location pending":
+        return 35
+
+    location_parts = _map_location_parts(location)
+    score = 45
+
+    if location_parts["city"]:
+        score += 20
+    if location_parts["country"]:
+        score += 10
+    if artist.portfolio_count:
+        score += min(15, artist.portfolio_count * 3)
+    if artist.public_post_count:
+        score += min(10, artist.public_post_count * 2)
+
+    return min(100, score)
+
+
+def _optional_location_coordinate(*objects, field_name):
+    for obj in objects:
+        if obj is None:
+            continue
+        value = getattr(obj, field_name, None)
+        if value not in (None, ""):
+            return value
+    return None
+
+
+def maps_page(request):
+    """Interactive public map built from verified artist profiles."""
+    verified_artists = (
+        User.objects
+        .filter(
+            is_active=True,
+            profile__account_type="tattoo_artist",
+            profile__verification_status="approved",
+            profile__is_email_verified=True,
+        )
+        .select_related("profile", "booking_settings")
+        .prefetch_related("portfolio_works", "manualverificationrequest")
+        .annotate(
+            portfolio_count=Count("portfolio_works", distinct=True),
+            public_post_count=Count(
+                "post",
+                filter=Q(post__visibility="public"),
+                distinct=True,
+            ),
+        )
+        .order_by("username")
+    )
+
+    artist_cards = []
+    for index, artist in enumerate(verified_artists[:36]):
+        manual_request = getattr(artist, "manualverificationrequest", None)
+        location_obj = (
+            Location.objects
+            .filter(linked_user=artist, status__in=["verified", "claimed"])
+            .exclude(latitude__isnull=True)
+            .exclude(longitude__isnull=True)
+            .order_by("-verified_at", "-updated_at")
+            .first()
+        )
+        location = location_obj.display_address if location_obj else ""
+        if not location and manual_request:
+            location = (manual_request.city_country or "").strip()
+
+        if not location:
+            location = (
+                Post.objects
+                .filter(user=artist, visibility="public")
+                .exclude(location="")
+                .values_list("location", flat=True)
+                .first()
+                or "Location pending"
+            )
+
+        has_confirmed_location = bool(location_obj)
+        source = "verified" if has_confirmed_location else "unclaimed"
+        location_parts = {
+            "city": location_obj.city,
+            "country": location_obj.country,
+        } if location_obj else _map_location_parts(location)
+        confidence_score = _artist_map_confidence_score(artist, location)
+        booking_settings = getattr(artist, "booking_settings", None)
+        style_tags = []
+
+        if booking_settings and booking_settings.active_styles:
+            style_tags.extend(booking_settings.active_styles[:4])
+
+        if len(style_tags) < 4:
+            portfolio_styles = (
+                artist.portfolio_works
+                .exclude(style="")
+                .values_list("style", flat=True)
+                .distinct()[:4 - len(style_tags)]
+            )
+            style_tags.extend(portfolio_styles)
+
+        booking_modes = []
+        if booking_settings and booking_settings.bookings_enabled:
+            booking_modes.append("Accepting new clients")
+            if booking_settings.online_consultation_enabled:
+                booking_modes.append("Online consult")
+            if booking_settings.studio_consultation_enabled:
+                booking_modes.append("In-person")
+
+        can_book = bool(booking_settings and booking_settings.bookings_enabled)
+        location_kind = (
+            "Registered Tatzo artist with verified/imported location"
+            if source == "verified"
+            else "Registered artist without confirmed address"
+        )
+
+        latitude = _optional_location_coordinate(
+            location_obj,
+            manual_request,
+            artist.profile,
+            field_name="latitude",
+        )
+        longitude = _optional_location_coordinate(
+            location_obj,
+            manual_request,
+            artist.profile,
+            field_name="longitude",
+        )
+        has_map_marker = bool(has_confirmed_location and latitude and longitude)
+
+        artist_cards.append({
+            "user": artist,
+            "is_registered": True,
+            "display_name": artist.username,
+            "tag": artist.profile.tag or artist.username,
+            "profile_image": artist.profile.profile_image,
+            "profile_url": f"/profile/{artist.username}/",
+            "book_url": f"/appointments/artist/{artist.username}/book/",
+            "location_id": location_obj.id if location_obj else "",
+            "phone": location_obj.phone if location_obj else "",
+            "website": location_obj.website if location_obj else "",
+            "location": location,
+            "location_city": location_parts["city"],
+            "location_country": location_parts["country"],
+            "location_kind": location_kind,
+            "location_kind_code": "registered_verified" if has_confirmed_location else "registered_pending",
+            "location_status": "verified" if has_confirmed_location else "pending",
+            "has_map_pin": has_map_marker,
+            "latitude": latitude,
+            "longitude": longitude,
+            "source": source,
+            "confidence_score": confidence_score,
+            "portfolio_count": artist.portfolio_count,
+            "post_count": artist.public_post_count,
+            "style_tags": style_tags,
+            "booking_modes": booking_modes,
+            "can_book": can_book,
+        })
+
+
+    external_locations = (
+        Location.objects
+        .filter(
+            linked_user__isnull=True,
+            status__in=["imported", "unclaimed", "pending_claim"],
+            latitude__isnull=False,
+            longitude__isnull=False,
+        )
+        .order_by("name")
+    )
+
+    for location_obj in external_locations:
+        location = location_obj.display_address or "Location pending"
+        location_parts = {
+            "city": location_obj.city,
+            "country": location_obj.country,
+        }
+        artist_cards.append({
+            "user": None,
+            "is_registered": False,
+            "display_name": location_obj.name,
+            "tag": "Imported location",
+            "profile_image": None,
+            "profile_url": "",
+            "book_url": "",
+            "location_id": location_obj.id,
+            "location": location,
+            "location_city": location_parts["city"],
+            "location_country": location_parts["country"],
+            "location_kind": "Not yet on Tatzo / Unclaimed",
+            "location_kind_code": "imported",
+            "location_status": location_obj.status,
+            "phone": location_obj.phone,
+            "website": location_obj.website,
+            "has_map_pin": True,
+            "latitude": location_obj.latitude,
+            "longitude": location_obj.longitude,
+            "source": "unclaimed",
+            "confidence_score": 80,
+            "portfolio_count": 0,
+            "post_count": 0,
+            "style_tags": [],
+            "booking_modes": [],
+            "can_book": False,
+        })
+
+    verified_location_count = sum(
+        1 for artist in artist_cards
+        if artist["is_registered"] and artist["has_map_pin"]
+    )
+    imported_location_count = sum(
+        1 for artist in artist_cards
+        if not artist["is_registered"] and artist["has_map_pin"]
+    )
+    pending_location_count = sum(
+        1 for artist in artist_cards
+        if artist["is_registered"] and not artist["has_map_pin"]
+    )
+    imported_count = verified_location_count
+    unclaimed_count = imported_location_count
+
+    return render(
+        request,
+        "users/maps.html",
+        {
+            "artist_cards": artist_cards,
+            "imported_count": imported_count,
+            "unclaimed_count": unclaimed_count,
+            "verified_location_count": verified_location_count,
+            "imported_location_count": imported_location_count,
+            "pending_location_count": pending_location_count,
+        },
+    )
+
 def coming_soon(request, feature):
     public_features = {"maps", "clean-slate", "contests"}
 
