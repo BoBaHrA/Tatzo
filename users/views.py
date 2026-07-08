@@ -2103,6 +2103,8 @@ def maps_page(request):
             "location_city": location_parts["city"],
             "location_country": location_parts["country"],
             "location_kind": location_kind,
+            "location_kind_code": "registered_verified" if has_confirmed_location else "registered_pending",
+            "location_status": "verified" if has_confirmed_location else "pending",
             "has_map_pin": has_map_marker,
             "latitude": latitude,
             "longitude": longitude,
@@ -2124,7 +2126,7 @@ def maps_page(request):
             latitude__isnull=False,
             longitude__isnull=False,
         )
-        .order_by("name")[:80]
+        .order_by("name")
     )
 
     for location_obj in external_locations:
@@ -2146,6 +2148,8 @@ def maps_page(request):
             "location_city": location_parts["city"],
             "location_country": location_parts["country"],
             "location_kind": "Not yet on Tatzo / Unclaimed",
+            "location_kind_code": "imported",
+            "location_status": location_obj.status,
             "phone": location_obj.phone,
             "website": location_obj.website,
             "has_map_pin": True,
@@ -2160,10 +2164,20 @@ def maps_page(request):
             "can_book": False,
         })
 
-    imported_count = sum(
-        1 for artist in artist_cards if artist["source"] == "verified"
+    verified_location_count = sum(
+        1 for artist in artist_cards
+        if artist["is_registered"] and artist["has_map_pin"]
     )
-    unclaimed_count = len(artist_cards) - imported_count
+    imported_location_count = sum(
+        1 for artist in artist_cards
+        if not artist["is_registered"] and artist["has_map_pin"]
+    )
+    pending_location_count = sum(
+        1 for artist in artist_cards
+        if artist["is_registered"] and not artist["has_map_pin"]
+    )
+    imported_count = verified_location_count
+    unclaimed_count = imported_location_count
 
     return render(
         request,
@@ -2172,6 +2186,9 @@ def maps_page(request):
             "artist_cards": artist_cards,
             "imported_count": imported_count,
             "unclaimed_count": unclaimed_count,
+            "verified_location_count": verified_location_count,
+            "imported_location_count": imported_location_count,
+            "pending_location_count": pending_location_count,
         },
     )
 

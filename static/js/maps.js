@@ -76,6 +76,7 @@
     }).addTo(map);
 
     const bounds = [];
+    // TODO: add marker clustering or viewport-based loading before scaling to thousands of points.
     cards.forEach((card) => {
       const rawLat = (card.dataset.lat || "").trim();
       const rawLng = (card.dataset.lng || "").trim();
@@ -111,7 +112,7 @@
       marker.bindPopup(`
         <div class="tatzo-map-popup">
           <strong>${escapeHtml(card.dataset.artist)}</strong>
-          <span>${escapeHtml(card.dataset.locationKind || card.dataset.source)}</span>
+          <span>${escapeHtml(card.dataset.locationLabel || card.dataset.locationKind || card.dataset.source)}</span>
           <p>${escapeHtml(card.dataset.location)}</p>
           ${contactDetails}
           <div class="tatzo-map-popup-actions">
