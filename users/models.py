@@ -547,3 +547,146 @@ class UserReport(models.Model):
 
     def __str__(self):
         return f"{self.get_report_type_display()} — {self.title}"
+
+class Location(models.Model):
+    SOURCE_CHOICES = [
+        ("manual", _("Manual")),
+        ("google_places", _("Google Places")),
+        ("apple_maps", _("Apple Maps")),
+        ("osm", _("OpenStreetMap")),
+        ("admin", _("Admin")),
+        ("unknown", _("Unknown")),
+    ]
+
+    STATUS_CHOICES = [
+        ("imported", _("Imported")),
+        ("unclaimed", _("Unclaimed")),
+        ("pending_claim", _("Pending claim")),
+        ("claimed", _("Claimed")),
+        ("verified", _("Verified")),
+        ("rejected", _("Rejected")),
+    ]
+
+    name = models.CharField(max_length=160)
+    address = models.CharField(max_length=255, blank=True)
+    formatted_address = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=120, blank=True)
+    country = models.CharField(max_length=120, blank=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    phone = models.CharField(max_length=60, blank=True)
+    website = models.URLField(max_length=500, blank=True)
+    source = models.CharField(max_length=30, choices=SOURCE_CHOICES, default="unknown")
+    source_place_id = models.CharField(max_length=255, blank=True)
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="imported")
+    linked_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="map_locations",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    verified_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ["name"]
+        indexes = [
+            models.Index(fields=["status", "source"]),
+            models.Index(fields=["linked_user", "status"]),
+            models.Index(fields=["latitude", "longitude"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["linked_user"],
+                condition=models.Q(linked_user__isnull=False, status="verified"),
+                name="unique_verified_location_per_artist",
+            )
+        ]
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def display_address(self):
+        return self.formatted_address or self.address or ", ".join(
+            part for part in [self.city, self.country] if part
+        )
+
+
+class LocationClaim(models.Model):
+    STATUS_CHOICES = [
+        ("draft", _("Draft")),
+        ("submitted", _("Submitted")),
+        ("under_review", _("Under review")),
+        ("approved", _("Approved")),
+        ("rejected", _("Rejected")),
+    ]
+
+    location = models.ForeignKey(
+        Location,
+        on_delete=models.CASCADE,
+        related_name="claims",
+    )
+    claimant_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="location_claims",
+    )
+    claimant_name = models.CharField(max_length=160)
+    contact_email = models.EmailField()
+    relation_to_location = models.CharField(max_length=160)
+    proof = models.TextField(blank=True)
+    message = models.TextField(blank=True)
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="draft")
+    admin_notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["status", "created_at"]),
+            models.Index(fields=["claimant_user", "status"]),
+        ]
+
+    def __str__(self):
+        return f"{self.claimant_name} — {self.location.name}"
+
+
+class LocationRequest(models.Model):
+    STATUS_CHOICES = [
+        ("submitted", _("Submitted")),
+        ("under_review", _("Under review")),
+        ("approved", _("Approved")),
+        ("rejected", _("Rejected")),
+    ]
+
+    name = models.CharField(max_length=160)
+    city = models.CharField(max_length=120)
+    country = models.CharField(max_length=120)
+    full_address = models.TextField()
+    website_or_map_link = models.URLField(max_length=500, blank=True)
+    phone = models.CharField(max_length=60, blank=True)
+    contact_email = models.EmailField()
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    message = models.TextField(blank=True)
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="submitted")
+    admin_notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["status", "created_at"]),
+            models.Index(fields=["city", "country"]),
+            models.Index(fields=["contact_email", "status"]),
+        ]
+
+    def __str__(self):
+        return f"{self.name} — {self.city}"
