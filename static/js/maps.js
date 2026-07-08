@@ -7,6 +7,7 @@
   const bookingFilters = Array.from(document.querySelectorAll("[data-booking-filter]"));
   const shell = document.querySelector(".maps-shell");
   const mobileSheetButtons = Array.from(document.querySelectorAll("[data-mobile-sheet]"));
+  const mobileSheetToggle = document.querySelector("[data-mobile-sheet-toggle]");
   const mobileSheetBackdrop = document.querySelector("[data-mobile-sheet-backdrop]");
   const mobileSheetClose = document.querySelector("[data-mobile-sheet-close]");
   const mobileMediaQuery = window.matchMedia("(max-width: 760px)");
@@ -43,6 +44,9 @@
     shell.classList.add("is-mobile-sheet-open");
     document.body.classList.add("maps-mobile-sheet-active");
     mobileSheetBackdrop?.removeAttribute("hidden");
+    if (mode === "search") {
+      window.setTimeout(() => search?.focus({ preventScroll: true }), 160);
+    }
     refreshMapSize();
   }
 
@@ -136,10 +140,16 @@
     const defaultLat = Number(shell?.dataset.defaultLat || 46.8);
     const defaultLng = Number(shell?.dataset.defaultLng || 2.5);
     const defaultZoom = Number(shell?.dataset.defaultZoom || 5);
+    const worldBounds = L.latLngBounds([[-85, -180], [85, 180]]);
     const map = L.map(mapContainer, {
       scrollWheelZoom: true,
       zoomControl: true,
-    }).setView([defaultLat, defaultLng], defaultZoom);
+      minZoom: isMobileMapLayout() ? 3 : 2,
+      maxZoom: 19,
+      maxBounds: worldBounds,
+      maxBoundsViscosity: 1.0,
+      worldCopyJump: false,
+    }).setView([defaultLat, defaultLng], Math.max(defaultZoom, isMobileMapLayout() ? 3 : 2));
     leafletMap = map;
 
     // Development tile layer only. Production should use an approved tile provider,
@@ -150,7 +160,10 @@
     // name, address, latitude, longitude, and status="imported" or "unclaimed".
     const tileUrl = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
     L.tileLayer(tileUrl, {
+      minZoom: 2,
       maxZoom: 19,
+      noWrap: true,
+      bounds: worldBounds,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
     }).addTo(map);
 
@@ -316,6 +329,7 @@
 
   initializeLeafletMap();
 
+  mobileSheetToggle?.addEventListener("click", () => openMobileSheet("list"));
   mobileSheetButtons.forEach((button) => {
     button.addEventListener("click", () => openMobileSheet(button.dataset.mobileSheet || "list"));
   });

@@ -28,6 +28,12 @@
     <aside class="maps-panel" data-mobile-sheet-panel aria-label="{% trans 'Map controls and results' %}">
       <button class="maps-mobile-sheet-close" type="button" data-mobile-sheet-close aria-label="{% trans 'Close map panel' %}">×</button>
       <div class="maps-mobile-sheet-handle" aria-hidden="true"></div>
+      <div class="maps-mobile-tabs" aria-label="{% trans 'Mobile map panel tabs' %}">
+        <button type="button" data-mobile-sheet="search">{% trans "Search" %}</button>
+        <button type="button" data-mobile-sheet="filters">{% trans "Filters" %}</button>
+        <button type="button" data-mobile-sheet="list">{% trans "List" %}</button>
+        <button type="button" data-open-add-location>{% trans "Add location" %}</button>
+      </div>
       <div class="maps-search-card">
         <label for="maps-search">{% trans "Search by artist, style or city" %}</label>
         <input id="maps-search" type="search" placeholder="Berlin, fine line, @artist" data-map-search>
@@ -111,12 +117,10 @@
 
     <section class="maps-canvas" aria-label="{% trans 'Tatzo artist map' %}">
       <div id="tatzo-map" class="tatzo-leaflet-map" data-map-container></div>
-      <div class="maps-mobile-actions" aria-label="{% trans 'Mobile map actions' %}">
-        <button type="button" data-mobile-sheet="search">{% trans "Search" %}</button>
-        <button type="button" data-mobile-sheet="filters">{% trans "Filters" %}</button>
-        <button type="button" data-mobile-sheet="list">{% trans "List" %}</button>
-        <button type="button" data-open-add-location>{% trans "Add location" %}</button>
-      </div>
+      <button class="maps-mobile-explore" type="button" data-mobile-sheet-toggle aria-label="{% trans 'Open map panel' %}">
+        <span aria-hidden="true"></span>
+        <span>{% trans "Explore" %}</span>
+      </button>
       <div class="maps-empty-map" data-empty-map-message hidden><strong>{% trans "No verified locations yet" %}</strong><span>{% trans "Locations appear after address confirmation." %}</span></div>
       <div class="maps-legend">
         <span><i class="verified"></i>{% trans "Verified/imported artist" %}</span>
