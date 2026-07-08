@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n l10n %}
 
 {% block title %}{% trans "Maps" %} | Tatzo{% endblock %}
 
@@ -58,7 +58,7 @@
 
       <div class="maps-results" data-map-results>
         {% for artist in artist_cards %}
-          <article class="maps-artist-card" data-location-card data-source="{{ artist.source }}" data-location="{{ artist.location }}" data-location-status="{{ artist.location_status }}" data-location-kind="{{ artist.location_kind_code }}" data-location-label="{{ artist.location_kind }}" data-phone="{{ artist.phone }}" data-website="{{ artist.website }}" data-lat="{{ artist.latitude|default:'' }}" data-lng="{{ artist.longitude|default:'' }}" data-city="{{ artist.location_city }}" data-country="{{ artist.location_country }}" data-artist="{{ artist.display_name }}" data-tag="{{ artist.tag }}" data-styles="{{ artist.style_tags|join:' ' }}" data-booking="{{ artist.booking_modes|join:' ' }}" data-profile-url="{{ artist.profile_url }}" data-book-url="{{ artist.book_url }}" data-can-book="{% if artist.is_registered and artist.source == 'verified' and artist.can_book %}true{% else %}false{% endif %}" data-action-label="{% if not artist.is_registered %}{% trans 'Claim this location' %}{% elif not artist.has_map_pin %}{% trans 'Add location request' %}{% endif %}" data-search="{{ artist.display_name }} {{ artist.location }} {{ artist.tag }} {{ artist.style_tags|join:' ' }} {{ artist.booking_modes|join:' ' }}">
+          <article class="maps-artist-card" data-location-card data-name="{{ artist.display_name }}" data-source="{{ artist.source }}" data-location="{{ artist.location }}" data-location-status="{{ artist.location_status }}" data-location-kind="{{ artist.location_kind_code }}" data-location-label="{{ artist.location_kind }}" data-phone="{{ artist.phone }}" data-website="{{ artist.website }}" data-lat="{{ artist.latitude|default:''|unlocalize }}" data-lng="{{ artist.longitude|default:''|unlocalize }}" data-city="{{ artist.location_city }}" data-country="{{ artist.location_country }}" data-artist="{{ artist.display_name }}" data-tag="{{ artist.tag }}" data-styles="{{ artist.style_tags|join:' ' }}" data-booking="{{ artist.booking_modes|join:' ' }}" data-profile-url="{{ artist.profile_url }}" data-book-url="{{ artist.book_url }}" data-can-book="{% if artist.is_registered and artist.source == 'verified' and artist.can_book %}true{% else %}false{% endif %}" data-action-label="{% if not artist.is_registered %}{% trans 'Claim this location' %}{% elif not artist.has_map_pin %}{% trans 'Add location request' %}{% endif %}" data-search="{{ artist.display_name }} {{ artist.location }} {{ artist.tag }} {{ artist.style_tags|join:' ' }} {{ artist.booking_modes|join:' ' }}">
             <div class="maps-card-top">
               <div class="maps-avatar">
                 {% if artist.profile_image %}
