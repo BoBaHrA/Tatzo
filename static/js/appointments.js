@@ -14,6 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
     duration: 60,
     styles: [],
     placement: "",
+    placementZone: "",
+    placementDetails: "",
     size: "",
     budget: "",
     references: [],
@@ -229,7 +231,42 @@ document.addEventListener("DOMContentLoaded", () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  function composePlacement() {
+    const zone = state.placementZone.trim();
+    const details = state.placementDetails.trim();
+
+    if (zone && details) return `${zone} — ${details}`;
+    return zone || details;
+  }
+
+  function syncPlacement() {
+    state.placement = composePlacement();
+
+    const selectedText = document.getElementById("booking-placement-selected");
+    if (selectedText) {
+      selectedText.replaceChildren();
+
+      if (state.placementZone) {
+        selectedText.append(document.createTextNode("Selected:"));
+
+        const chip = document.createElement("span");
+        chip.className = "booking-placement-chip";
+        chip.textContent = state.placementZone;
+        selectedText.appendChild(chip);
+      } else {
+        selectedText.textContent = "Selected: none yet";
+      }
+    }
+
+    document.querySelectorAll("[data-placement-zone]").forEach((button) => {
+      const isSelected = button.dataset.placementZone === state.placementZone;
+      button.classList.toggle("is-selected", isSelected);
+      button.setAttribute("aria-pressed", isSelected ? "true" : "false");
+    });
+  }
+
   function syncHiddenFields() {
+    syncPlacement();
     document.getElementById("booking-duration").value = state.duration;
     document.getElementById("booking-styles").value = state.styles.join(",");
     document.getElementById("booking-placement").value = state.placement;
@@ -317,8 +354,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  document.querySelectorAll("[data-placement-zone]").forEach((button) => {
+    button.setAttribute("aria-pressed", "false");
+
+    button.addEventListener("click", () => {
+      state.placementZone = button.dataset.placementZone;
+      syncHiddenFields();
+    });
+  });
+
   document.getElementById("booking-placement-text").addEventListener("input", (event) => {
-    state.placement = event.target.value.trim();
+    state.placementDetails = event.target.value.trim();
     syncHiddenFields();
   });
 
