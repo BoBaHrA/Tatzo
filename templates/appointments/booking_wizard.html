@@ -96,7 +96,58 @@
         </div>
 
         <label>{% trans "Placement" %}</label>
-        <input class="booking-input" type="text" id="booking-placement-text" placeholder="{% trans 'Arm, back, leg...' %}">
+        <div class="booking-placement-picker" aria-describedby="booking-placement-help">
+          <p class="booking-helper" id="booking-placement-help">{% trans "Tap the area where you want your tattoo." %}</p>
+          <div class="booking-body-views" aria-label="{% trans 'Body placement picker' %}">
+            <div class="booking-body-card">
+              <h3>{% trans "Front" %}</h3>
+              <div class="booking-body-map booking-body-map-front">
+                <svg viewBox="0 0 180 360" aria-hidden="true" focusable="false">
+                  <defs><linearGradient id="tatzoBodyGlowFront" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#04c5bf"/><stop offset="100%" stop-color="#ee0c6f"/></linearGradient></defs>
+                  <circle cx="90" cy="34" r="22"/>
+                  <path d="M72 64h36l18 66-12 86H66l-12-86z"/>
+                  <path d="M56 82 28 184M124 82l28 102"/>
+                  <path d="M74 216 58 330M106 216l16 114"/>
+                </svg>
+                <button type="button" class="booking-body-zone zone-head" data-placement-zone="Head / neck">{% trans "Head / neck" %}</button>
+                <button type="button" class="booking-body-zone zone-chest" data-placement-zone="Chest">{% trans "Chest" %}</button>
+                <button type="button" class="booking-body-zone zone-stomach" data-placement-zone="Stomach / ribs">{% trans "Stomach / ribs" %}</button>
+                <button type="button" class="booking-body-zone zone-left-arm" data-placement-zone="Left arm">{% trans "Left arm" %}</button>
+                <button type="button" class="booking-body-zone zone-right-arm" data-placement-zone="Right arm">{% trans "Right arm" %}</button>
+                <button type="button" class="booking-body-zone zone-left-forearm" data-placement-zone="Left forearm">{% trans "Left forearm" %}</button>
+                <button type="button" class="booking-body-zone zone-right-forearm" data-placement-zone="Right forearm">{% trans "Right forearm" %}</button>
+                <button type="button" class="booking-body-zone zone-left-hand" data-placement-zone="Left hand">{% trans "Left hand" %}</button>
+                <button type="button" class="booking-body-zone zone-right-hand" data-placement-zone="Right hand">{% trans "Right hand" %}</button>
+                <button type="button" class="booking-body-zone zone-left-leg" data-placement-zone="Left leg">{% trans "Left leg" %}</button>
+                <button type="button" class="booking-body-zone zone-right-leg" data-placement-zone="Right leg">{% trans "Right leg" %}</button>
+                <button type="button" class="booking-body-zone zone-left-calf" data-placement-zone="Left calf">{% trans "Left calf" %}</button>
+                <button type="button" class="booking-body-zone zone-right-calf" data-placement-zone="Right calf">{% trans "Right calf" %}</button>
+                <button type="button" class="booking-body-zone zone-foot" data-placement-zone="Foot / ankle">{% trans "Foot / ankle" %}</button>
+              </div>
+            </div>
+            <div class="booking-body-card">
+              <h3>{% trans "Back" %}</h3>
+              <div class="booking-body-map booking-body-map-back">
+                <svg viewBox="0 0 180 360" aria-hidden="true" focusable="false">
+                  <circle cx="90" cy="34" r="22"/>
+                  <path d="M72 64h36l18 66-12 86H66l-12-86z"/>
+                  <path d="M56 82 28 184M124 82l28 102"/>
+                  <path d="M74 216 58 330M106 216l16 114"/>
+                </svg>
+                <button type="button" class="booking-body-zone zone-back" data-placement-zone="Back">{% trans "Back" %}</button>
+                <button type="button" class="booking-body-zone zone-lower-back" data-placement-zone="Lower back">{% trans "Lower back" %}</button>
+                <button type="button" class="booking-body-zone zone-back-left-arm" data-placement-zone="Left arm">{% trans "Left arm" %}</button>
+                <button type="button" class="booking-body-zone zone-back-right-arm" data-placement-zone="Right arm">{% trans "Right arm" %}</button>
+                <button type="button" class="booking-body-zone zone-back-left-leg" data-placement-zone="Left leg">{% trans "Left leg" %}</button>
+                <button type="button" class="booking-body-zone zone-back-right-leg" data-placement-zone="Right leg">{% trans "Right leg" %}</button>
+              </div>
+            </div>
+          </div>
+          <p class="booking-placement-selected" id="booking-placement-selected">{% trans "Selected: none yet" %}</p>
+        </div>
+
+        <label for="booking-placement-text">{% trans "Placement details" %}</label>
+        <textarea class="booking-textarea booking-placement-details" id="booking-placement-text" placeholder="{% trans 'Optional details, e.g. inner forearm, near elbow...' %}"></textarea>
 
         <label>{% trans "Size" %}</label>
         <div class="booking-choice-grid" data-choice-group="size">

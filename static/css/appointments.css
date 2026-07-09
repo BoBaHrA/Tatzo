@@ -1305,3 +1305,163 @@
   background: linear-gradient(90deg, #04c5bf, #ee0c6f);
   transition: width 0.8s ease;
 }
+.booking-step-dot:focus-visible,
+.booking-calendar-head button:focus-visible,
+.booking-day:focus-visible,
+.booking-slots button:focus-visible,
+.booking-choice:focus-visible,
+.booking-choice-grid button:focus-visible,
+.booking-body-zone:focus-visible {
+  outline: 3px solid rgba(238, 12, 111, 0.78);
+  outline-offset: 3px;
+}
+
+.booking-day:not([disabled]):hover,
+.booking-slots button:hover,
+.booking-choice:hover,
+.booking-choice-grid button:hover {
+  border-color: rgba(238, 12, 111, 0.58);
+  box-shadow: 0 0 22px rgba(4, 197, 191, 0.14);
+}
+
+.booking-placement-picker {
+  padding: 16px;
+  border: 1px solid rgba(4, 197, 191, 0.18);
+  border-radius: 22px;
+  background: rgba(4, 197, 191, 0.045);
+}
+
+.booking-helper {
+  margin: 0 0 14px;
+  color: rgba(234, 255, 255, 0.72);
+  font-size: 14px;
+}
+
+.booking-body-views {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.booking-body-card {
+  min-width: 0;
+  padding: 12px;
+  border-radius: 20px;
+  background: rgba(0, 24, 34, 0.78);
+  border: 1px solid rgba(4, 197, 191, 0.16);
+}
+
+.booking-body-card h3 {
+  margin: 0 0 8px;
+  color: #04c5bf;
+  font-size: 15px;
+  text-align: center;
+}
+
+.booking-body-map {
+  position: relative;
+  width: min(100%, 280px);
+  aspect-ratio: 1 / 2;
+  margin: 0 auto;
+}
+
+.booking-body-map svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: rgba(4, 197, 191, 0.06);
+  stroke: rgba(4, 197, 191, 0.46);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 18px rgba(4, 197, 191, 0.18));
+}
+
+.booking-body-zone {
+  position: absolute;
+  min-width: 44px;
+  min-height: 34px;
+  padding: 5px 8px;
+  border: 1px solid rgba(4, 197, 191, 0.38);
+  border-radius: 999px;
+  background: rgba(0, 13, 24, 0.88);
+  color: #eaffff;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.05;
+  cursor: pointer;
+  box-shadow: 0 0 16px rgba(4, 197, 191, 0.12);
+  transform: translate(-50%, -50%);
+}
+
+.booking-body-zone:hover {
+  border-color: rgba(238, 12, 111, 0.72);
+  color: #ffffff;
+}
+
+.booking-body-zone.is-selected,
+.booking-day.is-selected,
+.booking-slots button.is-selected,
+.booking-choice.is-active,
+.booking-choice-grid button.is-selected {
+  border-color: rgba(255, 255, 255, 0.38);
+  background: linear-gradient(135deg, #04c5bf 0%, #ee0c6f 100%);
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42);
+  box-shadow: 0 0 24px rgba(238, 12, 111, 0.24), 0 0 18px rgba(4, 197, 191, 0.18);
+}
+
+.booking-step-dot.is-active {
+  border-color: rgba(255, 255, 255, 0.34);
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42);
+  box-shadow: 0 0 22px rgba(238, 12, 111, 0.22);
+}
+
+.booking-placement-selected {
+  margin: 14px 0 0;
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.booking-placement-details {
+  min-height: 86px;
+}
+
+.zone-head { left: 50%; top: 10%; }
+.zone-chest { left: 50%; top: 27%; }
+.zone-stomach { left: 50%; top: 42%; }
+.zone-left-arm { left: 22%; top: 29%; }
+.zone-right-arm { left: 78%; top: 29%; }
+.zone-left-forearm { left: 15%; top: 45%; }
+.zone-right-forearm { left: 85%; top: 45%; }
+.zone-left-hand { left: 12%; top: 56%; }
+.zone-right-hand { left: 88%; top: 56%; }
+.zone-left-leg { left: 42%; top: 66%; }
+.zone-right-leg { left: 58%; top: 66%; }
+.zone-left-calf { left: 38%; top: 82%; }
+.zone-right-calf { left: 62%; top: 82%; }
+.zone-foot { left: 50%; top: 94%; }
+.zone-back { left: 50%; top: 32%; }
+.zone-lower-back { left: 50%; top: 50%; }
+.zone-back-left-arm { left: 20%; top: 38%; }
+.zone-back-right-arm { left: 80%; top: 38%; }
+.zone-back-left-leg { left: 40%; top: 75%; }
+.zone-back-right-leg { left: 60%; top: 75%; }
+
+@media (max-width: 640px) {
+  .booking-body-views {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-body-map {
+    width: min(100%, 240px);
+  }
+
+  .booking-body-zone {
+    min-width: 48px;
+    min-height: 38px;
+    font-size: 10px;
+  }
+}
