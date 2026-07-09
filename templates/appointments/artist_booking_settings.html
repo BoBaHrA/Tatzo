@@ -393,6 +393,12 @@
       <form method="post" class="artist-settings-stack">
         {% csrf_token %}
         <input type="hidden" name="dashboard_form" value="settings">
+        <input
+          type="hidden"
+          name="booking_status"
+          id="artist-booking-status"
+          value="{{ booking_settings.booking_status|default:'open' }}"
+        >
 
         <div class="artist-card">
           <div class="artist-section-title-row">
@@ -559,32 +565,32 @@
           <h2>{% trans "Booking rules" %}</h2>
 
           <div class="artist-rules-grid">
-            <button type="button" class="artist-rule-card is-active tone-green">
+            <button type="button" class="artist-rule-card tone-green {% if booking_settings.booking_status == 'open' %}is-active{% endif %}" data-booking-status="open">
               <i data-lucide="check-circle"></i>
               <span>{% trans "Booking allowed" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card tone-cyan">
+            <button type="button" class="artist-rule-card tone-cyan {% if booking_settings.booking_status == 'paused' %}is-active{% endif %}" data-booking-status="paused">
               <i data-lucide="pause-circle"></i>
               <span>{% trans "Booking paused" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card tone-pink">
+            <button type="button" class="artist-rule-card tone-pink {% if booking_settings.booking_status == 'vacation' %}is-active{% endif %}" data-booking-status="vacation">
               <i data-lucide="palmtree"></i>
               <span>{% trans "Vacation" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card tone-violet">
+            <button type="button" class="artist-rule-card tone-violet {% if booking_settings.booking_status == 'fully_booked' %}is-active{% endif %}" data-booking-status="fully_booked">
               <i data-lucide="layers"></i>
               <span>{% trans "Fully booked" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card tone-orange">
+            <button type="button" class="artist-rule-card tone-orange {% if booking_settings.booking_status == 'consultation_only' %}is-active{% endif %}" data-booking-status="consultation_only">
               <i data-lucide="message-circle"></i>
               <span>{% trans "Consultation only" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card tone-red">
+            <button type="button" class="artist-rule-card tone-red {% if booking_settings.booking_status == 'emergency' %}is-active{% endif %}" data-booking-status="emergency">
               <i data-lucide="alert-triangle"></i>
               <span>{% trans "Emergency closure" %}</span>
             </button>
