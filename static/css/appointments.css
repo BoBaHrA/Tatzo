@@ -1508,3 +1508,10 @@
     display: none;
   }
 }
+
+.booking-form-error {
+  margin: -8px 0 14px;
+  color: #ff8fbd;
+  font-size: 13px;
+  font-weight: 800;
+}

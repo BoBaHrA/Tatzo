@@ -170,7 +170,7 @@
         <label class="booking-upload-zone" for="booking-references">
           <span>＋</span>
           <strong>{% trans "Upload reference images" %}</strong>
-          <small>{% trans "You can add screenshots, sketches or inspiration images." %}</small>
+          <small id="booking-reference-help">{% trans "You can add screenshots, sketches or inspiration images." %}</small>
         </label>
 
         <input
@@ -181,6 +181,8 @@
           multiple
           hidden
         >
+
+        <p class="booking-form-error" id="booking-reference-error" hidden></p>
 
         <div class="booking-reference-grid" id="booking-reference-grid"></div>
       </section>

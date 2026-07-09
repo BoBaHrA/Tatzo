@@ -27,6 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const nextBtn = document.getElementById("booking-next-btn");
   const backBtn = document.getElementById("booking-back-btn");
   const submitBtn = document.getElementById("booking-submit-btn");
+  const referenceInput = document.getElementById("booking-references");
+  const referenceError = document.getElementById("booking-reference-error");
+  const referenceHelp = document.getElementById("booking-reference-help");
 
   function pad(value) {
     return String(value).padStart(2, "0");
@@ -43,6 +46,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function minutesToTime(value) {
     return `${pad(Math.floor(value / 60))}:${pad(value % 60)}`;
+  }
+
+  function getReferenceMinimum() {
+    return Number(bookingData.settings.minimum_reference_images) || 1;
+  }
+
+  function getReferenceMaximum() {
+    return Number(bookingData.settings.maximum_reference_images) || 0;
+  }
+
+  function getReferenceRequiredMessage(minimum) {
+    return minimum === 1
+      ? "Please upload at least 1 reference image."
+      : `Please upload at least ${minimum} reference images.`;
+  }
+
+  function setReferenceError(message) {
+    if (!referenceError) return;
+
+    referenceError.textContent = message;
+    referenceError.hidden = !message;
+  }
+
+  function validateReferences() {
+    const count = state.references.length;
+    const minimum = getReferenceMinimum();
+    const maximum = getReferenceMaximum();
+
+    if (bookingData.settings.reference_images_required && count < minimum) {
+      setReferenceError(getReferenceRequiredMessage(minimum));
+      return false;
+    }
+
+    if (maximum && count > maximum) {
+      setReferenceError(
+        maximum === 1
+          ? "Please upload no more than 1 reference image."
+          : `Please upload no more than ${maximum} reference images.`
+      );
+      return false;
+    }
+
+    setReferenceError("");
+    return true;
   }
 
   function getScheduleForDate(date) {
@@ -289,6 +336,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <div><span>Placement</span><strong>${state.placement || "—"}</strong></div>
       <div><span>Size</span><strong>${state.size || "—"}</strong></div>
       <div><span>Budget</span><strong>${state.budget || "—"}</strong></div>
+      <div><span>References</span><strong>${state.references.length} uploaded</strong></div>
     `;
   }
 
@@ -375,22 +423,37 @@ document.addEventListener("DOMContentLoaded", () => {
     syncHiddenFields();
   });
 
-  document.getElementById("booking-references").addEventListener("change", (event) => {
+  if (referenceHelp && bookingData.settings.reference_images_required) {
+    const minimum = getReferenceMinimum();
+    referenceHelp.textContent = minimum === 1
+      ? "This artist requires at least 1 reference image."
+      : `This artist requires at least ${minimum} reference images.`;
+  }
+
+  referenceInput.addEventListener("change", (event) => {
     const grid = document.getElementById("booking-reference-grid");
+    const files = Array.from(event.target.files || []);
+    state.references = files;
     grid.innerHTML = "";
 
-    Array.from(event.target.files || []).forEach((file) => {
+    files.forEach((file) => {
       const url = URL.createObjectURL(file);
       const img = document.createElement("img");
       img.src = url;
       img.alt = file.name;
       grid.appendChild(img);
     });
+
+    validateReferences();
   });
 
   nextBtn.addEventListener("click", () => {
     if (state.step === 1 && (!state.selectedDate || !state.selectedTime)) {
       alert("Please choose a date and time.");
+      return;
+    }
+
+    if (state.step === 3 && !validateReferences()) {
       return;
     }
 
@@ -411,6 +474,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!state.selectedDate || !state.selectedTime) {
       event.preventDefault();
       alert("Please choose a date and time.");
+      return;
+    }
+
+    if (!validateReferences()) {
+      event.preventDefault();
     }
   });
 
