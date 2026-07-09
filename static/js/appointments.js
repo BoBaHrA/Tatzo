@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getReferenceMinimum() {
-    return Number(bookingData.settings.minimum_reference_images) || 1;
+    return Number(bookingData.settings.minimum_reference_images) || 0;
   }
 
   function getReferenceMaximum() {
@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const minimum = getReferenceMinimum();
     const maximum = getReferenceMaximum();
 
-    if (bookingData.settings.reference_images_required && count < minimum) {
+    if (minimum > 0 && count < minimum) {
       setReferenceError(getReferenceRequiredMessage(minimum));
       return false;
     }
@@ -423,11 +423,14 @@ document.addEventListener("DOMContentLoaded", () => {
     syncHiddenFields();
   });
 
-  if (referenceHelp && bookingData.settings.reference_images_required) {
+  if (referenceHelp) {
     const minimum = getReferenceMinimum();
-    referenceHelp.textContent = minimum === 1
-      ? "This artist requires at least 1 reference image."
-      : `This artist requires at least ${minimum} reference images.`;
+
+    if (minimum > 0) {
+      referenceHelp.textContent = minimum === 1
+        ? "This artist requires at least 1 reference image."
+        : `This artist requires at least ${minimum} reference images.`;
+    }
   }
 
   referenceInput.addEventListener("change", (event) => {

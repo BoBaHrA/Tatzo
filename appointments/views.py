@@ -259,10 +259,9 @@ def create_appointment(request, username):
 
     files = request.FILES.getlist("references")
 
-    if (
-        booking_settings.reference_images_required
-        and len(files) < booking_settings.minimum_reference_images
-    ):
+    minimum_reference_images = booking_settings.minimum_reference_images or 0
+
+    if minimum_reference_images > 0 and len(files) < minimum_reference_images:
         messages.error(request, _("Please upload the required reference images."))
         return redirect("booking_wizard", username=artist.username)
 
