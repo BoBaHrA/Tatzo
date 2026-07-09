@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, time
 
 from django.db.models import Count, Q
 
-from users.models import ChatMessage, PortfolioWork
+from users.models import ChatMessage, ChatThread, PortfolioWork
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -113,6 +113,58 @@ def _get_artist_settings(artist):
     return settings
 
 
+def _get_booking_status_block_message(booking_status):
+    blocked_messages = {
+        ArtistBookingSettings.BOOKING_STATUS_PAUSED: _(
+            "This artist has paused bookings right now."
+        ),
+        ArtistBookingSettings.BOOKING_STATUS_VACATION: _(
+            "This artist is currently on vacation."
+        ),
+        ArtistBookingSettings.BOOKING_STATUS_FULLY_BOOKED: _(
+            "This artist is fully booked right now."
+        ),
+        ArtistBookingSettings.BOOKING_STATUS_EMERGENCY: _(
+            "This artist is temporarily unavailable."
+        ),
+    }
+    return blocked_messages.get(booking_status)
+
+
+def _get_booking_status_label(booking_status):
+    labels = {
+        ArtistBookingSettings.BOOKING_STATUS_OPEN: _("Accepting bookings"),
+        ArtistBookingSettings.BOOKING_STATUS_PAUSED: _("Bookings paused"),
+        ArtistBookingSettings.BOOKING_STATUS_VACATION: _("On vacation"),
+        ArtistBookingSettings.BOOKING_STATUS_FULLY_BOOKED: _("Fully booked"),
+        ArtistBookingSettings.BOOKING_STATUS_CONSULTATION_ONLY: _("Consultation only"),
+        ArtistBookingSettings.BOOKING_STATUS_EMERGENCY: _("Emergency closure"),
+    }
+    return labels.get(booking_status, labels[ArtistBookingSettings.BOOKING_STATUS_OPEN])
+
+
+def _clean_auto_response_text(value):
+    return (value or "").strip()[:2000]
+
+
+def _send_artist_auto_response(appointment, message_text):
+    message_text = _clean_auto_response_text(message_text)
+
+    if not message_text:
+        return
+
+    thread = ChatThread.get_or_create_for_users(
+        appointment.artist,
+        appointment.client,
+    )
+    ChatMessage.objects.create(
+        thread=thread,
+        sender=appointment.artist,
+        content=message_text,
+    )
+    thread.save(update_fields=["updated_at"])
+
+
 @login_required
 def booking_wizard(request, username):
     artist = get_object_or_404(
@@ -128,6 +180,18 @@ def booking_wizard(request, username):
         raise Http404
 
     booking_settings = _get_artist_settings(artist)
+
+    block_message = _get_booking_status_block_message(
+        getattr(
+            booking_settings,
+            "booking_status",
+            ArtistBookingSettings.BOOKING_STATUS_OPEN,
+        )
+    )
+
+    if block_message:
+        messages.error(request, block_message)
+        return redirect("profile", username=artist.username)
 
     if not booking_settings.bookings_enabled:
         messages.error(request, _("This artist is not accepting bookings right now."))
@@ -208,11 +272,28 @@ def create_appointment(request, username):
         raise Http404
 
     booking_settings = _get_artist_settings(artist)
+    block_message = _get_booking_status_block_message(
+        getattr(
+            booking_settings,
+            "booking_status",
+            ArtistBookingSettings.BOOKING_STATUS_OPEN,
+        )
+    )
+
+    if block_message:
+        messages.error(request, block_message)
+        return redirect("profile", username=artist.username)
 
     date_raw = request.POST.get("date")
     start_time_raw = request.POST.get("start_time")
     duration_raw = request.POST.get("session_length_minutes") or "60"
     booking_type = request.POST.get("booking_type") or Appointment.TYPE_TATTOO
+
+    if (
+        booking_settings.booking_status
+        == ArtistBookingSettings.BOOKING_STATUS_CONSULTATION_ONLY
+    ):
+        booking_type = Appointment.TYPE_CONSULTATION
 
     if not date_raw or not start_time_raw:
         messages.error(request, _("Please choose a date and time."))
@@ -245,6 +326,10 @@ def create_appointment(request, username):
 
     if date_value > latest_allowed_date:
         messages.error(request, _("This date is too far in the future."))
+        return redirect("booking_wizard", username=artist.username)
+
+    if ArtistTimeOff.objects.filter(artist=artist, date=date_value).exists():
+        messages.error(request, _("This date is blocked by the artist."))
         return redirect("booking_wizard", username=artist.username)
 
     if start_dt < minimum_start:
@@ -295,6 +380,17 @@ def create_appointment(request, username):
             image=file,
             original_name=file.name,
             order=index,
+        )
+
+    _send_artist_auto_response(
+        appointment,
+        booking_settings.auto_response_booking_received,
+    )
+
+    if booking_settings.consultation_required_before_booking:
+        _send_artist_auto_response(
+            appointment,
+            booking_settings.auto_response_consultation_required,
         )
 
     messages.success(
@@ -353,7 +449,15 @@ def appointment_detail(request, appointment_id):
 @require_POST
 def accept_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id, artist=request.user)
+    previous_status = appointment.status
     appointment.accept()
+
+    if previous_status != Appointment.STATUS_ACCEPTED:
+        booking_settings = _get_artist_settings(appointment.artist)
+        _send_artist_auto_response(
+            appointment,
+            booking_settings.auto_response_booking_approved,
+        )
 
     messages.success(request, _("Appointment accepted."))
     return redirect("appointment_detail", appointment_id=appointment.id)
@@ -363,7 +467,15 @@ def accept_appointment(request, appointment_id):
 @require_POST
 def decline_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id, artist=request.user)
+    previous_status = appointment.status
     appointment.decline()
+
+    if previous_status != Appointment.STATUS_DECLINED:
+        booking_settings = _get_artist_settings(appointment.artist)
+        _send_artist_auto_response(
+            appointment,
+            booking_settings.auto_response_booking_declined,
+        )
 
     messages.success(request, _("Appointment declined."))
     return redirect("appointment_detail", appointment_id=appointment.id)
@@ -453,23 +565,30 @@ def _save_artist_availability_from_post(artist, post_data):
 
 def _save_artist_blocked_dates_from_post(artist, post_data):
     raw_dates = post_data.getlist("blocked_dates")
-    clean_dates = []
+    raw_reasons = post_data.getlist("blocked_reasons")
+    blocked_dates = {}
+    default_reason = _("Blocked from artist dashboard")
 
-    for raw_date in raw_dates:
+    for index, raw_date in enumerate(raw_dates):
         try:
-            clean_dates.append(datetime.strptime(raw_date, "%Y-%m-%d").date())
+            blocked_date = datetime.strptime(raw_date, "%Y-%m-%d").date()
         except (TypeError, ValueError):
             continue
 
+        raw_reason = raw_reasons[index] if index < len(raw_reasons) else ""
+        reason = raw_reason.strip()[:160] if raw_reason else ""
+        blocked_dates.setdefault(blocked_date, reason or default_reason)
+
     ArtistTimeOff.objects.filter(artist=artist).delete()
 
-    for blocked_date in sorted(set(clean_dates)):
+    for blocked_date, reason in sorted(blocked_dates.items()):
         ArtistTimeOff.objects.create(
             artist=artist,
             date=blocked_date,
-            reason=_("Blocked from artist dashboard"),
+            reason=reason,
         )
-        
+
+
 @login_required
 def artist_booking_settings(request):
     if not _is_verified_artist(request.user):
@@ -496,7 +615,21 @@ def artist_booking_settings(request):
         form_kind = request.POST.get("dashboard_form", "settings")
 
         if form_kind == "settings":
-            booking_settings.bookings_enabled = request.POST.get("bookings_enabled") == "on"
+            allowed_booking_statuses = dict(ArtistBookingSettings.BOOKING_STATUS_CHOICES)
+            booking_status = request.POST.get("booking_status") or getattr(
+                booking_settings,
+                "booking_status",
+                ArtistBookingSettings.BOOKING_STATUS_OPEN,
+            )
+
+            if booking_status not in allowed_booking_statuses:
+                booking_status = ArtistBookingSettings.BOOKING_STATUS_OPEN
+
+            booking_settings.booking_status = booking_status
+            booking_settings.bookings_enabled = booking_status in {
+                ArtistBookingSettings.BOOKING_STATUS_OPEN,
+                ArtistBookingSettings.BOOKING_STATUS_CONSULTATION_ONLY,
+            }
 
             booking_settings.consultation_required_before_booking = (
                 request.POST.get("consultation_required_before_booking") == "on"
@@ -550,6 +683,23 @@ def artist_booking_settings(request):
             )
             booking_settings.deposit_amount = request.POST.get("deposit_amount") or 0
             booking_settings.active_styles = request.POST.getlist("active_styles")
+            booking_settings.auto_response_booking_received = _clean_auto_response_text(
+                request.POST.get("auto_response_booking_received")
+            )
+            booking_settings.auto_response_consultation_required = _clean_auto_response_text(
+                request.POST.get("auto_response_consultation_required")
+            )
+            booking_settings.auto_response_need_more_references = _clean_auto_response_text(
+                request.POST.get("auto_response_need_more_references")
+            )
+            booking_settings.auto_response_booking_approved = _clean_auto_response_text(
+                request.POST.get("auto_response_booking_approved")
+            )
+            booking_settings.auto_response_booking_declined = _clean_auto_response_text(
+                request.POST.get("auto_response_booking_declined")
+            )
+            # TODO: Send auto_response_need_more_references when a dedicated
+            # dashboard action exists for requesting more references.
 
             booking_settings.save()
             
@@ -789,10 +939,12 @@ def artist_booking_settings(request):
             "portfolio_preview": portfolio_preview,
             "unread_messages_preview": unread_messages_preview,
             "reviews_preview": reviews_preview,
-            "current_status": (
-                _("Accepting bookings")
-                if booking_settings.bookings_enabled
-                else _("Bookings paused")
+            "current_status": _get_booking_status_label(
+                getattr(
+                    booking_settings,
+                    "booking_status",
+                    ArtistBookingSettings.BOOKING_STATUS_OPEN,
+                )
             ),
         },
     )
