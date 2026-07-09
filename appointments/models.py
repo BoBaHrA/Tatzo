@@ -5,6 +5,22 @@ from django.utils.translation import gettext_lazy as _
 
 
 class ArtistBookingSettings(models.Model):
+    BOOKING_STATUS_OPEN = "open"
+    BOOKING_STATUS_PAUSED = "paused"
+    BOOKING_STATUS_VACATION = "vacation"
+    BOOKING_STATUS_FULLY_BOOKED = "fully_booked"
+    BOOKING_STATUS_CONSULTATION_ONLY = "consultation_only"
+    BOOKING_STATUS_EMERGENCY = "emergency"
+
+    BOOKING_STATUS_CHOICES = [
+        (BOOKING_STATUS_OPEN, _("Booking allowed")),
+        (BOOKING_STATUS_PAUSED, _("Booking paused")),
+        (BOOKING_STATUS_VACATION, _("Vacation")),
+        (BOOKING_STATUS_FULLY_BOOKED, _("Fully booked")),
+        (BOOKING_STATUS_CONSULTATION_ONLY, _("Consultation only")),
+        (BOOKING_STATUS_EMERGENCY, _("Emergency closure")),
+    ]
+
     BOOKING_WORKFLOW_CHOICES = [
         ("manual", _("Manual approval")),
         ("auto", _("Auto accept")),
@@ -17,6 +33,11 @@ class ArtistBookingSettings(models.Model):
     )
 
     bookings_enabled = models.BooleanField(default=True)
+    booking_status = models.CharField(
+        max_length=30,
+        choices=BOOKING_STATUS_CHOICES,
+        default=BOOKING_STATUS_OPEN,
+    )
 
     minimum_notice_hours = models.PositiveIntegerField(default=24)
     maximum_booking_window_days = models.PositiveIntegerField(default=60)

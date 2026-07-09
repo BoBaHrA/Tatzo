@@ -323,6 +323,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const ruleCard = event.target.closest(".artist-rule-card");
 
     if (ruleCard) {
+      const bookingStatusInput = document.getElementById("artist-booking-status");
+      const bookingStatus = ruleCard.dataset.bookingStatus;
+
+      if (bookingStatusInput && bookingStatus) {
+        bookingStatusInput.value = bookingStatus;
+      }
+
       document.querySelectorAll(".artist-rule-card").forEach((card) => {
         card.classList.toggle("is-active", card === ruleCard);
       });
