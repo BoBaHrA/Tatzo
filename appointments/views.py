@@ -257,6 +257,19 @@ def create_appointment(request, username):
 
     end_dt = start_dt + timedelta(minutes=duration)
 
+    files = request.FILES.getlist("references")
+
+    if (
+        booking_settings.reference_images_required
+        and len(files) < booking_settings.minimum_reference_images
+    ):
+        messages.error(request, _("Please upload the required reference images."))
+        return redirect("booking_wizard", username=artist.username)
+
+    if len(files) > booking_settings.maximum_reference_images:
+        messages.error(request, _("You uploaded too many reference images."))
+        return redirect("booking_wizard", username=artist.username)
+
     initial_status = (
         Appointment.STATUS_ACCEPTED
         if booking_settings.booking_workflow == "auto"
@@ -290,8 +303,6 @@ def create_appointment(request, username):
             "description": request.POST.get("description", ""),
         },
     )
-
-    files = request.FILES.getlist("references")
 
     for index, file in enumerate(files[: booking_settings.maximum_reference_images]):
         AppointmentReferenceImage.objects.create(
