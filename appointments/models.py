@@ -70,6 +70,12 @@ class ArtistBookingSettings(models.Model):
 
     active_styles = models.JSONField(default=list, blank=True)
 
+    auto_response_booking_received = models.TextField(blank=True, default="")
+    auto_response_consultation_required = models.TextField(blank=True, default="")
+    auto_response_need_more_references = models.TextField(blank=True, default="")
+    auto_response_booking_approved = models.TextField(blank=True, default="")
+    auto_response_booking_declined = models.TextField(blank=True, default="")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

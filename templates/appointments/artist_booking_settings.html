@@ -90,7 +90,7 @@
         <p>{{ today|date:"l j F" }}</p>
       </div>
 
-      <a href="{% url 'appointments_list' %}" class="artist-dash-plus">+</a>
+      <button type="button" class="artist-dash-plus" data-open-manual-booking>+</button>
     </header>
 
     <section class="artist-dash-panel is-active" data-artist-panel="dashboard">
@@ -321,22 +321,26 @@
         <div class="artist-list">
           {% for client in clients %}
             <div class="artist-client-row">
-              {% if client.profile.profile_image %}
-                <img src="{{ client.profile.profile_image.url }}" alt="{{ client.username }}">
-              {% else %}
-                <span>{{ client.username|first|upper }}</span>
-              {% endif %}
+              <div class="artist-client-main">
+                {% if client.profile.profile_image %}
+                  <img src="{{ client.profile.profile_image.url }}" alt="{{ client.username }}">
+                {% else %}
+                  <span>{{ client.username|first|upper }}</span>
+                {% endif %}
 
-              <div>
-                <strong>{{ client.username }}</strong>
-                <small>
-                  {% blocktrans count count=client.artist_sessions_count %}
-                    {{ count }} session
-                  {% plural %}
-                    {{ count }} sessions
-                  {% endblocktrans %}
-                </small>
+                <div>
+                  <strong>{{ client.username }}</strong>
+                  <small>{% trans "Client" %}</small>
+                </div>
               </div>
+
+              <small class="artist-client-sessions">
+                {% blocktrans count count=client.artist_sessions_count %}
+                  {{ count }} session
+                {% plural %}
+                  {{ count }} sessions
+                {% endblocktrans %}
+              </small>
             </div>
           {% empty %}
             <p class="artist-empty">{% trans "No clients yet." %}</p>
@@ -603,27 +607,27 @@
           <div class="artist-auto-list">
             <label>
               <span>{% trans "Booking received" %}</span>
-              <input value="{% trans 'Thanks! I received your request and will reply within 24h.' %}">
+              <textarea name="auto_response_booking_received" rows="3" maxlength="2000" placeholder="{% trans 'Thanks! I received your request and will reply within 24h.' %}">{{ booking_settings.auto_response_booking_received }}</textarea>
             </label>
 
             <label>
               <span>{% trans "Consultation required" %}</span>
-              <input value="{% trans 'Your piece needs a consultation first — pick a slot below.' %}">
+              <textarea name="auto_response_consultation_required" rows="3" maxlength="2000" placeholder="{% trans 'Your piece needs a consultation first — pick a slot below.' %}">{{ booking_settings.auto_response_consultation_required }}</textarea>
             </label>
 
             <label>
               <span>{% trans "Need more references" %}</span>
-              <input value="{% trans 'Could you send 2–3 more reference images? It helps me nail the design.' %}">
+              <textarea name="auto_response_need_more_references" rows="3" maxlength="2000" placeholder="{% trans 'Could you send 2–3 more reference images? It helps me nail the design.' %}">{{ booking_settings.auto_response_need_more_references }}</textarea>
             </label>
 
             <label>
               <span>{% trans "Booking approved" %}</span>
-              <input value="{% trans 'You are booked! A deposit link has been sent to secure your slot.' %}">
+              <textarea name="auto_response_booking_approved" rows="3" maxlength="2000" placeholder="{% trans 'You are booked! A deposit link has been sent to secure your slot.' %}">{{ booking_settings.auto_response_booking_approved }}</textarea>
             </label>
 
             <label>
               <span>{% trans "Booking declined" %}</span>
-              <input value="{% trans 'Unfortunately I cannot take this on right now — thank you for reaching out.' %}">
+              <textarea name="auto_response_booking_declined" rows="3" maxlength="2000" placeholder="{% trans 'Unfortunately I cannot take this on right now — thank you for reaching out.' %}">{{ booking_settings.auto_response_booking_declined }}</textarea>
             </label>
           </div>
         </div>
@@ -706,6 +710,18 @@
       <strong>{{ current_status }}</strong>
     </div>
   </aside>
+</div>
+
+<div class="artist-manual-modal" data-manual-booking-modal hidden>
+  <div class="artist-manual-modal__backdrop" data-close-manual-booking></div>
+  <div class="artist-manual-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="manual-booking-title">
+    <h2 id="manual-booking-title">{% trans "Manual booking" %}</h2>
+    <p>{% trans "This will let you add a booking manually." %}</p>
+    <div class="artist-manual-modal__actions">
+      <button type="button" class="artist-ghost-btn" data-close-manual-booking>{% trans "Close" %}</button>
+      <button type="button" class="artist-save-btn" data-manual-booking-go-bookings>{% trans "Go to bookings" %}</button>
+    </div>
+  </div>
 </div>
 {% endblock %}
 

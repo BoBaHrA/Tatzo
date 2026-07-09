@@ -36,6 +36,26 @@ function syncCalendarRows() {
   });
 }
 
+function openManualBookingModal() {
+  const modal = document.querySelector("[data-manual-booking-modal]");
+
+  if (!modal) {
+    return;
+  }
+
+  modal.hidden = false;
+}
+
+function closeManualBookingModal() {
+  const modal = document.querySelector("[data-manual-booking-modal]");
+
+  if (!modal) {
+    return;
+  }
+
+  modal.hidden = true;
+}
+
 function syncBlockedEmptyState() {
   const list = document.getElementById("artist-blocked-list");
 
@@ -146,6 +166,14 @@ function formatBlockedDate(value) {
     month: "short",
     year: "numeric",
   });
+
+  return {
+    changed,
+    entries: Array.from(entriesByDate, ([date, entryReason]) => ({
+      date,
+      reason: entryReason,
+    })).sort((a, b) => a.date.localeCompare(b.date)),
+  };
 }
 
 function formatBlockedLabel(startValue, endValue, reason) {
@@ -305,6 +333,25 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (event.target.closest("[data-open-manual-booking]")) {
+      event.preventDefault();
+      openManualBookingModal();
+      return;
+    }
+
+    if (event.target.closest("[data-close-manual-booking]")) {
+      event.preventDefault();
+      closeManualBookingModal();
+      return;
+    }
+
+    if (event.target.closest("[data-manual-booking-go-bookings]")) {
+      event.preventDefault();
+      closeManualBookingModal();
+      showArtistPanel("bookings");
+      return;
+    }
+
     const removeBlockedButton = event.target.closest("[data-blocked-chip] button");
 
     if (removeBlockedButton) {
@@ -339,6 +386,12 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("change", (event) => {
     if (event.target.matches("[data-day-open], .artist-switch-input")) {
       syncCalendarRows();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeManualBookingModal();
     }
   });
 

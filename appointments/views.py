@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, time
 
 from django.db.models import Count, Q
 
-from users.models import ChatMessage, PortfolioWork
+from users.models import ChatMessage, ChatThread, PortfolioWork
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -141,6 +141,28 @@ def _get_booking_status_label(booking_status):
         ArtistBookingSettings.BOOKING_STATUS_EMERGENCY: _("Emergency closure"),
     }
     return labels.get(booking_status, labels[ArtistBookingSettings.BOOKING_STATUS_OPEN])
+
+
+def _clean_auto_response_text(value):
+    return (value or "").strip()[:2000]
+
+
+def _send_artist_auto_response(appointment, message_text):
+    message_text = _clean_auto_response_text(message_text)
+
+    if not message_text:
+        return
+
+    thread = ChatThread.get_or_create_for_users(
+        appointment.artist,
+        appointment.client,
+    )
+    ChatMessage.objects.create(
+        thread=thread,
+        sender=appointment.artist,
+        content=message_text,
+    )
+    thread.save(update_fields=["updated_at"])
 
 
 @login_required
@@ -370,6 +392,17 @@ def create_appointment(request, username):
             order=index,
         )
 
+    _send_artist_auto_response(
+        appointment,
+        booking_settings.auto_response_booking_received,
+    )
+
+    if booking_settings.consultation_required_before_booking:
+        _send_artist_auto_response(
+            appointment,
+            booking_settings.auto_response_consultation_required,
+        )
+
     messages.success(
         request,
         _("Your appointment request has been sent to the artist."),
@@ -426,7 +459,15 @@ def appointment_detail(request, appointment_id):
 @require_POST
 def accept_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id, artist=request.user)
+    previous_status = appointment.status
     appointment.accept()
+
+    if previous_status != Appointment.STATUS_ACCEPTED:
+        booking_settings = _get_artist_settings(appointment.artist)
+        _send_artist_auto_response(
+            appointment,
+            booking_settings.auto_response_booking_approved,
+        )
 
     messages.success(request, _("Appointment accepted."))
     return redirect("appointment_detail", appointment_id=appointment.id)
@@ -436,7 +477,15 @@ def accept_appointment(request, appointment_id):
 @require_POST
 def decline_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id, artist=request.user)
+    previous_status = appointment.status
     appointment.decline()
+
+    if previous_status != Appointment.STATUS_DECLINED:
+        booking_settings = _get_artist_settings(appointment.artist)
+        _send_artist_auto_response(
+            appointment,
+            booking_settings.auto_response_booking_declined,
+        )
 
     messages.success(request, _("Appointment declined."))
     return redirect("appointment_detail", appointment_id=appointment.id)
@@ -644,6 +693,23 @@ def artist_booking_settings(request):
             )
             booking_settings.deposit_amount = request.POST.get("deposit_amount") or 0
             booking_settings.active_styles = request.POST.getlist("active_styles")
+            booking_settings.auto_response_booking_received = _clean_auto_response_text(
+                request.POST.get("auto_response_booking_received")
+            )
+            booking_settings.auto_response_consultation_required = _clean_auto_response_text(
+                request.POST.get("auto_response_consultation_required")
+            )
+            booking_settings.auto_response_need_more_references = _clean_auto_response_text(
+                request.POST.get("auto_response_need_more_references")
+            )
+            booking_settings.auto_response_booking_approved = _clean_auto_response_text(
+                request.POST.get("auto_response_booking_approved")
+            )
+            booking_settings.auto_response_booking_declined = _clean_auto_response_text(
+                request.POST.get("auto_response_booking_declined")
+            )
+            # TODO: Send auto_response_need_more_references when a dedicated
+            # dashboard action exists for requesting more references.
 
             booking_settings.save()
             
