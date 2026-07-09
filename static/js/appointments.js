@@ -244,9 +244,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const selectedText = document.getElementById("booking-placement-selected");
     if (selectedText) {
-      selectedText.textContent = state.placementZone
-        ? `Selected: ${state.placementZone}`
-        : "Selected: none yet";
+      selectedText.replaceChildren();
+
+      if (state.placementZone) {
+        selectedText.append(document.createTextNode("Selected:"));
+
+        const chip = document.createElement("span");
+        chip.className = "booking-placement-chip";
+        chip.textContent = state.placementZone;
+        selectedText.appendChild(chip);
+      } else {
+        selectedText.textContent = "Selected: none yet";
+      }
     }
 
     document.querySelectorAll("[data-placement-zone]").forEach((button) => {
