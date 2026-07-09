@@ -166,6 +166,14 @@ function formatBlockedDate(value) {
     month: "short",
     year: "numeric",
   });
+
+  return {
+    changed,
+    entries: Array.from(entriesByDate, ([date, entryReason]) => ({
+      date,
+      reason: entryReason,
+    })).sort((a, b) => a.date.localeCompare(b.date)),
+  };
 }
 
 function formatBlockedLabel(startValue, endValue, reason) {
