@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     duration: 60,
     styles: [],
     placement: "",
-    placementZone: "",
+    placementZones: [],
     placementDetails: "",
     size: "",
     budget: "",
@@ -232,11 +232,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function composePlacement() {
-    const zone = state.placementZone.trim();
+    const zones = state.placementZones.join(", ");
     const details = state.placementDetails.trim();
 
-    if (zone && details) return `${zone} — ${details}`;
-    return zone || details;
+    if (zones && details) return `${zones} — ${details}`;
+    return zones || details;
   }
 
   function syncPlacement() {
@@ -246,20 +246,22 @@ document.addEventListener("DOMContentLoaded", () => {
     if (selectedText) {
       selectedText.replaceChildren();
 
-      if (state.placementZone) {
+      if (state.placementZones.length) {
         selectedText.append(document.createTextNode("Selected:"));
 
-        const chip = document.createElement("span");
-        chip.className = "booking-placement-chip";
-        chip.textContent = state.placementZone;
-        selectedText.appendChild(chip);
+        state.placementZones.forEach((zone) => {
+          const chip = document.createElement("span");
+          chip.className = "booking-placement-chip";
+          chip.textContent = zone;
+          selectedText.appendChild(chip);
+        });
       } else {
         selectedText.textContent = "Selected: none yet";
       }
     }
 
     document.querySelectorAll("[data-placement-zone]").forEach((button) => {
-      const isSelected = button.dataset.placementZone === state.placementZone;
+      const isSelected = state.placementZones.includes(button.dataset.placementZone);
       button.classList.toggle("is-selected", isSelected);
       button.setAttribute("aria-pressed", isSelected ? "true" : "false");
     });
@@ -358,7 +360,12 @@ document.addEventListener("DOMContentLoaded", () => {
     button.setAttribute("aria-pressed", "false");
 
     button.addEventListener("click", () => {
-      state.placementZone = button.dataset.placementZone;
+      const zone = button.dataset.placementZone;
+
+      state.placementZones = state.placementZones.includes(zone)
+        ? state.placementZones.filter((item) => item !== zone)
+        : [...state.placementZones, zone];
+
       syncHiddenFields();
     });
   });
