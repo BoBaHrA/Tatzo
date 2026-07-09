@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Appointments" %} | Tatzo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/appointments.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+
+<div class="booking-page">
+  <div class="booking-shell appointment-detail-shell">
+    <section class="appointment-detail-hero">
+      <div>
+        <p class="booking-eyebrow">Tatzo Booking</p>
+        <h1>{% trans "Appointments" %}</h1>
+        <p>{% trans "Track requests you've sent and appointments clients have requested with you." %}</p>
+      </div>
+    </section>
+
+    <section class="appointment-detail-grid">
+      <article class="appointment-detail-card">
+        <h2>{% trans "Requests you sent" %}</h2>
+        <div class="appointment-list-stack">
+          {% for appointment in client_appointments %}
+            <a href="{% url 'appointment_detail' appointment.id %}" class="appointment-list-item">
+              <span class="appointment-status-badge appointment-status-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
+              <strong>{{ appointment.artist.username }}</strong>
+              <small>{{ appointment.date }} · {{ appointment.start_time|time:"H:i" }}</small>
+              {% if appointment.placement %}<span>{{ appointment.placement }}</span>{% endif %}
+            </a>
+          {% empty %}
+            <p class="booking-muted">{% trans "No appointment requests sent yet." %}</p>
+          {% endfor %}
+        </div>
+      </article>
+
+      <article class="appointment-detail-card">
+        <h2>{% trans "Client requests" %}</h2>
+        <div class="appointment-list-stack">
+          {% for appointment in artist_appointments %}
+            <a href="{% url 'appointment_detail' appointment.id %}" class="appointment-list-item">
+              <span class="appointment-status-badge appointment-status-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
+              <strong>{{ appointment.client.username }}</strong>
+              <small>{{ appointment.date }} · {{ appointment.start_time|time:"H:i" }}</small>
+              {% if appointment.placement %}<span>{{ appointment.placement }}</span>{% endif %}
+            </a>
+          {% empty %}
+            <p class="booking-muted">{% trans "No client appointment requests yet." %}</p>
+          {% endfor %}
+        </div>
+      </article>
+    </section>
+  </div>
+</div>
+{% endblock %}
