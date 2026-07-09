@@ -1779,7 +1779,7 @@
   }
 }
 
-/* Final fix: mobile map modal close button */
+/* Real final fix: keep mobile modal close button in top-right */
 @media (max-width: 560px) {
   .maps-dialog-card,
   .maps-modal,
@@ -1787,60 +1787,83 @@
     position: relative !important;
   }
 
-  .maps-modal-header,
-  .maps-dialog-header {
-    display: block !important;
-    position: static !important;
-    padding-right: 0 !important;
-  }
-
-  .maps-modal-title,
-  .maps-dialog-title,
   .maps-dialog-card h2,
-  .maps-modal h2 {
-    padding-right: 72px !important;
-    max-width: 100% !important;
-    font-size: clamp(38px, 10.5vw, 52px) !important;
-    line-height: 1.08 !important;
-    letter-spacing: -0.04em !important;
-    overflow-wrap: normal !important;
-    word-break: normal !important;
-    hyphens: none !important;
+  .maps-modal h2,
+  .maps-modal-title,
+  .maps-dialog-title {
+    padding-right: 74px !important;
   }
 
-  .maps-dialog-close,
-  .maps-modal-close {
+  .maps-dialog-card > button[aria-label*="Close"],
+  .maps-dialog-card > button[aria-label*="close"],
+  .maps-dialog-card > button[aria-label*="Fermer"],
+  .maps-dialog-card > button[aria-label*="fermer"],
+  .maps-dialog-card > .maps-dialog-close,
+  .maps-dialog-card > .maps-modal-close,
+  .maps-dialog-card > .modal-close,
+  .maps-dialog-card > [data-dialog-close],
+  .maps-dialog-card > [data-modal-close],
+  .maps-modal > button[aria-label*="Close"],
+  .maps-modal > button[aria-label*="close"],
+  .maps-modal > button[aria-label*="Fermer"],
+  .maps-modal > button[aria-label*="fermer"],
+  .maps-modal > .maps-dialog-close,
+  .maps-modal > .maps-modal-close,
+  .maps-modal > .modal-close,
+  .maps-modal > [data-dialog-close],
+  .maps-modal > [data-modal-close] {
     position: absolute !important;
-    top: 28px !important;
-    right: 28px !important;
+    top: 26px !important;
+    right: 26px !important;
+    left: auto !important;
+    bottom: auto !important;
+
     width: 52px !important;
     height: 52px !important;
     min-width: 52px !important;
     min-height: 52px !important;
-    border-radius: 999px !important;
-    display: inline-flex !important;
+
+    display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    z-index: 20 !important;
+
     margin: 0 !important;
     padding: 0 !important;
     transform: none !important;
+    z-index: 50 !important;
+
+    border-radius: 999px !important;
   }
 }
 
 @media (max-width: 390px) {
-  .maps-modal-title,
-  .maps-dialog-title,
   .maps-dialog-card h2,
-  .maps-modal h2 {
-    font-size: clamp(34px, 10vw, 44px) !important;
-    padding-right: 64px !important;
+  .maps-modal h2,
+  .maps-modal-title,
+  .maps-dialog-title {
+    padding-right: 66px !important;
   }
 
-  .maps-dialog-close,
-  .maps-modal-close {
-    top: 24px !important;
-    right: 24px !important;
+  .maps-dialog-card > button[aria-label*="Close"],
+  .maps-dialog-card > button[aria-label*="close"],
+  .maps-dialog-card > button[aria-label*="Fermer"],
+  .maps-dialog-card > button[aria-label*="fermer"],
+  .maps-dialog-card > .maps-dialog-close,
+  .maps-dialog-card > .maps-modal-close,
+  .maps-dialog-card > .modal-close,
+  .maps-dialog-card > [data-dialog-close],
+  .maps-dialog-card > [data-modal-close],
+  .maps-modal > button[aria-label*="Close"],
+  .maps-modal > button[aria-label*="close"],
+  .maps-modal > button[aria-label*="Fermer"],
+  .maps-modal > button[aria-label*="fermer"],
+  .maps-modal > .maps-dialog-close,
+  .maps-modal > .maps-modal-close,
+  .maps-modal > .modal-close,
+  .maps-modal > [data-dialog-close],
+  .maps-modal > [data-modal-close] {
+    top: 22px !important;
+    right: 22px !important;
     width: 48px !important;
     height: 48px !important;
     min-width: 48px !important;
