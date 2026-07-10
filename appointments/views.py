@@ -412,6 +412,100 @@ def create_appointment(request, username):
 
 
 @login_required
+@require_POST
+def create_manual_appointment(request):
+    if not _is_verified_artist(request.user):
+        messages.error(request, _("Only verified artists can create manual bookings."))
+        return redirect("artist_booking_settings")
+
+    booking_settings = _get_artist_settings(request.user)
+    client_username = (request.POST.get("client_username") or "").strip()
+    date_raw = request.POST.get("date")
+    start_time_raw = request.POST.get("start_time")
+    duration_raw = request.POST.get("session_length_minutes") or "60"
+    booking_type = request.POST.get("booking_type") or Appointment.TYPE_TATTOO
+
+    if not client_username:
+        messages.error(request, _("Enter an existing client username."))
+        return redirect("artist_booking_settings")
+
+    client = User.objects.filter(username__iexact=client_username).first()
+
+    if not client:
+        messages.error(request, _("No user was found with that username."))
+        return redirect("artist_booking_settings")
+
+    if client == request.user:
+        messages.error(request, _("You cannot create a booking with yourself."))
+        return redirect("artist_booking_settings")
+
+    try:
+        date_value = datetime.strptime(date_raw, "%Y-%m-%d").date()
+        start_time_value = datetime.strptime(start_time_raw, "%H:%M").time()
+        duration = int(duration_raw)
+    except (TypeError, ValueError):
+        messages.error(request, _("Enter a valid manual booking date and time."))
+        return redirect("artist_booking_settings")
+
+    if duration <= 0:
+        messages.error(request, _("Duration must be greater than zero."))
+        return redirect("artist_booking_settings")
+
+    if duration > booking_settings.maximum_session_hours * 60:
+        messages.error(request, _("This session is longer than your booking settings allow."))
+        return redirect("artist_booking_settings")
+
+    start_dt = timezone.make_aware(
+        datetime.combine(date_value, start_time_value),
+        timezone.get_current_timezone(),
+    )
+
+    if start_dt < timezone.now():
+        messages.error(request, _("Manual bookings cannot be created in the past."))
+        return redirect("artist_booking_settings")
+
+    if ArtistTimeOff.objects.filter(artist=request.user, date=date_value).exists():
+        messages.error(request, _("This date is blocked on your calendar."))
+        return redirect("artist_booking_settings")
+
+    if booking_type not in dict(Appointment.BOOKING_TYPE_CHOICES):
+        booking_type = Appointment.TYPE_TATTOO
+
+    end_dt = start_dt + timedelta(minutes=duration)
+    styles = [
+        item.strip()
+        for item in (request.POST.get("styles") or "").split(",")
+        if item.strip()
+    ]
+
+    appointment = Appointment.objects.create(
+        client=client,
+        artist=request.user,
+        booking_type=booking_type,
+        status=Appointment.STATUS_ACCEPTED,
+        date=date_value,
+        start_time=start_time_value,
+        end_time=end_dt.time(),
+        session_length_minutes=duration,
+        styles=styles,
+        placement=request.POST.get("placement", ""),
+        size=request.POST.get("size", ""),
+        budget=request.POST.get("budget", ""),
+        description=request.POST.get("description", ""),
+        ai_ready_payload={
+            "placement": request.POST.get("placement", ""),
+            "styles": request.POST.get("styles", ""),
+            "size": request.POST.get("size", ""),
+            "budget": request.POST.get("budget", ""),
+            "description": request.POST.get("description", ""),
+        },
+    )
+
+    messages.success(request, _("Manual booking created."))
+    return redirect("appointment_detail", appointment_id=appointment.id)
+
+
+@login_required
 def appointments_list(request):
     client_appointments = Appointment.objects.filter(
         client=request.user,

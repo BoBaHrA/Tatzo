@@ -716,11 +716,75 @@
   <div class="artist-manual-modal__backdrop" data-close-manual-booking></div>
   <div class="artist-manual-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="manual-booking-title">
     <h2 id="manual-booking-title">{% trans "Manual booking" %}</h2>
-    <p>{% trans "This will let you add a booking manually." %}</p>
-    <div class="artist-manual-modal__actions">
-      <button type="button" class="artist-ghost-btn" data-close-manual-booking>{% trans "Close" %}</button>
-      <button type="button" class="artist-save-btn" data-manual-booking-go-bookings>{% trans "Go to bookings" %}</button>
-    </div>
+    <p>{% trans "Create an accepted booking for an existing Tatzo user." %}</p>
+
+    <form method="post" action="{% url 'create_manual_appointment' %}" class="artist-manual-form">
+      {% csrf_token %}
+
+      <label>
+        <span>{% trans "Client username" %}</span>
+        <input type="text" name="client_username" autocomplete="off" required>
+      </label>
+
+      <div class="artist-manual-form__grid">
+        <label>
+          <span>{% trans "Date" %}</span>
+          <input type="date" name="date" required>
+        </label>
+
+        <label>
+          <span>{% trans "Start time" %}</span>
+          <input type="time" name="start_time" required>
+        </label>
+      </div>
+
+      <div class="artist-manual-form__grid">
+        <label>
+          <span>{% trans "Duration minutes" %}</span>
+          <input type="number" name="session_length_minutes" min="15" step="15" value="60" required>
+        </label>
+
+        <label>
+          <span>{% trans "Booking type" %}</span>
+          <select name="booking_type">
+            <option value="tattoo_session">{% trans "Tattoo session" %}</option>
+            <option value="consultation">{% trans "Consultation" %}</option>
+          </select>
+        </label>
+      </div>
+
+      <label>
+        <span>{% trans "Styles" %}</span>
+        <input type="text" name="styles" placeholder="{% trans 'Fine Line, Blackwork' %}">
+      </label>
+
+      <div class="artist-manual-form__grid">
+        <label>
+          <span>{% trans "Placement" %}</span>
+          <input type="text" name="placement">
+        </label>
+
+        <label>
+          <span>{% trans "Size" %}</span>
+          <input type="text" name="size">
+        </label>
+      </div>
+
+      <label>
+        <span>{% trans "Budget" %}</span>
+        <input type="text" name="budget">
+      </label>
+
+      <label>
+        <span>{% trans "Notes" %}</span>
+        <textarea name="description" rows="4"></textarea>
+      </label>
+
+      <div class="artist-manual-modal__actions">
+        <button type="button" class="artist-ghost-btn" data-close-manual-booking>{% trans "Close" %}</button>
+        <button type="submit" class="artist-save-btn">{% trans "Create booking" %}</button>
+      </div>
+    </form>
   </div>
 </div>
 {% endblock %}

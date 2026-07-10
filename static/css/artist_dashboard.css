@@ -1475,3 +1475,61 @@ body {
     flex-direction: column-reverse;
   }
 }
+
+.artist-manual-modal__dialog {
+  width: min(640px, 100%);
+  max-height: min(86vh, 780px);
+  overflow-y: auto;
+}
+
+.artist-manual-form {
+  display: grid;
+  gap: 14px;
+}
+
+.artist-manual-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.artist-manual-form label {
+  display: grid;
+  gap: 8px;
+}
+
+.artist-manual-form span {
+  color: #dbe6ee;
+  font-weight: 800;
+}
+
+.artist-manual-form input,
+.artist-manual-form select,
+.artist-manual-form textarea {
+  width: 100%;
+  min-height: 42px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.045);
+  color: #dbe6ee;
+  padding: 10px 12px;
+  outline: none;
+  font: inherit;
+}
+
+.artist-manual-form textarea {
+  resize: vertical;
+}
+
+.artist-manual-form input:focus,
+.artist-manual-form select:focus,
+.artist-manual-form textarea:focus {
+  border-color: #04c5bf;
+  box-shadow: 0 0 0 3px rgba(4, 197, 191, 0.15);
+}
+
+@media (max-width: 640px) {
+  .artist-manual-form__grid {
+    grid-template-columns: 1fr;
+  }
+}
