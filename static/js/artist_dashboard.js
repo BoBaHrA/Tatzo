@@ -167,6 +167,255 @@ function formatBlockedDate(value) {
     month: "short",
     year: "numeric",
   });
+
+  return Array.from(entriesByDate, ([date, reason]) => ({ date, reason }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function normalizeBlockedRanges(entries) {
+  const ranges = [];
+
+  entries.forEach((entry) => {
+    const previous = ranges[ranges.length - 1];
+
+    if (
+      previous
+      && previous.reason === entry.reason
+      && addDays(previous.endDate, 1) === entry.date
+    ) {
+      previous.endDate = entry.date;
+      previous.dates.push(entry.date);
+      return;
+    }
+
+    ranges.push({
+      startDate: entry.date,
+      endDate: entry.date,
+      reason: entry.reason,
+      dates: [entry.date],
+    });
+  });
+
+  return ranges;
+}
+
+function createBlockedPeriodChip(range) {
+  const chip = document.createElement("div");
+  chip.className = "artist-blocked-chip";
+  chip.dataset.blockedChip = "";
+  chip.dataset.startDate = range.startDate;
+  chip.dataset.endDate = range.endDate;
+  chip.dataset.reason = range.reason;
+
+  range.dates.forEach((dateValue) => {
+    chip.appendChild(createHiddenInput("blocked_dates", dateValue));
+    chip.appendChild(createHiddenInput("blocked_reasons", range.reason));
+  });
+
+  const label = document.createElement("span");
+  label.textContent = formatBlockedLabel(range.startDate, range.endDate, range.reason);
+  chip.appendChild(label);
+
+  const removeButton = document.createElement("button");
+  removeButton.type = "button";
+  removeButton.setAttribute("aria-label", "Remove blocked period");
+  removeButton.textContent = "×";
+  chip.appendChild(removeButton);
+
+  return chip;
+}
+
+function renderBlockedEntries(entries) {
+  const list = document.getElementById("artist-blocked-list");
+
+  if (!list) {
+    return;
+  }
+
+  list.innerHTML = "";
+
+  normalizeBlockedRanges(entries).forEach((range) => {
+    list.appendChild(createBlockedPeriodChip(range));
+  });
+
+  syncBlockedEmptyState();
+}
+
+function rebuildBlockedChips() {
+  renderBlockedEntries(readBlockedEntries());
+}
+
+function upsertBlockedDates(dates, reason) {
+  const entriesByDate = new Map(
+    readBlockedEntries().map((entry) => [entry.date, entry.reason])
+  );
+  let changed = false;
+
+  dates.forEach((dateValue) => {
+    const existingReason = entriesByDate.get(dateValue);
+
+    if (existingReason === undefined) {
+      entriesByDate.set(dateValue, reason);
+      changed = true;
+      return;
+    }
+
+    if (reason && (!existingReason || isDefaultBlockedReason(existingReason))) {
+      entriesByDate.set(dateValue, reason);
+      changed = true;
+    }
+  });
+
+  return {
+    changed,
+    entries: Array.from(entriesByDate, ([date, entryReason]) => ({
+      date,
+      reason: entryReason,
+    })).sort((a, b) => a.date.localeCompare(b.date)),
+  };
+}
+
+function formatBlockedLabel(startValue, endValue, reason) {
+  const range = startValue === endValue
+    ? formatBlockedDate(startValue)
+    : `${formatBlockedDate(startValue)} — ${formatBlockedDate(endValue)}`;
+
+  return reason ? `${range} · ${reason}` : range;
+}
+
+function isDefaultBlockedReason(reason) {
+  return reason === "Blocked from artist dashboard";
+}
+
+function readBlockedEntries() {
+  const dateInputs = Array.from(document.querySelectorAll('input[name="blocked_dates"]'));
+  const reasonInputs = Array.from(document.querySelectorAll('input[name="blocked_reasons"]'));
+  const entriesByDate = new Map();
+
+  dateInputs.forEach((input, index) => {
+    const dateValue = input.value;
+
+    if (!dateValue || !parseISODateValue(dateValue)) {
+      return;
+    }
+
+    const reason = (reasonInputs[index]?.value || "").trim().slice(0, 160);
+    const existingReason = entriesByDate.get(dateValue);
+
+    if (
+      existingReason === undefined
+      || (!existingReason && reason)
+      || (isDefaultBlockedReason(existingReason) && reason)
+    ) {
+      entriesByDate.set(dateValue, reason);
+    }
+  });
+
+  return Array.from(entriesByDate, ([date, reason]) => ({ date, reason }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function normalizeBlockedRanges(entries) {
+  const ranges = [];
+
+  entries.forEach((entry) => {
+    const previous = ranges[ranges.length - 1];
+
+    if (
+      previous
+      && previous.reason === entry.reason
+      && addDays(previous.endDate, 1) === entry.date
+    ) {
+      previous.endDate = entry.date;
+      previous.dates.push(entry.date);
+      return;
+    }
+
+    ranges.push({
+      startDate: entry.date,
+      endDate: entry.date,
+      reason: entry.reason,
+      dates: [entry.date],
+    });
+  });
+
+  return ranges;
+}
+
+function createBlockedPeriodChip(range) {
+  const chip = document.createElement("div");
+  chip.className = "artist-blocked-chip";
+  chip.dataset.blockedChip = "";
+  chip.dataset.startDate = range.startDate;
+  chip.dataset.endDate = range.endDate;
+  chip.dataset.reason = range.reason;
+
+  range.dates.forEach((dateValue) => {
+    chip.appendChild(createHiddenInput("blocked_dates", dateValue));
+    chip.appendChild(createHiddenInput("blocked_reasons", range.reason));
+  });
+
+  const label = document.createElement("span");
+  label.textContent = formatBlockedLabel(range.startDate, range.endDate, range.reason);
+  chip.appendChild(label);
+
+  const removeButton = document.createElement("button");
+  removeButton.type = "button";
+  removeButton.setAttribute("aria-label", "Remove blocked period");
+  removeButton.textContent = "×";
+  chip.appendChild(removeButton);
+
+  return chip;
+}
+
+function renderBlockedEntries(entries) {
+  const list = document.getElementById("artist-blocked-list");
+
+  if (!list) {
+    return;
+  }
+
+  list.innerHTML = "";
+
+  normalizeBlockedRanges(entries).forEach((range) => {
+    list.appendChild(createBlockedPeriodChip(range));
+  });
+
+  syncBlockedEmptyState();
+}
+
+function rebuildBlockedChips() {
+  renderBlockedEntries(readBlockedEntries());
+}
+
+function upsertBlockedDates(dates, reason) {
+  const entriesByDate = new Map(
+    readBlockedEntries().map((entry) => [entry.date, entry.reason])
+  );
+  let changed = false;
+
+  dates.forEach((dateValue) => {
+    const existingReason = entriesByDate.get(dateValue);
+
+    if (existingReason === undefined) {
+      entriesByDate.set(dateValue, reason);
+      changed = true;
+      return;
+    }
+
+    if (reason && (!existingReason || isDefaultBlockedReason(existingReason))) {
+      entriesByDate.set(dateValue, reason);
+      changed = true;
+    }
+  });
+
+  return {
+    changed,
+    entries: Array.from(entriesByDate, ([date, entryReason]) => ({
+      date,
+      reason: entryReason,
+    })).sort((a, b) => a.date.localeCompare(b.date)),
+  };
 }
 
 function formatBlockedLabel(startValue, endValue, reason) {
