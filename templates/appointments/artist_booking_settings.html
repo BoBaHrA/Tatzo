@@ -560,9 +560,6 @@
             </div>
           </div>
 
-          <button type="submit" class="artist-save-btn">
-            {% trans "Save booking settings" %}
-          </button>
         </div>
 
         <div class="artist-card">
@@ -666,6 +663,16 @@
               <input value="">
             </label>
           </div>
+        </div>
+
+        <div class="artist-settings-actions">
+          <div>
+            <strong>{% trans "Save all settings" %}</strong>
+            <small>{% trans "Applies booking settings, rules, auto responses, and profile settings." %}</small>
+          </div>
+          <button type="submit" class="artist-save-btn">
+            {% trans "Save all settings" %}
+          </button>
         </div>
       </form>
     </section>

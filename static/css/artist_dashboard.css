@@ -1533,3 +1533,37 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+.artist-settings-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid rgba(4, 197, 191, 0.18);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.055);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+}
+
+.artist-settings-actions strong {
+  display: block;
+  color: #ffffff;
+}
+
+.artist-settings-actions small {
+  display: block;
+  margin-top: 4px;
+  color: rgba(219, 230, 238, 0.58);
+}
+
+.artist-settings-actions .artist-save-btn {
+  margin-top: 0;
+}
+
+@media (max-width: 640px) {
+  .artist-settings-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

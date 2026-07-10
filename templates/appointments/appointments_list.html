@@ -4,55 +4,46 @@
 {% block title %}{% trans "Appointments" %} | Tatzo{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/home.css' %}">
 <link rel="stylesheet" href="{% static 'css/appointments.css' %}">
 {% endblock %}
 
 {% block content %}
-{% include "partials/sidebar.html" %}
+<div class="appointment-page">
+  <div class="appointment-shell">
+    <h1 class="appointment-list-title">{% trans "Appointments" %}</h1>
 
-<div class="booking-page">
-  <div class="booking-shell appointment-detail-shell">
-    <section class="appointment-detail-hero">
-      <div>
-        <p class="booking-eyebrow">Tatzo Booking</p>
-        <h1>{% trans "Appointments" %}</h1>
-        <p>{% trans "Track requests you've sent and appointments clients have requested with you." %}</p>
+    <section class="appointment-list-card">
+      <h2>{% trans "My requests" %}</h2>
+      <div class="appointment-list-stack">
+        {% for appointment in client_appointments %}
+          <a href="{% url 'appointment_detail' appointment.id %}" class="appointment-list-item">
+            <div>
+              <strong>{{ appointment.artist.username }}</strong>
+              <small>{{ appointment.date }} · {{ appointment.start_time|time:"H:i" }} · {{ appointment.get_booking_type_display }}</small>
+            </div>
+            <span class="appointment-status is-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
+          </a>
+        {% empty %}
+          <p class="appointment-empty">{% trans "No appointment requests yet." %}</p>
+        {% endfor %}
       </div>
     </section>
 
-    <section class="appointment-detail-grid">
-      <article class="appointment-detail-card">
-        <h2>{% trans "Requests you sent" %}</h2>
-        <div class="appointment-list-stack">
-          {% for appointment in client_appointments %}
-            <a href="{% url 'appointment_detail' appointment.id %}" class="appointment-list-item">
-              <span class="appointment-status-badge appointment-status-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
-              <strong>{{ appointment.artist.username }}</strong>
-              <small>{{ appointment.date }} · {{ appointment.start_time|time:"H:i" }}</small>
-              {% if appointment.placement %}<span>{{ appointment.placement }}</span>{% endif %}
-            </a>
-          {% empty %}
-            <p class="booking-muted">{% trans "No appointment requests sent yet." %}</p>
-          {% endfor %}
-        </div>
-      </article>
-
-      <article class="appointment-detail-card">
-        <h2>{% trans "Client requests" %}</h2>
-        <div class="appointment-list-stack">
-          {% for appointment in artist_appointments %}
-            <a href="{% url 'appointment_detail' appointment.id %}" class="appointment-list-item">
-              <span class="appointment-status-badge appointment-status-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
+    <section class="appointment-list-card">
+      <h2>{% trans "Artist bookings" %}</h2>
+      <div class="appointment-list-stack">
+        {% for appointment in artist_appointments %}
+          <a href="{% url 'appointment_detail' appointment.id %}" class="appointment-list-item">
+            <div>
               <strong>{{ appointment.client.username }}</strong>
-              <small>{{ appointment.date }} · {{ appointment.start_time|time:"H:i" }}</small>
-              {% if appointment.placement %}<span>{{ appointment.placement }}</span>{% endif %}
-            </a>
-          {% empty %}
-            <p class="booking-muted">{% trans "No client appointment requests yet." %}</p>
-          {% endfor %}
-        </div>
-      </article>
+              <small>{{ appointment.date }} · {{ appointment.start_time|time:"H:i" }} · {{ appointment.get_booking_type_display }}</small>
+            </div>
+            <span class="appointment-status is-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
+          </a>
+        {% empty %}
+          <p class="appointment-empty">{% trans "No artist bookings yet." %}</p>
+        {% endfor %}
+      </div>
     </section>
   </div>
 </div>

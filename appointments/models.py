@@ -145,6 +145,8 @@ class Appointment(models.Model):
     STATUS_DECLINED = "declined"
     STATUS_CANCELLED = "cancelled"
     STATUS_COMPLETED = "completed"
+    STATUS_NEEDS_REFERENCES = "needs_references"
+    STATUS_CONSULTATION_REQUIRED = "consultation_required"
 
     STATUS_CHOICES = [
         (STATUS_PENDING, _("Pending")),
@@ -152,6 +154,8 @@ class Appointment(models.Model):
         (STATUS_DECLINED, _("Declined")),
         (STATUS_CANCELLED, _("Cancelled")),
         (STATUS_COMPLETED, _("Completed")),
+        (STATUS_NEEDS_REFERENCES, _("Need more references")),
+        (STATUS_CONSULTATION_REQUIRED, _("Consultation required")),
     ]
 
     TYPE_TATTOO = "tattoo_session"
@@ -197,7 +201,7 @@ class Appointment(models.Model):
     ai_ready_payload = models.JSONField(default=dict, blank=True)
 
     status = models.CharField(
-        max_length=20,
+        max_length=30,
         choices=STATUS_CHOICES,
         default=STATUS_PENDING,
     )

@@ -92,6 +92,7 @@ def _build_booking_payload(artist):
         artist=artist,
         status__in=[
             Appointment.STATUS_PENDING,
+            Appointment.STATUS_NEEDS_REFERENCES,
             Appointment.STATUS_ACCEPTED,
         ],
     ).only("date", "start_time", "end_time", "artist_id")
@@ -553,8 +554,20 @@ def appointment_detail(request, appointment_id):
 @require_POST
 def accept_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id, artist=request.user)
-    previous_status = appointment.status
+
+    if appointment.status not in [
+        Appointment.STATUS_PENDING,
+        Appointment.STATUS_NEEDS_REFERENCES,
+    ]:
+        messages.error(request, _("This appointment cannot be accepted."))
+        return redirect("appointment_detail", appointment_id=appointment.id)
+
     appointment.accept()
+    booking_settings = _get_artist_settings(appointment.artist)
+    _send_artist_auto_response(
+        appointment,
+        booking_settings.auto_response_booking_approved,
+    )
 
     if previous_status != Appointment.STATUS_ACCEPTED:
         booking_settings = _get_artist_settings(appointment.artist)
@@ -571,8 +584,20 @@ def accept_appointment(request, appointment_id):
 @require_POST
 def decline_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id, artist=request.user)
-    previous_status = appointment.status
+
+    if appointment.status not in [
+        Appointment.STATUS_PENDING,
+        Appointment.STATUS_NEEDS_REFERENCES,
+    ]:
+        messages.error(request, _("This appointment cannot be declined."))
+        return redirect("appointment_detail", appointment_id=appointment.id)
+
     appointment.decline()
+    booking_settings = _get_artist_settings(appointment.artist)
+    _send_artist_auto_response(
+        appointment,
+        booking_settings.auto_response_booking_declined,
+    )
 
     if previous_status != Appointment.STATUS_DECLINED:
         booking_settings = _get_artist_settings(appointment.artist)
@@ -582,6 +607,72 @@ def decline_appointment(request, appointment_id):
         )
 
     messages.success(request, _("Appointment declined."))
+    return redirect("appointment_detail", appointment_id=appointment.id)
+
+
+@login_required
+@require_POST
+def need_more_references(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id, artist=request.user)
+
+    if appointment.status not in [
+        Appointment.STATUS_PENDING,
+        Appointment.STATUS_NEEDS_REFERENCES,
+    ]:
+        messages.error(request, _("More references cannot be requested for this appointment."))
+        return redirect("appointment_detail", appointment_id=appointment.id)
+
+    appointment.status = Appointment.STATUS_NEEDS_REFERENCES
+    appointment.save(update_fields=["status", "updated_at"])
+    booking_settings = _get_artist_settings(appointment.artist)
+    _send_artist_auto_response(
+        appointment,
+        booking_settings.auto_response_need_more_references,
+    )
+
+    messages.success(request, _("Reference request sent."))
+    return redirect("appointment_detail", appointment_id=appointment.id)
+
+
+@login_required
+@require_POST
+def consultation_required(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id, artist=request.user)
+
+    if appointment.status not in [
+        Appointment.STATUS_PENDING,
+        Appointment.STATUS_NEEDS_REFERENCES,
+    ]:
+        messages.error(request, _("Consultation cannot be required for this appointment."))
+        return redirect("appointment_detail", appointment_id=appointment.id)
+
+    appointment.status = Appointment.STATUS_CONSULTATION_REQUIRED
+    appointment.responded_at = timezone.now()
+    appointment.save(update_fields=["status", "responded_at", "updated_at"])
+    booking_settings = _get_artist_settings(appointment.artist)
+    _send_artist_auto_response(
+        appointment,
+        booking_settings.auto_response_consultation_required,
+    )
+
+    messages.success(request, _("Consultation required response sent."))
+    return redirect("appointment_detail", appointment_id=appointment.id)
+
+
+@login_required
+@require_POST
+def cancel_appointment(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id, artist=request.user)
+
+    if appointment.status != Appointment.STATUS_ACCEPTED:
+        messages.error(request, _("Only accepted appointments can be cancelled."))
+        return redirect("appointment_detail", appointment_id=appointment.id)
+
+    appointment.status = Appointment.STATUS_CANCELLED
+    appointment.responded_at = timezone.now()
+    appointment.save(update_fields=["status", "responded_at", "updated_at"])
+
+    messages.success(request, _("Appointment cancelled."))
     return redirect("appointment_detail", appointment_id=appointment.id)
 
 def _is_verified_artist(user):
@@ -852,7 +943,10 @@ def artist_booking_settings(request):
     ).count()
 
     pending_requests_count = artist_appointments.filter(
-        status=Appointment.STATUS_PENDING,
+        status__in=[
+            Appointment.STATUS_PENDING,
+            Appointment.STATUS_NEEDS_REFERENCES,
+        ],
     ).count()
 
     unread_messages_count = (
@@ -868,7 +962,13 @@ def artist_booking_settings(request):
 
     references_waiting_count = (
         artist_appointments
-        .filter(status=Appointment.STATUS_PENDING, reference_images__isnull=True)
+        .filter(
+            status__in=[
+                Appointment.STATUS_PENDING,
+                Appointment.STATUS_NEEDS_REFERENCES,
+            ],
+            reference_images__isnull=True,
+        )
         .distinct()
         .count()
     )
@@ -908,7 +1008,12 @@ def artist_booking_settings(request):
 
     pending_appointments = (
         artist_appointments
-        .filter(status=Appointment.STATUS_PENDING)
+        .filter(
+            status__in=[
+                Appointment.STATUS_PENDING,
+                Appointment.STATUS_NEEDS_REFERENCES,
+            ]
+        )
         .order_by("date", "start_time")[:6]
     )
 
