@@ -166,6 +166,8 @@ class Appointment(models.Model):
     size = models.CharField(max_length=80, blank=True)
     budget = models.CharField(max_length=80, blank=True)
     description = models.TextField(blank=True)
+    consultation_already_completed = models.BooleanField(default=False)
+    consultation_note = models.CharField(max_length=240, blank=True)
 
     ai_ready_payload = models.JSONField(default=dict, blank=True)
 
