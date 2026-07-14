@@ -13,6 +13,7 @@
 
 <main
   class="tatzo-calendar-page calendar-shell"
+  data-context="{{ calendar_context }}"
   data-role="{{ calendar_role }}"
   data-events-url="{% url 'calendar_events' %}"
   data-create-url="{% url 'calendar_event_create' %}"

@@ -1285,6 +1285,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const panelTrigger = event.target.closest("[data-artist-panel-target]");
 
     if (panelTrigger) {
+      if (panelTrigger.hasAttribute("data-artist-panel-link")) {
+        return;
+      }
       event.preventDefault();
       showArtistPanel(panelTrigger.dataset.artistPanelTarget);
       return;
