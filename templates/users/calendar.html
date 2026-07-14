@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Calendar" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/calendar.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+
+<main
+  class="tatzo-calendar-page calendar-shell"
+  data-role="{{ calendar_role }}"
+  data-events-url="{% url 'calendar_events' %}"
+  data-create-url="{% url 'calendar_event_create' %}"
+  data-block-url="{% url 'calendar_block_time' %}"
+  data-vacation-url="{% url 'calendar_vacation' %}"
+  data-capacity="{{ calendar_capacity_hours }}"
+>
+  <section class="calendar-hero">
+    <div>
+      <p class="calendar-eyebrow">Tatzo</p>
+      <h1>{% trans "Calendar" %}</h1>
+      <p>
+        {% if calendar_role == 'artist' %}
+          {% trans "Manage sessions, consultations, blocked time and vacations." %}
+        {% else %}
+          {% trans "Track your appointments, reminders and reschedule requests." %}
+        {% endif %}
+      </p>
+    </div>
+
+    <div class="calendar-actions">
+      <button type="button" data-nav="prev">‹</button>
+      <button type="button" data-nav="today">{% trans "Today" %}</button>
+      <button type="button" data-nav="next">›</button>
+    </div>
+  </section>
+
+  <section class="calendar-toolbar">
+    <h2 id="calendar-title"></h2>
+    <div class="view-tabs">
+      <button type="button" class="active" data-view="month">{% trans "Month" %}</button>
+      <button type="button" data-view="week">{% trans "Week" %}</button>
+      <button type="button" data-view="day">{% trans "Day" %}</button>
+    </div>
+  </section>
+
+  {% if calendar_role == 'artist' %}
+    <section class="quick-actions">
+      <button type="button" data-open-create="tattoo_session">{% trans "Add session" %}</button>
+      <button type="button" data-open-create="blocked">{% trans "Block time" %}</button>
+      <button type="button" data-open-create="vacation">{% trans "Set vacation" %}</button>
+      <button type="button" data-open-create="consultation">{% trans "Create consultation" %}</button>
+    </section>
+  {% endif %}
+
+  <section id="calendar-insights" class="calendar-insights" hidden></section>
+  <section id="calendar-status" class="calendar-status">{% trans "Loading calendar…" %}</section>
+  <section id="calendar-grid" class="calendar-grid" aria-live="polite"></section>
+</main>
+
+<div class="tatzo-calendar-page calendar-modal" id="day-modal" hidden>
+  <div class="modal-card">
+    <button type="button" class="modal-close" data-close-modal>×</button>
+    <h3 id="day-modal-title"></h3>
+    <div id="day-modal-summary"></div>
+    <div id="day-modal-events"></div>
+  </div>
+</div>
+
+<div class="tatzo-calendar-page calendar-modal" id="create-modal" hidden>
+  <form class="modal-card" id="create-form">
+    <button type="button" class="modal-close" data-close-modal>×</button>
+    <h3>{% trans "Calendar event" %}</h3>
+    {% csrf_token %}
+    <input type="hidden" name="event_type" id="event-type">
+
+    <label>
+      {% trans "Client" %}
+      <select name="client">
+        <option value="">—</option>
+        {% for client in calendar_clients %}
+          <option value="{{ client.id }}">{{ client.username }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>{% trans "Date" %}<input required type="date" name="date"></label>
+    <label>{% trans "Start time" %}<input required type="time" name="start_time"></label>
+    <label>{% trans "End time" %}<input required type="time" name="end_time"></label>
+    <label>{% trans "Location" %}<input type="text" name="location"></label>
+    <label>{% trans "Notes" %}<textarea name="notes"></textarea></label>
+
+    <p class="form-error" id="create-error"></p>
+    <button class="primary" type="submit">{% trans "Save" %}</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/calendar.js' %}"></script>
+{% endblock %}
