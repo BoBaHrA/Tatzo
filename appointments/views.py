@@ -527,6 +527,14 @@ def appointments_list(request):
 
 
 @login_required
+def calendar_page(request):
+    if _is_verified_artist(request.user):
+        return redirect("artist_booking_settings")
+
+    return redirect("appointments_list")
+
+
+@login_required
 def appointment_detail(request, appointment_id):
     appointment = get_object_or_404(
         Appointment.objects.select_related(
