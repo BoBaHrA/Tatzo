@@ -1,0 +1,249 @@
+.tatzo-calendar-page {
+  color: #eaffff;
+  font-family: "Poppins", Arial, sans-serif;
+}
+
+.tatzo-calendar-page.calendar-shell {
+  margin-left: 270px;
+  min-height: 100vh;
+  padding: 28px;
+}
+
+.tatzo-calendar-page .calendar-hero,
+.tatzo-calendar-page .calendar-toolbar,
+.tatzo-calendar-page .quick-actions,
+.tatzo-calendar-page .calendar-insights {
+  background: linear-gradient(135deg, rgba(0, 10, 18, 0.96), rgba(0, 83, 81, 0.32));
+  border: 1px solid rgba(4, 197, 191, 0.18);
+  border-radius: 24px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+  margin-bottom: 16px;
+  padding: 22px;
+}
+
+.tatzo-calendar-page .calendar-hero {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.tatzo-calendar-page .calendar-eyebrow {
+  color: #04c5bf;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.tatzo-calendar-page .calendar-hero h1 {
+  font-size: 42px;
+  margin: 0;
+}
+
+.tatzo-calendar-page .calendar-actions button,
+.tatzo-calendar-page .view-tabs button,
+.tatzo-calendar-page .quick-actions button,
+.tatzo-calendar-page .primary {
+  background: #001a2e;
+  border: 1px solid rgba(4, 197, 191, 0.35);
+  border-radius: 999px;
+  color: #eaffff;
+  cursor: pointer;
+  padding: 10px 16px;
+}
+
+.tatzo-calendar-page .view-tabs button.active,
+.tatzo-calendar-page .primary {
+  background: #04c5bf;
+  color: #000a12;
+}
+
+.tatzo-calendar-page .quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tatzo-calendar-page .calendar-toolbar {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.tatzo-calendar-page .calendar-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(7, minmax(120px, 1fr));
+}
+
+.tatzo-calendar-page .calendar-cell {
+  background: #000a12;
+  border: 1px solid rgba(4, 197, 191, 0.14);
+  border-radius: 18px;
+  color: inherit;
+  cursor: pointer;
+  min-height: 132px;
+  padding: 12px;
+  text-align: left;
+}
+
+.tatzo-calendar-page .calendar-cell:hover {
+  border-color: #04c5bf;
+}
+
+.tatzo-calendar-page .calendar-cell.muted {
+  opacity: 0.42;
+}
+
+.tatzo-calendar-page .day-number {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.tatzo-calendar-page .workload-light {
+  box-shadow: inset 0 0 0 1px rgba(4, 197, 191, 0.18);
+}
+
+.tatzo-calendar-page .workload-busy {
+  box-shadow: inset 0 0 0 2px rgba(238, 12, 111, 0.35);
+}
+
+.tatzo-calendar-page .workload-full,
+.tatzo-calendar-page .workload-vacation,
+.tatzo-calendar-page .workload-blocked {
+  background: linear-gradient(135deg, #1b0010, #000a12);
+}
+
+.tatzo-calendar-page .event-dot {
+  color: #bfefff;
+  display: block;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.tatzo-calendar-page .timeline {
+  display: block;
+}
+
+.tatzo-calendar-page .timeline .calendar-cell {
+  min-height: 58px;
+}
+
+.tatzo-calendar-page .calendar-status {
+  color: #8fcfd0;
+  margin: 14px;
+}
+
+.tatzo-calendar-page.calendar-modal {
+  background: rgba(0, 0, 0, 0.62);
+  display: grid;
+  inset: 0;
+  place-items: center;
+  position: fixed;
+  z-index: 10000;
+}
+
+.tatzo-calendar-page.calendar-modal[hidden] {
+  display: none;
+}
+
+.tatzo-calendar-page.calendar-modal .modal-card {
+  background: #000a12;
+  border: 1px solid rgba(4, 197, 191, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 24px 80px #000;
+  color: #eaffff;
+  font-family: "Poppins", Arial, sans-serif;
+  max-height: 86vh;
+  overflow: auto;
+  padding: 22px;
+  width: min(720px, 92vw);
+}
+
+.tatzo-calendar-page.calendar-modal .modal-close {
+  background: none;
+  border: 0;
+  color: #fff;
+  float: right;
+  font-size: 28px;
+}
+
+.tatzo-calendar-page.calendar-modal .event-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(4, 197, 191, 0.16);
+  border-radius: 16px;
+  margin: 10px 0;
+  padding: 14px;
+}
+
+.tatzo-calendar-page.calendar-modal .event-actions a,
+.tatzo-calendar-page.calendar-modal .event-actions button {
+  display: inline-block;
+  margin: 6px 6px 0 0;
+}
+
+.tatzo-calendar-page.calendar-modal .event-details[hidden] {
+  display: none;
+}
+
+.tatzo-calendar-page.calendar-modal label {
+  display: block;
+  margin: 10px 0;
+}
+
+.tatzo-calendar-page.calendar-modal input,
+.tatzo-calendar-page.calendar-modal select,
+.tatzo-calendar-page.calendar-modal textarea {
+  background: #001a2e;
+  border: 1px solid rgba(4, 197, 191, 0.25);
+  border-radius: 10px;
+  box-sizing: border-box;
+  color: #fff;
+  padding: 10px;
+  width: 100%;
+}
+
+.tatzo-calendar-page.calendar-modal .form-error {
+  color: #ff8bb8;
+}
+
+@media (max-width: 800px) {
+  .tatzo-calendar-page.calendar-shell {
+    margin-left: 0;
+    padding: 14px 10px 86px;
+  }
+
+  .tatzo-calendar-page .calendar-hero,
+  .tatzo-calendar-page .calendar-toolbar {
+    display: block;
+  }
+
+  .tatzo-calendar-page .calendar-grid {
+    gap: 4px;
+    grid-template-columns: repeat(7, minmax(42px, 1fr));
+  }
+
+  .tatzo-calendar-page .calendar-cell {
+    border-radius: 12px;
+    min-height: 76px;
+    padding: 6px;
+  }
+
+  .tatzo-calendar-page .event-dot {
+    font-size: 0;
+  }
+
+  .tatzo-calendar-page .event-dot::before {
+    content: "•";
+    font-size: 18px;
+  }
+
+  .tatzo-calendar-page.calendar-modal {
+    align-items: end;
+  }
+
+  .tatzo-calendar-page.calendar-modal .modal-card {
+    border-radius: 24px 24px 0 0;
+    max-height: 92vh;
+    width: 100vw;
+  }
+}
