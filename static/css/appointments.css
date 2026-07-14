@@ -1649,3 +1649,100 @@
     min-height: auto;
   }
 }
+
+body:has(.appointment-page),
+.content:has(.appointment-page) {
+  margin: 0;
+  min-height: 100dvh;
+  background: #000d18;
+}
+
+.appointment-page {
+  position: relative;
+  width: auto;
+  box-shadow: -260px 0 0 #000d18;
+}
+
+.appointment-shell {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.appointment-list-title {
+  color: #ffffff;
+  font-size: clamp(34px, 5vw, 64px);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+}
+
+.appointment-list-card {
+  margin-bottom: 18px;
+  border-color: rgba(4, 197, 191, 0.22);
+  background:
+    radial-gradient(circle at top right, rgba(4, 197, 191, 0.08), transparent 34%),
+    rgba(0, 13, 24, 0.88);
+}
+
+.appointment-list-card h2 {
+  font-size: 1.1rem;
+  letter-spacing: 0.01em;
+}
+
+.appointment-list-item {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.appointment-list-item:hover,
+.appointment-list-item:focus-visible {
+  border-color: rgba(4, 197, 191, 0.58);
+  box-shadow: 0 14px 34px rgba(4, 197, 191, 0.12);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.appointment-list-item strong {
+  color: #ffffff;
+}
+
+.appointment-status.is-pending,
+.appointment-status.is-needs_references {
+  border-color: rgba(255, 179, 71, 0.46);
+  background: rgba(255, 179, 71, 0.08);
+  color: #ffca7a;
+}
+
+.appointment-status.is-accepted,
+.appointment-status.is-completed {
+  border-color: rgba(4, 197, 191, 0.44);
+  background: rgba(4, 197, 191, 0.08);
+  color: #04c5bf;
+}
+
+.appointment-status.is-consultation_required {
+  border-color: rgba(132, 116, 255, 0.48);
+  background: rgba(132, 116, 255, 0.10);
+  color: #b9b0ff;
+}
+
+.appointment-status.is-declined,
+.appointment-status.is-cancelled {
+  background: rgba(238, 12, 111, 0.09);
+}
+
+@media (max-width: 900px) {
+  .appointment-page {
+    margin-left: 0;
+    padding-top: calc(var(--mobile-topbar-h, 88px) + 16px);
+    box-shadow: none;
+  }
+
+  .appointment-list-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .appointment-status {
+    align-self: flex-start;
+  }
+}
