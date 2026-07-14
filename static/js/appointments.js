@@ -14,6 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
     duration: 60,
     styles: [],
     placement: "",
+    placementZones: [],
+    placementDetails: "",
     size: "",
     budget: "",
     references: [],
@@ -25,6 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const nextBtn = document.getElementById("booking-next-btn");
   const backBtn = document.getElementById("booking-back-btn");
   const submitBtn = document.getElementById("booking-submit-btn");
+  const referenceInput = document.getElementById("booking-references");
+  const referenceError = document.getElementById("booking-reference-error");
+  const referenceHelp = document.getElementById("booking-reference-help");
 
   function pad(value) {
     return String(value).padStart(2, "0");
@@ -41,6 +46,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function minutesToTime(value) {
     return `${pad(Math.floor(value / 60))}:${pad(value % 60)}`;
+  }
+
+  function getReferenceMinimum() {
+    return Number(bookingData.settings.minimum_reference_images) || 0;
+  }
+
+  function getReferenceMaximum() {
+    return Number(bookingData.settings.maximum_reference_images) || 0;
+  }
+
+  function getReferenceRequiredMessage(minimum) {
+    return minimum === 1
+      ? "Please upload at least 1 reference image."
+      : `Please upload at least ${minimum} reference images.`;
+  }
+
+  function setReferenceError(message) {
+    if (!referenceError) return;
+
+    referenceError.textContent = message;
+    referenceError.hidden = !message;
+  }
+
+  function validateReferences() {
+    const count = state.references.length;
+    const minimum = getReferenceMinimum();
+    const maximum = getReferenceMaximum();
+
+    if (minimum > 0 && count < minimum) {
+      setReferenceError(getReferenceRequiredMessage(minimum));
+      return false;
+    }
+
+    if (maximum && count > maximum) {
+      setReferenceError(
+        maximum === 1
+          ? "Please upload no more than 1 reference image."
+          : `Please upload no more than ${maximum} reference images.`
+      );
+      return false;
+    }
+
+    setReferenceError("");
+    return true;
   }
 
   function getScheduleForDate(date) {
@@ -229,10 +278,58 @@ document.addEventListener("DOMContentLoaded", () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  function composePlacement() {
+    const zones = state.placementZones.join(", ");
+    const details = (state.placementDetails || "").trim();
+
+    if (zones && details) return `${zones} — ${details}`;
+    return zones || details;
+  }
+
+  function renderPlacementChips() {
+    const chipsWrap = document.getElementById("booking-placement-chips");
+    const selectedText = document.getElementById("booking-placement-selected");
+    const target = chipsWrap || selectedText;
+
+    if (!target) return;
+
+    target.replaceChildren();
+
+    if (!state.placementZones.length) {
+      target.textContent = "Selected: none yet";
+      return;
+    }
+
+    target.append(document.createTextNode("Selected:"));
+
+    state.placementZones.forEach((zone) => {
+      const chip = document.createElement("span");
+      chip.className = "booking-placement-chip";
+      chip.textContent = zone;
+      target.appendChild(chip);
+    });
+  }
+
+  function syncPlacement() {
+    state.placement = composePlacement();
+    renderPlacementChips();
+
+    document.querySelectorAll("[data-placement-zone]").forEach((button) => {
+      const isSelected = state.placementZones.includes(button.dataset.placementZone);
+      button.classList.toggle("is-selected", isSelected);
+      button.setAttribute("aria-pressed", isSelected ? "true" : "false");
+    });
+
+    const placementInput = document.getElementById("booking-placement");
+    if (placementInput) {
+      placementInput.value = state.placement;
+    }
+  }
+
   function syncHiddenFields() {
+    syncPlacement();
     document.getElementById("booking-duration").value = state.duration;
     document.getElementById("booking-styles").value = state.styles.join(",");
-    document.getElementById("booking-placement").value = state.placement;
     document.getElementById("booking-size").value = state.size;
     document.getElementById("booking-budget").value = state.budget;
   }
@@ -250,6 +347,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <div><span>Placement</span><strong>${state.placement || "—"}</strong></div>
       <div><span>Size</span><strong>${state.size || "—"}</strong></div>
       <div><span>Budget</span><strong>${state.budget || "—"}</strong></div>
+      <div><span>References</span><strong>${state.references.length} uploaded</strong></div>
     `;
   }
 
@@ -317,27 +415,62 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  document.getElementById("booking-placement-text").addEventListener("input", (event) => {
-    state.placement = event.target.value.trim();
-    syncHiddenFields();
+  document.querySelectorAll("[data-placement-zone]").forEach((button) => {
+    button.setAttribute("aria-pressed", "false");
+
+    button.addEventListener("click", () => {
+      const zone = button.dataset.placementZone;
+
+      state.placementZones = state.placementZones.includes(zone)
+        ? state.placementZones.filter((item) => item !== zone)
+        : [...state.placementZones, zone];
+
+      syncHiddenFields();
+    });
   });
 
-  document.getElementById("booking-references").addEventListener("change", (event) => {
+  const placementDetailsInput = document.getElementById("booking-placement-text");
+  if (placementDetailsInput) {
+    placementDetailsInput.addEventListener("input", (event) => {
+      state.placementDetails = event.target.value;
+      syncHiddenFields();
+    });
+  }
+
+  if (referenceHelp) {
+    const minimum = getReferenceMinimum();
+
+    if (minimum > 0) {
+      referenceHelp.textContent = minimum === 1
+        ? "This artist requires at least 1 reference image."
+        : `This artist requires at least ${minimum} reference images.`;
+    }
+  }
+
+  referenceInput.addEventListener("change", (event) => {
     const grid = document.getElementById("booking-reference-grid");
+    const files = Array.from(event.target.files || []);
+    state.references = files;
     grid.innerHTML = "";
 
-    Array.from(event.target.files || []).forEach((file) => {
+    files.forEach((file) => {
       const url = URL.createObjectURL(file);
       const img = document.createElement("img");
       img.src = url;
       img.alt = file.name;
       grid.appendChild(img);
     });
+
+    validateReferences();
   });
 
   nextBtn.addEventListener("click", () => {
     if (state.step === 1 && (!state.selectedDate || !state.selectedTime)) {
       alert("Please choose a date and time.");
+      return;
+    }
+
+    if (state.step === 3 && !validateReferences()) {
       return;
     }
 
@@ -358,6 +491,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!state.selectedDate || !state.selectedTime) {
       event.preventDefault();
       alert("Please choose a date and time.");
+      return;
+    }
+
+    if (!validateReferences()) {
+      event.preventDefault();
     }
   });
 
