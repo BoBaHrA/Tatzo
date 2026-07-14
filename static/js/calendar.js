@@ -1,5 +1,5 @@
 (function(){
-  const root=document.querySelector('.calendar-shell'); if(!root) return;
+  const root=document.querySelector('.tatzo-calendar-page.calendar-shell'); if(!root) return;
   const state={view:'month',date:new Date(),events:[],days:{},role:root.dataset.role};
   const grid=document.getElementById('calendar-grid'), title=document.getElementById('calendar-title'), status=document.getElementById('calendar-status');
   const csrf=()=>document.querySelector('[name=csrfmiddlewaretoken]')?.value||'';
