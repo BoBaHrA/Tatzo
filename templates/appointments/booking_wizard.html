@@ -46,6 +46,8 @@
       <input type="hidden" name="start_time" id="booking-time">
       <input type="hidden" name="session_length_minutes" id="booking-duration" value="60">
       <input type="hidden" name="booking_type" id="booking-type" value="tattoo_session">
+      <input type="hidden" name="consultation_already_completed" id="booking-consultation-completed" value="false">
+      <input type="hidden" name="consultation_note" id="booking-consultation-note">
       <input type="hidden" name="styles" id="booking-styles">
       <input type="hidden" name="placement" id="booking-placement">
       <input type="hidden" name="size" id="booking-size">
@@ -77,6 +79,17 @@
         <h3>{% trans "Available time" %}</h3>
         <div class="booking-slots" id="booking-slots"></div>
 
+        <div class="booking-consultation-card">
+          <label class="booking-consultation-toggle" for="booking-consultation-toggle">
+            <input type="checkbox" id="booking-consultation-toggle">
+            <span>
+              <strong>{% trans "Book a consultation instead" %}</strong>
+              <small>{% trans "Consultations are limited to 1 hour." %}</small>
+            </span>
+          </label>
+          <p class="booking-form-error" id="booking-consultation-error" hidden></p>
+        </div>
+
         <div class="booking-session-grid">
           <button type="button" class="booking-choice is-active" data-duration="60">1h</button>
           <button type="button" class="booking-choice" data-duration="120">2h</button>
@@ -96,7 +109,45 @@
         </div>
 
         <label>{% trans "Placement" %}</label>
-        <input class="booking-input" type="text" id="booking-placement-text" placeholder="{% trans 'Arm, back, leg...' %}">
+        <div class="booking-placement-picker" aria-describedby="booking-placement-help">
+          <p class="booking-helper" id="booking-placement-help">{% trans "Tap the area where you want your tattoo." %}</p>
+          <div class="booking-body-views" aria-label="{% trans 'Body placement picker' %}">
+            <div class="booking-body-card">
+              <h3>{% trans "Front" %}</h3>
+              <div class="booking-body-map booking-body-map-front">
+                <button type="button" class="booking-body-zone zone-head" data-placement-zone="Head / neck" aria-label="Head / neck" title="Head / neck"></button>
+                <button type="button" class="booking-body-zone zone-chest" data-placement-zone="Chest" aria-label="Chest" title="Chest"></button>
+                <button type="button" class="booking-body-zone zone-stomach" data-placement-zone="Stomach / ribs" aria-label="Stomach / ribs" title="Stomach / ribs"></button>
+                <button type="button" class="booking-body-zone zone-left-arm" data-placement-zone="Left arm" aria-label="Left arm" title="Left arm"></button>
+                <button type="button" class="booking-body-zone zone-right-arm" data-placement-zone="Right arm" aria-label="Right arm" title="Right arm"></button>
+                <button type="button" class="booking-body-zone zone-left-forearm" data-placement-zone="Left forearm" aria-label="Left forearm" title="Left forearm"></button>
+                <button type="button" class="booking-body-zone zone-right-forearm" data-placement-zone="Right forearm" aria-label="Right forearm" title="Right forearm"></button>
+                <button type="button" class="booking-body-zone zone-left-hand" data-placement-zone="Left hand" aria-label="Left hand" title="Left hand"></button>
+                <button type="button" class="booking-body-zone zone-right-hand" data-placement-zone="Right hand" aria-label="Right hand" title="Right hand"></button>
+                <button type="button" class="booking-body-zone zone-left-leg" data-placement-zone="Left leg" aria-label="Left leg" title="Left leg"></button>
+                <button type="button" class="booking-body-zone zone-right-leg" data-placement-zone="Right leg" aria-label="Right leg" title="Right leg"></button>
+                <button type="button" class="booking-body-zone zone-left-calf" data-placement-zone="Left calf" aria-label="Left calf" title="Left calf"></button>
+                <button type="button" class="booking-body-zone zone-right-calf" data-placement-zone="Right calf" aria-label="Right calf" title="Right calf"></button>
+                <button type="button" class="booking-body-zone zone-foot" data-placement-zone="Foot / ankle" aria-label="Foot / ankle" title="Foot / ankle"></button>
+              </div>
+            </div>
+            <div class="booking-body-card">
+              <h3>{% trans "Back" %}</h3>
+              <div class="booking-body-map booking-body-map-back">
+                <button type="button" class="booking-body-zone zone-back" data-placement-zone="Back" aria-label="Back" title="Back"></button>
+                <button type="button" class="booking-body-zone zone-lower-back" data-placement-zone="Lower back" aria-label="Lower back" title="Lower back"></button>
+                <button type="button" class="booking-body-zone zone-back-left-arm" data-placement-zone="Left arm" aria-label="Left arm" title="Left arm"></button>
+                <button type="button" class="booking-body-zone zone-back-right-arm" data-placement-zone="Right arm" aria-label="Right arm" title="Right arm"></button>
+                <button type="button" class="booking-body-zone zone-back-left-leg" data-placement-zone="Left leg" aria-label="Left leg" title="Left leg"></button>
+                <button type="button" class="booking-body-zone zone-back-right-leg" data-placement-zone="Right leg" aria-label="Right leg" title="Right leg"></button>
+              </div>
+            </div>
+          </div>
+          <p class="booking-placement-selected" id="booking-placement-selected">{% trans "Selected: none yet" %}</p>
+        </div>
+
+        <label for="booking-placement-text">{% trans "Placement details" %}</label>
+        <textarea class="booking-textarea booking-placement-details" id="booking-placement-text" placeholder="{% trans 'Optional details, e.g. inner forearm, near elbow...' %}"></textarea>
 
         <label>{% trans "Size" %}</label>
         <div class="booking-choice-grid" data-choice-group="size">
@@ -132,7 +183,7 @@
         <label class="booking-upload-zone" for="booking-references">
           <span>＋</span>
           <strong>{% trans "Upload reference images" %}</strong>
-          <small>{% trans "You can add screenshots, sketches or inspiration images." %}</small>
+          <small id="booking-reference-help">{% trans "You can add screenshots, sketches or inspiration images." %}</small>
         </label>
 
         <input
@@ -143,6 +194,8 @@
           multiple
           hidden
         >
+
+        <p class="booking-form-error" id="booking-reference-error" hidden></p>
 
         <div class="booking-reference-grid" id="booking-reference-grid"></div>
       </section>
@@ -171,6 +224,41 @@
         </button>
       </div>
     </form>
+  </div>
+</div>
+
+<div class="booking-modal" id="booking-consultation-modal" hidden>
+  <div class="booking-modal-card" role="dialog" aria-modal="true" aria-labelledby="booking-consultation-modal-title">
+    <h2 id="booking-consultation-modal-title">{% trans "Consultation required" %}</h2>
+    <p>{% trans "This artist requires a consultation before booking a tattoo session." %}</p>
+
+    <label class="booking-modal-option">
+      <input type="radio" name="booking-consultation-required-choice" value="book" checked>
+      <span>
+        <strong>{% trans "Book consultation now" %}</strong>
+        <small>{% trans "We'll set this request as a 1-hour consultation." %}</small>
+      </span>
+    </label>
+
+    <label class="booking-modal-option">
+      <input type="radio" name="booking-consultation-required-choice" value="completed">
+      <span>
+        <strong>{% trans "I already had a consultation with this artist" %}</strong>
+        <small>{% trans "You can continue with a tattoo session request." %}</small>
+      </span>
+    </label>
+
+    <input
+      type="text"
+      class="booking-input"
+      id="booking-consultation-modal-note"
+      placeholder="{% trans 'Where/when did the consultation happen? e.g. Instagram, studio, phone...' %}"
+      hidden
+    >
+
+    <button type="button" class="booking-btn-primary" id="booking-consultation-continue">
+      {% trans "Continue" %}
+    </button>
   </div>
 </div>
 
