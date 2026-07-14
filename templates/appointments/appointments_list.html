@@ -10,7 +10,23 @@
 {% block content %}
 <div class="appointment-page">
   <div class="appointment-shell">
-    <h1 class="appointment-list-title">{% trans "Appointments" %}</h1>
+    <nav class="appointment-topbar" aria-label="{% trans 'Appointment navigation' %}">
+      <button type="button" class="appointment-back-link" onclick="window.history.back()">← {% trans "Back" %}</button>
+
+      <div class="appointment-topbar-links">
+        <a href="{% url 'home' %}" class="appointment-top-link">{% trans "Home" %}</a>
+        <a href="{% url 'user_profile' %}" class="appointment-top-link">{% trans "My profile" %}</a>
+        {% if request.user.profile.account_type == "tattoo_artist" %}
+          <a href="{% url 'artist_booking_settings' %}" class="appointment-top-link is-accent">{% trans "Artist dashboard" %}</a>
+        {% endif %}
+      </div>
+    </nav>
+
+    <header class="appointment-list-header">
+      <p class="booking-eyebrow">{% trans "Booking center" %}</p>
+      <h1 class="appointment-list-title">{% trans "Appointments" %}</h1>
+      <p>{% trans "Track your booking requests and client appointments." %}</p>
+    </header>
 
     <section class="appointment-list-card">
       <h2>{% trans "My requests" %}</h2>

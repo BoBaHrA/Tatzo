@@ -1746,3 +1746,83 @@ body:has(.appointment-page),
     align-self: flex-start;
   }
 }
+
+.appointment-page {
+  margin-left: 0;
+  box-shadow: none;
+}
+
+.appointment-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 26px;
+  padding: 12px;
+  border: 1px solid rgba(4, 197, 191, 0.18);
+  border-radius: 22px;
+  background: rgba(0, 13, 24, 0.72);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+}
+
+.appointment-topbar-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.appointment-back-link,
+.appointment-top-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(4, 197, 191, 0.24);
+  background: rgba(255, 255, 255, 0.045);
+  color: #dffdfb;
+  padding: 0 14px;
+  font: inherit;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.appointment-back-link:hover,
+.appointment-back-link:focus-visible,
+.appointment-top-link:hover,
+.appointment-top-link:focus-visible {
+  border-color: rgba(4, 197, 191, 0.78);
+  color: #04c5bf;
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.appointment-top-link.is-accent {
+  border-color: rgba(238, 12, 111, 0.34);
+  color: #ff8ab8;
+}
+
+.appointment-list-header {
+  margin-bottom: 24px;
+}
+
+.appointment-list-header p:last-child {
+  max-width: 620px;
+  margin: 12px 0 0;
+  color: rgba(234, 255, 255, 0.66);
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .appointment-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .appointment-topbar-links {
+    justify-content: flex-start;
+  }
+}
