@@ -18,15 +18,15 @@
     </a>
 
     <nav class="artist-dash-nav">
-      <button type="button" class="artist-dash-nav-item is-active" data-artist-panel-target="dashboard">
+      <a href="{% url 'artist_booking_settings' %}" class="artist-dash-nav-item {% if active_dashboard_panel == 'dashboard' %}is-active{% endif %}" data-artist-panel-target="dashboard" data-artist-panel-link>
         <img src="{% static 'icons/dashboard.svg' %}" class="artist-dash-icon" alt="">
         <span>{% trans "Dashboard" %}</span>
-      </button>
+      </a>
 
-      <button type="button" class="artist-dash-nav-item" data-artist-panel-target="calendar">
+      <a href="{% url 'artist_dashboard_calendar' %}" class="artist-dash-nav-item {% if active_dashboard_panel == 'calendar' %}is-active{% endif %}" data-artist-panel-target="calendar" data-artist-panel-link>
         <img src="{% static 'icons/calendar-dash.svg' %}" class="artist-dash-icon" alt="">
         <span>{% trans "Calendar" %}</span>
-      </button>
+      </a>
 
       <button type="button" class="artist-dash-nav-item" data-artist-panel-target="bookings">
         <img src="{% static 'icons/inbox.svg' %}" class="artist-dash-icon" alt="">
@@ -93,7 +93,7 @@
       <button type="button" class="artist-dash-plus" data-open-manual-booking>+</button>
     </header>
 
-    <section class="artist-dash-panel is-active" data-artist-panel="dashboard">
+    <section class="artist-dash-panel {% if active_dashboard_panel == 'dashboard' %}is-active{% endif %}" data-artist-panel="dashboard">
       <div class="artist-stat-grid">
         {% for stat in dashboard_stats %}
           <article class="artist-stat-card {% if stat.strong %}is-strong{% endif %}">
@@ -124,7 +124,7 @@
       </div>
     </section>
 
-    <section class="artist-dash-panel" data-artist-panel="calendar">
+    <section class="artist-dash-panel {% if active_dashboard_panel == 'calendar' %}is-active{% endif %}" data-artist-panel="calendar">
       <form method="post" class="artist-card artist-calendar-form">
         {% csrf_token %}
         <input type="hidden" name="dashboard_form" value="calendar">
