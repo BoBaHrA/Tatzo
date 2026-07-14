@@ -18,15 +18,15 @@
     </a>
 
     <nav class="artist-dash-nav">
-      <button type="button" class="artist-dash-nav-item is-active" data-artist-panel-target="dashboard">
+      <a href="{% url 'artist_booking_settings' %}" class="artist-dash-nav-item {% if active_dashboard_panel == 'dashboard' %}is-active{% endif %}" data-artist-panel-target="dashboard" data-artist-panel-link>
         <img src="{% static 'icons/dashboard.svg' %}" class="artist-dash-icon" alt="">
         <span>{% trans "Dashboard" %}</span>
-      </button>
+      </a>
 
-      <button type="button" class="artist-dash-nav-item" data-artist-panel-target="calendar">
+      <a href="{% url 'artist_dashboard_calendar' %}" class="artist-dash-nav-item {% if active_dashboard_panel == 'calendar' %}is-active{% endif %}" data-artist-panel-target="calendar" data-artist-panel-link>
         <img src="{% static 'icons/calendar-dash.svg' %}" class="artist-dash-icon" alt="">
         <span>{% trans "Calendar" %}</span>
-      </button>
+      </a>
 
       <button type="button" class="artist-dash-nav-item" data-artist-panel-target="bookings">
         <img src="{% static 'icons/inbox.svg' %}" class="artist-dash-icon" alt="">
@@ -90,10 +90,10 @@
         <p>{{ today|date:"l j F" }}</p>
       </div>
 
-      <a href="{% url 'appointments_list' %}" class="artist-dash-plus">+</a>
+      <button type="button" class="artist-dash-plus" data-open-manual-booking>+</button>
     </header>
 
-    <section class="artist-dash-panel is-active" data-artist-panel="dashboard">
+    <section class="artist-dash-panel {% if active_dashboard_panel == 'dashboard' %}is-active{% endif %}" data-artist-panel="dashboard">
       <div class="artist-stat-grid">
         {% for stat in dashboard_stats %}
           <article class="artist-stat-card {% if stat.strong %}is-strong{% endif %}">
@@ -124,7 +124,7 @@
       </div>
     </section>
 
-    <section class="artist-dash-panel" data-artist-panel="calendar">
+    <section class="artist-dash-panel {% if active_dashboard_panel == 'calendar' %}is-active{% endif %}" data-artist-panel="calendar">
       <form method="post" class="artist-card artist-calendar-form">
         {% csrf_token %}
         <input type="hidden" name="dashboard_form" value="calendar">
@@ -321,22 +321,26 @@
         <div class="artist-list">
           {% for client in clients %}
             <div class="artist-client-row">
-              {% if client.profile.profile_image %}
-                <img src="{{ client.profile.profile_image.url }}" alt="{{ client.username }}">
-              {% else %}
-                <span>{{ client.username|first|upper }}</span>
-              {% endif %}
+              <div class="artist-client-main">
+                {% if client.profile.profile_image %}
+                  <img src="{{ client.profile.profile_image.url }}" alt="{{ client.username }}">
+                {% else %}
+                  <span>{{ client.username|first|upper }}</span>
+                {% endif %}
 
-              <div>
-                <strong>{{ client.username }}</strong>
-                <small>
-                  {% blocktrans count count=client.artist_sessions_count %}
-                    {{ count }} session
-                  {% plural %}
-                    {{ count }} sessions
-                  {% endblocktrans %}
-                </small>
+                <div>
+                  <strong>{{ client.username }}</strong>
+                  <small>{% trans "Client" %}</small>
+                </div>
               </div>
+
+              <small class="artist-client-sessions">
+                {% blocktrans count count=client.artist_sessions_count %}
+                  {{ count }} session
+                {% plural %}
+                  {{ count }} sessions
+                {% endblocktrans %}
+              </small>
             </div>
           {% empty %}
             <p class="artist-empty">{% trans "No clients yet." %}</p>
@@ -393,6 +397,12 @@
       <form method="post" class="artist-settings-stack">
         {% csrf_token %}
         <input type="hidden" name="dashboard_form" value="settings">
+        <input
+          type="hidden"
+          name="booking_status"
+          id="artist-booking-status"
+          value="{{ booking_settings.booking_status|default:'open' }}"
+        >
 
         <div class="artist-card">
           <div class="artist-section-title-row">
@@ -550,41 +560,38 @@
             </div>
           </div>
 
-          <button type="submit" class="artist-save-btn">
-            {% trans "Save booking settings" %}
-          </button>
         </div>
 
         <div class="artist-card">
           <h2>{% trans "Booking rules" %}</h2>
 
           <div class="artist-rules-grid">
-            <button type="button" class="artist-rule-card is-active tone-green">
+            <button type="button" class="artist-rule-card tone-green {% if booking_settings.booking_status == 'open' %}is-active{% endif %}" data-booking-status="open">
               <i data-lucide="check-circle"></i>
               <span>{% trans "Booking allowed" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card tone-cyan">
+            <button type="button" class="artist-rule-card tone-cyan {% if booking_settings.booking_status == 'paused' %}is-active{% endif %}" data-booking-status="paused">
               <i data-lucide="pause-circle"></i>
               <span>{% trans "Booking paused" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card tone-pink">
+            <button type="button" class="artist-rule-card tone-pink {% if booking_settings.booking_status == 'vacation' %}is-active{% endif %}" data-booking-status="vacation">
               <i data-lucide="palmtree"></i>
               <span>{% trans "Vacation" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card tone-violet">
+            <button type="button" class="artist-rule-card tone-violet {% if booking_settings.booking_status == 'fully_booked' %}is-active{% endif %}" data-booking-status="fully_booked">
               <i data-lucide="layers"></i>
               <span>{% trans "Fully booked" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card tone-orange">
+            <button type="button" class="artist-rule-card tone-orange {% if booking_settings.booking_status == 'consultation_only' %}is-active{% endif %}" data-booking-status="consultation_only">
               <i data-lucide="message-circle"></i>
               <span>{% trans "Consultation only" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card tone-red">
+            <button type="button" class="artist-rule-card tone-red {% if booking_settings.booking_status == 'emergency' %}is-active{% endif %}" data-booking-status="emergency">
               <i data-lucide="alert-triangle"></i>
               <span>{% trans "Emergency closure" %}</span>
             </button>
@@ -597,27 +604,27 @@
           <div class="artist-auto-list">
             <label>
               <span>{% trans "Booking received" %}</span>
-              <input value="{% trans 'Thanks! I received your request and will reply within 24h.' %}">
+              <textarea name="auto_response_booking_received" rows="3" maxlength="2000" placeholder="{% trans 'Thanks! I received your request and will reply within 24h.' %}">{{ booking_settings.auto_response_booking_received }}</textarea>
             </label>
 
             <label>
               <span>{% trans "Consultation required" %}</span>
-              <input value="{% trans 'Your piece needs a consultation first — pick a slot below.' %}">
+              <textarea name="auto_response_consultation_required" rows="3" maxlength="2000" placeholder="{% trans 'Your piece needs a consultation first — pick a slot below.' %}">{{ booking_settings.auto_response_consultation_required }}</textarea>
             </label>
 
             <label>
               <span>{% trans "Need more references" %}</span>
-              <input value="{% trans 'Could you send 2–3 more reference images? It helps me nail the design.' %}">
+              <textarea name="auto_response_need_more_references" rows="3" maxlength="2000" placeholder="{% trans 'Could you send 2–3 more reference images? It helps me nail the design.' %}">{{ booking_settings.auto_response_need_more_references }}</textarea>
             </label>
 
             <label>
               <span>{% trans "Booking approved" %}</span>
-              <input value="{% trans 'You are booked! A deposit link has been sent to secure your slot.' %}">
+              <textarea name="auto_response_booking_approved" rows="3" maxlength="2000" placeholder="{% trans 'You are booked! A deposit link has been sent to secure your slot.' %}">{{ booking_settings.auto_response_booking_approved }}</textarea>
             </label>
 
             <label>
               <span>{% trans "Booking declined" %}</span>
-              <input value="{% trans 'Unfortunately I cannot take this on right now — thank you for reaching out.' %}">
+              <textarea name="auto_response_booking_declined" rows="3" maxlength="2000" placeholder="{% trans 'Unfortunately I cannot take this on right now — thank you for reaching out.' %}">{{ booking_settings.auto_response_booking_declined }}</textarea>
             </label>
           </div>
         </div>
@@ -656,6 +663,16 @@
               <input value="">
             </label>
           </div>
+        </div>
+
+        <div class="artist-settings-actions">
+          <div>
+            <strong>{% trans "Save all settings" %}</strong>
+            <small>{% trans "Applies booking settings, rules, auto responses, and profile settings." %}</small>
+          </div>
+          <button type="submit" class="artist-save-btn">
+            {% trans "Save all settings" %}
+          </button>
         </div>
       </form>
     </section>
@@ -700,6 +717,82 @@
       <strong>{{ current_status }}</strong>
     </div>
   </aside>
+</div>
+
+<div class="artist-manual-modal" data-manual-booking-modal hidden>
+  <div class="artist-manual-modal__backdrop" data-close-manual-booking></div>
+  <div class="artist-manual-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="manual-booking-title">
+    <h2 id="manual-booking-title">{% trans "Manual booking" %}</h2>
+    <p>{% trans "Create an accepted booking for an existing Tatzo user." %}</p>
+
+    <form method="post" action="{% url 'create_manual_appointment' %}" class="artist-manual-form">
+      {% csrf_token %}
+
+      <label>
+        <span>{% trans "Client username" %}</span>
+        <input type="text" name="client_username" autocomplete="off" required>
+      </label>
+
+      <div class="artist-manual-form__grid">
+        <label>
+          <span>{% trans "Date" %}</span>
+          <input type="date" name="date" required>
+        </label>
+
+        <label>
+          <span>{% trans "Start time" %}</span>
+          <input type="time" name="start_time" required>
+        </label>
+      </div>
+
+      <div class="artist-manual-form__grid">
+        <label>
+          <span>{% trans "Duration minutes" %}</span>
+          <input type="number" name="session_length_minutes" min="15" step="15" value="60" required>
+        </label>
+
+        <label>
+          <span>{% trans "Booking type" %}</span>
+          <select name="booking_type">
+            <option value="tattoo_session">{% trans "Tattoo session" %}</option>
+            <option value="consultation">{% trans "Consultation" %}</option>
+          </select>
+        </label>
+      </div>
+
+      <label>
+        <span>{% trans "Styles" %}</span>
+        <input type="text" name="styles" placeholder="{% trans 'Fine Line, Blackwork' %}">
+      </label>
+
+      <div class="artist-manual-form__grid">
+        <label>
+          <span>{% trans "Placement" %}</span>
+          <input type="text" name="placement">
+        </label>
+
+        <label>
+          <span>{% trans "Size" %}</span>
+          <input type="text" name="size">
+        </label>
+      </div>
+
+      <label>
+        <span>{% trans "Budget" %}</span>
+        <input type="text" name="budget">
+      </label>
+
+      <label>
+        <span>{% trans "Notes" %}</span>
+        <textarea name="description" rows="4"></textarea>
+      </label>
+
+      <div class="artist-manual-modal__actions">
+        <button type="button" class="artist-ghost-btn" data-close-manual-booking>{% trans "Close" %}</button>
+        <button type="submit" class="artist-save-btn">{% trans "Create booking" %}</button>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}
 

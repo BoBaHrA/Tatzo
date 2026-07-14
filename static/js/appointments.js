@@ -334,6 +334,34 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("booking-budget").value = state.budget;
   }
 
+  function renderPlacementChips() {
+    const chips = document.getElementById("booking-placement-chips");
+
+    if (!chips) {
+      return;
+    }
+
+    chips.innerHTML = "";
+
+    if (!state.placementZones.length) {
+      const empty = document.createElement("span");
+      empty.className = "booking-placement-empty";
+      empty.textContent = chips.dataset.emptyLabel || "No placement selected";
+      chips.appendChild(empty);
+      syncHiddenFields();
+      return;
+    }
+
+    state.placementZones.forEach((zone) => {
+      const chip = document.createElement("span");
+      chip.className = "booking-placement-chip";
+      chip.textContent = zone;
+      chips.appendChild(chip);
+    });
+
+    syncHiddenFields();
+  }
+
   function renderReview() {
     syncHiddenFields();
 
