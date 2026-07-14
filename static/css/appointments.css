@@ -1725,3 +1725,113 @@
     gap: 4px;
   }
 }
+
+.booking-consultation-card {
+  margin: 18px 0 12px;
+  padding: 14px;
+  border: 1px solid rgba(4, 197, 191, 0.18);
+  border-radius: 20px;
+  background: rgba(4, 197, 191, 0.055);
+}
+
+.booking-consultation-toggle,
+.booking-modal-option {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0;
+  color: #eaffff;
+  cursor: pointer;
+}
+
+.booking-consultation-toggle input,
+.booking-modal-option input {
+  accent-color: #04c5bf;
+  margin-top: 4px;
+}
+
+.booking-consultation-toggle strong,
+.booking-modal-option strong {
+  display: block;
+  color: #ffffff;
+}
+
+.booking-consultation-toggle small,
+.booking-modal-option small {
+  display: block;
+  margin-top: 3px;
+  color: rgba(234, 255, 255, 0.62);
+}
+
+.booking-choice.is-disabled,
+.booking-choice:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  background: rgba(4, 197, 191, 0.05);
+  box-shadow: none;
+}
+
+.booking-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(0, 8, 14, 0.74);
+  backdrop-filter: blur(14px);
+}
+
+.booking-modal[hidden] {
+  display: none;
+}
+
+.booking-modal-card {
+  width: min(560px, 100%);
+  padding: 24px;
+  border: 1px solid rgba(4, 197, 191, 0.24);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(4, 197, 191, 0.16), transparent 32%),
+    radial-gradient(circle at 88% 100%, rgba(238, 12, 111, 0.16), transparent 34%),
+    #000d18;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
+  color: #eaffff;
+}
+
+.booking-modal-card h2 {
+  margin: 0 0 10px;
+  color: #ee0c6f;
+  font-size: 30px;
+}
+
+.booking-modal-card p {
+  color: rgba(234, 255, 255, 0.72);
+}
+
+.booking-modal-option {
+  padding: 14px;
+  border: 1px solid rgba(4, 197, 191, 0.16);
+  border-radius: 18px;
+  background: rgba(4, 197, 191, 0.055);
+}
+
+.booking-modal-option + .booking-modal-option,
+.booking-modal-card .booking-input,
+.booking-modal-card .booking-btn-primary {
+  margin-top: 12px;
+}
+
+.appointment-consultation-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(4, 197, 191, 0.24), rgba(238, 12, 111, 0.2));
+  color: #eaffff;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}

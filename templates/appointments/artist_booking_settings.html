@@ -234,6 +234,11 @@
               <div>
                 <strong>{{ appointment.client.username }}</strong>
                 <small>{{ appointment.get_booking_type_display }} · {{ appointment.date }} {{ appointment.start_time|time:"H:i" }}</small>
+                {% if appointment.booking_type == "consultation" or appointment.booking_type == "online_consultation" %}
+                  <em class="artist-status-pill">{% trans "Consultation" %}</em>
+                {% elif appointment.consultation_already_completed %}
+                  <em class="artist-status-pill">{% trans "Consultation done" %}</em>
+                {% endif %}
               </div>
 
               <span class="artist-status-pill is-{{ appointment.status }}">
@@ -260,6 +265,11 @@
                   {% if appointment.placement %} — {{ appointment.placement }}{% endif %}
                 </strong>
                 <small>{{ appointment.styles|join:", "|default:appointment.get_booking_type_display }}</small>
+                {% if appointment.booking_type == "consultation" or appointment.booking_type == "online_consultation" %}
+                  <em class="artist-status-pill">{% trans "Consultation" %}</em>
+                {% elif appointment.consultation_already_completed %}
+                  <em class="artist-status-pill">{% trans "Consultation done" %}</em>
+                {% endif %}
               </div>
 
               <span class="artist-status-pill is-{{ appointment.status }}">

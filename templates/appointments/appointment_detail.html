@@ -53,6 +53,23 @@
           <div><dt>{% trans "Artist" %}</dt><dd>{{ appointment.artist.username }}</dd></div>
           <div><dt>{% trans "Client" %}</dt><dd>{{ appointment.client.username }}</dd></div>
           <div><dt>{% trans "Booking type" %}</dt><dd>{{ appointment.get_booking_type_display }}</dd></div>
+          <div>
+            <dt>{% trans "Consultation status" %}</dt>
+            <dd>
+              {% if appointment.booking_type == "consultation" or appointment.booking_type == "online_consultation" %}
+                {% trans "Consultation booking" %}
+              {% elif appointment.consultation_already_completed %}
+                {% trans "Client says consultation already happened" %}
+              {% elif appointment.artist.booking_settings.consultation_required_before_booking %}
+                {% trans "Consultation required before booking" %}
+              {% else %}
+                —
+              {% endif %}
+              {% if appointment.consultation_note %}
+                <br><small>{{ appointment.consultation_note }}</small>
+              {% endif %}
+            </dd>
+          </div>
           <div><dt>{% trans "Date" %}</dt><dd>{{ appointment.date }}</dd></div>
           <div><dt>{% trans "Start time" %}</dt><dd>{{ appointment.start_time|time:"H:i" }}</dd></div>
           {% if appointment.end_time %}

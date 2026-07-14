@@ -30,6 +30,11 @@
               <span class="appointment-status-badge appointment-status-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
               <strong>{{ appointment.artist.username }}</strong>
               <small>{{ appointment.date }} · {{ appointment.start_time|time:"H:i" }}</small>
+              {% if appointment.booking_type == "consultation" or appointment.booking_type == "online_consultation" %}
+                <em class="appointment-consultation-badge">{% trans "Consultation" %}</em>
+              {% elif appointment.consultation_already_completed %}
+                <em class="appointment-consultation-badge">{% trans "Consultation already done" %}</em>
+              {% endif %}
               {% if appointment.placement %}<span>{{ appointment.placement }}</span>{% endif %}
             </a>
           {% empty %}
@@ -46,6 +51,11 @@
               <span class="appointment-status-badge appointment-status-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
               <strong>{{ appointment.client.username }}</strong>
               <small>{{ appointment.date }} · {{ appointment.start_time|time:"H:i" }}</small>
+              {% if appointment.booking_type == "consultation" or appointment.booking_type == "online_consultation" %}
+                <em class="appointment-consultation-badge">{% trans "Consultation" %}</em>
+              {% elif appointment.consultation_already_completed %}
+                <em class="appointment-consultation-badge">{% trans "Consultation already done" %}</em>
+              {% endif %}
               {% if appointment.placement %}<span>{{ appointment.placement }}</span>{% endif %}
             </a>
           {% empty %}

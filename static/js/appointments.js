@@ -12,6 +12,11 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedDate: "",
     selectedTime: "",
     duration: 60,
+    bookingType: "tattoo_session",
+    isConsultation: false,
+    consultationAlreadyCompleted: false,
+    consultationNote: "",
+    consultationChoiceMade: false,
     styles: [],
     placement: "",
     placementZones: [],
@@ -30,6 +35,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const referenceInput = document.getElementById("booking-references");
   const referenceError = document.getElementById("booking-reference-error");
   const referenceHelp = document.getElementById("booking-reference-help");
+  const consultationToggle = document.getElementById("booking-consultation-toggle");
+  const consultationModal = document.getElementById("booking-consultation-modal");
+  const consultationContinue = document.getElementById("booking-consultation-continue");
+  const consultationModalNote = document.getElementById("booking-consultation-modal-note");
+  const consultationError = document.getElementById("booking-consultation-error");
 
   function pad(value) {
     return String(value).padStart(2, "0");
@@ -46,6 +56,94 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function minutesToTime(value) {
     return `${pad(Math.floor(value / 60))}:${pad(value % 60)}`;
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function consultationIsRequired() {
+    return Boolean(bookingData.settings.consultation_required_before_booking);
+  }
+
+  function bookingTypeLabel() {
+    if (state.bookingType === "consultation") return "Consultation";
+    if (state.bookingType === "online_consultation") return "Online consultation";
+    return "Tattoo session";
+  }
+
+  function consultationStatusLabel() {
+    if (state.isConsultation) return "Consultation booking";
+    return state.consultationAlreadyCompleted ? "Already completed" : "Not completed";
+  }
+
+  function setConsultationError(message) {
+    if (!consultationError) return;
+    consultationError.textContent = message;
+    consultationError.hidden = !message;
+  }
+
+  function updateDurationButtons() {
+    document.querySelectorAll("[data-duration]").forEach((button) => {
+      const isOneHour = Number(button.dataset.duration) === 60;
+      button.disabled = state.isConsultation && !isOneHour;
+      button.classList.toggle("is-disabled", button.disabled);
+      button.classList.toggle("is-active", Number(button.dataset.duration) === state.duration);
+    });
+  }
+
+  function applyBookingTypeState({ rerenderSlots = true } = {}) {
+    state.isConsultation = ["consultation", "online_consultation"].includes(state.bookingType);
+
+    if (state.isConsultation) {
+      state.duration = 60;
+      state.consultationAlreadyCompleted = false;
+      state.consultationNote = "";
+    }
+
+    if (consultationToggle) {
+      consultationToggle.checked = state.isConsultation;
+    }
+
+    updateDurationButtons();
+    syncHiddenFields();
+
+    if (rerenderSlots) {
+      state.selectedTime = "";
+      document.getElementById("booking-time").value = "";
+      renderCalendar();
+      renderSlots();
+    }
+  }
+
+  function openConsultationModal() {
+    if (!consultationModal) return;
+    consultationModal.hidden = false;
+  }
+
+  function closeConsultationModal() {
+    if (!consultationModal) return;
+    consultationModal.hidden = true;
+  }
+
+  function validateConsultationRequirement() {
+    if (
+      consultationIsRequired()
+      && state.bookingType === "tattoo_session"
+      && !state.consultationAlreadyCompleted
+    ) {
+      setConsultationError("This artist requires a consultation before booking a tattoo session.");
+      openConsultationModal();
+      return false;
+    }
+
+    setConsultationError("");
+    return true;
   }
 
   function getReferenceMinimum() {
@@ -329,6 +427,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function syncHiddenFields() {
     syncPlacement();
     document.getElementById("booking-duration").value = state.duration;
+    document.getElementById("booking-type").value = state.bookingType;
+    document.getElementById("booking-consultation-completed").value = state.consultationAlreadyCompleted ? "true" : "false";
+    document.getElementById("booking-consultation-note").value = state.consultationNote;
     document.getElementById("booking-styles").value = state.styles.join(",");
     document.getElementById("booking-size").value = state.size;
     document.getElementById("booking-budget").value = state.budget;
@@ -370,7 +471,10 @@ document.addEventListener("DOMContentLoaded", () => {
     review.innerHTML = `
       <div><span>Date</span><strong>${state.selectedDate || "—"}</strong></div>
       <div><span>Time</span><strong>${state.selectedTime || "—"}</strong></div>
+      <div><span>Booking type</span><strong>${bookingTypeLabel()}</strong></div>
       <div><span>Session</span><strong>${state.duration / 60}h</strong></div>
+      <div><span>Consultation</span><strong>${consultationStatusLabel()}</strong></div>
+      ${state.consultationNote ? `<div><span>Consultation note</span><strong>${escapeHtml(state.consultationNote)}</strong></div>` : ""}
       <div><span>Styles</span><strong>${state.styles.join(", ") || "—"}</strong></div>
       <div><span>Placement</span><strong>${state.placement || "—"}</strong></div>
       <div><span>Size</span><strong>${state.size || "—"}</strong></div>
@@ -391,6 +495,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelectorAll("[data-duration]").forEach((button) => {
     button.addEventListener("click", () => {
+      if (button.disabled) return;
+
       state.duration = Number(button.dataset.duration);
 
       document.querySelectorAll("[data-duration]").forEach((btn) => {
@@ -404,6 +510,45 @@ document.addEventListener("DOMContentLoaded", () => {
       renderSlots();
     });
   });
+
+  if (consultationToggle) {
+    consultationToggle.addEventListener("change", (event) => {
+      state.bookingType = event.target.checked ? "consultation" : "tattoo_session";
+      state.consultationAlreadyCompleted = false;
+      state.consultationChoiceMade = true;
+      applyBookingTypeState();
+    });
+  }
+
+  document.querySelectorAll('[name="booking-consultation-required-choice"]').forEach((input) => {
+    input.addEventListener("change", () => {
+      const completed = input.value === "completed" && input.checked;
+      if (consultationModalNote) consultationModalNote.hidden = !completed;
+    });
+  });
+
+  if (consultationModalNote) {
+    consultationModalNote.addEventListener("input", (event) => {
+      state.consultationNote = event.target.value.trim();
+      syncHiddenFields();
+    });
+  }
+
+  if (consultationContinue) {
+    consultationContinue.addEventListener("click", () => {
+      const selected = document.querySelector('[name="booking-consultation-required-choice"]:checked');
+      const completed = selected && selected.value === "completed";
+
+      state.consultationChoiceMade = true;
+      state.bookingType = completed ? "tattoo_session" : "consultation";
+      state.consultationAlreadyCompleted = completed;
+      state.consultationNote = completed && consultationModalNote ? consultationModalNote.value.trim() : "";
+
+      closeConsultationModal();
+      applyBookingTypeState();
+      validateConsultationRequirement();
+    });
+  }
 
   document.querySelectorAll('[data-choice-group="styles"] button').forEach((button) => {
     button.addEventListener("click", () => {
@@ -498,6 +643,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (state.step === 1 && !validateConsultationRequirement()) {
+      return;
+    }
+
     if (state.step === 3 && !validateReferences()) {
       return;
     }
@@ -522,11 +671,23 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (!validateConsultationRequirement()) {
+      event.preventDefault();
+      return;
+    }
+
     if (!validateReferences()) {
       event.preventDefault();
     }
   });
 
+  if (consultationIsRequired()) {
+    state.bookingType = "consultation";
+    state.consultationChoiceMade = false;
+    openConsultationModal();
+  }
+
+  applyBookingTypeState({ rerenderSlots: false });
   renderCalendar();
   renderSlots();
   showStep(1);
