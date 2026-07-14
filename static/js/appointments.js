@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     styles: [],
     placement: "",
     placementZones: [],
+    placementDetails: "",
     size: "",
     budget: "",
     references: [],
@@ -279,46 +280,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function composePlacement() {
     const zones = state.placementZones.join(", ");
-    const details = state.placementDetails.trim();
+    const details = (state.placementDetails || "").trim();
 
     if (zones && details) return `${zones} — ${details}`;
     return zones || details;
   }
 
+  function renderPlacementChips() {
+    const chipsWrap = document.getElementById("booking-placement-chips");
+    const selectedText = document.getElementById("booking-placement-selected");
+    const target = chipsWrap || selectedText;
+
+    if (!target) return;
+
+    target.replaceChildren();
+
+    if (!state.placementZones.length) {
+      target.textContent = "Selected: none yet";
+      return;
+    }
+
+    target.append(document.createTextNode("Selected:"));
+
+    state.placementZones.forEach((zone) => {
+      const chip = document.createElement("span");
+      chip.className = "booking-placement-chip";
+      chip.textContent = zone;
+      target.appendChild(chip);
+    });
+  }
+
   function syncPlacement() {
     state.placement = composePlacement();
-
-    const selectedText = document.getElementById("booking-placement-selected");
-    if (selectedText) {
-      selectedText.replaceChildren();
-
-      if (state.placementZones.length) {
-        selectedText.append(document.createTextNode("Selected:"));
-
-        state.placementZones.forEach((zone) => {
-          const chip = document.createElement("span");
-          chip.className = "booking-placement-chip";
-          chip.textContent = zone;
-          selectedText.appendChild(chip);
-        });
-      } else {
-        selectedText.textContent = "Selected: none yet";
-      }
-    }
+    renderPlacementChips();
 
     document.querySelectorAll("[data-placement-zone]").forEach((button) => {
       const isSelected = state.placementZones.includes(button.dataset.placementZone);
       button.classList.toggle("is-selected", isSelected);
       button.setAttribute("aria-pressed", isSelected ? "true" : "false");
     });
+
+    const placementInput = document.getElementById("booking-placement");
+    if (placementInput) {
+      placementInput.value = state.placement;
+    }
   }
 
   function syncHiddenFields() {
     syncPlacement();
     document.getElementById("booking-duration").value = state.duration;
     document.getElementById("booking-styles").value = state.styles.join(",");
-    state.placement = state.placementZones.join(", ");
-    document.getElementById("booking-placement").value = state.placement;
     document.getElementById("booking-size").value = state.size;
     document.getElementById("booking-budget").value = state.budget;
   }
@@ -433,22 +444,38 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.querySelectorAll("[data-placement-zone]").forEach((button) => {
+    button.setAttribute("aria-pressed", "false");
+
     button.addEventListener("click", () => {
       const zone = button.dataset.placementZone;
-      const exists = state.placementZones.includes(zone);
 
-      state.placementZones = exists
+      state.placementZones = state.placementZones.includes(zone)
         ? state.placementZones.filter((item) => item !== zone)
         : [...state.placementZones, zone];
 
-      button.classList.toggle("is-selected", !exists);
-      renderPlacementChips();
+      syncHiddenFields();
     });
   });
 
-  renderPlacementChips();
+  const placementDetailsInput = document.getElementById("booking-placement-text");
+  if (placementDetailsInput) {
+    placementDetailsInput.addEventListener("input", (event) => {
+      state.placementDetails = event.target.value;
+      syncHiddenFields();
+    });
+  }
 
-  document.getElementById("booking-references").addEventListener("change", (event) => {
+  if (referenceHelp) {
+    const minimum = getReferenceMinimum();
+
+    if (minimum > 0) {
+      referenceHelp.textContent = minimum === 1
+        ? "This artist requires at least 1 reference image."
+        : `This artist requires at least ${minimum} reference images.`;
+    }
+  }
+
+  referenceInput.addEventListener("change", (event) => {
     const grid = document.getElementById("booking-reference-grid");
     const files = Array.from(event.target.files || []);
     state.references = files;
