@@ -1347,3 +1347,223 @@ body {
     border-radius: 16px;
   }
 }
+
+.artist-dash-plus {
+  border: 0;
+  cursor: pointer;
+}
+
+.artist-auto-list textarea {
+  width: 100%;
+  min-height: 84px;
+  resize: vertical;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.045);
+  color: #dbe6ee;
+  padding: 10px 12px;
+  outline: none;
+  font: inherit;
+}
+
+.artist-auto-list textarea:focus {
+  border-color: #04c5bf;
+  box-shadow: 0 0 0 3px rgba(4, 197, 191, 0.15);
+}
+
+.artist-client-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.artist-client-row img,
+.artist-client-row > span,
+.artist-client-main img,
+.artist-client-main > span {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  min-height: 56px;
+  max-width: 56px;
+  max-height: 56px;
+  border-radius: 18px;
+  object-fit: cover;
+  display: block;
+  flex: 0 0 56px;
+}
+
+.artist-client-main > span,
+.artist-client-row > span {
+  display: grid;
+  place-items: center;
+  background: rgba(4, 197, 191, 0.16);
+  color: #04c5bf;
+  font-weight: 900;
+}
+
+.artist-client-sessions {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.artist-manual-modal[hidden] {
+  display: none;
+}
+
+.artist-manual-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.artist-manual-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(8px);
+}
+
+.artist-manual-modal__dialog {
+  position: relative;
+  z-index: 1;
+  width: min(440px, 100%);
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(11, 18, 32, 0.96);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  color: #dbe6ee;
+}
+
+.artist-manual-modal__dialog h2 {
+  margin: 0 0 8px;
+  color: #ffffff;
+}
+
+.artist-manual-modal__dialog p {
+  margin: 0 0 20px;
+  color: rgba(219, 230, 238, 0.68);
+}
+
+.artist-manual-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.artist-manual-modal__actions .artist-save-btn,
+.artist-manual-modal__actions .artist-ghost-btn {
+  margin-top: 0;
+}
+
+@media (max-width: 640px) {
+  .artist-client-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .artist-client-sessions {
+    text-align: left;
+  }
+
+  .artist-manual-modal__actions {
+    flex-direction: column-reverse;
+  }
+}
+
+.artist-manual-modal__dialog {
+  width: min(640px, 100%);
+  max-height: min(86vh, 780px);
+  overflow-y: auto;
+}
+
+.artist-manual-form {
+  display: grid;
+  gap: 14px;
+}
+
+.artist-manual-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.artist-manual-form label {
+  display: grid;
+  gap: 8px;
+}
+
+.artist-manual-form span {
+  color: #dbe6ee;
+  font-weight: 800;
+}
+
+.artist-manual-form input,
+.artist-manual-form select,
+.artist-manual-form textarea {
+  width: 100%;
+  min-height: 42px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.045);
+  color: #dbe6ee;
+  padding: 10px 12px;
+  outline: none;
+  font: inherit;
+}
+
+.artist-manual-form textarea {
+  resize: vertical;
+}
+
+.artist-manual-form input:focus,
+.artist-manual-form select:focus,
+.artist-manual-form textarea:focus {
+  border-color: #04c5bf;
+  box-shadow: 0 0 0 3px rgba(4, 197, 191, 0.15);
+}
+
+@media (max-width: 640px) {
+  .artist-manual-form__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.artist-settings-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid rgba(4, 197, 191, 0.18);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.055);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+}
+
+.artist-settings-actions strong {
+  display: block;
+  color: #ffffff;
+}
+
+.artist-settings-actions small {
+  display: block;
+  margin-top: 4px;
+  color: rgba(219, 230, 238, 0.58);
+}
+
+.artist-settings-actions .artist-save-btn {
+  margin-top: 0;
+}
+
+@media (max-width: 640px) {
+  .artist-settings-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
