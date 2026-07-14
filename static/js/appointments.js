@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     duration: 60,
     styles: [],
     placement: "",
+    placementZones: [],
     size: "",
     budget: "",
     references: [],
@@ -232,9 +233,38 @@ document.addEventListener("DOMContentLoaded", () => {
   function syncHiddenFields() {
     document.getElementById("booking-duration").value = state.duration;
     document.getElementById("booking-styles").value = state.styles.join(",");
+    state.placement = state.placementZones.join(", ");
     document.getElementById("booking-placement").value = state.placement;
     document.getElementById("booking-size").value = state.size;
     document.getElementById("booking-budget").value = state.budget;
+  }
+
+  function renderPlacementChips() {
+    const chips = document.getElementById("booking-placement-chips");
+
+    if (!chips) {
+      return;
+    }
+
+    chips.innerHTML = "";
+
+    if (!state.placementZones.length) {
+      const empty = document.createElement("span");
+      empty.className = "booking-placement-empty";
+      empty.textContent = chips.dataset.emptyLabel || "No placement selected";
+      chips.appendChild(empty);
+      syncHiddenFields();
+      return;
+    }
+
+    state.placementZones.forEach((zone) => {
+      const chip = document.createElement("span");
+      chip.className = "booking-placement-chip";
+      chip.textContent = zone;
+      chips.appendChild(chip);
+    });
+
+    syncHiddenFields();
   }
 
   function renderReview() {
@@ -317,10 +347,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  document.getElementById("booking-placement-text").addEventListener("input", (event) => {
-    state.placement = event.target.value.trim();
-    syncHiddenFields();
+  document.querySelectorAll("[data-placement-zone]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const zone = button.dataset.placementZone;
+      const exists = state.placementZones.includes(zone);
+
+      state.placementZones = exists
+        ? state.placementZones.filter((item) => item !== zone)
+        : [...state.placementZones, zone];
+
+      button.classList.toggle("is-selected", !exists);
+      renderPlacementChips();
+    });
   });
+
+  renderPlacementChips();
 
   document.getElementById("booking-references").addEventListener("change", (event) => {
     const grid = document.getElementById("booking-reference-grid");
