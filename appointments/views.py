@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.serializers.json import DjangoJSONEncoder
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -527,6 +527,64 @@ def appointments_list(request):
 
 
 @login_required
+def calendar_page(request):
+    if _is_verified_artist(request.user):
+        return redirect("artist_booking_settings")
+
+    return redirect("appointments_list")
+
+
+@login_required
+def calendar_events(request):
+    return JsonResponse({"events": []})
+
+
+@login_required
+@require_POST
+def calendar_event_create(request):
+    return JsonResponse(
+        {"ok": False, "detail": "Calendar events API is not implemented yet."},
+        status=501,
+    )
+
+
+@login_required
+@require_POST
+def calendar_event_complete(request, event_id):
+    return JsonResponse(
+        {"ok": False, "detail": "Calendar events API is not implemented yet."},
+        status=501,
+    )
+
+
+@login_required
+@require_POST
+def calendar_reschedule_request(request, event_id):
+    return JsonResponse(
+        {"ok": False, "detail": "Calendar events API is not implemented yet."},
+        status=501,
+    )
+
+
+@login_required
+@require_POST
+def calendar_block_time(request):
+    return JsonResponse(
+        {"ok": False, "detail": "Use artist dashboard blocked periods instead."},
+        status=501,
+    )
+
+
+@login_required
+@require_POST
+def calendar_vacation(request):
+    return JsonResponse(
+        {"ok": False, "detail": "Use artist dashboard blocked periods instead."},
+        status=501,
+    )
+
+
+@login_required
 def appointment_detail(request, appointment_id):
     appointment = get_object_or_404(
         Appointment.objects.select_related(
@@ -569,13 +627,6 @@ def accept_appointment(request, appointment_id):
         booking_settings.auto_response_booking_approved,
     )
 
-    if previous_status != Appointment.STATUS_ACCEPTED:
-        booking_settings = _get_artist_settings(appointment.artist)
-        _send_artist_auto_response(
-            appointment,
-            booking_settings.auto_response_booking_approved,
-        )
-
     messages.success(request, _("Appointment accepted."))
     return redirect("appointment_detail", appointment_id=appointment.id)
 
@@ -598,13 +649,6 @@ def decline_appointment(request, appointment_id):
         appointment,
         booking_settings.auto_response_booking_declined,
     )
-
-    if previous_status != Appointment.STATUS_DECLINED:
-        booking_settings = _get_artist_settings(appointment.artist)
-        _send_artist_auto_response(
-            appointment,
-            booking_settings.auto_response_booking_declined,
-        )
 
     messages.success(request, _("Appointment declined."))
     return redirect("appointment_detail", appointment_id=appointment.id)
