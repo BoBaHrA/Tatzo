@@ -300,12 +300,6 @@ def create_appointment(request, username):
     if booking_type not in valid_booking_types:
         booking_type = Appointment.TYPE_TATTOO
 
-    if (
-        booking_settings.booking_status
-        == ArtistBookingSettings.BOOKING_STATUS_CONSULTATION_ONLY
-    ):
-        booking_type = Appointment.TYPE_CONSULTATION
-
     if not date_raw or not start_time_raw:
         messages.error(request, _("Please choose a date and time."))
         return redirect("booking_wizard", username=artist.username)
