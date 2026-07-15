@@ -18,15 +18,15 @@
     </a>
 
     <nav class="artist-dash-nav">
-      <button type="button" class="artist-dash-nav-item is-active" data-artist-panel-target="dashboard">
+      <a href="{% url 'artist_booking_settings' %}" class="artist-dash-nav-item {% if active_dashboard_panel == 'dashboard' %}is-active{% endif %}" data-artist-panel-target="dashboard" data-artist-panel-link>
         <img src="{% static 'icons/dashboard.svg' %}" class="artist-dash-icon" alt="">
         <span>{% trans "Dashboard" %}</span>
-      </button>
+      </a>
 
-      <button type="button" class="artist-dash-nav-item" data-artist-panel-target="calendar">
+      <a href="{% url 'artist_dashboard_calendar' %}" class="artist-dash-nav-item {% if active_dashboard_panel == 'calendar' %}is-active{% endif %}" data-artist-panel-target="calendar" data-artist-panel-link>
         <img src="{% static 'icons/calendar-dash.svg' %}" class="artist-dash-icon" alt="">
         <span>{% trans "Calendar" %}</span>
-      </button>
+      </a>
 
       <button type="button" class="artist-dash-nav-item" data-artist-panel-target="bookings">
         <img src="{% static 'icons/inbox.svg' %}" class="artist-dash-icon" alt="">
@@ -96,7 +96,7 @@
       </div>
     </header>
 
-    <section class="artist-dash-panel is-active" data-artist-panel="dashboard">
+    <section class="artist-dash-panel {% if active_dashboard_panel == 'dashboard' %}is-active{% endif %}" data-artist-panel="dashboard">
       <div class="artist-stat-grid">
         {% for stat in dashboard_stats %}
           <article class="artist-stat-card {% if stat.strong %}is-strong{% endif %}">
@@ -127,7 +127,7 @@
       </div>
     </section>
 
-    <section class="artist-dash-panel" data-artist-panel="calendar">
+    <section class="artist-dash-panel {% if active_dashboard_panel == 'calendar' %}is-active{% endif %}" data-artist-panel="calendar">
       <form method="post" class="artist-card artist-calendar-form">
         {% csrf_token %}
         <input type="hidden" name="dashboard_form" value="calendar">
@@ -237,6 +237,11 @@
               <div>
                 <strong>{{ appointment.client.username }}</strong>
                 <small>{{ appointment.get_booking_type_display }} · {{ appointment.date }} {{ appointment.start_time|time:"H:i" }}</small>
+                {% if appointment.booking_type == "consultation" or appointment.booking_type == "online_consultation" %}
+                  <em class="artist-status-pill">{% trans "Consultation" %}</em>
+                {% elif appointment.consultation_already_completed %}
+                  <em class="artist-status-pill">{% trans "Consultation done" %}</em>
+                {% endif %}
               </div>
 
               <span class="artist-status-pill is-{{ appointment.status }}">
@@ -263,6 +268,11 @@
                   {% if appointment.placement %} — {{ appointment.placement }}{% endif %}
                 </strong>
                 <small>{{ appointment.styles|join:", "|default:appointment.get_booking_type_display }}</small>
+                {% if appointment.booking_type == "consultation" or appointment.booking_type == "online_consultation" %}
+                  <em class="artist-status-pill">{% trans "Consultation" %}</em>
+                {% elif appointment.consultation_already_completed %}
+                  <em class="artist-status-pill">{% trans "Consultation done" %}</em>
+                {% endif %}
               </div>
 
               <span class="artist-status-pill is-{{ appointment.status }}">
