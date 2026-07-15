@@ -43,6 +43,7 @@ function setAutosaveIndicator(message, state) {
     return;
   }
 
+  window.clearTimeout(Number(indicator.dataset.hideTimer || 0));
   indicator.textContent = message;
   indicator.hidden = false;
   indicator.classList.remove("is-saving", "is-saved", "is-error");
@@ -52,36 +53,24 @@ function setAutosaveIndicator(message, state) {
   }
 
   if (state === "saved") {
-    window.clearTimeout(indicator.dataset.hideTimer);
     const timer = window.setTimeout(() => {
       indicator.hidden = true;
-    }, 1800);
+    }, 2600);
     indicator.dataset.hideTimer = String(timer);
   }
 }
 
-async function autosaveSetting(setting, value) {
-  const autosaveUrl = getAutosaveUrl();
+function getCsrfToken() {
+  return (
+    getCookie("csrftoken") ||
+    document.querySelector('input[name="csrfmiddlewaretoken"]')?.value ||
+    ""
+  );
+}
 
-  if (!autosaveUrl) {
-    return null;
-  }
-
-  setAutosaveIndicator("Saving...", "saving");
-
-  const response = await fetch(autosaveUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": getCookie("csrftoken"),
-    },
-    body: JSON.stringify({ setting, value }),
-  });
-  const data = await response.json().catch(() => ({}));
-
-  if (!response.ok || data.ok === false) {
-    setAutosaveIndicator("Could not save", "error");
-    throw new Error(data.error || "Autosave failed.");
+function updateAutosaveFormState(data) {
+  if (!data) {
+    return;
   }
 
   if (data.current_status) {
@@ -92,6 +81,90 @@ async function autosaveSetting(setting, value) {
     }
   }
 
+  if (data.booking_status) {
+    const bookingStatusInput = document.getElementById("artist-booking-status");
+
+    if (bookingStatusInput) {
+      bookingStatusInput.value = data.booking_status;
+    }
+  }
+
+  if (typeof data.bookings_enabled === "boolean") {
+    document.querySelectorAll('[name="bookings_enabled"]').forEach((input) => {
+      if (input.type === "checkbox") {
+        input.checked = data.bookings_enabled;
+      }
+    });
+  }
+
+  if (data.setting && typeof data.value === "boolean") {
+    document.querySelectorAll(`[name="${data.setting}"]`).forEach((input) => {
+      if (input.type === "checkbox") {
+        input.checked = data.value;
+      }
+    });
+  }
+
+  if (data.setting === "active_styles" && Array.isArray(data.value)) {
+    document.querySelectorAll('[name="active_styles"]').forEach((input) => {
+      input.checked = data.value.includes(input.value);
+    });
+  }
+}
+
+async function autosaveSetting(setting, value) {
+  const autosaveUrl = getAutosaveUrl();
+
+  if (!autosaveUrl) {
+    setAutosaveIndicator("Autosave unavailable", "error");
+    console.error("Tatzo autosave failed", {
+      setting,
+      value,
+      status: "missing-url",
+      data: null,
+    });
+    throw new Error("Autosave URL is missing.");
+  }
+
+  setAutosaveIndicator("Saving...", "saving");
+
+  let response;
+  let data = {};
+
+  try {
+    response = await fetch(autosaveUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCsrfToken(),
+      },
+      body: JSON.stringify({ setting, value }),
+    });
+    data = await response.json().catch(() => ({}));
+  } catch (error) {
+    setAutosaveIndicator("Could not save", "error");
+    console.error("Tatzo autosave failed", {
+      setting,
+      value,
+      status: "network-error",
+      data: error,
+    });
+    throw error;
+  }
+
+  if (!response.ok || data.ok === false) {
+    setAutosaveIndicator("Could not save", "error");
+    console.error("Tatzo autosave failed", {
+      setting,
+      value,
+      status: response.status,
+      data,
+    });
+    throw new Error(data.error || "Autosave failed.");
+  }
+
+  updateAutosaveFormState(data);
+  window.dispatchEvent(new CustomEvent("tatzo:autosave-success", { detail: data }));
   setAutosaveIndicator("Saved", "saved");
   return data;
 }
@@ -253,79 +326,6 @@ function formatBlockedDate(value) {
     year: "numeric",
   });
 
-  syncBlockedEmptyState();
-}
-
-function rebuildBlockedChips() {
-  renderBlockedEntries(readBlockedEntries());
-}
-
-function upsertBlockedDates(dates, reason) {
-  const entriesByDate = new Map(
-    readBlockedEntries().map((entry) => [entry.date, entry.reason])
-  );
-  let changed = false;
-
-  dates.forEach((dateValue) => {
-    const existingReason = entriesByDate.get(dateValue);
-
-    if (existingReason === undefined) {
-      entriesByDate.set(dateValue, reason);
-      changed = true;
-      return;
-    }
-
-    if (reason && (!existingReason || isDefaultBlockedReason(existingReason))) {
-      entriesByDate.set(dateValue, reason);
-      changed = true;
-    }
-  });
-
-  return {
-    changed,
-    entries: Array.from(entriesByDate, ([date, entryReason]) => ({
-      date,
-      reason: entryReason,
-    })).sort((a, b) => a.date.localeCompare(b.date)),
-  };
-}
-
-function formatBlockedLabel(startValue, endValue, reason) {
-  const range = startValue === endValue
-    ? formatBlockedDate(startValue)
-    : `${formatBlockedDate(startValue)} — ${formatBlockedDate(endValue)}`;
-
-  return reason ? `${range} · ${reason}` : range;
-}
-
-function isDefaultBlockedReason(reason) {
-  return reason === "Blocked from artist dashboard";
-}
-
-function readBlockedEntries() {
-  const dateInputs = Array.from(document.querySelectorAll('input[name="blocked_dates"]'));
-  const reasonInputs = Array.from(document.querySelectorAll('input[name="blocked_reasons"]'));
-  const entriesByDate = new Map();
-
-  dateInputs.forEach((input, index) => {
-    const dateValue = input.value;
-
-    if (!dateValue || !parseISODateValue(dateValue)) {
-      return;
-    }
-
-    const reason = (reasonInputs[index]?.value || "").trim().slice(0, 160);
-    const existingReason = entriesByDate.get(dateValue);
-
-    if (
-      existingReason === undefined
-      || (!existingReason && reason)
-      || (isDefaultBlockedReason(existingReason) && reason)
-    ) {
-      entriesByDate.set(dateValue, reason);
-    }
-  });
-
   return Array.from(entriesByDate, ([date, reason]) => ({ date, reason }))
     .sort((a, b) => a.date.localeCompare(b.date));
 }
@@ -718,11 +718,235 @@ function upsertBlockedDates(dates, reason) {
     })).sort((a, b) => a.date.localeCompare(b.date)),
   };
 }
+
+function formatBlockedLabel(startValue, endValue, reason) {
+  const range = startValue === endValue
+    ? formatBlockedDate(startValue)
+    : `${formatBlockedDate(startValue)} — ${formatBlockedDate(endValue)}`;
+
+  return reason ? `${range} · ${reason}` : range;
+}
+
+function isDefaultBlockedReason(reason) {
+  return reason === "Blocked from artist dashboard";
+}
+
+function readBlockedEntries() {
+  const dateInputs = Array.from(document.querySelectorAll('input[name="blocked_dates"]'));
+  const reasonInputs = Array.from(document.querySelectorAll('input[name="blocked_reasons"]'));
+  const entriesByDate = new Map();
+
+  dateInputs.forEach((input, index) => {
+    const dateValue = input.value;
+
+    if (!dateValue || !parseISODateValue(dateValue)) {
+      return;
+    }
+
+    const reason = (reasonInputs[index]?.value || "").trim().slice(0, 160);
+    const existingReason = entriesByDate.get(dateValue);
+
+    if (
+      existingReason === undefined
+      || (!existingReason && reason)
+      || (isDefaultBlockedReason(existingReason) && reason)
+    ) {
+      entriesByDate.set(dateValue, reason);
+    }
+  });
+
+  return Array.from(entriesByDate, ([date, reason]) => ({ date, reason }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function normalizeBlockedRanges(entries) {
+  const ranges = [];
+
+  entries.forEach((entry) => {
+    const previous = ranges[ranges.length - 1];
+
+    if (
+      previous
+      && previous.reason === entry.reason
+      && addDays(previous.endDate, 1) === entry.date
+    ) {
+      previous.endDate = entry.date;
+      previous.dates.push(entry.date);
+      return;
+    }
+
+    ranges.push({
+      startDate: entry.date,
+      endDate: entry.date,
+      reason: entry.reason,
+      dates: [entry.date],
+    });
+  });
+
+  return ranges;
+}
+
+function createBlockedPeriodChip(range) {
+  const chip = document.createElement("div");
+  chip.className = "artist-blocked-chip";
+  chip.dataset.blockedChip = "";
+  chip.dataset.startDate = range.startDate;
+  chip.dataset.endDate = range.endDate;
+  chip.dataset.reason = range.reason;
+
+  range.dates.forEach((dateValue) => {
+    chip.appendChild(createHiddenInput("blocked_dates", dateValue));
+    chip.appendChild(createHiddenInput("blocked_reasons", range.reason));
+  });
+
+  const label = document.createElement("span");
+  label.textContent = formatBlockedLabel(range.startDate, range.endDate, range.reason);
+  chip.appendChild(label);
+
+  const removeButton = document.createElement("button");
+  removeButton.type = "button";
+  removeButton.setAttribute("aria-label", "Remove blocked period");
+  removeButton.textContent = "×";
+  chip.appendChild(removeButton);
+
+  return chip;
+}
+
+function renderBlockedEntries(entries) {
+  const list = document.getElementById("artist-blocked-list");
+
+  if (!list) {
+    return;
+  }
+
+  list.innerHTML = "";
+
+  normalizeBlockedRanges(entries).forEach((range) => {
+    list.appendChild(createBlockedPeriodChip(range));
+  });
+
+  syncBlockedEmptyState();
+}
+
+function rebuildBlockedChips() {
+  renderBlockedEntries(readBlockedEntries());
+}
+
+function upsertBlockedDates(dates, reason) {
+  const entriesByDate = new Map(
+    readBlockedEntries().map((entry) => [entry.date, entry.reason])
+  );
+  let changed = false;
+
+  dates.forEach((dateValue) => {
+    const existingReason = entriesByDate.get(dateValue);
+
+    if (existingReason === undefined) {
+      entriesByDate.set(dateValue, reason);
+      changed = true;
+      return;
+    }
+
+    if (reason && (!existingReason || isDefaultBlockedReason(existingReason))) {
+      entriesByDate.set(dateValue, reason);
+      changed = true;
+    }
+  });
+
+  return {
+    changed,
+    entries: Array.from(entriesByDate, ([date, entryReason]) => ({
+      date,
+      reason: entryReason,
+    })).sort((a, b) => a.date.localeCompare(b.date)),
+  };
+}
+
+
+function handleBookingRuleAutosave(ruleCard) {
+  const bookingStatusInput = document.getElementById("artist-booking-status");
+  const bookingStatus = ruleCard.dataset.bookingStatus;
+  const previousStatus = bookingStatusInput?.value || "";
+  const previousActiveCard = document.querySelector(".artist-rule-card.is-active");
+
+  if (bookingStatusInput && bookingStatus) {
+    bookingStatusInput.value = bookingStatus;
+  }
+
+  document.querySelectorAll(".artist-rule-card").forEach((card) => {
+    card.classList.toggle("is-active", card === ruleCard);
+  });
+
+  if (!bookingStatus) {
+    return;
+  }
+
+  autosaveSetting("booking_status", bookingStatus).catch(() => {
+    if (bookingStatusInput) {
+      bookingStatusInput.value = previousStatus;
+    }
+
+    document.querySelectorAll(".artist-rule-card").forEach((card) => {
+      card.classList.toggle("is-active", card === previousActiveCard);
+    });
+  });
+}
+
+function handleAutosaveCheckboxChange(checkbox) {
+  const setting = checkbox.dataset.autosaveSetting;
+  const checked = checkbox.checked;
+
+  autosaveSetting(setting, checked).catch(() => {
+    checkbox.checked = !checked;
+    syncCalendarRows();
+  });
+}
+
+function handleActiveStylesAutosave(checkbox) {
+  const checked = checkbox.checked;
+
+  autosaveSetting("active_styles", collectActiveStyles()).catch(() => {
+    checkbox.checked = !checked;
+  });
+}
+
+function attachAutosaveHandlers() {
+  document.querySelectorAll(".artist-rule-card").forEach((card) => {
+    card.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.tatzoAutosaveHandled = true;
+      handleBookingRuleAutosave(card);
+    });
+  });
+
+  document.querySelectorAll("[data-autosave-setting]").forEach((input) => {
+    input.addEventListener("change", (event) => {
+      event.tatzoAutosaveHandled = true;
+      handleAutosaveCheckboxChange(input);
+    });
+  });
+
+  document.querySelectorAll("[data-autosave-styles]").forEach((input) => {
+    input.addEventListener("change", (event) => {
+      event.tatzoAutosaveHandled = true;
+      handleActiveStylesAutosave(input);
+    });
+  });
+}
+
+window.tatzoAutosaveTest = function tatzoAutosaveTest(setting, value) {
+  return autosaveSetting(setting, value);
+};
 
 document.addEventListener("DOMContentLoaded", () => {
-  refreshArtistIcons();
-  syncCalendarRows();
-  rebuildBlockedChips();
+  [refreshArtistIcons, syncCalendarRows, rebuildBlockedChips].forEach((init) => {
+    try {
+      init();
+    } catch (error) {
+      console.error("Tatzo dashboard init failed", error);
+    }
+  });
+  attachAutosaveHandlers();
 
   document.addEventListener("click", (event) => {
     const panelTrigger = event.target.closest("[data-artist-panel-target]");
@@ -772,31 +996,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const ruleCard = event.target.closest(".artist-rule-card");
 
-    if (ruleCard) {
-      const bookingStatusInput = document.getElementById("artist-booking-status");
-      const bookingStatus = ruleCard.dataset.bookingStatus;
-      const previousStatus = bookingStatusInput?.value || "";
-      const previousActiveCard = document.querySelector(".artist-rule-card.is-active");
-
-      if (bookingStatusInput && bookingStatus) {
-        bookingStatusInput.value = bookingStatus;
-      }
-
-      document.querySelectorAll(".artist-rule-card").forEach((card) => {
-        card.classList.toggle("is-active", card === ruleCard);
-      });
-
-      if (bookingStatus) {
-        autosaveSetting("booking_status", bookingStatus).catch(() => {
-          if (bookingStatusInput) {
-            bookingStatusInput.value = previousStatus;
-          }
-
-          document.querySelectorAll(".artist-rule-card").forEach((card) => {
-            card.classList.toggle("is-active", card === previousActiveCard);
-          });
-        });
-      }
+    if (ruleCard && !event.tatzoAutosaveHandled) {
+      event.preventDefault();
+      handleBookingRuleAutosave(ruleCard);
     }
   });
 
@@ -805,24 +1007,12 @@ document.addEventListener("DOMContentLoaded", () => {
       syncCalendarRows();
     }
 
-    if (event.target.matches("[data-autosave-setting]")) {
-      const checkbox = event.target;
-      const setting = checkbox.dataset.autosaveSetting;
-      const checked = checkbox.checked;
-
-      autosaveSetting(setting, checked).catch(() => {
-        checkbox.checked = !checked;
-        syncCalendarRows();
-      });
+    if (event.target.matches("[data-autosave-setting]") && !event.tatzoAutosaveHandled) {
+      handleAutosaveCheckboxChange(event.target);
     }
 
-    if (event.target.matches("[data-autosave-styles]")) {
-      const checkbox = event.target;
-      const checked = checkbox.checked;
-
-      autosaveSetting("active_styles", collectActiveStyles()).catch(() => {
-        checkbox.checked = !checked;
-      });
+    if (event.target.matches("[data-autosave-styles]") && !event.tatzoAutosaveHandled) {
+      handleActiveStylesAutosave(event.target);
     }
   });
 

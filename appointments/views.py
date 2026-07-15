@@ -306,6 +306,12 @@ def create_appointment(request, username):
     ):
         booking_type = Appointment.TYPE_CONSULTATION
 
+    if (
+        booking_settings.booking_status
+        == ArtistBookingSettings.BOOKING_STATUS_CONSULTATION_ONLY
+    ):
+        booking_type = Appointment.TYPE_CONSULTATION
+
     if not date_raw or not start_time_raw:
         messages.error(request, _("Please choose a date and time."))
         return redirect("booking_wizard", username=artist.username)
@@ -860,6 +866,125 @@ def _save_artist_blocked_dates_from_post(artist, post_data):
             date=blocked_date,
             reason=reason,
         )
+
+
+@login_required
+@require_POST
+def autosave_artist_booking_setting(request):
+    if not _is_verified_artist(request.user):
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": _("Only verified tattoo artists can change these settings."),
+            },
+            status=403,
+        )
+
+    try:
+        payload = json.loads(request.body.decode("utf-8") or "{}")
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"ok": False, "error": _("Invalid JSON payload.")},
+            status=400,
+        )
+
+    setting = payload.get("setting")
+    value = payload.get("value")
+    booking_settings, created = ArtistBookingSettings.objects.get_or_create(
+        artist=request.user,
+        defaults={"active_styles": ["Fine Line", "Blackwork", "Geometric"]},
+    )
+
+    boolean_settings = {
+        "bookings_enabled",
+        "consultation_enabled",
+        "online_consultation_enabled",
+        "studio_consultation_enabled",
+        "phone_consultation_enabled",
+        "consultation_required_before_booking",
+        "reference_images_required",
+        "deposit_required",
+    }
+
+    update_fields = [setting]
+
+    if setting in boolean_settings:
+        value = value if isinstance(value, bool) else str(value).lower() == "true"
+        setattr(booking_settings, setting, value)
+    elif setting == "booking_status":
+        allowed_statuses = dict(ArtistBookingSettings.BOOKING_STATUS_CHOICES)
+
+        if value not in allowed_statuses:
+            return JsonResponse(
+                {"ok": False, "error": _("Invalid booking status.")},
+                status=400,
+            )
+
+        booking_settings.booking_status = value
+        booking_settings.bookings_enabled = value in {
+            ArtistBookingSettings.BOOKING_STATUS_OPEN,
+            ArtistBookingSettings.BOOKING_STATUS_CONSULTATION_ONLY,
+        }
+        update_fields = ["booking_status", "bookings_enabled"]
+    elif setting == "active_styles":
+        if not isinstance(value, list):
+            return JsonResponse(
+                {"ok": False, "error": _("Active styles must be a list.")},
+                status=400,
+            )
+
+        cleaned_styles = []
+        for style in value:
+            if not isinstance(style, str):
+                continue
+
+            style = style.strip()[:80]
+            if style and style not in cleaned_styles:
+                cleaned_styles.append(style)
+
+            if len(cleaned_styles) >= 30:
+                break
+
+        value = cleaned_styles
+        booking_settings.active_styles = cleaned_styles
+    else:
+        return JsonResponse(
+            {"ok": False, "error": _("This setting cannot be autosaved.")},
+            status=400,
+        )
+
+    booking_settings.save(update_fields=update_fields)
+    booking_settings.refresh_from_db()
+
+    if setting == "booking_status":
+        persisted_value = booking_settings.booking_status
+    else:
+        persisted_value = getattr(booking_settings, setting)
+
+    response_payload = {
+        "ok": True,
+        "setting": setting,
+        "value": persisted_value,
+        "current_status": str(
+            _get_booking_status_label(
+                getattr(
+                    booking_settings,
+                    "booking_status",
+                    ArtistBookingSettings.BOOKING_STATUS_OPEN,
+                )
+            )
+        ),
+    }
+
+    if setting == "booking_status":
+        response_payload.update(
+            {
+                "booking_status": booking_settings.booking_status,
+                "bookings_enabled": booking_settings.bookings_enabled,
+            }
+        )
+
+    return JsonResponse(response_payload)
 
 
 @login_required
