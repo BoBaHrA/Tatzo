@@ -300,6 +300,12 @@ def create_appointment(request, username):
     if booking_type not in valid_booking_types:
         booking_type = Appointment.TYPE_TATTOO
 
+    if (
+        booking_settings.booking_status
+        == ArtistBookingSettings.BOOKING_STATUS_CONSULTATION_ONLY
+    ):
+        booking_type = Appointment.TYPE_CONSULTATION
+
     if not date_raw or not start_time_raw:
         messages.error(request, _("Please choose a date and time."))
         return redirect("booking_wizard", username=artist.username)
@@ -857,6 +863,111 @@ def _save_artist_blocked_dates_from_post(artist, post_data):
 
 
 @login_required
+@require_POST
+def autosave_artist_booking_setting(request):
+    if not _is_verified_artist(request.user):
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": _("Only verified tattoo artists can change these settings."),
+            },
+            status=403,
+        )
+
+    try:
+        payload = json.loads(request.body.decode("utf-8") or "{}")
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"ok": False, "error": _("Invalid JSON payload.")},
+            status=400,
+        )
+
+    setting = payload.get("setting")
+    value = payload.get("value")
+    booking_settings, created = ArtistBookingSettings.objects.get_or_create(
+        artist=request.user,
+        defaults={"active_styles": ["Fine Line", "Blackwork", "Geometric"]},
+    )
+
+    boolean_settings = {
+        "bookings_enabled",
+        "consultation_enabled",
+        "online_consultation_enabled",
+        "studio_consultation_enabled",
+        "phone_consultation_enabled",
+        "consultation_required_before_booking",
+        "reference_images_required",
+        "deposit_required",
+    }
+
+    update_fields = [setting]
+
+    if setting in boolean_settings:
+        value = value if isinstance(value, bool) else str(value).lower() == "true"
+        setattr(booking_settings, setting, value)
+    elif setting == "booking_status":
+        allowed_statuses = dict(ArtistBookingSettings.BOOKING_STATUS_CHOICES)
+
+        if value not in allowed_statuses:
+            return JsonResponse(
+                {"ok": False, "error": _("Invalid booking status.")},
+                status=400,
+            )
+
+        booking_settings.booking_status = value
+        booking_settings.bookings_enabled = value in {
+            ArtistBookingSettings.BOOKING_STATUS_OPEN,
+            ArtistBookingSettings.BOOKING_STATUS_CONSULTATION_ONLY,
+        }
+        update_fields = ["booking_status", "bookings_enabled"]
+    elif setting == "active_styles":
+        if not isinstance(value, list):
+            return JsonResponse(
+                {"ok": False, "error": _("Active styles must be a list.")},
+                status=400,
+            )
+
+        cleaned_styles = []
+        for style in value:
+            if not isinstance(style, str):
+                continue
+
+            style = style.strip()[:80]
+            if style and style not in cleaned_styles:
+                cleaned_styles.append(style)
+
+            if len(cleaned_styles) >= 30:
+                break
+
+        value = cleaned_styles
+        booking_settings.active_styles = cleaned_styles
+    else:
+        return JsonResponse(
+            {"ok": False, "error": _("This setting cannot be autosaved.")},
+            status=400,
+        )
+
+    booking_settings.save(update_fields=update_fields)
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "setting": setting,
+            "value": value,
+            "current_status": str(
+                _get_booking_status_label(
+                    getattr(
+                        booking_settings,
+                        "booking_status",
+                        ArtistBookingSettings.BOOKING_STATUS_OPEN,
+                    )
+                )
+            ),
+        }
+    )
+
+
+@login_required
 def artist_booking_settings(request, active_panel="dashboard"):
     if not _is_verified_artist(request.user):
         messages.error(
@@ -1220,7 +1331,6 @@ def artist_booking_settings(request, active_panel="dashboard"):
             "portfolio_preview": portfolio_preview,
             "unread_messages_preview": unread_messages_preview,
             "reviews_preview": reviews_preview,
-            "active_dashboard_panel": active_panel,
             "current_status": _get_booking_status_label(
                 getattr(
                     booking_settings,
@@ -1230,349 +1340,3 @@ def artist_booking_settings(request, active_panel="dashboard"):
             ),
         },
     )
-
-# Calendar integration
-from django.core.exceptions import ValidationError
-from django.http import JsonResponse
-from django.views.decorators.http import require_GET
-from django.utils.dateparse import parse_date, parse_datetime
-from .models import CalendarEvent, CalendarRescheduleRequest
-
-CALENDAR_DAILY_CAPACITY_HOURS = 10  # TODO: Move to artist settings when capacity settings exist.
-
-APPOINTMENT_CALENDAR_STATUSES = [
-    Appointment.STATUS_ACCEPTED,
-    Appointment.STATUS_COMPLETED,
-    Appointment.STATUS_CONSULTATION_REQUIRED,
-]
-
-
-def _calendar_role(user):
-    profile = getattr(user, "profile", None)
-    return "artist" if profile and profile.account_type == "tattoo_artist" else "client"
-
-
-def _calendar_queryset(user):
-    qs = CalendarEvent.objects.select_related("artist", "client", "project").prefetch_related("reschedule_requests")
-    # Appointment is the canonical source for appointment-backed calendar entries.
-    qs = qs.filter(project__isnull=True)
-    return qs.filter(artist=user) if _calendar_role(user) == "artist" else qs.filter(client=user)
-
-
-def _appointment_queryset(user):
-    qs = Appointment.objects.select_related("artist", "client").filter(
-        status__in=APPOINTMENT_CALENDAR_STATUSES,
-    )
-    return qs.filter(artist=user) if _calendar_role(user) == "artist" else qs.filter(client=user)
-
-
-def _parse_local_datetime(date_value, time_value):
-    current_tz = timezone.get_current_timezone()
-    naive = datetime.combine(datetime.strptime(date_value, "%Y-%m-%d").date(), datetime.strptime(time_value, "%H:%M").time())
-    return timezone.make_aware(naive, current_tz)
-
-
-def _appointment_start_end(appointment):
-    current_tz = timezone.get_current_timezone()
-    starts_at = timezone.make_aware(
-        datetime.combine(appointment.date, appointment.start_time),
-        current_tz,
-    )
-
-    if appointment.end_time:
-        ends_at = timezone.make_aware(
-            datetime.combine(appointment.date, appointment.end_time),
-            current_tz,
-        )
-        if ends_at <= starts_at:
-            ends_at += timedelta(days=1)
-        return starts_at, ends_at
-
-    duration_minutes = appointment.session_length_minutes or 60
-    return starts_at, starts_at + timedelta(minutes=duration_minutes)
-
-
-def _chat_url_for(event, user):
-    other = event.client if user == event.artist else event.artist
-    if not other:
-        return ""
-    thread = ChatThread.get_or_create_for_users(user, other)
-    return reverse("chat_thread", kwargs={"thread_id": thread.id})
-
-
-def _appointment_chat_url_for(appointment, user):
-    other = appointment.client if user == appointment.artist else appointment.artist
-    thread = ChatThread.get_or_create_for_users(user, other)
-    return reverse("chat_thread", kwargs={"thread_id": thread.id})
-
-
-def _appointment_event_type(appointment):
-    if appointment.booking_type in [Appointment.TYPE_CONSULTATION, Appointment.TYPE_ONLINE_CONSULTATION]:
-        return CalendarEvent.TYPE_CONSULTATION
-    if appointment.status == Appointment.STATUS_CONSULTATION_REQUIRED:
-        return CalendarEvent.TYPE_CONSULTATION
-    return CalendarEvent.TYPE_TATTOO_SESSION
-
-
-def _appointment_status(appointment):
-    if appointment.status == Appointment.STATUS_COMPLETED:
-        return CalendarEvent.STATUS_COMPLETED
-    return CalendarEvent.STATUS_CONFIRMED
-
-
-def _appointment_title(appointment):
-    description = (appointment.description or "").strip()
-    if description:
-        return description[:80]
-    return appointment.get_booking_type_display()
-
-
-def _duration_hours(starts_at, ends_at):
-    return round((ends_at - starts_at).total_seconds() / 3600, 2)
-
-
-def _appointment_payload(appointment, user):
-    starts_at, ends_at = _appointment_start_end(appointment)
-    is_artist = user == appointment.artist
-    event_type = _appointment_event_type(appointment)
-    status = _appointment_status(appointment)
-    style = ", ".join(appointment.styles or [])
-    detail_url = reverse("appointment_detail", kwargs={"appointment_id": appointment.id})
-    complete_url = reverse("calendar_appointment_complete", kwargs={"appointment_id": appointment.id}) if is_artist and status != CalendarEvent.STATUS_COMPLETED else ""
-
-    return {
-        "id": f"appointment-{appointment.id}",
-        "source_type": "appointment",
-        "source_id": appointment.id,
-        "event_type": event_type,
-        "event_type_label": dict(CalendarEvent.EVENT_TYPE_CHOICES).get(event_type, appointment.get_booking_type_display()),
-        "status": status,
-        "status_label": dict(CalendarEvent.STATUS_CHOICES).get(status, status),
-        "title": _appointment_title(appointment),
-        "starts_at": starts_at.isoformat(),
-        "ends_at": ends_at.isoformat(),
-        "duration_hours": _duration_hours(starts_at, ends_at),
-        "location": "",
-        "notes": appointment.description,
-        "placement": appointment.placement,
-        "tattoo_style": style,
-        "deposit_status": CalendarEvent.DEPOSIT_UNKNOWN,
-        "deposit_status_label": dict(CalendarEvent.DEPOSIT_STATUS_CHOICES).get(CalendarEvent.DEPOSIT_UNKNOWN),
-        "client_name": appointment.client.username if is_artist else "",
-        "artist_name": appointment.artist.username,
-        "project_title": appointment.get_booking_type_display(),
-        "project_url": detail_url,
-        "chat_url": _appointment_chat_url_for(appointment, user),
-        "can_complete": bool(complete_url),
-        "can_request_reschedule": user == appointment.client,
-        "pending_reschedule": False,
-        "preparation_note": _("Please confirm the studio address and arrive on time."),
-        "actions": {
-            "complete_url": complete_url,
-            "reschedule_url": "",
-            "detail_url": detail_url,
-            "chat_url": _appointment_chat_url_for(appointment, user),
-        },
-    }
-
-
-def _event_payload(event, user):
-    is_artist = user == event.artist
-    pending_reschedule = event.reschedule_requests.filter(status=CalendarRescheduleRequest.STATUS_PENDING).exists()
-    client_name = event.client.username if event.client else ""
-    artist_name = event.artist.username
-    detail_url = reverse("appointment_detail", kwargs={"appointment_id": event.project_id}) if event.project_id else ""
-    chat_url = _chat_url_for(event, user) if event.client_id else ""
-    complete_url = reverse("calendar_event_complete", kwargs={"event_id": event.id}) if is_artist and event.status != CalendarEvent.STATUS_COMPLETED else ""
-    reschedule_url = reverse("calendar_reschedule_request", kwargs={"event_id": event.id}) if user == event.client else ""
-    return {
-        "id": f"calendar-event-{event.id}",
-        "source_type": "calendar_event",
-        "source_id": event.id,
-        "event_type": event.event_type,
-        "event_type_label": event.get_event_type_display(),
-        "status": event.status,
-        "status_label": event.get_status_display(),
-        "title": event.title,
-        "starts_at": event.starts_at.isoformat(),
-        "ends_at": event.ends_at.isoformat(),
-        "duration_hours": event.duration_hours,
-        "location": event.location,
-        "notes": event.notes,
-        "placement": event.placement,
-        "tattoo_style": event.tattoo_style,
-        "deposit_status": event.deposit_status,
-        "deposit_status_label": event.get_deposit_status_display(),
-        "client_name": client_name if is_artist else "",
-        "artist_name": artist_name,
-        "project_title": str(event.project) if event.project else "",
-        "project_url": detail_url,
-        "chat_url": chat_url,
-        "can_complete": bool(complete_url),
-        "can_request_reschedule": user == event.client,
-        "pending_reschedule": pending_reschedule,
-        "preparation_note": _("Please confirm the studio address and arrive on time."),
-        "actions": {
-            "complete_url": complete_url,
-            "reschedule_url": reschedule_url,
-            "detail_url": detail_url,
-            "chat_url": chat_url,
-        },
-    }
-
-
-def _payload_start(payload):
-    return datetime.fromisoformat(payload["starts_at"])
-
-
-def _calendar_summary(payloads, role):
-    days = {}
-    insights = []
-    for payload in payloads:
-        if payload["status"] in [CalendarEvent.STATUS_CANCELLED]:
-            continue
-        local_start = timezone.localtime(_payload_start(payload))
-        day_key = local_start.date().isoformat()
-        bucket = days.setdefault(day_key, {"sessions": 0, "consultations": 0, "booked_hours": 0, "events": 0, "workload": "empty"})
-        bucket["events"] += 1
-        if payload["event_type"] == CalendarEvent.TYPE_TATTOO_SESSION:
-            bucket["sessions"] += 1
-            bucket["booked_hours"] += payload["duration_hours"]
-        elif payload["event_type"] == CalendarEvent.TYPE_CONSULTATION:
-            bucket["consultations"] += 1
-            bucket["booked_hours"] += payload["duration_hours"]
-        elif payload["event_type"] == CalendarEvent.TYPE_VACATION:
-            bucket["workload"] = "vacation"
-        elif payload["event_type"] == CalendarEvent.TYPE_BLOCKED and bucket["workload"] != "vacation":
-            bucket["workload"] = "blocked"
-        if role == "client" and payload["status"] == CalendarEvent.STATUS_DEPOSIT_PENDING:
-            insights.append(_("A deposit is pending for an upcoming event."))
-    for day, bucket in days.items():
-        if bucket["workload"] in ["vacation", "blocked"]:
-            continue
-        hours = bucket["booked_hours"]
-        bucket["workload"] = "full" if hours >= CALENDAR_DAILY_CAPACITY_HOURS else "busy" if hours >= 8 else "light" if hours > 0 else "empty"
-        if role == "artist" and hours > 8:
-            insights.append(_("One day has more than 8 booked tattoo hours."))
-        if role == "artist" and hours >= CALENDAR_DAILY_CAPACITY_HOURS:
-            insights.append(_("One day is fully booked."))
-    return days, list(dict.fromkeys([str(item) for item in insights]))[:5]
-
-
-@login_required
-def calendar_page(request):
-    role = _calendar_role(request.user)
-    clients = User.objects.filter(calendar_client_events__artist=request.user).distinct().order_by("username") if role == "artist" else User.objects.none()
-    return render(request, "users/calendar.html", {"calendar_context": "user", "calendar_role": role, "calendar_capacity_hours": CALENDAR_DAILY_CAPACITY_HOURS, "calendar_clients": clients})
-
-
-@login_required
-def artist_dashboard_calendar(request):
-    if _calendar_role(request.user) != "artist":
-        return JsonResponse({"error": _("Artist dashboard calendar is available only for tattoo artists.")}, status=403)
-    return artist_booking_settings(request, active_panel="calendar")
-
-
-@login_required
-@require_GET
-def calendar_events(request):
-    start = parse_date(request.GET.get("start", ""))
-    end = parse_date(request.GET.get("end", ""))
-    if not start or not end:
-        return JsonResponse({"error": _("Valid start and end dates are required.")}, status=400)
-    current_tz = timezone.get_current_timezone()
-    start_dt = timezone.make_aware(datetime.combine(start, time.min), current_tz)
-    end_dt = timezone.make_aware(datetime.combine(end, time.max), current_tz)
-
-    calendar_event_payloads = [
-        _event_payload(event, request.user)
-        for event in _calendar_queryset(request.user).filter(starts_at__lte=end_dt, ends_at__gte=start_dt)
-    ]
-    appointment_payloads = [
-        _appointment_payload(appointment, request.user)
-        for appointment in _appointment_queryset(request.user).filter(date__gte=start, date__lte=end)
-    ]
-    payloads = sorted(appointment_payloads + calendar_event_payloads, key=lambda item: item["starts_at"])
-    summary, insights = _calendar_summary(payloads, _calendar_role(request.user))
-    return JsonResponse({"role": _calendar_role(request.user), "capacity_hours": CALENDAR_DAILY_CAPACITY_HOURS, "events": payloads, "days": summary, "insights": insights})
-
-
-def _create_calendar_event(request, forced_type=None):
-    if _calendar_role(request.user) != "artist":
-        return JsonResponse({"error": _("Only artists can create calendar events.")}, status=403)
-    event_type = forced_type or request.POST.get("event_type")
-    client_id = request.POST.get("client") or None
-    client = get_object_or_404(User, pk=client_id) if client_id else None
-    try:
-        starts_at = _parse_local_datetime(request.POST["date"], request.POST["start_time"])
-        ends_at = _parse_local_datetime(request.POST["date"], request.POST["end_time"])
-    except (KeyError, ValueError):
-        return JsonResponse({"error": _("Valid date, start time and end time are required.")}, status=400)
-    event = CalendarEvent(artist=request.user, client=client, event_type=event_type, status=CalendarEvent.STATUS_PLANNED, title=(request.POST.get("title") or dict(CalendarEvent.EVENT_TYPE_CHOICES).get(event_type, _("Calendar event"))), starts_at=starts_at, ends_at=ends_at, location=request.POST.get("location", ""), notes=request.POST.get("notes", ""))
-    try:
-        event.full_clean()
-    except ValidationError as exc:
-        return JsonResponse({"error": exc.message_dict if hasattr(exc, "message_dict") else exc.messages}, status=400)
-    if event.overlaps_for_artist():
-        return JsonResponse({"error": _("This event overlaps another artist event.")}, status=409)
-    event.save()
-    return JsonResponse({"event": _event_payload(event, request.user)}, status=201)
-
-
-@login_required
-@require_POST
-def calendar_event_create(request):
-    return _create_calendar_event(request)
-
-
-@login_required
-@require_POST
-def calendar_block_time(request):
-    return _create_calendar_event(request, CalendarEvent.TYPE_BLOCKED)
-
-
-@login_required
-@require_POST
-def calendar_vacation(request):
-    return _create_calendar_event(request, CalendarEvent.TYPE_VACATION)
-
-
-@login_required
-@require_POST
-def calendar_event_complete(request, event_id):
-    event = get_object_or_404(CalendarEvent, pk=event_id)
-    if event.artist_id != request.user.id:
-        return JsonResponse({"error": _("You cannot complete this event.")}, status=403)
-    event.status = CalendarEvent.STATUS_COMPLETED
-    event.save(update_fields=["status", "updated_at"])
-    return JsonResponse({"event": _event_payload(event, request.user)})
-
-
-@login_required
-@require_POST
-def calendar_appointment_complete(request, appointment_id):
-    appointment = get_object_or_404(Appointment, pk=appointment_id, artist=request.user)
-    if appointment.status not in [Appointment.STATUS_ACCEPTED, Appointment.STATUS_CONSULTATION_REQUIRED]:
-        return JsonResponse({"error": _("This appointment cannot be completed from calendar.")}, status=400)
-    appointment.status = Appointment.STATUS_COMPLETED
-    appointment.save(update_fields=["status", "updated_at"])
-    return JsonResponse({"event": _appointment_payload(appointment, request.user)})
-
-
-@login_required
-@require_POST
-def calendar_reschedule_request(request, event_id):
-    event = get_object_or_404(CalendarEvent, pk=event_id)
-    if event.client_id != request.user.id:
-        return JsonResponse({"error": _("You can request reschedule only for your own event.")}, status=403)
-    proposed_start = parse_datetime(request.POST.get("proposed_start", "")) if request.POST.get("proposed_start") else None
-    proposed_end = parse_datetime(request.POST.get("proposed_end", "")) if request.POST.get("proposed_end") else None
-    req = CalendarRescheduleRequest(event=event, requested_by=request.user, proposed_start=proposed_start, proposed_end=proposed_end, reason=request.POST.get("reason", ""))
-    try:
-        req.full_clean()
-    except ValidationError as exc:
-        return JsonResponse({"error": exc.message_dict if hasattr(exc, "message_dict") else exc.messages}, status=400)
-    req.save()
-    event.status = CalendarEvent.STATUS_RESCHEDULE_REQUESTED
-    event.save(update_fields=["status", "updated_at"])
-    return JsonResponse({"status": req.status, "event": _event_payload(event, request.user)}, status=201)

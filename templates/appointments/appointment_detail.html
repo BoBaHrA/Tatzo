@@ -1,128 +1,77 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "Appointment details" %} | Tatzo{% endblock %}
+{% block title %}{% trans "Appointment" %} | Tatzo{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/home.css' %}">
 <link rel="stylesheet" href="{% static 'css/appointments.css' %}">
 {% endblock %}
 
 {% block content %}
-{% include "partials/sidebar.html" %}
+<div class="appointment-page">
+  <div class="appointment-shell">
+    <a href="{% url 'appointments_list' %}" class="booking-back">← {% trans "Back to appointments" %}</a>
 
-<div class="booking-page">
-  <div class="booking-shell appointment-detail-shell">
-    <div class="appointment-nav-row">
-      <a href="{% url 'appointments_list' %}" class="booking-back">← {% trans "Back to appointments" %}</a>
-      <a href="{% url 'profile' appointment.artist.username %}" class="booking-back">{% trans "Artist profile" %}</a>
-    </div>
+    <article class="appointment-card">
+      <div class="appointment-card__head">
+        <div>
+          <p class="booking-eyebrow">{% trans "Appointment request" %}</p>
+          <h1>{{ appointment.client.username }} → {{ appointment.artist.username }}</h1>
+          <p>{{ appointment.date }} · {{ appointment.start_time|time:"H:i" }}{% if appointment.end_time %}–{{ appointment.end_time|time:"H:i" }}{% endif %}</p>
+        </div>
+        <span class="appointment-status is-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
+      </div>
 
-    <section class="appointment-detail-hero">
-      <div>
-        <p class="booking-eyebrow">Tatzo Booking</p>
-        <h1>{% trans "Appointment request" %}</h1>
-        {% if request.user == appointment.client %}
-          <p>{% trans "Your request has been sent. The artist will review it soon." %}</p>
-        {% else %}
-          <p>{% trans "Review the client request and respond when you're ready." %}</p>
+      {% if request.user == appointment.client %}
+        {% if appointment.status == 'needs_references' %}
+          <div class="appointment-notice">{% trans "The artist asked for more reference images. Continue the conversation in chat." %}</div>
+        {% elif appointment.status == 'consultation_required' %}
+          <div class="appointment-notice">{% trans "The artist requires a consultation before this project can be booked." %}</div>
         {% endif %}
-      </div>
-      <span class="appointment-status-badge appointment-status-{{ appointment.status }}">
-        {{ appointment.get_status_display }}
-      </span>
-    </section>
+      {% endif %}
 
-    {% if request.user == appointment.artist and appointment.is_pending %}
-      <div class="appointment-action-card">
-        <form method="post" action="{% url 'accept_appointment' appointment.id %}">
-          {% csrf_token %}
-          <button type="submit" class="booking-btn-primary">{% trans "Accept" %}</button>
-        </form>
-        <form method="post" action="{% url 'decline_appointment' appointment.id %}">
-          {% csrf_token %}
-          <button type="submit" class="booking-btn-secondary appointment-decline-btn">{% trans "Decline" %}</button>
-        </form>
-      </div>
-    {% endif %}
+      <dl class="appointment-details-grid">
+        <div><dt>{% trans "Type" %}</dt><dd>{{ appointment.get_booking_type_display }}</dd></div>
+        <div><dt>{% trans "Duration" %}</dt><dd>{{ appointment.session_length_minutes|default:"—" }} {% trans "minutes" %}</dd></div>
+        <div><dt>{% trans "Placement" %}</dt><dd>{{ appointment.placement|default:"—" }}</dd></div>
+        <div><dt>{% trans "Size" %}</dt><dd>{{ appointment.size|default:"—" }}</dd></div>
+        <div><dt>{% trans "Budget" %}</dt><dd>{{ appointment.budget|default:"—" }}</dd></div>
+        <div><dt>{% trans "Styles" %}</dt><dd>{{ appointment.styles|join:", "|default:"—" }}</dd></div>
+      </dl>
 
-    <section class="appointment-detail-grid">
-      <article class="appointment-detail-card">
-        <h2>{% trans "Booking details" %}</h2>
-        <dl class="appointment-detail-list">
-          <div><dt>{% trans "Artist" %}</dt><dd>{{ appointment.artist.username }}</dd></div>
-          <div><dt>{% trans "Client" %}</dt><dd>{{ appointment.client.username }}</dd></div>
-          <div><dt>{% trans "Booking type" %}</dt><dd>{{ appointment.get_booking_type_display }}</dd></div>
+      {% if appointment.description %}
+        <div class="appointment-description">
+          <h2>{% trans "Notes" %}</h2>
+          <p>{{ appointment.description }}</p>
+        </div>
+      {% endif %}
+
+      {% if appointment.reference_images.exists %}
+        <div class="appointment-references">
+          <h2>{% trans "Reference images" %}</h2>
           <div>
-            <dt>{% trans "Consultation status" %}</dt>
-            <dd>
-              {% if appointment.booking_type == "consultation" or appointment.booking_type == "online_consultation" %}
-                {% trans "Consultation booking" %}
-              {% elif appointment.consultation_already_completed %}
-                {% trans "Client says consultation already happened" %}
-              {% elif appointment.artist.booking_settings.consultation_required_before_booking %}
-                {% trans "Consultation required before booking" %}
-              {% else %}
-                —
-              {% endif %}
-              {% if appointment.consultation_note %}
-                <br><small>{{ appointment.consultation_note }}</small>
-              {% endif %}
-            </dd>
+            {% for reference in appointment.reference_images.all %}
+              <img src="{{ reference.image.url }}" alt="{{ reference.original_name|default:'Reference image' }}">
+            {% endfor %}
           </div>
-          <div><dt>{% trans "Date" %}</dt><dd>{{ appointment.date }}</dd></div>
-          <div><dt>{% trans "Start time" %}</dt><dd>{{ appointment.start_time|time:"H:i" }}</dd></div>
-          {% if appointment.end_time %}
-            <div><dt>{% trans "End time" %}</dt><dd>{{ appointment.end_time|time:"H:i" }}</dd></div>
-          {% endif %}
-          <div><dt>{% trans "Session duration" %}</dt><dd>{{ appointment.session_length_minutes|default:"—" }} {% trans "min" %}</dd></div>
-          <div>
-            <dt>{% trans "Styles" %}</dt>
-            <dd class="appointment-chip-list">
-              {% for style in appointment.styles %}
-                <span>{{ style }}</span>
-              {% empty %}
-                —
-              {% endfor %}
-            </dd>
-          </div>
-          <div><dt>{% trans "Placement" %}</dt><dd>{{ appointment.placement|default:"—" }}</dd></div>
-          <div><dt>{% trans "Size" %}</dt><dd>{{ appointment.size|default:"—" }}</dd></div>
-          <div><dt>{% trans "Budget" %}</dt><dd>{{ appointment.budget|default:"—" }}</dd></div>
-        </dl>
-      </article>
+        </div>
+      {% endif %}
 
-      <article class="appointment-detail-card">
-        <h2>{% trans "Project notes" %}</h2>
-        <div class="appointment-note-block">
-          <h3>{% trans "Description" %}</h3>
-          {% if appointment.description %}
-            <p>{{ appointment.description|linebreaksbr }}</p>
+      {% if request.user == appointment.artist %}
+        <div class="appointment-actions">
+          {% if appointment.status == 'pending' or appointment.status == 'needs_references' %}
+            <form method="post" action="{% url 'accept_appointment' appointment.id %}">{% csrf_token %}<button type="submit" class="appointment-action-btn is-primary">{% trans "Accept" %}</button></form>
+            <form method="post" action="{% url 'decline_appointment' appointment.id %}">{% csrf_token %}<button type="submit" class="appointment-action-btn is-danger">{% trans "Decline" %}</button></form>
+            <form method="post" action="{% url 'consultation_required' appointment.id %}">{% csrf_token %}<button type="submit" class="appointment-action-btn">{% trans "Consultation required" %}</button></form>
+            <form method="post" action="{% url 'need_more_references' appointment.id %}">{% csrf_token %}<button type="submit" class="appointment-action-btn">{% trans "Need more references" %}</button></form>
+          {% elif appointment.status == 'accepted' %}
+            <form method="post" action="{% url 'cancel_appointment' appointment.id %}">{% csrf_token %}<button type="submit" class="appointment-action-btn is-danger">{% trans "Cancel appointment" %}</button></form>
           {% else %}
-            <p>{% trans "No description provided." %}</p>
+            <p class="appointment-terminal-note">{% trans "No actions are available for this appointment status." %}</p>
           {% endif %}
         </div>
-        {% if appointment.artist_note %}
-          <div class="appointment-note-block">
-            <h3>{% trans "Artist note" %}</h3>
-            <p>{{ appointment.artist_note|linebreaksbr }}</p>
-          </div>
-        {% endif %}
-      </article>
-    </section>
-
-    <section class="appointment-detail-card appointment-references-card">
-      <h2>{% trans "Reference images" %}</h2>
-      <div class="appointment-reference-gallery">
-        {% for reference in appointment.reference_images.all %}
-          <a href="{{ reference.image.url }}" target="_blank" rel="noopener noreferrer">
-            <img src="{{ reference.image.url }}" alt="{{ reference.original_name|default:appointment.client.username }}">
-          </a>
-        {% empty %}
-          <p class="booking-muted">{% trans "No reference images." %}</p>
-        {% endfor %}
-      </div>
-    </section>
+      {% endif %}
+    </article>
   </div>
 </div>
 {% endblock %}

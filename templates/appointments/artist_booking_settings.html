@@ -11,7 +11,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="artist-dashboard-page">
+<div class="artist-dashboard-page" data-autosave-url="{% url 'autosave_artist_booking_setting' %}">
   <aside class="artist-dash-sidebar">
     <a href="{% url 'home' %}" class="artist-dash-brand" aria-label="Tatzo">
       <img src="{% static 'images/tatzo7.png' %}" alt="Tatzo" class="artist-dash-brand-icon">
@@ -90,7 +90,10 @@
         <p>{{ today|date:"l j F" }}</p>
       </div>
 
-      <button type="button" class="artist-dash-plus" data-open-manual-booking>+</button>
+      <div class="artist-dash-header-actions">
+        <span class="artist-autosave-indicator" data-autosave-indicator hidden></span>
+        <button type="button" class="artist-dash-plus" data-open-manual-booking>+</button>
+      </div>
     </header>
 
     <section class="artist-dash-panel {% if active_dashboard_panel == 'dashboard' %}is-active{% endif %}" data-artist-panel="dashboard">
@@ -425,7 +428,7 @@
               <div class="artist-setting-row">
                 <span>{% trans "Accept new clients" %}</span>
                 <label class="artist-setting-switch">
-                  <input type="checkbox" name="bookings_enabled" {% if booking_settings.bookings_enabled %}checked{% endif %}>
+                  <input type="checkbox" name="bookings_enabled" data-autosave-setting="bookings_enabled" {% if booking_settings.bookings_enabled %}checked{% endif %}>
                   <span></span>
                 </label>
               </div>
@@ -433,7 +436,7 @@
               <div class="artist-setting-row">
                 <span>{% trans "Reference images required" %}</span>
                 <label class="artist-setting-switch">
-                  <input type="checkbox" name="reference_images_required" {% if booking_settings.reference_images_required %}checked{% endif %}>
+                  <input type="checkbox" name="reference_images_required" data-autosave-setting="reference_images_required" {% if booking_settings.reference_images_required %}checked{% endif %}>
                   <span></span>
                 </label>
               </div>
@@ -441,7 +444,7 @@
               <div class="artist-setting-row">
                 <span>{% trans "Online consultation" %}</span>
                 <label class="artist-setting-switch">
-                  <input type="checkbox" name="online_consultation_enabled" {% if booking_settings.online_consultation_enabled %}checked{% endif %}>
+                  <input type="checkbox" name="online_consultation_enabled" data-autosave-setting="online_consultation_enabled" {% if booking_settings.online_consultation_enabled %}checked{% endif %}>
                   <span></span>
                 </label>
               </div>
@@ -449,7 +452,7 @@
               <div class="artist-setting-row">
                 <span>{% trans "Phone consultation" %}</span>
                 <label class="artist-setting-switch">
-                  <input type="checkbox" name="phone_consultation_enabled" {% if booking_settings.phone_consultation_enabled %}checked{% endif %}>
+                  <input type="checkbox" name="phone_consultation_enabled" data-autosave-setting="phone_consultation_enabled" {% if booking_settings.phone_consultation_enabled %}checked{% endif %}>
                   <span></span>
                 </label>
               </div>
@@ -492,7 +495,7 @@
               <div class="artist-setting-row">
                 <span>{% trans "Consultations enabled" %}</span>
                 <label class="artist-setting-switch">
-                  <input type="checkbox" name="consultation_enabled" {% if booking_settings.consultation_enabled %}checked{% endif %}>
+                  <input type="checkbox" name="consultation_enabled" data-autosave-setting="consultation_enabled" {% if booking_settings.consultation_enabled %}checked{% endif %}>
                   <span></span>
                 </label>
               </div>
@@ -500,7 +503,7 @@
               <div class="artist-setting-row">
                 <span>{% trans "Consultation required" %}</span>
                 <label class="artist-setting-switch">
-                  <input type="checkbox" name="consultation_required_before_booking" {% if booking_settings.consultation_required_before_booking %}checked{% endif %}>
+                  <input type="checkbox" name="consultation_required_before_booking" data-autosave-setting="consultation_required_before_booking" {% if booking_settings.consultation_required_before_booking %}checked{% endif %}>
                   <span></span>
                 </label>
               </div>
@@ -508,7 +511,7 @@
               <div class="artist-setting-row">
                 <span>{% trans "Deposit required" %}</span>
                 <label class="artist-setting-switch">
-                  <input type="checkbox" name="deposit_required" {% if booking_settings.deposit_required %}checked{% endif %}>
+                  <input type="checkbox" name="deposit_required" data-autosave-setting="deposit_required" {% if booking_settings.deposit_required %}checked{% endif %}>
                   <span></span>
                 </label>
               </div>
@@ -516,7 +519,7 @@
               <div class="artist-setting-row">
                 <span>{% trans "Studio consultation" %}</span>
                 <label class="artist-setting-switch">
-                  <input type="checkbox" name="studio_consultation_enabled" {% if booking_settings.studio_consultation_enabled %}checked{% endif %}>
+                  <input type="checkbox" name="studio_consultation_enabled" data-autosave-setting="studio_consultation_enabled" {% if booking_settings.studio_consultation_enabled %}checked{% endif %}>
                   <span></span>
                 </label>
               </div>
@@ -560,7 +563,7 @@
                 <label class="artist-style-chip">
                   <input
                     type="checkbox"
-                    name="active_styles"
+                    name="active_styles" data-autosave-styles
                     value="{{ style }}"
                     {% if style in booking_settings.active_styles %}checked{% endif %}
                   >
@@ -724,7 +727,7 @@
 
     <div class="artist-context-card artist-status-card">
       <span>{% trans "Current status" %}</span>
-      <strong>{{ current_status }}</strong>
+      <strong data-current-status>{{ current_status }}</strong>
     </div>
   </aside>
 </div>

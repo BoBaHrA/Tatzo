@@ -20,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
     styles: [],
     placement: "",
     placementZones: [],
-    placementDetails: "",
     size: "",
     budget: "",
     references: [],
@@ -431,6 +430,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("booking-consultation-completed").value = state.consultationAlreadyCompleted ? "true" : "false";
     document.getElementById("booking-consultation-note").value = state.consultationNote;
     document.getElementById("booking-styles").value = state.styles.join(",");
+    state.placement = state.placementZones.join(", ");
+    document.getElementById("booking-placement").value = state.placement;
     document.getElementById("booking-size").value = state.size;
     document.getElementById("booking-budget").value = state.budget;
   }
@@ -589,38 +590,22 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.querySelectorAll("[data-placement-zone]").forEach((button) => {
-    button.setAttribute("aria-pressed", "false");
-
     button.addEventListener("click", () => {
       const zone = button.dataset.placementZone;
+      const exists = state.placementZones.includes(zone);
 
-      state.placementZones = state.placementZones.includes(zone)
+      state.placementZones = exists
         ? state.placementZones.filter((item) => item !== zone)
         : [...state.placementZones, zone];
 
-      syncHiddenFields();
+      button.classList.toggle("is-selected", !exists);
+      renderPlacementChips();
     });
   });
 
-  const placementDetailsInput = document.getElementById("booking-placement-text");
-  if (placementDetailsInput) {
-    placementDetailsInput.addEventListener("input", (event) => {
-      state.placementDetails = event.target.value;
-      syncHiddenFields();
-    });
-  }
+  renderPlacementChips();
 
-  if (referenceHelp) {
-    const minimum = getReferenceMinimum();
-
-    if (minimum > 0) {
-      referenceHelp.textContent = minimum === 1
-        ? "This artist requires at least 1 reference image."
-        : `This artist requires at least ${minimum} reference images.`;
-    }
-  }
-
-  referenceInput.addEventListener("change", (event) => {
+  document.getElementById("booking-references").addEventListener("change", (event) => {
     const grid = document.getElementById("booking-reference-grid");
     const files = Array.from(event.target.files || []);
     state.references = files;

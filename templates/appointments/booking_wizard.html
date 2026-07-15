@@ -109,15 +109,16 @@
         </div>
 
         <label>{% trans "Placement" %}</label>
-        <div class="booking-placement-picker" aria-describedby="booking-placement-help">
-          <p class="booking-helper" id="booking-placement-help">{% trans "Tap the area where you want your tattoo." %}</p>
-          <div class="booking-body-views" aria-label="{% trans 'Body placement picker' %}">
+        <div class="booking-placement-picker">
+          <p>{% trans "Tap one or more body areas." %}</p>
+
+          <div class="booking-body-views">
             <div class="booking-body-card">
               <h3>{% trans "Front" %}</h3>
               <div class="booking-body-map booking-body-map-front">
-                <button type="button" class="booking-body-zone zone-head" data-placement-zone="Head / neck" aria-label="Head / neck" title="Head / neck"></button>
+                <button type="button" class="booking-body-zone zone-head" data-placement-zone="Head" aria-label="Head" title="Head"></button>
                 <button type="button" class="booking-body-zone zone-chest" data-placement-zone="Chest" aria-label="Chest" title="Chest"></button>
-                <button type="button" class="booking-body-zone zone-stomach" data-placement-zone="Stomach / ribs" aria-label="Stomach / ribs" title="Stomach / ribs"></button>
+                <button type="button" class="booking-body-zone zone-stomach" data-placement-zone="Stomach" aria-label="Stomach" title="Stomach"></button>
                 <button type="button" class="booking-body-zone zone-left-arm" data-placement-zone="Left arm" aria-label="Left arm" title="Left arm"></button>
                 <button type="button" class="booking-body-zone zone-right-arm" data-placement-zone="Right arm" aria-label="Right arm" title="Right arm"></button>
                 <button type="button" class="booking-body-zone zone-left-forearm" data-placement-zone="Left forearm" aria-label="Left forearm" title="Left forearm"></button>
@@ -128,26 +129,30 @@
                 <button type="button" class="booking-body-zone zone-right-leg" data-placement-zone="Right leg" aria-label="Right leg" title="Right leg"></button>
                 <button type="button" class="booking-body-zone zone-left-calf" data-placement-zone="Left calf" aria-label="Left calf" title="Left calf"></button>
                 <button type="button" class="booking-body-zone zone-right-calf" data-placement-zone="Right calf" aria-label="Right calf" title="Right calf"></button>
-                <button type="button" class="booking-body-zone zone-foot" data-placement-zone="Foot / ankle" aria-label="Foot / ankle" title="Foot / ankle"></button>
+                <button type="button" class="booking-body-zone zone-foot" data-placement-zone="Feet" aria-label="Feet" title="Feet"></button>
               </div>
             </div>
+
             <div class="booking-body-card">
               <h3>{% trans "Back" %}</h3>
               <div class="booking-body-map booking-body-map-back">
                 <button type="button" class="booking-body-zone zone-back" data-placement-zone="Back" aria-label="Back" title="Back"></button>
                 <button type="button" class="booking-body-zone zone-lower-back" data-placement-zone="Lower back" aria-label="Lower back" title="Lower back"></button>
-                <button type="button" class="booking-body-zone zone-back-left-arm" data-placement-zone="Left arm" aria-label="Left arm" title="Left arm"></button>
-                <button type="button" class="booking-body-zone zone-back-right-arm" data-placement-zone="Right arm" aria-label="Right arm" title="Right arm"></button>
-                <button type="button" class="booking-body-zone zone-back-left-leg" data-placement-zone="Left leg" aria-label="Left leg" title="Left leg"></button>
-                <button type="button" class="booking-body-zone zone-back-right-leg" data-placement-zone="Right leg" aria-label="Right leg" title="Right leg"></button>
+                <button type="button" class="booking-body-zone zone-back-left-arm" data-placement-zone="Back left arm" aria-label="Back left arm" title="Back left arm"></button>
+                <button type="button" class="booking-body-zone zone-back-right-arm" data-placement-zone="Back right arm" aria-label="Back right arm" title="Back right arm"></button>
+                <button type="button" class="booking-body-zone zone-back-left-leg" data-placement-zone="Back left leg" aria-label="Back left leg" title="Back left leg"></button>
+                <button type="button" class="booking-body-zone zone-back-right-leg" data-placement-zone="Back right leg" aria-label="Back right leg" title="Back right leg"></button>
               </div>
             </div>
           </div>
-          <p class="booking-placement-selected" id="booking-placement-selected">{% trans "Selected: none yet" %}</p>
-        </div>
 
-        <label for="booking-placement-text">{% trans "Placement details" %}</label>
-        <textarea class="booking-textarea booking-placement-details" id="booking-placement-text" placeholder="{% trans 'Optional details, e.g. inner forearm, near elbow...' %}"></textarea>
+          <div class="booking-placement-selected">
+            <span>{% trans "Selected:" %}</span>
+            <div id="booking-placement-chips" class="booking-placement-chip-list" data-empty-label="{% trans 'No placement selected' %}">
+              <span class="booking-placement-empty">{% trans "No placement selected" %}</span>
+            </div>
+          </div>
+        </div>
 
         <label>{% trans "Size" %}</label>
         <div class="booking-choice-grid" data-choice-group="size">

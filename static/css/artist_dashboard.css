@@ -1567,3 +1567,42 @@ body {
     flex-direction: column;
   }
 }
+
+.artist-dash-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.artist-autosave-indicator {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid rgba(234, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(0, 24, 34, 0.72);
+  color: rgba(234, 255, 255, 0.82);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+  transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.artist-autosave-indicator.is-saving {
+  border-color: rgba(234, 255, 255, 0.24);
+  color: rgba(234, 255, 255, 0.88);
+}
+
+.artist-autosave-indicator.is-saved {
+  border-color: rgba(4, 197, 191, 0.52);
+  color: #04c5bf;
+  box-shadow: 0 14px 34px rgba(4, 197, 191, 0.16);
+}
+
+.artist-autosave-indicator.is-error {
+  border-color: rgba(238, 12, 111, 0.56);
+  color: #ff8ab8;
+  box-shadow: 0 14px 34px rgba(238, 12, 111, 0.16);
+}
