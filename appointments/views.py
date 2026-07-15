@@ -318,6 +318,12 @@ def create_appointment(request, username):
     ):
         booking_type = Appointment.TYPE_CONSULTATION
 
+    if (
+        booking_settings.booking_status
+        == ArtistBookingSettings.BOOKING_STATUS_CONSULTATION_ONLY
+    ):
+        booking_type = Appointment.TYPE_CONSULTATION
+
     if not date_raw or not start_time_raw:
         messages.error(request, _("Please choose a date and time."))
         return redirect("booking_wizard", username=artist.username)
@@ -1370,5 +1376,6 @@ def artist_booking_settings(request, active_panel="dashboard"):
                 )
             ),
             "active_panel": active_panel,
+            "active_dashboard_panel": active_panel,
         },
     )
