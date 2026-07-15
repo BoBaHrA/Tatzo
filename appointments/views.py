@@ -226,6 +226,8 @@ def booking_wizard(request, username):
             "default_session_minutes": booking_settings.default_session_minutes,
             "consultation_enabled": booking_settings.consultation_enabled,
             "online_consultation_enabled": booking_settings.online_consultation_enabled,
+            "studio_consultation_enabled": booking_settings.studio_consultation_enabled,
+            "phone_consultation_enabled": booking_settings.phone_consultation_enabled,
             "consultation_required_before_booking": booking_settings.consultation_required_before_booking,
             "consultation_price": float(booking_settings.consultation_price),
             "online_consultation_price": float(booking_settings.online_consultation_price),
@@ -289,6 +291,32 @@ def create_appointment(request, username):
     start_time_raw = request.POST.get("start_time")
     duration_raw = request.POST.get("session_length_minutes") or "60"
     booking_type = request.POST.get("booking_type") or Appointment.TYPE_TATTOO
+    valid_booking_types = {choice[0] for choice in Appointment.BOOKING_TYPE_CHOICES}
+    consultation_already_completed = (
+        request.POST.get("consultation_already_completed") == "true"
+    )
+    consultation_note = (request.POST.get("consultation_note") or "").strip()[:240]
+
+    if booking_type not in valid_booking_types:
+        booking_type = Appointment.TYPE_TATTOO
+
+    if (
+        booking_settings.booking_status
+        == ArtistBookingSettings.BOOKING_STATUS_CONSULTATION_ONLY
+    ):
+        booking_type = Appointment.TYPE_CONSULTATION
+
+    if (
+        booking_settings.booking_status
+        == ArtistBookingSettings.BOOKING_STATUS_CONSULTATION_ONLY
+    ):
+        booking_type = Appointment.TYPE_CONSULTATION
+
+    if (
+        booking_settings.booking_status
+        == ArtistBookingSettings.BOOKING_STATUS_CONSULTATION_ONLY
+    ):
+        booking_type = Appointment.TYPE_CONSULTATION
 
     if (
         booking_settings.booking_status
@@ -308,6 +336,24 @@ def create_appointment(request, username):
         messages.error(request, _("Invalid booking date or time."))
         return redirect("booking_wizard", username=artist.username)
 
+    is_consultation_booking = booking_type in [
+        Appointment.TYPE_CONSULTATION,
+        Appointment.TYPE_ONLINE_CONSULTATION,
+    ]
+
+    if is_consultation_booking:
+        duration = 60
+        consultation_already_completed = False
+    elif (
+        booking_settings.consultation_required_before_booking
+        and not consultation_already_completed
+    ):
+        messages.error(
+            request,
+            _("This artist requires a consultation before booking a tattoo session."),
+        )
+        return redirect("booking_wizard", username=artist.username)
+
     start_dt = timezone.make_aware(
         datetime.combine(date_value, start_time_value),
         timezone.get_current_timezone(),
@@ -316,7 +362,7 @@ def create_appointment(request, username):
     minimum_start = timezone.now() + timedelta(
         hours=booking_settings.minimum_notice_hours
     )
-    
+
     if duration > booking_settings.maximum_session_hours * 60:
         messages.error(request, _("This session is longer than the artist allows."))
         return redirect("booking_wizard", username=artist.username)
@@ -339,6 +385,18 @@ def create_appointment(request, username):
 
     end_dt = start_dt + timedelta(minutes=duration)
 
+    files = request.FILES.getlist("references")
+
+    minimum_reference_images = booking_settings.minimum_reference_images or 0
+
+    if minimum_reference_images > 0 and len(files) < minimum_reference_images:
+        messages.error(request, _("Please upload the required reference images."))
+        return redirect("booking_wizard", username=artist.username)
+
+    if len(files) > booking_settings.maximum_reference_images:
+        messages.error(request, _("You uploaded too many reference images."))
+        return redirect("booking_wizard", username=artist.username)
+
     initial_status = (
         Appointment.STATUS_ACCEPTED
         if booking_settings.booking_workflow == "auto"
@@ -349,6 +407,8 @@ def create_appointment(request, username):
         client=request.user,
         artist=artist,
         booking_type=booking_type,
+        consultation_already_completed=consultation_already_completed,
+        consultation_note=consultation_note,
         status=initial_status,
         date=date_value,
         start_time=start_time_value,
@@ -370,10 +430,11 @@ def create_appointment(request, username):
             "size": request.POST.get("size", ""),
             "budget": request.POST.get("budget", ""),
             "description": request.POST.get("description", ""),
+            "booking_type": booking_type,
+            "consultation_already_completed": consultation_already_completed,
+            "consultation_note": consultation_note,
         },
     )
-
-    files = request.FILES.getlist("references")
 
     for index, file in enumerate(files[: booking_settings.maximum_reference_images]):
         AppointmentReferenceImage.objects.create(
@@ -582,6 +643,7 @@ def appointment_detail(request, appointment_id):
             "client__profile",
             "artist",
             "artist__profile",
+            "artist__booking_settings",
         ).prefetch_related("reference_images"),
         id=appointment_id,
     )
@@ -1064,7 +1126,7 @@ def artist_booking_settings(request, active_panel="dashboard"):
             _save_artist_blocked_dates_from_post(request.user, request.POST)
 
             messages.success(request, _("Calendar settings saved."))
-            return redirect("artist_booking_settings")
+            return redirect("artist_dashboard_calendar")
 
         messages.error(request, _("Unknown dashboard form."))
         return redirect("artist_booking_settings")
