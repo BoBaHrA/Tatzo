@@ -11,7 +11,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="artist-dashboard-page">
+<div class="artist-dashboard-page" data-autosave-url="{% url 'autosave_artist_booking_setting' %}">
   <aside class="artist-dash-sidebar">
     <a href="{% url 'home' %}" class="artist-dash-brand" aria-label="Tatzo">
       <img src="{% static 'images/tatzo7.png' %}" alt="Tatzo" class="artist-dash-brand-icon">
@@ -90,7 +90,10 @@
         <p>{{ today|date:"l j F" }}</p>
       </div>
 
-      <a href="{% url 'appointments_list' %}" class="artist-dash-plus">+</a>
+      <div class="artist-dash-header-actions">
+        <span class="artist-autosave-indicator" data-autosave-indicator hidden></span>
+        <button type="button" class="artist-dash-plus" data-open-manual-booking>+</button>
+      </div>
     </header>
 
     <section class="artist-dash-panel is-active" data-artist-panel="dashboard">
@@ -178,19 +181,48 @@
         </div>
 
         <div class="artist-blocked-card">
-          <h3>{% trans "Blocked dates" %}</h3>
-
-          <div id="artist-blocked-dates" class="artist-blocked-list">
-            {% for blocked in blocked_dates %}
-              <input type="date" name="blocked_dates" value="{{ blocked.date|date:'Y-m-d' }}">
-            {% empty %}
-              <input type="date" name="blocked_dates">
-            {% endfor %}
+          <div class="artist-blocked-head">
+            <h3>{% trans "Blocked periods" %}</h3>
+            <p>{% trans "Prevent clients from booking specific days or date ranges." %}</p>
           </div>
 
-          <button type="button" id="add-blocked-date" class="artist-ghost-btn">
-            + {% trans "Add blocked date" %}
-          </button>
+          <div
+            class="artist-blocked-period-form"
+            data-empty-message="{% trans 'No blocked periods yet.' %}"
+            data-missing-start-message="{% trans 'Choose a start date first.' %}"
+            data-invalid-range-message="{% trans 'End date cannot be before start date.' %}"
+            data-duplicate-message="{% trans 'Those dates are already blocked.' %}"
+          >
+            <label>
+              <span>{% trans "Start date" %}</span>
+              <input type="date" id="artist-blocked-start-date">
+            </label>
+            <label>
+              <span>{% trans "End date" %} <small>{% trans "optional" %}</small></span>
+              <input type="date" id="artist-blocked-end-date">
+            </label>
+            <label>
+              <span>{% trans "Reason" %} <small>{% trans "optional" %}</small></span>
+              <input type="text" id="artist-blocked-reason" maxlength="160" placeholder="{% trans 'Vacation, convention, studio closure…' %}">
+            </label>
+            <button type="button" id="artist-add-blocked-period" class="artist-ghost-btn">
+              + {% trans "Add period" %}
+            </button>
+          </div>
+          <p id="artist-blocked-error" class="artist-form-error" hidden></p>
+
+          <div id="artist-blocked-list" class="artist-blocked-period-list">
+            {% for blocked in blocked_dates %}
+              <div class="artist-blocked-chip" data-blocked-chip data-start-date="{{ blocked.date|date:'Y-m-d' }}" data-end-date="{{ blocked.date|date:'Y-m-d' }}">
+                <input type="hidden" name="blocked_dates" value="{{ blocked.date|date:'Y-m-d' }}">
+                <input type="hidden" name="blocked_reasons" value="{{ blocked.reason|default:'' }}">
+                <span>{{ blocked.date|date:"j M Y" }}{% if blocked.reason %} · {{ blocked.reason }}{% endif %}</span>
+                <button type="button" aria-label="{% trans 'Remove blocked period' %}">×</button>
+              </div>
+            {% empty %}
+              <p class="artist-empty" data-empty-blocked>{% trans "No blocked periods yet." %}</p>
+            {% endfor %}
+          </div>
         </div>
       </form>
     </section>
@@ -292,22 +324,26 @@
         <div class="artist-list">
           {% for client in clients %}
             <div class="artist-client-row">
-              {% if client.profile.profile_image %}
-                <img src="{{ client.profile.profile_image.url }}" alt="{{ client.username }}">
-              {% else %}
-                <span>{{ client.username|first|upper }}</span>
-              {% endif %}
+              <div class="artist-client-main">
+                {% if client.profile.profile_image %}
+                  <img src="{{ client.profile.profile_image.url }}" alt="{{ client.username }}">
+                {% else %}
+                  <span>{{ client.username|first|upper }}</span>
+                {% endif %}
 
-              <div>
-                <strong>{{ client.username }}</strong>
-                <small>
-                  {% blocktrans count count=client.artist_sessions_count %}
-                    {{ count }} session
-                  {% plural %}
-                    {{ count }} sessions
-                  {% endblocktrans %}
-                </small>
+                <div>
+                  <strong>{{ client.username }}</strong>
+                  <small>{% trans "Client" %}</small>
+                </div>
               </div>
+
+              <small class="artist-client-sessions">
+                {% blocktrans count count=client.artist_sessions_count %}
+                  {{ count }} session
+                {% plural %}
+                  {{ count }} sessions
+                {% endblocktrans %}
+              </small>
             </div>
           {% empty %}
             <p class="artist-empty">{% trans "No clients yet." %}</p>
@@ -364,6 +400,12 @@
       <form method="post" class="artist-settings-stack">
         {% csrf_token %}
         <input type="hidden" name="dashboard_form" value="settings">
+        <input
+          type="hidden"
+          name="booking_status"
+          id="artist-booking-status"
+          value="{{ booking_settings.booking_status|default:'open' }}"
+        >
 
         <div class="artist-card">
           <div class="artist-section-title-row">
@@ -376,7 +418,7 @@
               <div class="artist-setting-row">
                 <span>{% trans "Accept new clients" %}</span>
                 <label class="artist-setting-switch">
-                  <input type="checkbox" name="bookings_enabled" {% if booking_settings.bookings_enabled %}checked{% endif %}>
+                  <input type="checkbox" name="bookings_enabled" data-autosave-setting="bookings_enabled" {% if booking_settings.bookings_enabled %}checked{% endif %}>
                   <span></span>
                 </label>
               </div>
@@ -384,7 +426,7 @@
               <div class="artist-setting-row">
                 <span>{% trans "Reference images required" %}</span>
                 <label class="artist-setting-switch">
-                  <input type="checkbox" name="reference_images_required" {% if booking_settings.reference_images_required %}checked{% endif %}>
+                  <input type="checkbox" name="reference_images_required" data-autosave-setting="reference_images_required" {% if booking_settings.reference_images_required %}checked{% endif %}>
                   <span></span>
                 </label>
               </div>
@@ -392,7 +434,7 @@
               <div class="artist-setting-row">
                 <span>{% trans "Online consultation" %}</span>
                 <label class="artist-setting-switch">
-                  <input type="checkbox" name="online_consultation_enabled" {% if booking_settings.online_consultation_enabled %}checked{% endif %}>
+                  <input type="checkbox" name="online_consultation_enabled" data-autosave-setting="online_consultation_enabled" {% if booking_settings.online_consultation_enabled %}checked{% endif %}>
                   <span></span>
                 </label>
               </div>
@@ -400,7 +442,7 @@
               <div class="artist-setting-row">
                 <span>{% trans "Phone consultation" %}</span>
                 <label class="artist-setting-switch">
-                  <input type="checkbox" name="phone_consultation_enabled" {% if booking_settings.phone_consultation_enabled %}checked{% endif %}>
+                  <input type="checkbox" name="phone_consultation_enabled" data-autosave-setting="phone_consultation_enabled" {% if booking_settings.phone_consultation_enabled %}checked{% endif %}>
                   <span></span>
                 </label>
               </div>
@@ -443,7 +485,7 @@
               <div class="artist-setting-row">
                 <span>{% trans "Consultations enabled" %}</span>
                 <label class="artist-setting-switch">
-                  <input type="checkbox" name="consultation_enabled" {% if booking_settings.consultation_enabled %}checked{% endif %}>
+                  <input type="checkbox" name="consultation_enabled" data-autosave-setting="consultation_enabled" {% if booking_settings.consultation_enabled %}checked{% endif %}>
                   <span></span>
                 </label>
               </div>
@@ -451,7 +493,7 @@
               <div class="artist-setting-row">
                 <span>{% trans "Consultation required" %}</span>
                 <label class="artist-setting-switch">
-                  <input type="checkbox" name="consultation_required_before_booking" {% if booking_settings.consultation_required_before_booking %}checked{% endif %}>
+                  <input type="checkbox" name="consultation_required_before_booking" data-autosave-setting="consultation_required_before_booking" {% if booking_settings.consultation_required_before_booking %}checked{% endif %}>
                   <span></span>
                 </label>
               </div>
@@ -459,7 +501,7 @@
               <div class="artist-setting-row">
                 <span>{% trans "Deposit required" %}</span>
                 <label class="artist-setting-switch">
-                  <input type="checkbox" name="deposit_required" {% if booking_settings.deposit_required %}checked{% endif %}>
+                  <input type="checkbox" name="deposit_required" data-autosave-setting="deposit_required" {% if booking_settings.deposit_required %}checked{% endif %}>
                   <span></span>
                 </label>
               </div>
@@ -467,7 +509,7 @@
               <div class="artist-setting-row">
                 <span>{% trans "Studio consultation" %}</span>
                 <label class="artist-setting-switch">
-                  <input type="checkbox" name="studio_consultation_enabled" {% if booking_settings.studio_consultation_enabled %}checked{% endif %}>
+                  <input type="checkbox" name="studio_consultation_enabled" data-autosave-setting="studio_consultation_enabled" {% if booking_settings.studio_consultation_enabled %}checked{% endif %}>
                   <span></span>
                 </label>
               </div>
@@ -511,7 +553,7 @@
                 <label class="artist-style-chip">
                   <input
                     type="checkbox"
-                    name="active_styles"
+                    name="active_styles" data-autosave-styles
                     value="{{ style }}"
                     {% if style in booking_settings.active_styles %}checked{% endif %}
                   >
@@ -521,41 +563,38 @@
             </div>
           </div>
 
-          <button type="submit" class="artist-save-btn">
-            {% trans "Save booking settings" %}
-          </button>
         </div>
 
         <div class="artist-card">
           <h2>{% trans "Booking rules" %}</h2>
 
           <div class="artist-rules-grid">
-            <button type="button" class="artist-rule-card is-active tone-green">
+            <button type="button" class="artist-rule-card tone-green {% if booking_settings.booking_status == 'open' %}is-active{% endif %}" data-booking-status="open">
               <i data-lucide="check-circle"></i>
               <span>{% trans "Booking allowed" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card tone-cyan">
+            <button type="button" class="artist-rule-card tone-cyan {% if booking_settings.booking_status == 'paused' %}is-active{% endif %}" data-booking-status="paused">
               <i data-lucide="pause-circle"></i>
               <span>{% trans "Booking paused" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card tone-pink">
+            <button type="button" class="artist-rule-card tone-pink {% if booking_settings.booking_status == 'vacation' %}is-active{% endif %}" data-booking-status="vacation">
               <i data-lucide="palmtree"></i>
               <span>{% trans "Vacation" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card tone-violet">
+            <button type="button" class="artist-rule-card tone-violet {% if booking_settings.booking_status == 'fully_booked' %}is-active{% endif %}" data-booking-status="fully_booked">
               <i data-lucide="layers"></i>
               <span>{% trans "Fully booked" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card tone-orange">
+            <button type="button" class="artist-rule-card tone-orange {% if booking_settings.booking_status == 'consultation_only' %}is-active{% endif %}" data-booking-status="consultation_only">
               <i data-lucide="message-circle"></i>
               <span>{% trans "Consultation only" %}</span>
             </button>
 
-            <button type="button" class="artist-rule-card tone-red">
+            <button type="button" class="artist-rule-card tone-red {% if booking_settings.booking_status == 'emergency' %}is-active{% endif %}" data-booking-status="emergency">
               <i data-lucide="alert-triangle"></i>
               <span>{% trans "Emergency closure" %}</span>
             </button>
@@ -568,27 +607,27 @@
           <div class="artist-auto-list">
             <label>
               <span>{% trans "Booking received" %}</span>
-              <input value="{% trans 'Thanks! I received your request and will reply within 24h.' %}">
+              <textarea name="auto_response_booking_received" rows="3" maxlength="2000" placeholder="{% trans 'Thanks! I received your request and will reply within 24h.' %}">{{ booking_settings.auto_response_booking_received }}</textarea>
             </label>
 
             <label>
               <span>{% trans "Consultation required" %}</span>
-              <input value="{% trans 'Your piece needs a consultation first — pick a slot below.' %}">
+              <textarea name="auto_response_consultation_required" rows="3" maxlength="2000" placeholder="{% trans 'Your piece needs a consultation first — pick a slot below.' %}">{{ booking_settings.auto_response_consultation_required }}</textarea>
             </label>
 
             <label>
               <span>{% trans "Need more references" %}</span>
-              <input value="{% trans 'Could you send 2–3 more reference images? It helps me nail the design.' %}">
+              <textarea name="auto_response_need_more_references" rows="3" maxlength="2000" placeholder="{% trans 'Could you send 2–3 more reference images? It helps me nail the design.' %}">{{ booking_settings.auto_response_need_more_references }}</textarea>
             </label>
 
             <label>
               <span>{% trans "Booking approved" %}</span>
-              <input value="{% trans 'You are booked! A deposit link has been sent to secure your slot.' %}">
+              <textarea name="auto_response_booking_approved" rows="3" maxlength="2000" placeholder="{% trans 'You are booked! A deposit link has been sent to secure your slot.' %}">{{ booking_settings.auto_response_booking_approved }}</textarea>
             </label>
 
             <label>
               <span>{% trans "Booking declined" %}</span>
-              <input value="{% trans 'Unfortunately I cannot take this on right now — thank you for reaching out.' %}">
+              <textarea name="auto_response_booking_declined" rows="3" maxlength="2000" placeholder="{% trans 'Unfortunately I cannot take this on right now — thank you for reaching out.' %}">{{ booking_settings.auto_response_booking_declined }}</textarea>
             </label>
           </div>
         </div>
@@ -627,6 +666,16 @@
               <input value="">
             </label>
           </div>
+        </div>
+
+        <div class="artist-settings-actions">
+          <div>
+            <strong>{% trans "Save all settings" %}</strong>
+            <small>{% trans "Applies booking settings, rules, auto responses, and profile settings." %}</small>
+          </div>
+          <button type="submit" class="artist-save-btn">
+            {% trans "Save all settings" %}
+          </button>
         </div>
       </form>
     </section>
@@ -668,9 +717,85 @@
 
     <div class="artist-context-card artist-status-card">
       <span>{% trans "Current status" %}</span>
-      <strong>{{ current_status }}</strong>
+      <strong data-current-status>{{ current_status }}</strong>
     </div>
   </aside>
+</div>
+
+<div class="artist-manual-modal" data-manual-booking-modal hidden>
+  <div class="artist-manual-modal__backdrop" data-close-manual-booking></div>
+  <div class="artist-manual-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="manual-booking-title">
+    <h2 id="manual-booking-title">{% trans "Manual booking" %}</h2>
+    <p>{% trans "Create an accepted booking for an existing Tatzo user." %}</p>
+
+    <form method="post" action="{% url 'create_manual_appointment' %}" class="artist-manual-form">
+      {% csrf_token %}
+
+      <label>
+        <span>{% trans "Client username" %}</span>
+        <input type="text" name="client_username" autocomplete="off" required>
+      </label>
+
+      <div class="artist-manual-form__grid">
+        <label>
+          <span>{% trans "Date" %}</span>
+          <input type="date" name="date" required>
+        </label>
+
+        <label>
+          <span>{% trans "Start time" %}</span>
+          <input type="time" name="start_time" required>
+        </label>
+      </div>
+
+      <div class="artist-manual-form__grid">
+        <label>
+          <span>{% trans "Duration minutes" %}</span>
+          <input type="number" name="session_length_minutes" min="15" step="15" value="60" required>
+        </label>
+
+        <label>
+          <span>{% trans "Booking type" %}</span>
+          <select name="booking_type">
+            <option value="tattoo_session">{% trans "Tattoo session" %}</option>
+            <option value="consultation">{% trans "Consultation" %}</option>
+          </select>
+        </label>
+      </div>
+
+      <label>
+        <span>{% trans "Styles" %}</span>
+        <input type="text" name="styles" placeholder="{% trans 'Fine Line, Blackwork' %}">
+      </label>
+
+      <div class="artist-manual-form__grid">
+        <label>
+          <span>{% trans "Placement" %}</span>
+          <input type="text" name="placement">
+        </label>
+
+        <label>
+          <span>{% trans "Size" %}</span>
+          <input type="text" name="size">
+        </label>
+      </div>
+
+      <label>
+        <span>{% trans "Budget" %}</span>
+        <input type="text" name="budget">
+      </label>
+
+      <label>
+        <span>{% trans "Notes" %}</span>
+        <textarea name="description" rows="4"></textarea>
+      </label>
+
+      <div class="artist-manual-modal__actions">
+        <button type="button" class="artist-ghost-btn" data-close-manual-booking>{% trans "Close" %}</button>
+        <button type="submit" class="artist-save-btn">{% trans "Create booking" %}</button>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}
 
@@ -694,15 +819,6 @@
     syncRow();
   });
 
-  document.getElementById("add-blocked-date")?.addEventListener("click", () => {
-    const wrap = document.getElementById("artist-blocked-dates");
-    const input = document.createElement("input");
-
-    input.type = "date";
-    input.name = "blocked_dates";
-
-    wrap.appendChild(input);
-  });
 </script>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
