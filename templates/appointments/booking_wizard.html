@@ -46,6 +46,8 @@
       <input type="hidden" name="start_time" id="booking-time">
       <input type="hidden" name="session_length_minutes" id="booking-duration" value="60">
       <input type="hidden" name="booking_type" id="booking-type" value="tattoo_session">
+      <input type="hidden" name="consultation_already_completed" id="booking-consultation-completed" value="false">
+      <input type="hidden" name="consultation_note" id="booking-consultation-note">
       <input type="hidden" name="styles" id="booking-styles">
       <input type="hidden" name="placement" id="booking-placement">
       <input type="hidden" name="size" id="booking-size">
@@ -76,6 +78,17 @@
 
         <h3>{% trans "Available time" %}</h3>
         <div class="booking-slots" id="booking-slots"></div>
+
+        <div class="booking-consultation-card">
+          <label class="booking-consultation-toggle" for="booking-consultation-toggle">
+            <input type="checkbox" id="booking-consultation-toggle">
+            <span>
+              <strong>{% trans "Book a consultation instead" %}</strong>
+              <small>{% trans "Consultations are limited to 1 hour." %}</small>
+            </span>
+          </label>
+          <p class="booking-form-error" id="booking-consultation-error" hidden></p>
+        </div>
 
         <div class="booking-session-grid">
           <button type="button" class="booking-choice is-active" data-duration="60">1h</button>
@@ -175,7 +188,7 @@
         <label class="booking-upload-zone" for="booking-references">
           <span>＋</span>
           <strong>{% trans "Upload reference images" %}</strong>
-          <small>{% trans "You can add screenshots, sketches or inspiration images." %}</small>
+          <small id="booking-reference-help">{% trans "You can add screenshots, sketches or inspiration images." %}</small>
         </label>
 
         <input
@@ -186,6 +199,8 @@
           multiple
           hidden
         >
+
+        <p class="booking-form-error" id="booking-reference-error" hidden></p>
 
         <div class="booking-reference-grid" id="booking-reference-grid"></div>
       </section>
@@ -214,6 +229,41 @@
         </button>
       </div>
     </form>
+  </div>
+</div>
+
+<div class="booking-modal" id="booking-consultation-modal" hidden>
+  <div class="booking-modal-card" role="dialog" aria-modal="true" aria-labelledby="booking-consultation-modal-title">
+    <h2 id="booking-consultation-modal-title">{% trans "Consultation required" %}</h2>
+    <p>{% trans "This artist requires a consultation before booking a tattoo session." %}</p>
+
+    <label class="booking-modal-option">
+      <input type="radio" name="booking-consultation-required-choice" value="book" checked>
+      <span>
+        <strong>{% trans "Book consultation now" %}</strong>
+        <small>{% trans "We'll set this request as a 1-hour consultation." %}</small>
+      </span>
+    </label>
+
+    <label class="booking-modal-option">
+      <input type="radio" name="booking-consultation-required-choice" value="completed">
+      <span>
+        <strong>{% trans "I already had a consultation with this artist" %}</strong>
+        <small>{% trans "You can continue with a tattoo session request." %}</small>
+      </span>
+    </label>
+
+    <input
+      type="text"
+      class="booking-input"
+      id="booking-consultation-modal-note"
+      placeholder="{% trans 'Where/when did the consultation happen? e.g. Instagram, studio, phone...' %}"
+      hidden
+    >
+
+    <button type="button" class="booking-btn-primary" id="booking-consultation-continue">
+      {% trans "Continue" %}
+    </button>
   </div>
 </div>
 
