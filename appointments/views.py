@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.serializers.json import DjangoJSONEncoder
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -326,6 +326,110 @@ def appointments_list(request):
 
 
 @login_required
+def calendar_page(request):
+    today = timezone.localdate()
+    month_value = request.GET.get("month")
+
+    try:
+        current_month = datetime.strptime(month_value, "%Y-%m").date().replace(day=1)
+    except (TypeError, ValueError):
+        current_month = today.replace(day=1)
+
+    if current_month.month == 12:
+        next_month_date = current_month.replace(year=current_month.year + 1, month=1)
+    else:
+        next_month_date = current_month.replace(month=current_month.month + 1)
+
+    if current_month.month == 1:
+        previous_month_date = current_month.replace(year=current_month.year - 1, month=12)
+    else:
+        previous_month_date = current_month.replace(month=current_month.month - 1)
+
+    month_end = next_month_date - timedelta(days=1)
+    grid_start = current_month - timedelta(days=current_month.weekday())
+    grid_end = grid_start + timedelta(days=41)
+
+    appointments = (
+        Appointment.objects
+        .filter(Q(client=request.user) | Q(artist=request.user))
+        .filter(date__gte=grid_start, date__lte=grid_end)
+        .select_related("client", "client__profile", "artist", "artist__profile")
+        .order_by("date", "start_time")
+    )
+
+    events_by_date = {}
+    for appointment in appointments:
+        person = (
+            appointment.client.username
+            if request.user == appointment.artist
+            else appointment.artist.username
+        )
+        time_range = appointment.start_time.strftime("%H:%M") if appointment.start_time else ""
+
+        if appointment.end_time:
+            time_range = f"{time_range}–{appointment.end_time.strftime('%H:%M')}"
+
+        events_by_date.setdefault(appointment.date, []).append(
+            {
+                "id": appointment.id,
+                "person": person,
+                "time_range": time_range,
+                "booking_type": appointment.get_booking_type_display(),
+                "styles": appointment.styles or [],
+                "status": appointment.status,
+                "detail_url": reverse("appointment_detail", args=[appointment.id]),
+            }
+        )
+
+    calendar_days = []
+    for offset in range(42):
+        current_date = grid_start + timedelta(days=offset)
+        calendar_days.append(
+            {
+                "date": current_date,
+                "day_number": current_date.day,
+                "is_current_month": current_month <= current_date <= month_end,
+                "is_today": current_date == today,
+                "events": events_by_date.get(current_date, []),
+            }
+        )
+
+    insights = [
+        {
+            "label": _("Appointments this month"),
+            "value": appointments.filter(date__gte=current_month, date__lte=month_end).count(),
+        },
+        {
+            "label": _("Upcoming this week"),
+            "value": appointments.filter(date__gte=today, date__lte=today + timedelta(days=7)).count(),
+        },
+    ]
+
+    legend = [
+        {"status": Appointment.STATUS_PENDING, "label": _("Pending")},
+        {"status": Appointment.STATUS_ACCEPTED, "label": _("Accepted")},
+        {"status": Appointment.STATUS_DECLINED, "label": _("Declined")},
+        {"status": Appointment.STATUS_CANCELLED, "label": _("Cancelled")},
+        {"status": Appointment.STATUS_COMPLETED, "label": _("Completed")},
+    ]
+
+    return render(
+        request,
+        "appointments/calendar_page.html",
+        {
+            "calendar_days": calendar_days,
+            "current_month": current_month,
+            "previous_month": previous_month_date.strftime("%Y-%m"),
+            "next_month": next_month_date.strftime("%Y-%m"),
+            "today": today,
+            "today_month": today.strftime("%Y-%m"),
+            "insights": insights,
+            "legend": legend,
+        },
+    )
+
+
+@login_required
 def appointment_detail(request, appointment_id):
     appointment = get_object_or_404(
         Appointment.objects.select_related(
@@ -470,8 +574,154 @@ def _save_artist_blocked_dates_from_post(artist, post_data):
             reason=_("Blocked from artist dashboard"),
         )
         
+
 @login_required
-def artist_booking_settings(request):
+@require_POST
+def autosave_artist_booking_setting(request):
+    if not _is_verified_artist(request.user):
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": _("Only verified tattoo artists can change these settings."),
+            },
+            status=403,
+        )
+
+    try:
+        payload = json.loads(request.body.decode("utf-8") or "{}")
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"ok": False, "error": _("Invalid JSON payload.")},
+            status=400,
+        )
+
+    setting = payload.get("setting")
+    value = payload.get("value")
+
+    booking_settings, created = ArtistBookingSettings.objects.get_or_create(
+        artist=request.user,
+        defaults={"active_styles": ["Fine Line", "Blackwork", "Geometric"]},
+    )
+
+    boolean_settings = {
+        "bookings_enabled",
+        "consultation_enabled",
+        "online_consultation_enabled",
+        "studio_consultation_enabled",
+        "phone_consultation_enabled",
+        "consultation_required_before_booking",
+        "reference_images_required",
+        "deposit_required",
+    }
+
+    update_fields = [setting]
+
+    if setting in boolean_settings:
+        value = value if isinstance(value, bool) else str(value).lower() == "true"
+        setattr(booking_settings, setting, value)
+
+    elif setting == "booking_status":
+        allowed_statuses = dict(
+            getattr(ArtistBookingSettings, "BOOKING_STATUS_CHOICES", [])
+        )
+
+        if value not in allowed_statuses or not hasattr(
+            booking_settings,
+            "booking_status",
+        ):
+            return JsonResponse(
+                {"ok": False, "error": _("Invalid booking status.")},
+                status=400,
+            )
+
+        booking_settings.booking_status = value
+        booking_settings.bookings_enabled = value in {
+            getattr(ArtistBookingSettings, "BOOKING_STATUS_OPEN", "open"),
+            getattr(
+                ArtistBookingSettings,
+                "BOOKING_STATUS_CONSULTATION_ONLY",
+                "consultation_only",
+            ),
+        }
+        update_fields = ["booking_status", "bookings_enabled"]
+
+    elif setting == "active_styles":
+        if not isinstance(value, list):
+            return JsonResponse(
+                {"ok": False, "error": _("Active styles must be a list.")},
+                status=400,
+            )
+
+        cleaned_styles = []
+        for style in value:
+            if not isinstance(style, str):
+                continue
+
+            style = style.strip()[:80]
+            if style and style not in cleaned_styles:
+                cleaned_styles.append(style)
+
+            if len(cleaned_styles) >= 30:
+                break
+
+        value = cleaned_styles
+        booking_settings.active_styles = cleaned_styles
+
+    else:
+        return JsonResponse(
+            {"ok": False, "error": _("This setting cannot be autosaved.")},
+            status=400,
+        )
+
+    booking_settings.save(update_fields=update_fields)
+    booking_settings.refresh_from_db()
+
+    if setting == "booking_status":
+        persisted_value = getattr(booking_settings, "booking_status", value)
+    else:
+        persisted_value = getattr(booking_settings, setting)
+
+    if "_get_booking_status_label" in globals():
+        current_status = str(
+            _get_booking_status_label(
+                getattr(
+                    booking_settings,
+                    "booking_status",
+                    getattr(ArtistBookingSettings, "BOOKING_STATUS_OPEN", "open"),
+                )
+            )
+        )
+    else:
+        current_status = str(
+            _("Accepting bookings")
+            if booking_settings.bookings_enabled
+            else _("Bookings paused")
+        )
+
+    response_payload = {
+        "ok": True,
+        "setting": setting,
+        "value": persisted_value,
+        "current_status": current_status,
+    }
+
+    if setting == "booking_status":
+        response_payload.update(
+            {
+                "booking_status": getattr(booking_settings, "booking_status", None),
+                "bookings_enabled": booking_settings.bookings_enabled,
+            }
+        )
+
+    return JsonResponse(response_payload)
+
+@login_required
+def artist_dashboard_calendar(request):
+    return artist_booking_settings(request, active_panel="calendar")
+
+
+@login_required
+def artist_booking_settings(request, active_panel="dashboard"):
     if not _is_verified_artist(request.user):
         messages.error(
             request,
@@ -794,5 +1044,6 @@ def artist_booking_settings(request):
                 if booking_settings.bookings_enabled
                 else _("Bookings paused")
             ),
+            "active_dashboard_panel": active_panel,
         },
     )

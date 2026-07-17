@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Calendar" %} | Tatzo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/appointments.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="calendar-page">
+  <div class="calendar-shell">
+    <nav class="calendar-topbar" aria-label="{% trans 'Calendar navigation' %}">
+      <button type="button" class="calendar-back-link" onclick="window.history.back()">← {% trans "Back" %}</button>
+
+      <div class="calendar-topbar-links">
+        <a href="{% url 'home' %}">{% trans "Home" %}</a>
+        <a href="{% url 'user_profile' %}">{% trans "My profile" %}</a>
+        <a href="{% url 'appointments_list' %}">{% trans "Appointments" %}</a>
+      </div>
+    </nav>
+
+    <header class="calendar-header">
+      <div>
+        <p class="booking-eyebrow">Tatzo</p>
+        <h1>{% trans "Calendar" %}</h1>
+        <p>{% trans "Your appointments, sessions and booking requests in one view." %}</p>
+      </div>
+
+      <div class="calendar-controls" aria-label="{% trans 'Calendar controls' %}">
+        <a href="?month={{ previous_month }}" aria-label="{% trans 'Previous month' %}">‹</a>
+        <a href="?month={{ today_month }}" class="calendar-today-btn">{% trans "Today" %}</a>
+        <a href="?month={{ next_month }}" aria-label="{% trans 'Next month' %}">›</a>
+      </div>
+    </header>
+
+    <div class="calendar-toolbar">
+      <strong>{{ current_month|date:"F Y" }}</strong>
+      <div class="calendar-view-toggle" aria-label="{% trans 'Calendar view' %}">
+        <button type="button" class="is-active">{% trans "Month" %}</button>
+        <button type="button">{% trans "Week" %}</button>
+        <button type="button">{% trans "Day" %}</button>
+      </div>
+    </div>
+
+    <div class="calendar-layout">
+      <section class="calendar-grid-card" aria-label="{% trans 'Month calendar' %}">
+        <div class="calendar-weekdays">
+          <span>{% trans "Mon" %}</span>
+          <span>{% trans "Tue" %}</span>
+          <span>{% trans "Wed" %}</span>
+          <span>{% trans "Thu" %}</span>
+          <span>{% trans "Fri" %}</span>
+          <span>{% trans "Sat" %}</span>
+          <span>{% trans "Sun" %}</span>
+        </div>
+
+        <div class="calendar-month-grid">
+          {% for day in calendar_days %}
+            <article class="calendar-day-cell {% if not day.is_current_month %}is-muted{% endif %} {% if day.is_today %}is-today{% endif %}">
+              <div class="calendar-day-head">
+                <time datetime="{{ day.date|date:'Y-m-d' }}">{{ day.day_number }}</time>
+                {% if day.is_today %}<span>{% trans "Today" %}</span>{% endif %}
+              </div>
+
+              <div class="calendar-day-events">
+                {% for event in day.events %}
+                  <a href="{{ event.detail_url }}" class="calendar-event-pill is-{{ event.status }}">
+                    <span>{{ event.time_range }}</span>
+                    <strong>{{ event.booking_type }}</strong>
+                    <small>{{ event.person }}</small>
+                  </a>
+                {% empty %}
+                  <span class="calendar-no-events">{% trans "No events" %}</span>
+                {% endfor %}
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+
+      <aside class="calendar-side" aria-label="{% trans 'Calendar insights' %}">
+        <section class="calendar-side-card">
+          <p class="booking-eyebrow">{% trans "Insights" %}</p>
+          <h2>{% trans "This month" %}</h2>
+
+          <div class="calendar-insight-list">
+            {% for insight in insights %}
+              <div>
+                <strong>{{ insight.value }}</strong>
+                <span>{{ insight.label }}</span>
+              </div>
+            {% empty %}
+              <p>{% trans "No insights yet." %}</p>
+            {% endfor %}
+          </div>
+        </section>
+
+        <section class="calendar-side-card">
+          <p class="booking-eyebrow">{% trans "Legend" %}</p>
+          <h2>{% trans "Event status" %}</h2>
+
+          <ul class="calendar-legend-list">
+            {% for item in legend %}
+              <li>
+                <span class="calendar-legend-dot is-{{ item.status }}"></span>
+                {{ item.label }}
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>
+{% endblock %}
