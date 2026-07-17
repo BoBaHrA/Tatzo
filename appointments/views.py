@@ -761,6 +761,7 @@ def calendar_events(request):
                 "consultation_note": appointment.consultation_note,
                 "created_at": appointment.created_at.isoformat() if appointment.created_at else None,
                 "reference_images": reference_images,
+                "reference_count": len(reference_images),
                 "location": "",
                 "preparation_note": "",
                 "deposit_status": "",
