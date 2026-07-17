@@ -579,107 +579,207 @@ def appointments_list(request):
 
 @login_required
 def calendar_page(request):
-    today = timezone.localdate()
-    month_value = request.GET.get("month")
+    profile = getattr(request.user, "profile", None)
+    is_artist = bool(profile and profile.account_type == "tattoo_artist")
 
+    calendar_clients = []
+    calendar_capacity_hours = 8
+
+    if is_artist:
+        calendar_clients = (
+            User.objects
+            .filter(client_appointments__artist=request.user)
+            .distinct()
+            .order_by("username")
+        )
+
+        booking_settings = ArtistBookingSettings.objects.filter(
+            artist=request.user
+        ).first()
+
+        if booking_settings:
+            calendar_capacity_hours = max(
+                1,
+                int(getattr(booking_settings, "maximum_session_hours", 8) or 8),
+            )
+
+    return render(
+        request,
+        "users/calendar.html",
+        {
+            "calendar_context": "main",
+            "calendar_role": "artist" if is_artist else "client",
+            "calendar_clients": calendar_clients,
+            "calendar_capacity_hours": calendar_capacity_hours,
+        },
+    )
+
+def _parse_calendar_date(value, fallback):
     try:
-        current_month = datetime.strptime(month_value, "%Y-%m").date().replace(day=1)
+        return datetime.strptime(value, "%Y-%m-%d").date()
     except (TypeError, ValueError):
-        current_month = today.replace(day=1)
+        return fallback
 
-    if current_month.month == 12:
-        next_month_date = current_month.replace(year=current_month.year + 1, month=1)
-    else:
-        next_month_date = current_month.replace(month=current_month.month + 1)
 
-    if current_month.month == 1:
-        previous_month_date = current_month.replace(year=current_month.year - 1, month=12)
-    else:
-        previous_month_date = current_month.replace(month=current_month.month - 1)
-
-    month_end = next_month_date - timedelta(days=1)
-    grid_start = current_month - timedelta(days=current_month.weekday())
-    grid_end = grid_start + timedelta(days=41)
+@login_required
+def calendar_events(request):
+    today = timezone.localdate()
+    start_date = _parse_calendar_date(request.GET.get("start"), today)
+    end_date = _parse_calendar_date(
+        request.GET.get("end"),
+        start_date + timedelta(days=41),
+    )
 
     appointments = (
         Appointment.objects
         .filter(Q(client=request.user) | Q(artist=request.user))
-        .filter(date__gte=grid_start, date__lte=grid_end)
-        .select_related("client", "client__profile", "artist", "artist__profile")
+        .filter(date__gte=start_date, date__lte=end_date)
+        .select_related("client", "artist")
         .order_by("date", "start_time")
     )
 
-    events_by_date = {}
+    events = []
+    days = {}
+
     for appointment in appointments:
-        person = (
-            appointment.client.username
-            if request.user == appointment.artist
-            else appointment.artist.username
+        if not appointment.start_time:
+            continue
+
+        starts_at = timezone.make_aware(
+            datetime.combine(appointment.date, appointment.start_time),
+            timezone.get_current_timezone(),
         )
-        time_range = appointment.start_time.strftime("%H:%M") if appointment.start_time else ""
 
         if appointment.end_time:
-            time_range = f"{time_range}–{appointment.end_time.strftime('%H:%M')}"
+            ends_at = timezone.make_aware(
+                datetime.combine(appointment.date, appointment.end_time),
+                timezone.get_current_timezone(),
+            )
+        else:
+            ends_at = starts_at + timedelta(
+                minutes=appointment.session_length_minutes or 60
+            )
 
-        events_by_date.setdefault(appointment.date, []).append(
+        duration_hours = max(
+            0.5,
+            round((ends_at - starts_at).total_seconds() / 3600, 1),
+        )
+
+        event_type = (
+            "consultation"
+            if appointment.booking_type in [
+                Appointment.TYPE_CONSULTATION,
+                Appointment.TYPE_ONLINE_CONSULTATION,
+            ]
+            else "tattoo_session"
+        )
+
+        day_key = appointment.date.isoformat()
+        day = days.setdefault(
+            day_key,
+            {
+                "events": 0,
+                "sessions": 0,
+                "consultations": 0,
+                "booked_hours": 0,
+                "workload": "empty",
+            },
+        )
+
+        day["events"] += 1
+        day["booked_hours"] += duration_hours
+
+        if event_type == "consultation":
+            day["consultations"] += 1
+        else:
+            day["sessions"] += 1
+
+        if day["booked_hours"] >= 8:
+            day["workload"] = "full"
+        elif day["booked_hours"] >= 4:
+            day["workload"] = "busy"
+        else:
+            day["workload"] = "light"
+
+        events.append(
             {
                 "id": appointment.id,
-                "person": person,
-                "time_range": time_range,
-                "booking_type": appointment.get_booking_type_display(),
-                "styles": appointment.styles or [],
+                "event_type": event_type,
+                "event_type_label": appointment.get_booking_type_display(),
                 "status": appointment.status,
-                "detail_url": reverse("appointment_detail", args=[appointment.id]),
+                "status_label": appointment.get_status_display(),
+                "starts_at": starts_at.isoformat(),
+                "ends_at": ends_at.isoformat(),
+                "duration_hours": duration_hours,
+                "artist_name": appointment.artist.username,
+                "client_name": appointment.client.username,
+                "project_title": appointment.get_booking_type_display(),
+                "title": appointment.get_booking_type_display(),
+                "placement": appointment.placement,
+                "tattoo_style": ", ".join(appointment.styles or []),
+                "location": "",
+                "notes": appointment.description or "",
+                "preparation_note": "",
+                "deposit_status": "",
+                "deposit_status_label": "",
             }
         )
 
-    calendar_days = []
-    for offset in range(42):
-        current_date = grid_start + timedelta(days=offset)
-        calendar_days.append(
-            {
-                "date": current_date,
-                "day_number": current_date.day,
-                "is_current_month": current_month <= current_date <= month_end,
-                "is_today": current_date == today,
-                "events": events_by_date.get(current_date, []),
-            }
+    if getattr(request.user.profile, "account_type", "") == "tattoo_artist":
+        time_off_dates = ArtistTimeOff.objects.filter(
+            artist=request.user,
+            date__gte=start_date,
+            date__lte=end_date,
         )
 
-    insights = [
-        {
-            "label": _("Appointments this month"),
-            "value": appointments.filter(date__gte=current_month, date__lte=month_end).count(),
-        },
-        {
-            "label": _("Upcoming this week"),
-            "value": appointments.filter(date__gte=today, date__lte=today + timedelta(days=7)).count(),
-        },
-    ]
+        for item in time_off_dates:
+            day_key = item.date.isoformat()
+            day = days.setdefault(
+                day_key,
+                {
+                    "events": 0,
+                    "sessions": 0,
+                    "consultations": 0,
+                    "booked_hours": 0,
+                    "workload": "blocked",
+                },
+            )
+            day["workload"] = "blocked"
 
-    legend = [
-        {"status": Appointment.STATUS_PENDING, "label": _("Pending")},
-        {"status": Appointment.STATUS_ACCEPTED, "label": _("Accepted")},
-        {"status": Appointment.STATUS_DECLINED, "label": _("Declined")},
-        {"status": Appointment.STATUS_CANCELLED, "label": _("Cancelled")},
-        {"status": Appointment.STATUS_COMPLETED, "label": _("Completed")},
-    ]
-
-    return render(
-        request,
-        "appointments/calendar_page.html",
+    return JsonResponse(
         {
-            "calendar_days": calendar_days,
-            "current_month": current_month,
-            "previous_month": previous_month_date.strftime("%Y-%m"),
-            "next_month": next_month_date.strftime("%Y-%m"),
-            "today": today,
-            "today_month": today.strftime("%Y-%m"),
-            "insights": insights,
-            "legend": legend,
-        },
+            "events": events,
+            "days": days,
+            "insights": [],
+        }
     )
 
+
+@login_required
+@require_POST
+def calendar_event_create(request):
+    return JsonResponse(
+        {"ok": False, "error": _("Calendar event creation is not implemented yet.")},
+        status=501,
+    )
+
+
+@login_required
+@require_POST
+def calendar_block_time(request):
+    return JsonResponse(
+        {"ok": False, "error": _("Use artist dashboard blocked dates for now.")},
+        status=501,
+    )
+
+
+@login_required
+@require_POST
+def calendar_vacation(request):
+    return JsonResponse(
+        {"ok": False, "error": _("Use artist dashboard blocked dates for now.")},
+        status=501,
+    )
 
 @login_required
 def appointment_detail(request, appointment_id):
