@@ -1,0 +1,708 @@
+.tatzo-calendar-page {
+  --cal-bg: #000d18;
+  --cal-panel: #000a12;
+  --cal-line: rgba(255, 255, 255, 0.07);
+  --cal-line-soft: rgba(255, 255, 255, 0.045);
+  --cal-text: #e8eef4;
+  --cal-muted: #8ea0b0;
+  --cal-primary: #04c5bf;
+  --cal-accent: #ee0c6f;
+  color: var(--cal-text);
+  font-family: "Poppins", Arial, sans-serif;
+}
+
+.tatzo-calendar-page.calendar-shell {
+  margin-left: 270px;
+  min-height: 100vh;
+  padding: 22px 24px 32px;
+}
+
+.tatzo-calendar-page .calendar-topbar {
+  align-items: center;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(160px, 1fr) auto auto;
+  margin: 0 auto 14px;
+  max-width: 1280px;
+}
+
+.tatzo-calendar-page .calendar-eyebrow {
+  color: var(--cal-primary);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  margin: 0 0 2px;
+  text-transform: uppercase;
+}
+
+.tatzo-calendar-page .calendar-topbar h1,
+.tatzo-calendar-page .calendar-topbar h2 {
+  margin: 0;
+}
+
+.tatzo-calendar-page .calendar-topbar h1 {
+  font-size: 25px;
+  line-height: 1.1;
+}
+
+.tatzo-calendar-page .calendar-topbar h2 {
+  font-size: 18px;
+  min-width: 170px;
+}
+
+.tatzo-calendar-page .calendar-period-nav,
+.tatzo-calendar-page .view-tabs {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.tatzo-calendar-page .view-tabs {
+  background: var(--cal-panel);
+  border: 1px solid var(--cal-line);
+  border-radius: 11px;
+  padding: 3px;
+}
+
+.tatzo-calendar-page .calendar-period-nav button,
+.tatzo-calendar-page .view-tabs button,
+.tatzo-calendar-page .quick-actions button,
+.tatzo-calendar-page .primary {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--cal-line);
+  border-radius: 10px;
+  color: var(--cal-text);
+  cursor: pointer;
+  min-height: 34px;
+  padding: 7px 12px;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+
+.tatzo-calendar-page .calendar-period-nav button:hover,
+.tatzo-calendar-page .view-tabs button:hover,
+.tatzo-calendar-page .quick-actions button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(4, 197, 191, 0.32);
+}
+
+.tatzo-calendar-page .view-tabs button.active,
+.tatzo-calendar-page .primary {
+  background: var(--cal-primary);
+  color: #00181a;
+  font-weight: 700;
+}
+
+.tatzo-calendar-page .calendar-layout {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  margin: 0 auto;
+  max-width: 1280px;
+}
+
+.tatzo-calendar-page .calendar-board,
+.tatzo-calendar-page .side-card {
+  background: var(--cal-panel);
+  border: 1px solid var(--cal-line);
+  border-radius: 16px;
+}
+
+.tatzo-calendar-page .calendar-board {
+  padding: 12px;
+}
+
+.tatzo-calendar-page .weekday-row,
+.tatzo-calendar-page .calendar-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.tatzo-calendar-page .weekday-row {
+  color: var(--cal-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin: 0 0 8px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.tatzo-calendar-page .calendar-cell {
+  background: var(--cal-panel);
+  border: 1px solid var(--cal-line-soft);
+  border-radius: 12px;
+  color: inherit;
+  cursor: pointer;
+  min-height: 98px;
+  overflow: hidden;
+  padding: 9px;
+  position: relative;
+  text-align: left;
+  transition: border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.tatzo-calendar-page .calendar-cell:hover {
+  border-color: rgba(4, 197, 191, 0.4);
+  transform: translateY(-1px);
+}
+
+.tatzo-calendar-page .calendar-cell.today {
+  box-shadow: inset 0 0 0 1.5px var(--cal-primary);
+}
+
+.tatzo-calendar-page .calendar-cell.muted {
+  opacity: 0.34;
+}
+
+.tatzo-calendar-page .day-head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 7px;
+  position: relative;
+  z-index: 1;
+}
+
+.tatzo-calendar-page .day-number {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.tatzo-calendar-page .day-dots {
+  display: flex;
+  gap: 3px;
+}
+
+.tatzo-calendar-page .type-dot {
+  background: var(--cal-muted);
+  border-radius: 50%;
+  display: inline-block;
+  height: 7px;
+  width: 7px;
+}
+
+.tatzo-calendar-page .type-tattoo_session { background: var(--cal-primary); }
+.tatzo-calendar-page .type-consultation { background: var(--cal-accent); }
+.tatzo-calendar-page .type-blocked { background: #5b6b7a; }
+.tatzo-calendar-page .type-vacation { background: #8b7cf6; }
+.tatzo-calendar-page .type-sketch_deadline,
+.tatzo-calendar-page .type-deposit_reminder,
+.tatzo-calendar-page .type-healing_reminder { background: #f5a623; }
+
+.tatzo-calendar-page .cell-line,
+.tatzo-calendar-page .event-dot {
+  display: block;
+  font-size: 12px;
+  line-height: 1.35;
+  margin-top: 3px;
+  position: relative;
+  z-index: 1;
+}
+
+.tatzo-calendar-page .muted-line,
+.tatzo-calendar-page .event-dot {
+  color: var(--cal-muted);
+}
+
+.tatzo-calendar-page .workload-light::after,
+.tatzo-calendar-page .workload-busy::after,
+.tatzo-calendar-page .workload-full::after,
+.tatzo-calendar-page .workload-vacation::after,
+.tatzo-calendar-page .workload-blocked::after {
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.tatzo-calendar-page .workload-light::after { background: linear-gradient(180deg, transparent 45%, rgba(4, 197, 191, 0.06)); }
+.tatzo-calendar-page .workload-busy::after { background: linear-gradient(180deg, transparent 30%, rgba(4, 197, 191, 0.13)); }
+.tatzo-calendar-page .workload-full::after { background: linear-gradient(180deg, rgba(238, 12, 111, 0.06), rgba(238, 12, 111, 0.16)); }
+.tatzo-calendar-page .workload-vacation::after { background: rgba(139, 124, 246, 0.14); }
+.tatzo-calendar-page .workload-blocked::after { background: repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(91, 107, 122, 0.14) 6px, rgba(91, 107, 122, 0.14) 12px); }
+
+.tatzo-calendar-page .timeline {
+  display: block;
+}
+
+.tatzo-calendar-page .timeline .calendar-cell {
+  min-height: 72px;
+}
+
+.tatzo-calendar-page .calendar-side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tatzo-calendar-page .side-card {
+  padding: 14px;
+}
+
+.tatzo-calendar-page .side-card h3 {
+  font-size: 14px;
+  margin: 0 0 10px;
+}
+
+.tatzo-calendar-page .calendar-insights p,
+.tatzo-calendar-page .calendar-legend p {
+  color: var(--cal-muted);
+  font-size: 12px;
+  margin: 8px 0;
+}
+
+.tatzo-calendar-page .calendar-legend p {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.tatzo-calendar-page .quick-actions {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tatzo-calendar-page .quick-actions h3 {
+  grid-column: 1 / -1;
+}
+
+.tatzo-calendar-page .calendar-status {
+  color: var(--cal-muted);
+  font-size: 13px;
+  min-height: 18px;
+  padding: 10px 2px 0;
+}
+
+.tatzo-calendar-page.calendar-modal {
+  background: rgba(0, 4, 10, 0.72);
+  backdrop-filter: blur(6px);
+  display: grid;
+  inset: 0;
+  place-items: center;
+  position: fixed;
+  z-index: 10000;
+}
+
+.tatzo-calendar-page.calendar-modal[hidden] {
+  display: none;
+}
+
+.tatzo-calendar-page.calendar-modal .modal-card {
+  background: var(--cal-panel);
+  border: 1px solid var(--cal-line);
+  border-radius: 16px;
+  box-shadow: 0 24px 80px #000;
+  color: var(--cal-text);
+  font-family: "Poppins", Arial, sans-serif;
+  max-height: 88vh;
+  overflow: auto;
+  padding: 18px;
+  width: min(480px, 92vw);
+}
+
+.tatzo-calendar-page.calendar-modal .modal-close {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--cal-line);
+  border-radius: 10px;
+  color: #fff;
+  float: right;
+  font-size: 22px;
+  height: 32px;
+  width: 32px;
+}
+
+.tatzo-calendar-page.calendar-modal .modal-summary {
+  border-bottom: 1px solid var(--cal-line);
+  color: var(--cal-muted);
+  font-size: 13px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-empty {
+  color: var(--cal-muted);
+  margin: 8px 0 2px;
+}
+
+.tatzo-calendar-page.calendar-modal .event-card {
+  background: var(--cal-bg);
+  border: 1px solid var(--cal-line);
+  border-left: 3px solid var(--cal-primary);
+  border-radius: 13px;
+  margin: 10px 0;
+  padding: 12px;
+}
+
+.tatzo-calendar-page.calendar-modal .event-consultation { border-left-color: var(--cal-accent); }
+.tatzo-calendar-page.calendar-modal .event-blocked { border-left-color: #5b6b7a; }
+.tatzo-calendar-page.calendar-modal .event-vacation { border-left-color: #8b7cf6; }
+
+.tatzo-calendar-page.calendar-modal .event-card-top {
+  align-items: flex-start;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.tatzo-calendar-page.calendar-modal .event-card h4 {
+  font-size: 14px;
+  margin: 0;
+}
+
+.tatzo-calendar-page.calendar-modal .event-card p {
+  color: var(--cal-muted);
+  font-size: 12px;
+  margin: 6px 0 0;
+}
+
+.tatzo-calendar-page.calendar-modal .status-badge {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  color: var(--cal-primary);
+  flex: 0 0 auto;
+  font-size: 11px;
+  padding: 2px 8px;
+}
+
+.tatzo-calendar-page.calendar-modal .event-actions a,
+.tatzo-calendar-page.calendar-modal .event-actions button {
+  display: inline-block;
+  margin: 8px 6px 0 0;
+}
+
+.tatzo-calendar-page.calendar-modal .event-details[hidden] {
+  display: none;
+}
+
+.tatzo-calendar-page.calendar-modal label {
+  display: block;
+  margin: 10px 0;
+}
+
+.tatzo-calendar-page.calendar-modal input,
+.tatzo-calendar-page.calendar-modal select,
+.tatzo-calendar-page.calendar-modal textarea {
+  background: #001a2e;
+  border: 1px solid rgba(4, 197, 191, 0.25);
+  border-radius: 10px;
+  box-sizing: border-box;
+  color: #fff;
+  padding: 10px;
+  width: 100%;
+}
+
+.tatzo-calendar-page.calendar-modal .form-error {
+  color: #ff8bb8;
+}
+
+@media (max-width: 1000px) {
+  .tatzo-calendar-page .calendar-topbar,
+  .tatzo-calendar-page .calendar-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .tatzo-calendar-page.calendar-shell {
+    margin-left: 0;
+    padding: 14px 10px 86px;
+  }
+
+  .tatzo-calendar-page .calendar-period-nav,
+  .tatzo-calendar-page .view-tabs {
+    flex-wrap: wrap;
+  }
+
+  .tatzo-calendar-page .calendar-grid,
+  .tatzo-calendar-page .weekday-row {
+    gap: 4px;
+  }
+
+  .tatzo-calendar-page .calendar-cell {
+    min-height: 76px;
+    padding: 6px;
+  }
+
+  .tatzo-calendar-page .cell-line,
+  .tatzo-calendar-page .event-dot {
+    display: none;
+  }
+
+  .tatzo-calendar-page.calendar-modal {
+    align-items: end;
+  }
+
+  .tatzo-calendar-page.calendar-modal .modal-card {
+    border-radius: 24px 24px 0 0;
+    max-height: 92vh;
+    width: 100vw;
+  }
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.018));
+  border: 1px solid var(--cal-line);
+  border-left: 4px solid var(--cal-primary);
+  border-radius: 15px;
+  margin: 10px 0;
+  overflow: visible;
+  padding: 0;
+  position: relative;
+  transition: border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-card:hover,
+.tatzo-calendar-page.calendar-modal .calendar-event-card:focus-visible {
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-card--consultation {
+  border-left-color: var(--cal-accent);
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-card--blocked {
+  border-left-color: #5b6b7a;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-card--vacation {
+  border-left-color: #8b7cf6;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-card--sketch_deadline,
+.tatzo-calendar-page.calendar-modal .calendar-event-card--deposit_reminder,
+.tatzo-calendar-page.calendar-modal .calendar-event-card--healing_reminder {
+  border-left-color: #f5a623;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-main {
+  cursor: pointer;
+  padding: 13px 13px 6px;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-top {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-time {
+  color: var(--cal-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-badge {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-radius: 999px;
+  color: var(--cal-primary);
+  flex: 0 0 auto;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  padding: 3px 8px;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-badge--completed {
+  background: rgba(62, 207, 142, 0.12);
+  color: #70d9a8;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-badge--deposit_pending,
+.tatzo-calendar-page.calendar-modal .calendar-event-badge--reschedule_requested {
+  background: rgba(245, 166, 35, 0.12);
+  color: #f5c66d;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-title {
+  color: var(--cal-text);
+  font-size: 15.5px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 0 0 5px;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-person {
+  color: rgba(232, 238, 244, 0.88);
+  font-size: 13.5px;
+  font-weight: 600;
+  margin: 0 0 5px;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-meta,
+.tatzo-calendar-page.calendar-modal .calendar-event-deposit,
+.tatzo-calendar-page.calendar-modal .calendar-event-detail-row {
+  color: var(--cal-muted);
+  font-size: 12px;
+  line-height: 1.45;
+  margin: 4px 0 0;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-deposit--paid,
+.tatzo-calendar-page.calendar-modal .calendar-event-deposit--not_required {
+  color: #70d9a8;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-deposit--pending {
+  color: #f5c66d;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-details {
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  margin-top: 10px;
+  padding-top: 9px;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-details[hidden] {
+  display: none;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-detail-row strong {
+  color: rgba(232, 238, 244, 0.76);
+  font-weight: 700;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 13px 13px;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-action,
+.tatzo-calendar-page.calendar-modal .calendar-event-menu-button,
+.tatzo-calendar-page.calendar-modal .calendar-event-menu-item {
+  appearance: none;
+  border: 0;
+  border-radius: 10px;
+  box-sizing: border-box;
+  cursor: pointer;
+  font-family: "Poppins", Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.1;
+  min-height: 36px;
+  padding: 10px 13px;
+  text-decoration: none;
+  transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-action:focus-visible,
+.tatzo-calendar-page.calendar-modal .calendar-event-menu-button:focus-visible,
+.tatzo-calendar-page.calendar-modal .calendar-event-menu-item:focus-visible {
+  outline: 2px solid var(--cal-primary);
+  outline-offset: 2px;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-action--primary {
+  background: var(--cal-primary);
+  color: #00181a;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-action--primary:hover {
+  box-shadow: 0 0 0 3px rgba(4, 197, 191, 0.16), 0 10px 22px rgba(4, 197, 191, 0.14);
+  transform: translateY(-1px);
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-action--ghost,
+.tatzo-calendar-page.calendar-modal .calendar-event-menu-button {
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--cal-text);
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-action--ghost:hover,
+.tatzo-calendar-page.calendar-modal .calendar-event-menu-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-menu {
+  margin-left: auto;
+  position: relative;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-menu-button {
+  min-width: 40px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-menu-list {
+  background: #00111f;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.42);
+  min-width: 178px;
+  padding: 6px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 7px);
+  z-index: 3;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-menu-list[hidden] {
+  display: none;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-menu-item {
+  background: transparent;
+  border-radius: 8px;
+  color: var(--cal-text);
+  display: block;
+  font-weight: 700;
+  min-height: 34px;
+  text-align: left;
+  width: 100%;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-menu-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-menu-item--success {
+  color: #8ae3b8;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-menu-item--danger {
+  color: #ff7aa9;
+}
+
+.tatzo-calendar-page.calendar-modal .calendar-event-menu-item.is-loading {
+  opacity: 0.66;
+  pointer-events: none;
+}
+
+@media (max-width: 800px) {
+  .tatzo-calendar-page.calendar-modal .calendar-event-actions {
+    align-items: stretch;
+  }
+
+  .tatzo-calendar-page.calendar-modal .calendar-event-action--primary {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+
+  .tatzo-calendar-page.calendar-modal .calendar-event-action--ghost {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+
+  .tatzo-calendar-page.calendar-modal .calendar-event-menu {
+    margin-left: 0;
+  }
+
+  .tatzo-calendar-page.calendar-modal .calendar-event-menu-list {
+    left: 0;
+    right: auto;
+  }
+}
