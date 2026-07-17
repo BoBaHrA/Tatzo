@@ -84,23 +84,11 @@
   </div>
 </div>
 
-<div class="tatzo-calendar-page calendar-modal appointment-summary-modal" id="appointment-modal" hidden>
-  <div class="modal-card appointment-modal-card">
-    <button type="button" class="modal-close" data-close-modal>×</button>
-    <div class="appointment-modal-header">
-      <div>
-        <p class="calendar-eyebrow">{% trans "Appointment" %}</p>
-        <h3 id="appointment-modal-title"></h3>
-      </div>
-      <span id="appointment-modal-status" class="appointment-status-badge"></span>
-    </div>
-    <div id="appointment-modal-meta" class="appointment-modal-meta"></div>
-    <div id="appointment-modal-details" class="appointment-modal-details"></div>
-    <section class="appointment-modal-reference-section" aria-labelledby="appointment-modal-reference-title">
-      <h4 id="appointment-modal-reference-title">{% trans "Reference images" %}</h4>
-      <div id="appointment-modal-references"></div>
-    </section>
-    <div id="appointment-modal-actions" class="appointment-modal-actions"></div>
+<div class="tatzo-calendar-page calendar-modal reference-preview-modal" id="reference-preview-modal" hidden>
+  <div class="modal-card reference-preview-card" role="dialog" aria-modal="true" aria-labelledby="reference-preview-title">
+    <button type="button" class="modal-close reference-preview-close" data-close-reference-preview>×</button>
+    <h3 id="reference-preview-title"></h3>
+    <img id="reference-preview-image" alt="">
   </div>
 </div>
 
