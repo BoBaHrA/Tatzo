@@ -5,6 +5,8 @@ from appointments import views as appointment_views
 
 from appointments import views as appointment_views
 
+from appointments import views as appointment_views
+
 
 def healthz(request):
     return HttpResponse("ok", content_type="text/plain")
