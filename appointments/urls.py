@@ -14,6 +14,10 @@ urlpatterns = [
     path("manual/create/", views.create_manual_appointment, name="create_manual_appointment"),
     path("artist/<str:username>/book/", views.booking_wizard, name="booking_wizard"),
     path("artist/<str:username>/book/create/", views.create_appointment, name="create_appointment"),
+    path("calendar/events/", views.calendar_events, name="calendar_events"),
+    path("calendar/events/create/", views.calendar_event_create, name="calendar_event_create"),
+    path("calendar/block-time/", views.calendar_block_time, name="calendar_block_time"),
+    path("calendar/vacation/", views.calendar_vacation, name="calendar_vacation"),
     path(
         "settings/autosave/",
         views.autosave_artist_booking_setting,
