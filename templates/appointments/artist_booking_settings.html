@@ -18,12 +18,12 @@
     </a>
 
     <nav class="artist-dash-nav">
-      <a href="{% url 'artist_booking_settings' %}" class="artist-dash-nav-item {% if active_dashboard_panel == 'dashboard' %}is-active{% endif %}" data-artist-panel-target="dashboard" data-artist-panel-link>
+      <a href="{% url 'artist_booking_settings' %}" class="artist-dash-nav-item {% if active_dashboard_panel == 'dashboard' %}is-active{% endif %}">
         <img src="{% static 'icons/dashboard.svg' %}" class="artist-dash-icon" alt="">
         <span>{% trans "Dashboard" %}</span>
       </a>
 
-      <a href="{% url 'artist_dashboard_calendar' %}" class="artist-dash-nav-item {% if active_dashboard_panel == 'calendar' %}is-active{% endif %}" data-artist-panel-target="calendar" data-artist-panel-link>
+      <a href="{% url 'artist_dashboard_calendar' %}" class="artist-dash-nav-item {% if active_dashboard_panel == 'calendar' %}is-active{% endif %}">
         <img src="{% static 'icons/calendar-dash.svg' %}" class="artist-dash-icon" alt="">
         <span>{% trans "Calendar" %}</span>
       </a>
