@@ -177,19 +177,20 @@
   function eventCard(ev) {
     const card = document.createElement("article");
     card.className = `calendar-event-card calendar-event-card--${ev.event_type}`;
+    card.dataset.appointmentId = ev.appointment_id || ev.id;
+
     const main = document.createElement("div");
     main.className = "calendar-event-main";
     main.tabIndex = 0;
     main.setAttribute("role", "button");
-    main.setAttribute("aria-label", "Open appointment details");
+    main.setAttribute("aria-expanded", "false");
+    main.setAttribute("aria-label", "Show appointment details");
 
     const top = document.createElement("div");
     top.className = "calendar-event-top";
     const time = document.createElement("span");
     time.className = "calendar-event-time";
-    const start = new Date(ev.starts_at);
-    const end = new Date(ev.ends_at);
-    time.textContent = `${start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} — ${end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · ${ev.duration_hours}h`;
+    time.textContent = `${formatTimeRange(ev)} · ${formatDuration(ev)}`;
     top.appendChild(time);
     const badge = document.createElement("span");
     badge.className = `calendar-event-badge calendar-event-badge--${ev.status}`;
@@ -199,17 +200,17 @@
 
     const heading = document.createElement("h4");
     heading.className = "calendar-event-title";
-    heading.textContent = ev.project_title || ev.title || ev.event_type_label;
+    heading.textContent = ev.project_title || ev.title || ev.booking_type_label || ev.event_type_label;
     main.appendChild(heading);
 
     const person = document.createElement("p");
     person.className = "calendar-event-person";
-    person.textContent = state.role === "artist" ? (ev.client_name || "No client") : ev.artist_name;
+    person.textContent = state.role === "artist"
+      ? `Client: ${ev.client_name || "No client"}`
+      : `Artist: ${ev.artist_name || "No artist"}`;
     main.appendChild(person);
 
-    const metaItems = state.role === "artist"
-      ? [ev.placement, ev.tattoo_style].filter(Boolean)
-      : [ev.location, ev.project_title && ev.project_title !== ev.title ? ev.project_title : ""].filter(Boolean);
+    const metaItems = [ev.placement, formatStyles(ev)].filter(Boolean);
     if (metaItems.length) {
       const meta = document.createElement("p");
       meta.className = "calendar-event-meta";
@@ -217,126 +218,122 @@
       main.appendChild(meta);
     }
 
-    if (state.role === "artist" && ev.deposit_status_label) {
-      const deposit = document.createElement("p");
-      deposit.className = `calendar-event-deposit calendar-event-deposit--${ev.deposit_status}`;
-      deposit.textContent = ev.deposit_status_label;
-      main.appendChild(deposit);
-    }
-
-    main.addEventListener("click", () => openAppointmentModal(ev));
+    main.addEventListener("click", (event) => {
+      if (event.target.closest("a, button, .calendar-event-actions, .calendar-event-menu")) return;
+      toggleEventCard(card);
+    });
     main.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        openAppointmentModal(ev);
+        toggleEventCard(card);
       }
     });
+
     card.appendChild(main);
-    card.appendChild(actionBar(ev));
+    card.appendChild(expandedDetails(ev));
     return card;
   }
 
-  function addDetail(parent, label, value) {
-    if (!value) return;
-    const row = document.createElement("p");
-    row.className = "calendar-event-detail-row";
-    const strong = document.createElement("strong");
-    strong.textContent = `${label}: `;
-    row.appendChild(strong);
-    row.append(document.createTextNode(value));
-    parent.appendChild(row);
+  function toggleEventCard(card) {
+    closeAllMenus();
+    const wasExpanded = card.classList.contains("is-expanded");
+    document.querySelectorAll("#day-modal-events .calendar-event-card.is-expanded").forEach((item) => {
+      item.classList.remove("is-expanded");
+      item.querySelector(".calendar-event-main")?.setAttribute("aria-expanded", "false");
+      const details = item.querySelector(".calendar-event-expanded");
+      if (details) details.hidden = true;
+    });
+    if (!wasExpanded) {
+      card.classList.add("is-expanded");
+      card.querySelector(".calendar-event-main")?.setAttribute("aria-expanded", "true");
+      const details = card.querySelector(".calendar-event-expanded");
+      if (details) details.hidden = false;
+    }
   }
 
+  function expandedDetails(ev) {
+    const panel = document.createElement("section");
+    panel.className = "calendar-event-expanded";
+    panel.hidden = true;
 
-  function openAppointmentModal(ev) {
-    closeAllMenus();
-    const modal = document.getElementById("appointment-modal");
-    if (!modal) return;
+    const grid = document.createElement("div");
+    grid.className = "calendar-event-detail-grid";
+    addSummaryRow(grid, "Client", ev.client_name);
+    addSummaryRow(grid, "Artist", ev.artist_name);
+    addSummaryRow(grid, "Date", formatDate(ev.date || ev.starts_at));
+    addSummaryRow(grid, "Time", formatTimeRange(ev));
+    addSummaryRow(grid, "Duration", formatDuration(ev));
+    addSummaryRow(grid, "Size", ev.size);
+    addSummaryRow(grid, "Placement", ev.placement);
+    addSummaryRow(grid, "Style(s)", formatStyles(ev));
+    addSummaryRow(grid, "Budget", ev.budget);
+    addSummaryRow(grid, "References", plural(ev.reference_count || 0, "image"));
+    panel.appendChild(grid);
 
-    document.getElementById("appointment-modal-title").textContent = ev.booking_type_label || ev.event_type_label || ev.title || "Appointment";
-
-    const statusEl = document.getElementById("appointment-modal-status");
-    statusEl.textContent = ev.status_label || "";
-    statusEl.className = `appointment-status-badge appointment-status-badge--${ev.status || "default"}`;
-
-    const meta = document.getElementById("appointment-modal-meta");
-    meta.textContent = "";
-    addMetaPill(meta, "Client", ev.client_name);
-    addMetaPill(meta, "Artist", ev.artist_name);
-    addMetaPill(meta, "Date", formatDate(ev.date || ev.starts_at));
-    addMetaPill(meta, "Time", formatTimeRange(ev));
-    addMetaPill(meta, "Duration", formatDuration(ev));
-
-    const details = document.getElementById("appointment-modal-details");
-    details.textContent = "";
-    addSummaryRow(details, "Placement", ev.placement);
-    addSummaryRow(details, "Style(s)", formatStyles(ev));
-    addSummaryRow(details, "Size", ev.size);
-    addSummaryRow(details, "Budget", ev.budget);
-    addSummaryRow(details, "Description / notes", ev.description || ev.notes, true);
+    const brief = [ev.description, ev.notes].filter(Boolean).join("\n\n");
+    addTextSection(panel, "Brief / Notes", brief);
     if (ev.consultation_already_completed || ev.consultation_note) {
-      addSummaryRow(
-        details,
+      addTextSection(
+        panel,
         "Consultation",
-        [
-          ev.consultation_already_completed ? "Already completed" : "",
-          ev.consultation_note,
-        ].filter(Boolean).join(" · "),
-        true,
+        [ev.consultation_already_completed ? "Already completed" : "", ev.consultation_note].filter(Boolean).join(" · "),
       );
     }
 
-    const references = document.getElementById("appointment-modal-references");
-    references.textContent = "";
+    const refSection = document.createElement("section");
+    refSection.className = "calendar-event-references";
+    const refTitle = document.createElement("h5");
+    refTitle.textContent = "Reference images";
+    refSection.appendChild(refTitle);
     const images = Array.isArray(ev.reference_images) ? ev.reference_images.filter((image) => image?.url) : [];
     if (!images.length) {
       const empty = document.createElement("p");
-      empty.className = "appointment-reference-empty";
+      empty.className = "calendar-reference-empty";
       empty.textContent = "No reference images uploaded.";
-      references.appendChild(empty);
+      refSection.appendChild(empty);
     } else {
-      const grid = document.createElement("div");
-      grid.className = "appointment-reference-grid";
+      const refs = document.createElement("div");
+      refs.className = "calendar-reference-grid";
       images.forEach((image) => {
         const link = document.createElement("a");
         link.href = image.url;
         link.target = "_blank";
         link.rel = "noopener noreferrer";
-        link.className = "appointment-reference-thumb";
+        link.className = "calendar-reference-thumb";
         const img = document.createElement("img");
         img.src = image.url;
         img.alt = image.original_name || "Appointment reference image";
         link.appendChild(img);
-        grid.appendChild(link);
+        refs.appendChild(link);
       });
-      references.appendChild(grid);
+      refSection.appendChild(refs);
     }
-
-    const actions = document.getElementById("appointment-modal-actions");
-    actions.textContent = "";
-    const detailUrl = ev.detail_url || ev.actions?.detail_url;
-    if (detailUrl) addActionLink(actions, detailUrl, state.role === "artist" ? "Open project" : "View project", "primary");
-
-    modal.hidden = false;
+    panel.appendChild(refSection);
+    panel.appendChild(actionBar(ev));
+    return panel;
   }
 
-  function addMetaPill(parent, label, value) {
+  function addTextSection(parent, label, value) {
     if (!value) return;
-    const pill = document.createElement("span");
-    pill.className = "appointment-meta-pill";
-    pill.textContent = `${label}: ${value}`;
-    parent.appendChild(pill);
+    const section = document.createElement("section");
+    section.className = "calendar-event-text-section";
+    const title = document.createElement("h5");
+    title.textContent = label;
+    const text = document.createElement("p");
+    text.textContent = value;
+    section.append(title, text);
+    parent.appendChild(section);
   }
 
-  function addSummaryRow(parent, label, value, wide = false) {
+  function addSummaryRow(parent, label, value) {
     if (!value) return;
     const row = document.createElement("div");
-    row.className = `appointment-detail-row${wide ? " appointment-detail-row--wide" : ""}`;
+    row.className = "calendar-event-detail-item";
     const labelEl = document.createElement("span");
-    labelEl.className = "appointment-detail-label";
+    labelEl.className = "calendar-event-detail-label";
     labelEl.textContent = label;
     const valueEl = document.createElement("span");
-    valueEl.className = "appointment-detail-value";
+    valueEl.className = "calendar-event-detail-value";
     valueEl.textContent = value;
     row.append(labelEl, valueEl);
     parent.appendChild(row);
@@ -468,8 +465,6 @@
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       closeAllMenus();
-      const appointmentModal = document.getElementById("appointment-modal");
-      if (appointmentModal && !appointmentModal.hidden) appointmentModal.hidden = true;
     }
   });
 
