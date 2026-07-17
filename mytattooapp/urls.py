@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import include, path
+from appointments import views as appointment_views
 
 from appointments import views as appointment_views
 
