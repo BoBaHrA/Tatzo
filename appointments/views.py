@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.serializers.json import DjangoJSONEncoder
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -326,6 +326,30 @@ def appointments_list(request):
 
 
 @login_required
+def calendar_page(request):
+    today = timezone.localdate()
+    user_appointments = (
+        Appointment.objects
+        .filter(Q(client=request.user) | Q(artist=request.user))
+        .select_related("client", "client__profile", "artist", "artist__profile")
+        .order_by("date", "start_time")
+    )
+
+    return render(
+        request,
+        "appointments/calendar_page.html",
+        {
+            "upcoming_appointments": user_appointments.filter(date__gte=today),
+            "past_appointments": user_appointments.filter(date__lt=today).order_by(
+                "-date",
+                "-start_time",
+            )[:20],
+            "today": today,
+        },
+    )
+
+
+@login_required
 def appointment_detail(request, appointment_id):
     appointment = get_object_or_404(
         Appointment.objects.select_related(
@@ -470,8 +494,154 @@ def _save_artist_blocked_dates_from_post(artist, post_data):
             reason=_("Blocked from artist dashboard"),
         )
         
+
 @login_required
-def artist_booking_settings(request):
+@require_POST
+def autosave_artist_booking_setting(request):
+    if not _is_verified_artist(request.user):
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": _("Only verified tattoo artists can change these settings."),
+            },
+            status=403,
+        )
+
+    try:
+        payload = json.loads(request.body.decode("utf-8") or "{}")
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"ok": False, "error": _("Invalid JSON payload.")},
+            status=400,
+        )
+
+    setting = payload.get("setting")
+    value = payload.get("value")
+
+    booking_settings, created = ArtistBookingSettings.objects.get_or_create(
+        artist=request.user,
+        defaults={"active_styles": ["Fine Line", "Blackwork", "Geometric"]},
+    )
+
+    boolean_settings = {
+        "bookings_enabled",
+        "consultation_enabled",
+        "online_consultation_enabled",
+        "studio_consultation_enabled",
+        "phone_consultation_enabled",
+        "consultation_required_before_booking",
+        "reference_images_required",
+        "deposit_required",
+    }
+
+    update_fields = [setting]
+
+    if setting in boolean_settings:
+        value = value if isinstance(value, bool) else str(value).lower() == "true"
+        setattr(booking_settings, setting, value)
+
+    elif setting == "booking_status":
+        allowed_statuses = dict(
+            getattr(ArtistBookingSettings, "BOOKING_STATUS_CHOICES", [])
+        )
+
+        if value not in allowed_statuses or not hasattr(
+            booking_settings,
+            "booking_status",
+        ):
+            return JsonResponse(
+                {"ok": False, "error": _("Invalid booking status.")},
+                status=400,
+            )
+
+        booking_settings.booking_status = value
+        booking_settings.bookings_enabled = value in {
+            getattr(ArtistBookingSettings, "BOOKING_STATUS_OPEN", "open"),
+            getattr(
+                ArtistBookingSettings,
+                "BOOKING_STATUS_CONSULTATION_ONLY",
+                "consultation_only",
+            ),
+        }
+        update_fields = ["booking_status", "bookings_enabled"]
+
+    elif setting == "active_styles":
+        if not isinstance(value, list):
+            return JsonResponse(
+                {"ok": False, "error": _("Active styles must be a list.")},
+                status=400,
+            )
+
+        cleaned_styles = []
+        for style in value:
+            if not isinstance(style, str):
+                continue
+
+            style = style.strip()[:80]
+            if style and style not in cleaned_styles:
+                cleaned_styles.append(style)
+
+            if len(cleaned_styles) >= 30:
+                break
+
+        value = cleaned_styles
+        booking_settings.active_styles = cleaned_styles
+
+    else:
+        return JsonResponse(
+            {"ok": False, "error": _("This setting cannot be autosaved.")},
+            status=400,
+        )
+
+    booking_settings.save(update_fields=update_fields)
+    booking_settings.refresh_from_db()
+
+    if setting == "booking_status":
+        persisted_value = getattr(booking_settings, "booking_status", value)
+    else:
+        persisted_value = getattr(booking_settings, setting)
+
+    if "_get_booking_status_label" in globals():
+        current_status = str(
+            _get_booking_status_label(
+                getattr(
+                    booking_settings,
+                    "booking_status",
+                    getattr(ArtistBookingSettings, "BOOKING_STATUS_OPEN", "open"),
+                )
+            )
+        )
+    else:
+        current_status = str(
+            _("Accepting bookings")
+            if booking_settings.bookings_enabled
+            else _("Bookings paused")
+        )
+
+    response_payload = {
+        "ok": True,
+        "setting": setting,
+        "value": persisted_value,
+        "current_status": current_status,
+    }
+
+    if setting == "booking_status":
+        response_payload.update(
+            {
+                "booking_status": getattr(booking_settings, "booking_status", None),
+                "bookings_enabled": booking_settings.bookings_enabled,
+            }
+        )
+
+    return JsonResponse(response_payload)
+
+@login_required
+def artist_dashboard_calendar(request):
+    return artist_booking_settings(request, active_panel="calendar")
+
+
+@login_required
+def artist_booking_settings(request, active_panel="dashboard"):
     if not _is_verified_artist(request.user):
         messages.error(
             request,
@@ -794,5 +964,6 @@ def artist_booking_settings(request):
                 if booking_settings.bookings_enabled
                 else _("Bookings paused")
             ),
+            "active_dashboard_panel": active_panel,
         },
     )
