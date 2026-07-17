@@ -295,16 +295,20 @@
       const refs = document.createElement("div");
       refs.className = "calendar-reference-grid";
       images.forEach((image) => {
-        const link = document.createElement("a");
-        link.href = image.url;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        link.className = "calendar-reference-thumb";
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "calendar-reference-thumb";
+        button.setAttribute("aria-label", `Preview ${image.original_name || "appointment reference image"}`);
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          openReferencePreview(image);
+        });
         const img = document.createElement("img");
         img.src = image.url;
         img.alt = image.original_name || "Appointment reference image";
-        link.appendChild(img);
-        refs.appendChild(link);
+        button.appendChild(img);
+        refs.appendChild(button);
       });
       refSection.appendChild(refs);
     }
@@ -452,6 +456,32 @@
     });
   }
 
+
+  function openReferencePreview(image) {
+    const modal = document.getElementById("reference-preview-modal");
+    const preview = document.getElementById("reference-preview-image");
+    const title = document.getElementById("reference-preview-title");
+    if (!modal || !preview || !title || !image?.url) return;
+
+    closeAllMenus();
+    preview.src = image.url;
+    preview.alt = image.original_name || "Appointment reference image";
+    title.textContent = image.original_name || "Reference image";
+    modal.hidden = false;
+  }
+
+  function closeReferencePreview() {
+    const modal = document.getElementById("reference-preview-modal");
+    const preview = document.getElementById("reference-preview-image");
+    if (!modal) return;
+
+    modal.hidden = true;
+    if (preview) {
+      preview.removeAttribute("src");
+      preview.alt = "";
+    }
+  }
+
   async function postUrl(url, body = {}) {
     const fd = new FormData();
     Object.entries(body).forEach(([k, v]) => fd.append(k, v));
@@ -465,7 +495,20 @@
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       closeAllMenus();
+      closeReferencePreview();
     }
+  });
+
+  document.getElementById("reference-preview-modal")?.addEventListener("click", (event) => {
+    if (event.target.id === "reference-preview-modal") closeReferencePreview();
+  });
+
+  document.querySelectorAll("[data-close-reference-preview]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeReferencePreview();
+    });
   });
 
   document.querySelectorAll("[data-nav]").forEach((b) => b.onclick = () => {
