@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tatzo\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 15:57+0200\n"
+"POT-Creation-Date: 2026-07-17 18:44+0000\n"
 "PO-Revision-Date: 2026-05-27 09:40+0200\n"
 "Last-Translator: Vladimir Procopisin\n"
 "Language-Team: Russian\n"
@@ -17,155 +17,1672 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: .\mytattooapp\settings.py:116
-#: .\templates\partials\auth_language_switcher.html:14
+#: appointments/models.py:17
+#: templates/appointments/artist_booking_settings.html:592
+#, fuzzy
+#| msgid "Booking"
+msgid "Booking allowed"
+msgstr "Бронирование"
+
+#: appointments/models.py:18
+#: templates/appointments/artist_booking_settings.html:597
+#, fuzzy
+#| msgid "Booking"
+msgid "Booking paused"
+msgstr "Бронирование"
+
+#: appointments/models.py:19 appointments/models.py:276
+#: templates/appointments/artist_booking_settings.html:602
+#: templates/users/calendar.html:72
+#, fuzzy
+#| msgid "Location"
+msgid "Vacation"
+msgstr "Местоположение"
+
+#: appointments/models.py:20 appointments/views.py:140
+#: templates/appointments/artist_booking_settings.html:607
+msgid "Fully booked"
+msgstr "Полностью занято"
+
+#: appointments/models.py:21 appointments/views.py:141
+#: templates/appointments/artist_booking_settings.html:612
+msgid "Consultation only"
+msgstr "Только консультации"
+
+#: appointments/models.py:22 appointments/views.py:142
+#: templates/appointments/artist_booking_settings.html:617
+msgid "Emergency closure"
+msgstr "Экстренное закрытие"
+
+#: appointments/models.py:26
+#: templates/appointments/artist_booking_settings.html:493
+#, fuzzy
+#| msgid "Manual reviews"
+msgid "Manual approval"
+msgstr "Ручные проверки"
+
+#: appointments/models.py:27
+#: templates/appointments/artist_booking_settings.html:496
+#, fuzzy
+#| msgid "I accept the"
+msgid "Auto accept"
+msgstr "Я принимаю"
+
+#: appointments/models.py:89
+msgid "Sunday"
+msgstr ""
+
+#: appointments/models.py:90
+msgid "Monday"
+msgstr ""
+
+#: appointments/models.py:91
+msgid "Tuesday"
+msgstr ""
+
+#: appointments/models.py:92
+msgid "Wednesday"
+msgstr ""
+
+#: appointments/models.py:93
+msgid "Thursday"
+msgstr ""
+
+#: appointments/models.py:94
+msgid "Friday"
+msgstr ""
+
+#: appointments/models.py:95
+msgid "Saturday"
+msgstr ""
+
+#: appointments/models.py:153 appointments/models.py:305
+#: appointments/models.py:387 templates/users/profile.html:124
+#: templates/users/profile.html:126 users/models.py:37 users/models.py:74
+#: users/templates/users/verification_page.html:39
+#: users/templates/users/verification_page.html:41 users/views.py:708
+msgid "Pending"
+msgstr "На рассмотрении"
+
+#: appointments/models.py:154 appointments/models.py:388
+#, fuzzy
+#| msgid "I accept the"
+msgid "Accepted"
+msgstr "Я принимаю"
+
+#: appointments/models.py:155 appointments/models.py:389
+msgid "Declined"
+msgstr ""
+
+#: appointments/models.py:156 appointments/models.py:293
+#, fuzzy
+#| msgid "Cancel"
+msgid "Cancelled"
+msgstr "Отмена"
+
+#: appointments/models.py:157 appointments/models.py:292
+msgid "Completed"
+msgstr ""
+
+#: appointments/models.py:158 templates/appointments/appointment_detail.html:66
+#: templates/appointments/artist_booking_settings.html:637
+msgid "Need more references"
+msgstr "Нужно больше референсов"
+
+#: appointments/models.py:159 templates/appointments/appointment_detail.html:65
+#: templates/appointments/artist_booking_settings.html:512
+#: templates/appointments/artist_booking_settings.html:632
+#: templates/appointments/booking_wizard.html:237
+msgid "Consultation required"
+msgstr "Требуется консультация"
+
+#: appointments/models.py:167 appointments/models.py:273
+#: templates/appointments/artist_booking_settings.html:778
+#: templates/users/calendar.html:69
+#, fuzzy
+#| msgid "Tattoo studio registration"
+msgid "Tattoo session"
+msgstr "Регистрация тату-салона"
+
+#: appointments/models.py:168 appointments/models.py:274
+#: templates/appointments/artist_booking_settings.html:249
+#: templates/appointments/artist_booking_settings.html:280
+#: templates/appointments/artist_booking_settings.html:779
+#: templates/users/calendar.html:70
+#, fuzzy
+#| msgid "Location"
+msgid "Consultation"
+msgstr "Местоположение"
+
+#: appointments/models.py:169
+#: templates/appointments/artist_booking_settings.html:453
+msgid "Online consultation"
+msgstr "Онлайн-консультация"
+
+#: appointments/models.py:275
+msgid "Blocked time"
+msgstr ""
+
+#: appointments/models.py:277
+msgid "Sketch deadline"
+msgstr ""
+
+#: appointments/models.py:278
+msgid "Deposit reminder"
+msgstr ""
+
+#: appointments/models.py:279
+msgid "Healing reminder"
+msgstr ""
+
+#: appointments/models.py:290
+msgid "Planned"
+msgstr ""
+
+#: appointments/models.py:291
+#, fuzzy
+#| msgid "Confirm deletion"
+msgid "Confirmed"
+msgstr "Подтверждение удаления"
+
+#: appointments/models.py:294
+#, fuzzy
+#| msgid "Schedule Post"
+msgid "Reschedule requested"
+msgstr "Запланировать пост"
+
+#: appointments/models.py:295
+msgid "Deposit pending"
+msgstr ""
+
+#: appointments/models.py:304 users/models.py:570
+msgid "Unknown"
+msgstr ""
+
+#: appointments/models.py:306
+msgid "Paid"
+msgstr ""
+
+#: appointments/models.py:307
+#, fuzzy
+#| msgid "Not submitted"
+msgid "Not required"
+msgstr "Не отправлено"
+
+#: appointments/models.py:314
+#, fuzzy
+#| msgid "Tattoo Artist"
+msgid "Artist"
+msgstr "Тату-мастер"
+
+#: appointments/models.py:322
+#: templates/appointments/artist_booking_settings.html:354
+#: templates/users/calendar.html:94
+msgid "Client"
+msgstr "Клиент"
+
+#: appointments/models.py:331
+#, fuzzy
+#| msgid "Delete comment"
+msgid "Related appointment"
+msgstr "Удалить комментарий"
+
+#: appointments/models.py:360
+msgid "End time must be after start time."
+msgstr ""
+
+#: appointments/models.py:362
+msgid "Client is required for sessions and consultations."
+msgstr ""
+
+#: appointments/models.py:408
+msgid "Proposed end must be after proposed start."
+msgstr ""
+
+#: appointments/views.py:120
+#, fuzzy
+#| msgid "This artist has not added portfolio works yet."
+msgid "This artist has paused bookings right now."
+msgstr "Этот мастер пока не добавил работы в портфолио."
+
+#: appointments/views.py:123
+#, fuzzy
+#| msgid "This feature is currently in development."
+msgid "This artist is currently on vacation."
+msgstr "Эта функция сейчас находится в разработке."
+
+#: appointments/views.py:126
+msgid "This artist is fully booked right now."
+msgstr ""
+
+#: appointments/views.py:129
+msgid "This artist is temporarily unavailable."
+msgstr ""
+
+#: appointments/views.py:137 appointments/views.py:1147
+msgid "Accepting bookings"
+msgstr ""
+
+#: appointments/views.py:138 appointments/views.py:1149
+#, fuzzy
+#| msgid "Booking"
+msgid "Bookings paused"
+msgstr "Бронирование"
+
+#: appointments/views.py:139
+#, fuzzy
+#| msgid "Location"
+msgid "On vacation"
+msgstr "Местоположение"
+
+#: appointments/views.py:177 appointments/views.py:271
+#, fuzzy
+#| msgid "You cannot start a chat with yourself."
+msgid "You cannot book an appointment with yourself."
+msgstr "Нельзя начать чат с самим собой."
+
+#: appointments/views.py:198
+#, fuzzy
+#| msgid "This artist has not added portfolio works yet."
+msgid "This artist is not accepting bookings right now."
+msgstr "Этот мастер пока не добавил работы в портфолио."
+
+#: appointments/views.py:328
+msgid "Please choose a date and time."
+msgstr ""
+
+#: appointments/views.py:336
+msgid "Invalid booking date or time."
+msgstr ""
+
+#: appointments/views.py:353 templates/appointments/booking_wizard.html:238
+msgid "This artist requires a consultation before booking a tattoo session."
+msgstr ""
+
+#: appointments/views.py:367
+msgid "This session is longer than the artist allows."
+msgstr ""
+
+#: appointments/views.py:375
+msgid "This date is too far in the future."
+msgstr ""
+
+#: appointments/views.py:379
+msgid "This date is blocked by the artist."
+msgstr ""
+
+#: appointments/views.py:383
+msgid "This time slot is no longer available."
+msgstr ""
+
+#: appointments/views.py:393
+msgid "Please upload the required reference images."
+msgstr ""
+
+#: appointments/views.py:397
+msgid "You uploaded too many reference images."
+msgstr ""
+
+#: appointments/views.py:460
+#, fuzzy
+#| msgid "Your manual review request has been submitted."
+msgid "Your appointment request has been sent to the artist."
+msgstr "Ваша заявка на ручную проверку отправлена."
+
+#: appointments/views.py:470
+msgid "Only verified artists can create manual bookings."
+msgstr ""
+
+#: appointments/views.py:481
+msgid "Enter an existing client username."
+msgstr ""
+
+#: appointments/views.py:487
+msgid "No user was found with that username."
+msgstr ""
+
+#: appointments/views.py:491
+#, fuzzy
+#| msgid "You cannot start a chat with yourself."
+msgid "You cannot create a booking with yourself."
+msgstr "Нельзя начать чат с самим собой."
+
+#: appointments/views.py:499
+msgid "Enter a valid manual booking date and time."
+msgstr ""
+
+#: appointments/views.py:503
+msgid "Duration must be greater than zero."
+msgstr ""
+
+#: appointments/views.py:507
+msgid "This session is longer than your booking settings allow."
+msgstr ""
+
+#: appointments/views.py:516
+msgid "Manual bookings cannot be created in the past."
+msgstr ""
+
+#: appointments/views.py:520
+msgid "This date is blocked on your calendar."
+msgstr ""
+
+#: appointments/views.py:556
+msgid "Manual booking created."
+msgstr ""
+
+#: appointments/views.py:762
+msgid "Calendar event creation is not implemented yet."
+msgstr ""
+
+#: appointments/views.py:771 appointments/views.py:780
+msgid "Use artist dashboard blocked dates for now."
+msgstr ""
+
+#: appointments/views.py:818
+#, fuzzy
+#| msgid "Comment cannot be empty."
+msgid "This appointment cannot be accepted."
+msgstr "Комментарий не может быть пустым."
+
+#: appointments/views.py:828
+msgid "Appointment accepted."
+msgstr ""
+
+#: appointments/views.py:841
+#, fuzzy
+#| msgid "Comment cannot be empty."
+msgid "This appointment cannot be declined."
+msgstr "Комментарий не может быть пустым."
+
+#: appointments/views.py:851
+#, fuzzy
+#| msgid "Reported comment deleted."
+msgid "Appointment declined."
+msgstr "Комментарий из жалобы удалён."
+
+#: appointments/views.py:864
+msgid "More references cannot be requested for this appointment."
+msgstr ""
+
+#: appointments/views.py:875
+msgid "Reference request sent."
+msgstr ""
+
+#: appointments/views.py:888
+msgid "Consultation cannot be required for this appointment."
+msgstr ""
+
+#: appointments/views.py:900
+msgid "Consultation required response sent."
+msgstr ""
+
+#: appointments/views.py:910
+msgid "Only accepted appointments can be cancelled."
+msgstr ""
+
+#: appointments/views.py:917
+msgid "Appointment cancelled."
+msgstr ""
+
+#: appointments/views.py:1007
+#, fuzzy
+#| msgid "Moderation dashboard"
+msgid "Blocked from artist dashboard"
+msgstr "Панель модерации"
+
+#: appointments/views.py:1036
+msgid "Only verified tattoo artists can change these settings."
+msgstr ""
+
+#: appointments/views.py:1045
+#, fuzzy
+#| msgid "Invalid method."
+msgid "Invalid JSON payload."
+msgstr "Недопустимый метод запроса."
+
+#: appointments/views.py:1084
+msgid "Invalid booking status."
+msgstr ""
+
+#: appointments/views.py:1102
+msgid "Active styles must be a list."
+msgstr ""
+
+#: appointments/views.py:1123
+msgid "This setting cannot be autosaved."
+msgstr ""
+
+#: appointments/views.py:1179
+msgid "Booking settings are available only for verified tattoo artists."
+msgstr ""
+
+#: appointments/views.py:1288
+msgid "Booking settings saved."
+msgstr ""
+
+#: appointments/views.py:1295
+msgid "Calendar settings saved."
+msgstr ""
+
+#: appointments/views.py:1298
+msgid "Unknown dashboard form."
+msgstr ""
+
+#: appointments/views.py:1443
+msgid "Today's appointments"
+msgstr ""
+
+#: appointments/views.py:1448
+msgid "Upcoming consultations"
+msgstr ""
+
+#: appointments/views.py:1453
+#, fuzzy
+#| msgid "No pending document requests."
+msgid "Pending booking requests"
+msgstr "Нет заявок с документами на рассмотрении."
+
+#: appointments/views.py:1459 appointments/views.py:1498
+#, fuzzy
+#| msgid "Write a message..."
+msgid "Unread messages"
+msgstr "Напишите сообщение..."
+
+#: appointments/views.py:1465
+msgid "Projects waiting for references"
+msgstr ""
+
+#: appointments/views.py:1470
+msgid "Estimated deposits this month"
+msgstr ""
+
+#: appointments/views.py:1476
+msgid "Average response time"
+msgstr ""
+
+#: appointments/views.py:1481 appointments/views.py:1503
+#, fuzzy
+#| msgid "Profile form"
+msgid "Profile completeness"
+msgstr "Форма профиля"
+
+#: appointments/views.py:1488
+msgid "Monthly bookings"
+msgstr ""
+
+#: appointments/views.py:1493
+#, fuzzy
+#| msgid "Pending Profiles"
+msgid "Pending requests"
+msgstr "Ожидающие профили"
+
+#: mytattooapp/settings.py:129
+#: templates/partials/auth_language_switcher.html:14
 msgid "English"
 msgstr "Английский"
 
-#: .\mytattooapp\settings.py:117
-#: .\templates\partials\auth_language_switcher.html:24
+#: mytattooapp/settings.py:130
+#: templates/partials/auth_language_switcher.html:24
 msgid "Français"
 msgstr "Французский"
 
-#: .\mytattooapp\settings.py:118
-#: .\templates\partials\auth_language_switcher.html:34
+#: mytattooapp/settings.py:131
+#: templates/partials/auth_language_switcher.html:34
 msgid "Русский"
 msgstr "Русский"
 
-#: .\posts\templates\posts\bookmarks.html:4
-#: .\posts\templates\posts\bookmarks.html:13
-#: .\posts\templates\posts\bookmarks.html:18
-#: .\templates\partials\sidebar.html:82 .\templates\partials\sidebar.html:83
+#: posts/templates/posts/bookmarks.html:4
+#: posts/templates/posts/bookmarks.html:13
+#: posts/templates/posts/bookmarks.html:18 templates/partials/sidebar.html:82
+#: templates/partials/sidebar.html:83 templates/partials/sidebar.html:307
+#: templates/partials/sidebar.html:308
 msgid "Bookmarks"
 msgstr "Закладки"
 
-#: .\posts\templates\posts\bookmarks.html:14 .\templates\home.html:14
-#: .\templates\home.html:403 .\templates\users\profile.html:293
+#: posts/templates/posts/bookmarks.html:14 templates/home.html:14
+#: templates/home.html:444 templates/users/profile.html:314
 msgid "Write a comment..."
 msgstr "Напишите комментарий..."
 
-#: .\posts\templates\posts\bookmarks.html:19
+#: posts/templates/posts/bookmarks.html:19
 msgid "Your saved posts are stored here."
 msgstr "Ваши сохранённые посты хранятся здесь."
 
-#: .\posts\templates\posts\bookmarks.html:35
+#: posts/templates/posts/bookmarks.html:35
+#: templates/appointments/artist_booking_settings.html:20
 msgid "Saved"
-msgstr "Сохранённое"
+msgstr "Сохранено"
 
-#: .\posts\templates\posts\bookmarks.html:38
+#: posts/templates/posts/bookmarks.html:38
 msgid "No bookmarks yet"
 msgstr "Закладок пока нет"
 
-#: .\posts\templates\posts\bookmarks.html:41
+#: posts/templates/posts/bookmarks.html:41
 msgid "Save posts you like and they will appear here."
 msgstr "Сохраняйте понравившиеся посты, и они появятся здесь."
 
-#: .\posts\templates\posts\bookmarks.html:45
+#: posts/templates/posts/bookmarks.html:45
 msgid "Go to feed"
 msgstr "Перейти к ленте"
 
-#: .\posts\templates\posts\bookmarks.html:77 .\templates\home.html:219
-#: .\templates\home.html:398 .\templates\users\chat_thread.html:103
-#: .\templates\users\profile.html:301
+#: posts/templates/posts/bookmarks.html:77 templates/home.html:253
+#: templates/home.html:439 templates/users/profile.html:322
 msgid "Send"
 msgstr "Отправить"
 
-#: .\posts\templates\posts\feed.html:17 .\templates\home.html:117
-#: .\templates\home.html:389
+#: posts/templates/posts/feed.html:17 templates/home.html:151
+#: templates/home.html:426
 msgid "Post"
 msgstr "Опубликовать"
 
-#: .\posts\templates\posts\feed.html:27 .\templates\home.html:228
+#: posts/templates/posts/feed.html:27 templates/home.html:262
 msgid "Edit comment"
 msgstr "Редактировать комментарий"
 
-#: .\posts\templates\posts\feed.html:35
+#: posts/templates/posts/feed.html:35
 msgid "Edit your comment..."
 msgstr "Редактируйте комментарий..."
 
-#: .\posts\templates\posts\feed.html:41 .\templates\home.html:242
-#: .\templates\home.html:267 .\templates\home.html:292
-#: .\templates\home.html:319 .\templates\home.html:346
-#: .\templates\users\artist_portfolio.html:209
-#: .\templates\users\artist_portfolio_album.html:127
-#: .\templates\users\report_problem.html:71
-#: .\users\templates\users\edit_profile.html:188
-#: .\users\templates\users\edit_profile.html:222
+#: posts/templates/posts/feed.html:41 templates/home.html:276
+#: templates/home.html:301 templates/home.html:326 templates/home.html:353
+#: templates/home.html:380 templates/users/artist_portfolio.html:250
+#: templates/users/artist_portfolio_album.html:127
+#: templates/users/chat_thread.html:149 templates/users/report_problem.html:71
+#: users/templates/users/edit_profile.html:188
+#: users/templates/users/edit_profile.html:222
 msgid "Cancel"
 msgstr "Отмена"
 
-#: .\posts\templates\posts\feed.html:44 .\templates\home.html:246
-#: .\users\templates\users\edit_profile.html:226
-#: .\users\templates\users\password_reset_confirm.html:31
-#: .\users\templates\users\profile_form.html:18
+#: posts/templates/posts/feed.html:44 templates/home.html:280
+#: templates/users/calendar.html:102
+#: users/templates/users/edit_profile.html:226
+#: users/templates/users/password_reset_confirm.html:31
+#: users/templates/users/profile_form.html:18
 msgid "Save"
 msgstr "Сохранить"
 
-#: .\posts\templates\posts\feed.html:53 .\templates\home.html:127
+#: posts/templates/posts/feed.html:53 templates/home.html:161
 msgid "No posts available."
 msgstr "Постов пока нет."
 
-#: .\posts\views.py:92 .\users\views.py:174
+#: posts/views.py:93 users/views.py:214
 msgid "Post cannot be empty."
 msgstr "Пост не может быть пустым."
 
-#: .\posts\views.py:135
+#: posts/views.py:136
 msgid "Form validation failed."
 msgstr "Ошибка валидации формы."
 
-#: .\posts\views.py:150 .\templates\home.html:406
+#: posts/views.py:160
+msgid "You are commenting too quickly. Please wait a bit."
+msgstr "Вы комментируете слишком быстро. Подождите немного."
+
+#: posts/views.py:167 templates/home.html:447
 msgid "Comments are disabled for this post."
 msgstr "Комментарии к этому посту отключены."
 
-#: .\posts\views.py:162 .\posts\views.py:274
+#: posts/views.py:179 posts/views.py:291
 msgid "Comment cannot be empty."
 msgstr "Комментарий не может быть пустым."
 
-#: .\posts\views.py:299
+#: posts/views.py:323 posts/views.py:383 users/views.py:2436
+msgid "You are sending reports too quickly. Please wait a bit."
+msgstr "Вы отправляете жалобы слишком быстро. Подождите немного."
+
+#: posts/views.py:330
 msgid "You cannot report your own comment."
 msgstr "Нельзя пожаловаться на свой комментарий."
 
-#: .\posts\views.py:314 .\templates\home.html:401
+#: posts/views.py:345 templates/home.html:442
 msgid "Report sent."
 msgstr "Жалоба отправлена."
 
-#: .\posts\views.py:316
+#: posts/views.py:347
 msgid "You have already reported this comment."
 msgstr "Вы уже жаловались на этот комментарий."
 
-#: .\posts\views.py:345
+#: posts/views.py:390
 msgid "You cannot report your own post."
 msgstr "Нельзя пожаловаться на свой пост."
 
-#: .\posts\views.py:367
+#: posts/views.py:412
 msgid "Post report sent."
 msgstr "Жалоба на пост отправлена."
 
-#: .\posts\views.py:369
+#: posts/views.py:414
 msgid "You have already reported this post."
 msgstr "Вы уже жаловались на этот пост."
 
-#: .\posts\views.py:423
+#: posts/views.py:468
 msgid "Invalid method."
 msgstr "Недопустимый метод запроса."
 
-#: .\templates\emails\password_reset_email.html:7
-#: .\templates\emails\password_reset_email.txt:3
-#: .\templates\emails\password_reset_subject.txt:1
+#: templates/appointments/appointment_detail.html:4
+msgid "Appointment"
+msgstr ""
+
+#: templates/appointments/appointment_detail.html:13
+#, fuzzy
+#| msgid "Back to profile"
+msgid "Back to appointments"
+msgstr "Назад к профилю"
+
+#: templates/appointments/appointment_detail.html:18
+#, fuzzy
+#| msgid "Document requests"
+msgid "Appointment request"
+msgstr "Заявки с документами"
+
+#: templates/appointments/appointment_detail.html:27
+msgid ""
+"The artist asked for more reference images. Continue the conversation in "
+"chat."
+msgstr ""
+
+#: templates/appointments/appointment_detail.html:29
+msgid "The artist requires a consultation before this project can be booked."
+msgstr ""
+
+#: templates/appointments/appointment_detail.html:34
+#: templates/users/report_problem.html:35
+msgid "Type"
+msgstr "Тип"
+
+#: templates/appointments/appointment_detail.html:35
+#, fuzzy
+#| msgid "Moderation"
+msgid "Duration"
+msgstr "Модерация"
+
+#: templates/appointments/appointment_detail.html:35
+msgid "minutes"
+msgstr ""
+
+#: templates/appointments/appointment_detail.html:36
+#: templates/appointments/artist_booking_settings.html:791
+#: templates/appointments/booking_wizard.html:111
+#, fuzzy
+#| msgid "Body placement"
+msgid "Placement"
+msgstr "Место на теле"
+
+#: templates/appointments/appointment_detail.html:37
+#: templates/appointments/artist_booking_settings.html:796
+#: templates/appointments/booking_wizard.html:157
+msgid "Size"
+msgstr "Размер"
+
+#: templates/appointments/appointment_detail.html:38
+#: templates/appointments/artist_booking_settings.html:802
+#: templates/appointments/booking_wizard.html:167
+msgid "Budget"
+msgstr "Бюджет"
+
+#: templates/appointments/appointment_detail.html:39
+#: templates/appointments/artist_booking_settings.html:785
+#, fuzzy
+#| msgid "Style"
+msgid "Styles"
+msgstr "Стиль"
+
+#: templates/appointments/appointment_detail.html:44
+#: templates/appointments/artist_booking_settings.html:807
+#: templates/users/calendar.html:99
+msgid "Notes"
+msgstr "Заметки"
+
+#: templates/appointments/appointment_detail.html:51
+#, fuzzy
+#| msgid "Preview image"
+msgid "Reference images"
+msgstr "Предпросмотр изображения"
+
+#: templates/appointments/appointment_detail.html:63
+msgid "Accept"
+msgstr ""
+
+#: templates/appointments/appointment_detail.html:64
+msgid "Decline"
+msgstr ""
+
+#: templates/appointments/appointment_detail.html:68
+msgid "Cancel appointment"
+msgstr ""
+
+#: templates/appointments/appointment_detail.html:70
+#, fuzzy
+#| msgid "Comments are disabled for this post."
+msgid "No actions are available for this appointment status."
+msgstr "Комментарии к этому посту отключены."
+
+#: templates/appointments/appointments_list.html:4
+#: templates/appointments/appointments_list.html:27
+#: templates/appointments/calendar_page.html:19
+msgid "Appointments"
+msgstr ""
+
+#: templates/appointments/appointments_list.html:13
+msgid "Appointment navigation"
+msgstr ""
+
+#: templates/appointments/appointments_list.html:14
+#: templates/appointments/booking_wizard.html:137
+#: templates/appointments/booking_wizard.html:220
+#: templates/appointments/calendar_page.html:14
+msgid "Back"
+msgstr ""
+
+#: templates/appointments/appointments_list.html:17
+#: templates/appointments/calendar_page.html:17 templates/home.html:4
+#: templates/partials/auth_home_link.html:3
+#: templates/partials/auth_home_link.html:5 templates/partials/sidebar.html:28
+#: templates/partials/sidebar.html:29 templates/partials/sidebar.html:205
+#: templates/partials/sidebar.html:258 templates/partials/sidebar.html:259
+#: users/templates/users/profile_form.html:10
+#: users/templates/users/user_profile.html:8
+msgid "Home"
+msgstr "Главная"
+
+#: templates/appointments/appointments_list.html:18
+#: templates/appointments/calendar_page.html:18
+#, fuzzy
+#| msgid "My Profile"
+msgid "My profile"
+msgstr "Мой профиль"
+
+#: templates/appointments/appointments_list.html:20
+#: templates/appointments/artist_booking_settings.html:4
+#, fuzzy
+#| msgid "Moderation dashboard"
+msgid "Artist dashboard"
+msgstr "Панель модерации"
+
+#: templates/appointments/appointments_list.html:26
+#, fuzzy
+#| msgid "Booking"
+msgid "Booking center"
+msgstr "Бронирование"
+
+#: templates/appointments/appointments_list.html:28
+#, fuzzy
+#| msgid "Manage bookings, sessions and upcoming appointments."
+msgid "Track your booking requests and client appointments."
+msgstr "Управляйте бронированиями, сеансами и предстоящими встречами."
+
+#: templates/appointments/appointments_list.html:32
+#, fuzzy
+#| msgid "Document requests"
+msgid "My requests"
+msgstr "Заявки с документами"
+
+#: templates/appointments/appointments_list.html:43
+#, fuzzy
+#| msgid "No pending document requests."
+msgid "No appointment requests yet."
+msgstr "Нет заявок с документами на рассмотрении."
+
+#: templates/appointments/appointments_list.html:49
+msgid "Artist bookings"
+msgstr ""
+
+#: templates/appointments/appointments_list.html:60
+#, fuzzy
+#| msgid "No tattoo artists yet"
+msgid "No artist bookings yet."
+msgstr "Тату-мастеров пока нет"
+
+#: templates/appointments/artist_booking_settings.html:17
+#| msgid "No documents available"
+msgid "Autosave unavailable"
+msgstr "Автосохранение недоступно"
+
+#: templates/appointments/artist_booking_settings.html:18
+#| msgid "Sending..."
+msgid "Saving..."
+msgstr "Сохранение..."
+
+#: templates/appointments/artist_booking_settings.html:19
+msgid "Could not save"
+msgstr "Не удалось сохранить"
+
+#: templates/appointments/artist_booking_settings.html:21
+#: templates/appointments/artist_booking_settings.html:228
+msgid "Remove blocked period"
+msgstr "Удалить заблокированный период"
+
+#: templates/appointments/artist_booking_settings.html:31
+msgid "Dashboard"
+msgstr "Панель"
+
+#: templates/appointments/artist_booking_settings.html:36
+#: templates/appointments/calendar_page.html:4
+#: templates/appointments/calendar_page.html:26
+#: templates/partials/sidebar.html:72 templates/partials/sidebar.html:73
+#: templates/partials/sidebar.html:213 templates/partials/sidebar.html:294
+#: templates/partials/sidebar.html:295 templates/users/calendar.html:4
+#: templates/users/calendar.html:27 users/views.py:2386
+msgid "Calendar"
+msgstr "Календарь"
+
+#: templates/appointments/artist_booking_settings.html:41
+#, fuzzy
+#| msgid "Booking"
+msgid "Bookings"
+msgstr "Бронирование"
+
+#: templates/appointments/artist_booking_settings.html:46
+msgid "Projects"
+msgstr "Проекты"
+
+#: templates/appointments/artist_booking_settings.html:51
+#: templates/appointments/artist_booking_settings.html:299
+#, fuzzy
+#| msgid "Message"
+msgid "Messages"
+msgstr "Написать"
+
+#: templates/appointments/artist_booking_settings.html:56
+#: templates/appointments/artist_booking_settings.html:319
+#: templates/users/maps.html:97 templates/users/moderation_dashboard.html:224
+#: templates/users/profile.html:142
+msgid "Portfolio"
+msgstr "Портфолио"
+
+#: templates/appointments/artist_booking_settings.html:61
+#: templates/appointments/artist_booking_settings.html:340
+msgid "Clients"
+msgstr "Клиенты"
+
+#: templates/appointments/artist_booking_settings.html:66
+#: templates/appointments/artist_booking_settings.html:375
+#, fuzzy
+#| msgid "Review"
+msgid "Reviews"
+msgstr "Проверить"
+
+#: templates/appointments/artist_booking_settings.html:71
+#: templates/appointments/artist_booking_settings.html:395
+#, fuzzy
+#| msgid "Status"
+msgid "Statistics"
+msgstr "Статус"
+
+#: templates/appointments/artist_booking_settings.html:76
+#: templates/home.html:143 templates/partials/sidebar.html:127
+msgid "Settings"
+msgstr "Настройки"
+
+#: templates/appointments/artist_booking_settings.html:89
+#: templates/users/chat_thread.html:37 templates/users/following_list.html:48
+#: templates/users/profile.html:40 templates/users/search.html:110
+msgid "Tattoo Artist"
+msgstr "Тату-мастер"
+
+#: templates/appointments/artist_booking_settings.html:97
+#, fuzzy, python-format
+#| msgid "Hi %(username)s,"
+msgid "Good evening, %(username)s"
+msgstr "Привет, %(username)s,"
+
+#: templates/appointments/artist_booking_settings.html:120
+msgid "Smart insights"
+msgstr "Умные подсказки"
+
+#: templates/appointments/artist_booking_settings.html:124
+msgid "Your booking settings are now connected to the client booking wizard."
+msgstr "Ваши настройки записи теперь подключены к мастеру бронирования для клиентов."
+
+#: templates/appointments/artist_booking_settings.html:127
+msgid ""
+"Active styles selected here are shown directly in your public booking form."
+msgstr ""
+
+#: templates/appointments/artist_booking_settings.html:130
+msgid "Pending requests should be answered quickly to improve conversion."
+msgstr "На ожидающие запросы стоит отвечать быстро, чтобы повысить конверсию."
+
+#: templates/appointments/artist_booking_settings.html:133
+msgid "Add portfolio works to make your booking page more convincing."
+msgstr "Добавьте работы в портфолио, чтобы страница записи была убедительнее."
+
+#: templates/appointments/artist_booking_settings.html:145
+#, fuzzy
+#| msgid "Schedule"
+msgid "Weekly schedule"
+msgstr "Планирование"
+
+#: templates/appointments/artist_booking_settings.html:146
+msgid "Manage your working hours and blocked dates"
+msgstr "Управляйте рабочими часами и заблокированными датами"
+
+#: templates/appointments/artist_booking_settings.html:150
+#, fuzzy
+#| msgid "Calendar"
+msgid "Save calendar"
+msgstr "Календарь"
+
+#: templates/appointments/artist_booking_settings.html:169
+#, fuzzy
+#| msgid "Open file"
+msgid "Open"
+msgstr "Открыть файл"
+
+#: templates/appointments/artist_booking_settings.html:174
+#: templates/appointments/artist_booking_settings.html:812
+#: templates/partials/sidebar.html:302 templates/users/maps.html:139
+#: templates/users/maps.html:172
+msgid "Close"
+msgstr "Закрыто"
+
+#: templates/appointments/artist_booking_settings.html:179
+msgid "Break from"
+msgstr "Перерыв с"
+
+#: templates/appointments/artist_booking_settings.html:184
+#, fuzzy
+#| msgid "Back to feed"
+msgid "Break to"
+msgstr "Назад к ленте"
+
+#: templates/appointments/artist_booking_settings.html:193
+msgid "Blocked periods"
+msgstr "Заблокированные периоды"
+
+#: templates/appointments/artist_booking_settings.html:194
+msgid "Prevent clients from booking specific days or date ranges."
+msgstr "Запретите клиентам бронировать отдельные дни или диапазоны дат."
+
+#: templates/appointments/artist_booking_settings.html:199
+#: templates/appointments/artist_booking_settings.html:231
+#| msgid "No liked posts yet"
+msgid "No blocked periods yet."
+msgstr "Заблокированных периодов пока нет."
+
+#: templates/appointments/artist_booking_settings.html:200
+#| msgid "Choose a username"
+msgid "Choose a start date first."
+msgstr "Сначала выберите дату начала."
+
+#: templates/appointments/artist_booking_settings.html:201
+msgid "End date cannot be before start date."
+msgstr "Дата окончания не может быть раньше даты начала."
+
+#: templates/appointments/artist_booking_settings.html:202
+msgid "Those dates are already blocked."
+msgstr "Эти даты уже заблокированы."
+
+#: templates/appointments/artist_booking_settings.html:205
+#, fuzzy
+#| msgid "Last updated:"
+msgid "Start date"
+msgstr "Последнее обновление:"
+
+#: templates/appointments/artist_booking_settings.html:209
+msgid "End date"
+msgstr "Дата окончания"
+
+#: templates/appointments/artist_booking_settings.html:209
+#: templates/appointments/artist_booking_settings.html:213
+#, fuzzy
+#| msgid "Style, optional"
+msgid "optional"
+msgstr "Стиль, необязательно"
+
+#: templates/appointments/artist_booking_settings.html:213
+#, fuzzy
+#| msgid "No reason"
+msgid "Reason"
+msgstr "Без причины"
+
+#: templates/appointments/artist_booking_settings.html:214
+msgid "Vacation, convention, studio closure…"
+msgstr "Отпуск, конвенция, закрытие студии…"
+
+#: templates/appointments/artist_booking_settings.html:217
+msgid "Add period"
+msgstr "Добавить период"
+
+#: templates/appointments/artist_booking_settings.html:240
+#, fuzzy
+#| msgid "Document requests"
+msgid "Booking requests"
+msgstr "Заявки с документами"
+
+#: templates/appointments/artist_booking_settings.html:251
+#: templates/appointments/artist_booking_settings.html:282
+msgid "Consultation done"
+msgstr "Консультация проведена"
+
+#: templates/appointments/artist_booking_settings.html:260
+#, fuzzy
+#| msgid "No bookmarks yet"
+msgid "No booking requests yet."
+msgstr "Закладок пока нет"
+
+#: templates/appointments/artist_booking_settings.html:268
+#, fuzzy
+#| msgid "Tattoo artist"
+msgid "Tattoo projects"
+msgstr "Тату-мастер"
+
+#: templates/appointments/artist_booking_settings.html:291
+#, fuzzy
+#| msgid "No tattoo artists yet"
+msgid "No active tattoo projects yet."
+msgstr "Тату-мастеров пока нет"
+
+#: templates/appointments/artist_booking_settings.html:311
+#, fuzzy
+#| msgid "No messages yet."
+msgid "No unread messages."
+msgstr "Сообщений пока нет."
+
+#: templates/appointments/artist_booking_settings.html:329
+#, fuzzy
+#| msgid "No portfolio works yet"
+msgid "No portfolio works yet."
+msgstr "Работ в портфолио пока нет"
+
+#: templates/appointments/artist_booking_settings.html:331
+#, fuzzy
+#| msgid "Add first work"
+msgid "Add your first work"
+msgstr "Добавить первую работу"
+
+#: templates/appointments/artist_booking_settings.html:359
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "                Hi %(username)s,\n"
+#| "                "
+msgid ""
+"\n"
+"                  %(count)s session\n"
+"                "
+msgid_plural ""
+"\n"
+"                  %(count)s sessions\n"
+"                "
+msgstr[0] ""
+"\n"
+"                Привет, %(username)s,\n"
+"                "
+msgstr[1] ""
+"\n"
+"                Привет, %(username)s,\n"
+"                "
+msgstr[2] ""
+"\n"
+"                Привет, %(username)s,\n"
+"                "
+
+#: templates/appointments/artist_booking_settings.html:367
+#, fuzzy
+#| msgid "No comments yet."
+msgid "No clients yet."
+msgstr "Комментариев пока нет."
+
+#: templates/appointments/artist_booking_settings.html:383
+msgid "Completed session — review system can be connected here."
+msgstr "Завершённый сеанс — здесь можно подключить систему отзывов."
+
+#: templates/appointments/artist_booking_settings.html:387
+#, fuzzy
+#| msgid "No messages yet."
+msgid "No reviews yet."
+msgstr "Сообщений пока нет."
+
+#: templates/appointments/artist_booking_settings.html:431
+#: templates/users/profile.html:179
+#, fuzzy
+#| msgid "Booking"
+msgid "Booking settings"
+msgstr "Бронирование"
+
+#: templates/appointments/artist_booking_settings.html:437
+msgid "Accept new clients"
+msgstr "Принимать новых клиентов"
+
+#: templates/appointments/artist_booking_settings.html:445
+msgid "Reference images required"
+msgstr "Референсы обязательны"
+
+#: templates/appointments/artist_booking_settings.html:461
+msgid "Phone consultation"
+msgstr "Консультация по телефону"
+
+#: templates/appointments/artist_booking_settings.html:469
+msgid "Deposit amount"
+msgstr "Сумма депозита"
+
+#: templates/appointments/artist_booking_settings.html:477
+msgid "Max references"
+msgstr "Максимум референсов"
+
+#: templates/appointments/artist_booking_settings.html:482
+msgid "Minimum booking notice"
+msgstr "Минимальное уведомление перед записью"
+
+#: templates/appointments/artist_booking_settings.html:485
+#: templates/appointments/artist_booking_settings.html:552
+msgid "hrs"
+msgstr "ч"
+
+#: templates/appointments/artist_booking_settings.html:490
+msgid "Preferred booking workflow"
+msgstr "Предпочтительный процесс записи"
+
+#: templates/appointments/artist_booking_settings.html:504
+msgid "Consultations enabled"
+msgstr "Консультации включены"
+
+#: templates/appointments/artist_booking_settings.html:520
+msgid "Deposit required"
+msgstr "Депозит обязателен"
+
+#: templates/appointments/artist_booking_settings.html:528
+#, fuzzy
+#| msgid "Location"
+msgid "Studio consultation"
+msgstr "Местоположение"
+
+#: templates/appointments/artist_booking_settings.html:536
+msgid "Consultation price"
+msgstr "Цена консультации"
+
+#: templates/appointments/artist_booking_settings.html:544
+msgid "Min references"
+msgstr "Минимум референсов"
+
+#: templates/appointments/artist_booking_settings.html:549
+#, fuzzy
+#| msgid "Moderation"
+msgid "Max session duration"
+msgstr "Модерация"
+
+#: templates/appointments/artist_booking_settings.html:557
+msgid "Maximum booking window"
+msgstr "Максимальное окно записи"
+
+#: templates/appointments/artist_booking_settings.html:560
+msgid "days"
+msgstr "дней"
+
+#: templates/appointments/artist_booking_settings.html:567
+msgid "Tattoo styles offered"
+msgstr "Предлагаемые стили тату"
+
+#: templates/appointments/artist_booking_settings.html:587
+#, fuzzy
+#| msgid "Booking"
+msgid "Booking rules"
+msgstr "Бронирование"
+
+#: templates/appointments/artist_booking_settings.html:623
+#, fuzzy
+#| msgid "No reason"
+msgid "Auto responses"
+msgstr "Без причины"
+
+#: templates/appointments/artist_booking_settings.html:627
+#, fuzzy
+#| msgid "Booking"
+msgid "Booking received"
+msgstr "Бронирование"
+
+#: templates/appointments/artist_booking_settings.html:628
+msgid "Thanks! I received your request and will reply within 24h."
+msgstr "Спасибо! Я получил ваш запрос и отвечу в течение 24 часов."
+
+#: templates/appointments/artist_booking_settings.html:633
+msgid "Your piece needs a consultation first — pick a slot below."
+msgstr "Для вашей работы сначала нужна консультация — выберите время ниже."
+
+#: templates/appointments/artist_booking_settings.html:638
+msgid "Could you send 2–3 more reference images? It helps me nail the design."
+msgstr "Можете отправить ещё 2–3 референса? Это поможет точнее подготовить дизайн."
+
+#: templates/appointments/artist_booking_settings.html:642
+#, fuzzy
+#| msgid "Bookmarked"
+msgid "Booking approved"
+msgstr "В закладках"
+
+#: templates/appointments/artist_booking_settings.html:643
+msgid "You are booked! A deposit link has been sent to secure your slot."
+msgstr "Вы записаны! Ссылка на депозит отправлена для подтверждения времени."
+
+#: templates/appointments/artist_booking_settings.html:647
+#, fuzzy
+#| msgid "Booking"
+msgid "Booking declined"
+msgstr "Бронирование"
+
+#: templates/appointments/artist_booking_settings.html:648
+msgid ""
+"Unfortunately I cannot take this on right now — thank you for reaching out."
+msgstr ""
+
+#: templates/appointments/artist_booking_settings.html:654
+#, fuzzy
+#| msgid "Profile image"
+msgid "Profile settings"
+msgstr "Изображение профиля"
+
+#: templates/appointments/artist_booking_settings.html:658
+msgid "Studio name"
+msgstr "Название студии"
+
+#: templates/appointments/artist_booking_settings.html:663
+msgid "Address"
+msgstr "Адрес"
+
+#: templates/appointments/artist_booking_settings.html:668
+#, fuzzy
+#| msgid "Contests"
+msgid "Contact"
+msgstr "Конкурсы"
+
+#: templates/appointments/artist_booking_settings.html:683
+msgid "Website"
+msgstr "Сайт"
+
+#: templates/appointments/artist_booking_settings.html:691
+#: templates/appointments/artist_booking_settings.html:695
+#, fuzzy
+#| msgid "Settings"
+msgid "Save all settings"
+msgstr "Настройки"
+
+#: templates/appointments/artist_booking_settings.html:692
+msgid "Applies booking settings, rules, auto responses, and profile settings."
+msgstr "Применяет настройки записи, правила, автоответы и настройки профиля."
+
+#: templates/appointments/artist_booking_settings.html:704
+msgid "Next appointment"
+msgstr "Следующая запись"
+
+#: templates/appointments/artist_booking_settings.html:713
+msgid "No upcoming accepted appointments."
+msgstr "Нет предстоящих подтверждённых записей."
+
+#: templates/appointments/artist_booking_settings.html:718
+#: templates/users/calendar.html:59
+#, fuzzy
+#| msgid "Notifications"
+msgid "Quick actions"
+msgstr "Уведомления"
+
+#: templates/appointments/artist_booking_settings.html:722
+#, fuzzy
+#| msgid "Booking"
+msgid "New booking"
+msgstr "Бронирование"
+
+#: templates/appointments/artist_booking_settings.html:727
+msgid "Block a date"
+msgstr "Заблокировать дату"
+
+#: templates/appointments/artist_booking_settings.html:732
+msgid "Pause bookings"
+msgstr "Приостановить записи"
+
+#: templates/appointments/artist_booking_settings.html:737
+#, fuzzy
+#| msgid "Current avatar"
+msgid "Current status"
+msgstr "Текущий аватар"
+
+#: templates/appointments/artist_booking_settings.html:746
+msgid "Manual booking"
+msgstr "Ручная запись"
+
+#: templates/appointments/artist_booking_settings.html:747
+msgid "Create an accepted booking for an existing Tatzo user."
+msgstr "Создайте подтверждённую запись для существующего пользователя Tatzo."
+
+#: templates/appointments/artist_booking_settings.html:753
+#, fuzzy
+#| msgid "Choose a username"
+msgid "Client username"
+msgstr "Выберите имя пользователя"
+
+#: templates/appointments/artist_booking_settings.html:759
+#: templates/users/calendar.html:95
+msgid "Date"
+msgstr "Дата"
+
+#: templates/appointments/artist_booking_settings.html:764
+#: templates/users/calendar.html:96
+#, fuzzy
+#| msgid "Short title"
+msgid "Start time"
+msgstr "Короткий заголовок"
+
+#: templates/appointments/artist_booking_settings.html:771
+#, fuzzy
+#| msgid "Moderation"
+msgid "Duration minutes"
+msgstr "Модерация"
+
+#: templates/appointments/artist_booking_settings.html:776
+#, fuzzy
+#| msgid "Booking"
+msgid "Booking type"
+msgstr "Бронирование"
+
+#: templates/appointments/artist_booking_settings.html:786
+msgid "Fine Line, Blackwork"
+msgstr "Файнлайн, Блэкворк"
+
+#: templates/appointments/artist_booking_settings.html:813
+#, fuzzy
+#| msgid "Create account"
+msgid "Create booking"
+msgstr "Создать аккаунт"
+
+#: templates/appointments/booking_wizard.html:4
+#: templates/users/profile.html:183
+msgid "Book appointment"
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:17
+#: templates/users/artist_portfolio.html:23
+#: templates/users/following_list.html:18
+msgid "Back to profile"
+msgstr "Назад к профилю"
+
+#: templates/appointments/booking_wizard.html:31
+#, fuzzy, python-format
+#| msgid "Chat with %(username)s"
+msgid "Book with %(username)s"
+msgstr "Чат с %(username)s"
+
+#: templates/appointments/booking_wizard.html:32
+msgid ""
+"Choose a date, describe your tattoo project and send a request to the artist."
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:65
+msgid "Date and time"
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:79
+msgid "Available time"
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:86
+msgid "Book a consultation instead"
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:87
+msgid "Consultations are limited to 1 hour."
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:97
+msgid "Full day"
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:102
+#, fuzzy
+#| msgid "Tattoo artist"
+msgid "Tattoo project"
+msgstr "Тату-мастер"
+
+#: templates/appointments/booking_wizard.html:104
+#: templates/users/add_portfolio_work.html:61
+#: templates/users/edit_portfolio_album.html:37
+msgid "Style"
+msgstr "Стиль"
+
+#: templates/appointments/booking_wizard.html:113
+msgid "Tap one or more body areas."
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:117
+msgid "Front"
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:150
+#, fuzzy
+#| msgid "Rejected"
+msgid "Selected:"
+msgstr "Отклонено"
+
+#: templates/appointments/booking_wizard.html:151
+#: templates/appointments/booking_wizard.html:152
+#, fuzzy
+#| msgid "No file selected"
+msgid "No placement selected"
+msgstr "Файл не выбран"
+
+#: templates/appointments/booking_wizard.html:159
+msgid "Coin"
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:160
+msgid "Smartphone"
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:163
+msgid "Half sleeve"
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:164
+msgid "Full sleeve"
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:173
+#, fuzzy
+#| msgid "No bio yet."
+msgid "No budget"
+msgstr "Биография пока не заполнена."
+
+#: templates/appointments/booking_wizard.html:176
+msgid "Describe your idea"
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:181
+msgid "Tell the artist what you want, style, idea, meaning, references..."
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:186
+msgid "References"
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:190
+msgid "Upload reference images"
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:191
+msgid "You can add screenshots, sketches or inspiration images."
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:209
+#, fuzzy
+#| msgid "Reset link sent"
+msgid "Review and send"
+msgstr "Ссылка отправлена"
+
+#: templates/appointments/booking_wizard.html:214
+msgid ""
+"The artist will review your request and confirm or decline the appointment."
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:224
+msgid "Next"
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:228
+#, fuzzy
+#| msgid "Invalid request."
+msgid "Send request"
+msgstr "Недопустимый запрос."
+
+#: templates/appointments/booking_wizard.html:243
+msgid "Book consultation now"
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:244
+msgid "We'll set this request as a 1-hour consultation."
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:251
+msgid "I already had a consultation with this artist"
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:252
+msgid "You can continue with a tattoo session request."
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:260
+msgid ""
+"Where/when did the consultation happen? e.g. Instagram, studio, phone..."
+msgstr ""
+
+#: templates/appointments/booking_wizard.html:265
+#, fuzzy
+#| msgid "Contests"
+msgid "Continue"
+msgstr "Конкурсы"
+
+#: templates/appointments/calendar_page.html:13
+msgid "Calendar navigation"
+msgstr ""
+
+#: templates/appointments/calendar_page.html:27
+msgid "Your appointments, sessions and booking requests in one view."
+msgstr ""
+
+#: templates/appointments/calendar_page.html:30
+#, fuzzy
+#| msgid "Calendar"
+msgid "Calendar controls"
+msgstr "Календарь"
+
+#: templates/appointments/calendar_page.html:31
+msgid "Previous month"
+msgstr ""
+
+#: templates/appointments/calendar_page.html:32
+#: templates/appointments/calendar_page.html:63
+#: templates/users/calendar.html:31
+msgid "Today"
+msgstr ""
+
+#: templates/appointments/calendar_page.html:33
+msgid "Next month"
+msgstr ""
+
+#: templates/appointments/calendar_page.html:39
+#, fuzzy
+#| msgid "Calendar"
+msgid "Calendar view"
+msgstr "Календарь"
+
+#: templates/appointments/calendar_page.html:40
+#: templates/users/calendar.html:36
+msgid "Month"
+msgstr ""
+
+#: templates/appointments/calendar_page.html:41
+#: templates/users/calendar.html:37
+msgid "Week"
+msgstr ""
+
+#: templates/appointments/calendar_page.html:42
+#: templates/users/calendar.html:38
+msgid "Day"
+msgstr ""
+
+#: templates/appointments/calendar_page.html:47
+#, fuzzy
+#| msgid "Calendar"
+msgid "Month calendar"
+msgstr "Календарь"
+
+#: templates/appointments/calendar_page.html:49
+msgid "Mon"
+msgstr ""
+
+#: templates/appointments/calendar_page.html:50
+msgid "Tue"
+msgstr ""
+
+#: templates/appointments/calendar_page.html:51
+msgid "Wed"
+msgstr ""
+
+#: templates/appointments/calendar_page.html:52
+msgid "Thu"
+msgstr ""
+
+#: templates/appointments/calendar_page.html:53
+msgid "Fri"
+msgstr ""
+
+#: templates/appointments/calendar_page.html:54
+#, fuzzy
+#| msgid "Status"
+msgid "Sat"
+msgstr "Статус"
+
+#: templates/appointments/calendar_page.html:55
+msgid "Sun"
+msgstr ""
+
+#: templates/appointments/calendar_page.html:74
+msgid "No events"
+msgstr ""
+
+#: templates/appointments/calendar_page.html:82
+#, fuzzy
+#| msgid "Calendar"
+msgid "Calendar insights"
+msgstr "Календарь"
+
+#: templates/appointments/calendar_page.html:84
+#: templates/users/calendar.html:53
+msgid "Insights"
+msgstr ""
+
+#: templates/appointments/calendar_page.html:85
+msgid "This month"
+msgstr ""
+
+#: templates/appointments/calendar_page.html:94
+#, fuzzy
+#| msgid "No chats yet"
+msgid "No insights yet."
+msgstr "Пока нет чатов"
+
+#: templates/appointments/calendar_page.html:100
+#: templates/users/calendar.html:68
+msgid "Legend"
+msgstr ""
+
+#: templates/appointments/calendar_page.html:101
+msgid "Event status"
+msgstr ""
+
+#: templates/emails/password_reset_email.html:7
+#: templates/emails/password_reset_email.txt:3
+#: templates/emails/password_reset_subject.txt:1
 msgid "Reset your Tatzo password"
 msgstr "Сброс пароля Tatzo"
 
-#: .\templates\emails\password_reset_email.html:27
-#: .\templates\emails\verify_email.html:27
+#: templates/emails/password_reset_email.html:27
+#: templates/emails/verify_email.html:27
 msgid "Your tattoo community starts here"
 msgstr "Ваше тату-сообщество начинается здесь"
 
-#: .\templates\emails\password_reset_email.html:35
+#: templates/emails/password_reset_email.html:35
 msgid "Reset your password"
 msgstr "Сброс пароля"
 
-#: .\templates\emails\password_reset_email.html:39
-#: .\templates\emails\verify_email.html:39
+#: templates/emails/password_reset_email.html:39
+#: templates/emails/verify_email.html:39
 #, python-format
 msgid ""
 "\n"
@@ -176,57 +1693,56 @@ msgstr ""
 "                Привет, %(username)s,\n"
 "                "
 
-#: .\templates\emails\password_reset_email.html:45
-#: .\templates\emails\password_reset_email.txt:7
+#: templates/emails/password_reset_email.html:45
+#: templates/emails/password_reset_email.txt:7
 msgid "We received a request to reset the password for your Tatzo account."
 msgstr "Мы получили запрос на сброс пароля для вашего аккаунта Tatzo."
 
-#: .\templates\emails\password_reset_email.html:49
+#: templates/emails/password_reset_email.html:49
 msgid "Click the button below to create a new password."
 msgstr "Нажмите на кнопку ниже, чтобы создать новый пароль."
 
-#: .\templates\emails\password_reset_email.html:57
+#: templates/emails/password_reset_email.html:57
 msgid "Create new password"
 msgstr "Создать новый пароль"
 
-#: .\templates\emails\password_reset_email.html:65
-#: .\templates\emails\verify_email.html:61
+#: templates/emails/password_reset_email.html:65
+#: templates/emails/verify_email.html:61
 msgid ""
 "If the button does not work, copy and paste this link into your browser:"
 msgstr "Если кнопка не работает, скопируйте и вставьте эту ссылку в браузер:"
 
-#: .\templates\emails\password_reset_email.html:77
-#: .\templates\emails\password_reset_email.txt:12
+#: templates/emails/password_reset_email.html:77
+#: templates/emails/password_reset_email.txt:12
 msgid ""
 "If you did not request a password reset, you can safely ignore this email."
 msgstr "Если вы не запрашивали сброс пароля, просто проигнорируйте это письмо."
 
-#: .\templates\emails\password_reset_email.html:84
-#: .\templates\emails\verify_email.html:80
+#: templates/emails/password_reset_email.html:84
+#: templates/emails/verify_email.html:80
 msgid "Tattoo social platform"
 msgstr "Социальная платформа для тату"
 
-#: .\templates\emails\password_reset_email.txt:5
-#: .\templates\emails\verify_email.txt:5
+#: templates/emails/password_reset_email.txt:5
+#: templates/emails/verify_email.txt:5
 #, python-format
 msgid "Hi %(username)s,"
 msgstr "Привет, %(username)s,"
 
-#: .\templates\emails\password_reset_email.txt:9
+#: templates/emails/password_reset_email.txt:9
 msgid "Use the link below to create a new password:"
 msgstr "Используйте ссылку ниже, чтобы создать новый пароль:"
 
-#: .\templates\emails\verify_email.html:7 .\templates\emails\verify_email.txt:3
-#: .\users\utils.py:40
+#: templates/emails/verify_email.html:7 templates/emails/verify_email.txt:3
+#: users/utils.py:40
 msgid "Confirm your Tatzo account"
 msgstr "Подтверждение аккаунта Tatzo"
 
-#: .\templates\emails\verify_email.html:35
+#: templates/emails/verify_email.html:35
 msgid "Confirm your email"
 msgstr "Подтвердите email"
 
-#: .\templates\emails\verify_email.html:45
-#: .\templates\emails\verify_email.txt:7
+#: templates/emails/verify_email.html:45 templates/emails/verify_email.txt:7
 msgid ""
 "Welcome to Tatzo. Please confirm your email address to activate your account "
 "and start using the platform."
@@ -234,351 +1750,409 @@ msgstr ""
 "Добро пожаловать в Tatzo. Подтвердите ваш email, чтобы активировать аккаунт "
 "и начать пользоваться платформой."
 
-#: .\templates\emails\verify_email.html:53
+#: templates/emails/verify_email.html:53
 msgid "Confirm my account"
 msgstr "Подтвердить аккаунт"
 
-#: .\templates\emails\verify_email.html:73
-#: .\templates\emails\verify_email.txt:11
+#: templates/emails/verify_email.html:73 templates/emails/verify_email.txt:11
 msgid "If you did not create this account, you can safely ignore this email."
 msgstr "Если вы не создавали этот аккаунт, просто проигнорируйте это письмо."
 
-#: .\templates\home.html:4 .\templates\partials\auth_home_link.html:3
-#: .\templates\partials\auth_home_link.html:5
-#: .\templates\partials\sidebar.html:28 .\templates\partials\sidebar.html:29
-#: .\users\templates\users\profile_form.html:10
-#: .\users\templates\users\user_profile.html:8
-msgid "Home"
-msgstr "Главная"
-
-msgid "Images compressed"
-msgstr "Изображения сжаты"
-
-msgid "Compressing..."
-msgstr "Сжатие..."
-
-msgid "Space saved"
-msgstr "Сэкономлено"
-
-msgid "Image is still too large after compression."
-msgstr "Изображение всё ещё слишком большое после сжатия."
-
-msgid "Compressing images..."
-msgstr "Сжатие изображений..."
-
-msgid "Portfolio image is still too large after compression. Please choose a smaller image."
-msgstr "Изображение портфолио всё ещё слишком большое после сжатия. Выберите изображение поменьше."
-
-#: .\templates\home.html:12
+#: templates/home.html:12
 msgid "Got something new? Share it!"
 msgstr "Есть что-то новое? Поделитесь!"
 
-#: .\templates\home.html:13 .\templates\users\chat_thread.html:75
-#: .\templates\users\chat_thread.html:76
+#: templates/home.html:13 templates/users/chat_thread.html:104
+#: templates/users/chat_thread.html:105
 msgid "Add file"
 msgstr "Добавить файл"
 
-#: .\templates\home.html:15
+#: templates/home.html:15
 msgid "Update your comment..."
 msgstr "Обновите комментарий..."
 
-#: .\templates\home.html:16
+#: templates/home.html:16
 msgid "Describe the problem (optional)..."
 msgstr "Опишите проблему (необязательно)..."
 
-#: .\templates\home.html:49
+#: templates/home.html:41 templates/home.html:42
+msgid "Close composer"
+msgstr ""
+
+#: templates/home.html:59
 msgid "Grid"
 msgstr "Сетка"
 
-#: .\templates\home.html:53
+#: templates/home.html:63
 msgid "Carousel"
 msgstr "Карусель"
 
-#: .\templates\home.html:73
+#: templates/home.html:83
 msgid "Disable comments"
 msgstr "Отключить комментарии"
 
-#: .\templates\home.html:79
+#: templates/home.html:89
 msgid "Mark as Ad"
 msgstr "Отметить как рекламу"
 
-#: .\templates\home.html:83
+#: templates/home.html:95
+msgid ""
+"Location tools are coming soon. For now, you can mention the city in the "
+"post text."
+msgstr "Места скоро появятся. Пока можно указать город прямо в тексте поста."
+
+#: templates/home.html:97 templates/users/calendar.html:98
 msgid "Location"
 msgstr "Местоположение"
 
-#: .\templates\home.html:84
+#: templates/home.html:98
 msgid "Add Location"
 msgstr "Добавить место"
 
-#: .\templates\home.html:88
+#: templates/home.html:104
+msgid ""
+"Polls are coming soon. You will be able to create interactive polls inside "
+"posts."
+msgstr ""
+"Опросы скоро появятся. Можно будет создавать интерактивные опросы внутри "
+"постов."
+
+#: templates/home.html:106
 msgid "Poll"
 msgstr "Опрос"
 
-#: .\templates\home.html:89
+#: templates/home.html:107
 msgid "Create Poll"
 msgstr "Создать опрос"
 
-#: .\templates\home.html:93
+#: templates/home.html:113
+msgid ""
+"Scheduled posts are coming soon. You will be able to choose the date and "
+"time before publishing."
+msgstr ""
+"Запланированные посты скоро появятся. Можно будет выбрать дату и время "
+"публикации."
+
+#: templates/home.html:115
 msgid "Schedule"
 msgstr "Планирование"
 
-#: .\templates\home.html:94
+#: templates/home.html:116
 msgid "Schedule Post"
 msgstr "Запланировать пост"
 
-#: .\templates\home.html:99
+#: templates/home.html:123
+msgid ""
+"Co-authors are coming soon. You will be able to invite other users to appear "
+"on the same post."
+msgstr ""
+"Соавторы скоро появятся. Можно будет приглашать других пользователей в общий "
+"пост."
+
+#: templates/home.html:125
 msgid "Co-authors"
 msgstr "Соавторы"
 
-#: .\templates\home.html:100
+#: templates/home.html:126
 msgid "Invite Co-authors"
 msgstr "Пригласить соавторов"
 
-#: .\templates\home.html:104
+#: templates/home.html:132
+msgid ""
+"Audience settings are coming soon. You will be able to choose who can see "
+"each post."
+msgstr ""
+"Настройки аудитории скоро появятся. Можно будет выбирать, кто увидит пост."
+
+#: templates/home.html:134
 msgid "Who can see"
 msgstr "Кто может видеть"
 
-#: .\templates\home.html:105
+#: templates/home.html:135
 msgid "Who can see this"
 msgstr "Кто может это видеть"
 
-#: .\templates\home.html:109 .\templates\partials\sidebar.html:127
-msgid "Settings"
-msgstr "Настройки"
+#: templates/home.html:141
+msgid ""
+"Additional post options are coming soon. We are preparing more controls for "
+"creators."
+msgstr ""
+"Доп. настройки скоро появятся. Мы готовим больше инструментов для авторов."
 
-#: .\templates\home.html:110
+#: templates/home.html:144
 msgid "Additional options"
 msgstr "Доп. настройки"
 
-#: .\templates\home.html:134
+#: templates/home.html:168
 msgid "Discover"
 msgstr "Открывайте"
 
-#: .\templates\home.html:135
+#: templates/home.html:169 templates/partials/sidebar.html:226
+#: templates/partials/sidebar.html:227
 msgid "Recommendations"
 msgstr "Рекомендации"
 
-#: .\templates\home.html:136
+#: templates/home.html:170
 msgid "Explore tattoo artists and find profiles worth following."
 msgstr ""
 "Изучайте тату-мастеров и находите профили, на которые стоит подписаться."
 
-#: .\templates\home.html:164 .\templates\home.html:171 .\users\models.py:12
-#: .\users\templates\users\signup.html:119
+#: templates/home.html:198 templates/home.html:205 users/models.py:16
+#: users/templates/users/signup.html:157
 msgid "Tattoo artist"
 msgstr "Тату-мастер"
 
-#: .\templates\home.html:169 .\templates\users\profile.html:46
-#: .\templates\users\profile.html:120 .\users\models.py:122
+#: templates/home.html:203 templates/users/maps.html:42
+#: templates/users/maps.html:84 templates/users/profile.html:46
+#: templates/users/profile.html:120 users/models.py:136 users/models.py:578
 msgid "Verified"
 msgstr "Подтверждён"
 
-#: .\templates\home.html:177 .\templates\users\search.html:129
+#: templates/home.html:211 templates/users/search.html:129
 msgid "View profile"
 msgstr "Открыть профиль"
 
-#: .\templates\home.html:183
+#: templates/home.html:217
 msgid "No tattoo artists yet"
 msgstr "Тату-мастеров пока нет"
 
-#: .\templates\home.html:184
+#: templates/home.html:218
 msgid "Artist recommendations will appear here once profiles are available."
 msgstr "Рекомендации мастеров появятся здесь, когда будут доступны профили."
 
-#: .\templates\home.html:194
+#: templates/home.html:228
 msgid "Logout"
 msgstr "Выйти"
 
-#: .\templates\home.html:197 .\templates\registration\login.html:4
+#: templates/home.html:231 templates/partials/sidebar.html:198
+#: templates/registration/login.html:4
 msgid "Login"
 msgstr "Вход"
 
-#: .\templates\home.html:198 .\users\templates\users\signup.html:4
-#: .\users\templates\users\signup.html:127
+#: templates/home.html:232 templates/partials/sidebar.html:374
+#: users/templates/users/signup.html:4 users/templates/users/signup.html:189
 msgid "Sign up"
 msgstr "Регистрация"
 
-#: .\templates\home.html:255 .\templates\users\moderation_dashboard.html:416
+#: templates/home.html:289 templates/users/moderation_dashboard.html:416
 msgid "Delete comment"
 msgstr "Удалить комментарий"
 
-#: .\templates\home.html:261
+#: templates/home.html:295
 msgid "Are you sure you want to delete this comment?"
 msgstr "Вы уверены, что хотите удалить этот комментарий?"
 
-#: .\templates\home.html:271 .\templates\home.html:296
-#: .\templates\home.html:392 .\templates\partials\comment_item.html:57
-#: .\templates\partials\comment_item.html:138
-#: .\templates\users\artist_portfolio.html:210
-#: .\templates\users\artist_portfolio_album.html:128
+#: templates/home.html:305 templates/home.html:330 templates/home.html:433
+#: templates/partials/chat_message.html:83
+#: templates/partials/comment_item.html:59
+#: templates/partials/comment_item.html:142
+#: templates/users/artist_portfolio.html:251
+#: templates/users/artist_portfolio_album.html:128
+#: templates/users/chat_thread.html:150
 msgid "Delete"
 msgstr "Удалить"
 
-#: .\templates\home.html:280 .\templates\partials\post_card.html:56
-#: .\templates\users\moderation_dashboard.html:338
+#: templates/home.html:314 templates/partials/post_card.html:46
+#: templates/users/moderation_dashboard.html:338
 msgid "Delete post"
 msgstr "Удалить пост"
 
-#: .\templates\home.html:286
+#: templates/home.html:320
 msgid "Are you sure you want to delete this post?"
 msgstr "Вы уверены, что хотите удалить этот пост?"
 
-#: .\templates\home.html:305 .\templates\partials\post_card.html:60
+#: templates/home.html:339 templates/partials/post_card.html:50
 msgid "Report post"
 msgstr "Пожаловаться на пост"
 
-#: .\templates\home.html:323 .\templates\home.html:350
-#: .\templates\home.html:397 .\templates\users\report_problem.html:75
+#: templates/home.html:357 templates/home.html:384 templates/home.html:438
+#: templates/users/report_problem.html:75
 msgid "Send report"
 msgstr "Отправить жалобу"
 
-#: .\templates\home.html:332
+#: templates/home.html:366
 msgid "Report comment"
 msgstr "Пожаловаться на комментарий"
 
-#: .\templates\home.html:360 .\templates\users\coming_soon.html:4
-#: .\templates\users\coming_soon.html:20
+#: templates/home.html:394 templates/home.html:413
+#: templates/users/coming_soon.html:4 templates/users/coming_soon.html:20
 msgid "Coming soon"
 msgstr "Скоро"
 
-#: .\templates\home.html:363
+#: templates/home.html:397 templates/home.html:414
 msgid ""
 "Sharing posts will be available soon. We’re still working on this feature."
 msgstr ""
 "Возможность делиться постами скоро появится. Мы всё ещё работаем над этой "
 "функцией."
 
-#: .\templates\home.html:367
+#: templates/home.html:401
 msgid "Got it"
 msgstr "Понятно"
 
-#: .\templates\home.html:377
+#: templates/home.html:411
 msgid "Success"
 msgstr "Успешно"
 
-#: .\templates\home.html:378
+#: templates/home.html:412
 msgid "Action failed"
 msgstr "Действие не выполнено"
 
-#: .\templates\home.html:379
+#: templates/home.html:415
+msgid "This post feature is coming soon. We’re still working on it."
+msgstr "Эта функция поста скоро появится. Мы ещё работаем над ней."
+
+#: templates/home.html:416
 msgid "Info"
 msgstr "Информация"
 
-#: .\templates\home.html:380
+#: templates/home.html:417
 msgid "Done."
 msgstr "Готово."
 
-#: .\templates\home.html:382
+#: templates/home.html:419
 msgid "Unsupported file"
 msgstr "Неподдерживаемый файл"
 
-#: .\templates\home.html:383
+#: templates/home.html:420
 msgid "Remove file"
 msgstr "Удалить файл"
 
-#: .\templates\home.html:384
+#: templates/home.html:421
 msgid "Open preview"
 msgstr "Открыть предпросмотр"
 
-#: .\templates\home.html:385
+#: templates/home.html:422
 msgid "Preview"
 msgstr "Предпросмотр"
 
-#: .\templates\home.html:386
+#: templates/home.html:423
 msgid "Media"
 msgstr "Медиа"
 
-#: .\templates\home.html:388
+#: templates/home.html:425
 msgid "Posting..."
 msgstr "Публикация..."
 
-#: .\templates\home.html:390
+#: templates/home.html:427
 msgid "Post could not be created."
 msgstr "Не удалось создать пост."
 
-#: .\templates\home.html:393
+#: templates/home.html:428
+msgid "Compressing..."
+msgstr "Сжатие..."
+
+#: templates/home.html:429
+msgid "Images compressed"
+msgstr "Изображения сжаты"
+
+#: templates/home.html:430
+msgid "Space saved"
+msgstr "Сэкономлено"
+
+#: templates/home.html:431
+msgid "Image is still too large after compression."
+msgstr "Изображение всё ещё слишком большое после сжатия."
+
+#: templates/home.html:434
 msgid "Deleting..."
 msgstr "Удаление..."
 
-#: .\templates\home.html:394
+#: templates/home.html:435
 msgid "Delete failed."
 msgstr "Не удалось удалить."
 
-#: .\templates\home.html:395
+#: templates/home.html:436
 msgid "Post deleted."
 msgstr "Пост удалён."
 
-#: .\templates\home.html:399
+#: templates/home.html:440
 msgid "Sending..."
 msgstr "Отправка..."
 
-#: .\templates\home.html:400
+#: templates/home.html:441
 msgid "Report failed."
 msgstr "Не удалось отправить жалобу."
 
-#: .\templates\home.html:404
+#: templates/home.html:445
 msgid "Edit comment:"
 msgstr "Редактировать комментарий:"
 
-#: .\templates\home.html:405
+#: templates/home.html:446
 msgid "Delete this comment?"
 msgstr "Удалить этот комментарий?"
 
-#: .\templates\home.html:408
+#: templates/home.html:449
 msgid "Hide replies"
 msgstr "Скрыть ответы"
 
-#: .\templates\home.html:409
+#: templates/home.html:450
 msgid "View replies"
 msgstr "Показать ответы"
 
-#: .\templates\partials\chat_message.html:18
+#: templates/partials/chat_message.html:20
 msgid "Image attachment"
 msgstr "Изображение"
 
-#: .\templates\partials\chat_message.html:19
-#: .\templates\users\chats_list.html:55
-#: .\templates\users\report_problem.html:56 .\users\forms.py:270
-#: .\users\models.py:401
+#: templates/partials/chat_message.html:21 templates/users/chats_list.html:55
+#: templates/users/report_problem.html:56 users/forms.py:359
+#: users/models.py:547
 msgid "Attachment"
 msgstr "Вложение"
 
-#: .\templates\partials\chat_message.html:34
+#: templates/partials/chat_message.html:38
 msgid "Video attachment"
 msgstr "Видео"
 
-#: .\templates\partials\chat_message.html:51
+#: templates/partials/chat_message.html:57
 msgid "Open file"
 msgstr "Открыть файл"
 
-#: .\templates\partials\comment_item.html:7
-#: .\templates\partials\comment_item.html:88
-#: .\templates\partials\post_card.html:3
-msgid "User Avatar"
-msgstr "Аватар пользователя"
+#: templates/partials/chat_message.html:70
+#: templates/partials/chat_message.html:71 templates/users/chat_thread.html:151
+#, fuzzy
+#| msgid "Write a message..."
+msgid "Edit message"
+msgstr "Напишите сообщение..."
 
-#: .\templates\partials\comment_item.html:32
-#: .\templates\partials\comment_item.html:113
-#: .\templates\partials\post_card.html:4
-msgid "Like"
-msgstr "Лайк"
-
-#: .\templates\partials\comment_item.html:45
-#: .\templates\partials\comment_item.html:126
-msgid "Reply"
-msgstr "Ответить"
-
-#: .\templates\partials\comment_item.html:54
-#: .\templates\partials\comment_item.html:135
+#: templates/partials/chat_message.html:73
+#: templates/partials/comment_item.html:56
+#: templates/partials/comment_item.html:139
 msgid "Edit"
 msgstr "Редактировать"
 
-#: .\templates\partials\comment_item.html:61
-#: .\templates\partials\comment_item.html:142
+#: templates/partials/chat_message.html:80
+#: templates/partials/chat_message.html:81
+#, fuzzy
+#| msgid "Delete comment"
+msgid "Delete message"
+msgstr "Удалить комментарий"
+
+#: templates/partials/chat_message.html:90
+msgid "edited"
+msgstr ""
+
+#: templates/partials/comment_item.html:7
+#: templates/partials/comment_item.html:90 templates/partials/post_card.html:3
+msgid "User Avatar"
+msgstr "Аватар пользователя"
+
+#: templates/partials/comment_item.html:34
+#: templates/partials/comment_item.html:117 templates/partials/post_card.html:4
+msgid "Like"
+msgstr "Лайк"
+
+#: templates/partials/comment_item.html:47
+#: templates/partials/comment_item.html:130
+msgid "Reply"
+msgstr "Ответить"
+
+#: templates/partials/comment_item.html:63
+#: templates/partials/comment_item.html:146
 msgid "Report"
 msgstr "Пожаловаться"
 
-#: .\templates\partials\comment_item.html:76
+#: templates/partials/comment_item.html:78
 #, python-format
 msgid ""
 "\n"
@@ -601,172 +2175,212 @@ msgstr[2] ""
 "        Показать ответы (%(reply_count)s)\n"
 "      "
 
-#: .\templates\partials\comments_list.html:6
+#: templates/partials/comments_list.html:6
 msgid "No comments yet."
 msgstr "Комментариев пока нет."
 
-#: .\templates\partials\post_card.html:5
+#: templates/partials/post_card.html:5
 msgid "Comment"
 msgstr "Комментарий"
 
-#: .\templates\partials\post_card.html:6
+#: templates/partials/post_card.html:6
 msgid "Share"
 msgstr "Поделиться"
 
-#: .\templates\partials\post_card.html:7
+#: templates/partials/post_card.html:7
 msgid "Bookmark"
 msgstr "Добавить в закладки"
 
-#: .\templates\partials\post_card.html:8
+#: templates/partials/post_card.html:8
 msgid "Bookmarked"
 msgstr "В закладках"
 
-#: .\templates\partials\post_card.html:71
+#: templates/partials/post_card.html:61
 msgid "Ad"
 msgstr "Реклама"
 
-#: .\templates\partials\sidebar.html:10 .\templates\partials\sidebar.html:16
-#: .\templates\partials\sidebar.html:21
-#: .\users\templates\users\user_profile.html:4
-#: .\users\templates\users\user_profile.html:10
+#: templates/partials/sidebar.html:10 templates/partials/sidebar.html:16
+#: templates/partials/sidebar.html:21 templates/partials/sidebar.html:189
+#: templates/partials/sidebar.html:192
+#: users/templates/users/user_profile.html:4
+#: users/templates/users/user_profile.html:10
 msgid "My Profile"
 msgstr "Мой профиль"
 
-#: .\templates\partials\sidebar.html:38 .\templates\partials\sidebar.html:39
-#: .\templates\users\search.html:4 .\templates\users\search.html:19
+#: templates/partials/sidebar.html:38 templates/partials/sidebar.html:39
+#: templates/partials/sidebar.html:207 templates/partials/sidebar.html:266
+#: templates/partials/sidebar.html:267 templates/users/maps.html:32
+#: templates/users/search.html:4 templates/users/search.html:19
 msgid "Search"
 msgstr "Поиск"
 
-#: .\templates\partials\sidebar.html:48 .\templates\partials\sidebar.html:49
-#: .\users\views.py:1469
+#: templates/partials/sidebar.html:48 templates/partials/sidebar.html:49
+#: templates/partials/sidebar.html:211 templates/partials/sidebar.html:274
+#: templates/partials/sidebar.html:275 templates/users/maps.html:4
+#: users/views.py:2381
 msgid "Maps"
 msgstr "Карты"
 
-#: .\templates\partials\sidebar.html:58 .\templates\partials\sidebar.html:59
-#: .\templates\users\chats_list.html:4 .\templates\users\chats_list.html:19
+#: templates/partials/sidebar.html:58 templates/partials/sidebar.html:59
+#: templates/partials/sidebar.html:209 templates/partials/sidebar.html:282
+#: templates/partials/sidebar.html:283 templates/users/chats_list.html:4
+#: templates/users/chats_list.html:19
 msgid "Chats"
 msgstr "Чаты"
 
-#: .\templates\partials\sidebar.html:72 .\templates\partials\sidebar.html:73
-#: .\users\views.py:1474
-msgid "Calendar"
-msgstr "Календарь"
-
-#: .\templates\partials\sidebar.html:92 .\templates\partials\sidebar.html:93
-#: .\users\templates\users\contests.html:4 .\users\views.py:1489
+#: templates/partials/sidebar.html:92 templates/partials/sidebar.html:93
+#: templates/partials/sidebar.html:312 templates/partials/sidebar.html:313
+#: users/templates/users/contests.html:4 users/views.py:2401
 msgid "Contests"
 msgstr "Конкурсы"
 
-#: .\templates\partials\sidebar.html:102 .\templates\partials\sidebar.html:103
-#: .\users\views.py:1479
+#: templates/partials/sidebar.html:102 templates/partials/sidebar.html:103
+#: templates/partials/sidebar.html:317 templates/partials/sidebar.html:318
+#: users/views.py:2391
 msgid "Clean slate"
 msgstr "Чистый лист"
 
-#: .\templates\partials\sidebar.html:112 .\templates\partials\sidebar.html:113
-#: .\users\views.py:1484
+#: templates/partials/sidebar.html:112 templates/partials/sidebar.html:113
+#: templates/partials/sidebar.html:235 templates/partials/sidebar.html:236
+#: templates/partials/sidebar.html:238 users/views.py:2396
 msgid "Notifications"
 msgstr "Уведомления"
 
-#: .\templates\partials\sidebar.html:121 .\templates\partials\sidebar.html:122
+#: templates/partials/sidebar.html:121 templates/partials/sidebar.html:122
 msgid "More"
 msgstr "Ещё"
 
-#: .\templates\partials\sidebar.html:135
+#: templates/partials/sidebar.html:135 templates/partials/sidebar.html:341
 msgid "Language"
 msgstr "Язык"
 
-#: .\templates\partials\sidebar.html:154
-#: .\templates\users\report_problem.html:4
-#: .\templates\users\report_problem.html:21
+#: templates/partials/sidebar.html:154 templates/partials/sidebar.html:323
+#: templates/users/report_problem.html:4 templates/users/report_problem.html:21
 msgid "Report a problem"
 msgstr "Сообщить о проблеме"
 
+#: templates/partials/sidebar.html:158 templates/partials/sidebar.html:328
+#: templates/users/legal_index.html:5 templates/users/legal_index.html:17
+msgid "Legal"
+msgstr "Юридическое"
+
+#: templates/partials/sidebar.html:162 templates/partials/sidebar.html:332
+msgid "Legal center"
+msgstr "Юридический центр"
+
+#: templates/partials/sidebar.html:169 templates/partials/sidebar.html:382
 msgid "Moderation panel"
 msgstr "Панель модерации"
 
+#: templates/partials/sidebar.html:170
 msgid "Verifications and reports"
 msgstr "Проверки и жалобы"
 
-#: .\templates\partials\sidebar.html:168
+#: templates/partials/sidebar.html:176
 msgid "Your activity helps us prioritize new features."
 msgstr "Ваша активность помогает нам выбирать, какие функции добавлять раньше."
 
-#: .\templates\registration\logged_out.html:4
-msgid "Logged out"
+#: templates/partials/sidebar.html:245 templates/partials/sidebar.html:246
+#: templates/partials/sidebar.html:301
+msgid "Menu"
+msgstr ""
+
+#: templates/partials/sidebar.html:253
+msgid "Mobile navigation"
+msgstr ""
+
+#: templates/partials/sidebar.html:363
+#, fuzzy
+#| msgid "Logged out"
+msgid "Log out"
 msgstr "Выход выполнен"
 
-#: .\templates\registration\logged_out.html:7
-msgid "You have been logged out."
-msgstr "Вы вышли из аккаунта."
-
-#: .\templates\registration\logged_out.html:8
-msgid "Return to Home"
-msgstr "Вернуться на главную"
-
-#: .\templates\registration\login.html:15
-msgid "Enter your username"
-msgstr "Введите имя пользователя"
-
-#: .\templates\registration\login.html:16
-#: .\users\templates\users\signup.html:17
-msgid "Enter your password"
-msgstr "Введите пароль"
-
-#: .\templates\registration\login.html:26
-#: .\users\templates\users\signup.html:30
-msgid "Welcome"
-msgstr "Добро пожаловать"
-
-#: .\templates\registration\login.html:32
-#: .\users\templates\users\edit_profile.html:32
-#: .\users\templates\users\pending_profiles.html:13
-#: .\users\templates\users\pending_verifications.html:13
-#: .\users\templates\users\review_profile.html:11
-#: .\users\templates\users\signup.html:40
-msgid "Username"
-msgstr "Имя пользователя"
-
-#: .\templates\registration\login.html:43
-#: .\users\templates\users\signup.html:66
-msgid "Password"
-msgstr "Пароль"
-
-#: .\templates\registration\login.html:54
+#: templates/partials/sidebar.html:369 templates/registration/login.html:74
 msgid "Log in"
 msgstr "Войти"
 
-#: .\templates\registration\login.html:59
+#: templates/registration/logged_out.html:4
+msgid "Logged out"
+msgstr "Выход выполнен"
+
+#: templates/registration/logged_out.html:7
+msgid "You have been logged out."
+msgstr "Вы вышли из аккаунта."
+
+#: templates/registration/logged_out.html:8
+msgid "Return to Home"
+msgstr "Вернуться на главную"
+
+#: templates/registration/login.html:15
+msgid "Enter your username"
+msgstr "Введите имя пользователя"
+
+#: templates/registration/login.html:16 users/templates/users/signup.html:17
+msgid "Enter your password"
+msgstr "Введите пароль"
+
+#: templates/registration/login.html:26 users/templates/users/signup.html:30
+msgid "Welcome"
+msgstr "Добро пожаловать"
+
+#: templates/registration/login.html:32
+#: users/templates/users/edit_profile.html:32
+#: users/templates/users/pending_profiles.html:13
+#: users/templates/users/pending_verifications.html:13
+#: users/templates/users/review_profile.html:11
+#: users/templates/users/signup.html:40
+msgid "Username"
+msgstr "Имя пользователя"
+
+#: templates/registration/login.html:43 users/templates/users/signup.html:66
+msgid "Password"
+msgstr "Пароль"
+
+#: templates/registration/login.html:58 templates/registration/login.html:62
+#: templates/registration/login.html:66 users/templates/users/signup.html:80
+#: users/templates/users/signup.html:84 users/templates/users/signup.html:88
+#: users/templates/users/signup.html:114 users/templates/users/signup.html:118
+#: users/templates/users/signup.html:122
+msgid "Show password"
+msgstr "Показать пароль"
+
+#: templates/registration/login.html:59 users/templates/users/signup.html:81
+#: users/templates/users/signup.html:115
+msgid "Hide password"
+msgstr "Скрыть пароль"
+
+#: templates/registration/login.html:79
 msgid "Create account"
 msgstr "Создать аккаунт"
 
-#: .\templates\registration\login.html:61
+#: templates/registration/login.html:81
 msgid "Forgot password?"
 msgstr "Забыли пароль?"
 
-#: .\templates\users\add_portfolio_work.html:4
-#: .\templates\users\add_portfolio_work.html:23
+#: templates/users/add_portfolio_work.html:4
+#: templates/users/add_portfolio_work.html:23
 msgid "Add portfolio work"
 msgstr "Добавить работу в портфолио"
 
-#: .\templates\users\add_portfolio_work.html:12
+#: templates/users/add_portfolio_work.html:12
 msgid "Preview image"
 msgstr "Предпросмотр изображения"
 
-#: .\templates\users\add_portfolio_work.html:20
-#: .\templates\users\artist_portfolio_album.html:20
-#: .\templates\users\edit_portfolio_album.html:17
+#: templates/users/add_portfolio_work.html:20
+#: templates/users/artist_portfolio_album.html:20
+#: templates/users/edit_portfolio_album.html:17
 msgid "Back to portfolio"
 msgstr "Назад к портфолио"
 
-#: .\templates\users\add_portfolio_work.html:26
+#: templates/users/add_portfolio_work.html:26
 msgid "Upload a tattoo work and optionally organize it into an album."
 msgstr "Загрузите тату-работу и при желании добавьте её в альбом."
 
-#: .\templates\users\add_portfolio_work.html:35
+#: templates/users/add_portfolio_work.html:35
 msgid "Images"
 msgstr "Изображения"
 
-#: .\templates\users\add_portfolio_work.html:39
+#: templates/users/add_portfolio_work.html:39
 msgid ""
 "You can select multiple images at once. Each image will become a separate "
 "portfolio work."
@@ -774,151 +2388,212 @@ msgstr ""
 "Можно выбрать несколько изображений сразу. Каждое изображение станет "
 "отдельной работой в портфолио."
 
-#: .\templates\users\add_portfolio_work.html:46
-#: .\templates\users\report_problem.html:42 .\users\forms.py:268
-#: .\users\models.py:397
+#: templates/users/add_portfolio_work.html:46
+#: templates/users/report_problem.html:42 users/forms.py:357
+#: users/models.py:543
 msgid "Title"
 msgstr "Название"
 
-#: .\templates\users\add_portfolio_work.html:51
+#: templates/users/add_portfolio_work.html:51
 msgid "Existing album"
 msgstr "Существующий альбом"
 
-#: .\templates\users\add_portfolio_work.html:56
+#: templates/users/add_portfolio_work.html:56
 msgid "New album"
 msgstr "Новый альбом"
 
-#: .\templates\users\add_portfolio_work.html:61
-#: .\templates\users\edit_portfolio_album.html:37
-msgid "Style"
-msgstr "Стиль"
-
-#: .\templates\users\add_portfolio_work.html:66
+#: templates/users/add_portfolio_work.html:66
 msgid "Body placement"
 msgstr "Место на теле"
 
-#: .\templates\users\add_portfolio_work.html:71
-#: .\templates\users\edit_portfolio_album.html:42
+#: templates/users/add_portfolio_work.html:71
+#: templates/users/edit_portfolio_album.html:42
 msgid "Description"
 msgstr "Описание"
 
-#: .\templates\users\add_portfolio_work.html:82
+#: templates/users/add_portfolio_work.html:82
+#: templates/users/add_portfolio_work.html:90
 msgid "Save work"
 msgstr "Сохранить работу"
 
-#: .\templates\users\artist_portfolio.html:5
-#: .\templates\users\artist_portfolio.html:27
+#: templates/users/add_portfolio_work.html:89
+msgid "Compressing images..."
+msgstr "Сжатие изображений..."
+
+#: templates/users/add_portfolio_work.html:91
+msgid ""
+"Portfolio image is still too large after compression. Please choose a "
+"smaller image."
+msgstr ""
+"Изображение портфолио всё ещё слишком большое после сжатия. Выберите "
+"изображение поменьше."
+
+#: templates/users/artist_portfolio.html:5
+#: templates/users/artist_portfolio.html:27
 #, python-format
 msgid "%(username)s's portfolio"
 msgstr "Портфолио %(username)s"
 
-#: .\templates\users\artist_portfolio.html:15
-#: .\templates\users\artist_portfolio_album.html:12
+#: templates/users/artist_portfolio.html:15
+#: templates/users/artist_portfolio_album.html:12
 msgid "Portfolio work"
 msgstr "Работа портфолио"
 
-#: .\templates\users\artist_portfolio.html:23
-#: .\templates\users\following_list.html:18
-msgid "Back to profile"
-msgstr "Назад к профилю"
-
-#: .\templates\users\artist_portfolio.html:31
+#: templates/users/artist_portfolio.html:31
 msgid "A curated collection of tattoo works, albums and styles."
 msgstr "Подборка тату-работ, альбомов и стилей."
 
-#: .\templates\users\artist_portfolio.html:37
-#: .\templates\users\artist_portfolio_album.html:44
-#: .\templates\users\artist_portfolio_album.html:114
+#: templates/users/artist_portfolio.html:38
+#: templates/users/artist_portfolio_album.html:44
+#: templates/users/artist_portfolio_album.html:114
 msgid "Add work"
 msgstr "Добавить работу"
 
-#: .\templates\users\artist_portfolio.html:52
+#: templates/users/artist_portfolio.html:42
+#, fuzzy
+#| msgid "Portfolio link"
+msgid "Portfolio locked"
+msgstr "Ссылка на портфолио"
+
+#: templates/users/artist_portfolio.html:52
+#, fuzzy
+#| msgid "Artist verification"
+msgid "Portfolio unlocks after verification"
+msgstr "Верификация мастера"
+
+#: templates/users/artist_portfolio.html:55
+#, fuzzy
+#| msgid "Upload verification documents"
+msgid "To use artist tools, upload your verification documents first."
+msgstr "Загрузка документов для верификации"
+
+#: templates/users/artist_portfolio.html:59 templates/users/profile.html:136
+msgid "Start verification"
+msgstr "Начать верификацию"
+
+#: templates/users/artist_portfolio.html:63
+msgid ""
+"Your verification was rejected. Please contact support or submit new "
+"documents."
+msgstr ""
+
+#: templates/users/artist_portfolio.html:65
+msgid ""
+"Your documents are currently under review. Once approved, you will be able "
+"to upload works, create albums and use artist tools."
+msgstr ""
+
+#: templates/users/artist_portfolio.html:68
+#, fuzzy
+#| msgid "Pending verification"
+msgid "Waiting for verification"
+msgstr "Ожидает верификации"
+
+#: templates/users/artist_portfolio.html:73
+msgid "Upload tattoo works"
+msgstr ""
+
+#: templates/users/artist_portfolio.html:74
+#, fuzzy
+#| msgid "Manage portfolio"
+msgid "Organize portfolio albums"
+msgstr "Управлять портфолио"
+
+#: templates/users/artist_portfolio.html:75
+msgid "Receive bookings later"
+msgstr ""
+
+#: templates/users/artist_portfolio.html:76
+msgid "Appear as a verified tattoo artist"
+msgstr ""
+
+#: templates/users/artist_portfolio.html:91
 msgid "Create album"
 msgstr "Создать альбом"
 
-#: .\templates\users\artist_portfolio.html:53
+#: templates/users/artist_portfolio.html:92
 msgid "Group works by style, placement or project."
 msgstr "Группируйте работы по стилю, месту нанесения или проекту."
 
-#: .\templates\users\artist_portfolio.html:56
+#: templates/users/artist_portfolio.html:95
 msgid "Album name, e.g. Realism"
 msgstr "Название альбома, например Реализм"
 
-#: .\templates\users\artist_portfolio.html:57
+#: templates/users/artist_portfolio.html:96
 msgid "Style, optional"
 msgstr "Стиль, необязательно"
 
-#: .\templates\users\artist_portfolio.html:72
+#: templates/users/artist_portfolio.html:111
 msgid "Create"
 msgstr "Создать"
 
-#: .\templates\users\artist_portfolio.html:79
+#: templates/users/artist_portfolio.html:118
 msgid "Albums"
 msgstr "Альбомы"
 
-#: .\templates\users\artist_portfolio.html:96
+#: templates/users/artist_portfolio.html:135
 msgid "No cover"
 msgstr "Нет обложки"
 
-#: .\templates\users\artist_portfolio.html:107
+#: templates/users/artist_portfolio.html:146
 msgid "works"
 msgstr "работ"
 
-#: .\templates\users\artist_portfolio.html:117
-#: .\templates\users\edit_portfolio_album.html:4
-#: .\templates\users\edit_portfolio_album.html:20
+#: templates/users/artist_portfolio.html:156
+#: templates/users/edit_portfolio_album.html:4
+#: templates/users/edit_portfolio_album.html:20
 msgid "Edit album"
 msgstr "Редактировать альбом"
 
-#: .\templates\users\artist_portfolio.html:124
+#: templates/users/artist_portfolio.html:163
 msgid "Delete this album? Works will stay in All works."
 msgstr "Удалить этот альбом? Работы останутся в разделе Все работы."
 
-#: .\templates\users\artist_portfolio.html:127
+#: templates/users/artist_portfolio.html:166
 msgid "Delete album"
 msgstr "Удалить альбом"
 
-#: .\templates\users\artist_portfolio.html:140
+#: templates/users/artist_portfolio.html:179
 msgid "All works"
 msgstr "Все работы"
 
-#: .\templates\users\artist_portfolio.html:177
-#: .\templates\users\artist_portfolio_album.html:77
+#: templates/users/artist_portfolio.html:216
+#: templates/users/artist_portfolio_album.html:77
 msgid "Delete this portfolio work?"
 msgstr "Удалить эту работу из портфолио?"
 
-#: .\templates\users\artist_portfolio.html:180
-#: .\templates\users\artist_portfolio_album.html:80
+#: templates/users/artist_portfolio.html:219
+#: templates/users/artist_portfolio_album.html:80
 msgid "Delete work"
 msgstr "Удалить работу"
 
-#: .\templates\users\artist_portfolio.html:190
+#: templates/users/artist_portfolio.html:229
 msgid "No portfolio works yet"
 msgstr "Работ в портфолио пока нет"
 
-#: .\templates\users\artist_portfolio.html:193
+#: templates/users/artist_portfolio.html:232
 msgid "Add your best works to build a professional portfolio."
 msgstr "Добавьте свои лучшие работы, чтобы собрать профессиональное портфолио."
 
-#: .\templates\users\artist_portfolio.html:196
+#: templates/users/artist_portfolio.html:235
 msgid "Add first work"
 msgstr "Добавить первую работу"
 
-#: .\templates\users\artist_portfolio.html:199
+#: templates/users/artist_portfolio.html:238
 msgid "This artist has not added portfolio works yet."
 msgstr "Этот мастер пока не добавил работы в портфолио."
 
-#: .\templates\users\artist_portfolio.html:208
-#: .\templates\users\artist_portfolio_album.html:126
+#: templates/users/artist_portfolio.html:249
+#: templates/users/artist_portfolio_album.html:126
 msgid "Confirm deletion"
 msgstr "Подтверждение удаления"
 
-#: .\templates\users\artist_portfolio.html:211
-#: .\templates\users\artist_portfolio_album.html:129
+#: templates/users/artist_portfolio.html:252
+#: templates/users/artist_portfolio_album.html:129
 msgid "Delete this item?"
 msgstr "Удалить этот элемент?"
 
-#: .\templates\users\artist_portfolio_album.html:29
+#: templates/users/artist_portfolio_album.html:29
 #, python-format
 msgid ""
 "\n"
@@ -929,7 +2604,7 @@ msgstr ""
 "              Тату-работы в стиле %(style)s от %(username)s.\n"
 "            "
 
-#: .\templates\users\artist_portfolio_album.html:35
+#: templates/users/artist_portfolio_album.html:35
 #, python-format
 msgid ""
 "\n"
@@ -940,53 +2615,89 @@ msgstr ""
 "              Альбом портфолио от %(username)s.\n"
 "            "
 
-#: .\templates\users\artist_portfolio_album.html:51
+#: templates/users/artist_portfolio_album.html:51
 msgid "Works"
 msgstr "Работы"
 
-#: .\templates\users\artist_portfolio_album.html:108
+#: templates/users/artist_portfolio_album.html:108
 msgid "No works in this album yet"
 msgstr "В этом альбоме пока нет работ"
 
-#: .\templates\users\artist_portfolio_album.html:111
+#: templates/users/artist_portfolio_album.html:111
 msgid "Add works to this album to build a stronger portfolio."
 msgstr "Добавьте работы в этот альбом, чтобы усилить портфолио."
 
-#: .\templates\users\artist_portfolio_album.html:117
+#: templates/users/artist_portfolio_album.html:117
 msgid "This album has no works yet."
 msgstr "В этом альбоме пока нет работ."
 
-#: .\templates\users\chat_thread.html:5
+#: templates/users/calendar.html:60
+#, fuzzy
+#| msgid "Add Location"
+msgid "Add session"
+msgstr "Добавить место"
+
+#: templates/users/calendar.html:61
+#, fuzzy
+#| msgid "Block"
+msgid "Block time"
+msgstr "Заблокировать"
+
+#: templates/users/calendar.html:62
+#, fuzzy
+#| msgid "Start verification"
+msgid "Set vacation"
+msgstr "Начать верификацию"
+
+#: templates/users/calendar.html:63
+#, fuzzy
+#| msgid "Create account"
+msgid "Create consultation"
+msgstr "Создать аккаунт"
+
+#: templates/users/calendar.html:71
+#, fuzzy
+#| msgid "Block"
+msgid "Blocked"
+msgstr "Заблокировать"
+
+#: templates/users/calendar.html:90
+#, fuzzy
+#| msgid "Calendar"
+msgid "Calendar event"
+msgstr "Календарь"
+
+#: templates/users/calendar.html:97
+msgid "End time"
+msgstr ""
+
+#: templates/users/chat_thread.html:5
 #, python-format
 msgid "Chat with %(username)s"
 msgstr "Чат с %(username)s"
 
-#: .\templates\users\chat_thread.html:21
+#: templates/users/chat_thread.html:21
 msgid "Back to chats"
 msgstr "Назад к чатам"
 
-msgid "Block"
-msgstr "Заблокировать"
-
-msgid "Unblock"
-msgstr "Разблокировать"
-
-#: .\templates\users\chat_thread.html:37
-#: .\templates\users\following_list.html:48 .\templates\users\profile.html:40
-#: .\templates\users\search.html:110
-msgid "Tattoo Artist"
-msgstr "Тату-мастер"
-
-#: .\templates\users\chat_thread.html:39
-#: .\templates\users\following_list.html:50 .\templates\users\profile.html:55
+#: templates/users/chat_thread.html:39 templates/users/following_list.html:50
+#: templates/users/profile.html:55
 msgid "Community profile"
 msgstr "Профиль пользователя"
 
-#: .\templates\users\chat_thread.html:52
+#: templates/users/chat_thread.html:56 users/views.py:997
+msgid "Unblock"
+msgstr "Разблокировать"
+
+#: templates/users/chat_thread.html:58 users/views.py:997
+msgid "Block"
+msgstr "Заблокировать"
+
+#: templates/users/chat_thread.html:70
 msgid "No messages yet"
 msgstr "Сообщений пока нет"
 
-#: .\templates\users\chat_thread.html:54
+#: templates/users/chat_thread.html:72
 #, python-format
 msgid ""
 "\n"
@@ -997,40 +2708,90 @@ msgstr ""
 "                Начните переписку с %(username)s.\n"
 "              "
 
-#: .\templates\users\chat_thread.html:90
+#: templates/users/chat_thread.html:83
+msgid "You blocked this user. Unblock them to send messages."
+msgstr ""
+
+#: templates/users/chat_thread.html:85
+msgid "This user has blocked you. You cannot send messages."
+msgstr ""
+
+#: templates/users/chat_thread.html:119
 msgid "Write a message..."
 msgstr "Напишите сообщение..."
 
-#: .\templates\users\chat_thread.html:111
+#: templates/users/chat_thread.html:131
+#, fuzzy
+#| msgid "Message"
+msgid "Send message"
+msgstr "Написать"
+
+#: templates/users/chat_thread.html:145
 msgid "Chat media"
 msgstr "Медиа из чата"
 
-#: .\templates\users\chat_thread.html:112
+#: templates/users/chat_thread.html:146 users/views.py:1701
 msgid "Message was not sent."
 msgstr "Сообщение не было отправлено."
 
-#: .\templates\users\chats_list.html:20
+#: templates/users/chat_thread.html:147
+#, fuzzy
+#| msgid "Delete this item?"
+msgid "Delete message?"
+msgstr "Удалить этот элемент?"
+
+#: templates/users/chat_thread.html:148
+#, fuzzy
+#| msgid "Post cannot be empty."
+msgid "This action cannot be undone."
+msgstr "Пост не может быть пустым."
+
+#: templates/users/chat_thread.html:152
+#: templates/users/edit_portfolio_album.html:58
+#: users/templates/users/edit_profile.html:184
+msgid "Save changes"
+msgstr "Сохранить изменения"
+
+#: templates/users/chat_thread.html:153
+#, fuzzy
+#| msgid "Add file"
+msgid "Add files"
+msgstr "Добавить файл"
+
+#: templates/users/chat_thread.html:154
+#, fuzzy
+#| msgid "Image attachment"
+msgid "Remove attachment"
+msgstr "Изображение"
+
+#: templates/users/chat_thread.html:155
+#, fuzzy
+#| msgid "Image attachment"
+msgid "Keep attachment"
+msgstr "Изображение"
+
+#: templates/users/chats_list.html:20
 msgid "Your conversations with artists and users."
 msgstr "Ваши переписки с тату-мастерами и пользователями."
 
-#: .\templates\users\chats_list.html:49
+#: templates/users/chats_list.html:49
 msgid "You:"
 msgstr "Вы:"
 
-#: .\templates\users\chats_list.html:58
+#: templates/users/chats_list.html:58
 msgid "No messages yet."
 msgstr "Сообщений пока нет."
 
-#: .\templates\users\chats_list.html:73
+#: templates/users/chats_list.html:73
 msgid "No chats yet"
 msgstr "Пока нет чатов"
 
-#: .\templates\users\chats_list.html:74
+#: templates/users/chats_list.html:74
 msgid "Open someone’s profile and click Message to start a conversation."
 msgstr ""
 "Откройте чей-нибудь профиль и нажмите «Написать», чтобы начать переписку."
 
-#: .\templates\users\coming_soon.html:30
+#: templates/users/coming_soon.html:30
 msgid ""
 "Your activity helps us prioritize new features. The more users interact with "
 "Tatzo, the faster these sections will grow."
@@ -1039,191 +2800,499 @@ msgstr ""
 "больше пользователи взаимодействуют с Tatzo, тем быстрее будут развиваться "
 "эти разделы."
 
-#: .\templates\users\coming_soon.html:34
+#: templates/users/coming_soon.html:34
 msgid "Back to feed"
 msgstr "Назад к ленте"
 
-#: .\templates\users\edit_portfolio_album.html:23
+#: templates/users/edit_portfolio_album.html:23
 msgid "Update album name, style, description or cover image."
 msgstr "Измените название альбома, стиль, описание или обложку."
 
-#: .\templates\users\edit_portfolio_album.html:32
+#: templates/users/edit_portfolio_album.html:32
 msgid "Album name"
 msgstr "Название альбома"
 
-#: .\templates\users\edit_portfolio_album.html:47
+#: templates/users/edit_portfolio_album.html:47
 msgid "Cover image"
 msgstr "Обложка"
 
-#: .\templates\users\edit_portfolio_album.html:58
-#: .\users\templates\users\edit_profile.html:184
-msgid "Save changes"
-msgstr "Сохранить изменения"
-
-#: .\templates\users\following_list.html:5
+#: templates/users/following_list.html:5
 #, python-format
 msgid "%(username)s following"
 msgstr "Подписки %(username)s"
 
-#: .\templates\users\following_list.html:22
+#: templates/users/following_list.html:22
 #, python-format
 msgid "%(username)s is following"
 msgstr "%(username)s подписан на"
 
-#: .\templates\users\following_list.html:25
+#: templates/users/following_list.html:25
 msgid "Profiles followed by this user."
 msgstr "Профили, на которые подписан этот пользователь."
 
-#: .\templates\users\following_list.html:57
+#: templates/users/following_list.html:57
 msgid "No following yet"
 msgstr "Подписок пока нет"
 
-#: .\templates\users\following_list.html:58
+#: templates/users/following_list.html:58
 msgid "This user is not following anyone yet."
 msgstr "Этот пользователь пока ни на кого не подписан."
 
-#: .\templates\users\moderation_dashboard.html:4
-#: .\templates\users\moderation_dashboard.html:20
-msgid "Moderation dashboard"
-msgstr "Панель модерации"
-
-#: .\templates\users\moderation_dashboard.html:17
+#: templates/users/legal_index.html:14
+#: templates/users/moderation_dashboard.html:17
 msgid "Back to Tatzo"
 msgstr "Назад в Tatzo"
 
-#: .\templates\users\moderation_dashboard.html:23
+#: templates/users/legal_index.html:20
+msgid "Find all legal information about Tatzo in one place."
+msgstr "Вся юридическая информация о Tatzo в одном месте."
+
+#: templates/users/legal_index.html:27 users/templates/users/signup.html:176
+msgid "Terms"
+msgstr "Условия"
+
+#: templates/users/legal_index.html:28
+msgid "Rules for using Tatzo."
+msgstr "Правила использования Tatzo."
+
+#: templates/users/legal_index.html:35
+msgid "Privacy"
+msgstr "Конфиденциальность"
+
+#: templates/users/legal_index.html:36
+msgid "How we handle personal data."
+msgstr "Как мы обрабатываем персональные данные."
+
+#: templates/users/legal_index.html:43
+msgid "Cookies"
+msgstr "Cookies"
+
+#: templates/users/legal_index.html:44
+msgid "Cookies used by the platform."
+msgstr "Cookies, используемые платформой."
+
+#: templates/users/legal_index.html:51 users/templates/users/signup.html:183
+msgid "Community Guidelines"
+msgstr "Правила сообщества"
+
+#: templates/users/legal_index.html:52
+msgid "Rules for a safe community."
+msgstr "Правила безопасного сообщества."
+
+#: templates/users/legal_index.html:59
+msgid "Legal notice"
+msgstr "Правовая информация"
+
+#: templates/users/legal_index.html:60
+msgid "Publisher and hosting information."
+msgstr "Информация об издателе и хостинге."
+
+#: templates/users/legal_page.html:14
+msgid "Back to legal center"
+msgstr "Назад в юридический центр"
+
+#: templates/users/legal_page.html:20
+msgid "Last updated:"
+msgstr "Последнее обновление:"
+
+#: templates/users/maps.html:21
+#, fuzzy
+#| msgid "Find tattoo artists near you and explore studios by location."
+msgid "Find verified tattoo artists and studios"
+msgstr ""
+"Находите тату-мастеров рядом с вами и изучайте студии по местоположению."
+
+#: templates/users/maps.html:22
+msgid ""
+"Preview map for verified Tatzo artists and locations awaiting confirmation."
+msgstr ""
+
+#: templates/users/maps.html:24
+#, fuzzy
+#| msgid "Add Location"
+msgid "Add new location"
+msgstr "Добавить место"
+
+#: templates/users/maps.html:28
+msgid "Map controls and results"
+msgstr ""
+
+#: templates/users/maps.html:29
+msgid "Close map panel"
+msgstr ""
+
+#: templates/users/maps.html:31
+msgid "Mobile map panel tabs"
+msgstr ""
+
+#: templates/users/maps.html:33
+msgid "Filters"
+msgstr ""
+
+#: templates/users/maps.html:34
+msgid "List"
+msgstr ""
+
+#: templates/users/maps.html:35
+#, fuzzy
+#| msgid "Add Location"
+msgid "Add location"
+msgstr "Добавить место"
+
+#: templates/users/maps.html:38
+msgid "Search by artist, style or city"
+msgstr ""
+
+#: templates/users/maps.html:40
+#, fuzzy
+#| msgid "Open file"
+msgid "Map filters"
+msgstr "Открыть файл"
+
+#: templates/users/maps.html:41 templates/users/moderation_dashboard.html:98
+#: templates/users/moderation_dashboard.html:104 templates/users/search.html:45
+msgid "All"
+msgstr "Все"
+
+#: templates/users/maps.html:43 templates/users/maps.html:84
+msgid "Needs claim"
+msgstr ""
+
+#: templates/users/maps.html:48
+#, fuzzy
+#| msgid "Verification"
+msgid "Verified Tatzo locations"
+msgstr "Верификация"
+
+#: templates/users/maps.html:49
+msgid "Imported / unclaimed"
+msgstr ""
+
+#: templates/users/maps.html:50
+msgid "Location requests pending"
+msgstr ""
+
+#: templates/users/maps.html:54
+#, fuzzy
+#| msgid "Delete failed."
+msgid "Detailed filters"
+msgstr "Не удалось удалить."
+
+#: templates/users/maps.html:71 templates/users/maps.html:106
+msgid "Claim this location"
+msgstr ""
+
+#: templates/users/maps.html:71 templates/users/maps.html:108
+#, fuzzy
+#| msgid "Add Location"
+msgid "Add location request"
+msgstr "Добавить место"
+
+#: templates/users/maps.html:91
+#, fuzzy
+#| msgid "Style, optional"
+msgid "Styles pending"
+msgstr "Стиль, необязательно"
+
+#: templates/users/maps.html:98 templates/users/profile.html:198
+msgid "Posts"
+msgstr "Посты"
+
+#: templates/users/maps.html:99
+msgid "Data"
+msgstr ""
+
+#: templates/users/maps.html:102
+#, fuzzy
+#| msgid "Profiles"
+msgid "Profile"
+msgstr "Профили"
+
+#: templates/users/maps.html:104
+#, fuzzy
+#| msgid "Booking"
+msgid "Book"
+msgstr "Бронирование"
+
+#: templates/users/maps.html:113
+msgid "No verified artists are ready for the map yet."
+msgstr ""
+
+#: templates/users/maps.html:118
+#, fuzzy
+#| msgid "Tattoo artist"
+msgid "Tatzo artist map"
+msgstr "Тату-мастер"
+
+#: templates/users/maps.html:120
+msgid "Open map panel"
+msgstr ""
+
+#: templates/users/maps.html:122
+msgid "Explore"
+msgstr ""
+
+#: templates/users/maps.html:124
+#, fuzzy
+#| msgid "No liked posts yet"
+msgid "No verified locations yet"
+msgstr "Лайкнутых постов пока нет"
+
+#: templates/users/maps.html:124
+msgid "Locations appear after address confirmation."
+msgstr ""
+
+#: templates/users/maps.html:126
+msgid "Verified/imported artist"
+msgstr ""
+
+#: templates/users/maps.html:127
+msgid "Claim required"
+msgstr ""
+
+#: templates/users/maps.html:138
+#, fuzzy
+#| msgid "Add Location"
+msgid "Add a tattoo location"
+msgstr "Добавить место"
+
+#: templates/users/maps.html:142
+msgid ""
+"Tell us about a tattoo studio or artist location that should appear on "
+"Tatzo. We’ll review it before it appears on the map."
+msgstr ""
+
+#: templates/users/maps.html:143
+msgid ""
+"For best accuracy, add the full address. Tatzo will verify it before it "
+"appears on the map."
+msgstr ""
+
+#: templates/users/maps.html:144
+#, fuzzy
+#| msgid "Tattoo artist contests"
+msgid "Studio or artist name"
+msgstr "Конкурсы тату-мастеров"
+
+#: templates/users/maps.html:145
+#, fuzzy
+#| msgid "City / Country"
+msgid "Country"
+msgstr "Город / Страна"
+
+#: templates/users/maps.html:146
+msgid "City"
+msgstr ""
+
+#: templates/users/maps.html:147
+msgid "Full street address"
+msgstr ""
+
+#: templates/users/maps.html:148
+msgid "Website or Google/Apple Maps link"
+msgstr ""
+
+#: templates/users/maps.html:149
+msgid "Phone"
+msgstr ""
+
+#: templates/users/maps.html:151
+msgid "Attach supporting document or photo"
+msgstr ""
+
+#: templates/users/maps.html:153
+msgid "Optional. Helps Tatzo verify the location faster."
+msgstr ""
+
+#: templates/users/maps.html:155
+msgid "Contact email"
+msgstr ""
+
+#: templates/users/maps.html:158
+msgid "Use map pin"
+msgstr ""
+
+#: templates/users/maps.html:159
+#, fuzzy
+#| msgid "No file selected"
+msgid "No map pin selected yet."
+msgstr "Файл не выбран"
+
+#: templates/users/maps.html:160
+msgid "Message / extra details"
+msgstr ""
+
+#: templates/users/maps.html:161
+msgid "Requests are reviewed before anything appears publicly."
+msgstr ""
+
+#: templates/users/maps.html:162
+#, fuzzy
+#| msgid "Invalid verification request."
+msgid "Submit location request"
+msgstr "Недопустимая заявка на верификацию."
+
+#: templates/users/maps.html:171
+#, fuzzy
+#| msgid "Start verification"
+msgid "Request location verification"
+msgstr "Начать верификацию"
+
+#: templates/users/maps.html:175
+msgid ""
+"This artist/location needs address verification. Nothing is claimed "
+"instantly."
+msgstr ""
+
+#: templates/users/maps.html:181
+#, fuzzy
+#| msgid "Attachment"
+msgid "Attach proof document"
+msgstr "Вложение"
+
+#: templates/users/maps.html:183
+#, fuzzy
+#| msgid "JPG, PNG or WEBP"
+msgid "PDF, JPG, PNG or WEBP. Max 10 MB."
+msgstr "JPG, PNG или WEBP"
+
+#: templates/users/maps.html:186
+msgid "Admin review is required before anything changes on Tatzo."
+msgstr ""
+
+#: templates/users/maps.html:187
+#, fuzzy
+#| msgid "Submit documents"
+msgid "Submit claim request"
+msgstr "Отправить документы"
+
+#: templates/users/moderation_dashboard.html:4
+#: templates/users/moderation_dashboard.html:20
+msgid "Moderation dashboard"
+msgstr "Панель модерации"
+
+#: templates/users/moderation_dashboard.html:23
 msgid ""
 "Review artist verification requests, reports and platform safety issues."
 msgstr ""
 "Проверяйте заявки на верификацию мастеров, жалобы и вопросы безопасности "
 "платформы."
 
-#: .\templates\users\moderation_dashboard.html:30
+#: templates/users/moderation_dashboard.html:30
 msgid "Document requests"
 msgstr "Заявки с документами"
 
-#: .\templates\users\moderation_dashboard.html:35
+#: templates/users/moderation_dashboard.html:35
 msgid "Manual reviews"
 msgstr "Ручные проверки"
 
-#: .\templates\users\moderation_dashboard.html:40
-#: .\templates\users\moderation_dashboard.html:58
-#: .\templates\users\moderation_dashboard.html:278
+#: templates/users/moderation_dashboard.html:40
+#: templates/users/moderation_dashboard.html:58
+#: templates/users/moderation_dashboard.html:278
 msgid "Post reports"
 msgstr "Жалобы на посты"
 
-#: .\templates\users\moderation_dashboard.html:45
-#: .\templates\users\moderation_dashboard.html:63
-#: .\templates\users\moderation_dashboard.html:356
+#: templates/users/moderation_dashboard.html:45
+#: templates/users/moderation_dashboard.html:63
+#: templates/users/moderation_dashboard.html:356
 msgid "Comment reports"
 msgstr "Жалобы на комментарии"
 
-#: .\templates\users\moderation_dashboard.html:53
-#: .\templates\users\profile.html:116
+#: templates/users/moderation_dashboard.html:53
+#: templates/users/profile.html:116
 msgid "Verification"
 msgstr "Верификация"
 
-#: .\templates\users\moderation_dashboard.html:72
+#: templates/users/moderation_dashboard.html:72
 msgid "Search by username, email, reason..."
 msgstr "Поиск по имени пользователя, email или причине..."
 
-#: .\templates\users\moderation_dashboard.html:81
-#: .\templates\users\moderation_dashboard.html:87
+#: templates/users/moderation_dashboard.html:81
+#: templates/users/moderation_dashboard.html:87
 msgid "Newest first"
 msgstr "Сначала новые"
 
-#: .\templates\users\moderation_dashboard.html:91
+#: templates/users/moderation_dashboard.html:91
 msgid "Oldest first"
 msgstr "Сначала старые"
 
-#: .\templates\users\moderation_dashboard.html:98
-#: .\templates\users\moderation_dashboard.html:104
-#: .\templates\users\search.html:45
-msgid "All"
-msgstr "Все"
-
-#: .\templates\users\moderation_dashboard.html:108
+#: templates/users/moderation_dashboard.html:108
 msgid "With reason"
 msgstr "С причиной"
 
-#: .\templates\users\moderation_dashboard.html:112
+#: templates/users/moderation_dashboard.html:112
 msgid "No reason"
 msgstr "Без причины"
 
-#: .\templates\users\moderation_dashboard.html:122
+#: templates/users/moderation_dashboard.html:122
 msgid "Artist document requests"
 msgstr "Заявки документов мастеров"
 
-#: .\templates\users\moderation_dashboard.html:147
+#: templates/users/moderation_dashboard.html:147
 #, python-format
 msgid "Business: %(type)s"
 msgstr "Проф. документ: %(type)s"
 
-#: .\templates\users\moderation_dashboard.html:151
+#: templates/users/moderation_dashboard.html:151
 #, python-format
 msgid "ID: %(type)s"
 msgstr "Документ личности: %(type)s"
 
-#: .\templates\users\moderation_dashboard.html:157
+#: templates/users/moderation_dashboard.html:157
 msgid "Open business document"
 msgstr "Открыть профессиональный документ"
 
-#: .\templates\users\moderation_dashboard.html:161
+#: templates/users/moderation_dashboard.html:161
 msgid "Open ID document"
 msgstr "Открыть документ личности"
 
-#: .\templates\users\moderation_dashboard.html:171
-#: .\templates\users\moderation_dashboard.html:253
-#: .\users\templates\users\admin_verification.html:41
-#: .\users\templates\users\pending_verifications.html:66
-#: .\users\templates\users\review_profile.html:29
-#: .\users\templates\users\review_verifications.html:16
-#: .\users\templates\users\verify_document.html:24
+#: templates/users/moderation_dashboard.html:171
+#: templates/users/moderation_dashboard.html:253
+#: users/templates/users/admin_verification.html:41
+#: users/templates/users/pending_verifications.html:66
+#: users/templates/users/review_profile.html:29
+#: users/templates/users/review_verifications.html:16
+#: users/templates/users/verify_document.html:24
 msgid "Approve"
 msgstr "Подтвердить"
 
-#: .\templates\users\moderation_dashboard.html:178
-#: .\templates\users\moderation_dashboard.html:260
-#: .\users\templates\users\admin_verification.html:45
-#: .\users\templates\users\pending_verifications.html:73
-#: .\users\templates\users\review_profile.html:33
-#: .\users\templates\users\review_verifications.html:20
-#: .\users\templates\users\verify_document.html:27
+#: templates/users/moderation_dashboard.html:178
+#: templates/users/moderation_dashboard.html:260
+#: users/templates/users/admin_verification.html:45
+#: users/templates/users/pending_verifications.html:73
+#: users/templates/users/review_profile.html:33
+#: users/templates/users/review_verifications.html:20
+#: users/templates/users/verify_document.html:27
 msgid "Reject"
 msgstr "Отклонить"
 
-#: .\templates\users\moderation_dashboard.html:187
+#: templates/users/moderation_dashboard.html:187
 msgid "No pending document requests."
 msgstr "Нет заявок с документами на рассмотрении."
 
-#: .\templates\users\moderation_dashboard.html:194
+#: templates/users/moderation_dashboard.html:194
 msgid "Manual review requests"
 msgstr "Заявки на ручную проверку"
 
-#: .\templates\users\moderation_dashboard.html:224
-#: .\templates\users\profile.html:142
-msgid "Portfolio"
-msgstr "Портфолио"
-
-#: .\templates\users\moderation_dashboard.html:230
+#: templates/users/moderation_dashboard.html:230
 msgid "Social link"
 msgstr "Ссылка на соцсеть"
 
-#: .\templates\users\moderation_dashboard.html:242
+#: templates/users/moderation_dashboard.html:242
 msgid "Open optional file"
 msgstr "Открыть дополнительный файл"
 
-#: .\templates\users\moderation_dashboard.html:269
+#: templates/users/moderation_dashboard.html:269
 msgid "No pending manual reviews."
 msgstr "Нет заявок на ручную проверку."
 
-#: .\templates\users\moderation_dashboard.html:297
+#: templates/users/moderation_dashboard.html:297
 #, python-format
 msgid "Post by %(username)s"
 msgstr "Пост от %(username)s"
 
-#: .\templates\users\moderation_dashboard.html:301
-#: .\templates\users\moderation_dashboard.html:379
+#: templates/users/moderation_dashboard.html:301
+#: templates/users/moderation_dashboard.html:379
 #, python-format
 msgid ""
 "\n"
@@ -1234,185 +3303,175 @@ msgstr ""
 "                        Жалоба от %(username)s · %(date)s\n"
 "                      "
 
-#: .\templates\users\moderation_dashboard.html:310
-#: .\templates\users\moderation_dashboard.html:388
+#: templates/users/moderation_dashboard.html:310
+#: templates/users/moderation_dashboard.html:388
 msgid "No reason provided."
 msgstr "Причина не указана."
 
-#: .\templates\users\moderation_dashboard.html:325
+#: templates/users/moderation_dashboard.html:325
 msgid "View post"
 msgstr "Открыть пост"
 
-#: .\templates\users\moderation_dashboard.html:331
-#: .\templates\users\moderation_dashboard.html:409
+#: templates/users/moderation_dashboard.html:331
+#: templates/users/moderation_dashboard.html:409
 msgid "Resolve"
 msgstr "Закрыть"
 
-#: .\templates\users\moderation_dashboard.html:347
+#: templates/users/moderation_dashboard.html:347
 msgid "No unresolved post reports."
 msgstr "Нет нерешённых жалоб на посты."
 
-#: .\templates\users\moderation_dashboard.html:375
+#: templates/users/moderation_dashboard.html:375
 #, python-format
 msgid "Comment by %(username)s"
 msgstr "Комментарий от %(username)s"
 
-#: .\templates\users\moderation_dashboard.html:403
+#: templates/users/moderation_dashboard.html:403
 msgid "View author"
 msgstr "Открыть автора"
 
-#: .\templates\users\moderation_dashboard.html:425
+#: templates/users/moderation_dashboard.html:425
 msgid "No unresolved comment reports."
 msgstr "Нет нерешённых жалоб на комментарии."
 
-#: .\templates\users\profile.html:53
+#: templates/users/profile.html:53
 msgid "Professional portfolio"
 msgstr "Профессиональное портфолио"
 
-#: .\templates\users\profile.html:63
-#: .\users\templates\users\edit_profile.html:4
-#: .\users\templates\users\edit_profile.html:19
+#: templates/users/profile.html:63 users/templates/users/edit_profile.html:4
+#: users/templates/users/edit_profile.html:19
 msgid "Edit profile"
 msgstr "Редактировать профиль"
 
-#: .\templates\users\profile.html:72 .\templates\users\profile.html:346
-#: .\users\views.py:763
+#: templates/users/profile.html:72 templates/users/profile.html:367
+#: users/views.py:963
 msgid "Following"
 msgstr "Вы подписаны"
 
-#: .\templates\users\profile.html:74 .\templates\users\profile.html:347
-#: .\users\views.py:763
+#: templates/users/profile.html:74 templates/users/profile.html:368
+#: users/views.py:963
 msgid "Follow"
 msgstr "Подписаться"
 
-#: .\templates\users\profile.html:82 .\templates\users\report_problem.html:49
-#: .\templates\users\search.html:133 .\users\forms.py:269 .\users\models.py:398
+#: templates/users/profile.html:82 templates/users/report_problem.html:49
+#: templates/users/search.html:133 users/forms.py:358 users/models.py:544
 msgid "Message"
 msgstr "Написать"
 
-#: .\templates\users\profile.html:91
+#: templates/users/profile.html:91
 msgid "posts"
 msgstr "постов"
 
-#: .\templates\users\profile.html:96
+#: templates/users/profile.html:96
 msgid "followers"
 msgstr "подписчиков"
 
-#: .\templates\users\profile.html:101
+#: templates/users/profile.html:101
 msgid "following"
 msgstr "подписок"
 
-#: .\templates\users\profile.html:109 .\templates\users\search.html:123
+#: templates/users/profile.html:109 templates/users/search.html:123
 msgid "No bio yet."
 msgstr "Биография пока не заполнена."
 
-#: .\templates\users\profile.html:122 .\users\models.py:35
-#: .\users\templates\users\verification_page.html:37 .\users\views.py:514
+#: templates/users/profile.html:122 users/models.py:39 users/models.py:579
+#: users/models.py:636 users/models.py:687
+#: users/templates/users/verification_page.html:37 users/views.py:710
 msgid "Rejected"
 msgstr "Отклонено"
 
-#: .\templates\users\profile.html:124 .\templates\users\profile.html:126
-#: .\users\models.py:33 .\users\models.py:60
-#: .\users\templates\users\verification_page.html:39
-#: .\users\templates\users\verification_page.html:41 .\users\views.py:512
-msgid "Pending"
-msgstr "На рассмотрении"
-
-#: .\templates\users\profile.html:128 .\users\models.py:30
-#: .\users\models.py:127 .\users\templates\users\verification_page.html:43
-#: .\users\views.py:509
+#: templates/users/profile.html:128 users/models.py:34 users/models.py:141
+#: users/templates/users/verification_page.html:43 users/views.py:705
 msgid "Not submitted"
 msgstr "Не отправлено"
 
-#: .\templates\users\profile.html:136
-msgid "Start verification"
-msgstr "Начать верификацию"
-
-#: .\templates\users\profile.html:151
+#: templates/users/profile.html:151
 msgid "Manage portfolio"
 msgstr "Управлять портфолио"
 
-#: .\templates\users\profile.html:153
+#: templates/users/profile.html:153
 msgid "Add your works"
 msgstr "Добавить работы"
 
-#: .\templates\users\profile.html:157
+#: templates/users/profile.html:157
 msgid "Take a look"
 msgstr "Посмотреть"
 
-#: .\templates\users\profile.html:159
+#: templates/users/profile.html:159
 msgid "No works yet"
 msgstr "Работ пока нет"
 
-#: .\templates\users\profile.html:167
+#: templates/users/profile.html:167
 msgid "Booking"
 msgstr "Бронирование"
 
-#: .\templates\users\profile.html:168
-msgid "Coming later"
-msgstr "Будет позже"
+#: templates/users/profile.html:173
+msgid "Manage appointments"
+msgstr ""
 
-#: .\templates\users\profile.html:177
-msgid "Posts"
-msgstr "Посты"
+#: templates/users/profile.html:187
+#, fuzzy
+#| msgid "Artist verification"
+msgid "Available after verification"
+msgstr "Верификация мастера"
 
-#: .\templates\users\profile.html:181
+#: templates/users/profile.html:202
 msgid "Liked"
 msgstr "Лайкнутые"
 
-#: .\templates\users\profile.html:198
+#: templates/users/profile.html:219
 msgid "Post media"
 msgstr "Медиа поста"
 
-#: .\templates\users\profile.html:202 .\templates\users\profile.html:240
+#: templates/users/profile.html:223 templates/users/profile.html:261
 msgid "No media"
 msgstr "Нет медиа"
 
-#: .\templates\users\profile.html:208
+#: templates/users/profile.html:229
 msgid "No posts yet"
 msgstr "Постов пока нет"
 
-#: .\templates\users\profile.html:212
+#: templates/users/profile.html:233
 msgid "Your posts will appear here."
 msgstr "Ваши посты появятся здесь."
 
-#: .\templates\users\profile.html:214
+#: templates/users/profile.html:235
 msgid "This user has not published anything yet."
 msgstr "Этот пользователь ещё ничего не опубликовал."
 
-#: .\templates\users\profile.html:236
+#: templates/users/profile.html:257
 msgid "Liked post media"
 msgstr "Медиа лайкнутого поста"
 
-#: .\templates\users\profile.html:246
+#: templates/users/profile.html:267
 msgid "No liked posts yet"
 msgstr "Лайкнутых постов пока нет"
 
-#: .\templates\users\profile.html:250
+#: templates/users/profile.html:271
 msgid "Liked posts will appear here."
 msgstr "Лайкнутые посты появятся здесь."
 
-#: .\templates\users\profile.html:252
+#: templates/users/profile.html:273
 msgid "This user has no public liked posts yet."
 msgstr "У этого пользователя пока нет публичных лайкнутых постов."
 
-#: .\templates\users\profile.html:260
+#: templates/users/profile.html:281
 msgid "Liked posts are hidden"
 msgstr "Лайкнутые посты скрыты"
 
-#: .\templates\users\profile.html:263
+#: templates/users/profile.html:284
 msgid "This user decided to hide liked posts."
 msgstr "Этот пользователь решил скрыть лайкнутые посты."
 
-#: .\templates\users\profile.html:348
+#: templates/users/profile.html:369
 msgid "Follow action failed."
 msgstr "Не удалось выполнить действие подписки."
 
-#: .\templates\users\report_problem.html:18
+#: templates/users/report_problem.html:18
 msgid "Feedback"
 msgstr "Обратная связь"
 
-#: .\templates\users\report_problem.html:24
+#: templates/users/report_problem.html:24
 msgid ""
 "Tell us what happened or suggest an improvement. Your feedback helps us make "
 "Tatzo better."
@@ -1420,35 +3479,31 @@ msgstr ""
 "Расскажите, что произошло, или предложите улучшение. Ваш отзыв помогает нам "
 "делать Tatzo лучше."
 
-#: .\templates\users\report_problem.html:35
-msgid "Type"
-msgstr "Тип"
-
-#: .\templates\users\report_problem.html:59
+#: templates/users/report_problem.html:59
 msgid "Optional. You can add a screenshot or file."
 msgstr "Необязательно. Вы можете добавить скриншот или файл."
 
-#: .\templates\users\search.html:20
+#: templates/users/search.html:20
 msgid "Find users and tattoo artists by username or @tag."
 msgstr "Находите пользователей и тату-мастеров по имени или @tag."
 
-#: .\templates\users\search.html:28
+#: templates/users/search.html:28
 msgid "Search by username or @tag..."
 msgstr "Поиск по имени пользователя или @tag..."
 
-#: .\templates\users\search.html:54
+#: templates/users/search.html:54
 msgid "Tattoo artists"
 msgstr "Тату-мастера"
 
-#: .\templates\users\search.html:63
+#: templates/users/search.html:63
 msgid "Users"
 msgstr "Пользователи"
 
-#: .\templates\users\search.html:70
+#: templates/users/search.html:70
 msgid "Results"
 msgstr "Результаты"
 
-#: .\templates\users\search.html:76
+#: templates/users/search.html:76
 #, python-format
 msgid ""
 "\n"
@@ -1459,55 +3514,74 @@ msgstr ""
 "            Результаты по запросу <strong>%(search_query)s</strong>\n"
 "          "
 
-#: .\templates\users\search.html:114 .\users\models.py:389
+#: templates/users/search.html:114 users/models.py:535
 msgid "User"
 msgstr "Пользователь"
 
-#: .\templates\users\search.html:143
+#: templates/users/search.html:143
 msgid "No results found"
 msgstr "Ничего не найдено"
 
-#: .\templates\users\search.html:144
+#: templates/users/search.html:144
 msgid "Try another username, tag or account type."
 msgstr "Попробуйте другое имя, tag или тип аккаунта."
 
-#: .\templates\users\search.html:146
+#: templates/users/search.html:146
 msgid "Start searching"
 msgstr "Начните поиск"
 
-#: .\templates\users\search.html:147
+#: templates/users/search.html:147
 msgid "Type a username or @tag to find people on Tatzo."
 msgstr "Введите имя пользователя или @tag, чтобы найти людей на Tatzo."
 
-#: .\users\admin.py:107
+#: users/admin.py:108
 msgid "Report information"
 msgstr "Информация о жалобе"
 
-#: .\users\admin.py:117
+#: users/admin.py:118
 msgid "Moderation"
 msgstr "Модерация"
 
-#: .\users\forms.py:267 .\users\models.py:392
+#: users/forms.py:52 users/forms.py:57
+msgid ""
+"Only PDF or image files are allowed. Please upload PDF, JPG, PNG, WEBP or "
+"HEIC."
+msgstr ""
+"Разрешены только PDF или изображения. Загрузите PDF, JPG, PNG, WEBP или HEIC."
+
+#: users/forms.py:62
+msgid "This file is too large. Please upload a file under 10 MB."
+msgstr "Файл слишком большой. Загрузите файл меньше 10 МБ."
+
+#: users/forms.py:340
+msgid "Only image files are allowed."
+msgstr ""
+
+#: users/forms.py:345
+msgid "Each portfolio image must be under 10 MB."
+msgstr ""
+
+#: users/forms.py:356 users/models.py:538
 msgid "Report type"
 msgstr "Тип обращения"
 
-#: .\users\forms.py:277
+#: users/forms.py:366
 msgid "Short title"
 msgstr "Короткий заголовок"
 
-#: .\users\forms.py:281
+#: users/forms.py:370
 msgid "Describe the problem or suggestion..."
 msgstr "Опишите проблему или предложение..."
 
-#: .\users\models.py:11 .\users\templates\users\signup.html:105
+#: users/models.py:15 users/templates/users/signup.html:143
 msgid "Regular user"
 msgstr "Обычный пользователь"
 
-#: .\users\models.py:18
+#: users/models.py:22
 msgid "Congratulations, your tattoo artist account has been verified."
 msgstr "Поздравляем, ваш аккаунт тату-мастера подтверждён."
 
-#: .\users\models.py:23
+#: users/models.py:27
 msgid ""
 "Unfortunately, your tattoo artist account has not been verified. Contact "
 "technical support for more information."
@@ -1515,116 +3589,191 @@ msgstr ""
 "К сожалению, ваш аккаунт тату-мастера не был подтверждён. Свяжитесь с "
 "технической поддержкой для получения дополнительной информации."
 
-#: .\users\models.py:31 .\users\views.py:510
+#: users/models.py:35 users/views.py:706
 msgid "Pending documents review"
 msgstr "Ожидает проверки документов"
 
-#: .\users\models.py:32 .\users\views.py:511
+#: users/models.py:36 users/views.py:707
 msgid "Pending manual review"
 msgstr "Ожидает ручной проверки"
 
-#: .\users\models.py:34 .\users\templates\users\verification_page.html:35
-#: .\users\views.py:513
+#: users/models.py:38 users/models.py:635 users/models.py:686
+#: users/templates/users/verification_page.html:35 users/views.py:709
 msgid "Approved"
 msgstr "Подтверждено"
 
-#: .\users\models.py:40
+#: users/models.py:44
 msgid "Business license"
 msgstr "Лицензия на деятельность"
 
-#: .\users\models.py:41
+#: users/models.py:45
 msgid "Self-employed certificate"
 msgstr "Свидетельство самозанятого"
 
-#: .\users\models.py:42
+#: users/models.py:46
 msgid "Tattoo studio registration"
 msgstr "Регистрация тату-салона"
 
-#: .\users\models.py:43
+#: users/models.py:47
 msgid "Other (upload an official document)"
 msgstr "Другое — загрузите официальный документ"
 
-#: .\users\models.py:48
+#: users/models.py:59
+msgid "Uploaded proof files must be 10 MB or smaller."
+msgstr ""
+
+#: users/models.py:62
 msgid "Passport"
 msgstr "Паспорт"
 
-#: .\users\models.py:49
+#: users/models.py:63
 msgid "Driver license"
 msgstr "Водительское удостоверение"
 
-#: .\users\models.py:50
+#: users/models.py:64
 msgid "National ID"
 msgstr "Национальное удостоверение личности"
 
-#: .\users\models.py:60
+#: users/models.py:74
 msgid "Active"
 msgstr "Активный"
 
-#: .\users\models.py:119
+#: users/models.py:133
 msgid "Pending verification"
 msgstr "Ожидает верификации"
 
-#: .\users\models.py:125
+#: users/models.py:139
 msgid "Verification rejected"
 msgstr "Верификация отклонена"
 
-#: .\users\models.py:137 .\users\templates\users\verification_page.html:67
+#: users/models.py:158 users/templates/users/verification_page.html:67
 msgid "Business document type"
 msgstr "Тип профессионального документа"
 
-#: .\users\models.py:141
+#: users/models.py:162
 msgid "Business document"
 msgstr "Профессиональный документ"
 
-#: .\users\models.py:148 .\users\templates\users\verification_page.html:100
+#: users/models.py:169 users/templates/users/verification_page.html:100
 msgid "Identity document type"
 msgstr "Тип документа личности"
 
-#: .\users\models.py:152
+#: users/models.py:173
 msgid "Identity document"
 msgstr "Документ личности"
 
-#: .\users\models.py:156
+#: users/models.py:177
 msgid "Document verified"
 msgstr "Документ проверен"
 
-#: .\users\models.py:380
+#: users/models.py:526
 msgid "Bug"
 msgstr "Ошибка"
 
-#: .\users\models.py:381
+#: users/models.py:527
 msgid "Suggestion"
 msgstr "Предложение"
 
-#: .\users\models.py:382
+#: users/models.py:528
 msgid "Other"
 msgstr "Другое"
 
-#: .\users\models.py:399
+#: users/models.py:545
 msgid "Page URL"
 msgstr "URL страницы"
 
-#: .\users\models.py:406
+#: users/models.py:552
 msgid "Created at"
 msgstr "Создано"
 
-#: .\users\models.py:407
+#: users/models.py:553
 msgid "Resolved"
 msgstr "Решено"
 
-#: .\users\models.py:411
+#: users/models.py:557
 msgid "User report"
 msgstr "Обращение пользователя"
 
-#: .\users\models.py:412
+#: users/models.py:558
 msgid "User reports"
 msgstr "Обращения пользователей"
 
-#: .\users\templates\users\admin_verification.html:4
+#: users/models.py:565
+#, fuzzy
+#| msgid "Manual reviews"
+msgid "Manual"
+msgstr "Ручные проверки"
+
+#: users/models.py:566
+msgid "Google Places"
+msgstr ""
+
+#: users/models.py:567
+#, fuzzy
+#| msgid "Maps"
+msgid "Apple Maps"
+msgstr "Карты"
+
+#: users/models.py:568
+msgid "OpenStreetMap"
+msgstr ""
+
+#: users/models.py:569
+msgid "Admin"
+msgstr ""
+
+#: users/models.py:574
+msgid "Imported"
+msgstr ""
+
+#: users/models.py:575
+msgid "Unclaimed"
+msgstr ""
+
+#: users/models.py:576
+#, fuzzy
+#| msgid "Pending"
+msgid "Pending claim"
+msgstr "На рассмотрении"
+
+#: users/models.py:577
+msgid "Claimed"
+msgstr ""
+
+#: users/models.py:632
+msgid "Draft"
+msgstr ""
+
+#: users/models.py:633 users/models.py:684
+#, fuzzy
+#| msgid "Not submitted"
+msgid "Submitted"
+msgstr "Не отправлено"
+
+#: users/models.py:634 users/models.py:685
+#, fuzzy
+#| msgid "Open preview"
+msgid "Under review"
+msgstr "Открыть предпросмотр"
+
+#: users/security.py:92
+msgid "Too many actions. Please wait a bit and try again."
+msgstr "Слишком много действий. Подождите немного и попробуйте снова."
+
+#: users/security_views.py:32
+msgid "Too many login attempts. Please wait a bit and try again."
+msgstr "Слишком много попыток входа. Подождите немного и попробуйте снова."
+
+#: users/security_views.py:69
+msgid "Too many password reset requests. Please wait a bit and try again."
+msgstr ""
+"Слишком много запросов на сброс пароля. Подождите немного и попробуйте снова."
+
+#: users/templates/users/admin_verification.html:4
 msgid "Admin Verification"
 msgstr "Админская проверка"
 
-#: .\users\templates\users\admin_verification.html:9
+#: users/templates/users/admin_verification.html:9
 #, python-format
 msgid ""
 "\n"
@@ -1635,197 +3784,197 @@ msgstr ""
 "            Проверка профиля: %(username)s\n"
 "        "
 
-#: .\users\templates\users\admin_verification.html:15
-#: .\users\templates\users\password_reset.html:33
-#: .\users\templates\users\pending_profiles.html:14
-#: .\users\templates\users\pending_verifications.html:14
-#: .\users\templates\users\review_profile.html:16
-#: .\users\templates\users\signup.html:55
+#: users/templates/users/admin_verification.html:15
+#: users/templates/users/password_reset.html:33
+#: users/templates/users/pending_profiles.html:14
+#: users/templates/users/pending_verifications.html:14
+#: users/templates/users/review_profile.html:16
+#: users/templates/users/signup.html:55
 msgid "Email"
 msgstr "Email"
 
-#: .\users\templates\users\admin_verification.html:20
-#: .\users\templates\users\pending_profiles.html:15
-#: .\users\templates\users\pending_verifications.html:15
-#: .\users\templates\users\review_profile.html:21
+#: users/templates/users/admin_verification.html:20
+#: users/templates/users/pending_profiles.html:15
+#: users/templates/users/pending_verifications.html:15
+#: users/templates/users/review_profile.html:21
 msgid "Account Type"
 msgstr "Тип аккаунта"
 
-#: .\users\templates\users\admin_verification.html:24
-#: .\users\templates\users\pending_verifications.html:16
+#: users/templates/users/admin_verification.html:24
+#: users/templates/users/pending_verifications.html:16
 msgid "Documents"
 msgstr "Документы"
 
-#: .\users\templates\users\admin_verification.html:30
+#: users/templates/users/admin_verification.html:30
 msgid "Download"
 msgstr "Скачать"
 
-#: .\users\templates\users\admin_verification.html:34
-#: .\users\templates\users\pending_verifications.html:57
+#: users/templates/users/admin_verification.html:34
+#: users/templates/users/pending_verifications.html:57
 msgid "No documents available"
 msgstr "Документы недоступны"
 
-#: .\users\templates\users\contests.html:15
+#: users/templates/users/contests.html:15
 msgid "Tattoo artist contests"
 msgstr "Конкурсы тату-мастеров"
 
-#: .\users\templates\users\contests.html:19
+#: users/templates/users/contests.html:19
 msgid "Here you will soon find:"
 msgstr "Скоро здесь появятся:"
 
-#: .\users\templates\users\contests.html:22
+#: users/templates/users/contests.html:22
 msgid "Active competitions between artists"
 msgstr "Активные соревнования между мастерами"
 
-#: .\users\templates\users\contests.html:23
+#: users/templates/users/contests.html:23
 msgid "User voting"
 msgstr "Голосование пользователей"
 
-#: .\users\templates\users\contests.html:24
+#: users/templates/users/contests.html:24
 msgid "Winners and rewards"
 msgstr "Победители и награды"
 
-#: .\users\templates\users\edit_profile.html:20
+#: users/templates/users/edit_profile.html:20
 msgid "Update your public identity, privacy and avatar."
 msgstr "Обновите публичную информацию, настройки приватности и аватар."
 
-#: .\users\templates\users\edit_profile.html:42
+#: users/templates/users/edit_profile.html:42
 msgid "This is how other users will see you on Tatzo."
 msgstr "Так другие пользователи будут видеть вас на Tatzo."
 
-#: .\users\templates\users\edit_profile.html:53
+#: users/templates/users/edit_profile.html:53
 msgid "Tag"
 msgstr "Тег"
 
-#: .\users\templates\users\edit_profile.html:63
+#: users/templates/users/edit_profile.html:63
 msgid "Your unique tag helps people find you faster."
 msgstr "Ваш уникальный тег помогает людям быстрее вас находить."
 
-#: .\users\templates\users\edit_profile.html:74
+#: users/templates/users/edit_profile.html:74
 msgid "Bio"
 msgstr "Био"
 
-#: .\users\templates\users\edit_profile.html:85
+#: users/templates/users/edit_profile.html:85
 msgid "Tell others about yourself. You can use up to 300 characters."
 msgstr "Расскажите другим о себе. Можно использовать до 300 символов."
 
-#: .\users\templates\users\edit_profile.html:105
+#: users/templates/users/edit_profile.html:105
 msgid "Liked posts privacy"
 msgstr "Приватность лайкнутых постов"
 
-#: .\users\templates\users\edit_profile.html:106
+#: users/templates/users/edit_profile.html:106
 msgid "Choose who can see the posts you've liked."
 msgstr "Выберите, кто может видеть посты, которые вам понравились."
 
-#: .\users\templates\users\edit_profile.html:118
+#: users/templates/users/edit_profile.html:118
 msgid "Show my liked posts on my profile"
 msgstr "Показывать лайкнутые посты в моём профиле"
 
-#: .\users\templates\users\edit_profile.html:119
+#: users/templates/users/edit_profile.html:119
 msgid "If disabled, other users will see that your liked posts are hidden."
 msgstr ""
 "Если отключить, другие пользователи увидят, что ваши лайкнутые посты скрыты."
 
-#: .\users\templates\users\edit_profile.html:131
-#: .\users\templates\users\user_profile.html:30
+#: users/templates/users/edit_profile.html:131
+#: users/templates/users/user_profile.html:30
 msgid "Profile image"
 msgstr "Изображение профиля"
 
-#: .\users\templates\users\edit_profile.html:138
+#: users/templates/users/edit_profile.html:138
 msgid "Current avatar"
 msgstr "Текущий аватар"
 
-#: .\users\templates\users\edit_profile.html:153
+#: users/templates/users/edit_profile.html:153
 msgid "Avatar preview"
 msgstr "Предпросмотр аватара"
 
-#: .\users\templates\users\edit_profile.html:163
+#: users/templates/users/edit_profile.html:163
 msgid "Upload new avatar"
 msgstr "Загрузить новый аватар"
 
-#: .\users\templates\users\edit_profile.html:168
+#: users/templates/users/edit_profile.html:168
 msgid "JPG, PNG or WEBP"
 msgstr "JPG, PNG или WEBP"
 
-#: .\users\templates\users\edit_profile.html:169
+#: users/templates/users/edit_profile.html:169
 msgid "Max size 10MB"
 msgstr "Максимальный размер 10 МБ"
 
-#: .\users\templates\users\edit_profile.html:175
+#: users/templates/users/edit_profile.html:175
 msgid "Tip"
 msgstr "Совет"
 
-#: .\users\templates\users\edit_profile.html:176
+#: users/templates/users/edit_profile.html:176
 msgid "A clear profile picture helps others recognize you."
 msgstr "Чёткое фото профиля помогает другим быстрее вас узнавать."
 
-#: .\users\templates\users\edit_profile.html:202
+#: users/templates/users/edit_profile.html:202
 msgid "Adjust avatar"
 msgstr "Настроить аватар"
 
-#: .\users\templates\users\edit_profile.html:209
+#: users/templates/users/edit_profile.html:209
 msgid "Crop preview"
 msgstr "Предпросмотр обрезки"
 
-#: .\users\templates\users\edit_profile.html:215
+#: users/templates/users/edit_profile.html:215
 msgid "Zoom avatar"
 msgstr "Масштаб аватара"
 
-#: .\users\templates\users\password_reset.html:4
+#: users/templates/users/password_reset.html:4
 msgid "Password reset — Tatzo"
 msgstr "Восстановление пароля — Tatzo"
 
-#: .\users\templates\users\password_reset.html:16
-#: .\users\templates\users\signup.html:16
+#: users/templates/users/password_reset.html:16
+#: users/templates/users/signup.html:16
 msgid "Enter your email"
 msgstr "Введите email"
 
-#: .\users\templates\users\password_reset.html:23
-#: .\users\templates\users\password_reset_confirm.html:19
+#: users/templates/users/password_reset.html:23
+#: users/templates/users/password_reset_confirm.html:19
 msgid "Password reset"
 msgstr "Восстановление пароля"
 
-#: .\users\templates\users\password_reset.html:26
+#: users/templates/users/password_reset.html:26
 msgid "Enter your email and we will send you a password reset link."
 msgstr "Введите ваш email, и мы отправим вам ссылку для сброса пароля."
 
-#: .\users\templates\users\password_reset.html:44
+#: users/templates/users/password_reset.html:44
 msgid "Send reset link"
 msgstr "Отправить ссылку"
 
-#: .\users\templates\users\password_reset_complete.html:4
+#: users/templates/users/password_reset_complete.html:4
 msgid "Password updated — Tatzo"
 msgstr "Пароль обновлён — Tatzo"
 
-#: .\users\templates\users\password_reset_complete.html:20
+#: users/templates/users/password_reset_complete.html:20
 msgid "Password updated successfully!"
 msgstr "Пароль успешно обновлён!"
 
-#: .\users\templates\users\password_reset_complete.html:24
+#: users/templates/users/password_reset_complete.html:24
 msgid "You can now log in to your account with your new password."
 msgstr "Теперь вы можете войти в аккаунт с новым паролем."
 
-#: .\users\templates\users\password_reset_complete.html:28
+#: users/templates/users/password_reset_complete.html:28
 msgid "Go to login"
 msgstr "Перейти ко входу"
 
-#: .\users\templates\users\password_reset_confirm.html:4
+#: users/templates/users/password_reset_confirm.html:4
 msgid "New password — Tatzo"
 msgstr "Новый пароль — Tatzo"
 
-#: .\users\templates\users\password_reset_confirm.html:22
+#: users/templates/users/password_reset_confirm.html:22
 msgid "Create a new password for your account."
 msgstr "Придумайте новый пароль для вашего аккаунта."
 
-#: .\users\templates\users\password_reset_done.html:4
+#: users/templates/users/password_reset_done.html:4
 msgid "Reset link sent — Tatzo"
 msgstr "Ссылка отправлена — Tatzo"
 
-#: .\users\templates\users\password_reset_done.html:19
+#: users/templates/users/password_reset_done.html:19
 msgid "Reset link sent"
 msgstr "Ссылка отправлена"
 
-#: .\users\templates\users\password_reset_done.html:22
+#: users/templates/users/password_reset_done.html:22
 msgid ""
 "\n"
 "      If this email exists, you will receive a message with instructions to "
@@ -1837,97 +3986,96 @@ msgstr ""
 "сброса пароля.\n"
 "    "
 
-#: .\users\templates\users\password_reset_done.html:28
+#: users/templates/users/password_reset_done.html:28
 msgid "Do not forget to check your Spam folder."
 msgstr "Не забудьте проверить папку «Спам»."
 
-#: .\users\templates\users\pending_profiles.html:4
+#: users/templates/users/pending_profiles.html:4
 msgid "Pending Profiles"
 msgstr "Ожидающие профили"
 
-#: .\users\templates\users\pending_profiles.html:8
+#: users/templates/users/pending_profiles.html:8
 msgid "Profiles Pending Verification"
 msgstr "Профили, ожидающие проверки"
 
-#: .\users\templates\users\pending_profiles.html:16
-#: .\users\templates\users\pending_verifications.html:17
+#: users/templates/users/pending_profiles.html:16
+#: users/templates/users/pending_verifications.html:17
 msgid "Actions"
 msgstr "Действия"
 
-#: .\users\templates\users\pending_profiles.html:28
+#: users/templates/users/pending_profiles.html:28
 msgid "Review"
 msgstr "Проверить"
 
-#: .\users\templates\users\pending_profiles.html:35
+#: users/templates/users/pending_profiles.html:35
 msgid "No pending profiles."
 msgstr "Нет профилей на проверку."
 
-#: .\users\templates\users\pending_verifications.html:4
-#: .\users\templates\users\pending_verifications.html:8
+#: users/templates/users/pending_verifications.html:4
+#: users/templates/users/pending_verifications.html:8
 msgid "Pending Verifications"
 msgstr "Ожидающие проверки"
 
-#: .\users\templates\users\pending_verifications.html:38
+#: users/templates/users/pending_verifications.html:38
 msgid "View Document"
 msgstr "Посмотреть документ"
 
-#: .\users\templates\users\pending_verifications.html:44
+#: users/templates/users/pending_verifications.html:44
 msgid "Identity Document"
 msgstr "Документ личности"
 
-#: .\users\templates\users\pending_verifications.html:49
+#: users/templates/users/pending_verifications.html:49
 msgid "View Identity Document"
 msgstr "Посмотреть документ личности"
 
-#: .\users\templates\users\pending_verifications.html:81
+#: users/templates/users/pending_verifications.html:81
 msgid "No pending verifications."
 msgstr "Нет заявок на проверку."
 
-#: .\users\templates\users\profile_form.html:5
-#: .\users\templates\users\profile_form.html:13
+#: users/templates/users/profile_form.html:5
+#: users/templates/users/profile_form.html:13
 msgid "Profile form"
 msgstr "Форма профиля"
 
-#: .\users\templates\users\profile_list.html:5
+#: users/templates/users/profile_list.html:5
 msgid "Profiles"
 msgstr "Профили"
 
-#: .\users\templates\users\profile_list.html:10
+#: users/templates/users/profile_list.html:10
 msgid "Profiles list"
 msgstr "Список профилей"
 
-#: .\users\templates\users\profile_list.html:18
+#: users/templates/users/profile_list.html:18
 msgid "No profiles found."
 msgstr "Профили не найдены."
 
-#: .\users\templates\users\review_profile.html:4
-#: .\users\templates\users\review_profile.html:8
+#: users/templates/users/review_profile.html:4
+#: users/templates/users/review_profile.html:8
 msgid "Review Profile"
 msgstr "Проверка профиля"
 
-#: .\users\templates\users\review_verifications.html:4
-#: .\users\templates\users\review_verifications.html:8
+#: users/templates/users/review_verifications.html:4
+#: users/templates/users/review_verifications.html:8
 msgid "Review Verifications"
 msgstr "Проверка заявок"
 
-#: .\users\templates\users\review_verifications.html:24
+#: users/templates/users/review_verifications.html:24
 msgid "No verification documents to review."
 msgstr "Нет документов для проверки."
 
-#: .\users\templates\users\signup.html:15
+#: users/templates/users/signup.html:15
 msgid "Choose a username"
 msgstr "Выберите имя пользователя"
 
-#: .\users\templates\users\signup.html:18
+#: users/templates/users/signup.html:18
 msgid "Repeat your password"
 msgstr "Повторите пароль"
 
-#: .\users\templates\users\signup.html:19
-#: .\users\templates\users\signup.html:33
+#: users/templates/users/signup.html:19 users/templates/users/signup.html:33
 msgid "Join our community and discover the world of tattoo!"
 msgstr "Присоединяйтесь к нашему сообществу и откройте для себя мир тату!"
 
-#: .\users\templates\users\signup.html:20
+#: users/templates/users/signup.html:20
 msgid ""
 "Join our community! If you are a tattoo artist, make sure you provide "
 "documents to verify your status."
@@ -1935,7 +4083,7 @@ msgstr ""
 "Присоединяйтесь к нашему сообществу! Если вы тату-мастер, обязательно "
 "предоставьте документы для подтверждения вашего статуса."
 
-#: .\users\templates\users\signup.html:50
+#: users/templates/users/signup.html:50
 msgid ""
 "Your unique @tag will be created automatically based on your username. You "
 "will be able to change it later in your profile settings."
@@ -1943,7 +4091,7 @@ msgstr ""
 "Ваш уникальный @tag будет создан автоматически на основе имени пользователя. "
 "Позже вы сможете изменить его в настройках профиля."
 
-#: .\users\templates\users\signup.html:76
+#: users/templates/users/signup.html:95
 msgid ""
 "Password must contain at least 8 characters, one uppercase letter and one "
 "number."
@@ -1951,31 +4099,43 @@ msgstr ""
 "Пароль должен содержать не менее 8 символов, одну заглавную букву и одну "
 "цифру."
 
-#: .\users\templates\users\signup.html:81
+#: users/templates/users/signup.html:100
 msgid "Confirm password"
 msgstr "Подтвердите пароль"
 
-#: .\users\templates\users\signup.html:92
+#: users/templates/users/signup.html:130
 msgid "Account type"
 msgstr "Тип аккаунта"
 
-#: .\users\templates\users\signup.html:106
+#: users/templates/users/signup.html:144
 msgid "Discover inspiration and book sessions with tattoo artists."
 msgstr "Находите вдохновение и бронируйте сеансы у тату-мастеров."
 
-#: .\users\templates\users\signup.html:120
+#: users/templates/users/signup.html:158
 msgid "Publish your work and attract new clients."
 msgstr "Публикуйте свои работы и привлекайте новых клиентов."
 
-#: .\users\templates\users\signup.html:133
+#: users/templates/users/signup.html:174
+msgid "I accept the"
+msgstr "Я принимаю"
+
+#: users/templates/users/signup.html:179
+msgid "Privacy Policy"
+msgstr "Политику конфиденциальности"
+
+#: users/templates/users/signup.html:181
+msgid "and"
+msgstr "и"
+
+#: users/templates/users/signup.html:195
 msgid "Already have an account? Log in here!"
 msgstr "Уже есть аккаунт? Войдите здесь!"
 
-#: .\users\templates\users\signup.html:169
+#: users/templates/users/signup.html:231
 msgid "Registration successful!"
 msgstr "Регистрация успешна!"
 
-#: .\users\templates\users\signup.html:172
+#: users/templates/users/signup.html:234
 msgid ""
 "Confirm your email by clicking the link in the message we sent you. After "
 "that, you will be redirected to the right page."
@@ -1983,79 +4143,79 @@ msgstr ""
 "Подтвердите почту, перейдя по ссылке в письме. После этого вы будете "
 "перенаправлены на нужную страницу."
 
-#: .\users\templates\users\upload_verification_documents.html:4
-#: .\users\templates\users\upload_verification_documents.html:14
+#: users/templates/users/upload_verification_documents.html:4
+#: users/templates/users/upload_verification_documents.html:14
 msgid "Upload verification documents"
 msgstr "Загрузка документов для верификации"
 
-#: .\users\templates\users\upload_verification_documents.html:20
+#: users/templates/users/upload_verification_documents.html:20
 msgid "Document type"
 msgstr "Тип документа"
 
-#: .\users\templates\users\upload_verification_documents.html:22
+#: users/templates/users/upload_verification_documents.html:22
 msgid "Certificate of qualification"
 msgstr "Документ о квалификации"
 
-#: .\users\templates\users\upload_verification_documents.html:23
+#: users/templates/users/upload_verification_documents.html:23
 msgid "License"
 msgstr "Лицензия"
 
-#: .\users\templates\users\upload_verification_documents.html:24
+#: users/templates/users/upload_verification_documents.html:24
 msgid "Registration document"
 msgstr "Регистрационный документ"
 
-#: .\users\templates\users\upload_verification_documents.html:31
-#: .\users\templates\users\upload_verification_documents.html:41
+#: users/templates/users/upload_verification_documents.html:31
+#: users/templates/users/upload_verification_documents.html:41
 msgid "File uploaded ✅"
 msgstr "Файл загружен ✅"
 
-#: .\users\templates\users\upload_verification_documents.html:33
+#: users/templates/users/upload_verification_documents.html:33
 msgid "Upload document"
 msgstr "Загрузить документ"
 
-#: .\users\templates\users\upload_verification_documents.html:43
+#: users/templates/users/upload_verification_documents.html:43
 msgid "Upload identity document (optional)"
 msgstr "Загрузить документ личности (необязательно)"
 
-#: .\users\templates\users\upload_verification_documents.html:48
-#: .\users\templates\users\verification_page.html:138
+#: users/templates/users/upload_verification_documents.html:48
+#: users/templates/users/verification_page.html:138
 msgid "Submit documents"
 msgstr "Отправить документы"
 
-#: .\users\templates\users\user_profile.html:12
+#: users/templates/users/user_profile.html:12
 msgid "Username:"
 msgstr "Имя пользователя:"
 
-#: .\users\templates\users\user_profile.html:13
+#: users/templates/users/user_profile.html:13
 msgid "Email:"
 msgstr "Email:"
 
-#: .\users\templates\users\user_profile.html:16
+#: users/templates/users/user_profile.html:16
 msgid "Account type:"
 msgstr "Тип аккаунта:"
 
-#: .\users\templates\users\user_profile.html:23
+#: users/templates/users/user_profile.html:23
 msgid "Bio:"
 msgstr "Описание:"
 
-#: .\users\templates\users\user_profile.html:25
+#: users/templates/users/user_profile.html:25
 msgid "Profile image:"
 msgstr "Изображение профиля:"
 
-#: .\users\templates\users\user_profile.html:34
+#: users/templates/users/user_profile.html:34
 msgid "No profile image uploaded."
 msgstr "Изображение профиля не загружено."
 
-#: .\users\templates\users\user_profile.html:37
+#: users/templates/users/user_profile.html:37
 msgid "Edit Profile"
 msgstr "Редактировать профиль"
 
-#: .\users\templates\users\verification_page.html:4
-#: .\users\templates\users\verification_page.html:21
+#: users/templates/users/verification_page.html:4
+#: users/templates/users/verification_page.html:21
 msgid "Artist verification"
 msgstr "Верификация мастера"
 
-#: .\users\templates\users\verification_page.html:24
+#: users/templates/users/verification_page.html:24
 msgid ""
 "Verify your tattoo artist profile to build trust and unlock professional "
 "features."
@@ -2063,56 +4223,56 @@ msgstr ""
 "Подтвердите профиль тату-мастера, чтобы повысить доверие и открыть "
 "профессиональные функции."
 
-#: .\users\templates\users\verification_page.html:30
+#: users/templates/users/verification_page.html:30
 msgid "Status"
 msgstr "Статус"
 
-#: .\users\templates\users\verification_page.html:58
+#: users/templates/users/verification_page.html:58
 msgid "I have documents"
 msgstr "У меня есть документы"
 
-#: .\users\templates\users\verification_page.html:61
+#: users/templates/users/verification_page.html:61
 msgid "Upload your professional document and identity document."
 msgstr ""
 "Загрузите профессиональный документ и документ, удостоверяющий личность."
 
-#: .\users\templates\users\verification_page.html:74
+#: users/templates/users/verification_page.html:74
 msgid "Business document file"
 msgstr "Файл профессионального документа"
 
-#: .\users\templates\users\verification_page.html:83
-#: .\users\templates\users\verification_page.html:86
-#: .\users\templates\users\verification_page.html:116
-#: .\users\templates\users\verification_page.html:119
-#: .\users\templates\users\verification_page.html:193
-#: .\users\templates\users\verification_page.html:196
+#: users/templates/users/verification_page.html:83
+#: users/templates/users/verification_page.html:86
+#: users/templates/users/verification_page.html:116
+#: users/templates/users/verification_page.html:119
+#: users/templates/users/verification_page.html:193
+#: users/templates/users/verification_page.html:196
 msgid "Choose file"
 msgstr "Выберите файл"
 
-#: .\users\templates\users\verification_page.html:84
-#: .\users\templates\users\verification_page.html:117
-#: .\users\templates\users\verification_page.html:194
+#: users/templates/users/verification_page.html:84
+#: users/templates/users/verification_page.html:117
+#: users/templates/users/verification_page.html:194
 msgid "File selected ✅"
 msgstr "Файл выбран ✅"
 
-#: .\users\templates\users\verification_page.html:91
-#: .\users\templates\users\verification_page.html:93
-#: .\users\templates\users\verification_page.html:124
-#: .\users\templates\users\verification_page.html:126
-#: .\users\templates\users\verification_page.html:201
-#: .\users\templates\users\verification_page.html:203
+#: users/templates/users/verification_page.html:91
+#: users/templates/users/verification_page.html:93
+#: users/templates/users/verification_page.html:124
+#: users/templates/users/verification_page.html:126
+#: users/templates/users/verification_page.html:201
+#: users/templates/users/verification_page.html:203
 msgid "No file selected"
 msgstr "Файл не выбран"
 
-#: .\users\templates\users\verification_page.html:107
+#: users/templates/users/verification_page.html:107
 msgid "Identity document file"
 msgstr "Файл документа личности"
 
-#: .\users\templates\users\verification_page.html:147
+#: users/templates/users/verification_page.html:147
 msgid "No official documents?"
 msgstr "Нет официальных документов?"
 
-#: .\users\templates\users\verification_page.html:150
+#: users/templates/users/verification_page.html:150
 msgid ""
 "Request a manual review. Send your portfolio, social links and a short "
 "explanation."
@@ -2120,68 +4280,72 @@ msgstr ""
 "Запросите ручную проверку. Отправьте портфолио, ссылки на соцсети и короткое "
 "объяснение."
 
-#: .\users\templates\users\verification_page.html:156
+#: users/templates/users/verification_page.html:156
 msgid "Portfolio link"
 msgstr "Ссылка на портфолио"
 
-#: .\users\templates\users\verification_page.html:163
+#: users/templates/users/verification_page.html:163
 msgid "Social media link"
 msgstr "Ссылка на соцсеть"
 
-#: .\users\templates\users\verification_page.html:170
+#: users/templates/users/verification_page.html:170
 msgid "City / Country"
 msgstr "Город / Страна"
 
-#: .\users\templates\users\verification_page.html:177
+#: users/templates/users/verification_page.html:177
 msgid "Explanation"
 msgstr "Объяснение"
 
-#: .\users\templates\users\verification_page.html:184
+#: users/templates/users/verification_page.html:184
 msgid "Optional file"
 msgstr "Дополнительный файл"
 
-#: .\users\templates\users\verification_page.html:215
+#: users/templates/users/verification_page.html:215
 msgid "Request manual review"
 msgstr "Запросить ручную проверку"
 
-#: .\users\templates\users\verify_document.html:4
-#: .\users\templates\users\verify_document.html:8
+#: users/templates/users/verify_document.html:4
+#: users/templates/users/verify_document.html:8
 msgid "Verify document"
 msgstr "Проверить документ"
 
-#: .\users\templates\users\verify_document.html:10
+#: users/templates/users/verify_document.html:10
 msgid "User:"
 msgstr "Пользователь:"
 
-#: .\users\templates\users\verify_document.html:11
+#: users/templates/users/verify_document.html:11
 msgid "Document type:"
 msgstr "Тип документа:"
 
-#: .\users\templates\users\verify_document.html:12
+#: users/templates/users/verify_document.html:12
 msgid "Uploaded on:"
 msgstr "Загружено:"
 
-#: .\users\templates\users\verify_document.html:13
+#: users/templates/users/verify_document.html:13
 msgid "Document:"
 msgstr "Документ:"
 
-#: .\users\templates\users\verify_document.html:17
+#: users/templates/users/verify_document.html:17
 msgid "Document"
 msgstr "Документ"
 
-#: .\users\views.py:42
+#: users/views.py:66
 msgid "Please verify your email before logging in."
 msgstr "Пожалуйста, подтвердите email перед входом."
 
-#: .\users\views.py:48
+#: users/views.py:72
 msgid "Invalid username or password."
 msgstr "Неверное имя пользователя или пароль."
 
-#: .\users\views.py:143
+#: users/views.py:167
 msgid "This link is invalid or has expired."
 msgstr "Ссылка недействительна или устарела."
 
-#: .\users\views.py:201
+#: users/views.py:209
+msgid "You are posting too quickly. Please wait a bit."
+msgstr "Вы публикуете слишком быстро. Подождите немного."
+
+#: users/views.py:243
 msgid ""
 "Only image and video files are supported. Please upload JPG, PNG, WEBP, GIF, "
 "MP4, MOV or WEBM."
@@ -2189,95 +4353,144 @@ msgstr ""
 "Поддерживаются только изображения и видео. Загрузите JPG, PNG, WEBP, GIF, "
 "MP4, MOV или WEBM."
 
-#: .\users\views.py:262
+#: users/views.py:254
+#, fuzzy
+#| msgid "This file is too large. Please upload a file under 10 MB."
+msgid "This image is too large. Please upload an image under 10 MB."
+msgstr "Файл слишком большой. Загрузите файл меньше 10 МБ."
+
+#: users/views.py:265
+#, fuzzy
+#| msgid "This file is too large. Please upload a file under 10 MB."
+msgid "This video is too large. Please upload a video under 100 MB."
+msgstr "Файл слишком большой. Загрузите файл меньше 10 МБ."
+
+#: users/views.py:326
 msgid "We could not create your post. Please try another file."
 msgstr "Не удалось создать пост. Попробуйте другой файл."
 
-#: .\users\views.py:294
+#: users/views.py:358
 msgid "Profile updated successfully."
 msgstr "Профиль успешно обновлён."
 
-#: .\users\views.py:322
+#: users/views.py:386
 msgid "Your post has been deleted."
 msgstr "Ваш пост был удалён."
 
-#: .\users\views.py:324
+#: users/views.py:388
 msgid "You cannot delete this post."
 msgstr "Вы не можете удалить этот пост."
 
-#: .\users\views.py:352
+#: users/views.py:449
+msgid "You must accept the Terms and Privacy Policy to create an account."
+msgstr ""
+"Чтобы создать аккаунт, необходимо принять условия и политику "
+"конфиденциальности."
+
+#: users/views.py:491
+msgid "Too many signup attempts. Please wait a bit and try again."
+msgstr ""
+"Слишком много попыток регистрации. Подождите немного и попробуйте снова."
+
+#: users/views.py:523
 msgid "Account created. Please check your email to confirm your account."
 msgstr "Аккаунт создан. Проверьте почту, чтобы подтвердить аккаунт."
 
-#: .\users\views.py:373
+#: users/views.py:544
 msgid "We could not send the confirmation email. Please try again later."
 msgstr "Не удалось отправить письмо подтверждения. Попробуйте позже."
 
-#: .\users\views.py:398
+#: users/views.py:572
 msgid "You cannot edit this post."
 msgstr "Вы не можете редактировать этот пост."
 
-#: .\users\views.py:405
+#: users/views.py:579
 msgid "Your post has been updated successfully."
 msgstr "Ваш пост был успешно обновлён."
 
-#: .\users\views.py:424
+#: users/views.py:598
 #, python-format
 msgid "Profile %(username)s has been approved."
 msgstr "Профиль %(username)s был одобрен."
 
-#: .\users\views.py:432
+#: users/views.py:606
 #, python-format
 msgid "Profile %(username)s has been rejected."
 msgstr "Профиль %(username)s был отклонён."
 
-#: .\users\views.py:479
+#: users/views.py:654
 msgid "Your documents have been submitted for review."
 msgstr "Ваши документы отправлены на проверку."
 
-#: .\users\views.py:501
+#: users/views.py:665
+msgid ""
+"We could not submit your documents. Please try another file or a smaller "
+"file."
+msgstr ""
+"Не удалось отправить документы. Попробуйте другой файл или файл меньшего "
+"размера."
+
+#: users/views.py:687
 msgid "Your manual review request has been submitted."
 msgstr "Ваша заявка на ручную проверку отправлена."
 
-#: .\users\views.py:506
+#: users/views.py:698
+msgid ""
+"We could not submit your request. Please try another file or a smaller file."
+msgstr ""
+"Не удалось отправить заявку. Попробуйте другой файл или файл меньшего "
+"размера."
+
+#: users/views.py:702
 msgid "Invalid verification request."
 msgstr "Недопустимая заявка на верификацию."
 
-#: .\users\views.py:551
+#: users/views.py:747
 msgid "Invalid request."
 msgstr "Недопустимый запрос."
 
-#: .\users\views.py:573
+#: users/views.py:769
 msgid "Profile approved successfully."
 msgstr "Профиль успешно одобрен."
 
-#: .\users\views.py:577
+#: users/views.py:773
 msgid "Profile rejected successfully."
 msgstr "Профиль успешно отклонён."
 
-#: .\users\views.py:579
+#: users/views.py:775
 msgid "Invalid action."
 msgstr "Недопустимое действие."
 
-#: .\users\views.py:607
+#: users/views.py:803
 msgid "Your documents have been submitted for verification."
 msgstr "Ваши документы отправлены на верификацию."
 
-#: .\users\views.py:627
+#: users/views.py:823
 #, python-format
 msgid "Profile '%(username)s' has been approved."
 msgstr "Профиль «%(username)s» был одобрен."
 
-#: .\users\views.py:647
+#: users/views.py:843
 #, python-format
 msgid "Profile '%(username)s' has been rejected."
 msgstr "Профиль «%(username)s» был отклонён."
 
-#: .\users\views.py:738
+#: users/views.py:938
 msgid "You cannot follow yourself."
 msgstr "Нельзя подписаться на самого себя."
 
-#: .\users\views.py:877
+#: users/views.py:976
+#, fuzzy
+#| msgid "You cannot follow yourself."
+msgid "You cannot block yourself."
+msgstr "Нельзя подписаться на самого себя."
+
+#: users/views.py:1078 users/views.py:1152 users/views.py:1250
+#: users/views.py:1290 users/views.py:1316
+msgid "Portfolio tools unlock after your artist verification is approved."
+msgstr ""
+
+#: users/views.py:1127
 #, python-format
 msgid "Portfolio work added successfully."
 msgid_plural "%(count)s portfolio works added successfully."
@@ -2285,111 +4498,156 @@ msgstr[0] "Работа добавлена в портфолио."
 msgstr[1] "%(count)s работы добавлены в портфолио."
 msgstr[2] "%(count)s работ добавлено в портфолио."
 
-#: .\users\views.py:903
+#: users/views.py:1160
 msgid "Portfolio album created."
 msgstr "Альбом портфолио создан."
 
-#: .\users\views.py:987
+#: users/views.py:1267
 msgid "Album updated successfully."
 msgstr "Альбом успешно обновлён."
 
-#: .\users\views.py:1016
+#: users/views.py:1303
 msgid "Album deleted. Works were kept in All works."
 msgstr "Альбом удалён. Работы сохранены в разделе «Все работы»."
 
-#: .\users\views.py:1037
+#: users/views.py:1331
 msgid "Portfolio work deleted."
 msgstr "Работа из портфолио удалена."
 
-#: .\users\views.py:1102
+#: users/views.py:1396
 #, python-format
 msgid "%(username)s has been approved as a tattoo artist."
 msgstr "%(username)s был одобрен как тату-мастер."
 
-#: .\users\views.py:1121
+#: users/views.py:1415
 #, python-format
 msgid "%(username)s's verification has been rejected."
 msgstr "Верификация %(username)s была отклонена."
 
-#: .\users\views.py:1136
+#: users/views.py:1430
 msgid "Post report resolved."
 msgstr "Жалоба на пост обработана."
 
-#: .\users\views.py:1156
+#: users/views.py:1450
 msgid "Reported post deleted."
 msgstr "Пост из жалобы удалён."
 
-#: .\users\views.py:1169
+#: users/views.py:1463
 msgid "Comment report resolved."
 msgstr "Жалоба на комментарий обработана."
 
-#: .\users\views.py:1189
+#: users/views.py:1483
 msgid "Reported comment deleted."
 msgstr "Комментарий из жалобы удалён."
 
-#: .\users\views.py:1246
+#: users/views.py:1552
 msgid "You cannot start a chat with yourself."
 msgstr "Нельзя начать чат с самим собой."
 
-#: .\users\views.py:1267 .\users\views.py:1370
+#: users/views.py:1573 users/views.py:1866
 msgid "You cannot access this chat."
 msgstr "У вас нет доступа к этому чату."
 
-#: .\users\views.py:1304
+#: users/views.py:1626
 msgid "You cannot send messages in this chat."
 msgstr "Вы не можете отправлять сообщения в этом чате."
 
-#: .\users\views.py:1316
+#: users/views.py:1642
+#, fuzzy
+#| msgid "You cannot send messages in this chat."
+msgid "You cannot send messages to this user."
+msgstr "Вы не можете отправлять сообщения в этом чате."
+
+#: users/views.py:1660
+msgid "You are sending messages too quickly. Please wait a bit."
+msgstr "Вы отправляете сообщения слишком быстро. Подождите немного."
+
+#: users/views.py:1670 users/views.py:1801
 msgid "Message cannot be empty."
 msgstr "Сообщение не может быть пустым."
 
-#: .\users\views.py:1470
+#: users/views.py:1853
+#, fuzzy
+#| msgid "Message was not sent."
+msgid "Message was not edited."
+msgstr "Сообщение не было отправлено."
+
+#: users/views.py:1991
+msgid "Please provide your name, contact email and relation to this location."
+msgstr ""
+
+#: users/views.py:1998 users/views.py:2070
+msgid "Please enter a valid contact email."
+msgstr ""
+
+#: users/views.py:2002 users/views.py:2074
+msgid "Upload a PDF, JPG, PNG or WEBP file up to 10 MB."
+msgstr ""
+
+#: users/views.py:2021
+msgid "A claim request for this location is already under review."
+msgstr ""
+
+#: users/views.py:2040
+msgid ""
+"Your claim request was submitted. Tatzo will review it before anything "
+"changes."
+msgstr ""
+
+#: users/views.py:2063
+msgid ""
+"Please provide the location name, city, country, full street address, and "
+"contact email."
+msgstr ""
+
+#: users/views.py:2084
+msgid "Please enter valid latitude and longitude values."
+msgstr ""
+
+#: users/views.py:2090
+msgid "Latitude or longitude is outside the valid range."
+msgstr ""
+
+#: users/views.py:2105
+msgid "A location request for this studio is already under review."
+msgstr ""
+
+#: users/views.py:2126
+msgid ""
+"Your location request was submitted. Tatzo will review it before it appears "
+"on the map."
+msgstr ""
+
+#: users/views.py:2382
 msgid "Find tattoo artists near you and explore studios by location."
 msgstr ""
 "Находите тату-мастеров рядом с вами и изучайте студии по местоположению."
 
-#: .\users\views.py:1475
+#: users/views.py:2387
 msgid "Manage bookings, sessions and upcoming appointments."
 msgstr "Управляйте бронированиями, сеансами и предстоящими встречами."
 
-#: .\users\views.py:1480
+#: users/views.py:2392
 msgid "Discover tattoo removal resources, specialists and useful guides."
 msgstr "Изучайте материалы о удалении тату, специалистов и полезные гайды."
 
-#: .\users\views.py:1485
+#: users/views.py:2397
 msgid "Stay updated about likes, comments, replies and messages."
 msgstr "Получайте уведомления о лайках, комментариях, ответах и сообщениях."
 
-#: .\users\views.py:1490
+#: users/views.py:2402
 msgid ""
 "Vote for the best tattoo works, follow competitions and discover winners."
 msgstr ""
 "Голосуйте за лучшие тату-работы, следите за конкурсами и открывайте "
 "победителей."
 
-#: .\users\views.py:1519
+#: users/views.py:2455
 msgid "Thank you! Your report has been sent."
 msgstr "Спасибо! Ваше обращение отправлено."
 
-#, fuzzy
-#~| msgid "Message"
-#~ msgid "Messages"
-#~ msgstr "Написать"
-
-#, fuzzy
-#~| msgid "Maps"
-#~ msgid "Site Maps"
-#~ msgstr "Карты"
-
-#, fuzzy
-#~| msgid "Location"
-#~ msgid "Syndication"
-#~ msgstr "Местоположение"
-
-#, fuzzy
-#~| msgid "Moderation"
-#~ msgid "Duration"
-#~ msgstr "Модерация"
+#~ msgid "Coming later"
+#~ msgstr "Будет позже"
 
 #, fuzzy
 #~| msgid "Images"
@@ -2410,11 +4668,6 @@ msgstr "Спасибо! Ваше обращение отправлено."
 #~| msgid "Current avatar"
 #~ msgid "Currently"
 #~ msgstr "Текущий аватар"
-
-#, fuzzy
-#~| msgid "Status"
-#~ msgid "Sat"
-#~ msgstr "Статус"
 
 #, fuzzy
 #~| msgid "Search"
@@ -2447,134 +4700,3 @@ msgstr "Спасибо! Ваше обращение отправлено."
 #~| msgid "Document verified"
 #~ msgid "No month specified"
 #~ msgstr "Документ проверен"
-
-#~ msgid "This feature is currently in development."
-#~ msgstr "Эта функция сейчас находится в разработке."
-
-#: .\templates\home.html
-msgid "This post feature is coming soon. We’re still working on it."
-msgstr "Эта функция поста скоро появится. Мы ещё работаем над ней."
-
-#: .\templates\home.html
-msgid "Location tools are coming soon. For now, you can mention the city in the post text."
-msgstr "Места скоро появятся. Пока можно указать город прямо в тексте поста."
-
-#: .\templates\home.html
-msgid "Polls are coming soon. You will be able to create interactive polls inside posts."
-msgstr "Опросы скоро появятся. Можно будет создавать интерактивные опросы внутри постов."
-
-#: .\templates\home.html
-msgid "Scheduled posts are coming soon. You will be able to choose the date and time before publishing."
-msgstr "Запланированные посты скоро появятся. Можно будет выбрать дату и время публикации."
-
-#: .\templates\home.html
-msgid "Co-authors are coming soon. You will be able to invite other users to appear on the same post."
-msgstr "Соавторы скоро появятся. Можно будет приглашать других пользователей в общий пост."
-
-#: .\templates\home.html
-msgid "Audience settings are coming soon. You will be able to choose who can see each post."
-msgstr "Настройки аудитории скоро появятся. Можно будет выбирать, кто увидит пост."
-
-#: .\templates\home.html
-msgid "Additional post options are coming soon. We are preparing more controls for creators."
-msgstr "Доп. настройки скоро появятся. Мы готовим больше инструментов для авторов."
-
-msgid "Too many actions. Please wait a bit and try again."
-msgstr "Слишком много действий. Подождите немного и попробуйте снова."
-
-msgid "Too many login attempts. Please wait a bit and try again."
-msgstr "Слишком много попыток входа. Подождите немного и попробуйте снова."
-
-msgid "Too many password reset requests. Please wait a bit and try again."
-msgstr "Слишком много запросов на сброс пароля. Подождите немного и попробуйте снова."
-
-msgid "Too many signup attempts. Please wait a bit and try again."
-msgstr "Слишком много попыток регистрации. Подождите немного и попробуйте снова."
-
-msgid "You are posting too quickly. Please wait a bit."
-msgstr "Вы публикуете слишком быстро. Подождите немного."
-
-msgid "You are commenting too quickly. Please wait a bit."
-msgstr "Вы комментируете слишком быстро. Подождите немного."
-
-msgid "You are sending messages too quickly. Please wait a bit."
-msgstr "Вы отправляете сообщения слишком быстро. Подождите немного."
-
-msgid "You are sending reports too quickly. Please wait a bit."
-msgstr "Вы отправляете жалобы слишком быстро. Подождите немного."
-
-msgid "Last updated:"
-msgstr "Последнее обновление:"
-
-msgid "Terms"
-msgstr "Условия"
-
-msgid "Privacy"
-msgstr "Конфиденциальность"
-
-msgid "Cookies"
-msgstr "Cookies"
-
-msgid "Community Guidelines"
-msgstr "Правила сообщества"
-
-msgid "Legal notice"
-msgstr "Правовая информация"
-
-msgid "Privacy Policy"
-msgstr "Политику конфиденциальности"
-
-msgid "I accept the"
-msgstr "Я принимаю"
-
-msgid "and"
-msgstr "и"
-
-msgid "You must accept the Terms and Privacy Policy to create an account."
-msgstr "Чтобы создать аккаунт, необходимо принять условия и политику конфиденциальности."
-
-msgid "Legal"
-msgstr "Юридическое"
-
-
-msgid "Legal center"
-msgstr "Юридический центр"
-
-msgid "Back to legal center"
-msgstr "Назад в юридический центр"
-
-msgid "Find all legal information about Tatzo in one place."
-msgstr "Вся юридическая информация о Tatzo в одном месте."
-
-msgid "Rules for using Tatzo."
-msgstr "Правила использования Tatzo."
-
-msgid "How we handle personal data."
-msgstr "Как мы обрабатываем персональные данные."
-
-msgid "Cookies used by the platform."
-msgstr "Cookies, используемые платформой."
-
-msgid "Rules for a safe community."
-msgstr "Правила безопасного сообщества."
-
-msgid "Publisher and hosting information."
-msgstr "Информация об издателе и хостинге."
-
-msgid "Only PDF or image files are allowed. Please upload PDF, JPG, PNG, WEBP or HEIC."
-msgstr "Разрешены только PDF или изображения. Загрузите PDF, JPG, PNG, WEBP или HEIC."
-
-msgid "This file is too large. Please upload a file under 10 MB."
-msgstr "Файл слишком большой. Загрузите файл меньше 10 МБ."
-
-msgid "We could not submit your documents. Please try another file or a smaller file."
-msgstr "Не удалось отправить документы. Попробуйте другой файл или файл меньшего размера."
-
-msgid "We could not submit your request. Please try another file or a smaller file."
-msgstr "Не удалось отправить заявку. Попробуйте другой файл или файл меньшего размера."
-
-msgid "Show password"
-msgstr "Показать пароль"
-
-msgid "Hide password"
-msgstr "Скрыть пароль"

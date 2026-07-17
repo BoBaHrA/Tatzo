@@ -36,6 +36,18 @@ function getAutosaveUrl() {
   return document.querySelector(".artist-dashboard-page")?.dataset.autosaveUrl || "";
 }
 
+function getDashboardTranslations() {
+  const dashboard = document.querySelector(".artist-dashboard-page");
+
+  return {
+    autosaveUnavailable: dashboard?.dataset.autosaveUnavailableMessage || "Autosave unavailable",
+    autosaveSaving: dashboard?.dataset.autosaveSavingMessage || "Saving...",
+    autosaveError: dashboard?.dataset.autosaveErrorMessage || "Could not save",
+    autosaveSaved: dashboard?.dataset.autosaveSavedMessage || "Saved",
+    removeBlockedPeriod: dashboard?.dataset.removeBlockedPeriodLabel || "Remove blocked period",
+  };
+}
+
 function setAutosaveIndicator(message, state) {
   const indicator = document.querySelector("[data-autosave-indicator]");
 
@@ -116,7 +128,7 @@ async function autosaveSetting(setting, value) {
   const autosaveUrl = getAutosaveUrl();
 
   if (!autosaveUrl) {
-    setAutosaveIndicator("Autosave unavailable", "error");
+    setAutosaveIndicator(getDashboardTranslations().autosaveUnavailable, "error");
     console.error("Tatzo autosave failed", {
       setting,
       value,
@@ -126,7 +138,7 @@ async function autosaveSetting(setting, value) {
     throw new Error("Autosave URL is missing.");
   }
 
-  setAutosaveIndicator("Saving...", "saving");
+  setAutosaveIndicator(getDashboardTranslations().autosaveSaving, "saving");
 
   let response;
   let data = {};
@@ -142,7 +154,7 @@ async function autosaveSetting(setting, value) {
     });
     data = await response.json().catch(() => ({}));
   } catch (error) {
-    setAutosaveIndicator("Could not save", "error");
+    setAutosaveIndicator(getDashboardTranslations().autosaveError, "error");
     console.error("Tatzo autosave failed", {
       setting,
       value,
@@ -153,7 +165,7 @@ async function autosaveSetting(setting, value) {
   }
 
   if (!response.ok || data.ok === false) {
-    setAutosaveIndicator("Could not save", "error");
+    setAutosaveIndicator(getDashboardTranslations().autosaveError, "error");
     console.error("Tatzo autosave failed", {
       setting,
       value,
@@ -165,7 +177,7 @@ async function autosaveSetting(setting, value) {
 
   updateAutosaveFormState(data);
   window.dispatchEvent(new CustomEvent("tatzo:autosave-success", { detail: data }));
-  setAutosaveIndicator("Saved", "saved");
+  setAutosaveIndicator(getDashboardTranslations().autosaveSaved, "saved");
   return data;
 }
 
@@ -413,7 +425,7 @@ function createBlockedPeriodChip(range) {
 
   const removeButton = document.createElement("button");
   removeButton.type = "button";
-  removeButton.setAttribute("aria-label", "Remove blocked period");
+  removeButton.setAttribute("aria-label", getDashboardTranslations().removeBlockedPeriod);
   removeButton.textContent = "×";
   chip.appendChild(removeButton);
 
