@@ -11,7 +11,15 @@
 {% endblock %}
 
 {% block content %}
-<div class="artist-dashboard-page" data-autosave-url="{% url 'autosave_artist_booking_setting' %}">
+<div
+  class="artist-dashboard-page"
+  data-autosave-url="{% url 'autosave_artist_booking_setting' %}"
+  data-autosave-unavailable-message="{% trans 'Autosave unavailable' %}"
+  data-autosave-saving-message="{% trans 'Saving...' %}"
+  data-autosave-error-message="{% trans 'Could not save' %}"
+  data-autosave-saved-message="{% trans 'Saved' %}"
+  data-remove-blocked-period-label="{% trans 'Remove blocked period' %}"
+>
   <aside class="artist-dash-sidebar">
     <a href="{% url 'home' %}" class="artist-dash-brand" aria-label="Tatzo">
       <img src="{% static 'images/tatzo7.png' %}" alt="Tatzo" class="artist-dash-brand-icon">
