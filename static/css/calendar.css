@@ -706,3 +706,175 @@
     right: auto;
   }
 }
+
+.tatzo-calendar-page.calendar-modal.appointment-summary-modal {
+  z-index: 10001;
+}
+
+.tatzo-calendar-page.calendar-modal .appointment-modal-card {
+  background: linear-gradient(180deg, rgba(0, 20, 36, 0.98), rgba(0, 10, 18, 0.98));
+  max-height: 90vh;
+  width: min(760px, 94vw);
+}
+
+.tatzo-calendar-page .appointment-modal-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding-right: 38px;
+}
+
+.tatzo-calendar-page .appointment-modal-header h3 {
+  font-size: 24px;
+  line-height: 1.15;
+  margin: 0 0 12px;
+}
+
+.tatzo-calendar-page .appointment-status-badge {
+  background: rgba(4, 197, 191, 0.12);
+  border: 1px solid rgba(4, 197, 191, 0.22);
+  border-radius: 999px;
+  color: var(--cal-primary);
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 7px 11px;
+  text-transform: uppercase;
+}
+
+.tatzo-calendar-page .appointment-status-badge--completed {
+  background: rgba(62, 207, 142, 0.13);
+  border-color: rgba(62, 207, 142, 0.28);
+  color: #70d9a8;
+}
+
+.tatzo-calendar-page .appointment-status-badge--cancelled,
+.tatzo-calendar-page .appointment-status-badge--declined {
+  background: rgba(255, 122, 169, 0.12);
+  border-color: rgba(255, 122, 169, 0.25);
+  color: #ff8bb8;
+}
+
+.tatzo-calendar-page .appointment-modal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 16px;
+}
+
+.tatzo-calendar-page .appointment-meta-pill {
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--cal-line);
+  border-radius: 999px;
+  color: rgba(232, 238, 244, 0.86);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 10px;
+}
+
+.tatzo-calendar-page .appointment-modal-details {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 18px;
+}
+
+.tatzo-calendar-page .appointment-detail-row {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--cal-line);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.tatzo-calendar-page .appointment-detail-row--wide {
+  grid-column: 1 / -1;
+}
+
+.tatzo-calendar-page .appointment-detail-label {
+  color: var(--cal-muted);
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.tatzo-calendar-page .appointment-detail-value {
+  color: var(--cal-text);
+  display: block;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.tatzo-calendar-page .appointment-modal-reference-section {
+  border-top: 1px solid var(--cal-line);
+  padding-top: 16px;
+}
+
+.tatzo-calendar-page .appointment-modal-reference-section h4 {
+  font-size: 14px;
+  margin: 0 0 10px;
+}
+
+.tatzo-calendar-page .appointment-reference-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+}
+
+.tatzo-calendar-page .appointment-reference-thumb {
+  aspect-ratio: 1 / 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--cal-line);
+  border-radius: 14px;
+  display: block;
+  overflow: hidden;
+}
+
+.tatzo-calendar-page .appointment-reference-thumb img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.18s ease;
+  width: 100%;
+}
+
+.tatzo-calendar-page .appointment-reference-thumb:hover img {
+  transform: scale(1.04);
+}
+
+.tatzo-calendar-page .appointment-reference-empty {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  color: var(--cal-muted);
+  font-size: 13px;
+  margin: 0;
+  padding: 14px;
+}
+
+.tatzo-calendar-page .appointment-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+@media (max-width: 640px) {
+  .tatzo-calendar-page .appointment-modal-header {
+    display: block;
+  }
+
+  .tatzo-calendar-page .appointment-status-badge {
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+
+  .tatzo-calendar-page .appointment-modal-details {
+    grid-template-columns: 1fr;
+  }
+}
