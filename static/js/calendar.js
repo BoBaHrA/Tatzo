@@ -181,7 +181,7 @@
     main.className = "calendar-event-main";
     main.tabIndex = 0;
     main.setAttribute("role", "button");
-    main.setAttribute("aria-label", "Toggle event details");
+    main.setAttribute("aria-label", "Open appointment details");
 
     const top = document.createElement("div");
     top.className = "calendar-event-top";
@@ -224,24 +224,11 @@
       main.appendChild(deposit);
     }
 
-    const details = document.createElement("div");
-    details.className = "calendar-event-details";
-    details.hidden = true;
-    addDetail(details, "Placement", ev.placement);
-    addDetail(details, "Style", ev.tattoo_style);
-    addDetail(details, "Deposit", ev.deposit_status_label);
-    addDetail(details, "Location", ev.location);
-    addDetail(details, "Notes", ev.notes);
-    if (state.role !== "artist") addDetail(details, "Preparation", ev.preparation_note);
-    main.appendChild(details);
-
-    main.addEventListener("click", () => {
-      details.hidden = !details.hidden;
-    });
+    main.addEventListener("click", () => openAppointmentModal(ev));
     main.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        details.hidden = !details.hidden;
+        openAppointmentModal(ev);
       }
     });
     card.appendChild(main);
@@ -258,6 +245,127 @@
     row.appendChild(strong);
     row.append(document.createTextNode(value));
     parent.appendChild(row);
+  }
+
+
+  function openAppointmentModal(ev) {
+    closeAllMenus();
+    const modal = document.getElementById("appointment-modal");
+    if (!modal) return;
+
+    document.getElementById("appointment-modal-title").textContent = ev.booking_type_label || ev.event_type_label || ev.title || "Appointment";
+
+    const statusEl = document.getElementById("appointment-modal-status");
+    statusEl.textContent = ev.status_label || "";
+    statusEl.className = `appointment-status-badge appointment-status-badge--${ev.status || "default"}`;
+
+    const meta = document.getElementById("appointment-modal-meta");
+    meta.textContent = "";
+    addMetaPill(meta, "Client", ev.client_name);
+    addMetaPill(meta, "Artist", ev.artist_name);
+    addMetaPill(meta, "Date", formatDate(ev.date || ev.starts_at));
+    addMetaPill(meta, "Time", formatTimeRange(ev));
+    addMetaPill(meta, "Duration", formatDuration(ev));
+
+    const details = document.getElementById("appointment-modal-details");
+    details.textContent = "";
+    addSummaryRow(details, "Placement", ev.placement);
+    addSummaryRow(details, "Style(s)", formatStyles(ev));
+    addSummaryRow(details, "Size", ev.size);
+    addSummaryRow(details, "Budget", ev.budget);
+    addSummaryRow(details, "Description / notes", ev.description || ev.notes, true);
+    if (ev.consultation_already_completed || ev.consultation_note) {
+      addSummaryRow(
+        details,
+        "Consultation",
+        [
+          ev.consultation_already_completed ? "Already completed" : "",
+          ev.consultation_note,
+        ].filter(Boolean).join(" · "),
+        true,
+      );
+    }
+
+    const references = document.getElementById("appointment-modal-references");
+    references.textContent = "";
+    const images = Array.isArray(ev.reference_images) ? ev.reference_images.filter((image) => image?.url) : [];
+    if (!images.length) {
+      const empty = document.createElement("p");
+      empty.className = "appointment-reference-empty";
+      empty.textContent = "No reference images uploaded.";
+      references.appendChild(empty);
+    } else {
+      const grid = document.createElement("div");
+      grid.className = "appointment-reference-grid";
+      images.forEach((image) => {
+        const link = document.createElement("a");
+        link.href = image.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.className = "appointment-reference-thumb";
+        const img = document.createElement("img");
+        img.src = image.url;
+        img.alt = image.original_name || "Appointment reference image";
+        link.appendChild(img);
+        grid.appendChild(link);
+      });
+      references.appendChild(grid);
+    }
+
+    const actions = document.getElementById("appointment-modal-actions");
+    actions.textContent = "";
+    const detailUrl = ev.detail_url || ev.actions?.detail_url;
+    if (detailUrl) addActionLink(actions, detailUrl, state.role === "artist" ? "Open project" : "View project", "primary");
+
+    modal.hidden = false;
+  }
+
+  function addMetaPill(parent, label, value) {
+    if (!value) return;
+    const pill = document.createElement("span");
+    pill.className = "appointment-meta-pill";
+    pill.textContent = `${label}: ${value}`;
+    parent.appendChild(pill);
+  }
+
+  function addSummaryRow(parent, label, value, wide = false) {
+    if (!value) return;
+    const row = document.createElement("div");
+    row.className = `appointment-detail-row${wide ? " appointment-detail-row--wide" : ""}`;
+    const labelEl = document.createElement("span");
+    labelEl.className = "appointment-detail-label";
+    labelEl.textContent = label;
+    const valueEl = document.createElement("span");
+    valueEl.className = "appointment-detail-value";
+    valueEl.textContent = value;
+    row.append(labelEl, valueEl);
+    parent.appendChild(row);
+  }
+
+  function formatStyles(ev) {
+    if (Array.isArray(ev.styles) && ev.styles.length) return ev.styles.join(", ");
+    return ev.tattoo_style || "";
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+    const date = value.length === 10 ? new Date(`${value}T00:00:00`) : new Date(value);
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
+  }
+
+  function formatTimeRange(ev) {
+    if (ev.start_time || ev.end_time) return [ev.start_time, ev.end_time].filter(Boolean).join(" — ");
+    if (!ev.starts_at) return "";
+    const start = new Date(ev.starts_at);
+    const end = ev.ends_at ? new Date(ev.ends_at) : null;
+    const startText = start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const endText = end ? end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
+    return [startText, endText].filter(Boolean).join(" — ");
+  }
+
+  function formatDuration(ev) {
+    if (ev.duration_minutes) return `${ev.duration_minutes} minutes (${ev.duration_hours}h)`;
+    return ev.duration_hours ? `${ev.duration_hours}h` : "";
   }
 
   function actionBar(ev) {
@@ -358,7 +466,11 @@
     if (!event.target.closest(".calendar-event-menu")) closeAllMenus();
   });
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeAllMenus();
+    if (event.key === "Escape") {
+      closeAllMenus();
+      const appointmentModal = document.getElementById("appointment-modal");
+      if (appointmentModal && !appointmentModal.hidden) appointmentModal.hidden = true;
+    }
   });
 
   document.querySelectorAll("[data-nav]").forEach((b) => b.onclick = () => {

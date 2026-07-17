@@ -635,6 +635,7 @@ def calendar_events(request):
         .filter(Q(client=request.user) | Q(artist=request.user))
         .filter(date__gte=start_date, date__lte=end_date)
         .select_related("client", "artist")
+        .prefetch_related("reference_images")
         .order_by("date", "start_time")
     )
 
@@ -660,9 +661,13 @@ def calendar_events(request):
                 minutes=appointment.session_length_minutes or 60
             )
 
+        duration_minutes = max(
+            0,
+            int(round((ends_at - starts_at).total_seconds() / 60)),
+        )
         duration_hours = max(
             0.5,
-            round((ends_at - starts_at).total_seconds() / 3600, 1),
+            round(duration_minutes / 60, 1),
         )
 
         event_type = (
@@ -701,27 +706,69 @@ def calendar_events(request):
         else:
             day["workload"] = "light"
 
+        reference_images = []
+        for reference_image in appointment.reference_images.all():
+            try:
+                image_url = reference_image.image.url if reference_image.image else ""
+            except ValueError:
+                image_url = ""
+
+            if not image_url:
+                continue
+
+            reference_images.append(
+                {
+                    "url": image_url,
+                    "original_name": reference_image.original_name or "",
+                }
+            )
+
+        styles = appointment.styles or []
+        tattoo_style = ", ".join(styles)
+        detail_url = reverse("appointment_detail", kwargs={"appointment_id": appointment.id})
+        other_user = appointment.client if request.user == appointment.artist else appointment.artist
+
         events.append(
             {
                 "id": appointment.id,
+                "appointment_id": appointment.id,
+                "detail_url": detail_url,
+                "booking_type": appointment.booking_type,
+                "booking_type_label": appointment.get_booking_type_display(),
                 "event_type": event_type,
                 "event_type_label": appointment.get_booking_type_display(),
                 "status": appointment.status,
                 "status_label": appointment.get_status_display(),
                 "starts_at": starts_at.isoformat(),
                 "ends_at": ends_at.isoformat(),
+                "date": appointment.date.isoformat(),
+                "start_time": _time_to_string(appointment.start_time),
+                "end_time": _time_to_string(appointment.end_time),
+                "duration_minutes": duration_minutes,
                 "duration_hours": duration_hours,
                 "artist_name": appointment.artist.username,
                 "client_name": appointment.client.username,
                 "project_title": appointment.get_booking_type_display(),
                 "title": appointment.get_booking_type_display(),
                 "placement": appointment.placement,
-                "tattoo_style": ", ".join(appointment.styles or []),
-                "location": "",
+                "tattoo_style": tattoo_style,
+                "styles": styles,
+                "size": appointment.size,
+                "budget": appointment.budget,
+                "description": appointment.description or "",
                 "notes": appointment.description or "",
+                "consultation_already_completed": appointment.consultation_already_completed,
+                "consultation_note": appointment.consultation_note,
+                "created_at": appointment.created_at.isoformat() if appointment.created_at else None,
+                "reference_images": reference_images,
+                "location": "",
                 "preparation_note": "",
                 "deposit_status": "",
                 "deposit_status_label": "",
+                "actions": {
+                    "detail_url": detail_url,
+                    "chat_url": reverse("start_chat", kwargs={"username": other_user.username}),
+                },
             }
         )
 
