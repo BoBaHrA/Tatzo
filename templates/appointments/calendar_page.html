@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Calendar" %} | Tatzo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/appointments.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+
+<div class="calendar-page">
+  <div class="calendar-shell">
+    <nav class="calendar-topbar" aria-label="{% trans 'Calendar navigation' %}">
+      <button type="button" class="appointment-back-link" onclick="window.history.back()">← {% trans "Back" %}</button>
+
+      <div class="appointment-topbar-links">
+        <a href="{% url 'home' %}" class="appointment-top-link">{% trans "Home" %}</a>
+        <a href="{% url 'user_profile' %}" class="appointment-top-link">{% trans "My profile" %}</a>
+        <a href="{% url 'appointments_list' %}" class="appointment-top-link is-accent">{% trans "Appointments" %}</a>
+      </div>
+    </nav>
+
+    <header class="calendar-hero">
+      <p class="booking-eyebrow">{% trans "Calendar" %}</p>
+      <h1>{% trans "Calendar" %}</h1>
+      <p>{% trans "Your upcoming appointments and sessions." %}</p>
+    </header>
+
+    <section class="calendar-card">
+      <div class="calendar-card-head">
+        <div>
+          <p class="booking-eyebrow">{% trans "Upcoming" %}</p>
+          <h2>{% trans "Upcoming appointments" %}</h2>
+        </div>
+        <span>{{ today|date:"j F Y" }}</span>
+      </div>
+
+      <div class="calendar-event-list">
+        {% for appointment in upcoming_appointments %}
+          <a href="{% url 'appointment_detail' appointment.id %}" class="calendar-event-card">
+            <time datetime="{{ appointment.date|date:'Y-m-d' }}">
+              <strong>{{ appointment.date|date:"d" }}</strong>
+              <span>{{ appointment.date|date:"M" }}</span>
+            </time>
+
+            <div class="calendar-event-main">
+              <strong>
+                {% if request.user == appointment.artist %}
+                  {{ appointment.client.username }}
+                {% else %}
+                  {{ appointment.artist.username }}
+                {% endif %}
+              </strong>
+              <small>
+                {{ appointment.start_time|time:"H:i" }}{% if appointment.end_time %}–{{ appointment.end_time|time:"H:i" }}{% endif %}
+                · {{ appointment.get_booking_type_display }}
+                {% if appointment.styles %}· {{ appointment.styles|join:", " }}{% endif %}
+              </small>
+            </div>
+
+            <span class="calendar-status is-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
+          </a>
+        {% empty %}
+          <p class="appointment-empty">{% trans "No upcoming appointments yet." %}</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="calendar-card">
+      <div class="calendar-card-head">
+        <div>
+          <p class="booking-eyebrow">{% trans "History" %}</p>
+          <h2>{% trans "Past appointments" %}</h2>
+        </div>
+      </div>
+
+      <div class="calendar-event-list">
+        {% for appointment in past_appointments %}
+          <a href="{% url 'appointment_detail' appointment.id %}" class="calendar-event-card is-past">
+            <time datetime="{{ appointment.date|date:'Y-m-d' }}">
+              <strong>{{ appointment.date|date:"d" }}</strong>
+              <span>{{ appointment.date|date:"M" }}</span>
+            </time>
+
+            <div class="calendar-event-main">
+              <strong>
+                {% if request.user == appointment.artist %}
+                  {{ appointment.client.username }}
+                {% else %}
+                  {{ appointment.artist.username }}
+                {% endif %}
+              </strong>
+              <small>
+                {{ appointment.start_time|time:"H:i" }}{% if appointment.end_time %}–{{ appointment.end_time|time:"H:i" }}{% endif %}
+                · {{ appointment.get_booking_type_display }}
+                {% if appointment.styles %}· {{ appointment.styles|join:", " }}{% endif %}
+              </small>
+            </div>
+
+            <span class="calendar-status is-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
+          </a>
+        {% empty %}
+          <p class="appointment-empty">{% trans "No past appointments yet." %}</p>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

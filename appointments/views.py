@@ -326,6 +326,30 @@ def appointments_list(request):
 
 
 @login_required
+def calendar_page(request):
+    today = timezone.localdate()
+    user_appointments = (
+        Appointment.objects
+        .filter(Q(client=request.user) | Q(artist=request.user))
+        .select_related("client", "client__profile", "artist", "artist__profile")
+        .order_by("date", "start_time")
+    )
+
+    return render(
+        request,
+        "appointments/calendar_page.html",
+        {
+            "upcoming_appointments": user_appointments.filter(date__gte=today),
+            "past_appointments": user_appointments.filter(date__lt=today).order_by(
+                "-date",
+                "-start_time",
+            )[:20],
+            "today": today,
+        },
+    )
+
+
+@login_required
 def appointment_detail(request, appointment_id):
     appointment = get_object_or_404(
         Appointment.objects.select_related(
@@ -471,7 +495,12 @@ def _save_artist_blocked_dates_from_post(artist, post_data):
         )
         
 @login_required
-def artist_booking_settings(request):
+def artist_dashboard_calendar(request):
+    return artist_booking_settings(request, active_panel="calendar")
+
+
+@login_required
+def artist_booking_settings(request, active_panel="dashboard"):
     if not _is_verified_artist(request.user):
         messages.error(
             request,
@@ -794,5 +823,6 @@ def artist_booking_settings(request):
                 if booking_settings.bookings_enabled
                 else _("Bookings paused")
             ),
+            "active_dashboard_panel": active_panel,
         },
     )
