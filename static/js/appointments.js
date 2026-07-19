@@ -207,10 +207,15 @@ document.addEventListener("DOMContentLoaded", () => {
     referenceError.hidden = !message;
   }
 
-  function validateReferences() {
-    const count = state.references.length;
-    const minimum = getReferenceMinimum();
-    const maximum = getReferenceMaximum();
+    function validateReferences() {
+      if (state.isConsultation) {
+        setReferenceError("");
+        return true;
+      }
+
+      const count = state.references.length;
+      const minimum = getReferenceMinimum();
+      const maximum = getReferenceMaximum();
 
     if (minimum > 0 && count < minimum) {
       setReferenceError(getReferenceRequiredMessage(minimum));
@@ -649,6 +654,34 @@ document.addEventListener("DOMContentLoaded", () => {
     validateReferences();
   });
 
+  function validateProjectStep() {
+      if (state.isConsultation) {
+        return true;
+      }
+
+      if (!state.styles.length) {
+        alert("Please choose at least one tattoo style.");
+        return false;
+      }
+
+      if (!state.placement) {
+        alert("Please choose tattoo placement.");
+        return false;
+      }
+
+      if (!state.size) {
+        alert("Please choose tattoo size.");
+        return false;
+      }
+
+      if (!state.budget) {
+        alert("Please choose your budget.");
+        return false;
+      }
+
+      return true;
+    }
+
   nextBtn.addEventListener("click", () => {
     if (state.step === 1 && (!state.selectedDate || !state.selectedTime)) {
       alert(t("Please choose a date and time.", "Please choose a date and time."));
@@ -656,6 +689,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (state.step === 1 && !validateConsultationRequirement()) {
+      return;
+    }
+
+    if (state.step === 2 && !validateProjectStep()) {
       return;
     }
 
