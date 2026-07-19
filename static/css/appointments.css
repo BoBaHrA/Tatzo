@@ -2394,3 +2394,289 @@ body:has(.appointment-page) {
     height: 350px;
   }
 }
+
+/* ===== Booking body placement map ===== */
+
+.booking-placement-picker {
+  display: grid;
+  gap: 24px;
+}
+
+.booking-body-views {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+.booking-body-card {
+  border: 1px solid rgba(4, 197, 191, 0.18);
+  border-radius: 24px;
+  background: rgba(0, 18, 30, 0.58);
+  padding: 20px;
+}
+
+.booking-body-card h4,
+.booking-body-card h3 {
+  margin: 0 0 16px;
+  color: #fff;
+}
+
+.booking-body-map {
+  position: relative;
+  width: 220px;
+  height: 380px;
+  margin: 0 auto;
+}
+
+/* Base zone style */
+.booking-body-zone {
+  position: absolute;
+  display: block;
+  border: 1px solid rgba(4, 197, 191, 0.38);
+  background: rgba(4, 197, 191, 0.08);
+  color: transparent;
+  font-size: 0;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.booking-body-zone:hover,
+.booking-body-zone.is-selected,
+.booking-body-zone[aria-pressed="true"] {
+  background: linear-gradient(135deg, rgba(4, 197, 191, 0.96), rgba(238, 12, 111, 0.9));
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 0 20px rgba(4, 197, 191, 0.28);
+}
+
+/* ===== FRONT ===== */
+
+.zone-head {
+  top: 0;
+  left: 82px;
+  width: 56px;
+  height: 54px;
+  border-radius: 18px;
+}
+
+.zone-chest {
+  top: 68px;
+  left: 62px;
+  width: 96px;
+  height: 78px;
+  border-radius: 26px;
+}
+
+.zone-stomach,
+.zone-stomach-ribs {
+  top: 150px;
+  left: 66px;
+  width: 88px;
+  height: 74px;
+  border-radius: 24px;
+}
+
+.zone-left-arm {
+  top: 76px;
+  left: 26px;
+  width: 28px;
+  height: 124px;
+  border-radius: 999px;
+  transform: rotate(8deg);
+}
+
+.zone-right-arm {
+  top: 76px;
+  right: 26px;
+  width: 28px;
+  height: 124px;
+  border-radius: 999px;
+  transform: rotate(-8deg);
+}
+
+.zone-left-forearm {
+  top: 196px;
+  left: 26px;
+  width: 24px;
+  height: 108px;
+  border-radius: 999px;
+  transform: rotate(2deg);
+}
+
+.zone-right-forearm {
+  top: 196px;
+  right: 26px;
+  width: 24px;
+  height: 108px;
+  border-radius: 999px;
+  transform: rotate(-2deg);
+}
+
+.zone-left-leg {
+  top: 230px;
+  left: 74px;
+  width: 30px;
+  height: 138px;
+  border-radius: 999px;
+}
+
+.zone-right-leg {
+  top: 230px;
+  right: 74px;
+  width: 30px;
+  height: 138px;
+  border-radius: 999px;
+}
+
+/* feet fix */
+.zone-feet,
+.zone-left-foot,
+.zone-right-foot {
+  top: 352px;
+  width: 34px;
+  height: 16px;
+  border-radius: 999px;
+}
+
+.zone-left-foot {
+  left: 68px;
+}
+
+.zone-right-foot {
+  right: 68px;
+}
+
+.zone-feet {
+  left: 93px;
+  width: 34px;
+}
+
+/* ===== BACK ===== */
+/* делаем полного человека, а не только спину */
+
+.zone-neck,
+.zone-back-neck {
+  top: 0;
+  left: 88px;
+  width: 44px;
+  height: 18px;
+  border-radius: 999px;
+}
+
+.zone-shoulders,
+.zone-upper-back {
+  top: 26px;
+  left: 64px;
+  width: 92px;
+  height: 82px;
+  border-radius: 26px;
+}
+
+.zone-back,
+.zone-mid-back {
+  top: 112px;
+  left: 66px;
+  width: 88px;
+  height: 62px;
+  border-radius: 22px;
+}
+
+.zone-lower-back {
+  top: 178px;
+  left: 66px;
+  width: 88px;
+  height: 54px;
+  border-radius: 22px;
+}
+
+.zone-left-arm-back {
+  top: 78px;
+  left: 28px;
+  width: 28px;
+  height: 122px;
+  border-radius: 999px;
+  transform: rotate(8deg);
+}
+
+.zone-right-arm-back {
+  top: 78px;
+  right: 28px;
+  width: 28px;
+  height: 122px;
+  border-radius: 999px;
+  transform: rotate(-8deg);
+}
+
+.zone-left-forearm-back {
+  top: 196px;
+  left: 28px;
+  width: 24px;
+  height: 106px;
+  border-radius: 999px;
+}
+
+.zone-right-forearm-back {
+  top: 196px;
+  right: 28px;
+  width: 24px;
+  height: 106px;
+  border-radius: 999px;
+}
+
+.zone-left-leg-back {
+  top: 236px;
+  left: 74px;
+  width: 30px;
+  height: 132px;
+  border-radius: 999px;
+}
+
+.zone-right-leg-back {
+  top: 236px;
+  right: 74px;
+  width: 30px;
+  height: 132px;
+  border-radius: 999px;
+}
+
+.zone-left-foot-back {
+  top: 352px;
+  left: 68px;
+  width: 34px;
+  height: 16px;
+  border-radius: 999px;
+}
+
+.zone-right-foot-back {
+  top: 352px;
+  right: 68px;
+  width: 34px;
+  height: 16px;
+  border-radius: 999px;
+}
+
+@media (max-width: 760px) {
+  .booking-body-views {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-body-map {
+    width: 200px;
+    height: 360px;
+  }
+
+  .zone-head {
+    left: 72px;
+  }
+
+  .zone-chest,
+  .zone-stomach,
+  .zone-stomach-ribs,
+  .zone-shoulders,
+  .zone-upper-back,
+  .zone-back,
+  .zone-mid-back,
+  .zone-lower-back {
+    left: 56px;
+  }
+}
