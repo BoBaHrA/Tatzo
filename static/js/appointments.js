@@ -5,6 +5,16 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!dataEl || !form) return;
 
   const bookingData = JSON.parse(dataEl.textContent);
+  const i18nEl = document.getElementById("booking-i18n");
+  const bookingI18n = i18nEl ? JSON.parse(i18nEl.textContent) : {};
+
+  function t(key, fallback, params = {}) {
+    const value = bookingI18n[key] || fallback;
+    return Object.entries(params).reduce(
+      (text, [name, replacement]) => text.replaceAll(`%(${name})s`, replacement),
+      value
+    );
+  }
 
   const state = {
     step: 1,
@@ -71,14 +81,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function bookingTypeLabel() {
-    if (state.bookingType === "consultation") return "Consultation";
-    if (state.bookingType === "online_consultation") return "Online consultation";
-    return "Tattoo session";
+    if (state.bookingType === "consultation") return t("Consultation", "Consultation");
+    if (state.bookingType === "online_consultation") {
+      return t("Online consultation", "Online consultation");
+    }
+    return t("Tattoo session", "Tattoo session");
   }
 
   function consultationStatusLabel() {
-    if (state.isConsultation) return "Consultation booking";
-    return state.consultationAlreadyCompleted ? "Already completed" : "Not completed";
+    if (state.isConsultation) return t("Consultation booking", "Consultation booking");
+    return state.consultationAlreadyCompleted
+      ? t("Already completed", "Already completed")
+      : t("Not completed", "Not completed");
   }
 
   function setConsultationError(message) {
@@ -90,6 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateDurationButtons() {
     document.querySelectorAll("[data-duration]").forEach((button) => {
       const isOneHour = Number(button.dataset.duration) === 60;
+      button.hidden = state.isConsultation && !isOneHour;
       button.disabled = state.isConsultation && !isOneHour;
       button.classList.toggle("is-disabled", button.disabled);
       button.classList.toggle("is-active", Number(button.dataset.duration) === state.duration);
@@ -136,7 +151,10 @@ document.addEventListener("DOMContentLoaded", () => {
       && state.bookingType === "tattoo_session"
       && !state.consultationAlreadyCompleted
     ) {
-      setConsultationError("This artist requires a consultation before booking a tattoo session.");
+      setConsultationError(t(
+        "This artist requires a consultation before booking a tattoo session.",
+        "This artist requires a consultation before booking a tattoo session."
+      ));
       openConsultationModal();
       return false;
     }
@@ -155,8 +173,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function getReferenceRequiredMessage(minimum) {
     return minimum === 1
-      ? "Please upload at least 1 reference image."
-      : `Please upload at least ${minimum} reference images.`;
+      ? t("Please upload at least 1 reference image.", "Please upload at least 1 reference image.")
+      : t(
+        "Please upload at least %(count)s reference images.",
+        "Please upload at least %(count)s reference images.",
+        { count: minimum }
+      );
   }
 
   function setReferenceError(message) {
@@ -179,8 +201,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (maximum && count > maximum) {
       setReferenceError(
         maximum === 1
-          ? "Please upload no more than 1 reference image."
-          : `Please upload no more than ${maximum} reference images.`
+          ? t("Please upload no more than 1 reference image.", "Please upload no more than 1 reference image.")
+          : t(
+            "Please upload no more than %(count)s reference images.",
+            "Please upload no more than %(count)s reference images.",
+            { count: maximum }
+          )
       );
       return false;
     }
@@ -322,7 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
     slotsWrap.innerHTML = "";
 
     if (!state.selectedDate) {
-      slotsWrap.innerHTML = `<p class="booking-muted">Choose a date first.</p>`;
+      slotsWrap.innerHTML = `<p class="booking-muted">${escapeHtml(t("Choose a date first.", "Choose a date first."))}</p>`;
       return;
     }
 
@@ -330,7 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const slots = generateSlots(date);
 
     if (!slots.length) {
-      slotsWrap.innerHTML = `<p class="booking-muted">No available slots for this day.</p>`;
+      slotsWrap.innerHTML = `<p class="booking-muted">${escapeHtml(t("No available slots for this day.", "No available slots for this day."))}</p>`;
       return;
     }
 
@@ -383,30 +409,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return zones || details;
   }
 
-  function renderPlacementChips() {
-    const chipsWrap = document.getElementById("booking-placement-chips");
-    const selectedText = document.getElementById("booking-placement-selected");
-    const target = chipsWrap || selectedText;
-
-    if (!target) return;
-
-    target.replaceChildren();
-
-    if (!state.placementZones.length) {
-      target.textContent = "Selected: none yet";
-      return;
-    }
-
-    target.append(document.createTextNode("Selected:"));
-
-    state.placementZones.forEach((zone) => {
-      const chip = document.createElement("span");
-      chip.className = "booking-placement-chip";
-      chip.textContent = zone;
-      target.appendChild(chip);
-    });
-  }
-
   function syncPlacement() {
     state.placement = composePlacement();
     renderPlacementChips();
@@ -430,8 +432,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("booking-consultation-completed").value = state.consultationAlreadyCompleted ? "true" : "false";
     document.getElementById("booking-consultation-note").value = state.consultationNote;
     document.getElementById("booking-styles").value = state.styles.join(",");
-    state.placement = state.placementZones.join(", ");
-    document.getElementById("booking-placement").value = state.placement;
     document.getElementById("booking-size").value = state.size;
     document.getElementById("booking-budget").value = state.budget;
   }
@@ -448,9 +448,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!state.placementZones.length) {
       const empty = document.createElement("span");
       empty.className = "booking-placement-empty";
-      empty.textContent = chips.dataset.emptyLabel || "No placement selected";
+      empty.textContent = t("No placement selected", chips.dataset.emptyLabel || "No placement selected");
       chips.appendChild(empty);
-      syncHiddenFields();
       return;
     }
 
@@ -460,8 +459,6 @@ document.addEventListener("DOMContentLoaded", () => {
       chip.textContent = zone;
       chips.appendChild(chip);
     });
-
-    syncHiddenFields();
   }
 
   function renderReview() {
@@ -470,17 +467,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const review = document.getElementById("booking-review-card");
 
     review.innerHTML = `
-      <div><span>Date</span><strong>${state.selectedDate || "—"}</strong></div>
-      <div><span>Time</span><strong>${state.selectedTime || "—"}</strong></div>
-      <div><span>Booking type</span><strong>${bookingTypeLabel()}</strong></div>
-      <div><span>Session</span><strong>${state.duration / 60}h</strong></div>
-      <div><span>Consultation</span><strong>${consultationStatusLabel()}</strong></div>
-      ${state.consultationNote ? `<div><span>Consultation note</span><strong>${escapeHtml(state.consultationNote)}</strong></div>` : ""}
-      <div><span>Styles</span><strong>${state.styles.join(", ") || "—"}</strong></div>
-      <div><span>Placement</span><strong>${state.placement || "—"}</strong></div>
-      <div><span>Size</span><strong>${state.size || "—"}</strong></div>
-      <div><span>Budget</span><strong>${state.budget || "—"}</strong></div>
-      <div><span>References</span><strong>${state.references.length} uploaded</strong></div>
+      <div><span>${escapeHtml(t("Date", "Date"))}</span><strong>${state.selectedDate || "—"}</strong></div>
+      <div><span>${escapeHtml(t("Time", "Time"))}</span><strong>${state.selectedTime || "—"}</strong></div>
+      <div><span>${escapeHtml(t("Booking type", "Booking type"))}</span><strong>${bookingTypeLabel()}</strong></div>
+      <div><span>${escapeHtml(t("Session", "Session"))}</span><strong>${state.duration / 60}h</strong></div>
+      <div><span>${escapeHtml(t("Consultation", "Consultation"))}</span><strong>${consultationStatusLabel()}</strong></div>
+      ${state.consultationNote ? `<div><span>${escapeHtml(t("Consultation note", "Consultation note"))}</span><strong>${escapeHtml(state.consultationNote)}</strong></div>` : ""}
+      <div><span>${escapeHtml(t("Styles", "Styles"))}</span><strong>${state.styles.join(", ") || "—"}</strong></div>
+      <div><span>${escapeHtml(t("Placement", "Placement"))}</span><strong>${state.placement || "—"}</strong></div>
+      <div><span>${escapeHtml(t("Size", "Size"))}</span><strong>${state.size || "—"}</strong></div>
+      <div><span>${escapeHtml(t("Budget", "Budget"))}</span><strong>${state.budget || "—"}</strong></div>
+      <div><span>${escapeHtml(t("References", "References"))}</span><strong>${state.references.length} ${escapeHtml(t("uploaded", "uploaded"))}</strong></div>
     `;
   }
 
@@ -598,8 +595,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ? state.placementZones.filter((item) => item !== zone)
         : [...state.placementZones, zone];
 
-      button.classList.toggle("is-selected", !exists);
-      renderPlacementChips();
+      syncPlacement();
     });
   });
 
@@ -624,7 +620,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   nextBtn.addEventListener("click", () => {
     if (state.step === 1 && (!state.selectedDate || !state.selectedTime)) {
-      alert("Please choose a date and time.");
+      alert(t("Please choose a date and time.", "Please choose a date and time."));
       return;
     }
 
@@ -652,7 +648,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!state.selectedDate || !state.selectedTime) {
       event.preventDefault();
-      alert("Please choose a date and time.");
+      alert(t("Please choose a date and time.", "Please choose a date and time."));
       return;
     }
 

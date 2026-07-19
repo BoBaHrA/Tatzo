@@ -139,20 +139,18 @@ msgstr "Требуется консультация"
 #: appointments/models.py:167 appointments/models.py:273
 #: templates/appointments/artist_booking_settings.html:778
 #: templates/users/calendar.html:69
-#, fuzzy
 #| msgid "Tattoo studio registration"
 msgid "Tattoo session"
-msgstr "Регистрация тату-салона"
+msgstr "Сеанс татуировки"
 
 #: appointments/models.py:168 appointments/models.py:274
 #: templates/appointments/artist_booking_settings.html:249
 #: templates/appointments/artist_booking_settings.html:280
 #: templates/appointments/artist_booking_settings.html:779
 #: templates/users/calendar.html:70
-#, fuzzy
 #| msgid "Location"
 msgid "Consultation"
-msgstr "Местоположение"
+msgstr "Консультация"
 
 #: appointments/models.py:169
 #: templates/appointments/artist_booking_settings.html:453
@@ -289,7 +287,7 @@ msgstr "Этот мастер пока не добавил работы в по�
 
 #: appointments/views.py:328
 msgid "Please choose a date and time."
-msgstr ""
+msgstr "Пожалуйста, выберите дату и время."
 
 #: appointments/views.py:336
 msgid "Invalid booking date or time."
@@ -297,7 +295,7 @@ msgstr ""
 
 #: appointments/views.py:353 templates/appointments/booking_wizard.html:238
 msgid "This artist requires a consultation before booking a tattoo session."
-msgstr ""
+msgstr "Этот мастер требует пройти консультацию перед записью на сеанс татуировки."
 
 #: appointments/views.py:367
 msgid "This session is longer than the artist allows."
@@ -702,10 +700,9 @@ msgstr ""
 #: templates/appointments/appointment_detail.html:36
 #: templates/appointments/artist_booking_settings.html:791
 #: templates/appointments/booking_wizard.html:111
-#, fuzzy
 #| msgid "Body placement"
 msgid "Placement"
-msgstr "Место на теле"
+msgstr "Место нанесения"
 
 #: templates/appointments/appointment_detail.html:37
 #: templates/appointments/artist_booking_settings.html:796
@@ -721,10 +718,9 @@ msgstr "Бюджет"
 
 #: templates/appointments/appointment_detail.html:39
 #: templates/appointments/artist_booking_settings.html:785
-#, fuzzy
 #| msgid "Style"
 msgid "Styles"
-msgstr "Стиль"
+msgstr "Стили"
 
 #: templates/appointments/appointment_detail.html:44
 #: templates/appointments/artist_booking_settings.html:807
@@ -1367,10 +1363,9 @@ msgid "Duration minutes"
 msgstr "Модерация"
 
 #: templates/appointments/artist_booking_settings.html:776
-#, fuzzy
 #| msgid "Booking"
 msgid "Booking type"
-msgstr "Бронирование"
+msgstr "Тип записи"
 
 #: templates/appointments/artist_booking_settings.html:786
 msgid "Fine Line, Blackwork"
@@ -1445,17 +1440,15 @@ msgid "Front"
 msgstr ""
 
 #: templates/appointments/booking_wizard.html:150
-#, fuzzy
 #| msgid "Rejected"
 msgid "Selected:"
-msgstr "Отклонено"
+msgstr "Выбрано:"
 
 #: templates/appointments/booking_wizard.html:151
 #: templates/appointments/booking_wizard.html:152
-#, fuzzy
 #| msgid "No file selected"
 msgid "No placement selected"
-msgstr "Файл не выбран"
+msgstr "Место не выбрано"
 
 #: templates/appointments/booking_wizard.html:159
 msgid "Coin"
@@ -1489,7 +1482,7 @@ msgstr ""
 
 #: templates/appointments/booking_wizard.html:186
 msgid "References"
-msgstr ""
+msgstr "Референсы"
 
 #: templates/appointments/booking_wizard.html:190
 msgid "Upload reference images"
@@ -4700,3 +4693,62 @@ msgstr "Спасибо! Ваше обращение отправлено."
 #~| msgid "Document verified"
 #~ msgid "No month specified"
 #~ msgstr "Документ проверен"
+
+
+#: appointments/views.py
+msgid "uploaded"
+msgstr "загружено"
+
+#: appointments/views.py
+msgid "Time"
+msgstr "Время"
+
+#: appointments/views.py
+msgid "Consultation note"
+msgstr "Примечание к консультации"
+
+#: appointments/views.py
+#, python-format
+msgid "Please upload no more than %(count)s reference images."
+msgstr "Пожалуйста, загрузите не более %(count)s изображений-референсов."
+
+#: appointments/views.py
+msgid "Session"
+msgstr "Сеанс"
+
+#: appointments/views.py
+msgid "Please upload at least 1 reference image."
+msgstr "Пожалуйста, загрузите хотя бы 1 изображение-референс."
+
+#: appointments/views.py
+msgid "Please upload no more than 1 reference image."
+msgstr "Пожалуйста, загрузите не более 1 изображения-референса."
+
+#: appointments/views.py
+msgid "Selected: none yet"
+msgstr "Выбрано: пока ничего"
+
+#: appointments/views.py
+msgid "Already completed"
+msgstr "Уже пройдена"
+
+#: appointments/views.py
+msgid "Not completed"
+msgstr "Не пройдена"
+
+#: appointments/views.py
+msgid "Choose a date first."
+msgstr "Сначала выберите дату."
+
+#: appointments/views.py
+#, python-format
+msgid "Please upload at least %(count)s reference images."
+msgstr "Пожалуйста, загрузите хотя бы %(count)s изображений-референсов."
+
+#: appointments/views.py
+msgid "Consultation booking"
+msgstr "Запись на консультацию"
+
+#: appointments/views.py
+msgid "No available slots for this day."
+msgstr "На этот день нет свободного времени."

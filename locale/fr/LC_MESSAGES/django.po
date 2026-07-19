@@ -138,20 +138,18 @@ msgstr "Consultation requise"
 #: appointments/models.py:167 appointments/models.py:273
 #: templates/appointments/artist_booking_settings.html:778
 #: templates/users/calendar.html:69
-#, fuzzy
 #| msgid "Tattoo studio registration"
 msgid "Tattoo session"
-msgstr "Enregistrement du salon de tatouage"
+msgstr "Séance de tatouage"
 
 #: appointments/models.py:168 appointments/models.py:274
 #: templates/appointments/artist_booking_settings.html:249
 #: templates/appointments/artist_booking_settings.html:280
 #: templates/appointments/artist_booking_settings.html:779
 #: templates/users/calendar.html:70
-#, fuzzy
 #| msgid "Location"
 msgid "Consultation"
-msgstr "Localisation"
+msgstr "Consultation"
 
 #: appointments/models.py:169
 #: templates/appointments/artist_booking_settings.html:453
@@ -288,7 +286,7 @@ msgstr "Cet artiste n'a pas encore ajouté de travaux à son portfolio."
 
 #: appointments/views.py:328
 msgid "Please choose a date and time."
-msgstr ""
+msgstr "Veuillez choisir une date et une heure."
 
 #: appointments/views.py:336
 msgid "Invalid booking date or time."
@@ -296,7 +294,7 @@ msgstr ""
 
 #: appointments/views.py:353 templates/appointments/booking_wizard.html:238
 msgid "This artist requires a consultation before booking a tattoo session."
-msgstr ""
+msgstr "Cet artiste exige une consultation avant de réserver une séance de tatouage."
 
 #: appointments/views.py:367
 msgid "This session is longer than the artist allows."
@@ -702,10 +700,9 @@ msgstr ""
 #: templates/appointments/appointment_detail.html:36
 #: templates/appointments/artist_booking_settings.html:791
 #: templates/appointments/booking_wizard.html:111
-#, fuzzy
 #| msgid "Body placement"
 msgid "Placement"
-msgstr "Emplacement sur le corps"
+msgstr "Emplacement"
 
 #: templates/appointments/appointment_detail.html:37
 #: templates/appointments/artist_booking_settings.html:796
@@ -721,10 +718,9 @@ msgstr "Budget"
 
 #: templates/appointments/appointment_detail.html:39
 #: templates/appointments/artist_booking_settings.html:785
-#, fuzzy
 #| msgid "Style"
 msgid "Styles"
-msgstr "Style"
+msgstr "Styles"
 
 #: templates/appointments/appointment_detail.html:44
 #: templates/appointments/artist_booking_settings.html:807
@@ -1363,10 +1359,9 @@ msgid "Duration minutes"
 msgstr "Modération"
 
 #: templates/appointments/artist_booking_settings.html:776
-#, fuzzy
 #| msgid "Booking"
 msgid "Booking type"
-msgstr "Réservation"
+msgstr "Type de réservation"
 
 #: templates/appointments/artist_booking_settings.html:786
 msgid "Fine Line, Blackwork"
@@ -1441,17 +1436,15 @@ msgid "Front"
 msgstr ""
 
 #: templates/appointments/booking_wizard.html:150
-#, fuzzy
 #| msgid "Rejected"
 msgid "Selected:"
-msgstr "Refusé"
+msgstr "Sélection :"
 
 #: templates/appointments/booking_wizard.html:151
 #: templates/appointments/booking_wizard.html:152
-#, fuzzy
 #| msgid "No file selected"
 msgid "No placement selected"
-msgstr "Aucun fichier sélectionné"
+msgstr "Aucun emplacement sélectionné"
 
 #: templates/appointments/booking_wizard.html:159
 msgid "Coin"
@@ -1485,7 +1478,7 @@ msgstr ""
 
 #: templates/appointments/booking_wizard.html:186
 msgid "References"
-msgstr ""
+msgstr "Références"
 
 #: templates/appointments/booking_wizard.html:190
 msgid "Upload reference images"
@@ -4726,3 +4719,62 @@ msgstr "Merci ! Votre signalement a été envoyé."
 #~| msgid "Document verified"
 #~ msgid "No month specified"
 #~ msgstr "Document vérifié"
+
+
+#: appointments/views.py
+msgid "uploaded"
+msgstr "importée(s)"
+
+#: appointments/views.py
+msgid "Time"
+msgstr "Heure"
+
+#: appointments/views.py
+msgid "Consultation note"
+msgstr "Note de consultation"
+
+#: appointments/views.py
+#, python-format
+msgid "Please upload no more than %(count)s reference images."
+msgstr "Veuillez importer au maximum %(count)s images de référence."
+
+#: appointments/views.py
+msgid "Session"
+msgstr "Séance"
+
+#: appointments/views.py
+msgid "Please upload at least 1 reference image."
+msgstr "Veuillez importer au moins 1 image de référence."
+
+#: appointments/views.py
+msgid "Please upload no more than 1 reference image."
+msgstr "Veuillez importer au maximum 1 image de référence."
+
+#: appointments/views.py
+msgid "Selected: none yet"
+msgstr "Sélection : aucune pour le moment"
+
+#: appointments/views.py
+msgid "Already completed"
+msgstr "Déjà effectuée"
+
+#: appointments/views.py
+msgid "Not completed"
+msgstr "Non effectuée"
+
+#: appointments/views.py
+msgid "Choose a date first."
+msgstr "Choisissez d’abord une date."
+
+#: appointments/views.py
+#, python-format
+msgid "Please upload at least %(count)s reference images."
+msgstr "Veuillez importer au moins %(count)s images de référence."
+
+#: appointments/views.py
+msgid "Consultation booking"
+msgstr "Réservation d’une consultation"
+
+#: appointments/views.py
+msgid "No available slots for this day."
+msgstr "Aucun créneau disponible pour ce jour."
