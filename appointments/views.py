@@ -248,12 +248,54 @@ def booking_wizard(request, username):
 
     active_styles = booking_settings.active_styles or DEFAULT_TATTOO_STYLES
 
+    booking_i18n = {
+        "Consultation": _("Consultation"),
+        "Online consultation": _("Online consultation"),
+        "Tattoo session": _("Tattoo session"),
+        "Consultation booking": _("Consultation booking"),
+        "Already completed": _("Already completed"),
+        "Not completed": _("Not completed"),
+        "This artist requires a consultation before booking a tattoo session.": _(
+            "This artist requires a consultation before booking a tattoo session."
+        ),
+        "Choose a date first.": _("Choose a date first."),
+        "No available slots for this day.": _("No available slots for this day."),
+        "Selected: none yet": _("Selected: none yet"),
+        "Selected:": _("Selected:"),
+        "No placement selected": _("No placement selected"),
+        "Please choose a date and time.": _("Please choose a date and time."),
+        "Date": _("Date"),
+        "Time": _("Time"),
+        "Booking type": _("Booking type"),
+        "Session": _("Session"),
+        "Consultation note": _("Consultation note"),
+        "Styles": _("Styles"),
+        "Placement": _("Placement"),
+        "Size": _("Size"),
+        "Budget": _("Budget"),
+        "References": _("References"),
+        "uploaded": _("uploaded"),
+        "Please upload at least 1 reference image.": _(
+            "Please upload at least 1 reference image."
+        ),
+        "Please upload at least %(count)s reference images.": _(
+            "Please upload at least %(count)s reference images."
+        ),
+        "Please upload no more than 1 reference image.": _(
+            "Please upload no more than 1 reference image."
+        ),
+        "Please upload no more than %(count)s reference images.": _(
+            "Please upload no more than %(count)s reference images."
+        ),
+    }
+
     return render(
         request,
         "appointments/booking_wizard.html",
         {
             "artist": artist,
             "booking_data_json": json.dumps(booking_data, cls=DjangoJSONEncoder),
+            "booking_i18n": booking_i18n,
             "active_styles": active_styles,
         },
     )
