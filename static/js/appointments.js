@@ -102,13 +102,33 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateDurationButtons() {
-    document.querySelectorAll("[data-duration]").forEach((button) => {
-      const isOneHour = Number(button.dataset.duration) === 60;
-      button.disabled = state.isConsultation && !isOneHour;
-      button.classList.toggle("is-disabled", button.disabled);
-      button.classList.toggle("is-active", Number(button.dataset.duration) === state.duration);
-    });
-  }
+      document.querySelectorAll("[data-duration]").forEach((button) => {
+        const duration = Number(button.dataset.duration);
+        const isOneHour = duration === 60;
+
+        if (state.isConsultation) {
+            button.hidden = !isOneHour;
+            button.disabled = !isOneHour;
+            button.classList.toggle("is-disabled", !isOneHour);
+            button.classList.toggle("is-active", isOneHour);
+            button.classList.toggle("is-selected", isOneHour);
+            button.setAttribute("aria-pressed", isOneHour ? "true" : "false");
+            return;
+        }
+
+        button.hidden = false;
+        button.disabled = false;
+        button.classList.remove("is-disabled");
+        button.classList.toggle("is-active", duration === state.duration);
+        button.classList.toggle("is-selected", duration === state.duration);
+        button.setAttribute("aria-pressed", duration === state.duration ? "true" : "false");
+      });
+
+      const durationInput = document.getElementById("booking-duration");
+      if (durationInput) {
+        durationInput.value = state.duration;
+      }
+    }
 
   function applyBookingTypeState({ rerenderSlots = true } = {}) {
     state.isConsultation = ["consultation", "online_consultation"].includes(state.bookingType);
@@ -449,44 +469,25 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function syncHiddenFields() {
-    syncPlacement();
-    document.getElementById("booking-duration").value = state.duration;
-    document.getElementById("booking-type").value = state.bookingType;
-    document.getElementById("booking-consultation-completed").value = state.consultationAlreadyCompleted ? "true" : "false";
-    document.getElementById("booking-consultation-note").value = state.consultationNote;
-    document.getElementById("booking-styles").value = state.styles.join(",");
-    state.placement = state.placementZones.join(", ");
-    document.getElementById("booking-placement").value = state.placement;
-    document.getElementById("booking-size").value = state.size;
-    document.getElementById("booking-budget").value = state.budget;
-  }
+      syncPlacement();
 
-  function renderPlacementChips() {
-    const chips = document.getElementById("booking-placement-chips");
+      const durationInput = document.getElementById("booking-duration");
+      const bookingTypeInput = document.getElementById("booking-type");
+      const consultationCompletedInput = document.getElementById("booking-consultation-completed");
+      const consultationNoteInput = document.getElementById("booking-consultation-note");
+      const stylesInput = document.getElementById("booking-styles");
+      const sizeInput = document.getElementById("booking-size");
+      const budgetInput = document.getElementById("booking-budget");
 
-    if (!chips) {
-      return;
-    }
-
-    chips.innerHTML = "";
-
-    if (!state.placementZones.length) {
-      const empty = document.createElement("span");
-      empty.className = "booking-placement-empty";
-      empty.textContent = t("No placement selected", chips.dataset.emptyLabel || "No placement selected");
-      chips.appendChild(empty);
-      syncHiddenFields();
-      return;
-    }
-
-    state.placementZones.forEach((zone) => {
-      const chip = document.createElement("span");
-      chip.className = "booking-placement-chip";
-      chip.textContent = zone;
-      chips.appendChild(chip);
-    });
-
-    syncHiddenFields();
+      if (durationInput) durationInput.value = state.duration;
+      if (bookingTypeInput) bookingTypeInput.value = state.bookingType;
+      if (consultationCompletedInput) {
+        consultationCompletedInput.value = state.consultationAlreadyCompleted ? "true" : "false";
+      }
+      if (consultationNoteInput) consultationNoteInput.value = state.consultationNote;
+      if (stylesInput) stylesInput.value = state.styles.join(",");
+      if (sizeInput) sizeInput.value = state.size;
+      if (budgetInput) budgetInput.value = state.budget;
   }
 
   function renderReview() {
@@ -615,20 +616,21 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.querySelectorAll("[data-placement-zone]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const zone = button.dataset.placementZone;
-      const exists = state.placementZones.includes(zone);
+      button.addEventListener("click", () => {
+        const zone = button.dataset.placementZone;
+        if (!zone) return;
 
-      state.placementZones = exists
-        ? state.placementZones.filter((item) => item !== zone)
-        : [...state.placementZones, zone];
+        const exists = state.placementZones.includes(zone);
 
-      button.classList.toggle("is-selected", !exists);
-      renderPlacementChips();
-    });
+        state.placementZones = exists
+          ? state.placementZones.filter((item) => item !== zone)
+          : [...state.placementZones, zone];
+
+        syncPlacement();
+      });
   });
 
-  renderPlacementChips();
+  syncPlacement();
 
   document.getElementById("booking-references").addEventListener("change", (event) => {
     const grid = document.getElementById("booking-reference-grid");
@@ -692,13 +694,34 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   if (consultationIsRequired()) {
-    state.bookingType = "consultation";
-    state.consultationChoiceMade = false;
-    openConsultationModal();
-  }
+      state.bookingType = "consultation";
+      state.isConsultation = true;
+      state.duration = 60;
+      state.consultationAlreadyCompleted = false;
+      state.consultationNote = "";
+      state.consultationChoiceMade = false;
 
-  applyBookingTypeState({ rerenderSlots: false });
-  renderCalendar();
-  renderSlots();
-  showStep(1);
+      const bookChoice = document.querySelector(
+        '[name="booking-consultation-required-choice"][value="book"]'
+      );
+      const completedChoice = document.querySelector(
+        '[name="booking-consultation-required-choice"][value="completed"]'
+      );
+
+      if (bookChoice) bookChoice.checked = true;
+      if (completedChoice) completedChoice.checked = false;
+
+      if (consultationModalNote) {
+        consultationModalNote.hidden = true;
+        consultationModalNote.value = "";
+      }
+
+      setConsultationError("");
+      openConsultationModal();
+    }
+
+    applyBookingTypeState({ rerenderSlots: false });
+    renderCalendar();
+    renderSlots();
+    showStep(1);
 });
