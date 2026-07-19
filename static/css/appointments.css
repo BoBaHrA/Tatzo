@@ -169,7 +169,7 @@
 }
 
 .booking-day.is-selected {
-  background: #04c5bf;
+  background: linear-gradient(135deg, #04c5bf, #ee0c6f);
   color: #001014;
 }
 
@@ -197,7 +197,7 @@
 .booking-slots button.is-selected,
 .booking-choice.is-active,
 .booking-choice-grid button.is-selected {
-  background: #04c5bf;
+  background: linear-gradient(135deg, #04c5bf, #ee0c6f);
   color: #001014;
 }
 
