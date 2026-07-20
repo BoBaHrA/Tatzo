@@ -92,7 +92,11 @@ body {
   padding: 0 14px;
   cursor: pointer;
   text-align: left;
+  font-family: inherit;
+  font-size: 14px;
   font-weight: 800;
+  line-height: 1.2;
+  text-decoration: none;
   transition: 0.2s;
 }
 

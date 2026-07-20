@@ -19,25 +19,22 @@ msgstr ""
 
 #: appointments/models.py:17
 #: templates/appointments/artist_booking_settings.html:592
-#, fuzzy
 #| msgid "Booking"
 msgid "Booking allowed"
-msgstr "Бронирование"
+msgstr "Запись открыта"
 
 #: appointments/models.py:18
 #: templates/appointments/artist_booking_settings.html:597
-#, fuzzy
 #| msgid "Booking"
 msgid "Booking paused"
-msgstr "Бронирование"
+msgstr "Запись приостановлена"
 
 #: appointments/models.py:19 appointments/models.py:276
 #: templates/appointments/artist_booking_settings.html:602
 #: templates/users/calendar.html:72
-#, fuzzy
 #| msgid "Location"
 msgid "Vacation"
-msgstr "Местоположение"
+msgstr "Отпуск"
 
 #: appointments/models.py:20 appointments/views.py:140
 #: templates/appointments/artist_booking_settings.html:607
@@ -56,17 +53,15 @@ msgstr "Экстренное закрытие"
 
 #: appointments/models.py:26
 #: templates/appointments/artist_booking_settings.html:493
-#, fuzzy
 #| msgid "Manual reviews"
 msgid "Manual approval"
-msgstr "Ручные проверки"
+msgstr "Подтверждение вручную"
 
 #: appointments/models.py:27
 #: templates/appointments/artist_booking_settings.html:496
-#, fuzzy
 #| msgid "I accept the"
 msgid "Auto accept"
-msgstr "Я принимаю"
+msgstr "Автоматическое подтверждение"
 
 #: appointments/models.py:89
 msgid "Sunday"
@@ -462,51 +457,47 @@ msgstr ""
 
 #: appointments/views.py:1443
 msgid "Today's appointments"
-msgstr ""
+msgstr "Сегодняшние записи"
 
 #: appointments/views.py:1448
 msgid "Upcoming consultations"
-msgstr ""
+msgstr "Предстоящие консультации"
 
 #: appointments/views.py:1453
-#, fuzzy
 #| msgid "No pending document requests."
 msgid "Pending booking requests"
-msgstr "Нет заявок с документами на рассмотрении."
+msgstr "Заявки на запись"
 
 #: appointments/views.py:1459 appointments/views.py:1498
-#, fuzzy
 #| msgid "Write a message..."
 msgid "Unread messages"
-msgstr "Напишите сообщение..."
+msgstr "Непрочитанные сообщения"
 
 #: appointments/views.py:1465
 msgid "Projects waiting for references"
-msgstr ""
+msgstr "Проекты, ожидающие референсов"
 
 #: appointments/views.py:1470
 msgid "Estimated deposits this month"
-msgstr ""
+msgstr "Ожидаемые депозиты за месяц"
 
 #: appointments/views.py:1476
 msgid "Average response time"
-msgstr ""
+msgstr "Среднее время ответа"
 
 #: appointments/views.py:1481 appointments/views.py:1503
-#, fuzzy
 #| msgid "Profile form"
 msgid "Profile completeness"
-msgstr "Форма профиля"
+msgstr "Заполнение профиля"
 
 #: appointments/views.py:1488
 msgid "Monthly bookings"
-msgstr ""
+msgstr "Записи за месяц"
 
 #: appointments/views.py:1493
-#, fuzzy
 #| msgid "Pending Profiles"
 msgid "Pending requests"
-msgstr "Ожидающие профили"
+msgstr "Ожидающие заявки"
 
 #: mytattooapp/settings.py:129
 #: templates/partials/auth_language_switcher.html:14
@@ -782,10 +773,9 @@ msgstr "Мой профиль"
 
 #: templates/appointments/appointments_list.html:20
 #: templates/appointments/artist_booking_settings.html:4
-#, fuzzy
 #| msgid "Moderation dashboard"
 msgid "Artist dashboard"
-msgstr "Панель модерации"
+msgstr "Панель мастера"
 
 #: templates/appointments/appointments_list.html:26
 #, fuzzy
@@ -855,10 +845,9 @@ msgid "Calendar"
 msgstr "Календарь"
 
 #: templates/appointments/artist_booking_settings.html:41
-#, fuzzy
 #| msgid "Booking"
 msgid "Bookings"
-msgstr "Бронирование"
+msgstr "Записи"
 
 #: templates/appointments/artist_booking_settings.html:46
 msgid "Projects"
@@ -866,10 +855,9 @@ msgstr "Проекты"
 
 #: templates/appointments/artist_booking_settings.html:51
 #: templates/appointments/artist_booking_settings.html:299
-#, fuzzy
 #| msgid "Message"
 msgid "Messages"
-msgstr "Написать"
+msgstr "Сообщения"
 
 #: templates/appointments/artist_booking_settings.html:56
 #: templates/appointments/artist_booking_settings.html:319
@@ -885,17 +873,15 @@ msgstr "Клиенты"
 
 #: templates/appointments/artist_booking_settings.html:66
 #: templates/appointments/artist_booking_settings.html:375
-#, fuzzy
 #| msgid "Review"
 msgid "Reviews"
-msgstr "Проверить"
+msgstr "Отзывы"
 
 #: templates/appointments/artist_booking_settings.html:71
 #: templates/appointments/artist_booking_settings.html:395
-#, fuzzy
 #| msgid "Status"
 msgid "Statistics"
-msgstr "Статус"
+msgstr "Статистика"
 
 #: templates/appointments/artist_booking_settings.html:76
 #: templates/home.html:143 templates/partials/sidebar.html:127
@@ -909,10 +895,10 @@ msgid "Tattoo Artist"
 msgstr "Тату-мастер"
 
 #: templates/appointments/artist_booking_settings.html:97
-#, fuzzy, python-format
+#, python-format
 #| msgid "Hi %(username)s,"
 msgid "Good evening, %(username)s"
-msgstr "Привет, %(username)s,"
+msgstr "Добрый вечер, %(username)s"
 
 #: templates/appointments/artist_booking_settings.html:120
 msgid "Smart insights"
@@ -925,7 +911,7 @@ msgstr "Ваши настройки записи теперь подключен
 #: templates/appointments/artist_booking_settings.html:127
 msgid ""
 "Active styles selected here are shown directly in your public booking form."
-msgstr ""
+msgstr "Выбранные здесь активные стили отображаются прямо в публичной форме записи."
 
 #: templates/appointments/artist_booking_settings.html:130
 msgid "Pending requests should be answered quickly to improve conversion."
@@ -936,43 +922,39 @@ msgid "Add portfolio works to make your booking page more convincing."
 msgstr "Добавьте работы в портфолио, чтобы страница записи была убедительнее."
 
 #: templates/appointments/artist_booking_settings.html:145
-#, fuzzy
 #| msgid "Schedule"
 msgid "Weekly schedule"
-msgstr "Планирование"
+msgstr "Расписание на неделю"
 
 #: templates/appointments/artist_booking_settings.html:146
 msgid "Manage your working hours and blocked dates"
 msgstr "Управляйте рабочими часами и заблокированными датами"
 
 #: templates/appointments/artist_booking_settings.html:150
-#, fuzzy
 #| msgid "Calendar"
 msgid "Save calendar"
-msgstr "Календарь"
+msgstr "Сохранить календарь"
 
 #: templates/appointments/artist_booking_settings.html:169
-#, fuzzy
 #| msgid "Open file"
 msgid "Open"
-msgstr "Открыть файл"
+msgstr "Открыть"
 
 #: templates/appointments/artist_booking_settings.html:174
 #: templates/appointments/artist_booking_settings.html:812
 #: templates/partials/sidebar.html:302 templates/users/maps.html:139
 #: templates/users/maps.html:172
 msgid "Close"
-msgstr "Закрыто"
+msgstr "Закрыть"
 
 #: templates/appointments/artist_booking_settings.html:179
 msgid "Break from"
 msgstr "Перерыв с"
 
 #: templates/appointments/artist_booking_settings.html:184
-#, fuzzy
 #| msgid "Back to feed"
 msgid "Break to"
-msgstr "Назад к ленте"
+msgstr "Перерыв до"
 
 #: templates/appointments/artist_booking_settings.html:193
 msgid "Blocked periods"
@@ -1002,10 +984,9 @@ msgid "Those dates are already blocked."
 msgstr "Эти даты уже заблокированы."
 
 #: templates/appointments/artist_booking_settings.html:205
-#, fuzzy
 #| msgid "Last updated:"
 msgid "Start date"
-msgstr "Последнее обновление:"
+msgstr "Дата начала"
 
 #: templates/appointments/artist_booking_settings.html:209
 msgid "End date"
@@ -1013,16 +994,14 @@ msgstr "Дата окончания"
 
 #: templates/appointments/artist_booking_settings.html:209
 #: templates/appointments/artist_booking_settings.html:213
-#, fuzzy
 #| msgid "Style, optional"
 msgid "optional"
-msgstr "Стиль, необязательно"
+msgstr "необязательно"
 
 #: templates/appointments/artist_booking_settings.html:213
-#, fuzzy
 #| msgid "No reason"
 msgid "Reason"
-msgstr "Без причины"
+msgstr "Причина"
 
 #: templates/appointments/artist_booking_settings.html:214
 msgid "Vacation, convention, studio closure…"
@@ -1033,10 +1012,9 @@ msgid "Add period"
 msgstr "Добавить период"
 
 #: templates/appointments/artist_booking_settings.html:240
-#, fuzzy
 #| msgid "Document requests"
 msgid "Booking requests"
-msgstr "Заявки с документами"
+msgstr "Заявки на запись"
 
 #: templates/appointments/artist_booking_settings.html:251
 #: templates/appointments/artist_booking_settings.html:282
@@ -1044,43 +1022,37 @@ msgid "Consultation done"
 msgstr "Консультация проведена"
 
 #: templates/appointments/artist_booking_settings.html:260
-#, fuzzy
 #| msgid "No bookmarks yet"
 msgid "No booking requests yet."
-msgstr "Закладок пока нет"
+msgstr "Заявок на запись пока нет."
 
 #: templates/appointments/artist_booking_settings.html:268
-#, fuzzy
 #| msgid "Tattoo artist"
 msgid "Tattoo projects"
-msgstr "Тату-мастер"
+msgstr "Тату-проекты"
 
 #: templates/appointments/artist_booking_settings.html:291
-#, fuzzy
 #| msgid "No tattoo artists yet"
 msgid "No active tattoo projects yet."
-msgstr "Тату-мастеров пока нет"
+msgstr "Активных тату-проектов пока нет."
 
 #: templates/appointments/artist_booking_settings.html:311
-#, fuzzy
 #| msgid "No messages yet."
 msgid "No unread messages."
-msgstr "Сообщений пока нет."
+msgstr "Непрочитанных сообщений нет."
 
 #: templates/appointments/artist_booking_settings.html:329
-#, fuzzy
 #| msgid "No portfolio works yet"
 msgid "No portfolio works yet."
-msgstr "Работ в портфолио пока нет"
+msgstr "Работ в портфолио пока нет."
 
 #: templates/appointments/artist_booking_settings.html:331
-#, fuzzy
 #| msgid "Add first work"
 msgid "Add your first work"
 msgstr "Добавить первую работу"
 
 #: templates/appointments/artist_booking_settings.html:359
-#, fuzzy, python-format
+#, python-format
 #| msgid ""
 #| "\n"
 #| "                Hi %(username)s,\n"
@@ -1095,39 +1067,36 @@ msgid_plural ""
 "                "
 msgstr[0] ""
 "\n"
-"                Привет, %(username)s,\n"
+"                  %(count)s сеанс\n"
 "                "
 msgstr[1] ""
 "\n"
-"                Привет, %(username)s,\n"
+"                  %(count)s сеанса\n"
 "                "
 msgstr[2] ""
 "\n"
-"                Привет, %(username)s,\n"
+"                  %(count)s сеансов\n"
 "                "
 
 #: templates/appointments/artist_booking_settings.html:367
-#, fuzzy
 #| msgid "No comments yet."
 msgid "No clients yet."
-msgstr "Комментариев пока нет."
+msgstr "Клиентов пока нет."
 
 #: templates/appointments/artist_booking_settings.html:383
 msgid "Completed session — review system can be connected here."
 msgstr "Завершённый сеанс — здесь можно подключить систему отзывов."
 
 #: templates/appointments/artist_booking_settings.html:387
-#, fuzzy
 #| msgid "No messages yet."
 msgid "No reviews yet."
-msgstr "Сообщений пока нет."
+msgstr "Отзывов пока нет."
 
 #: templates/appointments/artist_booking_settings.html:431
 #: templates/users/profile.html:179
-#, fuzzy
 #| msgid "Booking"
 msgid "Booking settings"
-msgstr "Бронирование"
+msgstr "Настройки записи"
 
 #: templates/appointments/artist_booking_settings.html:437
 msgid "Accept new clients"
@@ -1171,10 +1140,9 @@ msgid "Deposit required"
 msgstr "Депозит обязателен"
 
 #: templates/appointments/artist_booking_settings.html:528
-#, fuzzy
 #| msgid "Location"
 msgid "Studio consultation"
-msgstr "Местоположение"
+msgstr "Консультация в студии"
 
 #: templates/appointments/artist_booking_settings.html:536
 msgid "Consultation price"
@@ -1185,10 +1153,9 @@ msgid "Min references"
 msgstr "Минимум референсов"
 
 #: templates/appointments/artist_booking_settings.html:549
-#, fuzzy
 #| msgid "Moderation"
 msgid "Max session duration"
-msgstr "Модерация"
+msgstr "Максимальная длительность сеанса"
 
 #: templates/appointments/artist_booking_settings.html:557
 msgid "Maximum booking window"
@@ -1203,22 +1170,19 @@ msgid "Tattoo styles offered"
 msgstr "Предлагаемые стили тату"
 
 #: templates/appointments/artist_booking_settings.html:587
-#, fuzzy
 #| msgid "Booking"
 msgid "Booking rules"
-msgstr "Бронирование"
+msgstr "Правила записи"
 
 #: templates/appointments/artist_booking_settings.html:623
-#, fuzzy
 #| msgid "No reason"
 msgid "Auto responses"
-msgstr "Без причины"
+msgstr "Автоответы"
 
 #: templates/appointments/artist_booking_settings.html:627
-#, fuzzy
 #| msgid "Booking"
 msgid "Booking received"
-msgstr "Бронирование"
+msgstr "Заявка получена"
 
 #: templates/appointments/artist_booking_settings.html:628
 msgid "Thanks! I received your request and will reply within 24h."
@@ -1233,31 +1197,28 @@ msgid "Could you send 2–3 more reference images? It helps me nail the design."
 msgstr "Можете отправить ещё 2–3 референса? Это поможет точнее подготовить дизайн."
 
 #: templates/appointments/artist_booking_settings.html:642
-#, fuzzy
 #| msgid "Bookmarked"
 msgid "Booking approved"
-msgstr "В закладках"
+msgstr "Запись подтверждена"
 
 #: templates/appointments/artist_booking_settings.html:643
 msgid "You are booked! A deposit link has been sent to secure your slot."
 msgstr "Вы записаны! Ссылка на депозит отправлена для подтверждения времени."
 
 #: templates/appointments/artist_booking_settings.html:647
-#, fuzzy
 #| msgid "Booking"
 msgid "Booking declined"
-msgstr "Бронирование"
+msgstr "Запись отклонена"
 
 #: templates/appointments/artist_booking_settings.html:648
 msgid ""
 "Unfortunately I cannot take this on right now — thank you for reaching out."
-msgstr ""
+msgstr "К сожалению, сейчас я не могу взяться за эту работу. Спасибо за обращение."
 
 #: templates/appointments/artist_booking_settings.html:654
-#, fuzzy
 #| msgid "Profile image"
 msgid "Profile settings"
-msgstr "Изображение профиля"
+msgstr "Настройки профиля"
 
 #: templates/appointments/artist_booking_settings.html:658
 msgid "Studio name"
@@ -1268,10 +1229,9 @@ msgid "Address"
 msgstr "Адрес"
 
 #: templates/appointments/artist_booking_settings.html:668
-#, fuzzy
 #| msgid "Contests"
 msgid "Contact"
-msgstr "Конкурсы"
+msgstr "Контакт"
 
 #: templates/appointments/artist_booking_settings.html:683
 msgid "Website"
@@ -1279,10 +1239,9 @@ msgstr "Сайт"
 
 #: templates/appointments/artist_booking_settings.html:691
 #: templates/appointments/artist_booking_settings.html:695
-#, fuzzy
 #| msgid "Settings"
 msgid "Save all settings"
-msgstr "Настройки"
+msgstr "Сохранить все настройки"
 
 #: templates/appointments/artist_booking_settings.html:692
 msgid "Applies booking settings, rules, auto responses, and profile settings."
@@ -1298,16 +1257,14 @@ msgstr "Нет предстоящих подтверждённых записе�
 
 #: templates/appointments/artist_booking_settings.html:718
 #: templates/users/calendar.html:59
-#, fuzzy
 #| msgid "Notifications"
 msgid "Quick actions"
-msgstr "Уведомления"
+msgstr "Быстрые действия"
 
 #: templates/appointments/artist_booking_settings.html:722
-#, fuzzy
 #| msgid "Booking"
 msgid "New booking"
-msgstr "Бронирование"
+msgstr "Новая запись"
 
 #: templates/appointments/artist_booking_settings.html:727
 msgid "Block a date"
@@ -1318,10 +1275,9 @@ msgid "Pause bookings"
 msgstr "Приостановить записи"
 
 #: templates/appointments/artist_booking_settings.html:737
-#, fuzzy
 #| msgid "Current avatar"
 msgid "Current status"
-msgstr "Текущий аватар"
+msgstr "Текущий статус"
 
 #: templates/appointments/artist_booking_settings.html:746
 msgid "Manual booking"
@@ -1332,10 +1288,9 @@ msgid "Create an accepted booking for an existing Tatzo user."
 msgstr "Создайте подтверждённую запись для существующего пользователя Tatzo."
 
 #: templates/appointments/artist_booking_settings.html:753
-#, fuzzy
 #| msgid "Choose a username"
 msgid "Client username"
-msgstr "Выберите имя пользователя"
+msgstr "Имя пользователя клиента"
 
 #: templates/appointments/artist_booking_settings.html:759
 #: templates/users/calendar.html:95
@@ -1344,16 +1299,14 @@ msgstr "Дата"
 
 #: templates/appointments/artist_booking_settings.html:764
 #: templates/users/calendar.html:96
-#, fuzzy
 #| msgid "Short title"
 msgid "Start time"
-msgstr "Короткий заголовок"
+msgstr "Время начала"
 
 #: templates/appointments/artist_booking_settings.html:771
-#, fuzzy
 #| msgid "Moderation"
 msgid "Duration minutes"
-msgstr "Модерация"
+msgstr "Длительность в минутах"
 
 #: templates/appointments/artist_booking_settings.html:776
 #| msgid "Booking"
@@ -1365,10 +1318,9 @@ msgid "Fine Line, Blackwork"
 msgstr "Файнлайн, Блэкворк"
 
 #: templates/appointments/artist_booking_settings.html:813
-#, fuzzy
 #| msgid "Create account"
 msgid "Create booking"
-msgstr "Создать аккаунт"
+msgstr "Создать запись"
 
 #: templates/appointments/booking_wizard.html:4
 #: templates/users/profile.html:183
@@ -4860,3 +4812,13 @@ msgstr "Спина"
 msgctxt "navigation"
 msgid "Back"
 msgstr "Назад"
+
+#: templates/appointments/artist_booking_settings.html
+msgctxt "working hours"
+msgid "Open"
+msgstr "Начало"
+
+#: templates/appointments/artist_booking_settings.html
+msgctxt "working hours"
+msgid "Close"
+msgstr "Окончание"

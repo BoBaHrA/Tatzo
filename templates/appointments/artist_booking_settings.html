@@ -26,12 +26,12 @@
     </a>
 
     <nav class="artist-dash-nav">
-      <a href="{% url 'artist_booking_settings' %}" class="artist-dash-nav-item {% if active_dashboard_panel == 'dashboard' %}is-active{% endif %}">
+      <a href="{% url 'artist_booking_settings' %}" class="artist-dash-nav-item {% if active_dashboard_panel == 'dashboard' %}is-active{% endif %}" data-artist-panel-target="dashboard" data-artist-panel-link>
         <img src="{% static 'icons/dashboard.svg' %}" class="artist-dash-icon" alt="">
         <span>{% trans "Dashboard" %}</span>
       </a>
 
-      <a href="{% url 'artist_dashboard_calendar' %}" class="artist-dash-nav-item {% if active_dashboard_panel == 'calendar' %}is-active{% endif %}">
+      <a href="{% url 'artist_dashboard_calendar' %}" class="artist-dash-nav-item {% if active_dashboard_panel == 'calendar' %}is-active{% endif %}" data-artist-panel-target="calendar" data-artist-panel-link>
         <img src="{% static 'icons/calendar-dash.svg' %}" class="artist-dash-icon" alt="">
         <span>{% trans "Calendar" %}</span>
       </a>
@@ -95,7 +95,7 @@
     <header class="artist-dash-header">
       <div>
         <h1>{% blocktrans with username=request.user.username %}Good evening, {{ username }}{% endblocktrans %}</h1>
-        <p>{{ today|date:"l j F" }}</p>
+        <p>{{ today|date:"l, j E" }}</p>
       </div>
 
       <div class="artist-dash-header-actions">
@@ -166,12 +166,12 @@
               </label>
 
               <div class="artist-time-field">
-                <small>{% trans "Open" %}</small>
+                <small>{% translate "Open" context "working hours" %}</small>
                 <input type="time" name="weekday_{{ row.weekday }}_open_time" value="{{ row.open_time|time:'H:i' }}" {% if row.is_closed %}disabled{% endif %}>
               </div>
 
               <div class="artist-time-field">
-                <small>{% trans "Close" %}</small>
+                <small>{% translate "Close" context "working hours" %}</small>
                 <input type="time" name="weekday_{{ row.weekday }}_close_time" value="{{ row.close_time|time:'H:i' }}" {% if row.is_closed %}disabled{% endif %}>
               </div>
 
@@ -567,15 +567,15 @@
             <p>{% trans "Tattoo styles offered" %}</p>
 
             <div class="artist-style-grid">
-              {% for style in default_styles %}
+              {% for style in default_style_choices %}
                 <label class="artist-style-chip">
                   <input
                     type="checkbox"
                     name="active_styles" data-autosave-styles
-                    value="{{ style }}"
-                    {% if style in booking_settings.active_styles %}checked{% endif %}
+                    value="{{ style.value }}"
+                    {% if style.value in booking_settings.active_styles %}checked{% endif %}
                   >
-                  <span>{{ style }}</span>
+                  <span>{{ style.label }}</span>
                 </label>
               {% endfor %}
             </div>

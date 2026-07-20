@@ -1644,7 +1644,10 @@ def artist_booking_settings(request, active_panel="dashboard"):
             "booking_settings": booking_settings,
             "availability_rows": availability_rows,
             "blocked_dates": blocked_dates,
-            "default_styles": DEFAULT_TATTOO_STYLES,
+            "default_style_choices": [
+                {"value": style, "label": _get_tattoo_style_label(style)}
+                for style in DEFAULT_TATTOO_STYLES
+            ],
             "dashboard_stats": dashboard_stats,
             "stats_bars": stats_bars,
             "today": today,
