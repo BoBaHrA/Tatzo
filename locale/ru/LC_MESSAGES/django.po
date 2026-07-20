@@ -4474,7 +4474,7 @@ msgstr ""
 #, python-format
 msgid "Portfolio work added successfully."
 msgid_plural "%(count)s portfolio works added successfully."
-msgstr[0] "Работа добавлена в портфолио."
+msgstr[0] "%(count)s работа добавлена в портфолио."
 msgstr[1] "%(count)s работы добавлены в портфолио."
 msgstr[2] "%(count)s работ добавлено в портфолио."
 
