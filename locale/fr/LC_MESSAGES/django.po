@@ -99,24 +99,22 @@ msgid "Pending"
 msgstr "En attente"
 
 #: appointments/models.py:154 appointments/models.py:388
-#, fuzzy
 #| msgid "I accept the"
 msgid "Accepted"
-msgstr "J’accepte les"
+msgstr "Accepté"
 
 #: appointments/models.py:155 appointments/models.py:389
 msgid "Declined"
-msgstr ""
+msgstr "Refusé"
 
 #: appointments/models.py:156 appointments/models.py:293
-#, fuzzy
 #| msgid "Cancel"
 msgid "Cancelled"
-msgstr "Annuler"
+msgstr "Annulé"
 
 #: appointments/models.py:157 appointments/models.py:292
 msgid "Completed"
-msgstr ""
+msgstr "Terminé"
 
 #: appointments/models.py:158 templates/appointments/appointment_detail.html:66
 #: templates/appointments/artist_booking_settings.html:637
@@ -740,18 +738,18 @@ msgstr "Les commentaires sont désactivés pour cette publication."
 #: templates/appointments/appointments_list.html:27
 #: templates/appointments/calendar_page.html:19
 msgid "Appointments"
-msgstr ""
+msgstr "Rendez-vous"
 
 #: templates/appointments/appointments_list.html:13
 msgid "Appointment navigation"
-msgstr ""
+msgstr "Navigation des rendez-vous"
 
 #: templates/appointments/appointments_list.html:14
 #: templates/appointments/booking_wizard.html:137
 #: templates/appointments/booking_wizard.html:220
 #: templates/appointments/calendar_page.html:14
 msgid "Back"
-msgstr ""
+msgstr "Retour"
 
 #: templates/appointments/appointments_list.html:17
 #: templates/appointments/calendar_page.html:17 templates/home.html:4
@@ -766,7 +764,6 @@ msgstr "Accueil"
 
 #: templates/appointments/appointments_list.html:18
 #: templates/appointments/calendar_page.html:18
-#, fuzzy
 #| msgid "My Profile"
 msgid "My profile"
 msgstr "Mon profil"
@@ -778,38 +775,33 @@ msgid "Artist dashboard"
 msgstr "Tableau de bord de l’artiste"
 
 #: templates/appointments/appointments_list.html:26
-#, fuzzy
 #| msgid "Booking"
 msgid "Booking center"
-msgstr "Réservation"
+msgstr "Centre de réservation"
 
 #: templates/appointments/appointments_list.html:28
-#, fuzzy
 #| msgid "Manage bookings, sessions and upcoming appointments."
 msgid "Track your booking requests and client appointments."
-msgstr "Gérez vos réservations, vos séances et vos prochains rendez-vous."
+msgstr "Suivez vos demandes de réservation et les rendez-vous de vos clients."
 
 #: templates/appointments/appointments_list.html:32
-#, fuzzy
 #| msgid "Document requests"
 msgid "My requests"
-msgstr "Demandes avec documents"
+msgstr "Mes demandes"
 
 #: templates/appointments/appointments_list.html:43
-#, fuzzy
 #| msgid "No pending document requests."
 msgid "No appointment requests yet."
-msgstr "Aucune demande avec documents en attente."
+msgstr "Aucune demande de réservation pour le moment."
 
 #: templates/appointments/appointments_list.html:49
 msgid "Artist bookings"
-msgstr ""
+msgstr "Rendez-vous clients"
 
 #: templates/appointments/appointments_list.html:60
-#, fuzzy
 #| msgid "No tattoo artists yet"
 msgid "No artist bookings yet."
-msgstr "Aucun tatoueur pour le moment"
+msgstr "Aucun rendez-vous client pour le moment."
 
 #: templates/appointments/artist_booking_settings.html:17
 #| msgid "No documents available"
