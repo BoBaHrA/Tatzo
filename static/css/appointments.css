@@ -2598,3 +2598,106 @@ body:has(.appointment-page) {
   height: 18px;
   border-radius: 6px;
 }
+
+@media (max-width: 760px) {
+  .booking-body-views {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-body-map {
+    width: 200px;
+    height: 380px;
+  }
+
+  .zone-head,
+  .zone-back-head {
+    left: 72px;
+  }
+
+  .zone-chest,
+  .zone-back {
+    left: 52px;
+  }
+
+  .zone-stomach,
+  .zone-lower-back {
+    left: 56px;
+  }
+
+  .zone-left-arm,
+  .zone-left-arm-back {
+    left: 16px;
+  }
+
+  .zone-right-arm,
+  .zone-right-arm-back {
+    right: 16px;
+  }
+
+  .zone-left-forearm,
+  .zone-left-forearm-back {
+    left: 18px;
+  }
+
+  .zone-right-forearm,
+  .zone-right-forearm-back {
+    right: 18px;
+  }
+
+  .zone-left-hand,
+  .zone-left-hand-back {
+    left: 19px;
+  }
+
+  .zone-right-hand,
+  .zone-right-hand-back {
+    right: 19px;
+  }
+
+  .zone-left-leg,
+  .zone-left-leg-back {
+    left: 64px;
+  }
+
+  .zone-right-leg,
+  .zone-right-leg-back {
+    right: 64px;
+  }
+
+  .zone-left-calf,
+  .zone-left-calf-back {
+    left: 66px;
+  }
+
+  .zone-right-calf,
+  .zone-right-calf-back {
+    right: 66px;
+  }
+
+  .zone-feet,
+  .zone-feet-back {
+    left: 62px;
+  }
+}
+
+.booking-placement-chip-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 34px;
+  color: rgba(255, 255, 255, 0.82);
+  font-weight: 700;
+}
+
+.booking-placement-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #04c5bf, #ee0c6f);
+  color: #fff;
+  font-size: 0.85rem;
+  line-height: 1;
+  box-shadow: 0 0 16px rgba(4, 197, 191, 0.2);
+}
