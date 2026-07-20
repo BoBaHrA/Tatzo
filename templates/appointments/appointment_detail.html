@@ -32,11 +32,24 @@
 
       <dl class="appointment-details-grid">
         <div><dt>{% trans "Type" %}</dt><dd>{{ appointment.get_booking_type_display }}</dd></div>
-        <div><dt>{% trans "Duration" %}</dt><dd>{{ appointment.session_length_minutes|default:"—" }} {% trans "minutes" %}</dd></div>
-        <div><dt>{% trans "Placement" %}</dt><dd>{{ appointment.placement|default:"—" }}</dd></div>
-        <div><dt>{% trans "Size" %}</dt><dd>{{ appointment.size|default:"—" }}</dd></div>
-        <div><dt>{% trans "Budget" %}</dt><dd>{{ appointment.budget|default:"—" }}</dd></div>
-        <div><dt>{% trans "Styles" %}</dt><dd>{{ appointment.styles|join:", "|default:"—" }}</dd></div>
+        <div>
+          <dt>{% trans "Duration" %}</dt>
+          <dd>
+            {% if appointment.session_length_minutes %}
+              {% blocktrans trimmed count count=appointment.session_length_minutes %}
+                {{ count }} minute
+              {% plural %}
+                {{ count }} minutes
+              {% endblocktrans %}
+            {% else %}
+              —
+            {% endif %}
+          </dd>
+        </div>
+        <div><dt>{% trans "Placement" %}</dt><dd>{{ appointment.localized_placement|default:"—" }}</dd></div>
+        <div><dt>{% trans "Size" %}</dt><dd>{{ appointment.localized_size|default:"—" }}</dd></div>
+        <div><dt>{% trans "Budget" %}</dt><dd>{{ appointment.localized_budget|default:"—" }}</dd></div>
+        <div><dt>{% trans "Styles" %}</dt><dd>{{ appointment.localized_styles|default:"—" }}</dd></div>
       </dl>
 
       {% if appointment.description %}
@@ -50,8 +63,9 @@
         <div class="appointment-references">
           <h2>{% trans "Reference images" %}</h2>
           <div>
+            {% translate "Reference image" as reference_image_alt %}
             {% for reference in appointment.reference_images.all %}
-              <img src="{{ reference.image.url }}" alt="{{ reference.original_name|default:'Reference image' }}">
+              <img src="{{ reference.image.url }}" alt="{{ reference.original_name|default:reference_image_alt }}">
             {% endfor %}
           </div>
         </div>

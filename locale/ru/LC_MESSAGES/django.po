@@ -640,29 +640,28 @@ msgstr "Недопустимый метод запроса."
 
 #: templates/appointments/appointment_detail.html:4
 msgid "Appointment"
-msgstr ""
+msgstr "Запись"
 
 #: templates/appointments/appointment_detail.html:13
-#, fuzzy
 #| msgid "Back to profile"
 msgid "Back to appointments"
-msgstr "Назад к профилю"
+msgstr "Назад к записям"
 
 #: templates/appointments/appointment_detail.html:18
-#, fuzzy
 #| msgid "Document requests"
 msgid "Appointment request"
-msgstr "Заявки с документами"
+msgstr "Заявка на запись"
 
 #: templates/appointments/appointment_detail.html:27
 msgid ""
 "The artist asked for more reference images. Continue the conversation in "
 "chat."
 msgstr ""
+"Мастер запросил дополнительные референсы. Продолжите общение в чате."
 
 #: templates/appointments/appointment_detail.html:29
 msgid "The artist requires a consultation before this project can be booked."
-msgstr ""
+msgstr "Для этого проекта мастер требует консультацию перед записью."
 
 #: templates/appointments/appointment_detail.html:34
 #: templates/users/report_problem.html:35
@@ -670,14 +669,13 @@ msgid "Type"
 msgstr "Тип"
 
 #: templates/appointments/appointment_detail.html:35
-#, fuzzy
 #| msgid "Moderation"
 msgid "Duration"
-msgstr "Модерация"
+msgstr "Продолжительность"
 
 #: templates/appointments/appointment_detail.html:35
 msgid "minutes"
-msgstr ""
+msgstr "минут"
 
 #: templates/appointments/appointment_detail.html:36
 #: templates/appointments/artist_booking_settings.html:791
@@ -711,28 +709,26 @@ msgid "Notes"
 msgstr "Заметки"
 
 #: templates/appointments/appointment_detail.html:51
-#, fuzzy
 #| msgid "Preview image"
 msgid "Reference images"
-msgstr "Предпросмотр изображения"
+msgstr "Референсы"
 
 #: templates/appointments/appointment_detail.html:63
 msgid "Accept"
-msgstr ""
+msgstr "Принять"
 
 #: templates/appointments/appointment_detail.html:64
 msgid "Decline"
-msgstr ""
+msgstr "Отклонить"
 
 #: templates/appointments/appointment_detail.html:68
 msgid "Cancel appointment"
-msgstr ""
+msgstr "Отменить запись"
 
 #: templates/appointments/appointment_detail.html:70
-#, fuzzy
 #| msgid "Comments are disabled for this post."
 msgid "No actions are available for this appointment status."
-msgstr "Комментарии к этому посту отключены."
+msgstr "Для этого статуса записи нет доступных действий."
 
 #: templates/appointments/appointments_list.html:4
 #: templates/appointments/appointments_list.html:27
@@ -4809,6 +4805,30 @@ msgstr "Назад"
 msgctxt "working hours"
 msgid "Open"
 msgstr "Начало"
+
+#: appointments/models.py
+msgid "Head / neck"
+msgstr "Голова / шея"
+
+#: appointments/models.py
+msgid "Stomach / ribs"
+msgstr "Живот / рёбра"
+
+#: appointments/models.py
+msgid "Foot"
+msgstr "Стопа"
+
+#: templates/appointments/appointment_detail.html
+msgid "Reference image"
+msgstr "Референс"
+
+#: templates/appointments/appointment_detail.html
+#, python-format
+msgid "%(count)s minute"
+msgid_plural "%(count)s minutes"
+msgstr[0] "%(count)s минута"
+msgstr[1] "%(count)s минуты"
+msgstr[2] "%(count)s минут"
 
 #: templates/appointments/artist_booking_settings.html
 msgctxt "working hours"

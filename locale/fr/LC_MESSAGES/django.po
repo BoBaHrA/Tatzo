@@ -640,29 +640,30 @@ msgstr "Méthode non autorisée."
 
 #: templates/appointments/appointment_detail.html:4
 msgid "Appointment"
-msgstr ""
+msgstr "Rendez-vous"
 
 #: templates/appointments/appointment_detail.html:13
-#, fuzzy
 #| msgid "Back to profile"
 msgid "Back to appointments"
-msgstr "Retour au profil"
+msgstr "Retour aux rendez-vous"
 
 #: templates/appointments/appointment_detail.html:18
-#, fuzzy
 #| msgid "Document requests"
 msgid "Appointment request"
-msgstr "Demandes avec documents"
+msgstr "Demande de rendez-vous"
 
 #: templates/appointments/appointment_detail.html:27
 msgid ""
 "The artist asked for more reference images. Continue the conversation in "
 "chat."
 msgstr ""
+"L’artiste a demandé davantage d’images de référence. Poursuivez la "
+"conversation dans le chat."
 
 #: templates/appointments/appointment_detail.html:29
 msgid "The artist requires a consultation before this project can be booked."
 msgstr ""
+"L’artiste exige une consultation avant que ce projet puisse être réservé."
 
 #: templates/appointments/appointment_detail.html:34
 #: templates/users/report_problem.html:35
@@ -670,14 +671,13 @@ msgid "Type"
 msgstr "Type"
 
 #: templates/appointments/appointment_detail.html:35
-#, fuzzy
 #| msgid "Moderation"
 msgid "Duration"
-msgstr "Modération"
+msgstr "Durée"
 
 #: templates/appointments/appointment_detail.html:35
 msgid "minutes"
-msgstr ""
+msgstr "minutes"
 
 #: templates/appointments/appointment_detail.html:36
 #: templates/appointments/artist_booking_settings.html:791
@@ -711,28 +711,26 @@ msgid "Notes"
 msgstr "Notes"
 
 #: templates/appointments/appointment_detail.html:51
-#, fuzzy
 #| msgid "Preview image"
 msgid "Reference images"
-msgstr "Aperçu de l'image"
+msgstr "Images de référence"
 
 #: templates/appointments/appointment_detail.html:63
 msgid "Accept"
-msgstr ""
+msgstr "Accepter"
 
 #: templates/appointments/appointment_detail.html:64
 msgid "Decline"
-msgstr ""
+msgstr "Refuser"
 
 #: templates/appointments/appointment_detail.html:68
 msgid "Cancel appointment"
-msgstr ""
+msgstr "Annuler le rendez-vous"
 
 #: templates/appointments/appointment_detail.html:70
-#, fuzzy
 #| msgid "Comments are disabled for this post."
 msgid "No actions are available for this appointment status."
-msgstr "Les commentaires sont désactivés pour cette publication."
+msgstr "Aucune action n’est disponible pour ce statut de rendez-vous."
 
 #: templates/appointments/appointments_list.html:4
 #: templates/appointments/appointments_list.html:27
@@ -4835,6 +4833,29 @@ msgstr "Retour"
 msgctxt "working hours"
 msgid "Open"
 msgstr "Ouverture"
+
+#: appointments/models.py
+msgid "Head / neck"
+msgstr "Tête / cou"
+
+#: appointments/models.py
+msgid "Stomach / ribs"
+msgstr "Ventre / côtes"
+
+#: appointments/models.py
+msgid "Foot"
+msgstr "Pied"
+
+#: templates/appointments/appointment_detail.html
+msgid "Reference image"
+msgstr "Image de référence"
+
+#: templates/appointments/appointment_detail.html
+#, python-format
+msgid "%(count)s minute"
+msgid_plural "%(count)s minutes"
+msgstr[0] "%(count)s minute"
+msgstr[1] "%(count)s minutes"
 
 #: templates/appointments/artist_booking_settings.html
 msgctxt "working hours"

@@ -2,7 +2,63 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
+
+
+APPOINTMENT_VALUE_LABELS = {
+    "Head": _("Head"),
+    "Head / neck": _("Head / neck"),
+    "Chest": _("Chest"),
+    "Stomach": _("Stomach"),
+    "Stomach / ribs": _("Stomach / ribs"),
+    "Back": pgettext_lazy("body placement", "Back"),
+    "Lower back": _("Lower back"),
+    "Left arm": _("Left arm"),
+    "Right arm": _("Right arm"),
+    "Left forearm": _("Left forearm"),
+    "Right forearm": _("Right forearm"),
+    "Left hand": _("Left hand"),
+    "Right hand": _("Right hand"),
+    "Left leg": _("Left leg"),
+    "Right leg": _("Right leg"),
+    "Left calf": _("Left calf"),
+    "Right calf": _("Right calf"),
+    "Foot": _("Foot"),
+    "Feet": _("Feet"),
+    "Fine Line": _("Fine Line"),
+    "Blackwork": _("Blackwork"),
+    "Realism": _("Realism"),
+    "Japanese": _("Japanese"),
+    "Minimalist": _("Minimalist"),
+    "Lettering": _("Lettering"),
+    "Geometric": _("Geometric"),
+    "Watercolor": _("Watercolor"),
+    "Floral": _("Floral"),
+    "Traditional": _("Traditional"),
+    "Other": _("Other"),
+    "Coin": _("Coin"),
+    "Smartphone": _("Smartphone"),
+    "Half sleeve": _("Half sleeve"),
+    "Full sleeve": _("Full sleeve"),
+    "No budget": _("No budget"),
+}
+
+
+def _localize_appointment_value(value):
+    value = str(value or "").strip()
+    return str(APPOINTMENT_VALUE_LABELS.get(value, value))
+
+
+def _localize_appointment_values(value):
+    if not value:
+        return ""
+
+    values = value if isinstance(value, (list, tuple)) else str(value).split(",")
+    return ", ".join(
+        _localize_appointment_value(item)
+        for item in values
+        if str(item).strip()
+    )
 
 
 class ArtistBookingSettings(models.Model):
@@ -225,6 +281,22 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"{self.client.username} → {self.artist.username} on {self.date} {self.start_time}"
+
+    @property
+    def localized_placement(self):
+        return _localize_appointment_values(self.placement)
+
+    @property
+    def localized_styles(self):
+        return _localize_appointment_values(self.styles)
+
+    @property
+    def localized_size(self):
+        return _localize_appointment_value(self.size)
+
+    @property
+    def localized_budget(self):
+        return _localize_appointment_value(self.budget)
 
     @property
     def is_pending(self):

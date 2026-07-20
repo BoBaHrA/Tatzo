@@ -273,9 +273,9 @@
               <div>
                 <strong>
                   {{ appointment.client.username }}
-                  {% if appointment.placement %} — {{ appointment.placement }}{% endif %}
+                  {% if appointment.placement %} — {{ appointment.localized_placement }}{% endif %}
                 </strong>
-                <small>{{ appointment.styles|join:", "|default:appointment.get_booking_type_display }}</small>
+                <small>{{ appointment.localized_styles|default:appointment.get_booking_type_display }}</small>
                 {% if appointment.booking_type == "consultation" or appointment.booking_type == "online_consultation" %}
                   <em class="artist-status-pill">{% trans "Consultation" %}</em>
                 {% elif appointment.consultation_already_completed %}
