@@ -39,6 +39,23 @@ DEFAULT_TATTOO_STYLES = [
 ]
 
 
+def _get_tattoo_style_label(style):
+    labels = {
+        "Fine Line": _("Fine Line"),
+        "Blackwork": _("Blackwork"),
+        "Realism": _("Realism"),
+        "Japanese": _("Japanese"),
+        "Minimalist": _("Minimalist"),
+        "Lettering": _("Lettering"),
+        "Geometric": _("Geometric"),
+        "Watercolor": _("Watercolor"),
+        "Floral": _("Floral"),
+        "Traditional": _("Traditional"),
+        "Other": _("Other"),
+    }
+    return labels.get(style, style)
+
+
 def _is_bookable_artist(user):
     profile = getattr(user, "profile", None)
 
@@ -247,6 +264,10 @@ def booking_wizard(request, username):
     }
 
     active_styles = booking_settings.active_styles or DEFAULT_TATTOO_STYLES
+    active_style_choices = [
+        {"value": style, "label": _get_tattoo_style_label(style)}
+        for style in active_styles
+    ]
 
     booking_i18n = {
         "Consultation": _("Consultation"),
@@ -264,6 +285,14 @@ def booking_wizard(request, username):
         "Selected:": _("Selected:"),
         "No placement selected": _("No placement selected"),
         "Please choose a date and time.": _("Please choose a date and time."),
+        "Please choose at least one tattoo style.": _(
+            "Please choose at least one tattoo style."
+        ),
+        "Please choose tattoo placement.": _("Please choose tattoo placement."),
+        "Please choose tattoo size.": _("Please choose tattoo size."),
+        "Please choose your budget.": _("Please choose your budget."),
+        "%(count)s h": _("%(count)s h"),
+        "Uploaded": _("Uploaded"),
         "Date": _("Date"),
         "Time": _("Time"),
         "Booking type": _("Booking type"),
@@ -297,6 +326,7 @@ def booking_wizard(request, username):
             "booking_data_json": json.dumps(booking_data, cls=DjangoJSONEncoder),
             "booking_i18n": booking_i18n,
             "active_styles": active_styles,
+            "active_style_choices": active_style_choices,
         },
     )
 

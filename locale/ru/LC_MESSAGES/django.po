@@ -42,7 +42,7 @@ msgstr "Местоположение"
 #: appointments/models.py:20 appointments/views.py:140
 #: templates/appointments/artist_booking_settings.html:607
 msgid "Fully booked"
-msgstr "Полностью занято"
+msgstr "Нет свободных мест"
 
 #: appointments/models.py:21 appointments/views.py:141
 #: templates/appointments/artist_booking_settings.html:612
@@ -134,7 +134,7 @@ msgstr "Нужно больше референсов"
 #: templates/appointments/artist_booking_settings.html:632
 #: templates/appointments/booking_wizard.html:237
 msgid "Consultation required"
-msgstr "Требуется консультация"
+msgstr "Необходима консультация"
 
 #: appointments/models.py:167 appointments/models.py:273
 #: templates/appointments/artist_booking_settings.html:778
@@ -238,94 +238,87 @@ msgid "Proposed end must be after proposed start."
 msgstr ""
 
 #: appointments/views.py:120
-#, fuzzy
 #| msgid "This artist has not added portfolio works yet."
 msgid "This artist has paused bookings right now."
-msgstr "Этот мастер пока не добавил работы в портфолио."
+msgstr "Мастер временно приостановил запись."
 
 #: appointments/views.py:123
-#, fuzzy
 #| msgid "This feature is currently in development."
 msgid "This artist is currently on vacation."
-msgstr "Эта функция сейчас находится в разработке."
+msgstr "Мастер сейчас в отпуске."
 
 #: appointments/views.py:126
 msgid "This artist is fully booked right now."
-msgstr ""
+msgstr "У мастера сейчас нет свободных мест."
 
 #: appointments/views.py:129
 msgid "This artist is temporarily unavailable."
-msgstr ""
+msgstr "Мастер временно недоступен."
 
 #: appointments/views.py:137 appointments/views.py:1147
 msgid "Accepting bookings"
-msgstr ""
+msgstr "Запись открыта"
 
 #: appointments/views.py:138 appointments/views.py:1149
-#, fuzzy
 #| msgid "Booking"
 msgid "Bookings paused"
-msgstr "Бронирование"
+msgstr "Запись приостановлена"
 
 #: appointments/views.py:139
-#, fuzzy
 #| msgid "Location"
 msgid "On vacation"
-msgstr "Местоположение"
+msgstr "В отпуске"
 
 #: appointments/views.py:177 appointments/views.py:271
-#, fuzzy
 #| msgid "You cannot start a chat with yourself."
 msgid "You cannot book an appointment with yourself."
-msgstr "Нельзя начать чат с самим собой."
+msgstr "Нельзя записаться на сеанс к самому себе."
 
 #: appointments/views.py:198
-#, fuzzy
 #| msgid "This artist has not added portfolio works yet."
 msgid "This artist is not accepting bookings right now."
-msgstr "Этот мастер пока не добавил работы в портфолио."
+msgstr "Мастер сейчас не принимает новые записи."
 
 #: appointments/views.py:328
 msgid "Please choose a date and time."
-msgstr "Пожалуйста, выберите дату и время."
+msgstr "Выберите дату и время."
 
 #: appointments/views.py:336
 msgid "Invalid booking date or time."
-msgstr ""
+msgstr "Указана неверная дата или время записи."
 
 #: appointments/views.py:353 templates/appointments/booking_wizard.html:238
 msgid "This artist requires a consultation before booking a tattoo session."
-msgstr "Этот мастер требует пройти консультацию перед записью на сеанс татуировки."
+msgstr "Перед записью на сеанс этот мастер требует пройти консультацию."
 
 #: appointments/views.py:367
 msgid "This session is longer than the artist allows."
-msgstr ""
+msgstr "Продолжительность сеанса превышает разрешённую мастером."
 
 #: appointments/views.py:375
 msgid "This date is too far in the future."
-msgstr ""
+msgstr "Эта дата находится слишком далеко в будущем."
 
 #: appointments/views.py:379
 msgid "This date is blocked by the artist."
-msgstr ""
+msgstr "Эта дата заблокирована мастером."
 
 #: appointments/views.py:383
 msgid "This time slot is no longer available."
-msgstr ""
+msgstr "Это время больше недоступно."
 
 #: appointments/views.py:393
 msgid "Please upload the required reference images."
-msgstr ""
+msgstr "Загрузите необходимое количество изображений-референсов."
 
 #: appointments/views.py:397
 msgid "You uploaded too many reference images."
-msgstr ""
+msgstr "Вы загрузили слишком много изображений-референсов."
 
 #: appointments/views.py:460
-#, fuzzy
 #| msgid "Your manual review request has been submitted."
 msgid "Your appointment request has been sent to the artist."
-msgstr "Ваша заявка на ручную проверку отправлена."
+msgstr "Ваш запрос на запись отправлен мастеру."
 
 #: appointments/views.py:470
 msgid "Only verified artists can create manual bookings."
@@ -702,7 +695,7 @@ msgstr ""
 #: templates/appointments/booking_wizard.html:111
 #| msgid "Body placement"
 msgid "Placement"
-msgstr "Место нанесения"
+msgstr "Зона нанесения"
 
 #: templates/appointments/appointment_detail.html:37
 #: templates/appointments/artist_booking_settings.html:796
@@ -1380,50 +1373,49 @@ msgstr "Создать аккаунт"
 #: templates/appointments/booking_wizard.html:4
 #: templates/users/profile.html:183
 msgid "Book appointment"
-msgstr ""
+msgstr "Записаться на сеанс"
 
 #: templates/appointments/booking_wizard.html:17
 #: templates/users/artist_portfolio.html:23
 #: templates/users/following_list.html:18
 msgid "Back to profile"
-msgstr "Назад к профилю"
+msgstr "Вернуться к профилю"
 
 #: templates/appointments/booking_wizard.html:31
 #, fuzzy, python-format
 #| msgid "Chat with %(username)s"
 msgid "Book with %(username)s"
-msgstr "Чат с %(username)s"
+msgstr "Записаться к %(username)s"
 
 #: templates/appointments/booking_wizard.html:32
 msgid ""
 "Choose a date, describe your tattoo project and send a request to the artist."
-msgstr ""
+msgstr "Выберите дату, опишите идею татуировки и отправьте запрос мастеру."
 
 #: templates/appointments/booking_wizard.html:65
 msgid "Date and time"
-msgstr ""
+msgstr "Дата и время"
 
 #: templates/appointments/booking_wizard.html:79
 msgid "Available time"
-msgstr ""
+msgstr "Доступное время"
 
 #: templates/appointments/booking_wizard.html:86
 msgid "Book a consultation instead"
-msgstr ""
+msgstr "Записаться вместо этого на консультацию"
 
 #: templates/appointments/booking_wizard.html:87
 msgid "Consultations are limited to 1 hour."
-msgstr ""
+msgstr "Продолжительность консультации — не более 1 часа."
 
 #: templates/appointments/booking_wizard.html:97
 msgid "Full day"
-msgstr ""
+msgstr "Полный день"
 
 #: templates/appointments/booking_wizard.html:102
-#, fuzzy
 #| msgid "Tattoo artist"
 msgid "Tattoo project"
-msgstr "Тату-мастер"
+msgstr "Проект татуировки"
 
 #: templates/appointments/booking_wizard.html:104
 #: templates/users/add_portfolio_work.html:61
@@ -1433,7 +1425,7 @@ msgstr "Стиль"
 
 #: templates/appointments/booking_wizard.html:113
 msgid "Tap one or more body areas."
-msgstr ""
+msgstr "Выберите одну или несколько зон тела."
 
 #: templates/appointments/booking_wizard.html:117
 msgid "Front"
@@ -1448,37 +1440,36 @@ msgstr "Выбрано:"
 #: templates/appointments/booking_wizard.html:152
 #| msgid "No file selected"
 msgid "No placement selected"
-msgstr "Место не выбрано"
+msgstr "Зона не выбрана"
 
 #: templates/appointments/booking_wizard.html:159
 msgid "Coin"
-msgstr ""
+msgstr "Монета"
 
 #: templates/appointments/booking_wizard.html:160
 msgid "Smartphone"
-msgstr ""
+msgstr "Смартфон"
 
 #: templates/appointments/booking_wizard.html:163
 msgid "Half sleeve"
-msgstr ""
+msgstr "Половина рукава"
 
 #: templates/appointments/booking_wizard.html:164
 msgid "Full sleeve"
-msgstr ""
+msgstr "Полный рукав"
 
 #: templates/appointments/booking_wizard.html:173
-#, fuzzy
 #| msgid "No bio yet."
 msgid "No budget"
-msgstr "Биография пока не заполнена."
+msgstr "Без ограничений по бюджету"
 
 #: templates/appointments/booking_wizard.html:176
 msgid "Describe your idea"
-msgstr ""
+msgstr "Опишите вашу идею"
 
 #: templates/appointments/booking_wizard.html:181
 msgid "Tell the artist what you want, style, idea, meaning, references..."
-msgstr ""
+msgstr "Расскажите мастеру, что вы хотите: стиль, идея, значение, референсы…"
 
 #: templates/appointments/booking_wizard.html:186
 msgid "References"
@@ -1486,59 +1477,56 @@ msgstr "Референсы"
 
 #: templates/appointments/booking_wizard.html:190
 msgid "Upload reference images"
-msgstr ""
+msgstr "Загрузите изображения-референсы"
 
 #: templates/appointments/booking_wizard.html:191
 msgid "You can add screenshots, sketches or inspiration images."
-msgstr ""
+msgstr "Можно добавить скриншоты, эскизы или изображения для вдохновения."
 
 #: templates/appointments/booking_wizard.html:209
-#, fuzzy
 #| msgid "Reset link sent"
 msgid "Review and send"
-msgstr "Ссылка отправлена"
+msgstr "Проверка и отправка"
 
 #: templates/appointments/booking_wizard.html:214
 msgid ""
 "The artist will review your request and confirm or decline the appointment."
-msgstr ""
+msgstr "Мастер рассмотрит ваш запрос и подтвердит или отклонит запись."
 
 #: templates/appointments/booking_wizard.html:224
 msgid "Next"
-msgstr ""
+msgstr "Далее"
 
 #: templates/appointments/booking_wizard.html:228
-#, fuzzy
 #| msgid "Invalid request."
 msgid "Send request"
-msgstr "Недопустимый запрос."
+msgstr "Отправить запрос"
 
 #: templates/appointments/booking_wizard.html:243
 msgid "Book consultation now"
-msgstr ""
+msgstr "Записаться на консультацию"
 
 #: templates/appointments/booking_wizard.html:244
 msgid "We'll set this request as a 1-hour consultation."
-msgstr ""
+msgstr "Этот запрос будет оформлен как часовая консультация."
 
 #: templates/appointments/booking_wizard.html:251
 msgid "I already had a consultation with this artist"
-msgstr ""
+msgstr "Я уже проходил консультацию у этого мастера"
 
 #: templates/appointments/booking_wizard.html:252
 msgid "You can continue with a tattoo session request."
-msgstr ""
+msgstr "Вы можете продолжить оформление запроса на сеанс."
 
 #: templates/appointments/booking_wizard.html:260
 msgid ""
 "Where/when did the consultation happen? e.g. Instagram, studio, phone..."
-msgstr ""
+msgstr "Где и когда проходила консультация? Например: Instagram, студия, телефон…"
 
 #: templates/appointments/booking_wizard.html:265
-#, fuzzy
 #| msgid "Contests"
 msgid "Continue"
-msgstr "Конкурсы"
+msgstr "Продолжить"
 
 #: templates/appointments/calendar_page.html:13
 msgid "Calendar navigation"
@@ -1597,33 +1585,32 @@ msgstr "Календарь"
 
 #: templates/appointments/calendar_page.html:49
 msgid "Mon"
-msgstr ""
+msgstr "Пн"
 
 #: templates/appointments/calendar_page.html:50
 msgid "Tue"
-msgstr ""
+msgstr "Вт"
 
 #: templates/appointments/calendar_page.html:51
 msgid "Wed"
-msgstr ""
+msgstr "Ср"
 
 #: templates/appointments/calendar_page.html:52
 msgid "Thu"
-msgstr ""
+msgstr "Чт"
 
 #: templates/appointments/calendar_page.html:53
 msgid "Fri"
-msgstr ""
+msgstr "Пт"
 
 #: templates/appointments/calendar_page.html:54
-#, fuzzy
 #| msgid "Status"
 msgid "Sat"
-msgstr "Статус"
+msgstr "Сб"
 
 #: templates/appointments/calendar_page.html:55
 msgid "Sun"
-msgstr ""
+msgstr "Вс"
 
 #: templates/appointments/calendar_page.html:74
 msgid "No events"
@@ -4694,7 +4681,6 @@ msgstr "Спасибо! Ваше обращение отправлено."
 #~ msgid "No month specified"
 #~ msgstr "Документ проверен"
 
-
 #: appointments/views.py
 msgid "uploaded"
 msgstr "загружено"
@@ -4710,7 +4696,7 @@ msgstr "Примечание к консультации"
 #: appointments/views.py
 #, python-format
 msgid "Please upload no more than %(count)s reference images."
-msgstr "Пожалуйста, загрузите не более %(count)s изображений-референсов."
+msgstr "Загрузите не более %(count)s изображений-референсов."
 
 #: appointments/views.py
 msgid "Session"
@@ -4718,11 +4704,11 @@ msgstr "Сеанс"
 
 #: appointments/views.py
 msgid "Please upload at least 1 reference image."
-msgstr "Пожалуйста, загрузите хотя бы 1 изображение-референс."
+msgstr "Загрузите хотя бы 1 изображение-референс."
 
 #: appointments/views.py
 msgid "Please upload no more than 1 reference image."
-msgstr "Пожалуйста, загрузите не более 1 изображения-референса."
+msgstr "Загрузите не более 1 изображения-референса."
 
 #: appointments/views.py
 msgid "Selected: none yet"
@@ -4730,11 +4716,11 @@ msgstr "Выбрано: пока ничего"
 
 #: appointments/views.py
 msgid "Already completed"
-msgstr "Уже пройдена"
+msgstr "Уже проведена"
 
 #: appointments/views.py
 msgid "Not completed"
-msgstr "Не пройдена"
+msgstr "Не проведена"
 
 #: appointments/views.py
 msgid "Choose a date first."
@@ -4743,7 +4729,7 @@ msgstr "Сначала выберите дату."
 #: appointments/views.py
 #, python-format
 msgid "Please upload at least %(count)s reference images."
-msgstr "Пожалуйста, загрузите хотя бы %(count)s изображений-референсов."
+msgstr "Загрузите не менее %(count)s изображений-референсов."
 
 #: appointments/views.py
 msgid "Consultation booking"
@@ -4752,3 +4738,125 @@ msgstr "Запись на консультацию"
 #: appointments/views.py
 msgid "No available slots for this day."
 msgstr "На этот день нет свободного времени."
+
+msgid "Tatzo Booking"
+msgstr "Бронирование Tatzo"
+
+msgid "1h"
+msgstr "1 ч"
+
+msgid "2h"
+msgstr "2 ч"
+
+msgid "3h"
+msgstr "3 ч"
+
+msgid "Head"
+msgstr "Голова"
+
+msgid "Chest"
+msgstr "Грудь"
+
+msgid "Stomach"
+msgstr "Живот"
+
+msgid "Lower back"
+msgstr "Поясница"
+
+msgid "Left arm"
+msgstr "Левая рука"
+
+msgid "Right arm"
+msgstr "Правая рука"
+
+msgid "Left forearm"
+msgstr "Левое предплечье"
+
+msgid "Right forearm"
+msgstr "Правое предплечье"
+
+msgid "Left hand"
+msgstr "Левая кисть"
+
+msgid "Right hand"
+msgstr "Правая кисть"
+
+msgid "Left leg"
+msgstr "Левая нога"
+
+msgid "Right leg"
+msgstr "Правая нога"
+
+msgid "Left calf"
+msgstr "Левая голень"
+
+msgid "Right calf"
+msgstr "Правая голень"
+
+msgid "Feet"
+msgstr "Стопы"
+
+msgid "Please choose at least one tattoo style."
+msgstr "Выберите хотя бы один стиль татуировки."
+
+msgid "Please choose tattoo placement."
+msgstr "Выберите зону нанесения татуировки."
+
+msgid "Please choose tattoo size."
+msgstr "Выберите размер татуировки."
+
+msgid "Please choose your budget."
+msgstr "Выберите ваш бюджет."
+
+msgid "Uploaded"
+msgstr "Загружено"
+
+#, python-format
+msgid "%(count)s h"
+msgstr "%(count)s ч"
+
+msgid "Fine Line"
+msgstr "Тонкие линии"
+
+msgid "Blackwork"
+msgstr "Блэкворк"
+
+msgid "Realism"
+msgstr "Реализм"
+
+msgid "Japanese"
+msgstr "Японский стиль"
+
+msgid "Minimalist"
+msgstr "Минимализм"
+
+msgid "Lettering"
+msgstr "Леттеринг"
+
+msgid "Geometric"
+msgstr "Геометрия"
+
+msgid "Watercolor"
+msgstr "Акварель"
+
+msgid "Floral"
+msgstr "Флористика"
+
+msgid "Traditional"
+msgstr "Традиционный стиль"
+
+msgctxt "body view"
+msgid "Front"
+msgstr "Спереди"
+
+msgctxt "body view"
+msgid "Back"
+msgstr "Сзади"
+
+msgctxt "body placement"
+msgid "Back"
+msgstr "Спина"
+
+msgctxt "navigation"
+msgid "Back"
+msgstr "Назад"

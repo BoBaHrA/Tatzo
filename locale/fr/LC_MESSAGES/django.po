@@ -46,7 +46,7 @@ msgstr "Complet"
 #: appointments/models.py:21 appointments/views.py:141
 #: templates/appointments/artist_booking_settings.html:612
 msgid "Consultation only"
-msgstr "Consultations uniquement"
+msgstr "Consultation uniquement"
 
 #: appointments/models.py:22 appointments/views.py:142
 #: templates/appointments/artist_booking_settings.html:617
@@ -237,52 +237,46 @@ msgid "Proposed end must be after proposed start."
 msgstr ""
 
 #: appointments/views.py:120
-#, fuzzy
 #| msgid "This artist has not added portfolio works yet."
 msgid "This artist has paused bookings right now."
-msgstr "Cet artiste n'a pas encore ajouté de travaux à son portfolio."
+msgstr "Cet artiste a temporairement suspendu les réservations."
 
 #: appointments/views.py:123
-#, fuzzy
 #| msgid "This feature is currently in development."
 msgid "This artist is currently on vacation."
-msgstr "Cette fonctionnalité est actuellement en développement."
+msgstr "Cet artiste est actuellement en vacances."
 
 #: appointments/views.py:126
 msgid "This artist is fully booked right now."
-msgstr ""
+msgstr "Cet artiste est complet pour le moment."
 
 #: appointments/views.py:129
 msgid "This artist is temporarily unavailable."
-msgstr ""
+msgstr "Cet artiste est temporairement indisponible."
 
 #: appointments/views.py:137 appointments/views.py:1147
 msgid "Accepting bookings"
-msgstr ""
+msgstr "Réservations ouvertes"
 
 #: appointments/views.py:138 appointments/views.py:1149
-#, fuzzy
 #| msgid "Booking"
 msgid "Bookings paused"
-msgstr "Réservation"
+msgstr "Réservations suspendues"
 
 #: appointments/views.py:139
-#, fuzzy
 #| msgid "Location"
 msgid "On vacation"
-msgstr "Localisation"
+msgstr "En vacances"
 
 #: appointments/views.py:177 appointments/views.py:271
-#, fuzzy
 #| msgid "You cannot start a chat with yourself."
 msgid "You cannot book an appointment with yourself."
-msgstr "Vous ne pouvez pas démarrer une conversation avec vous-même."
+msgstr "Vous ne pouvez pas prendre rendez-vous avec vous-même."
 
 #: appointments/views.py:198
-#, fuzzy
 #| msgid "This artist has not added portfolio works yet."
 msgid "This artist is not accepting bookings right now."
-msgstr "Cet artiste n'a pas encore ajouté de travaux à son portfolio."
+msgstr "Cet artiste n’accepte pas de réservations pour le moment."
 
 #: appointments/views.py:328
 msgid "Please choose a date and time."
@@ -290,7 +284,7 @@ msgstr "Veuillez choisir une date et une heure."
 
 #: appointments/views.py:336
 msgid "Invalid booking date or time."
-msgstr ""
+msgstr "La date ou l’heure de réservation est invalide."
 
 #: appointments/views.py:353 templates/appointments/booking_wizard.html:238
 msgid "This artist requires a consultation before booking a tattoo session."
@@ -298,33 +292,32 @@ msgstr "Cet artiste exige une consultation avant de réserver une séance de tat
 
 #: appointments/views.py:367
 msgid "This session is longer than the artist allows."
-msgstr ""
+msgstr "Cette séance dépasse la durée autorisée par l’artiste."
 
 #: appointments/views.py:375
 msgid "This date is too far in the future."
-msgstr ""
+msgstr "Cette date est trop éloignée dans le futur."
 
 #: appointments/views.py:379
 msgid "This date is blocked by the artist."
-msgstr ""
+msgstr "Cette date a été bloquée par l’artiste."
 
 #: appointments/views.py:383
 msgid "This time slot is no longer available."
-msgstr ""
+msgstr "Ce créneau n’est plus disponible."
 
 #: appointments/views.py:393
 msgid "Please upload the required reference images."
-msgstr ""
+msgstr "Veuillez importer les images de référence requises."
 
 #: appointments/views.py:397
 msgid "You uploaded too many reference images."
-msgstr ""
+msgstr "Vous avez importé trop d’images de référence."
 
 #: appointments/views.py:460
-#, fuzzy
 #| msgid "Your manual review request has been submitted."
 msgid "Your appointment request has been sent to the artist."
-msgstr "Votre demande de vérification manuelle a été envoyée."
+msgstr "Votre demande de rendez-vous a été envoyée à l’artiste."
 
 #: appointments/views.py:470
 msgid "Only verified artists can create manual bookings."
@@ -1376,7 +1369,7 @@ msgstr "Créer un compte"
 #: templates/appointments/booking_wizard.html:4
 #: templates/users/profile.html:183
 msgid "Book appointment"
-msgstr ""
+msgstr "Prendre rendez-vous"
 
 #: templates/appointments/booking_wizard.html:17
 #: templates/users/artist_portfolio.html:23
@@ -1388,38 +1381,37 @@ msgstr "Retour au profil"
 #, fuzzy, python-format
 #| msgid "Chat with %(username)s"
 msgid "Book with %(username)s"
-msgstr "Conversation avec %(username)s"
+msgstr "Prendre rendez-vous avec %(username)s"
 
 #: templates/appointments/booking_wizard.html:32
 msgid ""
 "Choose a date, describe your tattoo project and send a request to the artist."
-msgstr ""
+msgstr "Choisissez une date, décrivez votre projet de tatouage et envoyez une demande à l’artiste."
 
 #: templates/appointments/booking_wizard.html:65
 msgid "Date and time"
-msgstr ""
+msgstr "Date et heure"
 
 #: templates/appointments/booking_wizard.html:79
 msgid "Available time"
-msgstr ""
+msgstr "Créneaux disponibles"
 
 #: templates/appointments/booking_wizard.html:86
 msgid "Book a consultation instead"
-msgstr ""
+msgstr "Réserver plutôt une consultation"
 
 #: templates/appointments/booking_wizard.html:87
 msgid "Consultations are limited to 1 hour."
-msgstr ""
+msgstr "Les consultations sont limitées à 1 heure."
 
 #: templates/appointments/booking_wizard.html:97
 msgid "Full day"
-msgstr ""
+msgstr "Journée complète"
 
 #: templates/appointments/booking_wizard.html:102
-#, fuzzy
 #| msgid "Tattoo artist"
 msgid "Tattoo project"
-msgstr "Tatoueur"
+msgstr "Projet de tatouage"
 
 #: templates/appointments/booking_wizard.html:104
 #: templates/users/add_portfolio_work.html:61
@@ -1429,7 +1421,7 @@ msgstr "Style"
 
 #: templates/appointments/booking_wizard.html:113
 msgid "Tap one or more body areas."
-msgstr ""
+msgstr "Sélectionnez une ou plusieurs zones du corps."
 
 #: templates/appointments/booking_wizard.html:117
 msgid "Front"
@@ -1444,37 +1436,36 @@ msgstr "Sélection :"
 #: templates/appointments/booking_wizard.html:152
 #| msgid "No file selected"
 msgid "No placement selected"
-msgstr "Aucun emplacement sélectionné"
+msgstr "Aucune zone sélectionnée"
 
 #: templates/appointments/booking_wizard.html:159
 msgid "Coin"
-msgstr ""
+msgstr "Pièce"
 
 #: templates/appointments/booking_wizard.html:160
 msgid "Smartphone"
-msgstr ""
+msgstr "Smartphone"
 
 #: templates/appointments/booking_wizard.html:163
 msgid "Half sleeve"
-msgstr ""
+msgstr "Demi-manche"
 
 #: templates/appointments/booking_wizard.html:164
 msgid "Full sleeve"
-msgstr ""
+msgstr "Manche complète"
 
 #: templates/appointments/booking_wizard.html:173
-#, fuzzy
 #| msgid "No bio yet."
 msgid "No budget"
-msgstr "Aucune bio pour le moment."
+msgstr "Budget non défini"
 
 #: templates/appointments/booking_wizard.html:176
 msgid "Describe your idea"
-msgstr ""
+msgstr "Décrivez votre idée"
 
 #: templates/appointments/booking_wizard.html:181
 msgid "Tell the artist what you want, style, idea, meaning, references..."
-msgstr ""
+msgstr "Décrivez à l’artiste ce que vous souhaitez : style, idée, signification, références…"
 
 #: templates/appointments/booking_wizard.html:186
 msgid "References"
@@ -1482,59 +1473,56 @@ msgstr "Références"
 
 #: templates/appointments/booking_wizard.html:190
 msgid "Upload reference images"
-msgstr ""
+msgstr "Importer des images de référence"
 
 #: templates/appointments/booking_wizard.html:191
 msgid "You can add screenshots, sketches or inspiration images."
-msgstr ""
+msgstr "Vous pouvez ajouter des captures d’écran, des croquis ou des images d’inspiration."
 
 #: templates/appointments/booking_wizard.html:209
-#, fuzzy
 #| msgid "Reset link sent"
 msgid "Review and send"
-msgstr "Lien envoyé"
+msgstr "Vérifier et envoyer"
 
 #: templates/appointments/booking_wizard.html:214
 msgid ""
 "The artist will review your request and confirm or decline the appointment."
-msgstr ""
+msgstr "L’artiste examinera votre demande et confirmera ou refusera le rendez-vous."
 
 #: templates/appointments/booking_wizard.html:224
 msgid "Next"
-msgstr ""
+msgstr "Suivant"
 
 #: templates/appointments/booking_wizard.html:228
-#, fuzzy
 #| msgid "Invalid request."
 msgid "Send request"
-msgstr "Requête invalide."
+msgstr "Envoyer la demande"
 
 #: templates/appointments/booking_wizard.html:243
 msgid "Book consultation now"
-msgstr ""
+msgstr "Réserver une consultation maintenant"
 
 #: templates/appointments/booking_wizard.html:244
 msgid "We'll set this request as a 1-hour consultation."
-msgstr ""
+msgstr "Cette demande sera enregistrée comme une consultation d’une heure."
 
 #: templates/appointments/booking_wizard.html:251
 msgid "I already had a consultation with this artist"
-msgstr ""
+msgstr "J’ai déjà eu une consultation avec cet artiste"
 
 #: templates/appointments/booking_wizard.html:252
 msgid "You can continue with a tattoo session request."
-msgstr ""
+msgstr "Vous pouvez poursuivre votre demande de séance de tatouage."
 
 #: templates/appointments/booking_wizard.html:260
 msgid ""
 "Where/when did the consultation happen? e.g. Instagram, studio, phone..."
-msgstr ""
+msgstr "Où et quand la consultation a-t-elle eu lieu ? Par exemple : Instagram, studio, téléphone…"
 
 #: templates/appointments/booking_wizard.html:265
-#, fuzzy
 #| msgid "Contests"
 msgid "Continue"
-msgstr "Concours"
+msgstr "Continuer"
 
 #: templates/appointments/calendar_page.html:13
 msgid "Calendar navigation"
@@ -1593,33 +1581,32 @@ msgstr "Calendrier"
 
 #: templates/appointments/calendar_page.html:49
 msgid "Mon"
-msgstr ""
+msgstr "Lun"
 
 #: templates/appointments/calendar_page.html:50
 msgid "Tue"
-msgstr ""
+msgstr "Mar"
 
 #: templates/appointments/calendar_page.html:51
 msgid "Wed"
-msgstr ""
+msgstr "Mer"
 
 #: templates/appointments/calendar_page.html:52
 msgid "Thu"
-msgstr ""
+msgstr "Jeu"
 
 #: templates/appointments/calendar_page.html:53
 msgid "Fri"
-msgstr ""
+msgstr "Ven"
 
 #: templates/appointments/calendar_page.html:54
-#, fuzzy
 #| msgid "Status"
 msgid "Sat"
-msgstr "Statut"
+msgstr "Sam"
 
 #: templates/appointments/calendar_page.html:55
 msgid "Sun"
-msgstr ""
+msgstr "Dim"
 
 #: templates/appointments/calendar_page.html:74
 msgid "No events"
@@ -4720,7 +4707,6 @@ msgstr "Merci ! Votre signalement a été envoyé."
 #~ msgid "No month specified"
 #~ msgstr "Document vérifié"
 
-
 #: appointments/views.py
 msgid "uploaded"
 msgstr "importée(s)"
@@ -4736,7 +4722,7 @@ msgstr "Note de consultation"
 #: appointments/views.py
 #, python-format
 msgid "Please upload no more than %(count)s reference images."
-msgstr "Veuillez importer au maximum %(count)s images de référence."
+msgstr "Veuillez ne pas importer plus de %(count)s images de référence."
 
 #: appointments/views.py
 msgid "Session"
@@ -4748,7 +4734,7 @@ msgstr "Veuillez importer au moins 1 image de référence."
 
 #: appointments/views.py
 msgid "Please upload no more than 1 reference image."
-msgstr "Veuillez importer au maximum 1 image de référence."
+msgstr "Veuillez ne pas importer plus d’une image de référence."
 
 #: appointments/views.py
 msgid "Selected: none yet"
@@ -4777,4 +4763,126 @@ msgstr "Réservation d’une consultation"
 
 #: appointments/views.py
 msgid "No available slots for this day."
-msgstr "Aucun créneau disponible pour ce jour."
+msgstr "Aucun créneau disponible ce jour-là."
+
+msgid "Tatzo Booking"
+msgstr "Réservation Tatzo"
+
+msgid "1h"
+msgstr "1 h"
+
+msgid "2h"
+msgstr "2 h"
+
+msgid "3h"
+msgstr "3 h"
+
+msgid "Head"
+msgstr "Tête"
+
+msgid "Chest"
+msgstr "Poitrine"
+
+msgid "Stomach"
+msgstr "Ventre"
+
+msgid "Lower back"
+msgstr "Bas du dos"
+
+msgid "Left arm"
+msgstr "Bras gauche"
+
+msgid "Right arm"
+msgstr "Bras droit"
+
+msgid "Left forearm"
+msgstr "Avant-bras gauche"
+
+msgid "Right forearm"
+msgstr "Avant-bras droit"
+
+msgid "Left hand"
+msgstr "Main gauche"
+
+msgid "Right hand"
+msgstr "Main droite"
+
+msgid "Left leg"
+msgstr "Jambe gauche"
+
+msgid "Right leg"
+msgstr "Jambe droite"
+
+msgid "Left calf"
+msgstr "Mollet gauche"
+
+msgid "Right calf"
+msgstr "Mollet droit"
+
+msgid "Feet"
+msgstr "Pieds"
+
+msgid "Please choose at least one tattoo style."
+msgstr "Veuillez choisir au moins un style de tatouage."
+
+msgid "Please choose tattoo placement."
+msgstr "Veuillez choisir l’emplacement du tatouage."
+
+msgid "Please choose tattoo size."
+msgstr "Veuillez choisir la taille du tatouage."
+
+msgid "Please choose your budget."
+msgstr "Veuillez choisir votre budget."
+
+msgid "Uploaded"
+msgstr "Importées"
+
+#, python-format
+msgid "%(count)s h"
+msgstr "%(count)s h"
+
+msgid "Fine Line"
+msgstr "Fine line"
+
+msgid "Blackwork"
+msgstr "Blackwork"
+
+msgid "Realism"
+msgstr "Réalisme"
+
+msgid "Japanese"
+msgstr "Japonais"
+
+msgid "Minimalist"
+msgstr "Minimaliste"
+
+msgid "Lettering"
+msgstr "Lettrage"
+
+msgid "Geometric"
+msgstr "Géométrique"
+
+msgid "Watercolor"
+msgstr "Aquarelle"
+
+msgid "Floral"
+msgstr "Floral"
+
+msgid "Traditional"
+msgstr "Traditionnel"
+
+msgctxt "body view"
+msgid "Front"
+msgstr "Face"
+
+msgctxt "body view"
+msgid "Back"
+msgstr "Dos"
+
+msgctxt "body placement"
+msgid "Back"
+msgstr "Dos"
+
+msgctxt "navigation"
+msgid "Back"
+msgstr "Retour"

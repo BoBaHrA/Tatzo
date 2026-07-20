@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const bookingData = JSON.parse(dataEl.textContent);
   const i18nEl = document.getElementById("booking-i18n");
   const bookingI18n = i18nEl ? JSON.parse(i18nEl.textContent) : {};
+  const locale = document.documentElement.lang || undefined;
 
   function t(key, fallback, params = {}) {
     const value = bookingI18n[key] || fallback;
@@ -50,6 +51,31 @@ document.addEventListener("DOMContentLoaded", () => {
   const consultationModalNote = document.getElementById("booking-consultation-modal-note");
   const consultationError = document.getElementById("booking-consultation-error");
 
+  const placementLabels = new Map(
+    Array.from(document.querySelectorAll("[data-placement-zone]")).map((button) => [
+      button.dataset.placementZone,
+      button.dataset.placementLabel || button.dataset.placementZone,
+    ])
+  );
+
+  const choiceLabels = new Map();
+  document.querySelectorAll("[data-choice-group]").forEach((group) => {
+    group.querySelectorAll("[data-value]").forEach((button) => {
+      choiceLabels.set(
+        `${group.dataset.choiceGroup}:${button.dataset.value}`,
+        button.textContent.trim()
+      );
+    });
+  });
+
+  function placementLabel(value) {
+    return placementLabels.get(value) || value;
+  }
+
+  function choiceLabel(group, value) {
+    return choiceLabels.get(`${group}:${value}`) || value;
+  }
+
   function pad(value) {
     return String(value).padStart(2, "0");
   }
@@ -65,6 +91,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function minutesToTime(value) {
     return `${pad(Math.floor(value / 60))}:${pad(value % 60)}`;
+  }
+
+  function formatDateForDisplay(value) {
+    if (!value) return "—";
+
+    return new Date(`${value}T00:00:00`).toLocaleDateString(locale, {
+      dateStyle: "medium",
+    });
   }
 
   function escapeHtml(value) {
@@ -320,7 +354,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const year = state.cursor.getFullYear();
     const month = state.cursor.getMonth();
 
-    monthLabel.textContent = state.cursor.toLocaleDateString(undefined, {
+    monthLabel.textContent = state.cursor.toLocaleDateString(locale, {
       month: "long",
       year: "numeric",
     });
@@ -425,8 +459,8 @@ document.addEventListener("DOMContentLoaded", () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function composePlacement() {
-    const zones = state.placementZones.join(", ");
+  function composePlacement(zonesToDisplay = state.placementZones) {
+    const zones = zonesToDisplay.join(", ");
     const details = (state.placementDetails || "").trim();
 
     if (zones && details) return `${zones} — ${details}`;
@@ -452,7 +486,7 @@ document.addEventListener("DOMContentLoaded", () => {
     state.placementZones.forEach((zone) => {
       const chip = document.createElement("span");
       chip.className = "booking-placement-chip";
-      chip.textContent = zone;
+      chip.textContent = placementLabel(zone);
       target.appendChild(chip);
     });
   }
@@ -500,18 +534,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const review = document.getElementById("booking-review-card");
 
+    const localizedStyles = state.styles
+      .map((value) => choiceLabel("styles", value))
+      .join(", ");
+    const localizedPlacement = composePlacement(
+      state.placementZones.map(placementLabel)
+    );
+
     review.innerHTML = `
-      <div><span>${escapeHtml(t("Date", "Date"))}</span><strong>${state.selectedDate || "—"}</strong></div>
+      <div><span>${escapeHtml(t("Date", "Date"))}</span><strong>${formatDateForDisplay(state.selectedDate)}</strong></div>
       <div><span>${escapeHtml(t("Time", "Time"))}</span><strong>${state.selectedTime || "—"}</strong></div>
       <div><span>${escapeHtml(t("Booking type", "Booking type"))}</span><strong>${bookingTypeLabel()}</strong></div>
-      <div><span>${escapeHtml(t("Session", "Session"))}</span><strong>${state.duration / 60}h</strong></div>
+      <div><span>${escapeHtml(t("Session", "Session"))}</span><strong>${escapeHtml(t("%(count)s h", "%(count)s h", { count: state.duration / 60 }))}</strong></div>
       <div><span>${escapeHtml(t("Consultation", "Consultation"))}</span><strong>${consultationStatusLabel()}</strong></div>
       ${state.consultationNote ? `<div><span>${escapeHtml(t("Consultation note", "Consultation note"))}</span><strong>${escapeHtml(state.consultationNote)}</strong></div>` : ""}
-      <div><span>${escapeHtml(t("Styles", "Styles"))}</span><strong>${state.styles.join(", ") || "—"}</strong></div>
-      <div><span>${escapeHtml(t("Placement", "Placement"))}</span><strong>${state.placement || "—"}</strong></div>
-      <div><span>${escapeHtml(t("Size", "Size"))}</span><strong>${state.size || "—"}</strong></div>
-      <div><span>${escapeHtml(t("Budget", "Budget"))}</span><strong>${state.budget || "—"}</strong></div>
-      <div><span>${escapeHtml(t("References", "References"))}</span><strong>${state.references.length} ${escapeHtml(t("uploaded", "uploaded"))}</strong></div>
+      <div><span>${escapeHtml(t("Styles", "Styles"))}</span><strong>${escapeHtml(localizedStyles || "—")}</strong></div>
+      <div><span>${escapeHtml(t("Placement", "Placement"))}</span><strong>${escapeHtml(localizedPlacement || "—")}</strong></div>
+      <div><span>${escapeHtml(t("Size", "Size"))}</span><strong>${escapeHtml(state.size ? choiceLabel("size", state.size) : "—")}</strong></div>
+      <div><span>${escapeHtml(t("Budget", "Budget"))}</span><strong>${escapeHtml(state.budget ? choiceLabel("budget", state.budget) : "—")}</strong></div>
+      <div><span>${escapeHtml(t("References", "References"))}</span><strong>${escapeHtml(t("Uploaded", "Uploaded"))}: ${state.references.length}</strong></div>
     `;
   }
 
@@ -660,22 +701,22 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (!state.styles.length) {
-        alert("Please choose at least one tattoo style.");
+        alert(t("Please choose at least one tattoo style.", "Please choose at least one tattoo style."));
         return false;
       }
 
       if (!state.placement) {
-        alert("Please choose tattoo placement.");
+        alert(t("Please choose tattoo placement.", "Please choose tattoo placement."));
         return false;
       }
 
       if (!state.size) {
-        alert("Please choose tattoo size.");
+        alert(t("Please choose tattoo size.", "Please choose tattoo size."));
         return false;
       }
 
       if (!state.budget) {
-        alert("Please choose your budget.");
+        alert(t("Please choose your budget.", "Please choose your budget."));
         return false;
       }
 
