@@ -42,7 +42,13 @@
   <div class="calendar-layout">
     <section class="calendar-board">
       <div class="weekday-row" aria-hidden="true">
-        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        <span>{% trans "Mon" %}</span>
+        <span>{% trans "Tue" %}</span>
+        <span>{% trans "Wed" %}</span>
+        <span>{% trans "Thu" %}</span>
+        <span>{% trans "Fri" %}</span>
+        <span>{% trans "Sat" %}</span>
+        <span>{% trans "Sun" %}</span>
       </div>
       <section id="calendar-grid" class="calendar-grid" aria-live="polite"></section>
       <section id="calendar-status" class="calendar-status"></section>
@@ -110,6 +116,8 @@
     <button class="primary" type="submit">{% trans "Save" %}</button>
   </form>
 </div>
+
+{{ calendar_i18n|json_script:"calendar-i18n" }}
 {% endblock %}
 
 {% block extra_js %}

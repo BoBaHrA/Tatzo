@@ -201,10 +201,9 @@ msgid "Not required"
 msgstr "Не отправлено"
 
 #: appointments/models.py:314
-#, fuzzy
 #| msgid "Tattoo Artist"
 msgid "Artist"
-msgstr "Тату-мастер"
+msgstr "Мастер"
 
 #: appointments/models.py:322
 #: templates/appointments/artist_booking_settings.html:354
@@ -357,11 +356,11 @@ msgstr ""
 
 #: appointments/views.py:762
 msgid "Calendar event creation is not implemented yet."
-msgstr ""
+msgstr "Создание событий календаря пока не реализовано."
 
 #: appointments/views.py:771 appointments/views.py:780
 msgid "Use artist dashboard blocked dates for now."
-msgstr ""
+msgstr "Пока используйте заблокированные даты в панели мастера."
 
 #: appointments/views.py:818
 #, fuzzy
@@ -1490,7 +1489,7 @@ msgstr ""
 #: templates/appointments/calendar_page.html:63
 #: templates/users/calendar.html:31
 msgid "Today"
-msgstr ""
+msgstr "Сегодня"
 
 #: templates/appointments/calendar_page.html:33
 msgid "Next month"
@@ -1505,17 +1504,17 @@ msgstr "Календарь"
 #: templates/appointments/calendar_page.html:40
 #: templates/users/calendar.html:36
 msgid "Month"
-msgstr ""
+msgstr "Месяц"
 
 #: templates/appointments/calendar_page.html:41
 #: templates/users/calendar.html:37
 msgid "Week"
-msgstr ""
+msgstr "Неделя"
 
 #: templates/appointments/calendar_page.html:42
 #: templates/users/calendar.html:38
 msgid "Day"
-msgstr ""
+msgstr "День"
 
 #: templates/appointments/calendar_page.html:47
 #, fuzzy
@@ -1565,7 +1564,7 @@ msgstr "Календарь"
 #: templates/appointments/calendar_page.html:84
 #: templates/users/calendar.html:53
 msgid "Insights"
-msgstr ""
+msgstr "Подсказки"
 
 #: templates/appointments/calendar_page.html:85
 msgid "This month"
@@ -1580,7 +1579,7 @@ msgstr "Пока нет чатов"
 #: templates/appointments/calendar_page.html:100
 #: templates/users/calendar.html:68
 msgid "Legend"
-msgstr ""
+msgstr "Легенда"
 
 #: templates/appointments/calendar_page.html:101
 msgid "Event status"
@@ -2552,44 +2551,38 @@ msgid "This album has no works yet."
 msgstr "В этом альбоме пока нет работ."
 
 #: templates/users/calendar.html:60
-#, fuzzy
 #| msgid "Add Location"
 msgid "Add session"
-msgstr "Добавить место"
+msgstr "Добавить сеанс"
 
 #: templates/users/calendar.html:61
-#, fuzzy
 #| msgid "Block"
 msgid "Block time"
-msgstr "Заблокировать"
+msgstr "Заблокировать время"
 
 #: templates/users/calendar.html:62
-#, fuzzy
 #| msgid "Start verification"
 msgid "Set vacation"
-msgstr "Начать верификацию"
+msgstr "Установить отпуск"
 
 #: templates/users/calendar.html:63
-#, fuzzy
 #| msgid "Create account"
 msgid "Create consultation"
-msgstr "Создать аккаунт"
+msgstr "Создать консультацию"
 
 #: templates/users/calendar.html:71
-#, fuzzy
 #| msgid "Block"
 msgid "Blocked"
-msgstr "Заблокировать"
+msgstr "Заблокировано"
 
 #: templates/users/calendar.html:90
-#, fuzzy
 #| msgid "Calendar"
 msgid "Calendar event"
-msgstr "Календарь"
+msgstr "Событие календаря"
 
 #: templates/users/calendar.html:97
 msgid "End time"
-msgstr ""
+msgstr "Время окончания"
 
 #: templates/users/chat_thread.html:5
 #, python-format
@@ -4656,7 +4649,7 @@ msgstr "Выбрано: пока ничего"
 
 #: appointments/views.py
 msgid "Already completed"
-msgstr "Уже проведена"
+msgstr "Уже завершено"
 
 #: appointments/views.py
 msgid "Not completed"
@@ -4834,3 +4827,144 @@ msgstr[2] "%(count)s минут"
 msgctxt "working hours"
 msgid "Close"
 msgstr "Окончание"
+
+#: appointments/views.py templates/users/calendar.html
+#, python-format
+msgid "%(hours)s h"
+msgstr "%(hours)s ч"
+
+#: appointments/views.py templates/users/calendar.html
+#, python-format
+msgid "+%(count)s more"
+msgstr "+ ещё %(count)s"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Appointment reference image"
+msgstr "Референс записи"
+
+#: appointments/views.py templates/users/calendar.html
+#, python-format
+msgid "Booked: %(booked)s/%(capacity)s h"
+msgstr "Занято: %(booked)s/%(capacity)s ч"
+
+#: appointments/views.py templates/users/calendar.html
+#, python-format
+msgid "Booked: %(hours)s h"
+msgstr "Занято: %(hours)s ч"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Brief / Notes"
+msgstr "Описание / заметки"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Client requested reschedule from calendar."
+msgstr "Клиент запросил перенос через календарь."
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Could not load calendar."
+msgstr "Не удалось загрузить календарь."
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Directions"
+msgstr "Маршрут"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Loading calendar…"
+msgstr "Загрузка календаря…"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Mark completed"
+msgstr "Отметить завершённым"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Message artist"
+msgstr "Написать мастеру"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "More event actions"
+msgstr "Другие действия с записью"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "No alerts right now."
+msgstr "Сейчас нет предупреждений."
+
+#: appointments/views.py templates/users/calendar.html
+msgid "No artist"
+msgstr "Мастер не указан"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "No client"
+msgstr "Клиент не указан"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "No reference images uploaded."
+msgstr "Референсы не загружены."
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Nothing scheduled."
+msgstr "Ничего не запланировано."
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Open chat"
+msgstr "Открыть чат"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Open project"
+msgstr "Открыть проект"
+
+#: appointments/views.py templates/users/calendar.html
+#, python-format
+msgid "Preview %(name)s"
+msgstr "Открыть %(name)s"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Request reschedule"
+msgstr "Запросить перенос"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Reschedule"
+msgstr "Перенести"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Show appointment details"
+msgstr "Показать детали записи"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "View project"
+msgstr "Посмотреть проект"
+
+#: appointments/views.py
+#, python-format
+msgid "%(count)s appointment"
+msgid_plural "%(count)s appointments"
+msgstr[0] "%(count)s запись"
+msgstr[1] "%(count)s записи"
+msgstr[2] "%(count)s записей"
+
+#: appointments/views.py
+#, python-format
+msgid "%(count)s consultation"
+msgid_plural "%(count)s consultations"
+msgstr[0] "%(count)s консультация"
+msgstr[1] "%(count)s консультации"
+msgstr[2] "%(count)s консультаций"
+
+#: appointments/views.py
+#, python-format
+msgid "%(count)s image"
+msgid_plural "%(count)s images"
+msgstr[0] "%(count)s изображение"
+msgstr[1] "%(count)s изображения"
+msgstr[2] "%(count)s изображений"
+
+#: appointments/views.py
+#, python-format
+msgid "%(count)s session"
+msgid_plural "%(count)s sessions"
+msgstr[0] "%(count)s сеанс"
+msgstr[1] "%(count)s сеанса"
+msgstr[2] "%(count)s сеансов"
+
+#: appointments/views.py
+msgid "Could not update calendar."
+msgstr "Не удалось обновить календарь."

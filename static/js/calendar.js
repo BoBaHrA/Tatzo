@@ -2,6 +2,33 @@
   const root = document.querySelector(".tatzo-calendar-page.calendar-shell");
   if (!root) return;
 
+  const i18nElement = document.getElementById("calendar-i18n");
+  const i18n = i18nElement ? JSON.parse(i18nElement.textContent) : {};
+  const locale = document.documentElement.lang || undefined;
+  const pluralRules = new Intl.PluralRules(locale);
+  const fallbackPlurals = {
+    session: { one: "%(count)s session", other: "%(count)s sessions" },
+    consultation: { one: "%(count)s consultation", other: "%(count)s consultations" },
+    appointment: { one: "%(count)s appointment", other: "%(count)s appointments" },
+    image: { one: "%(count)s image", other: "%(count)s images" },
+    minute: { one: "%(count)s minute", other: "%(count)s minutes" },
+  };
+
+  function t(key, fallback, params = {}) {
+    const value = i18n[key] || fallback;
+    return Object.entries(params).reduce(
+      (text, [name, replacement]) => text.replaceAll(`%(${name})s`, replacement),
+      value
+    );
+  }
+
+  function plural(key, count) {
+    const forms = i18n.plurals?.[key] || fallbackPlurals[key];
+    const category = pluralRules.select(count);
+    const template = forms?.[category] || forms?.other || forms?.one || "";
+    return template.replaceAll("%(count)s", count);
+  }
+
   const state = {
     view: "month",
     date: new Date(),
@@ -23,8 +50,6 @@
     return x;
   };
   const isSameDay = (a, b) => ymd(a) === ymd(b);
-  const plural = (count, singular, pluralForm = `${singular}s`) => `${count} ${count === 1 ? singular : pluralForm}`;
-
   function range() {
     let s;
     let e;
@@ -46,10 +71,10 @@
 
   async function load() {
     const [s, e] = range();
-    status.textContent = "Loading calendar…";
+    status.textContent = t("loading", "Loading calendar…");
     const r = await fetch(`${root.dataset.eventsUrl}?start=${ymd(s)}&end=${ymd(e)}`);
     if (!r.ok) {
-      status.textContent = "Could not load calendar.";
+      status.textContent = t("load_error", "Could not load calendar.");
       return;
     }
     const data = await r.json();
@@ -57,7 +82,9 @@
     state.days = data.days || {};
     renderInsights(data.insights || []);
     render();
-    status.textContent = state.view === "day" && !state.events.length ? "Nothing scheduled." : "";
+    status.textContent = state.view === "day" && !state.events.length
+      ? t("nothing_scheduled", "Nothing scheduled.")
+      : "";
   }
 
   function renderInsights(items) {
@@ -65,7 +92,7 @@
     box.textContent = "";
     if (!items.length) {
       const p = document.createElement("p");
-      p.textContent = "No alerts right now.";
+      p.textContent = t("no_alerts", "No alerts right now.");
       box.appendChild(p);
       return;
     }
@@ -79,7 +106,7 @@
   function render() {
     grid.textContent = "";
     const [s, e] = range();
-    title.textContent = state.date.toLocaleDateString(undefined, {
+    title.textContent = state.date.toLocaleDateString(locale, {
       month: "long",
       year: "numeric",
       day: state.view === "day" ? "numeric" : undefined,
@@ -119,23 +146,41 @@
     });
 
     if (state.role === "artist" && day.events) {
-      if (day.sessions) appendCellLine(cell, plural(day.sessions, "session"));
-      if (day.consultations) appendCellLine(cell, plural(day.consultations, "consultation"));
-      if (day.booked_hours) appendCellLine(cell, `${day.booked_hours}h booked`, true);
+      if (day.sessions) appendCellLine(cell, plural("session", day.sessions));
+      if (day.consultations) appendCellLine(cell, plural("consultation", day.consultations));
+      if (day.booked_hours) {
+        appendCellLine(
+          cell,
+          t("hours_booked", "Booked: %(hours)s h", { hours: day.booked_hours }),
+          true
+        );
+      }
     }
 
     if (state.role !== "artist") {
       evs.slice(0, 2).forEach((ev) => {
         const p = document.createElement("span");
         p.className = "event-dot";
-        const time = new Date(ev.starts_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        const time = new Date(ev.starts_at).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
         p.textContent = `${time} ${ev.event_type_label} · ${ev.artist_name}`;
         cell.appendChild(p);
       });
-      if (evs.length > 2) appendCellLine(cell, `+${evs.length - 2} more`, true);
+      if (evs.length > 2) {
+        appendCellLine(
+          cell,
+          t("more", "+%(count)s more", { count: evs.length - 2 }),
+          true
+        );
+      }
     }
 
-    if (day.workload === "vacation" || day.workload === "blocked") appendCellLine(cell, day.workload, true);
+    if (day.workload === "vacation" || day.workload === "blocked") {
+      appendCellLine(
+        cell,
+        t(day.workload, day.workload === "vacation" ? "Vacation" : "Blocked"),
+        true
+      );
+    }
     cell.addEventListener("click", () => openDay(d));
     grid.appendChild(cell);
   }
@@ -156,18 +201,21 @@
     const key = ymd(d);
     const evs = eventsForDay(key);
     const modal = document.getElementById("day-modal");
-    document.getElementById("day-modal-title").textContent = d.toLocaleDateString();
+    document.getElementById("day-modal-title").textContent = d.toLocaleDateString(locale);
     const sum = document.getElementById("day-modal-summary");
     const day = state.days[key] || {};
     sum.textContent = state.role === "artist"
-      ? `${plural(day.sessions || 0, "session")} · ${plural(day.consultations || 0, "consultation")} · ${day.booked_hours || 0}/${root.dataset.capacity}h booked`
-      : plural(evs.length, "appointment");
+      ? `${plural("session", day.sessions || 0)} · ${plural("consultation", day.consultations || 0)} · ${t("booked_capacity", "Booked: %(booked)s/%(capacity)s h", {
+          booked: day.booked_hours || 0,
+          capacity: root.dataset.capacity,
+        })}`
+      : plural("appointment", evs.length);
     const wrap = document.getElementById("day-modal-events");
     wrap.textContent = "";
     if (!evs.length) {
       const empty = document.createElement("p");
       empty.className = "calendar-empty";
-      empty.textContent = "Nothing scheduled.";
+      empty.textContent = t("nothing_scheduled", "Nothing scheduled.");
       wrap.appendChild(empty);
     }
     evs.forEach((ev) => wrap.appendChild(eventCard(ev)));
@@ -184,7 +232,7 @@
     main.tabIndex = 0;
     main.setAttribute("role", "button");
     main.setAttribute("aria-expanded", "false");
-    main.setAttribute("aria-label", "Show appointment details");
+    main.setAttribute("aria-label", t("show_details", "Show appointment details"));
 
     const top = document.createElement("div");
     top.className = "calendar-event-top";
@@ -206,8 +254,8 @@
     const person = document.createElement("p");
     person.className = "calendar-event-person";
     person.textContent = state.role === "artist"
-      ? `Client: ${ev.client_name || "No client"}`
-      : `Artist: ${ev.artist_name || "No artist"}`;
+      ? `${t("client", "Client")}: ${ev.client_name || t("no_client", "No client")}`
+      : `${t("artist", "Artist")}: ${ev.artist_name || t("no_artist", "No artist")}`;
     main.appendChild(person);
 
     const metaItems = [ev.placement, formatStyles(ev)].filter(Boolean);
@@ -258,38 +306,38 @@
 
     const grid = document.createElement("div");
     grid.className = "calendar-event-detail-grid";
-    addSummaryRow(grid, "Client", ev.client_name);
-    addSummaryRow(grid, "Artist", ev.artist_name);
-    addSummaryRow(grid, "Date", formatDate(ev.date || ev.starts_at));
-    addSummaryRow(grid, "Time", formatTimeRange(ev));
-    addSummaryRow(grid, "Duration", formatDuration(ev));
-    addSummaryRow(grid, "Size", ev.size);
-    addSummaryRow(grid, "Placement", ev.placement);
-    addSummaryRow(grid, "Style(s)", formatStyles(ev));
-    addSummaryRow(grid, "Budget", ev.budget);
-    addSummaryRow(grid, "References", plural(ev.reference_count || 0, "image"));
+    addSummaryRow(grid, t("client", "Client"), ev.client_name);
+    addSummaryRow(grid, t("artist", "Artist"), ev.artist_name);
+    addSummaryRow(grid, t("date", "Date"), formatDate(ev.date || ev.starts_at));
+    addSummaryRow(grid, t("time", "Time"), formatTimeRange(ev));
+    addSummaryRow(grid, t("duration", "Duration"), formatDuration(ev));
+    addSummaryRow(grid, t("size", "Size"), ev.size);
+    addSummaryRow(grid, t("placement", "Placement"), ev.placement);
+    addSummaryRow(grid, t("styles", "Styles"), formatStyles(ev));
+    addSummaryRow(grid, t("budget", "Budget"), ev.budget);
+    addSummaryRow(grid, t("references", "References"), plural("image", ev.reference_count || 0));
     panel.appendChild(grid);
 
     const brief = [ev.description, ev.notes].filter(Boolean).join("\n\n");
-    addTextSection(panel, "Brief / Notes", brief);
+    addTextSection(panel, t("brief_notes", "Brief / Notes"), brief);
     if (ev.consultation_already_completed || ev.consultation_note) {
       addTextSection(
         panel,
-        "Consultation",
-        [ev.consultation_already_completed ? "Already completed" : "", ev.consultation_note].filter(Boolean).join(" · "),
+        t("consultation", "Consultation"),
+        [ev.consultation_already_completed ? t("already_completed", "Already completed") : "", ev.consultation_note].filter(Boolean).join(" · "),
       );
     }
 
     const refSection = document.createElement("section");
     refSection.className = "calendar-event-references";
     const refTitle = document.createElement("h5");
-    refTitle.textContent = "Reference images";
+    refTitle.textContent = t("reference_images", "Reference images");
     refSection.appendChild(refTitle);
     const images = Array.isArray(ev.reference_images) ? ev.reference_images.filter((image) => image?.url) : [];
     if (!images.length) {
       const empty = document.createElement("p");
       empty.className = "calendar-reference-empty";
-      empty.textContent = "No reference images uploaded.";
+      empty.textContent = t("no_reference_images", "No reference images uploaded.");
       refSection.appendChild(empty);
     } else {
       const refs = document.createElement("div");
@@ -298,7 +346,12 @@
         const button = document.createElement("button");
         button.type = "button";
         button.className = "calendar-reference-thumb";
-        button.setAttribute("aria-label", `Preview ${image.original_name || "appointment reference image"}`);
+        button.setAttribute(
+          "aria-label",
+          t("preview", "Preview %(name)s", {
+            name: image.original_name || t("appointment_reference_image", "appointment reference image"),
+          })
+        );
         button.addEventListener("click", (event) => {
           event.preventDefault();
           event.stopPropagation();
@@ -306,7 +359,7 @@
         });
         const img = document.createElement("img");
         img.src = image.url;
-        img.alt = image.original_name || "Appointment reference image";
+        img.alt = image.original_name || t("appointment_reference_image", "Appointment reference image");
         button.appendChild(img);
         refs.appendChild(button);
       });
@@ -344,6 +397,7 @@
   }
 
   function formatStyles(ev) {
+    if (ev.styles_label) return ev.styles_label;
     if (Array.isArray(ev.styles) && ev.styles.length) return ev.styles.join(", ");
     return ev.tattoo_style || "";
   }
@@ -351,7 +405,7 @@
   function formatDate(value) {
     if (!value) return "";
     const date = value.length === 10 ? new Date(`${value}T00:00:00`) : new Date(value);
-    return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString(locale);
   }
 
   function formatTimeRange(ev) {
@@ -359,14 +413,20 @@
     if (!ev.starts_at) return "";
     const start = new Date(ev.starts_at);
     const end = ev.ends_at ? new Date(ev.ends_at) : null;
-    const startText = start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    const endText = end ? end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
+    const startText = start.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
+    const endText = end ? end.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) : "";
     return [startText, endText].filter(Boolean).join(" — ");
   }
 
   function formatDuration(ev) {
-    if (ev.duration_minutes) return `${ev.duration_minutes} minutes (${ev.duration_hours}h)`;
-    return ev.duration_hours ? `${ev.duration_hours}h` : "";
+    if (ev.duration_minutes) {
+      return `${plural("minute", ev.duration_minutes)} (${t("hours_short", "%(hours)s h", {
+        hours: ev.duration_hours,
+      })})`;
+    }
+    return ev.duration_hours
+      ? t("hours_short", "%(hours)s h", { hours: ev.duration_hours })
+      : "";
   }
 
   function actionBar(ev) {
@@ -374,21 +434,48 @@
     actions.className = "calendar-event-actions";
 
     if (ev.actions?.detail_url) {
-      addActionLink(actions, ev.actions.detail_url, state.role === "artist" ? "Open project" : "View project", "primary");
+      addActionLink(
+        actions,
+        ev.actions.detail_url,
+        state.role === "artist"
+          ? t("open_project", "Open project")
+          : t("view_project", "View project"),
+        "primary"
+      );
     }
     if (ev.actions?.chat_url) {
-      addActionLink(actions, ev.actions.chat_url, state.role === "artist" ? "Open chat" : "Message artist", "ghost");
+      addActionLink(
+        actions,
+        ev.actions.chat_url,
+        state.role === "artist"
+          ? t("open_chat", "Open chat")
+          : t("message_artist", "Message artist"),
+        "ghost"
+      );
     }
     if (state.role !== "artist" && ev.location) {
-      addActionLink(actions, `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.location)}`, "Directions", "ghost");
+      addActionLink(
+        actions,
+        `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.location)}`,
+        t("directions", "Directions"),
+        "ghost"
+      );
     }
 
     const overflowItems = [];
     if (ev.actions?.complete_url) {
-      overflowItems.push({ label: "Mark completed", kind: "success", action: () => postUrl(ev.actions.complete_url) });
+      overflowItems.push({ label: t("mark_completed", "Mark completed"), kind: "success", action: () => postUrl(ev.actions.complete_url) });
     }
     if (ev.actions?.reschedule_url) {
-      overflowItems.push({ label: state.role === "artist" ? "Reschedule" : "Request reschedule", kind: "ghost", action: () => postUrl(ev.actions.reschedule_url, { reason: "Client requested reschedule from calendar." }) });
+      overflowItems.push({
+        label: state.role === "artist"
+          ? t("reschedule", "Reschedule")
+          : t("request_reschedule", "Request reschedule"),
+        kind: "ghost",
+        action: () => postUrl(ev.actions.reschedule_url, {
+          reason: t("reschedule_reason", "Client requested reschedule from calendar."),
+        }),
+      });
     }
 
     if (overflowItems.length) actions.appendChild(overflowMenu(overflowItems));
@@ -410,7 +497,7 @@
     button.type = "button";
     button.className = "calendar-event-menu-button";
     button.textContent = "•••";
-    button.setAttribute("aria-label", "More event actions");
+    button.setAttribute("aria-label", t("more_actions", "More event actions"));
     button.setAttribute("aria-haspopup", "menu");
     button.setAttribute("aria-expanded", "false");
     const menu = document.createElement("div");
@@ -465,8 +552,8 @@
 
     closeAllMenus();
     preview.src = image.url;
-    preview.alt = image.original_name || "Appointment reference image";
-    title.textContent = image.original_name || "Reference image";
+    preview.alt = image.original_name || t("appointment_reference_image", "Appointment reference image");
+    title.textContent = image.original_name || t("reference_image", "Reference image");
     modal.hidden = false;
   }
 
@@ -544,7 +631,9 @@
       e.target.reset();
       load();
     } else {
-      document.getElementById("create-error").textContent = JSON.stringify((await r.json()).error);
+      const data = await r.json().catch(() => ({}));
+      document.getElementById("create-error").textContent =
+        data.error || t("action_error", "Could not update calendar.");
     }
   });
 

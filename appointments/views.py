@@ -13,7 +13,7 @@ from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, ngettext
 from django.views.decorators.http import require_POST
 
 from .models import (
@@ -675,6 +675,83 @@ def calendar_page(request):
                 int(getattr(booking_settings, "maximum_session_hours", 8) or 8),
             )
 
+    calendar_i18n = {
+        "loading": _("Loading calendar…"),
+        "load_error": _("Could not load calendar."),
+        "action_error": _("Could not update calendar."),
+        "nothing_scheduled": _("Nothing scheduled."),
+        "no_alerts": _("No alerts right now."),
+        "hours_booked": _("Booked: %(hours)s h"),
+        "booked_capacity": _("Booked: %(booked)s/%(capacity)s h"),
+        "more": _("+%(count)s more"),
+        "vacation": _("Vacation"),
+        "blocked": _("Blocked"),
+        "show_details": _("Show appointment details"),
+        "client": _("Client"),
+        "no_client": _("No client"),
+        "artist": _("Artist"),
+        "no_artist": _("No artist"),
+        "date": _("Date"),
+        "time": _("Time"),
+        "duration": _("Duration"),
+        "size": _("Size"),
+        "placement": _("Placement"),
+        "styles": _("Styles"),
+        "budget": _("Budget"),
+        "references": _("References"),
+        "brief_notes": _("Brief / Notes"),
+        "consultation": _("Consultation"),
+        "already_completed": _("Already completed"),
+        "reference_images": _("Reference images"),
+        "no_reference_images": _("No reference images uploaded."),
+        "preview": _("Preview %(name)s"),
+        "appointment_reference_image": _("Appointment reference image"),
+        "reference_image": _("Reference image"),
+        "open_project": _("Open project"),
+        "view_project": _("View project"),
+        "open_chat": _("Open chat"),
+        "message_artist": _("Message artist"),
+        "directions": _("Directions"),
+        "mark_completed": _("Mark completed"),
+        "reschedule": _("Reschedule"),
+        "request_reschedule": _("Request reschedule"),
+        "reschedule_reason": _("Client requested reschedule from calendar."),
+        "more_actions": _("More event actions"),
+        "hours_short": _("%(hours)s h"),
+        "plurals": {
+            "session": {
+                "one": ngettext("%(count)s session", "%(count)s sessions", 1),
+                "few": ngettext("%(count)s session", "%(count)s sessions", 2),
+                "many": ngettext("%(count)s session", "%(count)s sessions", 5),
+                "other": ngettext("%(count)s session", "%(count)s sessions", 2),
+            },
+            "consultation": {
+                "one": ngettext("%(count)s consultation", "%(count)s consultations", 1),
+                "few": ngettext("%(count)s consultation", "%(count)s consultations", 2),
+                "many": ngettext("%(count)s consultation", "%(count)s consultations", 5),
+                "other": ngettext("%(count)s consultation", "%(count)s consultations", 2),
+            },
+            "appointment": {
+                "one": ngettext("%(count)s appointment", "%(count)s appointments", 1),
+                "few": ngettext("%(count)s appointment", "%(count)s appointments", 2),
+                "many": ngettext("%(count)s appointment", "%(count)s appointments", 5),
+                "other": ngettext("%(count)s appointment", "%(count)s appointments", 2),
+            },
+            "image": {
+                "one": ngettext("%(count)s image", "%(count)s images", 1),
+                "few": ngettext("%(count)s image", "%(count)s images", 2),
+                "many": ngettext("%(count)s image", "%(count)s images", 5),
+                "other": ngettext("%(count)s image", "%(count)s images", 2),
+            },
+            "minute": {
+                "one": ngettext("%(count)s minute", "%(count)s minutes", 1),
+                "few": ngettext("%(count)s minute", "%(count)s minutes", 2),
+                "many": ngettext("%(count)s minute", "%(count)s minutes", 5),
+                "other": ngettext("%(count)s minute", "%(count)s minutes", 2),
+            },
+        },
+    }
+
     return render(
         request,
         "users/calendar.html",
@@ -683,6 +760,7 @@ def calendar_page(request):
             "calendar_role": "artist" if is_artist else "client",
             "calendar_clients": calendar_clients,
             "calendar_capacity_hours": calendar_capacity_hours,
+            "calendar_i18n": calendar_i18n,
         },
     )
 
@@ -796,7 +874,7 @@ def calendar_events(request):
             )
 
         styles = appointment.styles or []
-        tattoo_style = ", ".join(styles)
+        tattoo_style = appointment.localized_styles
         detail_url = reverse("appointment_detail", kwargs={"appointment_id": appointment.id})
         other_user = appointment.client if request.user == appointment.artist else appointment.artist
 
@@ -822,11 +900,12 @@ def calendar_events(request):
                 "client_name": appointment.client.username,
                 "project_title": appointment.get_booking_type_display(),
                 "title": appointment.get_booking_type_display(),
-                "placement": appointment.placement,
+                "placement": appointment.localized_placement,
                 "tattoo_style": tattoo_style,
                 "styles": styles,
-                "size": appointment.size,
-                "budget": appointment.budget,
+                "styles_label": appointment.localized_styles,
+                "size": appointment.localized_size,
+                "budget": appointment.localized_budget,
                 "description": appointment.description or "",
                 "notes": appointment.description or "",
                 "consultation_already_completed": appointment.consultation_already_completed,

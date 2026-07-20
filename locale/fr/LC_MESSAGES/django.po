@@ -200,10 +200,9 @@ msgid "Not required"
 msgstr "Non envoyé"
 
 #: appointments/models.py:314
-#, fuzzy
 #| msgid "Tattoo Artist"
 msgid "Artist"
-msgstr "Tatoueur"
+msgstr "Artiste"
 
 #: appointments/models.py:322
 #: templates/appointments/artist_booking_settings.html:354
@@ -356,11 +355,12 @@ msgstr ""
 
 #: appointments/views.py:762
 msgid "Calendar event creation is not implemented yet."
-msgstr ""
+msgstr "La création d’événements dans le calendrier n’est pas encore disponible."
 
 #: appointments/views.py:771 appointments/views.py:780
 msgid "Use artist dashboard blocked dates for now."
 msgstr ""
+"Pour le moment, utilisez les dates bloquées dans le tableau de bord artiste."
 
 #: appointments/views.py:818
 #, fuzzy
@@ -1488,7 +1488,7 @@ msgstr ""
 #: templates/appointments/calendar_page.html:63
 #: templates/users/calendar.html:31
 msgid "Today"
-msgstr ""
+msgstr "Aujourd’hui"
 
 #: templates/appointments/calendar_page.html:33
 msgid "Next month"
@@ -1503,17 +1503,17 @@ msgstr "Calendrier"
 #: templates/appointments/calendar_page.html:40
 #: templates/users/calendar.html:36
 msgid "Month"
-msgstr ""
+msgstr "Mois"
 
 #: templates/appointments/calendar_page.html:41
 #: templates/users/calendar.html:37
 msgid "Week"
-msgstr ""
+msgstr "Semaine"
 
 #: templates/appointments/calendar_page.html:42
 #: templates/users/calendar.html:38
 msgid "Day"
-msgstr ""
+msgstr "Jour"
 
 #: templates/appointments/calendar_page.html:47
 #, fuzzy
@@ -1563,7 +1563,7 @@ msgstr "Calendrier"
 #: templates/appointments/calendar_page.html:84
 #: templates/users/calendar.html:53
 msgid "Insights"
-msgstr ""
+msgstr "Informations"
 
 #: templates/appointments/calendar_page.html:85
 msgid "This month"
@@ -1578,7 +1578,7 @@ msgstr "Aucune conversation pour le moment"
 #: templates/appointments/calendar_page.html:100
 #: templates/users/calendar.html:68
 msgid "Legend"
-msgstr ""
+msgstr "Légende"
 
 #: templates/appointments/calendar_page.html:101
 msgid "Event status"
@@ -2561,44 +2561,38 @@ msgid "This album has no works yet."
 msgstr "Cet album ne contient aucun travail pour le moment."
 
 #: templates/users/calendar.html:60
-#, fuzzy
 #| msgid "Add Location"
 msgid "Add session"
-msgstr "Ajouter un lieu"
+msgstr "Ajouter une séance"
 
 #: templates/users/calendar.html:61
-#, fuzzy
 #| msgid "Block"
 msgid "Block time"
-msgstr "Bloquer"
+msgstr "Bloquer une période"
 
 #: templates/users/calendar.html:62
-#, fuzzy
 #| msgid "Start verification"
 msgid "Set vacation"
-msgstr "Commencer la vérification"
+msgstr "Définir des vacances"
 
 #: templates/users/calendar.html:63
-#, fuzzy
 #| msgid "Create account"
 msgid "Create consultation"
-msgstr "Créer un compte"
+msgstr "Créer une consultation"
 
 #: templates/users/calendar.html:71
-#, fuzzy
 #| msgid "Block"
 msgid "Blocked"
-msgstr "Bloquer"
+msgstr "Bloqué"
 
 #: templates/users/calendar.html:90
-#, fuzzy
 #| msgid "Calendar"
 msgid "Calendar event"
-msgstr "Calendrier"
+msgstr "Événement du calendrier"
 
 #: templates/users/calendar.html:97
 msgid "End time"
-msgstr ""
+msgstr "Heure de fin"
 
 #: templates/users/chat_thread.html:5
 #, python-format
@@ -4684,7 +4678,7 @@ msgstr "Sélection : aucune pour le moment"
 
 #: appointments/views.py
 msgid "Already completed"
-msgstr "Déjà effectuée"
+msgstr "Déjà terminée"
 
 #: appointments/views.py
 msgid "Not completed"
@@ -4861,3 +4855,140 @@ msgstr[1] "%(count)s minutes"
 msgctxt "working hours"
 msgid "Close"
 msgstr "Fermeture"
+
+#: appointments/views.py templates/users/calendar.html
+#, python-format
+msgid "%(hours)s h"
+msgstr "%(hours)s h"
+
+#: appointments/views.py templates/users/calendar.html
+#, python-format
+msgid "+%(count)s more"
+msgstr "+%(count)s de plus"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Appointment reference image"
+msgstr "Image de référence du rendez-vous"
+
+#: appointments/views.py templates/users/calendar.html
+#, python-format
+msgid "Booked: %(booked)s/%(capacity)s h"
+msgstr "Réservé : %(booked)s/%(capacity)s h"
+
+#: appointments/views.py templates/users/calendar.html
+#, python-format
+msgid "Booked: %(hours)s h"
+msgstr "Réservé : %(hours)s h"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Brief / Notes"
+msgstr "Brief / Notes"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Client requested reschedule from calendar."
+msgstr "Le client a demandé une reprogrammation depuis le calendrier."
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Could not load calendar."
+msgstr "Impossible de charger le calendrier."
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Directions"
+msgstr "Itinéraire"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Loading calendar…"
+msgstr "Chargement du calendrier…"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Mark completed"
+msgstr "Marquer comme terminé"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Message artist"
+msgstr "Contacter l’artiste"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "More event actions"
+msgstr "Plus d’actions pour ce rendez-vous"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "No alerts right now."
+msgstr "Aucune alerte pour le moment."
+
+#: appointments/views.py templates/users/calendar.html
+msgid "No artist"
+msgstr "Aucun artiste"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "No client"
+msgstr "Aucun client"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "No reference images uploaded."
+msgstr "Aucune image de référence ajoutée."
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Nothing scheduled."
+msgstr "Rien de prévu."
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Open chat"
+msgstr "Ouvrir le chat"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Open project"
+msgstr "Ouvrir le projet"
+
+#: appointments/views.py templates/users/calendar.html
+#, python-format
+msgid "Preview %(name)s"
+msgstr "Aperçu de %(name)s"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Request reschedule"
+msgstr "Demander une reprogrammation"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Reschedule"
+msgstr "Reprogrammer"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "Show appointment details"
+msgstr "Afficher les détails du rendez-vous"
+
+#: appointments/views.py templates/users/calendar.html
+msgid "View project"
+msgstr "Voir le projet"
+
+#: appointments/views.py
+#, python-format
+msgid "%(count)s appointment"
+msgid_plural "%(count)s appointments"
+msgstr[0] "%(count)s rendez-vous"
+msgstr[1] "%(count)s rendez-vous"
+
+#: appointments/views.py
+#, python-format
+msgid "%(count)s consultation"
+msgid_plural "%(count)s consultations"
+msgstr[0] "%(count)s consultation"
+msgstr[1] "%(count)s consultations"
+
+#: appointments/views.py
+#, python-format
+msgid "%(count)s image"
+msgid_plural "%(count)s images"
+msgstr[0] "%(count)s image"
+msgstr[1] "%(count)s images"
+
+#: appointments/views.py
+#, python-format
+msgid "%(count)s session"
+msgid_plural "%(count)s sessions"
+msgstr[0] "%(count)s séance"
+msgstr[1] "%(count)s séances"
+
+#: appointments/views.py
+msgid "Could not update calendar."
+msgstr "Impossible de mettre à jour le calendrier."
