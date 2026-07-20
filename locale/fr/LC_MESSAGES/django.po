@@ -1378,7 +1378,7 @@ msgid "Back to profile"
 msgstr "Retour au profil"
 
 #: templates/appointments/booking_wizard.html:31
-#, fuzzy, python-format
+#, python-format
 #| msgid "Chat with %(username)s"
 msgid "Book with %(username)s"
 msgstr "Prendre rendez-vous avec %(username)s"

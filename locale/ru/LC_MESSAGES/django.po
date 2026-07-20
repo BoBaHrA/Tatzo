@@ -1382,7 +1382,7 @@ msgid "Back to profile"
 msgstr "Вернуться к профилю"
 
 #: templates/appointments/booking_wizard.html:31
-#, fuzzy, python-format
+#, python-format
 #| msgid "Chat with %(username)s"
 msgid "Book with %(username)s"
 msgstr "Записаться к %(username)s"
