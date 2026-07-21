@@ -4,10 +4,12 @@
 {% block title %}{{ album.title }} — {{ profile_user.username }}{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
 <link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
 {% endblock %}
 
 {% block content %}
+{% include "partials/sidebar.html" with mobile_only=True %}
 
 {% trans "Portfolio work" as portfolio_work_label %}
 

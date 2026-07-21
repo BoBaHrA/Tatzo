@@ -4815,3 +4815,24 @@ msgstr "Votez pour les meilleurs travaux de tatouage, suivez les concours et dé
 #: users/views.py:2488
 msgid "Thank you! Your report has been sent."
 msgstr "Merci ! Votre signalement a été envoyé."
+
+#: templates/partials/sidebar.html templates/users/followers_list.html
+msgid "Followers"
+msgstr "Abonnés"
+
+#: templates/users/followers_list.html
+#, python-format
+msgid "%(username)s followers"
+msgstr "Abonnés de %(username)s"
+
+#: templates/users/followers_list.html
+msgid "Profiles following this user."
+msgstr "Profils abonnés à cet utilisateur."
+
+#: templates/users/followers_list.html
+msgid "No followers yet"
+msgstr "Aucun abonné pour le moment"
+
+#: templates/users/followers_list.html
+msgid "This user has no followers yet."
+msgstr "Cet utilisateur n’a encore aucun abonné."

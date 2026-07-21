@@ -4829,3 +4829,24 @@ msgstr "Голосуйте за лучшие тату-работы, следит
 #: users/views.py:2488
 msgid "Thank you! Your report has been sent."
 msgstr "Спасибо! Ваше обращение отправлено."
+
+#: templates/partials/sidebar.html templates/users/followers_list.html
+msgid "Followers"
+msgstr "Подписчики"
+
+#: templates/users/followers_list.html
+#, python-format
+msgid "%(username)s followers"
+msgstr "Подписчики %(username)s"
+
+#: templates/users/followers_list.html
+msgid "Profiles following this user."
+msgstr "Пользователи, подписанные на этого пользователя."
+
+#: templates/users/followers_list.html
+msgid "No followers yet"
+msgstr "Пока нет подписчиков"
+
+#: templates/users/followers_list.html
+msgid "This user has no followers yet."
+msgstr "На этого пользователя пока никто не подписан."

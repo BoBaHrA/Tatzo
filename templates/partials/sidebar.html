@@ -1,5 +1,6 @@
 {% load static i18n %}
 
+{% if not mobile_only %}
 <div class="sidebar">
   <ul class="sidebar-main-menu">
     <li>
@@ -179,6 +180,7 @@
     </li>
   </ul>
 </div>
+{% endif %}
 
 <header class="mobile-app-topbar">
   <div class="mobile-topbar-left">
@@ -207,10 +209,24 @@
         {% trans "Search" %}
       {% elif request.resolver_match.url_name == "chats_list" or request.resolver_match.url_name == "chat_thread" %}
         {% trans "Chats" %}
-      {% elif request.resolver_match.url_name == "coming_soon" and request.resolver_match.kwargs.feature == "maps" %}
+      {% elif request.resolver_match.url_name == "maps_page" %}
         {% trans "Maps" %}
-      {% elif request.resolver_match.url_name == "coming_soon" and request.resolver_match.kwargs.feature == "calendar" %}
+      {% elif request.resolver_match.url_name == "calendar" %}
         {% trans "Calendar" %}
+      {% elif request.resolver_match.url_name == "appointments_list" or request.resolver_match.url_name == "appointment_detail" %}
+        {% trans "Appointments" %}
+      {% elif request.resolver_match.url_name == "booking_wizard" %}
+        {% trans "Booking" %}
+      {% elif request.resolver_match.url_name == "edit_profile" %}
+        {% trans "Edit profile" %}
+      {% elif request.resolver_match.url_name == "artist_portfolio" or request.resolver_match.url_name == "artist_portfolio_album" or request.resolver_match.url_name == "add_portfolio_work" or request.resolver_match.url_name == "edit_portfolio_album" %}
+        {% trans "Portfolio" %}
+      {% elif request.resolver_match.url_name == "followers_list" %}
+        {% trans "Followers" %}
+      {% elif request.resolver_match.url_name == "following_list" %}
+        {% trans "Following" %}
+      {% elif request.resolver_match.url_name == "report_problem" %}
+        {% trans "Report a problem" %}
       {% else %}
         Tatzo
       {% endif %}
@@ -289,7 +305,7 @@
 
   <a
     href="{% url 'calendar' %}"
-    class="mobile-bottom-nav-item {% if request.resolver_match.url_name == 'calendar' %}active{% endif %}"
+    class="mobile-bottom-nav-item {% if request.resolver_match.url_name == 'calendar' or request.resolver_match.url_name == 'appointments_list' or request.resolver_match.url_name == 'appointment_detail' %}active{% endif %}"
   >
     <img src="{% static 'icons/calendar.svg' %}" alt="{% trans 'Calendar' %}">
     <span>{% trans "Calendar" %}</span>

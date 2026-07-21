@@ -4,10 +4,12 @@
 {% block title %}{% trans "Edit profile" %}{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock %}
 
 {% block content %}
+{% include "partials/sidebar.html" with mobile_only=True %}
 <div class="edit-profile-page">
   <div class="edit-profile-card">
     <div class="edit-profile-header edit-profile-hero">

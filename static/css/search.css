@@ -404,3 +404,68 @@ body {
     align-items: stretch;
   }
 }
+
+/* =========================
+   MOBILE SEARCH COMPLETION
+========================= */
+
+@media (max-width: 900px) {
+  .search-page,
+  .search-shell,
+  .search-header,
+  .search-form,
+  .search-user-card,
+  .search-user-main {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .search-page {
+    width: 100%;
+    padding: 14px 10px 28px;
+    overflow-x: hidden;
+  }
+
+  .search-header {
+    padding: 21px 18px;
+    border-radius: 22px;
+  }
+
+  .search-filters {
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  .search-filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .search-filters button,
+  .search-btn {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 560px) {
+  .search-header h1 {
+    font-size: clamp(30px, 9vw, 38px);
+  }
+
+  .search-header p,
+  .search-user-bio,
+  .search-user-name {
+    overflow-wrap: anywhere;
+  }
+
+  .search-user-card {
+    gap: 12px;
+    padding: 14px 12px;
+    border-radius: 20px;
+  }
+
+  .search-btn {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}

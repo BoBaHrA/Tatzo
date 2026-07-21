@@ -2701,3 +2701,103 @@ body:has(.appointment-page) {
   line-height: 1;
   box-shadow: 0 0 16px rgba(4, 197, 191, 0.2);
 }
+
+/* =========================
+   MOBILE APP COMPLETION
+========================= */
+
+@media (max-width: 900px) {
+  .booking-page,
+  .appointment-page {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 16px 12px 28px;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+
+  .booking-shell,
+  .appointment-shell,
+  .booking-form,
+  .appointment-card,
+  .appointment-list-card,
+  .appointment-list-item > *,
+  .appointment-card__head > * {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .appointment-topbar {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+
+  .appointment-topbar-links {
+    display: none;
+  }
+
+  .appointment-back-link,
+  .booking-back,
+  .appointment-top-link,
+  .appointment-action-btn,
+  .booking-btn-primary,
+  .booking-btn-secondary {
+    min-height: 46px;
+  }
+
+  .appointment-card h1,
+  .appointment-list-title,
+  .booking-artist-card h1,
+  .booking-step h2,
+  .appointment-description p,
+  .appointment-details-grid dd {
+    overflow-wrap: anywhere;
+  }
+
+  .booking-modal {
+    z-index: 26000;
+  }
+}
+
+@media (max-width: 620px) {
+  .booking-artist-card {
+    flex-direction: column;
+  }
+
+  .booking-artist-card h1 {
+    font-size: clamp(30px, 10vw, 40px);
+  }
+
+  .booking-progress {
+    justify-content: space-between;
+  }
+
+  .booking-step-dot {
+    width: 42px;
+    height: 42px;
+  }
+
+  .appointment-topbar-links {
+    display: none;
+  }
+
+  .appointment-back-link,
+  .booking-back {
+    width: auto;
+    max-width: 100%;
+  }
+
+  .appointment-actions form,
+  .appointment-action-btn {
+    width: 100%;
+  }
+
+  .booking-review-card div {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+}

@@ -1069,3 +1069,122 @@ body {
     font-size: 24px;
   }
 }
+
+/* =========================
+   MOBILE PORTFOLIO COMPLETION
+========================= */
+
+@media (max-width: 620px) {
+  .portfolio-page {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 14px 10px 28px;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+
+  .portfolio-shell,
+  .portfolio-form-shell,
+  .portfolio-header,
+  .portfolio-form,
+  .portfolio-create-album,
+  .portfolio-album-card,
+  .portfolio-work-card {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .portfolio-header {
+    gap: 16px;
+    padding: 19px 17px;
+    border-radius: 22px;
+  }
+
+  .portfolio-header h1 {
+    font-size: clamp(30px, 9vw, 38px);
+    overflow-wrap: anywhere;
+  }
+
+  .portfolio-header .portfolio-btn,
+  .portfolio-form .portfolio-btn,
+  .portfolio-create-album button {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .portfolio-form {
+    padding: 19px 16px;
+  }
+
+  .portfolio-field input,
+  .portfolio-field select,
+  .portfolio-field textarea,
+  .portfolio-create-album input {
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+  .portfolio-work-overlay {
+    opacity: 1;
+    padding: 15px;
+    background: linear-gradient(to top, rgba(0, 5, 10, 0.88), rgba(0, 5, 10, 0.05));
+  }
+
+  .portfolio-card-menu-btn {
+    width: 44px;
+    height: 44px;
+    opacity: 1;
+    transform: none;
+  }
+
+  .portfolio-card-menu {
+    min-width: min(180px, calc(100vw - 42px));
+  }
+
+  .portfolio-card-menu a,
+  .portfolio-card-menu button {
+    min-height: 44px;
+  }
+
+  .portfolio-upload-remove {
+    width: 34px;
+    height: 34px;
+  }
+
+  .portfolio-lightbox {
+    padding: calc(64px + env(safe-area-inset-top)) 10px calc(18px + env(safe-area-inset-bottom));
+  }
+
+  .portfolio-lightbox img {
+    max-height: 74dvh;
+    border-radius: 16px;
+  }
+
+  .portfolio-lightbox-close {
+    top: calc(12px + env(safe-area-inset-top));
+    right: 12px;
+  }
+
+  .portfolio-confirm-modal {
+    align-items: flex-end;
+    padding: 10px 10px env(safe-area-inset-bottom);
+  }
+
+  .portfolio-confirm-dialog {
+    width: 100%;
+    padding: 24px 18px;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .portfolio-confirm-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-confirm-actions button {
+    width: 100%;
+    min-height: 48px;
+  }
+}

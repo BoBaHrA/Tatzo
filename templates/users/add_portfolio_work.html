@@ -4,10 +4,12 @@
 {% block title %}{% trans "Add portfolio work" %}{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
 <link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
 {% endblock %}
 
 {% block content %}
+{% include "partials/sidebar.html" with mobile_only=True %}
 
 {% trans "Preview image" as preview_image_alt %}
 

@@ -6,11 +6,13 @@
 {% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 <link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
 {% endblock %}
 
 {% block content %}
+{% include "partials/sidebar.html" with mobile_only=True %}
 
 {% trans "Portfolio work" as portfolio_work_label %}
 
