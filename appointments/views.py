@@ -1,6 +1,7 @@
 import json
 from datetime import datetime, timedelta, time
 
+from django.db import transaction
 from django.db.models import Count, Q
 
 from users.models import ChatMessage, ChatThread, PortfolioWork
@@ -129,6 +130,53 @@ def _build_booking_payload(artist):
 def _get_artist_settings(artist):
     settings, created = ArtistBookingSettings.objects.get_or_create(artist=artist)
     return settings
+
+
+ACTIVE_BOOKING_STATUSES = [
+    Appointment.STATUS_PENDING,
+    Appointment.STATUS_NEEDS_REFERENCES,
+    Appointment.STATUS_CONSULTATION_REQUIRED,
+    Appointment.STATUS_ACCEPTED,
+]
+
+
+def _validate_artist_slot(artist, date_value, start_time_value, end_time_value):
+    """Validate working hours and collisions on the server."""
+    weekday = (date_value.weekday() + 1) % 7  # Model uses Sunday=0.
+    availability = ArtistAvailability.objects.filter(
+        artist=artist,
+        weekday=weekday,
+    ).first()
+
+    if (
+        not availability
+        or availability.is_closed
+        or not availability.open_time
+        or not availability.close_time
+        or start_time_value < availability.open_time
+        or end_time_value > availability.close_time
+        or end_time_value <= start_time_value
+    ):
+        return _("This time is outside the artist's working hours.")
+
+    if (
+        availability.break_start
+        and availability.break_end
+        and start_time_value < availability.break_end
+        and end_time_value > availability.break_start
+    ):
+        return _("This time overlaps the artist's break.")
+
+    if Appointment.objects.filter(
+        artist=artist,
+        date=date_value,
+        status__in=ACTIVE_BOOKING_STATUSES,
+        start_time__lt=end_time_value,
+        end_time__gt=start_time_value,
+    ).exists():
+        return _("This time slot is already booked.")
+
+    return None
 
 
 def _get_booking_status_block_message(booking_status):
@@ -347,6 +395,10 @@ def create_appointment(request, username):
         raise Http404
 
     booking_settings = _get_artist_settings(artist)
+
+    if not booking_settings.bookings_enabled:
+        messages.error(request, _("This artist is not accepting bookings right now."))
+        return redirect("profile", username=artist.username)
     block_message = _get_booking_status_block_message(
         getattr(
             booking_settings,
@@ -371,24 +423,6 @@ def create_appointment(request, username):
 
     if booking_type not in valid_booking_types:
         booking_type = Appointment.TYPE_TATTOO
-
-    if (
-        booking_settings.booking_status
-        == ArtistBookingSettings.BOOKING_STATUS_CONSULTATION_ONLY
-    ):
-        booking_type = Appointment.TYPE_CONSULTATION
-
-    if (
-        booking_settings.booking_status
-        == ArtistBookingSettings.BOOKING_STATUS_CONSULTATION_ONLY
-    ):
-        booking_type = Appointment.TYPE_CONSULTATION
-
-    if (
-        booking_settings.booking_status
-        == ArtistBookingSettings.BOOKING_STATUS_CONSULTATION_ONLY
-    ):
-        booking_type = Appointment.TYPE_CONSULTATION
 
     if (
         booking_settings.booking_status
@@ -426,6 +460,10 @@ def create_appointment(request, username):
         )
         return redirect("booking_wizard", username=artist.username)
 
+    if duration <= 0:
+        messages.error(request, _("Duration must be greater than zero."))
+        return redirect("booking_wizard", username=artist.username)
+
     start_dt = timezone.make_aware(
         datetime.combine(date_value, start_time_value),
         timezone.get_current_timezone(),
@@ -457,9 +495,17 @@ def create_appointment(request, username):
 
     end_dt = start_dt + timedelta(minutes=duration)
 
+    if end_dt.date() != date_value:
+        messages.error(request, _("This time is outside the artist's working hours."))
+        return redirect("booking_wizard", username=artist.username)
+
     files = request.FILES.getlist("references")
 
-    minimum_reference_images = booking_settings.minimum_reference_images or 0
+    minimum_reference_images = (
+        booking_settings.minimum_reference_images or 0
+        if booking_settings.reference_images_required
+        else 0
+    )
 
     if minimum_reference_images > 0 and len(files) < minimum_reference_images:
         messages.error(request, _("Please upload the required reference images."))
@@ -475,9 +521,21 @@ def create_appointment(request, username):
         else Appointment.STATUS_PENDING
     )
 
-    appointment = Appointment.objects.create(
-        client=request.user,
-        artist=artist,
+    with transaction.atomic():
+        User.objects.select_for_update().get(pk=artist.pk)
+        slot_error = _validate_artist_slot(
+            artist,
+            date_value,
+            start_time_value,
+            end_dt.time(),
+        )
+        if slot_error:
+            messages.error(request, slot_error)
+            return redirect("booking_wizard", username=artist.username)
+
+        appointment = Appointment.objects.create(
+            client=request.user,
+            artist=artist,
         booking_type=booking_type,
         consultation_already_completed=consultation_already_completed,
         consultation_note=consultation_note,
@@ -496,7 +554,7 @@ def create_appointment(request, username):
         size=request.POST.get("size", ""),
         budget=request.POST.get("budget", ""),
         description=request.POST.get("description", ""),
-        ai_ready_payload={
+            ai_ready_payload={
             "placement": request.POST.get("placement", ""),
             "styles": request.POST.get("styles", ""),
             "size": request.POST.get("size", ""),
@@ -505,8 +563,8 @@ def create_appointment(request, username):
             "booking_type": booking_type,
             "consultation_already_completed": consultation_already_completed,
             "consultation_note": consultation_note,
-        },
-    )
+            },
+        )
 
     for index, file in enumerate(files[: booking_settings.maximum_reference_images]):
         AppointmentReferenceImage.objects.create(
@@ -602,9 +660,21 @@ def create_manual_appointment(request):
         if item.strip()
     ]
 
-    appointment = Appointment.objects.create(
-        client=client,
-        artist=request.user,
+    with transaction.atomic():
+        User.objects.select_for_update().get(pk=request.user.pk)
+        slot_error = _validate_artist_slot(
+            request.user,
+            date_value,
+            start_time_value,
+            end_dt.time(),
+        )
+        if slot_error:
+            messages.error(request, slot_error)
+            return redirect("artist_booking_settings")
+
+        appointment = Appointment.objects.create(
+            client=client,
+            artist=request.user,
         booking_type=booking_type,
         status=Appointment.STATUS_ACCEPTED,
         date=date_value,
@@ -616,14 +686,14 @@ def create_manual_appointment(request):
         size=request.POST.get("size", ""),
         budget=request.POST.get("budget", ""),
         description=request.POST.get("description", ""),
-        ai_ready_payload={
+            ai_ready_payload={
             "placement": request.POST.get("placement", ""),
             "styles": request.POST.get("styles", ""),
             "size": request.POST.get("size", ""),
             "budget": request.POST.get("budget", ""),
             "description": request.POST.get("description", ""),
-        },
-    )
+            },
+        )
 
     messages.success(request, _("Manual booking created."))
     return redirect("appointment_detail", appointment_id=appointment.id)

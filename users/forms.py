@@ -167,15 +167,15 @@ class VerificationForm(forms.ModelForm):
             "id_document_file",
         ]
         
-        def clean_business_document_file(self):
-            return validate_verification_file(
-                self.cleaned_data.get("business_document_file")
-            )
+    def clean_business_document_file(self):
+        return validate_verification_file(
+            self.cleaned_data.get("business_document_file")
+        )
 
-        def clean_id_document_file(self):
-            return validate_verification_file(
-                self.cleaned_data.get("id_document_file")
-            )
+    def clean_id_document_file(self):
+        return validate_verification_file(
+            self.cleaned_data.get("id_document_file")
+        )
         
 class ManualVerificationForm(forms.ModelForm):
     class Meta:
@@ -213,10 +213,10 @@ class ManualVerificationForm(forms.ModelForm):
             }),
         }
     
-        def clean_extra_file(self):
-            return validate_verification_file(
-                self.cleaned_data.get("extra_file")
-            )
+    def clean_extra_file(self):
+        return validate_verification_file(
+            self.cleaned_data.get("extra_file")
+        )
         
 class PortfolioAlbumForm(forms.ModelForm):
     class Meta:
@@ -376,3 +376,6 @@ class UserReportForm(forms.ModelForm):
                 "class": "report-file",
             }),
         }
+
+    def clean_attachment(self):
+        return validate_verification_file(self.cleaned_data.get("attachment"))

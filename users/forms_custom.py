@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from users.models import Profile
 
 USER_TYPE_CHOICES = [
-    ("regular_user", _("Regular user")),
+    ("regular", _("Regular user")),
     ("tattoo_artist", _("Tattoo artist")),
 ]
 
@@ -22,6 +22,12 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ("username", "email", "password1", "password2", "account_type")
+
+    def clean_email(self):
+        email = (self.cleaned_data.get("email") or "").strip().lower()
+        if User.objects.filter(email__iexact=email).exists():
+            raise ValidationError(_("An account with this email already exists."))
+        return email
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -42,6 +48,9 @@ class CustomUserCreationForm(UserCreationForm):
         if password1 and password2 and password1 != password2:
             errors.append(_("Passwords do not match."))
 
+        if not password1:
+            return password2
+
         if len(password1) < 8:
             errors.append(_("Password must contain at least 8 characters."))
         if not re.search(r"[A-Z]", password1):
@@ -59,6 +68,9 @@ class CustomSetPasswordForm(SetPasswordForm):
     def clean_new_password1(self):
         password1 = self.cleaned_data.get("new_password1")
         errors = []
+
+        if not password1:
+            return password1
 
         if len(password1) < 8:
             errors.append(_("Password must contain at least 8 characters."))

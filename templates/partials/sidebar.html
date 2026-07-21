@@ -148,12 +148,14 @@
           </select>
         </form>
 
-        <a
-          href="{% url 'report_problem' %}?next={{ request.get_full_path|urlencode }}"
-          class="sidebar-more-link sidebar-report-problem-btn"
-        >
-          <span>{% trans "Report a problem" %}</span>
-        </a>
+        {% if request.resolver_match.url_name != "report_problem" %}
+          <a
+            href="{% url 'report_problem' %}?next={{ request.get_full_path|urlencode }}"
+            class="sidebar-more-link sidebar-report-problem-btn"
+          >
+            <span>{% trans "Report a problem" %}</span>
+          </a>
+        {% endif %}
 
         <div class="sidebar-more-title sidebar-more-title-secondary">
           {% trans "Legal" %}

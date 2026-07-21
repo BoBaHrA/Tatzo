@@ -22,7 +22,7 @@ from .models import (
 
 def feed(request):
     posts = (
-        Post.objects
+        Post.objects.visible_to(request.user)
         .select_related("user", "user__profile")
         .prefetch_related("medias", "likes", "comments", "bookmarks")
         .all()
@@ -57,7 +57,7 @@ def feed(request):
 @login_required
 @require_POST
 def toggle_like(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+    post = get_object_or_404(Post.objects.visible_to(request.user), id=post_id)
 
     like = PostLike.objects.filter(post=post, user=request.user).first()
 
@@ -142,7 +142,7 @@ def create_post(request):
 @login_required
 @require_POST
 def create_comment(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+    post = get_object_or_404(Post.objects.visible_to(request.user), id=post_id)
     
     comment_limit = 20 if is_new_account(request.user) else 60
 
@@ -212,7 +212,7 @@ def create_comment(request, post_id):
 
 
 def get_comments(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+    post = get_object_or_404(Post.objects.visible_to(request.user), id=post_id)
 
     liked_comment_ids = set()
 
@@ -240,7 +240,10 @@ def get_comments(request, post_id):
 @login_required
 @require_POST
 def toggle_comment_like(request, comment_id):
-    comment = get_object_or_404(PostComment, id=comment_id)
+    comment = get_object_or_404(
+        PostComment.objects.filter(post__in=Post.objects.visible_to(request.user)),
+        id=comment_id,
+    )
 
     like, created = CommentLike.objects.get_or_create(
         user=request.user,
@@ -307,7 +310,10 @@ def edit_comment(request, comment_id):
 @login_required
 @require_POST
 def report_comment(request, comment_id):
-    comment = get_object_or_404(PostComment, id=comment_id)
+    comment = get_object_or_404(
+        PostComment.objects.filter(post__in=Post.objects.visible_to(request.user)),
+        id=comment_id,
+    )
     
     allowed, retry_after = check_rate_limit(
         request,
@@ -419,7 +425,7 @@ def report_post(request, post_id):
 
 def post_detail_fragment(request, post_id):
     post = get_object_or_404(
-        Post.objects
+        Post.objects.visible_to(request.user)
         .select_related("user", "user__profile")
         .prefetch_related("medias", "likes", "comments"),
         id=post_id,
@@ -470,7 +476,7 @@ def toggle_bookmark(request, post_id):
             status=405,
         )
 
-    post = get_object_or_404(Post, id=post_id)
+    post = get_object_or_404(Post.objects.visible_to(request.user), id=post_id)
 
     bookmark, created = PostBookmark.objects.get_or_create(
         user=request.user,
@@ -495,7 +501,7 @@ def toggle_bookmark(request, post_id):
 def bookmarks_page(request):
     bookmarks = (
         PostBookmark.objects
-        .filter(user=request.user)
+        .filter(user=request.user, post__in=Post.objects.visible_to(request.user))
         .select_related("post", "post__user", "post__user__profile")
         .prefetch_related("post__medias", "post__likes", "post__comments")
     )

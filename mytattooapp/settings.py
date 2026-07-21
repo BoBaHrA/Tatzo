@@ -206,6 +206,16 @@ CSRF_TRUSTED_ORIGINS = [
     if origin.strip()
 ]
 
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "3600"))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv(
+        "SECURE_HSTS_INCLUDE_SUBDOMAINS", "True"
+    ) == "True"
+    SECURE_HSTS_PRELOAD = os.getenv("SECURE_HSTS_PRELOAD", "False") == "True"
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

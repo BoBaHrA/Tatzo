@@ -735,6 +735,20 @@ input[type="file"] { display: none; }
 
   .main-content {
     margin-right: 20px;
+    margin-left: 290px;
+    padding-left: 32px;
+  }
+}
+
+/* Keep the floating post avatar clear of the fixed desktop sidebar. */
+@media (min-width: 901px) and (max-width: 1100px) {
+  .main-content .feed,
+  .main-content #feed {
+    min-width: 0;
+  }
+
+  .feed .post.other-user {
+    margin-left: 28px;
   }
 }
 

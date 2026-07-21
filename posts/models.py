@@ -1,10 +1,35 @@
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 
 from cloudinary.utils import cloudinary_url
 
 # Create your models here.
+
+class PostQuerySet(models.QuerySet):
+    def visible_to(self, user):
+        """Return only posts the viewer is allowed to discover or interact with."""
+        if not getattr(user, "is_authenticated", False):
+            return self.filter(visibility="public")
+
+        blocked_user_ids = user.blocking_relations.values("blocked_id")
+        blocked_by_user_ids = user.blocked_by_relations.values("blocker_id")
+
+        return (
+            self.exclude(user_id__in=blocked_user_ids)
+            .exclude(user_id__in=blocked_by_user_ids)
+            .filter(
+                Q(visibility="public")
+                | Q(user=user)
+                | Q(
+                    visibility="followers",
+                    user__follower_relations__follower=user,
+                )
+            )
+            .distinct()
+        )
+
 
 class Post(models.Model):
     LAYOUT_CHOICES = [
@@ -34,6 +59,8 @@ class Post(models.Model):
         default="public",
     )
     location = models.CharField(max_length=120, blank=True)
+
+    objects = PostQuerySet.as_manager()
 
     layout = models.CharField(
         max_length=10, choices=LAYOUT_CHOICES, default="grid"

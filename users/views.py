@@ -78,7 +78,7 @@ def login_view(request):
 # Главная страница
 def home(request):
     posts = (
-        Post.objects
+        Post.objects.visible_to(request.user)
         .select_related("user", "user__profile")
         .prefetch_related("medias", "likes", "comments", "bookmarks")
         .order_by("-created_at")
@@ -99,7 +99,11 @@ def home(request):
     recommended_artists = (
         User.objects
         .select_related("profile", "booking_settings")
-        .filter(profile__account_type="tattoo_artist")
+        .filter(
+            is_active=True,
+            profile__account_type="tattoo_artist",
+            profile__is_email_verified=True,
+        )
         .annotate(
             is_verified_recommendation=Case(
                 When(profile__verification_status="approved", then=Value(1)),
@@ -120,6 +124,8 @@ def home(request):
         recommended_artists = (
             recommended_artists
             .exclude(id=request.user.id)
+            .exclude(blocked_by_relations__blocker=request.user)
+            .exclude(blocking_relations__blocked=request.user)
             .annotate(is_already_followed=Exists(followed_artists))
             .filter(is_already_followed=False)
         )
@@ -176,7 +182,7 @@ def news_feed(request):
     Отображение ленты новостей.
     """
     # Получаем все посты из базы данных
-    posts = Post.objects.all().order_by(
+    posts = Post.objects.visible_to(request.user).order_by(
         "-id"
     )  # Сортируем по убыванию (новые посты первыми)
 
@@ -858,8 +864,15 @@ def profile_view(request, username):
         if not (request.user.is_authenticated and request.user.is_staff):
             raise Http404
 
+    if request.user.is_authenticated and request.user != user_obj:
+        if UserBlock.objects.filter(
+            Q(blocker=request.user, blocked=user_obj)
+            | Q(blocker=user_obj, blocked=request.user)
+        ).exists():
+            raise Http404
+
     posts = (
-        Post.objects
+        Post.objects.visible_to(request.user)
         .filter(user=user_obj)
         .select_related("user", "user__profile")
         .prefetch_related("medias", "likes", "comments", "bookmarks")
@@ -875,7 +888,7 @@ def profile_view(request, username):
 
     if can_view_liked:
         liked_posts = (
-            Post.objects
+            Post.objects.visible_to(request.user)
             .filter(likes__user=user_obj)
             .select_related("user", "user__profile")
             .prefetch_related("medias", "likes", "comments", "bookmarks")
@@ -941,6 +954,15 @@ def toggle_follow(request, username):
             status=400,
         )
 
+    if UserBlock.objects.filter(
+        Q(blocker=request.user, blocked=target_user)
+        | Q(blocker=target_user, blocked=request.user)
+    ).exists():
+        return JsonResponse(
+            {"ok": False, "error": _("You cannot follow this user.")},
+            status=403,
+        )
+
     follow_relation, created = UserFollow.objects.get_or_create(
         follower=request.user,
         following=target_user,
@@ -986,6 +1008,10 @@ def toggle_user_block(request, username):
 
     if created:
         is_blocked = True
+        UserFollow.objects.filter(
+            Q(follower=request.user, following=target_user)
+            | Q(follower=target_user, following=request.user)
+        ).delete()
     else:
         block_relation.delete()
         is_blocked = False
@@ -1934,6 +1960,12 @@ def search_page(request):
         .order_by("username")
     )
 
+    if request.user.is_authenticated:
+        users = (
+            users.exclude(blocked_by_relations__blocker=request.user)
+            .exclude(blocking_relations__blocked=request.user)
+        )
+
     if clean_query:
         users = users.filter(
             Q(username__icontains=clean_query) |
@@ -1943,7 +1975,7 @@ def search_page(request):
     if account_filter == "artists":
         users = users.filter(profile__account_type="tattoo_artist")
     elif account_filter == "users":
-        users = users.filter(profile__account_type="regular_user")
+        users = users.filter(profile__account_type="regular")
 
     users = users[:40]
 
