@@ -80,10 +80,18 @@
 }
 
 .maps-panel {
+  box-sizing: border-box;
   border-radius: 26px;
   max-height: calc(100vh - 116px);
-  overflow: auto;
-  padding: 14px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 14px 18px 14px 14px;
+  scrollbar-gutter: stable;
+}
+
+.maps-panel > * {
+  max-width: 100%;
+  min-width: 0;
 }
 
 .maps-search-card label {
@@ -172,10 +180,15 @@
 
 .maps-results {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
+  min-width: 0;
 }
 
 .maps-artist-card {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.055);
@@ -212,12 +225,14 @@
 }
 
 .maps-card-title {
+  flex: 1 1 auto;
   min-width: 0;
 }
 
 .maps-card-title h2 {
   font-size: 16px;
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .maps-card-title p,
@@ -226,15 +241,20 @@
   margin: 2px 0 0;
   color: var(--map-muted);
   font-size: 12px;
+  overflow-wrap: anywhere;
 }
 
 .maps-status {
+  flex: 0 1 auto;
   margin-left: auto;
+  max-width: 46%;
   border-radius: 999px;
   padding: 6px 9px;
   font-size: 10px;
   font-weight: 900;
-  white-space: nowrap;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 
 .maps-status-verified {
@@ -258,10 +278,12 @@
 
 .maps-tags span,
 .maps-card-metrics span {
+  max-width: 100%;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.07);
   color: var(--map-muted);
   font-size: 11px;
+  overflow-wrap: anywhere;
   padding: 6px 8px;
 }
 
@@ -271,7 +293,9 @@
 
 .maps-actions a,
 .maps-actions button {
+  box-sizing: border-box;
   flex: 1;
+  max-width: 100%;
   min-width: 118px;
   border: 0;
   border-radius: 13px;
@@ -446,27 +470,30 @@
 }
 
 .maps-panel {
-  scrollbar-color: rgba(4, 197, 191, 0.75) rgba(2, 10, 14, 0.85);
+  scrollbar-color: rgba(4, 197, 191, 0.72) transparent;
   scrollbar-width: thin;
 }
 
 .maps-panel::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 
 .maps-panel::-webkit-scrollbar-track {
-  background: rgba(2, 10, 14, 0.88);
+  background: transparent;
   border-radius: 999px;
+  margin-block: 18px;
 }
 
 .maps-panel::-webkit-scrollbar-thumb {
-  border: 2px solid rgba(2, 10, 14, 0.88);
+  border: 2px solid transparent;
   border-radius: 999px;
   background: linear-gradient(180deg, var(--map-accent), var(--map-pink));
+  background-clip: padding-box;
 }
 
 .maps-panel::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #42fff6, #ff4f9a);
+  background-clip: padding-box;
 }
 
 .maps-actions a,
@@ -478,6 +505,8 @@
   min-width: 0;
   padding: 8px 10px;
   line-height: 1.15;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .maps-disabled-submit,
