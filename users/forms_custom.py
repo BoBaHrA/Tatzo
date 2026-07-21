@@ -5,12 +5,13 @@ from django import forms
 from django.contrib.auth.forms import SetPasswordForm, UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from users.models import Profile
 
 USER_TYPE_CHOICES = [
-    ("regular_user", "Обычный пользователь"),
-    ("tattoo_artist", "Тату-мастер"),
+    ("regular_user", _("Regular user")),
+    ("tattoo_artist", _("Tattoo artist")),
 ]
 
 
@@ -39,14 +40,14 @@ class CustomUserCreationForm(UserCreationForm):
         errors = []
 
         if password1 and password2 and password1 != password2:
-            errors.append("Пароли не совпадают.")
+            errors.append(_("Passwords do not match."))
 
         if len(password1) < 8:
-            errors.append("Пароль должен содержать минимум 8 символов.")
+            errors.append(_("Password must contain at least 8 characters."))
         if not re.search(r"[A-Z]", password1):
-            errors.append("Пароль должен содержать хотя бы одну заглавную букву.")
+            errors.append(_("Password must contain at least one uppercase letter."))
         if not re.search(r"\d", password1):
-            errors.append("Пароль должен содержать хотя бы одну цифру.")
+            errors.append(_("Password must contain at least one number."))
 
         if errors:
             raise ValidationError(errors)
@@ -60,11 +61,11 @@ class CustomSetPasswordForm(SetPasswordForm):
         errors = []
 
         if len(password1) < 8:
-            errors.append("Пароль должен содержать минимум 8 символов.")
+            errors.append(_("Password must contain at least 8 characters."))
         if not re.search(r"[A-Z]", password1):
-            errors.append("Пароль должен содержать хотя бы одну заглавную букву.")
+            errors.append(_("Password must contain at least one uppercase letter."))
         if not re.search(r"\d", password1):
-            errors.append("Пароль должен содержать хотя бы одну цифру.")
+            errors.append(_("Password must contain at least one number."))
 
         if errors:
             raise ValidationError(errors)
@@ -76,7 +77,7 @@ class CustomSetPasswordForm(SetPasswordForm):
         password2 = self.cleaned_data.get("new_password2")
 
         if password1 and password2 and password1 != password2:
-            raise ValidationError("Пароли не совпадают.")
+            raise ValidationError(_("Passwords do not match."))
 
         return password2
 

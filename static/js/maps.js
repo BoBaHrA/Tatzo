@@ -20,6 +20,25 @@
   const leafletMarkersByArtist = new Map();
   const activeStyleFilters = new Set();
   const activeBookingFilters = new Set();
+  const i18nNode = document.getElementById("maps-i18n");
+  let i18n = {};
+
+  try {
+    i18n = JSON.parse(i18nNode?.textContent || "{}");
+  } catch (_error) {
+    i18n = {};
+  }
+
+  function t(key, fallback) {
+    return i18n[key] || fallback;
+  }
+
+  function formatTranslation(key, fallback, values = {}) {
+    return Object.entries(values).reduce(
+      (text, [name, value]) => text.replaceAll(`%(${name})s`, String(value)),
+      t(key, fallback),
+    );
+  }
 
 
   function isMobileMapLayout() {
@@ -191,7 +210,13 @@
       const output = document.querySelector("[data-location-pin-output]");
       if (latInput) latInput.value = lat;
       if (lngInput) lngInput.value = lng;
-      if (output) output.textContent = `Pin selected: ${lat}, ${lng}`;
+      if (output) {
+        output.textContent = formatTranslation(
+          "pin_selected",
+          "Pin selected: %(lat)s, %(lng)s",
+          { lat, lng },
+        );
+      }
 
       if (pickedLocationMarker) {
         pickedLocationMarker.setLatLng(event.latlng);
@@ -235,21 +260,27 @@
 
       const isVerified = source === "verified";
       const popupType = isVerified ? "verified" : "unclaimed";
-      const popupStatus = isVerified ? "Verified Tatzo location" : "Not yet on Tatzo / Unclaimed";
-      const popupBadge = isVerified ? "Verified" : "Imported location";
-      const confidence = card.dataset.confidence ? `${escapeHtml(card.dataset.confidence)}%` : "Pending";
+      const popupStatus = isVerified
+        ? t("verified_tatzo_location", "Verified Tatzo location")
+        : t("not_on_tatzo", "Not yet on Tatzo / Unclaimed");
+      const popupBadge = isVerified
+        ? t("verified", "Verified")
+        : t("imported_location", "Imported location");
+      const confidence = card.dataset.confidence
+        ? `${escapeHtml(card.dataset.confidence)}%`
+        : t("pending", "Pending");
       const website = safeExternalUrl(card.dataset.website || "");
       const websiteLabel = website.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
       const profileButton = isVerified && card.dataset.profileUrl
-        ? `<a class="tatzo-map-popup-action tatzo-map-popup-profile" href="${escapeHtml(card.dataset.profileUrl)}">Profile</a>`
+        ? `<a class="tatzo-map-popup-action tatzo-map-popup-profile" href="${escapeHtml(card.dataset.profileUrl)}">${escapeHtml(t("profile", "Profile"))}</a>`
         : "";
 
       let actionButton = "";
       if (isVerified && card.dataset.canBook === "true") {
-        actionButton = `<a class="tatzo-map-popup-action tatzo-map-popup-book" href="${escapeHtml(card.dataset.bookUrl)}">Book</a>`;
+        actionButton = `<a class="tatzo-map-popup-action tatzo-map-popup-book" href="${escapeHtml(card.dataset.bookUrl)}">${escapeHtml(t("book", "Book"))}</a>`;
       } else if (!isVerified) {
-        actionButton = `<button class="tatzo-map-popup-action tatzo-map-popup-claim" type="button" data-open-claim data-claim-url="/maps/location/${card.dataset.locationId}/claim/" data-claim-location="${escapeHtml(card.dataset.location)}" data-claim-artist="${escapeHtml(card.dataset.artist)}" data-claim-kind="${source}">${escapeHtml(card.dataset.actionLabel || "Claim this location")}</button>`;
+        actionButton = `<button class="tatzo-map-popup-action tatzo-map-popup-claim" type="button" data-open-claim data-claim-url="/maps/location/${card.dataset.locationId}/claim/" data-claim-location="${escapeHtml(card.dataset.location)}" data-claim-artist="${escapeHtml(card.dataset.artist)}" data-claim-kind="${source}">${escapeHtml(card.dataset.actionLabel || t("claim_location", "Claim this location"))}</button>`;
       }
 
       const contactDetails = [
@@ -257,7 +288,7 @@
           ? `<span class="tatzo-map-popup-pill">${escapeHtml(card.dataset.phone)}</span>`
           : "",
         website
-          ? `<a class="tatzo-map-popup-pill" href="${escapeHtml(website)}" target="_blank" rel="noopener noreferrer">${escapeHtml(websiteLabel || "Website")}</a>`
+          ? `<a class="tatzo-map-popup-pill" href="${escapeHtml(website)}" target="_blank" rel="noopener noreferrer">${escapeHtml(websiteLabel || t("website", "Website"))}</a>`
           : "",
       ].filter(Boolean).join("");
 
@@ -272,9 +303,9 @@
           </div>
           <div class="tatzo-map-popup-meta">
             <span>${popupBadge}</span>
-            <span>Data ${confidence}</span>
+            <span>${escapeHtml(t("data", "Data"))} ${confidence}</span>
           </div>
-          <p class="tatzo-map-popup-address">${escapeHtml(card.dataset.location || card.dataset.city || "Address pending")}</p>
+          <p class="tatzo-map-popup-address">${escapeHtml(card.dataset.location || card.dataset.city || t("address_pending", "Address pending"))}</p>
           ${contactDetails ? `<div class="tatzo-map-popup-contact">${contactDetails}</div>` : ""}
           <div class="tatzo-map-popup-actions">
             ${profileButton}
@@ -411,7 +442,7 @@
       const submitButton = form.querySelector("button[type='submit']");
       if (!submitButton) return;
       submitButton.disabled = true;
-      submitButton.textContent = "Submitting…";
+      submitButton.textContent = t("submitting", "Submitting…");
     });
   });
   document.addEventListener("click", (event) => {
@@ -428,15 +459,23 @@
     if (claimSubmit) {
       claimSubmit.disabled = !isImportedLocation;
       claimSubmit.textContent = isImportedLocation
-        ? "Submit claim request"
-        : "Use Add location for address review";
+        ? t("submit_claim", "Submit claim request")
+        : t("use_add_location", "Use Add location for address review");
     }
 
     if (claimSummary) {
-      const title = isImportedLocation ? "Claim this location" : "Request location verification";
+      const title = isImportedLocation
+        ? t("claim_location", "Claim this location")
+        : t("request_verification", "Request location verification");
       const summary = isImportedLocation
-        ? "Submit a verification request for this studio. Tatzo will review it before anything changes."
-        : "Submit your address details for review. Nothing is published until Tatzo verifies it.";
+        ? t(
+            "claim_summary",
+            "Submit a verification request for this studio. Tatzo will review it before anything changes.",
+          )
+        : t(
+            "address_review_summary",
+            "Submit your address details for review. Nothing is published until Tatzo verifies it.",
+          );
       if (claimTitle) claimTitle.textContent = title;
       claimSummary.textContent = summary;
     }

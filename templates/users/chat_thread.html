@@ -151,6 +151,7 @@
 {% trans "Edit message" as edit_modal_title %}
 {% trans "Save changes" as save_changes_text %}
 {% trans "Add files" as add_files_text %}
+{% trans "Remove file" as remove_file_text %}
 {% trans "Remove attachment" as remove_attachment_text %}
 {% trans "Keep attachment" as keep_attachment_text %}
 
@@ -233,6 +234,7 @@
     const messageNotSentText = "{{ message_not_sent|escapejs }}";
     const deleteMessageConfirm = "{{ delete_message_confirm|escapejs }}";
     const messageDeletedText = "{{ message_deleted_text|escapejs }}";
+    const removeFileText = "{{ remove_file_text|escapejs }}";
 
     const removeAttachmentText = "{{ remove_attachment_text|escapejs }}";
     const keepAttachmentText = "{{ keep_attachment_text|escapejs }}";
@@ -400,7 +402,7 @@
         removeBtn.className = removeClass;
         removeBtn.dataset.index = index;
         removeBtn.textContent = "×";
-        removeBtn.setAttribute("aria-label", "Remove file");
+        removeBtn.setAttribute("aria-label", removeFileText);
 
         item.appendChild(media);
         item.appendChild(name);

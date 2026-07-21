@@ -89,6 +89,7 @@
 {% trans "Compressing images..." as portfolio_compressing_text %}
 {% trans "Save work" as portfolio_save_work_text %}
 {% trans "Portfolio image is still too large after compression. Please choose a smaller image." as portfolio_image_too_large_text %}
+{% trans "Remove image" as remove_image_text %}
 
 <script src="{% static 'js/image_compression.js' %}"></script>
 
@@ -101,6 +102,7 @@
     const portfolioCompressingText = "{{ portfolio_compressing_text|escapejs }}";
     const portfolioSaveWorkText = "{{ portfolio_save_work_text|escapejs }}";
     const portfolioImageTooLargeText = "{{ portfolio_image_too_large_text|escapejs }}";
+    const removeImageText = "{{ remove_image_text|escapejs }}";
 
     if (!input || !preview) return;
 
@@ -252,7 +254,7 @@
         removeBtn.type = "button";
         removeBtn.className = "portfolio-upload-remove";
         removeBtn.textContent = "×";
-        removeBtn.setAttribute("aria-label", "Remove image");
+        removeBtn.setAttribute("aria-label", removeImageText);
 
         imgButton.appendChild(img);
         item.appendChild(imgButton);

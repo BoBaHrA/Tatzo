@@ -45,6 +45,7 @@ from .models import (
 from datetime import timedelta
 
 from posts.forms import PostForm, PostMediaUploadForm
+from appointments.models import APPOINTMENT_VALUE_LABELS
 from .forms import ProfileForm, VerificationForm, UserEditForm, ManualVerificationForm, PortfolioWorkForm, PortfolioAlbumForm, UserReportForm
 
 from .forms_custom import CustomUserCreationForm
@@ -2138,7 +2139,7 @@ def _map_location_parts(location):
 
 def _artist_map_confidence_score(artist, location):
     """Score data completeness for the map without implying user compatibility."""
-    if location == "Location pending":
+    if not location:
         return 35
 
     location_parts = _map_location_parts(location)
@@ -2211,7 +2212,7 @@ def maps_page(request):
                 .exclude(location="")
                 .values_list("location", flat=True)
                 .first()
-                or "Location pending"
+                or ""
             )
 
         has_confirmed_location = bool(location_obj)
@@ -2236,6 +2237,11 @@ def maps_page(request):
             )
             style_tags.extend(portfolio_styles)
 
+        style_labels = [
+            str(APPOINTMENT_VALUE_LABELS.get(style, style))
+            for style in style_tags
+        ]
+
         booking_modes = []
         if booking_settings and booking_settings.bookings_enabled:
             booking_modes.append("Accepting new clients")
@@ -2246,9 +2252,9 @@ def maps_page(request):
 
         can_book = bool(booking_settings and booking_settings.bookings_enabled)
         location_kind = (
-            "Registered Tatzo artist with verified/imported location"
+            _("Registered Tatzo artist with verified/imported location")
             if source == "verified"
-            else "Registered artist without confirmed address"
+            else _("Registered artist without confirmed address")
         )
 
         latitude = _optional_location_coordinate(
@@ -2276,7 +2282,7 @@ def maps_page(request):
             "location_id": location_obj.id if location_obj else "",
             "phone": location_obj.phone if location_obj else "",
             "website": location_obj.website if location_obj else "",
-            "location": location,
+            "location": location or _("Location pending"),
             "location_city": location_parts["city"],
             "location_country": location_parts["country"],
             "location_kind": location_kind,
@@ -2290,6 +2296,7 @@ def maps_page(request):
             "portfolio_count": artist.portfolio_count,
             "post_count": artist.public_post_count,
             "style_tags": style_tags,
+            "style_labels": style_labels,
             "booking_modes": booking_modes,
             "can_book": can_book,
         })
@@ -2307,7 +2314,7 @@ def maps_page(request):
     )
 
     for location_obj in external_locations:
-        location = location_obj.display_address or "Location pending"
+        location = location_obj.display_address or _("Location pending")
         location_parts = {
             "city": location_obj.city,
             "country": location_obj.country,
@@ -2316,7 +2323,7 @@ def maps_page(request):
             "user": None,
             "is_registered": False,
             "display_name": location_obj.name,
-            "tag": "Imported location",
+            "tag": _("Imported location"),
             "profile_image": None,
             "profile_url": "",
             "book_url": "",
@@ -2324,7 +2331,7 @@ def maps_page(request):
             "location": location,
             "location_city": location_parts["city"],
             "location_country": location_parts["country"],
-            "location_kind": "Not yet on Tatzo / Unclaimed",
+            "location_kind": _("Not yet on Tatzo / Unclaimed"),
             "location_kind_code": "imported",
             "location_status": location_obj.status,
             "phone": location_obj.phone,
@@ -2337,6 +2344,7 @@ def maps_page(request):
             "portfolio_count": 0,
             "post_count": 0,
             "style_tags": [],
+            "style_labels": [],
             "booking_modes": [],
             "can_book": False,
         })
@@ -2355,6 +2363,30 @@ def maps_page(request):
     )
     imported_count = verified_location_count
     unclaimed_count = imported_location_count
+    maps_i18n = {
+        "pin_selected": _("Pin selected: %(lat)s, %(lng)s"),
+        "verified_tatzo_location": _("Verified Tatzo location"),
+        "not_on_tatzo": _("Not yet on Tatzo / Unclaimed"),
+        "verified": _("Verified"),
+        "imported_location": _("Imported location"),
+        "pending": _("Pending"),
+        "profile": _("Profile"),
+        "book": _("Book"),
+        "claim_location": _("Claim this location"),
+        "website": _("Website"),
+        "data": _("Data"),
+        "address_pending": _("Address pending"),
+        "submitting": _("Submitting…"),
+        "submit_claim": _("Submit claim request"),
+        "use_add_location": _("Use Add location for address review"),
+        "request_verification": _("Request location verification"),
+        "claim_summary": _(
+            "Submit a verification request for this studio. Tatzo will review it before anything changes."
+        ),
+        "address_review_summary": _(
+            "Submit your address details for review. Nothing is published until Tatzo verifies it."
+        ),
+    }
 
     return render(
         request,
@@ -2366,6 +2398,7 @@ def maps_page(request):
             "verified_location_count": verified_location_count,
             "imported_location_count": imported_location_count,
             "pending_location_count": pending_location_count,
+            "maps_i18n": maps_i18n,
         },
     )
 

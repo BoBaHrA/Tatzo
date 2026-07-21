@@ -386,8 +386,10 @@
 
 <div class="mobile-ui-backdrop" id="mobile-ui-backdrop"></div>
 
+{% trans "Close" as sidebar_close_text %}
 <script>
   document.addEventListener("DOMContentLoaded", () => {
+    const sidebarCloseText = "{{ sidebar_close_text|escapejs }}";
     const moreTrigger = document.getElementById("sidebar-more-trigger");
     const moreMenu = document.getElementById("sidebar-more-menu");
 
@@ -436,7 +438,7 @@
         closeBtn.type = "button";
         closeBtn.className = "mobile-suggestions-close";
         closeBtn.textContent = "×";
-        closeBtn.setAttribute("aria-label", "Close");
+        closeBtn.setAttribute("aria-label", sidebarCloseText);
 
         closeBtn.addEventListener("click", closeMobileSuggestions);
         suggestions.prepend(closeBtn);

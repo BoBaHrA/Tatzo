@@ -36,7 +36,7 @@
       </div>
       <div class="maps-search-card">
         <label for="maps-search">{% trans "Search by artist, style or city" %}</label>
-        <input id="maps-search" type="search" placeholder="Berlin, fine line, @artist" data-map-search>
+        <input id="maps-search" type="search" placeholder="{% trans 'Berlin, fine line, @artist' %}" data-map-search>
         <div class="maps-filter-row" role="group" aria-label="{% trans 'Map filters' %}">
           <button class="is-active" type="button" data-map-filter="all">{% trans "All" %}</button>
           <button type="button" data-map-filter="verified">{% trans "Verified" %}</button>
@@ -55,13 +55,13 @@
         <div class="maps-chip-group" data-placeholder-filters>
           {# Frontend-only until backend fields exist for availability, distance, rating and price. #}
           <div class="maps-chip-row">
-            <button type="button" data-draft-filter="Fine Line">Fine Line</button><button type="button" data-draft-filter="Blackwork">Blackwork</button><button type="button" data-draft-filter="Realism">Realism</button><button type="button" data-draft-filter="Japanese">Japanese</button><button type="button" data-draft-filter="Traditional">Traditional</button><button type="button" data-draft-filter="Neo Traditional">Neo Traditional</button><button type="button" data-draft-filter="Minimalist">Minimalist</button><button type="button" data-draft-filter="Lettering">Lettering</button><button type="button" data-draft-filter="Geometric">Geometric</button><button type="button" data-draft-filter="Watercolor">Watercolor</button><button type="button" data-draft-filter="Black & Grey">Black & Grey</button><button type="button" data-draft-filter="Color">Color</button>
+            <button type="button" data-draft-filter="Fine Line">{% trans "Fine Line" %}</button><button type="button" data-draft-filter="Blackwork">{% trans "Blackwork" %}</button><button type="button" data-draft-filter="Realism">{% trans "Realism" %}</button><button type="button" data-draft-filter="Japanese">{% trans "Japanese" %}</button><button type="button" data-draft-filter="Traditional">{% trans "Traditional" %}</button><button type="button" data-draft-filter="Neo Traditional">{% trans "Neo Traditional" %}</button><button type="button" data-draft-filter="Minimalist">{% trans "Minimalist" %}</button><button type="button" data-draft-filter="Lettering">{% trans "Lettering" %}</button><button type="button" data-draft-filter="Geometric">{% trans "Geometric" %}</button><button type="button" data-draft-filter="Watercolor">{% trans "Watercolor" %}</button><button type="button" data-draft-filter="Black & Grey">{% trans "Black & Grey" %}</button><button type="button" data-draft-filter="Color">{% trans "Color" %}</button>
           </div>
           <div class="maps-chip-row maps-chip-row-muted">
-            <button type="button" disabled>Available today</button><button type="button" disabled>This week</button><button type="button" disabled>This month</button><button type="button" disabled>5 km</button><button type="button" disabled>10 km</button><button type="button" disabled>25 km</button><button type="button" disabled>50 km</button><button type="button" disabled>100 km</button><button type="button" disabled>4.5+</button><button type="button" disabled>4.8+</button><button type="button" disabled>Most reviewed</button><button type="button" disabled>Budget friendly</button><button type="button" disabled>Mid range</button><button type="button" disabled>Premium</button><button type="button" disabled>Luxury</button>
+            <button type="button" disabled>{% trans "Available today" %}</button><button type="button" disabled>{% trans "This week" %}</button><button type="button" disabled>{% trans "This month" %}</button><button type="button" disabled>5 km</button><button type="button" disabled>10 km</button><button type="button" disabled>25 km</button><button type="button" disabled>50 km</button><button type="button" disabled>100 km</button><button type="button" disabled>4.5+</button><button type="button" disabled>4.8+</button><button type="button" disabled>{% trans "Most reviewed" %}</button><button type="button" disabled>{% trans "Budget friendly" %}</button><button type="button" disabled>{% trans "Mid range" %}</button><button type="button" disabled>{% trans "Premium" %}</button><button type="button" disabled>{% trans "Luxury" %}</button>
           </div>
           <div class="maps-chip-row">
-            <button type="button" data-booking-filter="Accepting new clients">Accepting new clients</button><button type="button" data-booking-filter="Online consult">Online consult</button><button type="button" data-booking-filter="In-person">In-person</button>
+            <button type="button" data-booking-filter="Accepting new clients">{% trans "Accepting new clients" %}</button><button type="button" data-booking-filter="Online consult">{% trans "Online consult" %}</button><button type="button" data-booking-filter="In-person">{% trans "In-person" %}</button>
           </div>
         </div>
       </section>
@@ -86,7 +86,7 @@
             <p class="maps-kind">{{ artist.location_kind }}</p>
             <p class="maps-location">📍 {{ artist.location }}</p>
             {% if artist.style_tags %}
-              <div class="maps-tags">{% for style in artist.style_tags %}<span>{{ style }}</span>{% endfor %}</div>
+              <div class="maps-tags">{% for style in artist.style_labels %}<span>{{ style }}</span>{% endfor %}</div>
             {% else %}
               <div class="maps-tags maps-tags-muted"><span>{% trans "Styles pending" %}</span></div>
             {% endif %}
@@ -173,16 +173,16 @@
       </div>
       <div class="maps-modal-body">
         <p data-claim-summary>{% trans "This artist/location needs address verification. Nothing is claimed instantly." %}</p>
-        <input type="text" name="claimant_name" placeholder="Claimant name" required>
-        <input type="email" name="contact_email" placeholder="Contact email" required>
-        <input type="text" name="relation_to_location" placeholder="Relation to studio/location" required>
-        <input type="url" name="proof" placeholder="Portfolio or proof link">
+        <input type="text" name="claimant_name" placeholder="{% trans 'Claimant name' %}" required>
+        <input type="email" name="contact_email" placeholder="{% trans 'Contact email' %}" required>
+        <input type="text" name="relation_to_location" placeholder="{% trans 'Relation to studio/location' %}" required>
+        <input type="url" name="proof" placeholder="{% trans 'Portfolio or proof link' %}">
         <label class="maps-file-upload">
           <span>{% trans "Attach proof document" %}</span>
           <input type="file" name="proof_document" accept=".pdf,.jpg,.jpeg,.png,.webp">
           <small>{% trans "PDF, JPG, PNG or WEBP. Max 10 MB." %}</small>
         </label>
-        <textarea name="message" placeholder="Message"></textarea>
+        <textarea name="message" placeholder="{% trans 'Message' %}"></textarea>
         <output>{% trans "Admin review is required before anything changes on Tatzo." %}</output>
         <button type="submit" class="maps-disabled-submit maps-claim-submit">{% trans "Submit claim request" %}</button>
       </div>
@@ -190,6 +190,7 @@
   </dialog>
 </main>
 
+{{ maps_i18n|json_script:"maps-i18n" }}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" defer></script>
 <script src="{% static 'js/maps.js' %}" defer></script>

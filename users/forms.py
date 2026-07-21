@@ -71,7 +71,7 @@ class UserEditForm(forms.ModelForm):
         widgets = {
             "username": forms.TextInput(attrs={
                 "class": "edit-profile-input",
-                "placeholder": "Username",
+                "placeholder": _("Username"),
             }),
         }
 
@@ -83,12 +83,12 @@ class ProfileForm(forms.ModelForm):
         widgets = {
             "bio": forms.Textarea(attrs={
                 "class": "edit-profile-textarea",
-                "placeholder": "Tell something about yourself...",
+                "placeholder": _("Tell something about yourself..."),
                 "rows": 4,
             }),
             "tag": forms.TextInput(attrs={
                 "class": "edit-profile-input",
-                "placeholder": "Your unique tag",
+                "placeholder": _("Your unique tag"),
                 "maxlength": "32",
             }),
             "profile_image": forms.ClearableFileInput(attrs={
@@ -112,10 +112,10 @@ class ProfileForm(forms.ModelForm):
             existing_tag = existing_tag.exclude(pk=self.instance.pk)
 
         if existing_tag.exists():
-            raise forms.ValidationError("This tag is already taken.")
+            raise forms.ValidationError(_("This tag is already taken."))
 
         if len(tag) < 3:
-            raise forms.ValidationError("Tag must contain at least 3 characters.")
+            raise forms.ValidationError(_("Tag must contain at least 3 characters."))
 
         return tag    
     
@@ -135,11 +135,11 @@ class ProfileForm(forms.ModelForm):
 class VerificationForm(forms.ModelForm):
     business_document_type = forms.ChoiceField(
         choices=BUSINESS_DOCUMENT_CHOICES,
-        label="Тип бизнес-документа",
+        label=_("Business document type"),
         required=True,
     )
     business_document_file = forms.FileField(
-        label="Файл бизнес-документа",
+        label=_("Business document file"),
         required=True,
         widget=forms.ClearableFileInput(attrs={
             "accept": ".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,image/*,application/pdf",
@@ -147,11 +147,11 @@ class VerificationForm(forms.ModelForm):
     )
     id_document_type = forms.ChoiceField(
         choices=ID_DOCUMENT_CHOICES,
-        label="Тип документа личности",
+        label=_("Identity document type"),
         required=True,
     )
     id_document_file = forms.FileField(
-        label="Файл документа личности",
+        label=_("Identity document file"),
         required=True,
         widget=forms.ClearableFileInput(attrs={
             "accept": ".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,image/*,application/pdf",
@@ -194,15 +194,17 @@ class ManualVerificationForm(forms.ModelForm):
             }),
             "social_link": forms.URLInput(attrs={
                 "class": "verification-input",
-                "placeholder": "Instagram, TikTok, website...",
+                "placeholder": _("Instagram, TikTok, website..."),
             }),
             "city_country": forms.TextInput(attrs={
                 "class": "verification-input",
-                "placeholder": "Paris, France",
+                "placeholder": _("Paris, France"),
             }),
             "explanation": forms.Textarea(attrs={
                 "class": "verification-textarea",
-                "placeholder": "Tell us about your tattoo experience, studio, portfolio, or why you cannot provide official documents yet.",
+                "placeholder": _(
+                    "Tell us about your tattoo experience, studio, portfolio, or why you cannot provide official documents yet."
+                ),
                 "rows": 5,
             }),
             "extra_file": forms.ClearableFileInput(attrs={
@@ -223,16 +225,16 @@ class PortfolioAlbumForm(forms.ModelForm):
         widgets = {
             "title": forms.TextInput(attrs={
                 "class": "portfolio-input",
-                "placeholder": "Album name, e.g. Realism",
+                "placeholder": _("Album name, e.g. Realism"),
             }),
             "description": forms.Textarea(attrs={
                 "class": "portfolio-textarea",
-                "placeholder": "Short description...",
+                "placeholder": _("Short description..."),
                 "rows": 3,
             }),
             "style": forms.TextInput(attrs={
                 "class": "portfolio-input",
-                "placeholder": "Style, e.g. Blackwork",
+                "placeholder": _("Style, e.g. Blackwork"),
             }),
             "cover_image": forms.ClearableFileInput(attrs={
                 "class": "portfolio-file",
@@ -260,7 +262,7 @@ class PortfolioWorkForm(forms.Form):
     album = forms.ModelChoiceField(
         queryset=PortfolioAlbum.objects.none(),
         required=False,
-        empty_label="All works / no album",
+        empty_label=_("All works / no album"),
         widget=forms.Select(attrs={
             "class": "portfolio-input",
         }),
@@ -271,7 +273,7 @@ class PortfolioWorkForm(forms.Form):
         max_length=80,
         widget=forms.TextInput(attrs={
             "class": "portfolio-input",
-            "placeholder": "Or create new album, e.g. Japanese style",
+            "placeholder": _("Or create new album, e.g. Japanese style"),
         }),
     )
 
@@ -289,7 +291,7 @@ class PortfolioWorkForm(forms.Form):
         max_length=120,
         widget=forms.TextInput(attrs={
             "class": "portfolio-input",
-            "placeholder": "Work title, optional",
+            "placeholder": _("Work title, optional"),
         }),
     )
 
@@ -297,7 +299,7 @@ class PortfolioWorkForm(forms.Form):
         required=False,
         widget=forms.Textarea(attrs={
             "class": "portfolio-textarea",
-            "placeholder": "Describe these works...",
+            "placeholder": _("Describe these works..."),
             "rows": 4,
         }),
     )
@@ -307,7 +309,7 @@ class PortfolioWorkForm(forms.Form):
         max_length=80,
         widget=forms.TextInput(attrs={
             "class": "portfolio-input",
-            "placeholder": "Style, e.g. Realism",
+            "placeholder": _("Style, e.g. Realism"),
         }),
     )
 
@@ -316,7 +318,7 @@ class PortfolioWorkForm(forms.Form):
         max_length=80,
         widget=forms.TextInput(attrs={
             "class": "portfolio-input",
-            "placeholder": "Placement, e.g. forearm, back, chest",
+            "placeholder": _("Placement, e.g. forearm, back, chest"),
         }),
     )
 

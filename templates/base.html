@@ -23,7 +23,7 @@
         {% for message in messages %}
             <div class="flash-message flash-{{ message.tags|default:'info' }}">
                 <span class="flash-message-text">{{ message }}</span>
-                <button type="button" class="flash-close" aria-label="Close">×</button>
+                <button type="button" class="flash-close" aria-label="{% trans 'Close' %}">×</button>
             </div>
         {% endfor %}
     </div>
