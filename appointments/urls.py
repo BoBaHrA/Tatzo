@@ -19,6 +19,26 @@ urlpatterns = [
     path("calendar/block-time/", views.calendar_block_time, name="calendar_block_time"),
     path("calendar/vacation/", views.calendar_vacation, name="calendar_vacation"),
     path(
+        "calendar/events/<int:event_id>/complete/",
+        views.calendar_event_complete,
+        name="calendar_event_complete",
+    ),
+    path(
+        "calendar/events/<int:event_id>/reschedule/",
+        views.calendar_reschedule_request,
+        name="calendar_reschedule_request",
+    ),
+    path(
+        "calendar/appointments/<int:appointment_id>/complete/",
+        views.calendar_appointment_complete,
+        name="calendar_appointment_complete",
+    ),
+    path(
+        "calendar/appointments/<int:appointment_id>/reschedule/",
+        views.calendar_appointment_reschedule,
+        name="calendar_appointment_reschedule",
+    ),
+    path(
         "settings/autosave/",
         views.autosave_artist_booking_setting,
         name="autosave_artist_booking_setting",

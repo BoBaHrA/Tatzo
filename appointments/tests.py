@@ -164,3 +164,35 @@ class AppointmentCalendarSourceTests(TestCase):
         event = self.get_payloads(self.artist)['events'][0]
         self.assertEqual(event['id'], f'appointment-{appointment.id}')
         self.assertEqual(event['event_type'], CalendarEvent.TYPE_CONSULTATION)
+
+    def test_artist_can_complete_booking_appointment_from_calendar(self):
+        appointment = self.create_appointment()
+        self.client.force_login(self.artist)
+        response = self.client.post(
+            reverse('calendar_appointment_complete', args=[appointment.id])
+        )
+        self.assertEqual(response.status_code, 200)
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.status, Appointment.STATUS_COMPLETED)
+
+    def test_client_cannot_complete_booking_appointment(self):
+        appointment = self.create_appointment()
+        self.client.force_login(self.client_user)
+        response = self.client.post(
+            reverse('calendar_appointment_complete', args=[appointment.id])
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_booking_appointment_reschedule_is_visible_in_calendar(self):
+        appointment = self.create_appointment()
+        self.client.force_login(self.client_user)
+        response = self.client.post(
+            reverse('calendar_appointment_reschedule', args=[appointment.id]),
+            {'reason': 'Please move this session'},
+        )
+        self.assertEqual(response.status_code, 201)
+        event = CalendarEvent.objects.get(project=appointment)
+        self.assertEqual(event.status, CalendarEvent.STATUS_RESCHEDULE_REQUESTED)
+        payload = self.get_payloads(self.artist)['events'][0]
+        self.assertEqual(payload['id'], f'appointment-{appointment.id}')
+        self.assertEqual(payload['status'], CalendarEvent.STATUS_RESCHEDULE_REQUESTED)

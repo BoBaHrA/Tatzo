@@ -573,7 +573,13 @@
     const fd = new FormData();
     Object.entries(body).forEach(([k, v]) => fd.append(k, v));
     const r = await fetch(url, { method: "POST", headers: { "X-CSRFToken": csrf() }, body: fd });
-    if (r.ok) load();
+    if (r.ok) {
+      await load();
+      return true;
+    }
+    const data = await r.json().catch(() => ({}));
+    status.textContent = data.error || t("action_error", "Could not update calendar.");
+    return false;
   }
 
   document.addEventListener("click", (event) => {
