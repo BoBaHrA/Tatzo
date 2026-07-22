@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
+from django.test import override_settings
 from django.urls import reverse
 
 from .forms import VerificationForm
@@ -131,6 +132,58 @@ class AccountSecurityTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("home"))
         self.assertFalse(User.objects.filter(pk=self.user.pk).exists())
+
+
+@override_settings(
+    PUBLIC_SITE_URL="https://tatzo.eu",
+    STORAGES={
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+        },
+    },
+)
+class SeoEndpointTests(TestCase):
+    def setUp(self):
+        self.approved = User.objects.create_user("indexed-artist")
+        self.hidden = User.objects.create_user("hidden-artist")
+        User.objects.filter(pk__in=[self.approved.pk, self.hidden.pk]).update(
+            is_active=True
+        )
+        Profile.objects.filter(user=self.approved).update(
+            account_type="tattoo_artist",
+            status="active",
+            verification_status="approved",
+        )
+        Profile.objects.filter(user=self.hidden).update(
+            account_type="tattoo_artist",
+            status="active",
+            verification_status="pending",
+        )
+
+    def test_robots_advertises_sitemap_and_blocks_private_areas(self):
+        response = self.client.get(reverse("robots_txt"))
+        self.assertContains(response, "Sitemap: https://tatzo.eu/sitemap.xml")
+        self.assertContains(response, "Disallow: /protected-media/")
+        self.assertContains(response, "Disallow: /appointments/")
+
+    def test_sitemap_contains_only_approved_active_artist_profiles(self):
+        response = self.client.get("/sitemap.xml")
+        self.assertContains(response, f"/profile/{self.approved.username}/")
+        self.assertNotContains(response, f"/profile/{self.hidden.username}/")
+
+    def test_canonical_uses_primary_domain_without_query_string(self):
+        response = self.client.get(reverse("search_page") + "?q=blackwork")
+        self.assertContains(
+            response,
+            '<link rel="canonical" href="https://tatzo.eu/search/">',
+            html=True,
+        )
+        self.assertContains(response, 'content="index,follow"')
+
+    def test_private_page_is_noindex(self):
+        response = self.client.get(reverse("login"))
+        self.assertContains(response, 'content="noindex,nofollow"')
 
 
 class ModerationAccessTests(TestCase):

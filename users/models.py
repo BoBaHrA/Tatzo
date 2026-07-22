@@ -87,6 +87,11 @@ class Profile(models.Model):
     
     is_email_verified = models.BooleanField(default=False)
     show_liked_posts = models.BooleanField(default=True)
+    timezone = models.CharField(
+        max_length=64,
+        default="Europe/Paris",
+        help_text=_("Time zone used for bookings and calendar times."),
+    )
     tag = models.SlugField(
         max_length=32,
         unique=True,

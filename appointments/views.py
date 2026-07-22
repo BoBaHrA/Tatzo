@@ -1,5 +1,6 @@
 import json
 from datetime import datetime, timedelta, time
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from django.db import transaction
 from django.db.models import Count, Q
@@ -132,6 +133,21 @@ def _build_booking_payload(artist):
 def _get_artist_settings(artist):
     settings, created = ArtistBookingSettings.objects.get_or_create(artist=artist)
     return settings
+
+
+def _artist_timezone(artist):
+    timezone_name = getattr(getattr(artist, "profile", None), "timezone", "UTC")
+    try:
+        return ZoneInfo(timezone_name)
+    except (ZoneInfoNotFoundError, ValueError, TypeError):
+        return ZoneInfo("UTC")
+
+
+def _artist_datetime(artist, date_value, time_value):
+    return timezone.make_aware(
+        datetime.combine(date_value, time_value),
+        _artist_timezone(artist),
+    )
 
 
 ACTIVE_BOOKING_STATUSES = [
@@ -466,10 +482,7 @@ def create_appointment(request, username):
         messages.error(request, _("Duration must be greater than zero."))
         return redirect("booking_wizard", username=artist.username)
 
-    start_dt = timezone.make_aware(
-        datetime.combine(date_value, start_time_value),
-        timezone.get_current_timezone(),
-    )
+    start_dt = _artist_datetime(artist, date_value, start_time_value)
 
     minimum_start = timezone.now() + timedelta(
         hours=booking_settings.minimum_notice_hours
@@ -479,7 +492,7 @@ def create_appointment(request, username):
         messages.error(request, _("This session is longer than the artist allows."))
         return redirect("booking_wizard", username=artist.username)
 
-    latest_allowed_date = timezone.localdate() + timedelta(
+    latest_allowed_date = timezone.localdate(_artist_timezone(artist)) + timedelta(
         days=booking_settings.maximum_booking_window_days
     )
 
@@ -639,10 +652,7 @@ def create_manual_appointment(request):
         messages.error(request, _("This session is longer than your booking settings allow."))
         return redirect("artist_booking_settings")
 
-    start_dt = timezone.make_aware(
-        datetime.combine(date_value, start_time_value),
-        timezone.get_current_timezone(),
-    )
+    start_dt = _artist_datetime(request.user, date_value, start_time_value)
 
     if start_dt < timezone.now():
         messages.error(request, _("Manual bookings cannot be created in the past."))
@@ -930,15 +940,13 @@ def calendar_events(request):
         if not appointment.start_time:
             continue
 
-        starts_at = timezone.make_aware(
-            datetime.combine(appointment.date, appointment.start_time),
-            timezone.get_current_timezone(),
+        starts_at = _artist_datetime(
+            appointment.artist, appointment.date, appointment.start_time
         )
 
         if appointment.end_time:
-            ends_at = timezone.make_aware(
-                datetime.combine(appointment.date, appointment.end_time),
-                timezone.get_current_timezone(),
+            ends_at = _artist_datetime(
+                appointment.artist, appointment.date, appointment.end_time
             )
         else:
             ends_at = starts_at + timedelta(
@@ -1022,8 +1030,8 @@ def calendar_events(request):
                 "event_type_label": appointment.get_booking_type_display(),
                 "status": calendar_status,
                 "status_label": str(calendar_status_labels.get(calendar_status, calendar_status)),
-                "starts_at": starts_at.isoformat(),
-                "ends_at": ends_at.isoformat(),
+                "starts_at": starts_at.astimezone(ZoneInfo("UTC")).isoformat(),
+                "ends_at": ends_at.astimezone(ZoneInfo("UTC")).isoformat(),
                 "date": appointment.date.isoformat(),
                 "start_time": _time_to_string(appointment.start_time),
                 "end_time": _time_to_string(appointment.end_time),
@@ -1058,9 +1066,15 @@ def calendar_events(request):
         CalendarEvent.objects.filter(project_id__isnull=False)
         .values_list("project_id", flat=True)
     )
+    utc_start = timezone.make_aware(
+        datetime.combine(start_date - timedelta(days=1), time.min), ZoneInfo("UTC")
+    )
+    utc_end = timezone.make_aware(
+        datetime.combine(end_date + timedelta(days=2), time.min), ZoneInfo("UTC")
+    )
     calendar_qs = (
         CalendarEvent.objects
-        .filter(starts_at__date__gte=start_date, starts_at__date__lte=end_date)
+        .filter(starts_at__gte=utc_start, starts_at__lt=utc_end)
         .exclude(status=CalendarEvent.STATUS_CANCELLED)
         .select_related("artist", "client", "project")
     )
@@ -1079,8 +1093,11 @@ def calendar_events(request):
         ):
             continue
 
-        local_start = timezone.localtime(event.starts_at)
-        local_end = timezone.localtime(event.ends_at)
+        event_tz = _artist_timezone(event.artist)
+        local_start = timezone.localtime(event.starts_at, event_tz)
+        local_end = timezone.localtime(event.ends_at, event_tz)
+        if not start_date <= local_start.date() <= end_date:
+            continue
         duration_minutes = max(
             0,
             int(round((event.ends_at - event.starts_at).total_seconds() / 60)),
@@ -1117,8 +1134,8 @@ def calendar_events(request):
                 "event_type_label": event.get_event_type_display(),
                 "status": event.status,
                 "status_label": event.get_status_display(),
-                "starts_at": event.starts_at.isoformat(),
-                "ends_at": event.ends_at.isoformat(),
+                "starts_at": event.starts_at.astimezone(ZoneInfo("UTC")).isoformat(),
+                "ends_at": event.ends_at.astimezone(ZoneInfo("UTC")).isoformat(),
                 "date": local_start.date().isoformat(),
                 "start_time": _time_to_string(local_start.time()),
                 "end_time": _time_to_string(local_end.time()),
@@ -1209,13 +1226,10 @@ def _calendar_artist_or_403(request):
     return bool(profile and profile.account_type == "tattoo_artist")
 
 
-def _calendar_datetime(date_value, time_value):
+def _calendar_datetime(artist, date_value, time_value):
     parsed_date = datetime.strptime(date_value, "%Y-%m-%d").date()
     parsed_time = datetime.strptime(time_value, "%H:%M").time()
-    return timezone.make_aware(
-        datetime.combine(parsed_date, parsed_time),
-        timezone.get_current_timezone(),
-    )
+    return _artist_datetime(artist, parsed_date, parsed_time)
 
 
 def _create_calendar_event(request, forced_type=None):
@@ -1229,10 +1243,12 @@ def _create_calendar_event(request, forced_type=None):
 
     try:
         starts_at = _calendar_datetime(
+            request.user,
             request.POST.get("date"),
             request.POST.get("start_time"),
         )
         ends_at = _calendar_datetime(
+            request.user,
             request.POST.get("date"),
             request.POST.get("end_time"),
         )
@@ -1240,10 +1256,15 @@ def _create_calendar_event(request, forced_type=None):
         return JsonResponse({"ok": False, "error": _("Invalid date or time.")}, status=400)
     if ends_at <= starts_at:
         matching_overnight_event = any(
-            timezone.localtime(item.starts_at).date() == starts_at.date()
-            and timezone.localtime(item.starts_at).strftime("%H:%M")
+            timezone.localtime(item.starts_at, _artist_timezone(request.user)).date()
+            == starts_at.date()
+            and timezone.localtime(
+                item.starts_at, _artist_timezone(request.user)
+            ).strftime("%H:%M")
             == starts_at.strftime("%H:%M")
-            and timezone.localtime(item.ends_at).strftime("%H:%M")
+            and timezone.localtime(
+                item.ends_at, _artist_timezone(request.user)
+            ).strftime("%H:%M")
             == ends_at.strftime("%H:%M")
             for item in CalendarEvent.objects.filter(
                 artist=request.user,
@@ -1342,10 +1363,12 @@ def calendar_reschedule_request(request, event_id):
     if request.POST.get("date") or request.POST.get("start_time") or request.POST.get("end_time"):
         try:
             proposed_start = _calendar_datetime(
+                event.artist,
                 request.POST.get("date"),
                 request.POST.get("start_time"),
             )
             proposed_end = _calendar_datetime(
+                event.artist,
                 request.POST.get("date"),
                 request.POST.get("end_time"),
             )
@@ -1408,15 +1431,11 @@ def calendar_appointment_reschedule(request, appointment_id):
             status=409,
         )
 
-    starts_at = timezone.make_aware(
-        datetime.combine(appointment.date, appointment.start_time),
-        timezone.get_current_timezone(),
+    starts_at = _artist_datetime(
+        appointment.artist, appointment.date, appointment.start_time
     )
     ends_at = (
-        timezone.make_aware(
-            datetime.combine(appointment.date, appointment.end_time),
-            timezone.get_current_timezone(),
-        )
+        _artist_datetime(appointment.artist, appointment.date, appointment.end_time)
         if appointment.end_time
         else starts_at + timedelta(minutes=appointment.session_length_minutes or 60)
     )

@@ -13,7 +13,7 @@ class CalendarAccessTests(TestCase):
         self.client_user=User.objects.create_user('client',password='pw')
         self.client2=User.objects.create_user('client2',password='pw')
         for u,t in [(self.artist,'tattoo_artist'),(self.artist2,'tattoo_artist'),(self.client_user,'regular'),(self.client2,'regular')]:
-            Profile.objects.update_or_create(user=u, defaults={'account_type': t, 'status': 'active', 'is_email_verified': True, 'verification_status': 'approved' if t == 'tattoo_artist' else 'not_submitted'}); u.is_active=True; u.save(update_fields=['is_active'])
+            Profile.objects.update_or_create(user=u, defaults={'account_type': t, 'status': 'active', 'is_email_verified': True, 'verification_status': 'approved' if t == 'tattoo_artist' else 'not_submitted', 'timezone': 'UTC'}); u.is_active=True; u.save(update_fields=['is_active'])
         self.start=timezone.now()+timedelta(days=2)
         self.end=self.start+timedelta(hours=2)
         self.event=CalendarEvent.objects.create(artist=self.artist,client=self.client_user,event_type=CalendarEvent.TYPE_TATTOO_SESSION,status=CalendarEvent.STATUS_CONFIRMED,title='Session',starts_at=self.start,ends_at=self.end)
@@ -51,6 +51,30 @@ class CalendarAccessTests(TestCase):
         self.client.force_login(self.client_user)
         response = self.client.get(reverse('artist_dashboard_calendar'))
         self.assertEqual(response.status_code, 403)
+
+    def test_calendar_uses_artist_timezone_for_local_input_and_output(self):
+        self.artist.profile.timezone = "Europe/Paris"
+        self.artist.profile.save(update_fields=["timezone"])
+        self.client.force_login(self.artist)
+        response = self.client.post(
+            reverse("calendar_event_create"),
+            {
+                "event_type": CalendarEvent.TYPE_BLOCKED,
+                "date": "2030-07-15",
+                "start_time": "10:00",
+                "end_time": "11:00",
+            },
+        )
+        self.assertEqual(response.status_code, 201)
+        event = CalendarEvent.objects.get(pk=response.json()["event_id"])
+        self.assertEqual(timezone.localtime(event.starts_at).strftime("%H:%M"), "08:00")
+
+        payload = self.client.get(
+            reverse("calendar_events") + "?start=2030-07-15&end=2030-07-15"
+        ).json()["events"]
+        created = next(item for item in payload if item["id"] == f"event-{event.id}")
+        self.assertEqual(created["start_time"], "10:00")
+        self.assertTrue(created["starts_at"].endswith("+00:00"))
 
 class AppointmentCalendarSourceTests(TestCase):
     def setUp(self):

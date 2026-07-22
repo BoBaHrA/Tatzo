@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
+    "django.contrib.sitemaps",
     "posts",
     "users.apps.UsersConfig",
     "django.contrib.messages",
@@ -74,6 +75,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "users.context_processors.chat_unread_count",
+                "mytattooapp.seo.seo_context",
             ],
         },
     },
@@ -125,6 +127,8 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
+
+PUBLIC_SITE_URL = os.getenv("PUBLIC_SITE_URL", "https://tatzo.eu").rstrip("/")
 
 LANGUAGES = [
     ("en", _("English")),

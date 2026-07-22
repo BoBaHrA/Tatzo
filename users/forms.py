@@ -86,9 +86,29 @@ class UserEditForm(forms.ModelForm):
 
 
 class ProfileForm(forms.ModelForm):
+    TIMEZONE_CHOICES = [
+        ("Europe/Paris", _("Europe — Paris")),
+        ("Europe/London", _("Europe — London")),
+        ("Europe/Berlin", _("Europe — Berlin")),
+        ("Europe/Bucharest", _("Europe — Bucharest")),
+        ("Europe/Chisinau", _("Europe — Chisinau")),
+        ("America/New_York", _("America — New York")),
+        ("America/Chicago", _("America — Chicago")),
+        ("America/Denver", _("America — Denver")),
+        ("America/Los_Angeles", _("America — Los Angeles")),
+        ("Asia/Tokyo", _("Asia — Tokyo")),
+        ("Australia/Sydney", _("Australia — Sydney")),
+        ("UTC", "UTC"),
+    ]
+    timezone = forms.ChoiceField(
+        choices=TIMEZONE_CHOICES,
+        label=_("Booking time zone"),
+        widget=forms.Select(attrs={"class": "edit-profile-input"}),
+    )
+
     class Meta:
         model = Profile
-        fields = ["tag", "bio", "profile_image", "show_liked_posts"]
+        fields = ["tag", "bio", "profile_image", "show_liked_posts", "timezone"]
         widgets = {
             "bio": forms.Textarea(attrs={
                 "class": "edit-profile-textarea",
