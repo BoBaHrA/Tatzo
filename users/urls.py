@@ -2,8 +2,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
+from django.urls import reverse_lazy
 
-from users.forms_custom import CustomSetPasswordForm
+from users.forms_custom import CustomPasswordChangeForm, CustomSetPasswordForm
 from users import views as users_views
 
 from . import views
@@ -153,6 +154,16 @@ urlpatterns = [
         name="admin_verification",
     ),
     path("profile/edit/", views.edit_profile, name="edit_profile"),
+    path(
+        "settings/password/",
+        auth_views.PasswordChangeView.as_view(
+            template_name="users/password_change.html",
+            form_class=CustomPasswordChangeForm,
+            success_url=reverse_lazy("edit_profile"),
+        ),
+        name="password_change",
+    ),
+    path("settings/delete-account/", views.delete_account, name="delete_account"),
     path("profile/", views.user_profile, name="user_profile"),
     path("verification/", views.verification_page, name="verification_page"),
     path(

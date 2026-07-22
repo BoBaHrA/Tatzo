@@ -373,7 +373,7 @@ def delete_post(request, post_id):
 @login_required
 @require_POST
 def report_post(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+    post = get_object_or_404(Post.objects.visible_to(request.user), id=post_id)
     
     allowed, retry_after = check_rate_limit(
         request,
@@ -398,7 +398,7 @@ def report_post(request, post_id):
             status=400,
         )
 
-    reason = (request.POST.get("reason") or "").strip()
+    reason = (request.POST.get("reason") or "").strip()[:255]
 
     report, created = PostReport.objects.get_or_create(
         post=post,

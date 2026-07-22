@@ -75,6 +75,15 @@ class UserEditForm(forms.ModelForm):
             }),
         }
 
+    def clean_username(self):
+        username = (self.cleaned_data.get("username") or "").strip()
+        duplicate = User.objects.filter(username__iexact=username)
+        if self.instance and self.instance.pk:
+            duplicate = duplicate.exclude(pk=self.instance.pk)
+        if duplicate.exists():
+            raise forms.ValidationError(_("A user with that username already exists."))
+        return username
+
 
 class ProfileForm(forms.ModelForm):
     class Meta:

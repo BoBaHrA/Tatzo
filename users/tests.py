@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from .forms import VerificationForm
 from .forms_custom import CustomUserCreationForm
-from .models import ChatAttachment, ChatMessage, ChatThread
+from .models import ChatAttachment, ChatMessage, ChatThread, Profile
 
 
 User = get_user_model()
@@ -102,3 +102,84 @@ class ProtectedMediaTests(TestCase):
     def test_private_storage_does_not_expose_direct_url(self):
         with self.assertRaises(ValueError):
             self.attachment.file.url
+
+
+class AccountSecurityTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user("account-owner", password="Password123!")
+        self.user.is_active = True
+        self.user.save(update_fields=["is_active"])
+
+    def test_new_staff_user_is_not_deactivated_by_profile_signal(self):
+        staff = User.objects.create_user("new-staff", password="Password123!", is_staff=True)
+        self.assertTrue(staff.is_active)
+        self.assertTrue(Profile.objects.filter(user=staff).exists())
+
+    def test_delete_account_requires_post_and_current_password(self):
+        self.client.force_login(self.user)
+        url = reverse("delete_account")
+        self.assertEqual(self.client.get(url).status_code, 405)
+        response = self.client.post(url, {"password": "wrong"})
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(User.objects.filter(pk=self.user.pk).exists())
+
+    def test_delete_account_removes_user_with_correct_password(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("delete_account"), {"password": "Password123!"}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("home"))
+        self.assertFalse(User.objects.filter(pk=self.user.pk).exists())
+
+
+class ModerationAccessTests(TestCase):
+    def setUp(self):
+        self.regular = User.objects.create_user("regular-user", password="Password123!")
+        self.artist = User.objects.create_user("pending-artist", password="Password123!")
+        self.staff = User.objects.create_user(
+            "moderator", password="Password123!", is_staff=True
+        )
+        User.objects.filter(pk__in=[self.regular.pk, self.artist.pk, self.staff.pk]).update(
+            is_active=True
+        )
+        Profile.objects.filter(user=self.regular).update(account_type="regular")
+        Profile.objects.filter(user=self.artist).update(
+            account_type="tattoo_artist", verification_status="pending"
+        )
+
+    def test_non_staff_cannot_use_moderation_action(self):
+        self.client.force_login(self.regular)
+        response = self.client.post(
+            reverse("moderation_approve_artist", args=[self.artist.username])
+        )
+        self.assertEqual(response.status_code, 302)
+        self.artist.profile.refresh_from_db()
+        self.assertEqual(self.artist.profile.verification_status, "pending")
+
+    def test_moderation_actions_are_post_only(self):
+        self.client.force_login(self.staff)
+        response = self.client.get(
+            reverse("moderation_approve_artist", args=[self.artist.username])
+        )
+        self.assertEqual(response.status_code, 405)
+
+    def test_staff_cannot_approve_regular_account_as_artist(self):
+        self.client.force_login(self.staff)
+        response = self.client.post(
+            reverse("moderation_approve_artist", args=[self.regular.username])
+        )
+        self.assertEqual(response.status_code, 404)
+        self.regular.profile.refresh_from_db()
+        self.assertNotEqual(self.regular.profile.verification_status, "approved")
+
+    def test_legacy_profile_action_no_longer_changes_status(self):
+        self.client.force_login(self.staff)
+        self.artist.profile.refresh_from_db()
+        response = self.client.post(
+            reverse("approve_profile", args=[self.artist.profile.pk])
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("moderation_dashboard"))
+        self.artist.profile.refresh_from_db()
+        self.assertEqual(self.artist.profile.verification_status, "pending")

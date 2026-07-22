@@ -12,6 +12,8 @@ from .models import (
     LocationClaim,
     LocationRequest,
     ManualVerificationRequest,
+    PortfolioAlbum,
+    PortfolioWork,
     Profile,
     UserReport,
     VerificationDocument,
@@ -23,25 +25,16 @@ logger = logging.getLogger(__name__)
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        # Создаём профиль только если его ещё нет
         if not hasattr(instance, "profile"):
             Profile.objects.create(
                 user=instance,
                 is_email_verified=False,
                 tag=Profile.generate_unique_tag(instance.username),
             )
-        instance.is_active = False
-        instance.save()
-
-
-@receiver(post_save, sender=User)  # 🔴 Важно! Без этого сигнал не сработает
-def deactivate_user_after_creation(sender, instance, created, **kwargs):
-    if created:
-        instance.is_active = False  # Отключаем логин до подтверждения почты
-        instance.save()
 
 
 PRIVATE_FILE_FIELDS = {
+    Profile: ("profile_image",),
     VerificationDocument: ("business_document_file", "id_document_file"),
     ManualVerificationRequest: ("extra_file",),
     ChatAttachment: ("file",),
@@ -50,6 +43,8 @@ PRIVATE_FILE_FIELDS = {
     LocationRequest: ("supporting_file",),
     AppointmentReferenceImage: ("image",),
     PostMedia: ("file",),
+    PortfolioAlbum: ("cover_image",),
+    PortfolioWork: ("image",),
 }
 
 

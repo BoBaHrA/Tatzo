@@ -2,7 +2,8 @@
 import re
 
 from django import forms
-from django.contrib.auth.forms import SetPasswordForm, UserCreationForm
+from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm, UserCreationForm
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -61,6 +62,8 @@ class CustomUserCreationForm(UserCreationForm):
         if errors:
             raise ValidationError(errors)
 
+        validate_password(password2, self.instance)
+
         return password2
 
 
@@ -82,6 +85,8 @@ class CustomSetPasswordForm(SetPasswordForm):
         if errors:
             raise ValidationError(errors)
 
+        validate_password(password1, self.user)
+
         return password1
 
     def clean_new_password2(self):
@@ -94,10 +99,12 @@ class CustomSetPasswordForm(SetPasswordForm):
         return password2
 
     def save(self, commit=True):
-        print("[DEBUG] save() вызван, пароль меняется!")
-        user = super().save(commit=False)
-        password = self.cleaned_data["new_password1"]
-        user.set_password(password)  # Устанавливаем новый пароль
-        if commit:
-            user.save()
-        return user
+        return super().save(commit=commit)
+
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    def clean_new_password1(self):
+        password = self.cleaned_data.get("new_password1")
+        if password:
+            validate_password(password, self.user)
+        return password

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<main class="edit-profile-page">
+  <section class="edit-profile-card">
+    <header class="edit-profile-header">
+      <h1>{% trans "Settings" %}</h1>
+      <p>{% trans "Update your public profile and account security." %}</p>
+    </header>
+
+    <form method="post" enctype="multipart/form-data" class="edit-profile-form">
+      {% csrf_token %}
+      {{ user_form.non_field_errors }}
+      {{ profile_form.non_field_errors }}
+      <div class="edit-profile-layout">
+        <div class="edit-profile-left">
+          {% for field in user_form %}
+            <div class="edit-profile-field">
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {{ field.errors }}
+            </div>
+          {% endfor %}
+          {% for field in profile_form %}
+            <div class="edit-profile-field">
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {{ field.errors }}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="edit-profile-actions">
+        <a class="profile-btn" href="{% url 'profile' request.user.username %}">{% trans "Cancel" %}</a>
+        <button class="profile-btn profile-btn-primary" type="submit">{% trans "Save changes" %}</button>
+      </div>
+    </form>
+
+    <hr>
+    <section aria-labelledby="account-security-title">
+      <h2 id="account-security-title">{% trans "Account security" %}</h2>
+      <p><a class="profile-btn" href="{% url 'password_change' %}">{% trans "Change password" %}</a></p>
+
+      <form method="post" action="{% url 'delete_account' %}" onsubmit="return confirm('{% trans "Delete your account permanently? This cannot be undone." %}');">
+        {% csrf_token %}
+        <label for="delete-account-password">{% trans "Enter your password to delete the account" %}</label>
+        <input id="delete-account-password" name="password" type="password" autocomplete="current-password" required>
+        <button class="profile-btn" type="submit">{% trans "Delete account" %}</button>
+      </form>
+    </section>
+  </section>
+</main>
+{% endblock %}

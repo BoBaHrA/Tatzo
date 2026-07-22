@@ -41,6 +41,17 @@ class PostVisibilityTests(TestCase):
             {self.public.id, self.followers.id, self.private.id},
         )
 
+    def test_private_post_cannot_be_reported_by_direct_id(self):
+        self.client.force_login(self.stranger)
+        response = self.client.post(
+            reverse("posts:report_post", args=[self.private.pk]),
+            {"reason": "direct access"},
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertFalse(
+            PostReport.objects.filter(post=self.private, user=self.stranger).exists()
+        )
+
     def test_block_hides_all_posts_in_both_directions(self):
         UserBlock.objects.create(blocker=self.stranger, blocked=self.author)
         self.assertEqual(self.ids_visible_to(self.stranger), set())

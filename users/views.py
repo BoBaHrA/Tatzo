@@ -56,6 +56,10 @@ from .utils import send_verification_email
 User = get_user_model()
 
 
+def is_admin(user):
+    return user.is_authenticated and user.is_staff
+
+
 @login_required
 def protected_media(request, media_type, object_id, field):
     """Stream private uploads only after checking object-level access."""
@@ -422,8 +426,8 @@ def logout(request):
 
 
 def profile_list(request):
-    profiles = Profile.objects.all()  # Получаем все профили
-    return render(request, "users/profile_list.html", {"profiles": profiles})
+    # Legacy endpoint retained for old links, but it must never expose pending users.
+    return redirect("search_page")
 
 
 @login_required
@@ -457,8 +461,24 @@ def user_profile(request):
     return redirect("profile", username=request.user.username)
 
 
+@login_required
+@require_POST
+def delete_account(request):
+    password = request.POST.get("password") or ""
+    if not request.user.check_password(password):
+        messages.error(request, _("The password you entered is incorrect."))
+        return redirect("edit_profile")
+
+    user = request.user
+    auth_logout(request)
+    user.delete()
+    messages.success(request, _("Your account and associated data have been deleted."))
+    return redirect("home")
+
+
 # Обработка удаления поста
 @login_required
+@require_POST
 def delete_post(request, post_id):
     """
     Удаление поста.
@@ -668,9 +688,8 @@ def edit_post(request, post_id):
     return render(request, "edit_post.html", context)
 
 
+@user_passes_test(is_admin)
 def admin_verification(request, profile_id):
-    if not request.user.is_staff:
-        return redirect_to_login(request.get_full_path())
     get_object_or_404(Profile, id=profile_id)
     return redirect("moderation_dashboard")
 
@@ -681,6 +700,9 @@ def verification_page(request):
 
     if profile.account_type != "tattoo_artist":
         return redirect("home")
+
+    if profile.verification_status == "approved":
+        return redirect("profile", username=request.user.username)
 
     existing_document_request = VerificationDocument.objects.filter(
         user=request.user
@@ -784,129 +806,46 @@ def verification_page(request):
     return render(request, "users/verification_page.html", context)
 
 
-# Проверка, является ли пользователь администратором
-def is_admin(user):
-    return user.is_staff
-
-
 @user_passes_test(is_admin)
 def review_verifications(request):
     return redirect("moderation_dashboard")
 
 
 @user_passes_test(is_admin)
+@require_POST
 def verify_document(request, document_id):
-    document = get_object_or_404(VerificationDocument, id=document_id)
-    if request.method == "POST":
-        action = request.POST.get("action")
-        if action == "approve":
-            document.is_verified = True
-        elif action == "reject":
-            document.is_verified = False
-        document.save()
-        return JsonResponse({"success": True, "status": document.is_verified})
-    return JsonResponse({"success": False, "error": _("Invalid request.")})
+    get_object_or_404(VerificationDocument, id=document_id)
+    return redirect("moderation_dashboard")
 
 
 @user_passes_test(is_admin)
 def pending_verifications(request):
-    # Получаем список неподтвержденных документов
-    pending_docs = VerificationDocument.objects.filter(is_verified=False)
-    return render(
-        request, "users/pending_verifications.html", {"pending_docs": pending_docs}
-    )
+    return redirect("moderation_dashboard")
 
 
 @user_passes_test(is_admin)
 def review_profile(request, profile_id):
-    # Получаем профиль по ID или возвращаем 404
-    profile = get_object_or_404(Profile, id=profile_id)
-
-    if request.method == "POST":
-        action = request.POST.get("action")
-        if action == "approve":
-            profile.verification_status = "approved"
-            profile.save()
-            message = _("Profile approved successfully.")
-        elif action == "reject":
-            profile.verification_status = "rejected"
-            profile.save()
-            message = _("Profile rejected successfully.")
-        else:
-            message = _("Invalid action.")
-
-        return render(
-            request,
-            "users/review_profile.html",
-            {"profile": profile, "message": message},
-        )
-
-    return render(request, "users/review_profile.html", {"profile": profile})
+    get_object_or_404(Profile, id=profile_id)
+    return redirect("moderation_dashboard")
 
 
 @login_required
 def upload_verification_documents(request):
-    if request.method == "POST":
-        document_type = request.POST.get("document_type")
-        document_file = request.FILES.get("document_file")
-        identity_document = request.FILES.get("identity_document")
-
-        # Сохраняем документ
-        verification_document = VerificationDocument(
-            user=request.user,
-            document_type=document_type,
-            document_file=document_file,
-            identity_document=identity_document,
-        )
-        verification_document.save()
-
-        messages.success(
-            request, _("Your documents have been submitted for verification.")
-        )
-        return redirect(
-            "home"
-        )  # Перенаправляем на главную страницу или другую, если нужно
-    return render(request, "users/upload_verification_documents.html")
+    return redirect("verification_page")
 
 
 @user_passes_test(is_admin)
+@require_POST
 def approve_profile(request, profile_id):
-    # Получаем профиль по ID или возвращаем 404
-    profile = get_object_or_404(Profile, id=profile_id)
-
-    # Обновляем статус верификации профиля
-    profile.verification_status = "approved"
-    profile.save()
-
-    # Сообщение об успешном одобрении
-    messages.success(
-        request,
-        _("Profile '%(username)s' has been approved.")
-        % {"username": profile.user.username},
-    )
-
-    # Перенаправление обратно на список профилей или другую страницу
-    return redirect("profile_list")  # Замените на ваш URL для списка профилей
+    get_object_or_404(Profile, id=profile_id)
+    return redirect("moderation_dashboard")
 
 
 @user_passes_test(is_admin)
+@require_POST
 def reject_profile(request, profile_id):
-    # Получаем профиль по ID или возвращаем 404
-    profile = get_object_or_404(Profile, id=profile_id)
-
-    # Обновляем статус верификации профиля
-    profile.verification_status = "rejected"
-    profile.save()
-
-    # Сообщение об успешном отклонении
-    messages.success(
-        request,
-        _("Profile '%(username)s' has been rejected.")
-        % {"username": profile.user.username},
-    )
-
-    # Перенаправление обратно на список профилей или другую страницу
-    return redirect("profile_list")  # Замените на ваш URL для списка профилей
+    get_object_or_404(Profile, id=profile_id)
+    return redirect("moderation_dashboard")
 
 def profile_view(request, username):
     user_obj = get_object_or_404(
@@ -1464,7 +1403,16 @@ def moderation_dashboard(request):
 @user_passes_test(is_admin)
 @require_POST
 def moderation_approve_artist(request, username):
-    user_obj = get_object_or_404(User.objects.select_related("profile", "booking_settings"), username=username)
+    user_obj = get_object_or_404(
+        User.objects.select_related("profile", "booking_settings"),
+        username=username,
+        profile__account_type="tattoo_artist",
+        profile__verification_status__in=[
+            "pending",
+            "pending_documents",
+            "pending_manual_review",
+        ],
+    )
 
     user_obj.profile.verification_status = "approved"
     user_obj.profile.save(update_fields=["verification_status"])
@@ -1483,7 +1431,16 @@ def moderation_approve_artist(request, username):
 @user_passes_test(is_admin)
 @require_POST
 def moderation_reject_artist(request, username):
-    user_obj = get_object_or_404(User.objects.select_related("profile", "booking_settings"), username=username)
+    user_obj = get_object_or_404(
+        User.objects.select_related("profile", "booking_settings"),
+        username=username,
+        profile__account_type="tattoo_artist",
+        profile__verification_status__in=[
+            "pending",
+            "pending_documents",
+            "pending_manual_review",
+        ],
+    )
 
     user_obj.profile.verification_status = "rejected"
     user_obj.profile.save(update_fields=["verification_status"])
