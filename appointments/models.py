@@ -3,6 +3,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
+from django.urls import reverse
+from mytattooapp.storage_backends import private_media_storage
 
 
 APPOINTMENT_VALUE_LABELS = {
@@ -319,7 +321,10 @@ class AppointmentReferenceImage(models.Model):
         on_delete=models.CASCADE,
         related_name="reference_images",
     )
-    image = models.ImageField(upload_to="appointments/references/")
+    image = models.ImageField(
+        upload_to="appointments/references/",
+        storage=private_media_storage,
+    )
     original_name = models.CharField(max_length=255, blank=True)
     order = models.PositiveIntegerField(default=0)
 
@@ -330,6 +335,10 @@ class AppointmentReferenceImage(models.Model):
 
     def __str__(self):
         return self.original_name or f"Reference #{self.id}"
+
+    @property
+    def private_url(self):
+        return reverse("protected_media", args=["appointment-reference", self.pk, "file"])
 
 
 class CalendarEvent(models.Model):

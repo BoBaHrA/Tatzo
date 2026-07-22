@@ -153,11 +153,11 @@
                     </div>
 
                     <div class="moderation-file-links">
-                      <a href="{{ doc.business_document_file.url }}" target="_blank">
+                      <a href="{{ doc.business_document_url }}" target="_blank">
                         {% trans "Open business document" %}
                       </a>
 
-                      <a href="{{ doc.id_document_file.url }}" target="_blank">
+                      <a href="{{ doc.id_document_url }}" target="_blank">
                         {% trans "Open ID document" %}
                       </a>
                     </div>
@@ -238,7 +238,7 @@
 
                     {% if item.extra_file %}
                       <div class="moderation-file-links">
-                        <a href="{{ item.extra_file.url }}" target="_blank">
+                        <a href="{{ item.extra_file_url }}" target="_blank">
                           {% trans "Open optional file" %}
                         </a>
                       </div>

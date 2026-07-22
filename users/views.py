@@ -15,7 +15,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import transaction
 from django.db.models import Case, Count, Exists, IntegerField, OuterRef, Q, Value, When
-from django.http import Http404, JsonResponse
+from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -40,6 +40,7 @@ from .models import (
     ChatThread,
     ChatMessage,
     ChatAttachment,
+    UserReport,
 )
 
 from datetime import timedelta
@@ -53,6 +54,81 @@ from posts.models import Post, PostMedia,  PostLike, PostBookmark, PostReport, P
 from .utils import send_verification_email
 
 User = get_user_model()
+
+
+@login_required
+def protected_media(request, media_type, object_id, field):
+    """Stream private uploads only after checking object-level access."""
+    file_field = None
+    original_name = ""
+
+    if media_type == "verification":
+        item = get_object_or_404(VerificationDocument, pk=object_id)
+        if request.user != item.user and not request.user.is_staff:
+            raise Http404
+        file_field = {
+            "business": item.business_document_file,
+            "identity": item.id_document_file,
+        }.get(field)
+    elif media_type == "manual-verification":
+        item = get_object_or_404(ManualVerificationRequest, pk=object_id)
+        if request.user != item.user and not request.user.is_staff:
+            raise Http404
+        file_field = item.extra_file if field == "file" else None
+    elif media_type == "chat":
+        item = get_object_or_404(
+            ChatAttachment.objects.select_related(
+                "message__thread__participant_one",
+                "message__thread__participant_two",
+            ),
+            pk=object_id,
+        )
+        if not item.message.thread.has_user(request.user):
+            raise Http404
+        file_field = item.file if field == "file" else None
+        original_name = item.original_name
+    elif media_type == "report":
+        item = get_object_or_404(UserReport, pk=object_id)
+        if request.user != item.user and not request.user.is_staff:
+            raise Http404
+        file_field = item.attachment if field == "file" else None
+    elif media_type == "location-claim":
+        item = get_object_or_404(LocationClaim, pk=object_id)
+        if request.user != item.claimant_user and not request.user.is_staff:
+            raise Http404
+        file_field = item.proof_document if field == "file" else None
+    elif media_type == "location-request":
+        item = get_object_or_404(LocationRequest, pk=object_id)
+        if not request.user.is_staff:
+            raise Http404
+        file_field = item.supporting_file if field == "file" else None
+    elif media_type == "appointment-reference":
+        from appointments.models import AppointmentReferenceImage
+
+        item = get_object_or_404(
+            AppointmentReferenceImage.objects.select_related(
+                "appointment__artist", "appointment__client"
+            ),
+            pk=object_id,
+        )
+        appointment = item.appointment
+        if request.user not in {appointment.artist, appointment.client} and not request.user.is_staff:
+            raise Http404
+        file_field = item.image if field == "file" else None
+        original_name = item.original_name
+    else:
+        raise Http404
+
+    if not file_field:
+        raise Http404
+
+    try:
+        stream = file_field.open("rb")
+    except (FileNotFoundError, OSError, ValueError):
+        raise Http404
+
+    filename = original_name or file_field.name.rsplit("/", 1)[-1]
+    return FileResponse(stream, as_attachment=False, filename=filename)
 
 def login_view(request):
     if request.method == "POST":
@@ -593,29 +669,10 @@ def edit_post(request, post_id):
 
 
 def admin_verification(request, profile_id):
-    profile = get_object_or_404(Profile, id=profile_id)
-
-    if request.method == "POST":
-        action = request.POST.get("action")
-        if action == "approve":
-            profile.verification_status = "approved"
-            profile.save()
-            messages.success(
-                request,
-                _("Profile %(username)s has been approved.")
-                % {"username": profile.user.username},
-            )
-        elif action == "reject":
-            profile.verification_status = "rejected"
-            profile.save()
-            messages.success(
-                request,
-                _("Profile %(username)s has been rejected.")
-                % {"username": profile.user.username},
-            )
-        return redirect("profile_list")
-
-    return render(request, "users/admin_verification.html", {"profile": profile})
+    if not request.user.is_staff:
+        return redirect_to_login(request.get_full_path())
+    get_object_or_404(Profile, id=profile_id)
+    return redirect("moderation_dashboard")
 
 
 @login_required
@@ -734,10 +791,7 @@ def is_admin(user):
 
 @user_passes_test(is_admin)
 def review_verifications(request):
-    documents = VerificationDocument.objects.filter(
-        is_verified=False
-    )  # Отображаем документы, которые еще не проверены
-    return render(request, "users/review_verifications.html", {"documents": documents})
+    return redirect("moderation_dashboard")
 
 
 @user_passes_test(is_admin)
@@ -1461,18 +1515,17 @@ def moderation_resolve_post_report(request, report_id):
 @user_passes_test(is_admin)
 @require_POST
 def moderation_delete_reported_post(request, report_id):
-    report = get_object_or_404(
-        PostReport.objects.select_related("post"),
-        id=report_id,
-    )
-
-    post = report.post
-    post.delete()
-
-    PostReport.objects.filter(post=post).update(
-        is_resolved=True,
-        resolved_at=timezone.now(),
-    )
+    with transaction.atomic():
+        report = get_object_or_404(
+            PostReport.objects.select_for_update().select_related("post"),
+            id=report_id,
+        )
+        post_id = report.post_id
+        PostReport.objects.filter(post_id=post_id).update(
+            is_resolved=True,
+            resolved_at=timezone.now(),
+        )
+        Post.objects.filter(pk=post_id).delete()
 
     messages.success(request, _("Reported post deleted."))
     return redirect("moderation_dashboard")
@@ -1494,18 +1547,17 @@ def moderation_resolve_comment_report(request, report_id):
 @user_passes_test(is_admin)
 @require_POST
 def moderation_delete_reported_comment(request, report_id):
-    report = get_object_or_404(
-        CommentReport.objects.select_related("comment"),
-        id=report_id,
-    )
-
-    comment = report.comment
-    comment.delete()
-
-    CommentReport.objects.filter(comment=comment).update(
-        is_resolved=True,
-        resolved_at=timezone.now(),
-    )
+    with transaction.atomic():
+        report = get_object_or_404(
+            CommentReport.objects.select_for_update().select_related("comment"),
+            id=report_id,
+        )
+        comment_id = report.comment_id
+        CommentReport.objects.filter(comment_id=comment_id).update(
+            is_resolved=True,
+            resolved_at=timezone.now(),
+        )
+        PostComment.objects.filter(pk=comment_id).delete()
 
     messages.success(request, _("Reported comment deleted."))
     return redirect("moderation_dashboard")

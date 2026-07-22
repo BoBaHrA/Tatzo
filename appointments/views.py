@@ -967,7 +967,7 @@ def calendar_events(request):
         reference_images = []
         for reference_image in appointment.reference_images.all():
             try:
-                image_url = reference_image.image.url if reference_image.image else ""
+                image_url = reference_image.private_url if reference_image.image else ""
             except ValueError:
                 image_url = ""
 

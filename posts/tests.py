@@ -1,9 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.urls import reverse
 
 from users.models import UserBlock, UserFollow
 
-from .models import Post
+from .models import CommentReport, Post, PostComment, PostReport
 
 
 User = get_user_model()
@@ -46,3 +47,44 @@ class PostVisibilityTests(TestCase):
 
         stranger_post = Post.objects.create(user=self.stranger, visibility="public")
         self.assertNotIn(stranger_post.id, self.ids_visible_to(self.author))
+
+
+class ModerationDeletionTests(TestCase):
+    def setUp(self):
+        self.staff = User.objects.create_user("moderator", password="test", is_staff=True)
+        self.author = User.objects.create_user("author", password="test")
+        self.reporter = User.objects.create_user("reporter", password="test")
+        User.objects.filter(
+            pk__in=[self.staff.pk, self.author.pk, self.reporter.pk]
+        ).update(is_active=True)
+        self.staff.refresh_from_db()
+        self.client.force_login(self.staff)
+
+    def test_reported_post_is_deleted_without_server_error(self):
+        post = Post.objects.create(user=self.author, content="reported")
+        report = PostReport.objects.create(post=post, user=self.reporter)
+        response = self.client.post(
+            reverse("moderation_delete_reported_post", args=[report.pk])
+        )
+        self.assertRedirects(
+            response,
+            reverse("moderation_dashboard"),
+            fetch_redirect_response=False,
+        )
+        self.assertFalse(Post.objects.filter(pk=post.pk).exists())
+
+    def test_reported_comment_is_deleted_without_server_error(self):
+        post = Post.objects.create(user=self.author, content="post")
+        comment = PostComment.objects.create(
+            post=post, user=self.author, content="reported"
+        )
+        report = CommentReport.objects.create(comment=comment, user=self.reporter)
+        response = self.client.post(
+            reverse("moderation_delete_reported_comment", args=[report.pk])
+        )
+        self.assertRedirects(
+            response,
+            reverse("moderation_dashboard"),
+            fetch_redirect_response=False,
+        )
+        self.assertFalse(PostComment.objects.filter(pk=comment.pk).exists())

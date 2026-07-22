@@ -7,7 +7,9 @@ from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
 from cloudinary.utils import cloudinary_url
+from mytattooapp.storage_backends import private_media_storage
 
 # Определяем варианты выбора для типа пользователя
 # Определяем варианты выбора для типа пользователя
@@ -159,6 +161,7 @@ class VerificationDocument(models.Model):
     )
     business_document_file = models.FileField(
         upload_to="business_docs",
+        storage=private_media_storage,
         verbose_name=_("Business document"),
     )
 
@@ -170,6 +173,7 @@ class VerificationDocument(models.Model):
     )
     id_document_file = models.FileField(
         upload_to="id_docs",
+        storage=private_media_storage,
         verbose_name=_("Identity document"),
     )
 
@@ -178,6 +182,17 @@ class VerificationDocument(models.Model):
 
     def __str__(self):
         return f"Verification for {self.user.username}"
+
+    def private_url(self, field):
+        return reverse("protected_media", args=["verification", self.pk, field])
+
+    @property
+    def business_document_url(self):
+        return self.private_url("business")
+
+    @property
+    def id_document_url(self):
+        return self.private_url("identity")
     
 class ManualVerificationRequest(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -210,6 +225,7 @@ class ManualVerificationRequest(models.Model):
 
     extra_file = models.FileField(
         upload_to="manual_review_files/",
+        storage=private_media_storage,
         blank=True,
         null=True,
         verbose_name="Optional file",
@@ -222,6 +238,10 @@ class ManualVerificationRequest(models.Model):
 
     def __str__(self):
         return f"Manual review for {self.user.username}"
+
+    @property
+    def extra_file_url(self):
+        return reverse("protected_media", args=["manual-verification", self.pk, "file"])
     
 class UserFollow(models.Model):
     follower = models.ForeignKey(
@@ -444,7 +464,10 @@ class ChatAttachment(models.Model):
         on_delete=models.CASCADE,
         related_name="attachments",
     )
-    file = models.FileField(upload_to="chat_attachments/")
+    file = models.FileField(
+        upload_to="chat_attachments/",
+        storage=private_media_storage,
+    )
     original_name = models.CharField(max_length=255, blank=True, default="")
     content_type = models.CharField(max_length=120, blank=True, default="")
     uploaded_at = models.DateTimeField(auto_now_add=True)
@@ -510,16 +533,7 @@ class ChatAttachment(models.Model):
     def media_url(self):
         if not self.file:
             return ""
-
-        if self.is_video and getattr(settings, "USE_CLOUDINARY", False):
-            url, _ = cloudinary_url(
-                self.file.name,
-                resource_type="video",
-                secure=True,
-            )
-            return url
-
-        return self.file.url
+        return reverse("protected_media", args=["chat", self.pk, "file"])
     
 class UserReport(models.Model):
     REPORT_TYPES = [
@@ -546,6 +560,7 @@ class UserReport(models.Model):
     attachment = models.FileField(
         _("Attachment"),
         upload_to="reports/",
+        storage=private_media_storage,
         blank=True,
         null=True,
     )
@@ -656,6 +671,7 @@ class LocationClaim(models.Model):
     # (for example S3 or private Cloudinary delivery) for verification documents.
     proof_document = models.FileField(
         upload_to="location_claim_proofs/",
+        storage=private_media_storage,
         blank=True,
         validators=[
             FileExtensionValidator(allowed_extensions=LOCATION_UPLOAD_EXTENSIONS),
@@ -695,6 +711,7 @@ class LocationRequest(models.Model):
     phone = models.CharField(max_length=60, blank=True)
     supporting_file = models.FileField(
         upload_to="location_request_supporting_files/",
+        storage=private_media_storage,
         blank=True,
         validators=[
             FileExtensionValidator(allowed_extensions=LOCATION_UPLOAD_EXTENSIONS),

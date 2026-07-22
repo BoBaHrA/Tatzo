@@ -1,9 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
+from django.urls import reverse
 
 from .forms import VerificationForm
 from .forms_custom import CustomUserCreationForm
+from .models import ChatAttachment, ChatMessage, ChatThread
 
 
 User = get_user_model()
@@ -55,3 +57,48 @@ class VerificationUploadTests(TestCase):
         )
         self.assertFalse(form.is_valid())
         self.assertIn("business_document_file", form.errors)
+
+
+class ProtectedMediaTests(TestCase):
+    def setUp(self):
+        self.first = User.objects.create_user("first", password="test")
+        self.second = User.objects.create_user("second", password="test")
+        self.outsider = User.objects.create_user("outsider", password="test")
+        User.objects.filter(
+            pk__in=[self.first.pk, self.second.pk, self.outsider.pk]
+        ).update(is_active=True)
+        self.first.refresh_from_db()
+        self.second.refresh_from_db()
+        self.outsider.refresh_from_db()
+        thread = ChatThread.objects.create(
+            participant_one=self.first,
+            participant_two=self.second,
+        )
+        message = ChatMessage.objects.create(
+            thread=thread,
+            sender=self.first,
+            content="private",
+        )
+        self.attachment = ChatAttachment.objects.create(
+            message=message,
+            file=SimpleUploadedFile("private.txt", b"secret"),
+            original_name="private.txt",
+            content_type="text/plain",
+        )
+        self.url = reverse(
+            "protected_media", args=["chat", self.attachment.pk, "file"]
+        )
+
+    def test_chat_participant_can_download_attachment(self):
+        self.client.force_login(self.second)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(b"".join(response.streaming_content), b"secret")
+
+    def test_outsider_cannot_download_attachment(self):
+        self.client.force_login(self.outsider)
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+
+    def test_private_storage_does_not_expose_direct_url(self):
+        with self.assertRaises(ValueError):
+            self.attachment.file.url

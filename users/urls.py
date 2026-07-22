@@ -11,6 +11,11 @@ from .views import create_post
 from users.security_views import TatzoLoginView, TatzoPasswordResetView
 
 urlpatterns = [
+    path(
+        "protected-media/<str:media_type>/<int:object_id>/<str:field>/",
+        views.protected_media,
+        name="protected_media",
+    ),
     path("signup/", views.signup, name="signup"),
     path(
     "moderation/",
@@ -143,7 +148,7 @@ urlpatterns = [
     ),
     path("profiles/", views.profile_list, name="profile_list"),
     path(
-        "admin/verification/<int:profile_id>/",
+        "staff/verification/<int:profile_id>/",
         views.admin_verification,
         name="admin_verification",
     ),

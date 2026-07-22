@@ -3,6 +3,7 @@ from django.contrib import admin
 from posts.models import Post
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
 from .models import Location, LocationClaim, LocationRequest, Profile, VerificationDocument, UserReport
 
 
@@ -98,7 +99,7 @@ class UserReportAdmin(admin.ModelAdmin):
         "title",
         "message",
         "page_url",
-        "attachment",
+        "attachment_link",
         "created_at",
     )
     list_editable = ("is_resolved",)
@@ -112,7 +113,7 @@ class UserReportAdmin(admin.ModelAdmin):
                 "title",
                 "message",
                 "page_url",
-                "attachment",
+                "attachment_link",
             )
         }),
         (_("Moderation"), {
@@ -122,6 +123,17 @@ class UserReportAdmin(admin.ModelAdmin):
             )
         }),
     )
+
+    @admin.display(description=_("Attachment"))
+    def attachment_link(self, obj):
+        if not obj.attachment:
+            return "—"
+        url = reverse("protected_media", args=["report", obj.pk, "file"])
+        return format_html(
+            '<a href="{}" target="_blank" rel="noopener noreferrer">{}</a>',
+            url,
+            _("Open attachment"),
+        )
 
 
 @admin.register(Location)
@@ -189,7 +201,8 @@ class LocationClaimAdmin(admin.ModelAdmin):
     def proof_document_link(self, obj):
         if not obj.proof_document:
             return "—"
-        return format_html('<a href="{}" target="_blank" rel="noopener noreferrer">Open proof document</a>', obj.proof_document.url)
+        url = reverse("protected_media", args=["location-claim", obj.pk, "file"])
+        return format_html('<a href="{}" target="_blank" rel="noopener noreferrer">Open proof document</a>', url)
 
 
 @admin.register(LocationRequest)
@@ -219,4 +232,5 @@ class LocationRequestAdmin(admin.ModelAdmin):
     def supporting_file_link(self, obj):
         if not obj.supporting_file:
             return "—"
-        return format_html('<a href="{}" target="_blank" rel="noopener noreferrer">Open supporting file</a>', obj.supporting_file.url)
+        url = reverse("protected_media", args=["location-request", obj.pk, "file"])
+        return format_html('<a href="{}" target="_blank" rel="noopener noreferrer">Open supporting file</a>', url)

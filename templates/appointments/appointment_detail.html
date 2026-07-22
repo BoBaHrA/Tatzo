@@ -67,7 +67,7 @@
           <div>
             {% translate "Reference image" as reference_image_alt %}
             {% for reference in appointment.reference_images.all %}
-              <img src="{{ reference.image.url }}" alt="{{ reference.original_name|default:reference_image_alt }}">
+              <img src="{{ reference.private_url }}" alt="{{ reference.original_name|default:reference_image_alt }}">
             {% endfor %}
           </div>
         </div>
