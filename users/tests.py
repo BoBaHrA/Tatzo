@@ -164,11 +164,13 @@ class SeoEndpointTests(TestCase):
     def test_robots_advertises_sitemap_and_blocks_private_areas(self):
         response = self.client.get(reverse("robots_txt"))
         self.assertContains(response, "Sitemap: https://tatzo.eu/sitemap.xml")
+        self.assertNotIn("X-Robots-Tag", response)
         self.assertContains(response, "Disallow: /protected-media/")
         self.assertContains(response, "Disallow: /appointments/")
 
     def test_sitemap_contains_only_approved_active_artist_profiles(self):
         response = self.client.get("/sitemap.xml")
+        self.assertNotIn("X-Robots-Tag", response)
         self.assertContains(response, f"/profile/{self.approved.username}/")
         self.assertNotContains(response, f"/profile/{self.hidden.username}/")
 

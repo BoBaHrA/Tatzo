@@ -7,6 +7,9 @@ from .sitemaps import ArtistSitemap, StaticSitemap
 from appointments import views as appointment_views
 
 
+SITEMAPS = {"static": StaticSitemap, "artists": ArtistSitemap}
+
+
 def healthz(request):
     return HttpResponse("ok", content_type="text/plain")
 
@@ -29,13 +32,22 @@ def robots_txt(request):
     return HttpResponse(body + "\n", content_type="text/plain")
 
 
+def sitemap_xml(request):
+    response = sitemap(request, sitemaps=SITEMAPS)
+    # Django marks sitemap responses as noindex by default. Although sitemap
+    # files are not search results themselves, some crawlers reject that
+    # header while discovering the URLs contained in the XML.
+    if "X-Robots-Tag" in response:
+        del response["X-Robots-Tag"]
+    return response
+
+
 urlpatterns = [
     path("healthz/", healthz, name="healthz"),
     path("robots.txt", robots_txt, name="robots_txt"),
     path(
         "sitemap.xml",
-        sitemap,
-        {"sitemaps": {"static": StaticSitemap, "artists": ArtistSitemap}},
+        sitemap_xml,
         name="django.contrib.sitemaps.views.sitemap",
     ),
     path("admin/", admin.site.urls),
