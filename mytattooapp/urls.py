@@ -27,6 +27,7 @@ def robots_txt(request):
             "Disallow: /chats/",
             "Disallow: /settings/",
             f"Sitemap: {settings.PUBLIC_SITE_URL}/sitemap.xml",
+            f"Sitemap: {settings.PUBLIC_SITE_URL}/sitemap.txt",
         ]
     )
     return HttpResponse(body + "\n", content_type="text/plain")
@@ -42,9 +43,26 @@ def sitemap_xml(request):
     return response
 
 
+def sitemap_txt(request):
+    locations = []
+    for sitemap_class in SITEMAPS.values():
+        sitemap_instance = sitemap_class()
+        for item in sitemap_instance.items():
+            location = sitemap_instance.location(item)
+            locations.append(f"{settings.PUBLIC_SITE_URL}{location}")
+
+    response = HttpResponse(
+        "\n".join(locations) + "\n",
+        content_type="text/plain; charset=utf-8",
+    )
+    response["Cache-Control"] = "public, max-age=3600"
+    return response
+
+
 urlpatterns = [
     path("healthz/", healthz, name="healthz"),
     path("robots.txt", robots_txt, name="robots_txt"),
+    path("sitemap.txt", sitemap_txt, name="sitemap_txt"),
     path(
         "sitemap.xml",
         sitemap_xml,
