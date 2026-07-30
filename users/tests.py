@@ -164,6 +164,7 @@ class SeoEndpointTests(TestCase):
     def test_robots_advertises_sitemap_and_blocks_private_areas(self):
         response = self.client.get(reverse("robots_txt"))
         self.assertContains(response, "Sitemap: https://tatzo.eu/sitemap.xml")
+        self.assertContains(response, "Sitemap: https://tatzo.eu/sitemap.txt")
         self.assertNotIn("X-Robots-Tag", response)
         self.assertContains(response, "Disallow: /protected-media/")
         self.assertContains(response, "Disallow: /appointments/")
@@ -173,6 +174,19 @@ class SeoEndpointTests(TestCase):
         self.assertNotIn("X-Robots-Tag", response)
         self.assertContains(response, f"/profile/{self.approved.username}/")
         self.assertNotContains(response, f"/profile/{self.hidden.username}/")
+
+    def test_text_sitemap_contains_only_approved_active_artist_profiles(self):
+        response = self.client.get("/sitemap.txt")
+        urls = response.content.decode("utf-8").splitlines()
+
+        self.assertEqual(response["Content-Type"], "text/plain; charset=utf-8")
+        self.assertEqual(response["Cache-Control"], "public, max-age=3600")
+        self.assertIn("https://tatzo.eu/", urls)
+        self.assertIn("https://tatzo.eu/search/", urls)
+        self.assertIn("https://tatzo.eu/maps/", urls)
+        self.assertIn(f"https://tatzo.eu/profile/{self.approved.username}/", urls)
+        self.assertNotIn(f"https://tatzo.eu/profile/{self.hidden.username}/", urls)
+        self.assertEqual(len(urls), len(set(urls)))
 
     def test_canonical_uses_primary_domain_without_query_string(self):
         response = self.client.get(reverse("search_page") + "?q=blackwork")
