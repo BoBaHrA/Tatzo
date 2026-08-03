@@ -178,6 +178,42 @@ CARDS = {
         "is_active": True,
         "is_approved": True,
     },
+    "SM008": {
+        "image_url": "https://res.cloudinary.com/dz0wuti9s/image/upload/v1785763726/style_match/cards/SM008.jpg",
+        "cloudinary_public_id": "style_match/cards/SM008",
+        "primary_style": "black_grey_realism",
+        "style_weights": {
+            "black_grey_realism": 0.99,
+            "micro_realism": 0.72,
+            "illustrative": 0.32,
+            "fine_line": 0.28,
+            "abstract": 0.24,
+            "blackwork": 0.22,
+            "engraving": 0.08,
+        },
+        "visual_traits": {
+            "color": 0.0,
+            "line_weight": 0.32,
+            "density": 0.76,
+            "contrast": 0.88,
+            "realism": 0.99,
+            "organic": 0.9,
+            "geometric": 0.16,
+            "symmetry": 0.82,
+        },
+        "motifs": [
+            "human eye",
+            "reflection",
+            "desert dunes",
+            "lone silhouette",
+            "horizon",
+        ],
+        "body_area": "outer forearm",
+        "skin_tone": "dark",
+        "quality_score": 0.96,
+        "is_active": True,
+        "is_approved": True,
+    },
 }
 
 
