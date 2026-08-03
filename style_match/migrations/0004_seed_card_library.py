@@ -251,6 +251,43 @@ CARDS = {
         "is_active": True,
         "is_approved": True,
     },
+    "SM010": {
+        "image_url": "https://res.cloudinary.com/dz0wuti9s/image/upload/v1785764262/style_match/cards/SM010.jpg",
+        "cloudinary_public_id": "style_match/cards/SM010",
+        "primary_style": "engraving",
+        "style_weights": {
+            "engraving": 0.99,
+            "illustrative": 0.72,
+            "fine_line": 0.62,
+            "ornamental": 0.48,
+            "dotwork": 0.38,
+            "botanical": 0.32,
+            "black_grey_realism": 0.2,
+            "blackwork": 0.16,
+        },
+        "visual_traits": {
+            "color": 0.0,
+            "line_weight": 0.28,
+            "density": 0.74,
+            "contrast": 0.73,
+            "realism": 0.55,
+            "organic": 0.99,
+            "geometric": 0.06,
+            "symmetry": 0.72,
+        },
+        "motifs": [
+            "deep-sea jellyfish",
+            "kelp",
+            "tentacles",
+            "ocean",
+            "marine life",
+        ],
+        "body_area": "lower back",
+        "skin_tone": "medium-light",
+        "quality_score": 0.97,
+        "is_active": True,
+        "is_approved": True,
+    },
 }
 
 
