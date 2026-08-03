@@ -142,6 +142,42 @@ CARDS = {
         "is_active": True,
         "is_approved": True,
     },
+    "SM007": {
+        "image_url": "https://res.cloudinary.com/dz0wuti9s/image/upload/v1785763475/style_match/cards/SM007.jpg",
+        "cloudinary_public_id": "style_match/cards/SM007",
+        "primary_style": "geometric",
+        "style_weights": {
+            "geometric": 0.98,
+            "minimalism": 0.94,
+            "fine_line": 0.62,
+            "blackwork": 0.32,
+            "abstract": 0.28,
+            "ornamental": 0.12,
+            "dotwork": 0.04,
+        },
+        "visual_traits": {
+            "color": 0.0,
+            "line_weight": 0.24,
+            "density": 0.17,
+            "contrast": 0.91,
+            "realism": 0.01,
+            "organic": 0.06,
+            "geometric": 0.98,
+            "symmetry": 0.88,
+        },
+        "motifs": [
+            "solar eclipse",
+            "orbital arcs",
+            "planet",
+            "stars",
+            "celestial",
+        ],
+        "body_area": "outer ankle",
+        "skin_tone": "medium-dark",
+        "quality_score": 0.95,
+        "is_active": True,
+        "is_approved": True,
+    },
 }
 
 
