@@ -106,6 +106,42 @@ CARDS = {
         "is_active": True,
         "is_approved": True,
     },
+    "SM006": {
+        "image_url": "https://res.cloudinary.com/dz0wuti9s/image/upload/v1785763169/style_match/cards/SM006.jpg",
+        "cloudinary_public_id": "style_match/cards/SM006",
+        "primary_style": "american_traditional",
+        "style_weights": {
+            "american_traditional": 0.98,
+            "illustrative": 0.72,
+            "neo_traditional": 0.4,
+            "ornamental": 0.28,
+            "blackwork": 0.18,
+            "dotwork": 0.1,
+            "color_realism": 0.05,
+        },
+        "visual_traits": {
+            "color": 0.86,
+            "line_weight": 0.88,
+            "density": 0.62,
+            "contrast": 0.84,
+            "realism": 0.08,
+            "organic": 0.58,
+            "geometric": 0.34,
+            "symmetry": 0.72,
+        },
+        "motifs": [
+            "storm lantern",
+            "flame",
+            "wind",
+            "wind swirls",
+            "fire",
+        ],
+        "body_area": "outer thigh",
+        "skin_tone": "medium",
+        "quality_score": 0.95,
+        "is_active": True,
+        "is_approved": True,
+    },
 }
 
 
