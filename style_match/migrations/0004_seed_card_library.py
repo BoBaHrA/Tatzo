@@ -437,6 +437,42 @@ CARDS = {
         "is_active": True,
         "is_approved": True,
     },
+    "SM015": {
+        "image_url": "https://res.cloudinary.com/dz0wuti9s/image/upload/v1785766634/style_match/cards/SM015.jpg",
+        "cloudinary_public_id": "style_match/cards/SM015",
+        "primary_style": "minimalism",
+        "style_weights": {
+            "minimalism": 0.99,
+            "fine_line": 0.86,
+            "abstract": 0.68,
+            "illustrative": 0.38,
+            "geometric": 0.24,
+            "blackwork": 0.08,
+            "ornamental": 0.06,
+        },
+        "visual_traits": {
+            "color": 0.0,
+            "line_weight": 0.14,
+            "density": 0.07,
+            "contrast": 0.72,
+            "realism": 0.02,
+            "organic": 0.48,
+            "geometric": 0.25,
+            "symmetry": 0.14,
+        },
+        "motifs": [
+            "human silhouette",
+            "wind",
+            "motion",
+            "resilience",
+            "minimal line figure",
+        ],
+        "body_area": "upper chest below collarbone",
+        "skin_tone": "dark",
+        "quality_score": 0.95,
+        "is_active": True,
+        "is_approved": True,
+    },
 }
 
 
