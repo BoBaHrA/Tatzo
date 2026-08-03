@@ -362,6 +362,43 @@ CARDS = {
         "is_active": True,
         "is_approved": True,
     },
+    "SM013": {
+        "image_url": "https://res.cloudinary.com/dz0wuti9s/image/upload/v1785765879/style_match/cards/SM013.jpg",
+        "cloudinary_public_id": "style_match/cards/SM013",
+        "primary_style": "dotwork",
+        "style_weights": {
+            "dotwork": 0.99,
+            "engraving": 0.72,
+            "fine_line": 0.68,
+            "illustrative": 0.64,
+            "black_grey_realism": 0.44,
+            "geometric": 0.28,
+            "blackwork": 0.24,
+            "ornamental": 0.18,
+        },
+        "visual_traits": {
+            "color": 0.0,
+            "line_weight": 0.22,
+            "density": 0.76,
+            "contrast": 0.66,
+            "realism": 0.64,
+            "organic": 0.9,
+            "geometric": 0.4,
+            "symmetry": 0.96,
+        },
+        "motifs": [
+            "cicada",
+            "insect",
+            "wings",
+            "entomology",
+            "stippling",
+        ],
+        "body_area": "back of upper arm",
+        "skin_tone": "medium-light",
+        "quality_score": 0.97,
+        "is_active": True,
+        "is_approved": True,
+    },
 }
 
 
