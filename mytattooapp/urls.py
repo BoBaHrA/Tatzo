@@ -78,5 +78,6 @@ urlpatterns = [
     path("", include("users.urls")),
     path("posts/", include("posts.urls")),
     path("appointments/", include("appointments.urls")),
+    path("style-match/", include("style_match.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
 ]
