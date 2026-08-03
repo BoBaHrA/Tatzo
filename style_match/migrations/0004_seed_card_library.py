@@ -214,6 +214,43 @@ CARDS = {
         "is_active": True,
         "is_approved": True,
     },
+    "SM009": {
+        "image_url": "https://res.cloudinary.com/dz0wuti9s/image/upload/v1785763998/style_match/cards/SM009.jpg",
+        "cloudinary_public_id": "style_match/cards/SM009",
+        "primary_style": "watercolor",
+        "style_weights": {
+            "watercolor": 0.99,
+            "abstract": 0.91,
+            "illustrative": 0.58,
+            "ornamental": 0.34,
+            "fine_line": 0.28,
+            "color_realism": 0.16,
+            "minimalism": 0.08,
+        },
+        "visual_traits": {
+            "color": 0.98,
+            "line_weight": 0.22,
+            "density": 0.56,
+            "contrast": 0.74,
+            "realism": 0.08,
+            "organic": 0.98,
+            "geometric": 0.05,
+            "symmetry": 0.18,
+        },
+        "motifs": [
+            "flame",
+            "ocean wave",
+            "wind",
+            "water",
+            "fire",
+            "transformation",
+        ],
+        "body_area": "front shin",
+        "skin_tone": "light",
+        "quality_score": 0.96,
+        "is_active": True,
+        "is_approved": True,
+    },
 }
 
 
