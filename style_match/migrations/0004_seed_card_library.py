@@ -288,6 +288,43 @@ CARDS = {
         "is_active": True,
         "is_approved": True,
     },
+    "SM011": {
+        "image_url": "https://res.cloudinary.com/dz0wuti9s/image/upload/v1785764733/style_match/cards/SM011.jpg",
+        "cloudinary_public_id": "style_match/cards/SM011",
+        "primary_style": "botanical",
+        "style_weights": {
+            "botanical": 0.99,
+            "fine_line": 0.78,
+            "illustrative": 0.54,
+            "ornamental": 0.42,
+            "watercolor": 0.26,
+            "color_realism": 0.24,
+            "engraving": 0.18,
+            "minimalism": 0.12,
+        },
+        "visual_traits": {
+            "color": 0.52,
+            "line_weight": 0.22,
+            "density": 0.48,
+            "contrast": 0.52,
+            "realism": 0.52,
+            "organic": 0.99,
+            "geometric": 0.04,
+            "symmetry": 0.35,
+        },
+        "motifs": [
+            "night-blooming cereus",
+            "flower",
+            "flower buds",
+            "leaves",
+            "botanical stem",
+        ],
+        "body_area": "sternum and upper abdomen",
+        "skin_tone": "medium-dark",
+        "quality_score": 0.96,
+        "is_active": True,
+        "is_approved": True,
+    },
 }
 
 
