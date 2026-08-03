@@ -69,6 +69,43 @@ CARDS = {
         "is_active": True,
         "is_approved": True,
     },
+    "SM005": {
+        "image_url": "https://res.cloudinary.com/dz0wuti9s/image/upload/v1785762680/style_match/cards/SM005.jpg",
+        "cloudinary_public_id": "style_match/cards/SM005",
+        "primary_style": "ornamental",
+        "style_weights": {
+            "ornamental": 0.98,
+            "dotwork": 0.9,
+            "botanical": 0.62,
+            "abstract": 0.55,
+            "fine_line": 0.42,
+            "geometric": 0.35,
+            "blackwork": 0.2,
+            "minimalism": 0.12,
+        },
+        "visual_traits": {
+            "color": 0.0,
+            "line_weight": 0.35,
+            "density": 0.7,
+            "contrast": 0.58,
+            "realism": 0.05,
+            "organic": 0.85,
+            "geometric": 0.55,
+            "symmetry": 0.94,
+        },
+        "motifs": [
+            "abstract botanical ornament",
+            "filigree",
+            "leaves",
+            "arabesque",
+            "symmetrical ornament",
+        ],
+        "body_area": "side ribcage",
+        "skin_tone": "dark",
+        "quality_score": 0.96,
+        "is_active": True,
+        "is_approved": True,
+    },
 }
 
 
