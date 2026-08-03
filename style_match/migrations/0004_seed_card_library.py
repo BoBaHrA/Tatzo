@@ -325,6 +325,43 @@ CARDS = {
         "is_active": True,
         "is_approved": True,
     },
+    "SM012": {
+        "image_url": "https://res.cloudinary.com/dz0wuti9s/image/upload/v1785765232/style_match/cards/SM012.jpg",
+        "cloudinary_public_id": "style_match/cards/SM012",
+        "primary_style": "micro_realism",
+        "style_weights": {
+            "micro_realism": 0.99,
+            "minimalism": 0.92,
+            "fine_line": 0.62,
+            "color_realism": 0.58,
+            "geometric": 0.44,
+            "illustrative": 0.35,
+            "abstract": 0.3,
+        },
+        "visual_traits": {
+            "color": 0.55,
+            "line_weight": 0.2,
+            "density": 0.26,
+            "contrast": 0.56,
+            "realism": 0.88,
+            "organic": 0.42,
+            "geometric": 0.76,
+            "symmetry": 0.91,
+        },
+        "motifs": [
+            "hourglass",
+            "sand",
+            "ocean wave",
+            "time",
+            "transformation",
+            "glass",
+        ],
+        "body_area": "inner upper arm",
+        "skin_tone": "medium",
+        "quality_score": 0.96,
+        "is_active": True,
+        "is_approved": True,
+    },
 }
 
 
