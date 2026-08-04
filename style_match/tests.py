@@ -109,6 +109,23 @@ class StyleMatchFlowTests(TestCase):
         self.assertEqual(result.status_code, 200)
         self.assertEqual(result.json()["top_style"]["slug"], "fine_line")
 
+    def test_reacting_to_a_future_card_returns_conflict(self):
+        make_card("T002", "blackwork")
+        started = self.start().json()
+        session = StyleMatchSession.objects.get(pk=started["session_id"])
+        future_card_id = session.card_order[1]
+
+        response = self.client.post(
+            started["react_url"],
+            data=json.dumps({"action": "like", "card_id": future_card_id}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(
+            response.json()["error"], "Please react to the current card first."
+        )
+
     def test_anonymous_session_is_private_to_browser_session(self):
         started = self.start().json()
 

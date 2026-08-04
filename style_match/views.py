@@ -183,7 +183,7 @@ def react(request, session_id):
                 {"error": _("Please react to the current card first.")}, status=409
             )
 
-        response, _ = StyleMatchResponse.objects.get_or_create(
+        response, _response_created = StyleMatchResponse.objects.get_or_create(
             session=session,
             card_id=card_id,
             defaults={"position": session.current_index},
