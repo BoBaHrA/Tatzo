@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "cloudinary_storage",
     "cloudinary",
     "appointments",
+    "style_match.apps.StyleMatchConfig",
 ]
 
 # Настройки middleware
@@ -93,6 +94,7 @@ DATABASES = {
 }
 
 TATZO_RATE_LIMIT_ENABLED = os.getenv("TATZO_RATE_LIMIT_ENABLED", "True") == "True"
+STYLE_MATCH_CARD_COUNT = int(os.getenv("STYLE_MATCH_CARD_COUNT", "30"))
 
 CACHES = {
     "default": {

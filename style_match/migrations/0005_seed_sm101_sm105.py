@@ -1,0 +1,216 @@
+from django.db import migrations
+
+
+CARDS = {
+    "SM101": {
+        "image_url": "https://res.cloudinary.com/dz0wuti9s/image/upload/v1785852092/style_match/cards/SM101.jpg",
+        "cloudinary_public_id": "style_match/cards/SM101",
+        "primary_style": "fine_line",
+        "style_weights": {
+            "fine_line": 0.97,
+            "geometric": 0.88,
+            "minimalism": 0.74,
+            "abstract": 0.48,
+            "illustrative": 0.30,
+            "engraving": 0.18,
+            "dotwork": 0.05,
+            "blackwork": 0.04,
+        },
+        "visual_traits": {
+            "color": 0.0,
+            "line_weight": 0.10,
+            "density": 0.42,
+            "contrast": 0.24,
+            "realism": 0.34,
+            "organic": 0.12,
+            "geometric": 0.94,
+            "symmetry": 0.52,
+        },
+        "motifs": [
+            "weaving shuttle",
+            "warp threads",
+            "impossible loop",
+            "textile tool",
+            "interlaced ribbon",
+            "parallel lines",
+        ],
+        "body_area": "inner bicep",
+        "skin_tone": "dark",
+        "quality_score": 0.96,
+        "is_active": True,
+        "is_approved": True,
+    },
+    "SM102": {
+        "image_url": "https://res.cloudinary.com/dz0wuti9s/image/upload/v1785852117/style_match/cards/SM102.jpg",
+        "cloudinary_public_id": "style_match/cards/SM102",
+        "primary_style": "dotwork",
+        "style_weights": {
+            "dotwork": 0.94,
+            "engraving": 0.88,
+            "fine_line": 0.70,
+            "micro_realism": 0.64,
+            "illustrative": 0.55,
+            "black_grey_realism": 0.24,
+            "geometric": 0.15,
+            "minimalism": 0.10,
+        },
+        "visual_traits": {
+            "color": 0.0,
+            "line_weight": 0.12,
+            "density": 0.62,
+            "contrast": 0.26,
+            "realism": 0.76,
+            "organic": 0.88,
+            "geometric": 0.18,
+            "symmetry": 0.38,
+        },
+        "motifs": [
+            "rotifer",
+            "microscopic organism",
+            "internal anatomy",
+            "ciliated corona",
+            "microorganisms",
+            "scientific specimen",
+            "microbiology",
+        ],
+        "body_area": "back of calf",
+        "skin_tone": "medium-light",
+        "quality_score": 0.95,
+        "is_active": True,
+        "is_approved": True,
+    },
+    "SM103": {
+        "image_url": "https://res.cloudinary.com/dz0wuti9s/image/upload/v1785852121/style_match/cards/SM103.jpg",
+        "cloudinary_public_id": "style_match/cards/SM103",
+        "primary_style": "engraving",
+        "style_weights": {
+            "engraving": 0.97,
+            "illustrative": 0.74,
+            "geometric": 0.70,
+            "black_grey_realism": 0.52,
+            "micro_realism": 0.46,
+            "fine_line": 0.34,
+            "dotwork": 0.28,
+            "minimalism": 0.08,
+        },
+        "visual_traits": {
+            "color": 0.12,
+            "line_weight": 0.38,
+            "density": 0.78,
+            "contrast": 0.60,
+            "realism": 0.80,
+            "organic": 0.05,
+            "geometric": 0.82,
+            "symmetry": 0.20,
+        },
+        "motifs": [
+            "exploded music box",
+            "winding key",
+            "pinned cylinder",
+            "steel comb",
+            "clockwork gears",
+            "mechanical diagram",
+            "antique mechanism",
+            "sound",
+        ],
+        "body_area": "outer upper arm",
+        "skin_tone": "medium-dark",
+        "quality_score": 0.97,
+        "is_active": True,
+        "is_approved": True,
+    },
+    "SM104": {
+        "image_url": "https://res.cloudinary.com/dz0wuti9s/image/upload/v1785852125/style_match/cards/SM104.jpg",
+        "cloudinary_public_id": "style_match/cards/SM104",
+        "primary_style": "botanical",
+        "style_weights": {
+            "botanical": 0.94,
+            "dotwork": 0.92,
+            "engraving": 0.75,
+            "black_grey_realism": 0.72,
+            "illustrative": 0.55,
+            "micro_realism": 0.44,
+            "fine_line": 0.28,
+            "color_realism": 0.18,
+        },
+        "visual_traits": {
+            "color": 0.16,
+            "line_weight": 0.35,
+            "density": 0.94,
+            "contrast": 0.55,
+            "realism": 0.90,
+            "organic": 0.95,
+            "geometric": 0.10,
+            "symmetry": 0.08,
+        },
+        "motifs": [
+            "foliose lichen",
+            "lichen colony",
+            "fractured slate",
+            "rock texture",
+            "symbiosis",
+            "weathered stone",
+            "natural patina",
+        ],
+        "body_area": "rear shoulder and upper arm",
+        "skin_tone": "light",
+        "quality_score": 0.98,
+        "is_active": True,
+        "is_approved": True,
+    },
+    "SM105": {
+        "image_url": "https://res.cloudinary.com/dz0wuti9s/image/upload/v1785852130/style_match/cards/SM105.jpg",
+        "cloudinary_public_id": "style_match/cards/SM105",
+        "primary_style": "minimalism",
+        "style_weights": {
+            "minimalism": 0.98,
+            "geometric": 0.88,
+            "fine_line": 0.78,
+            "abstract": 0.52,
+            "illustrative": 0.20,
+            "dotwork": 0.15,
+            "blackwork": 0.08,
+        },
+        "visual_traits": {
+            "color": 0.0,
+            "line_weight": 0.12,
+            "density": 0.15,
+            "contrast": 0.35,
+            "realism": 0.05,
+            "organic": 0.05,
+            "geometric": 0.92,
+            "symmetry": 0.25,
+        },
+        "motifs": [
+            "open domino tile",
+            "domino pips",
+            "released dots",
+            "fading trail",
+            "chance",
+            "sequence",
+            "negative space",
+        ],
+        "body_area": "inner wrist",
+        "skin_tone": "medium",
+        "quality_score": 0.96,
+        "is_active": True,
+        "is_approved": True,
+    },
+}
+
+
+def seed_sm101_sm105(apps, schema_editor):
+    TattooCard = apps.get_model("style_match", "TattooCard")
+    for card_id, defaults in CARDS.items():
+        TattooCard.objects.update_or_create(card_id=card_id, defaults=defaults)
+
+
+def remove_sm101_sm105(apps, schema_editor):
+    TattooCard = apps.get_model("style_match", "TattooCard")
+    TattooCard.objects.filter(card_id__in=CARDS).delete()
+
+
+class Migration(migrations.Migration):
+    dependencies = [("style_match", "0004_seed_card_library")]
+
+    operations = [migrations.RunPython(seed_sm101_sm105, remove_sm101_sm105)]

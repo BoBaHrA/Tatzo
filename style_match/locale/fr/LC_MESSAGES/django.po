@@ -1,0 +1,336 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Tatzo Style Match\n"
+"POT-Creation-Date: 2026-08-03 12:34+0000\n"
+"PO-Revision-Date: 2026-08-03 14:45+0200\n"
+"Last-Translator: Tatzo\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Style Match"
+msgstr "Style Match"
+
+msgid "Swipe through tattoo ideas and discover the styles and artists that fit your taste."
+msgstr "Faites défiler des idées de tatouage et découvrez les styles et artistes qui vous correspondent."
+
+msgid "Something interrupted the connection. Please try again."
+msgstr "La connexion a été interrompue. Veuillez réessayer."
+
+msgid "Saved to your collection"
+msgstr "Enregistré dans votre collection"
+
+msgid "Removed from your collection"
+msgstr "Retiré de votre collection"
+
+msgid "Preparing your cards..."
+msgstr "Préparation de vos cartes..."
+
+msgid "Analyzing preferences..."
+msgstr "Analyse de vos préférences..."
+
+msgid "Comparing styles..."
+msgstr "Comparaison des styles..."
+
+msgid "Finding artists..."
+msgstr "Recherche d’artistes..."
+
+msgid "Building your tattoo personality..."
+msgstr "Création de votre personnalité tatouage..."
+
+msgid "Artist matches will appear as verified portfolios gain style labels."
+msgstr "Les artistes compatibles apparaîtront à mesure que les portfolios vérifiés seront classés par style."
+
+msgid "Location pending"
+msgstr "Lieu à confirmer"
+
+msgid "View profile"
+msgstr "Voir le profil"
+
+msgid "Start again"
+msgstr "Recommencer"
+
+msgid "people share your tattoo personality."
+msgstr "personnes partagent votre personnalité tatouage."
+
+msgid "saved"
+msgstr "enregistrés"
+
+msgid "Your taste, decoded"
+msgstr "Vos goûts, décryptés"
+
+msgid "A new way to discover"
+msgstr "Une nouvelle façon de découvrir"
+
+msgid "Not sure what tattoo style fits you?"
+msgstr "Vous ne savez pas quel style de tatouage vous correspond ?"
+
+msgid "Swipe through tattoos and we’ll discover your taste — no labels and no pressure."
+msgstr "Faites défiler les tatouages et nous découvrirons vos goûts — sans étiquette ni pression."
+
+msgid "Discover my style"
+msgstr "Découvrir mon style"
+
+msgid "Up to %(count)s choices · a result made for you"
+msgstr "Jusqu’à %(count)s choix · un résultat fait pour vous"
+
+msgid "The first cards are on their way"
+msgstr "Les premières cartes arrivent"
+
+msgid "The Style Match library is being curated now."
+msgstr "La bibliothèque Style Match est en cours de sélection."
+
+msgid "Tatzo Style Match"
+msgstr "Tatzo Style Match"
+
+msgid "Follow the feeling, not the label."
+msgstr "Suivez votre instinct, pas l’étiquette."
+
+msgid "Every choice maps the visual language that feels most like you. The styles stay hidden until your reveal."
+msgstr "Chaque choix révèle le langage visuel qui vous ressemble. Les styles restent cachés jusqu’au résultat."
+
+msgid "Your taste map"
+msgstr "La carte de vos goûts"
+
+msgid "Tattoo discovery deck"
+msgstr "Cartes de découverte tatouage"
+
+msgid "Card actions"
+msgstr "Actions de la carte"
+
+msgid "Not my style"
+msgstr "Pas mon style"
+
+msgid "Save tattoo"
+msgstr "Enregistrer le tatouage"
+
+msgid "Like this tattoo"
+msgstr "J’aime ce tatouage"
+
+msgid "This is a favorite"
+msgstr "C’est un favori"
+
+msgid "Swipe to choose · hold to save · double tap to favorite"
+msgstr "Glissez pour choisir · maintenez pour enregistrer · double-cliquez pour favoriser"
+
+msgid "A smarter kind of swipe"
+msgstr "Une sélection plus intelligente"
+
+msgid "No style names while you choose. We connect the dots only when the picture is clear."
+msgstr "Aucun nom de style pendant vos choix. Nous relions les points lorsque l’image devient claire."
+
+msgid "Tatzo intelligence"
+msgstr "Intelligence Tatzo"
+
+msgid "Discovering your tattoo personality"
+msgstr "Découverte de votre personnalité tatouage"
+
+msgid "Style Match complete"
+msgstr "Style Match terminé"
+
+msgid "Your Style Match"
+msgstr "Votre Style Match"
+
+msgid "Match confidence"
+msgstr "Fiabilité du résultat"
+
+msgid "Your style spectrum"
+msgstr "Votre spectre de styles"
+
+msgid "Tattoo personality"
+msgstr "Personnalité tatouage"
+
+msgid "You’re drawn to"
+msgstr "Ce qui vous attire"
+
+msgid "You tend to skip"
+msgstr "Ce que vous évitez"
+
+msgid "Artist matches"
+msgstr "Artistes compatibles"
+
+msgid "Made for your mood"
+msgstr "Pensé pour votre univers"
+
+msgid "Based on your results, explore these next."
+msgstr "À partir de vos résultats, explorez ensuite ces styles."
+
+msgid "Your people"
+msgstr "Votre communauté"
+
+msgid "Your unlocks"
+msgstr "Vos succès"
+
+msgid "First Style Match"
+msgstr "Premier Style Match"
+
+msgid "Tattoo Explorer"
+msgstr "Explorateur tatouage"
+
+msgid "Unlocked"
+msgstr "Débloqué"
+
+msgid "Master Collector"
+msgstr "Maître collectionneur"
+
+msgid "Style Expert"
+msgstr "Expert du style"
+
+msgid "Keep exploring"
+msgstr "Continuez à explorer"
+
+msgid "Your session"
+msgstr "Votre session"
+
+msgid "Tatzo Wrapped"
+msgstr "Bilan Tatzo"
+
+msgid "Your style"
+msgstr "Votre style"
+
+msgid "Cards explored"
+msgstr "Cartes explorées"
+
+msgid "Personality"
+msgstr "Personnalité"
+
+msgid "Explore Tatzo"
+msgstr "Explorer Tatzo"
+
+msgid "The Storyteller"
+msgstr "Le Conteur"
+
+msgid "You are drawn to tattoos with emotion, organic movement and details that feel personal."
+msgstr "Vous êtes attiré par les tatouages chargés d’émotion, le mouvement organique et les détails personnels."
+
+msgid "The Architect"
+msgstr "L’Architecte"
+
+msgid "You notice balance, rhythm and structure. Precision is part of the meaning for you."
+msgstr "Vous remarquez l’équilibre, le rythme et la structure. Pour vous, la précision fait partie du sens."
+
+msgid "The Visionary"
+msgstr "Le Visionnaire"
+
+msgid "You prefer bold visual ideas, unusual silhouettes and work that refuses to blend in."
+msgstr "Vous préférez les idées visuelles audacieuses, les silhouettes singulières et les œuvres qui se démarquent."
+
+msgid "The Observer"
+msgstr "L’Observateur"
+
+msgid "You value technique, texture and images that reward a closer look."
+msgstr "Vous appréciez la technique, la texture et les images qui gagnent à être regardées de près."
+
+msgid "The Collector"
+msgstr "Le Collectionneur"
+
+msgid "You gravitate toward expressive traditions, confident composition and lasting visual language."
+msgstr "Vous aimez les traditions expressives, les compositions affirmées et un langage visuel durable."
+
+msgid "More choices will sharpen this result"
+msgstr "Plus de choix préciseront ce résultat"
+
+msgid "Fine Line"
+msgstr "Fine line"
+
+msgid "Minimalism"
+msgstr "Minimalisme"
+
+msgid "Botanical"
+msgstr "Botanique"
+
+msgid "Ornamental"
+msgstr "Ornemental"
+
+msgid "Geometric"
+msgstr "Géométrique"
+
+msgid "Dotwork"
+msgstr "Dotwork"
+
+msgid "Blackwork"
+msgstr "Blackwork"
+
+msgid "Engraving"
+msgstr "Gravure"
+
+msgid "Illustrative"
+msgstr "Illustratif"
+
+msgid "Micro Realism"
+msgstr "Microréalisme"
+
+msgid "Black & Grey Realism"
+msgstr "Réalisme noir et gris"
+
+msgid "Color Realism"
+msgstr "Réalisme couleur"
+
+msgid "American Traditional"
+msgstr "Traditionnel américain"
+
+msgid "Neo-Traditional"
+msgstr "Néo-traditionnel"
+
+msgid "Japanese"
+msgstr "Japonais"
+
+msgid "Watercolor"
+msgstr "Aquarelle"
+
+msgid "Abstract"
+msgstr "Abstrait"
+
+msgid "Cybersigilism"
+msgstr "Cybersigilisme"
+
+msgid "Color"
+msgstr "Couleur"
+
+msgid "Bold lines"
+msgstr "Lignes épaisses"
+
+msgid "Dense compositions"
+msgstr "Compositions denses"
+
+msgid "High contrast"
+msgstr "Contraste élevé"
+
+msgid "Realistic detail"
+msgstr "Détails réalistes"
+
+msgid "Organic shapes"
+msgstr "Formes organiques"
+
+msgid "Geometric structure"
+msgstr "Structure géométrique"
+
+msgid "Symmetry"
+msgstr "Symétrie"
+
+msgid "Style Match cards are being prepared. Please try again soon."
+msgstr "Les cartes Style Match sont en préparation. Veuillez réessayer bientôt."
+
+msgid "Too many Style Match sessions. Please wait a bit and try again."
+msgstr "Trop de sessions Style Match. Patientez un moment puis réessayez."
+
+msgid "Invalid request body."
+msgstr "Corps de requête invalide."
+
+msgid "Unknown Style Match action."
+msgstr "Action Style Match inconnue."
+
+msgid "A valid card is required."
+msgstr "Une carte valide est requise."
+
+msgid "This card is not part of the session."
+msgstr "Cette carte ne fait pas partie de la session."
+
+msgid "Please react to the current card first."
+msgstr "Veuillez d’abord réagir à la carte actuelle."
+
+msgid "This Style Match is not complete yet."
+msgstr "Ce Style Match n’est pas encore terminé."

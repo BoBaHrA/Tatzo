@@ -43,6 +43,16 @@
 
     <li>
       <a
+        href="{% url 'style_match:index' %}"
+        class="{% if request.resolver_match.app_name == 'style_match' %}active{% endif %}"
+      >
+        <img src="{% static 'icons/palette.svg' %}" alt="{% trans 'Style Match' %}">
+        <span>{% trans "Style Match" %}</span>
+      </a>
+    </li>
+
+    <li>
+      <a
         href="{% url 'maps_page' %}"
         class="{% if request.resolver_match.url_name == 'maps_page' %}active{% endif %}"
       >
@@ -321,6 +331,11 @@
   </div>
 
   <div class="mobile-menu-grid">
+    <a href="{% url 'style_match:index' %}">
+      <img src="{% static 'icons/palette.svg' %}" alt="{% trans 'Style Match' %}">
+      <span>{% trans "Style Match" %}</span>
+    </a>
+
     <a href="{% url 'posts:bookmarks' %}">
       <img src="{% static 'icons/bookmark.svg' %}" alt="{% trans 'Bookmarks' %}">
       <span>{% trans "Bookmarks" %}</span>

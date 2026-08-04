@@ -1,0 +1,336 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Tatzo Style Match\n"
+"POT-Creation-Date: 2026-08-03 12:34+0000\n"
+"PO-Revision-Date: 2026-08-03 14:45+0200\n"
+"Last-Translator: Tatzo\n"
+"Language-Team: Russian\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Style Match"
+msgstr "Подбор стиля"
+
+msgid "Swipe through tattoo ideas and discover the styles and artists that fit your taste."
+msgstr "Листайте идеи тату и находите стили и мастеров, которые совпадают с вашим вкусом."
+
+msgid "Something interrupted the connection. Please try again."
+msgstr "Соединение прервалось. Попробуйте ещё раз."
+
+msgid "Saved to your collection"
+msgstr "Сохранено в вашу коллекцию"
+
+msgid "Removed from your collection"
+msgstr "Удалено из вашей коллекции"
+
+msgid "Preparing your cards..."
+msgstr "Готовим карточки..."
+
+msgid "Analyzing preferences..."
+msgstr "Анализируем предпочтения..."
+
+msgid "Comparing styles..."
+msgstr "Сравниваем стили..."
+
+msgid "Finding artists..."
+msgstr "Подбираем мастеров..."
+
+msgid "Building your tattoo personality..."
+msgstr "Собираем ваш тату-профиль..."
+
+msgid "Artist matches will appear as verified portfolios gain style labels."
+msgstr "Подходящие мастера появятся, когда в подтверждённых портфолио будут размечены стили."
+
+msgid "Location pending"
+msgstr "Локация уточняется"
+
+msgid "View profile"
+msgstr "Открыть профиль"
+
+msgid "Start again"
+msgstr "Начать заново"
+
+msgid "people share your tattoo personality."
+msgstr "человек разделяют ваш тату-характер."
+
+msgid "saved"
+msgstr "сохранено"
+
+msgid "Your taste, decoded"
+msgstr "Ваш вкус раскрыт"
+
+msgid "A new way to discover"
+msgstr "Новый способ найти своё"
+
+msgid "Not sure what tattoo style fits you?"
+msgstr "Не знаете, какой стиль тату вам подходит?"
+
+msgid "Swipe through tattoos and we’ll discover your taste — no labels and no pressure."
+msgstr "Листайте татуировки, а мы определим ваш вкус — без ярлыков и давления."
+
+msgid "Discover my style"
+msgstr "Узнать мой стиль"
+
+msgid "Up to %(count)s choices · a result made for you"
+msgstr "До %(count)s выборов · персональный результат"
+
+msgid "The first cards are on their way"
+msgstr "Первые карточки уже готовятся"
+
+msgid "The Style Match library is being curated now."
+msgstr "Сейчас мы собираем библиотеку для подбора стиля."
+
+msgid "Tatzo Style Match"
+msgstr "Подбор стиля Tatzo"
+
+msgid "Follow the feeling, not the label."
+msgstr "Следуйте ощущению, а не названию."
+
+msgid "Every choice maps the visual language that feels most like you. The styles stay hidden until your reveal."
+msgstr "Каждый выбор помогает понять близкий вам визуальный язык. Названия стилей останутся скрытыми до финала."
+
+msgid "Your taste map"
+msgstr "Карта вашего вкуса"
+
+msgid "Tattoo discovery deck"
+msgstr "Колода для подбора тату"
+
+msgid "Card actions"
+msgstr "Действия с карточкой"
+
+msgid "Not my style"
+msgstr "Не мой стиль"
+
+msgid "Save tattoo"
+msgstr "Сохранить тату"
+
+msgid "Like this tattoo"
+msgstr "Мне нравится эта татуировка"
+
+msgid "This is a favorite"
+msgstr "Это фаворит"
+
+msgid "Swipe to choose · hold to save · double tap to favorite"
+msgstr "Свайп — выбрать · удержание — сохранить · двойное нажатие — в фавориты"
+
+msgid "A smarter kind of swipe"
+msgstr "Свайпы с пониманием вкуса"
+
+msgid "No style names while you choose. We connect the dots only when the picture is clear."
+msgstr "Никаких названий стилей во время выбора. Мы соединим точки, когда картина станет ясной."
+
+msgid "Tatzo intelligence"
+msgstr "Интеллект Tatzo"
+
+msgid "Discovering your tattoo personality"
+msgstr "Определяем ваш тату-характер"
+
+msgid "Style Match complete"
+msgstr "Подбор стиля завершён"
+
+msgid "Your Style Match"
+msgstr "Ваш стиль"
+
+msgid "Match confidence"
+msgstr "Точность совпадения"
+
+msgid "Your style spectrum"
+msgstr "Ваш спектр стилей"
+
+msgid "Tattoo personality"
+msgstr "Тату-характер"
+
+msgid "You’re drawn to"
+msgstr "Вас привлекают"
+
+msgid "You tend to skip"
+msgstr "Вы чаще пропускаете"
+
+msgid "Artist matches"
+msgstr "Подходящие мастера"
+
+msgid "Made for your mood"
+msgstr "Под ваше настроение"
+
+msgid "Based on your results, explore these next."
+msgstr "Исходя из результата, попробуйте эти направления."
+
+msgid "Your people"
+msgstr "Ваши единомышленники"
+
+msgid "Your unlocks"
+msgstr "Ваши достижения"
+
+msgid "First Style Match"
+msgstr "Первый подбор стиля"
+
+msgid "Tattoo Explorer"
+msgstr "Исследователь тату"
+
+msgid "Unlocked"
+msgstr "Открыто"
+
+msgid "Master Collector"
+msgstr "Мастер коллекции"
+
+msgid "Style Expert"
+msgstr "Эксперт по стилю"
+
+msgid "Keep exploring"
+msgstr "Продолжайте исследовать"
+
+msgid "Your session"
+msgstr "Ваша сессия"
+
+msgid "Tatzo Wrapped"
+msgstr "Итоги Tatzo"
+
+msgid "Your style"
+msgstr "Ваш стиль"
+
+msgid "Cards explored"
+msgstr "Просмотрено карточек"
+
+msgid "Personality"
+msgstr "Характер"
+
+msgid "Explore Tatzo"
+msgstr "Перейти в Tatzo"
+
+msgid "The Storyteller"
+msgstr "Рассказчик"
+
+msgid "You are drawn to tattoos with emotion, organic movement and details that feel personal."
+msgstr "Вас привлекают эмоциональные татуировки, органичное движение и детали с личным смыслом."
+
+msgid "The Architect"
+msgstr "Архитектор"
+
+msgid "You notice balance, rhythm and structure. Precision is part of the meaning for you."
+msgstr "Вы замечаете баланс, ритм и структуру. Точность для вас — часть смысла."
+
+msgid "The Visionary"
+msgstr "Визионер"
+
+msgid "You prefer bold visual ideas, unusual silhouettes and work that refuses to blend in."
+msgstr "Вам близки смелые визуальные идеи, необычные силуэты и работы, которые невозможно не заметить."
+
+msgid "The Observer"
+msgstr "Наблюдатель"
+
+msgid "You value technique, texture and images that reward a closer look."
+msgstr "Вы цените технику, фактуру и изображения, которые хочется рассматривать ближе."
+
+msgid "The Collector"
+msgstr "Коллекционер"
+
+msgid "You gravitate toward expressive traditions, confident composition and lasting visual language."
+msgstr "Вас привлекают выразительные традиции, уверенная композиция и визуальный язык вне времени."
+
+msgid "More choices will sharpen this result"
+msgstr "Больше выборов сделают результат точнее"
+
+msgid "Fine Line"
+msgstr "Тонкие линии"
+
+msgid "Minimalism"
+msgstr "Минимализм"
+
+msgid "Botanical"
+msgstr "Ботаника"
+
+msgid "Ornamental"
+msgstr "Орнаментал"
+
+msgid "Geometric"
+msgstr "Геометрия"
+
+msgid "Dotwork"
+msgstr "Дотворк"
+
+msgid "Blackwork"
+msgstr "Блэкворк"
+
+msgid "Engraving"
+msgstr "Гравюра"
+
+msgid "Illustrative"
+msgstr "Иллюстративный"
+
+msgid "Micro Realism"
+msgstr "Микрореализм"
+
+msgid "Black & Grey Realism"
+msgstr "Чёрно-серый реализм"
+
+msgid "Color Realism"
+msgstr "Цветной реализм"
+
+msgid "American Traditional"
+msgstr "Американский традишнл"
+
+msgid "Neo-Traditional"
+msgstr "Неотрадишнл"
+
+msgid "Japanese"
+msgstr "Японский"
+
+msgid "Watercolor"
+msgstr "Акварель"
+
+msgid "Abstract"
+msgstr "Абстракция"
+
+msgid "Cybersigilism"
+msgstr "Киберсигилизм"
+
+msgid "Color"
+msgstr "Цвет"
+
+msgid "Bold lines"
+msgstr "Толстые линии"
+
+msgid "Dense compositions"
+msgstr "Плотные композиции"
+
+msgid "High contrast"
+msgstr "Высокий контраст"
+
+msgid "Realistic detail"
+msgstr "Реалистичные детали"
+
+msgid "Organic shapes"
+msgstr "Органичные формы"
+
+msgid "Geometric structure"
+msgstr "Геометричная структура"
+
+msgid "Symmetry"
+msgstr "Симметрия"
+
+msgid "Style Match cards are being prepared. Please try again soon."
+msgstr "Карточки для подбора стиля готовятся. Попробуйте ещё раз немного позже."
+
+msgid "Too many Style Match sessions. Please wait a bit and try again."
+msgstr "Слишком много запусков подбора стиля. Немного подождите и попробуйте снова."
+
+msgid "Invalid request body."
+msgstr "Некорректные данные запроса."
+
+msgid "Unknown Style Match action."
+msgstr "Неизвестное действие подбора стиля."
+
+msgid "A valid card is required."
+msgstr "Нужна корректная карточка."
+
+msgid "This card is not part of the session."
+msgstr "Эта карточка не входит в текущую сессию."
+
+msgid "Please react to the current card first."
+msgstr "Сначала оцените текущую карточку."
+
+msgid "This Style Match is not complete yet."
+msgstr "Этот подбор стиля ещё не завершён."

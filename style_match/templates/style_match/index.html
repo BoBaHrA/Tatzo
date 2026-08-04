@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Style Match" %} — Tatzo{% endblock %}
+{% block meta_description %}{% trans "Swipe through tattoo ideas and discover the styles and artists that fit your taste." %}{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'style_match/style_match.css' %}">
+{% endblock %}
+
+{% block content %}
+<div
+  class="sm-shell"
+  id="style-match-app"
+  data-start-url="{% url 'style_match:start' %}"
+  data-home-url="{% url 'home' %}"
+  data-has-cards="{% if has_cards %}true{% else %}false{% endif %}"
+  data-i18n-network="{% trans 'Something interrupted the connection. Please try again.' %}"
+  data-i18n-saved="{% trans 'Saved to your collection' %}"
+  data-i18n-unsaved="{% trans 'Removed from your collection' %}"
+  data-i18n-loading="{% trans 'Preparing your cards...' %}"
+  data-i18n-analyzing="{% trans 'Analyzing preferences...' %}"
+  data-i18n-comparing="{% trans 'Comparing styles...' %}"
+  data-i18n-artists="{% trans 'Finding artists...' %}"
+  data-i18n-personality="{% trans 'Building your tattoo personality...' %}"
+  data-i18n-no-artists="{% trans 'Artist matches will appear as verified portfolios gain style labels.' %}"
+  data-i18n-location-pending="{% trans 'Location pending' %}"
+  data-i18n-view-profile="{% trans 'View profile' %}"
+  data-i18n-restart="{% trans 'Start again' %}"
+  data-i18n-people="{% trans 'people share your tattoo personality.' %}"
+  data-i18n-saved-count="{% trans 'saved' %}"
+>
+  {% csrf_token %}
+  <div class="sm-ambient sm-ambient-teal" aria-hidden="true"></div>
+  <div class="sm-ambient sm-ambient-pink" aria-hidden="true"></div>
+  <div class="sm-confetti" id="sm-confetti" aria-hidden="true"></div>
+
+  <section class="sm-screen sm-screen-active" id="sm-onboarding" aria-labelledby="sm-onboarding-title">
+    <main class="sm-onboarding-card">
+      <header class="sm-brand-row">
+        <a class="sm-wordmark" href="{% url 'home' %}" aria-label="Tatzo">tatzo<span>.</span></a>
+        <span class="sm-kicker">{% trans "Style Match" %}</span>
+      </header>
+
+      <div class="sm-onboarding-visual" aria-hidden="true">
+        {% if preview_cards %}
+          {% for card in preview_cards %}
+            <div class="sm-preview-card sm-preview-card-{{ forloop.counter }}">
+              <img src="{{ card.delivery_url }}" alt="" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}">
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="sm-preview-card sm-preview-card-1 sm-preview-placeholder"></div>
+          <div class="sm-preview-card sm-preview-card-2 sm-preview-placeholder"></div>
+          <div class="sm-preview-card sm-preview-card-3 sm-preview-placeholder"></div>
+        {% endif %}
+        <span class="sm-visual-pill">{% trans "Your taste, decoded" %}</span>
+      </div>
+
+      <div class="sm-onboarding-copy">
+        <p class="sm-eyebrow">{% trans "A new way to discover" %}</p>
+        <h1 id="sm-onboarding-title">{% trans "Not sure what tattoo style fits you?" %}</h1>
+        <p>{% trans "Swipe through tattoos and we’ll discover your taste — no labels and no pressure." %}</p>
+      </div>
+
+      {% if has_cards %}
+        <button class="sm-primary-button" id="sm-start" type="button">
+          <span>{% trans "Discover my style" %}</span>
+          <span aria-hidden="true">✦</span>
+        </button>
+        <p class="sm-footnote">
+          {% blocktrans with count=target_count %}Up to {{ count }} choices · a result made for you{% endblocktrans %}
+        </p>
+      {% else %}
+        <div class="sm-empty-state" role="status">
+          <strong>{% trans "The first cards are on their way" %}</strong>
+          <span>{% trans "The Style Match library is being curated now." %}</span>
+        </div>
+      {% endif %}
+    </main>
+  </section>
+
+  <section class="sm-screen" id="sm-discovery" aria-labelledby="sm-discovery-title" hidden>
+    <main class="sm-discovery-layout">
+      <aside class="sm-discovery-copy">
+        <p class="sm-eyebrow">{% trans "Tatzo Style Match" %}</p>
+        <h2 id="sm-discovery-title">{% trans "Follow the feeling, not the label." %}</h2>
+        <p>{% trans "Every choice maps the visual language that feels most like you. The styles stay hidden until your reveal." %}</p>
+      </aside>
+
+      <div class="sm-deck-column">
+        <header class="sm-deck-header">
+          <a class="sm-wordmark" href="{% url 'home' %}" aria-label="Tatzo">tatzo<span>.</span></a>
+          <div class="sm-progress-copy">
+            <span>{% trans "Your taste map" %}</span>
+            <strong id="sm-progress-count" aria-live="polite">1 / 1</strong>
+          </div>
+        </header>
+
+        <div class="sm-progress-track" aria-hidden="true"><span id="sm-progress-fill"></span></div>
+        <div class="sm-toast" id="sm-toast" role="status" aria-live="polite"></div>
+        <div class="sm-deck" id="sm-deck" aria-label="{% trans 'Tattoo discovery deck' %}"></div>
+
+        <div class="sm-actions" aria-label="{% trans 'Card actions' %}">
+          <button class="sm-action sm-reject" id="sm-reject" type="button" aria-label="{% trans 'Not my style' %}" title="{% trans 'Not my style' %}">×</button>
+          <button class="sm-action sm-save" id="sm-save" type="button" aria-label="{% trans 'Save tattoo' %}" title="{% trans 'Save tattoo' %}">
+            <span aria-hidden="true">⌑</span>
+          </button>
+          <button class="sm-action sm-like" id="sm-like" type="button" aria-label="{% trans 'Like this tattoo' %}" title="{% trans 'Like this tattoo' %}">♡</button>
+          <button class="sm-action sm-favorite" id="sm-favorite" type="button" aria-label="{% trans 'This is a favorite' %}" title="{% trans 'This is a favorite' %}">✦</button>
+        </div>
+        <p class="sm-hint">{% trans "Swipe to choose · hold to save · double tap to favorite" %}</p>
+      </div>
+
+      <aside class="sm-tip-card">
+        <p class="sm-eyebrow">{% trans "A smarter kind of swipe" %}</p>
+        <p>{% trans "No style names while you choose. We connect the dots only when the picture is clear." %}</p>
+      </aside>
+    </main>
+  </section>
+
+  <section class="sm-screen" id="sm-analysis" aria-labelledby="sm-analysis-title" hidden>
+    <main class="sm-analysis-card">
+      <a class="sm-wordmark" href="{% url 'home' %}" aria-label="Tatzo">tatzo<span>.</span></a>
+      <div class="sm-analysis-orb" aria-hidden="true">
+        <span></span><span></span><span></span><b>◎</b>
+      </div>
+      <p class="sm-eyebrow">{% trans "Tatzo intelligence" %}</p>
+      <h2 id="sm-analysis-title">{% trans "Discovering your tattoo personality" %}</h2>
+      <p id="sm-analysis-message" aria-live="polite">{% trans "Analyzing preferences..." %}</p>
+      <div class="sm-analysis-meter" aria-hidden="true"><span id="sm-analysis-fill"></span></div>
+    </main>
+  </section>
+
+  <section class="sm-screen" id="sm-results" aria-labelledby="sm-results-title" hidden>
+    <main class="sm-results-wrap">
+      <header class="sm-results-header">
+        <a class="sm-wordmark" href="{% url 'home' %}" aria-label="Tatzo">tatzo<span>.</span></a>
+        <span class="sm-complete-badge">{% trans "Style Match complete" %}</span>
+      </header>
+
+      <div class="sm-results-grid">
+        <div class="sm-results-column">
+          <section class="sm-result-hero">
+            <p class="sm-eyebrow">{% trans "Your Style Match" %}</p>
+            <div class="sm-match-lockup">
+              <strong id="sm-match-number">0%</strong>
+              <div>
+                <span>{% trans "Match confidence" %}</span>
+                <h1 id="sm-results-title">{% trans "Discovering" %}</h1>
+              </div>
+            </div>
+          </section>
+
+          <section class="sm-panel">
+            <h2>{% trans "Your style spectrum" %}</h2>
+            <div class="sm-style-spectrum" id="sm-style-spectrum"></div>
+          </section>
+
+          <section class="sm-personality-card">
+            <p class="sm-eyebrow">{% trans "Tattoo personality" %}</p>
+            <h2 id="sm-personality-title"></h2>
+            <p id="sm-personality-description"></p>
+          </section>
+
+          <div class="sm-preference-grid">
+            <section class="sm-panel">
+              <h2>{% trans "You’re drawn to" %}</h2>
+              <ul class="sm-preference-list" id="sm-drawn-to"></ul>
+            </section>
+            <section class="sm-panel">
+              <h2>{% trans "You tend to skip" %}</h2>
+              <ul class="sm-preference-list sm-skip-list" id="sm-skip"></ul>
+            </section>
+          </div>
+        </div>
+
+        <div class="sm-results-column">
+          <section class="sm-panel">
+            <h2>{% trans "Artist matches" %}</h2>
+            <div class="sm-artist-list" id="sm-artist-list"></div>
+          </section>
+
+          <section class="sm-panel">
+            <h2>{% trans "Made for your mood" %}</h2>
+            <p class="sm-panel-subtitle">{% trans "Based on your results, explore these next." %}</p>
+            <div class="sm-tag-cloud" id="sm-tag-cloud"></div>
+          </section>
+
+          <section class="sm-community-card">
+            <p class="sm-eyebrow">{% trans "Your people" %}</p>
+            <h2 id="sm-community-copy"></h2>
+          </section>
+
+          <section class="sm-panel">
+            <h2>{% trans "Your unlocks" %}</h2>
+            <div class="sm-achievement-grid">
+              <div class="sm-achievement sm-unlocked"><span>✦</span><strong>{% trans "First Style Match" %}</strong><small>{% trans "Unlocked" %}</small></div>
+              <div class="sm-achievement sm-unlocked"><span>◉</span><strong>{% trans "Tattoo Explorer" %}</strong><small>{% trans "Unlocked" %}</small></div>
+              <div class="sm-achievement"><span>⌑</span><strong>{% trans "Master Collector" %}</strong><small id="sm-saved-count"></small></div>
+              <div class="sm-achievement"><span>◎</span><strong>{% trans "Style Expert" %}</strong><small>{% trans "Keep exploring" %}</small></div>
+            </div>
+          </section>
+
+          <section class="sm-wrapped-card">
+            <p class="sm-eyebrow">{% trans "Your session" %}</p>
+            <h2>{% trans "Tatzo Wrapped" %}</h2>
+            <div class="sm-wrapped-row"><span>{% trans "Your style" %}</span><strong id="sm-wrapped-style"></strong></div>
+            <div class="sm-wrapped-row"><span>{% trans "Cards explored" %}</span><strong id="sm-wrapped-count"></strong></div>
+            <div class="sm-wrapped-row"><span>{% trans "Personality" %}</span><strong id="sm-wrapped-personality"></strong></div>
+          </section>
+        </div>
+      </div>
+
+      <div class="sm-result-actions">
+        <button class="sm-secondary-button" id="sm-restart" type="button">↻ <span>{% trans "Start again" %}</span></button>
+        <a class="sm-primary-button sm-home-button" href="{% url 'home' %}">{% trans "Explore Tatzo" %}</a>
+      </div>
+    </main>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'style_match/style_match.js' %}"></script>
+{% endblock %}
