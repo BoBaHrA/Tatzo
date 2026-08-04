@@ -18,6 +18,7 @@
     noArtists: app.dataset.i18nNoArtists,
     locationPending: app.dataset.i18nLocationPending,
     viewProfile: app.dataset.i18nViewProfile,
+    person: app.dataset.i18nPerson,
     people: app.dataset.i18nPeople,
     savedCount: app.dataset.i18nSavedCount,
   };
@@ -387,8 +388,12 @@
     appendList($("#sm-skip"), result.tend_to_skip || []);
     renderArtists(result.artists || []);
     renderTags(result.styles || []);
-    const people = Number(result.community_count || 1).toLocaleString(document.documentElement.lang || undefined);
-    $("#sm-community-copy").textContent = `${people} ${result.personality.label}: ${i18n.people}`;
+    const people = Number(result.community_count || 1).toLocaleString(
+      document.documentElement.lang || undefined,
+    );
+    const communityCopy =
+      Number(result.community_count || 1) === 1 ? i18n.person : i18n.people;
+    $("#sm-community-copy").textContent = `${people} ${result.personality.label}: ${communityCopy}`;
     $("#sm-saved-count").textContent = `${result.saved_count} ${i18n.savedCount}`;
     $("#sm-wrapped-style").textContent = topStyle.label;
     $("#sm-wrapped-count").textContent = result.completed_count;

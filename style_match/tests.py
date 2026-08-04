@@ -67,6 +67,7 @@ class StyleMatchFlowTests(TestCase):
         )
 
         self.assertContains(response, "Не знаете, какой стиль тату вам подходит?")
+        self.assertContains(response, "человек разделяет ваш тату-характер.")
 
     def test_start_returns_visual_card_data_without_style_labels(self):
         response = self.start()
@@ -105,9 +106,14 @@ class StyleMatchFlowTests(TestCase):
         self.assertEqual(session.status, StyleMatchSession.STATUS_COMPLETED)
         self.assertGreater(session.style_scores["fine_line"], 50)
 
-        result = self.client.get(started["result_url"])
+        result = self.client.get(started["result_url"], HTTP_ACCEPT_LANGUAGE="ru")
         self.assertEqual(result.status_code, 200)
         self.assertEqual(result.json()["top_style"]["slug"], "fine_line")
+        self.assertEqual(result.json()["personality"]["label"], "Рассказчик")
+        self.assertEqual(
+            result.json()["personality"]["description"],
+            "Вас привлекают эмоциональные татуировки, органичное движение и детали с личным смыслом.",
+        )
 
     def test_reacting_to_a_future_card_returns_conflict(self):
         make_card("T002", "blackwork")

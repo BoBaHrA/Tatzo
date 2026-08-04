@@ -53,8 +53,11 @@ msgstr "Открыть профиль"
 msgid "Start again"
 msgstr "Начать заново"
 
+msgid "person shares your tattoo personality."
+msgstr "человек разделяет ваш тату-характер."
+
 msgid "people share your tattoo personality."
-msgstr "человек разделяют ваш тату-характер."
+msgstr "пользователей разделяют ваш тату-характер."
 
 msgid "saved"
 msgstr "сохранено"
