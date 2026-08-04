@@ -53,6 +53,9 @@ msgstr "Voir le profil"
 msgid "Start again"
 msgstr "Recommencer"
 
+msgid "person shares your tattoo personality."
+msgstr "personne partage votre personnalité tatouage."
+
 msgid "people share your tattoo personality."
 msgstr "personnes partagent votre personnalité tatouage."
 

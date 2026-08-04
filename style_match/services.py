@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db.models import Prefetch
 from django.urls import reverse
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from users.models import PortfolioWork
 
@@ -20,29 +21,29 @@ SAVE_BONUS = 0.15
 
 PERSONALITIES = {
     "storyteller": {
-        "label": _("The Storyteller"),
-        "description": _(
+        "label": gettext_lazy("The Storyteller"),
+        "description": gettext_lazy(
             "You are drawn to tattoos with emotion, organic movement and details that feel personal."
         ),
         "styles": {"fine_line", "minimalism", "botanical", "watercolor"},
     },
     "architect": {
-        "label": _("The Architect"),
-        "description": _(
+        "label": gettext_lazy("The Architect"),
+        "description": gettext_lazy(
             "You notice balance, rhythm and structure. Precision is part of the meaning for you."
         ),
         "styles": {"ornamental", "geometric", "dotwork"},
     },
     "visionary": {
-        "label": _("The Visionary"),
-        "description": _(
+        "label": gettext_lazy("The Visionary"),
+        "description": gettext_lazy(
             "You prefer bold visual ideas, unusual silhouettes and work that refuses to blend in."
         ),
         "styles": {"blackwork", "abstract", "cybersigilism"},
     },
     "observer": {
-        "label": _("The Observer"),
-        "description": _(
+        "label": gettext_lazy("The Observer"),
+        "description": gettext_lazy(
             "You value technique, texture and images that reward a closer look."
         ),
         "styles": {
@@ -54,8 +55,8 @@ PERSONALITIES = {
         },
     },
     "collector": {
-        "label": _("The Collector"),
-        "description": _(
+        "label": gettext_lazy("The Collector"),
+        "description": gettext_lazy(
             "You gravitate toward expressive traditions, confident composition and lasting visual language."
         ),
         "styles": {"american_traditional", "neo_traditional", "japanese"},
