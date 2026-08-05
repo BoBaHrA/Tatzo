@@ -14,6 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     {% block extra_css %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'style_match/style_match_hotfix.css' %}">
 
     <link rel="icon" type="image/png" href="{% static 'images/tatzo-icon.png' %}">
     <link rel="apple-touch-icon" href="{% static 'images/tatzo-icon.png' %}">
@@ -152,5 +153,6 @@
     {% block extra_js %}
         <script src="{% static 'js/verification.js' %}"></script>
     {% endblock %}
+    <script src="{% static 'style_match/style_match_hotfix.js' %}"></script>
 </body>
 </html>

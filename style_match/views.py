@@ -22,6 +22,8 @@ from .services import (
     session_limits,
 )
 
+PENDING_RESULT_SESSION_KEY = "style_match_pending_result_id"
+
 
 def _browser_session_key(request):
     if not request.session.session_key:
@@ -51,8 +53,46 @@ def _json_body(request):
     return data if isinstance(data, dict) else None
 
 
+def _claim_pending_result(request):
+    if not request.user.is_authenticated:
+        return None
+
+    pending_id = request.session.pop(PENDING_RESULT_SESSION_KEY, None)
+    if not pending_id:
+        return None
+
+    session = (
+        StyleMatchSession.objects.filter(
+            pk=pending_id,
+            user__isnull=True,
+            status=StyleMatchSession.STATUS_COMPLETED,
+        )
+        .order_by("-completed_at")
+        .first()
+    )
+    if session:
+        session.user = request.user
+        session.browser_session_key = ""
+        session.save(update_fields=("user", "browser_session_key", "updated_at"))
+    return session
+
+
+def _latest_completed_session(request):
+    if not request.user.is_authenticated:
+        return None
+    return (
+        StyleMatchSession.objects.filter(
+            user=request.user,
+            status=StyleMatchSession.STATUS_COMPLETED,
+        )
+        .order_by("-completed_at", "-started_at")
+        .first()
+    )
+
+
 @ensure_csrf_cookie
 def index(request):
+    _claim_pending_result(request)
     base_count, _batch_size, max_count = session_limits()
     preview_cards = list(
         TattooCard.objects.filter(is_active=True, is_approved=True).order_by("card_id")[
@@ -73,6 +113,25 @@ def index(request):
             "base_count": base_count,
             "max_count": max_count,
         },
+    )
+
+
+@require_GET
+def latest_result(request):
+    claimed = _claim_pending_result(request)
+    session = claimed or _latest_completed_session(request)
+    return JsonResponse(
+        {
+            "authenticated": request.user.is_authenticated,
+            "has_result": bool(session),
+            "result_url": (
+                reverse("style_match:result", kwargs={"session_id": session.pk})
+                if session
+                else ""
+            ),
+            "login_url": f"{reverse('login')}?next={reverse('style_match:index')}",
+            "signup_url": f"{reverse('signup')}?next={reverse('style_match:index')}",
+        }
     )
 
 
@@ -235,6 +294,7 @@ def react(request, session_id):
                     }
                 )
             complete_session(session)
+            request.session[PENDING_RESULT_SESSION_KEY] = str(session.pk)
             return JsonResponse(
                 {
                     "completed": True,
