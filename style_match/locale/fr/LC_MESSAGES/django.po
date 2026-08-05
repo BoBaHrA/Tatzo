@@ -29,6 +29,9 @@ msgstr "Retiré de votre collection"
 msgid "Preparing your cards..."
 msgstr "Préparation de vos cartes..."
 
+msgid "A few more choices will make your match clearer."
+msgstr "Encore quelques choix pour préciser votre résultat."
+
 msgid "Analyzing preferences..."
 msgstr "Analyse de vos préférences..."
 
@@ -77,8 +80,8 @@ msgstr "Faites défiler les tatouages et nous découvrirons vos goûts — sans 
 msgid "Discover my style"
 msgstr "Découvrir mon style"
 
-msgid "Up to %(count)s choices · a result made for you"
-msgstr "Jusqu’à %(count)s choix · un résultat fait pour vous"
+msgid "Usually %(base)s choices · up to %(maximum)s when your taste needs a closer look"
+msgstr "En général %(base)s choix · jusqu’à %(maximum)s si vos goûts demandent à être précisés"
 
 msgid "The first cards are on their way"
 msgstr "Les premières cartes arrivent"

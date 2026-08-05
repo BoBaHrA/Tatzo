@@ -22,6 +22,7 @@
   data-i18n-saved="{% trans 'Saved to your collection' %}"
   data-i18n-unsaved="{% trans 'Removed from your collection' %}"
   data-i18n-loading="{% trans 'Preparing your cards...' %}"
+  data-i18n-clarifying="{% trans 'A few more choices will make your match clearer.' %}"
   data-i18n-analyzing="{% trans 'Analyzing preferences...' %}"
   data-i18n-comparing="{% trans 'Comparing styles...' %}"
   data-i18n-artists="{% trans 'Finding artists...' %}"
@@ -73,7 +74,7 @@
           <span aria-hidden="true">✦</span>
         </button>
         <p class="sm-footnote">
-          {% blocktrans with count=target_count %}Up to {{ count }} choices · a result made for you{% endblocktrans %}
+          {% blocktrans with base=base_count maximum=max_count %}Usually {{ base }} choices · up to {{ maximum }} when your taste needs a closer look{% endblocktrans %}
         </p>
       {% else %}
         <div class="sm-empty-state" role="status">

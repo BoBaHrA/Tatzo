@@ -29,6 +29,9 @@ msgstr "Удалено из вашей коллекции"
 msgid "Preparing your cards..."
 msgstr "Готовим карточки..."
 
+msgid "A few more choices will make your match clearer."
+msgstr "Нужно ещё немного — уточняем ваши предпочтения."
+
 msgid "Analyzing preferences..."
 msgstr "Анализируем предпочтения..."
 
@@ -77,8 +80,8 @@ msgstr "Листайте татуировки, а мы определим ваш
 msgid "Discover my style"
 msgstr "Узнать мой стиль"
 
-msgid "Up to %(count)s choices · a result made for you"
-msgstr "До %(count)s выборов · персональный результат"
+msgid "Usually %(base)s choices · up to %(maximum)s when your taste needs a closer look"
+msgstr "Обычно %(base)s выборов · до %(maximum)s, если результат нужно уточнить"
 
 msgid "The first cards are on their way"
 msgstr "Первые карточки уже готовятся"

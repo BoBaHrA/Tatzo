@@ -12,7 +12,13 @@ from django.urls import reverse
 from appointments.models import ArtistBookingSettings
 
 from .models import StyleMatchResponse, StyleMatchSession, TattooCard
-from .services import result_payload, select_balanced_card_ids
+from .services import (
+    calculate_match_confidence,
+    calculate_session_scores,
+    result_payload,
+    select_balanced_card_ids,
+    select_clarification_card_ids,
+)
 
 
 def make_card(card_id="T001", primary_style="fine_line", **overrides):
@@ -68,6 +74,10 @@ class StyleMatchFlowTests(TestCase):
 
         self.assertContains(response, "Не знаете, какой стиль тату вам подходит?")
         self.assertContains(response, "человек разделяет ваш тату-характер.")
+        self.assertContains(
+            response,
+            "Обычно 30 выборов · до 42, если результат нужно уточнить",
+        )
 
     def test_start_returns_visual_card_data_without_style_labels(self):
         response = self.start()
@@ -149,6 +159,87 @@ class StyleMatchFlowTests(TestCase):
             StyleMatchSession.STATUS_ABANDONED,
         )
 
+    @override_settings(
+        STYLE_MATCH_CARD_COUNT=4,
+        STYLE_MATCH_CLARIFICATION_BATCH_SIZE=2,
+        STYLE_MATCH_MAX_CARD_COUNT=8,
+        STYLE_MATCH_CONFIDENCE_THRESHOLD=100,
+    )
+    def test_ambiguous_session_adds_two_private_batches_then_stops_at_maximum(self):
+        for index in range(2, 9):
+            make_card(
+                f"A{index:03}",
+                "fine_line" if index % 2 else "blackwork",
+            )
+
+        started = self.start().json()
+        self.assertEqual(started["total"], 4)
+
+        extension_sizes = []
+        completed_payload = None
+        while completed_payload is None:
+            session = StyleMatchSession.objects.get(pk=started["session_id"])
+            card_id = session.card_order[session.current_index]
+            response = self.client.post(
+                started["react_url"],
+                data=json.dumps({"action": "like", "card_id": card_id}),
+                content_type="application/json",
+            )
+            self.assertEqual(response.status_code, 200)
+            payload = response.json()
+            if payload.get("clarification"):
+                extension_sizes.append(len(payload["cards"]))
+                self.assertEqual(
+                    set(payload["cards"][0]),
+                    {"id", "card_id", "image_url", "alt"},
+                )
+                self.assertNotIn("style_weights", payload["cards"][0])
+                self.assertNotIn("primary_style", payload["cards"][0])
+            if payload["completed"]:
+                completed_payload = payload
+
+        session = StyleMatchSession.objects.get(pk=started["session_id"])
+        self.assertEqual(extension_sizes, [2, 2])
+        self.assertEqual(session.target_count, 8)
+        self.assertEqual(session.current_index, 8)
+        self.assertEqual(len(set(session.card_order)), 8)
+        self.assertEqual(session.status, StyleMatchSession.STATUS_COMPLETED)
+        self.assertLess(
+            self.client.get(started["result_url"]).json()["match_confidence"],
+            100,
+        )
+
+    @override_settings(
+        STYLE_MATCH_CARD_COUNT=4,
+        STYLE_MATCH_CLARIFICATION_BATCH_SIZE=2,
+        STYLE_MATCH_MAX_CARD_COUNT=8,
+        STYLE_MATCH_CONFIDENCE_THRESHOLD=0,
+    )
+    def test_confident_session_completes_at_base_count(self):
+        for index in range(2, 9):
+            make_card(f"C{index:03}", "fine_line")
+
+        started = self.start().json()
+        final_payload = None
+        for _index in range(4):
+            session = StyleMatchSession.objects.get(pk=started["session_id"])
+            response = self.client.post(
+                started["react_url"],
+                data=json.dumps(
+                    {
+                        "action": "favorite",
+                        "card_id": session.card_order[session.current_index],
+                    }
+                ),
+                content_type="application/json",
+            )
+            final_payload = response.json()
+
+        self.assertTrue(final_payload["completed"])
+        self.assertNotIn("clarification", final_payload)
+        session = StyleMatchSession.objects.get(pk=started["session_id"])
+        self.assertEqual(session.target_count, 4)
+
 
 class StyleMatchScoringTests(TestCase):
     def setUp(self):
@@ -181,6 +272,83 @@ class StyleMatchScoringTests(TestCase):
 
         with self.assertRaises(ValidationError):
             card.full_clean()
+
+    def test_clarification_selection_targets_leading_styles_without_repeats(self):
+        used_cards = [
+            make_card("USED1", "fine_line"),
+            make_card("USED2", "blackwork"),
+        ]
+        session = StyleMatchSession.objects.create(
+            browser_session_key="test-browser",
+            target_count=2,
+            card_order=[card.pk for card in used_cards],
+            current_index=2,
+        )
+        contenders = ["fine_line", "blackwork", "ornamental"]
+        for style in contenders:
+            for index in range(2):
+                make_card(
+                    f"{style[:3].upper()}{index}",
+                    style,
+                    style_weights={style: 0.9},
+                )
+        for index in range(3):
+            make_card(f"OTHER{index}", "watercolor")
+
+        selected = select_clarification_card_ids(
+            session,
+            {"fine_line": 70, "blackwork": 68, "ornamental": 65},
+            limit=6,
+        )
+        selected_styles = set(
+            TattooCard.objects.filter(pk__in=selected).values_list(
+                "primary_style", flat=True
+            )
+        )
+
+        self.assertEqual(len(selected), 6)
+        self.assertEqual(len(set(selected)), 6)
+        self.assertFalse(set(selected) & set(session.card_order))
+        self.assertEqual(selected_styles, set(contenders))
+
+    def test_real_confidence_distinguishes_clear_and_tied_results(self):
+        def build_session(prefix, reactions):
+            cards = []
+            for index, (style, _reaction) in enumerate(reactions):
+                cards.append(make_card(f"{prefix}{index:02}", style))
+            session = StyleMatchSession.objects.create(
+                browser_session_key=f"{prefix}-browser",
+                target_count=len(cards),
+                card_order=[card.pk for card in cards],
+                current_index=len(cards),
+            )
+            for position, (card, (_style, reaction)) in enumerate(
+                zip(cards, reactions)
+            ):
+                StyleMatchResponse.objects.create(
+                    session=session,
+                    card=card,
+                    position=position,
+                    reaction=reaction,
+                )
+            scores = calculate_session_scores(session)
+            return session, scores
+
+        clear_reactions = [("fine_line", StyleMatchResponse.REACTION_FAVORITE)] * 15 + [
+            ("blackwork", StyleMatchResponse.REACTION_REJECT)
+        ] * 15
+        tied_reactions = [("fine_line", StyleMatchResponse.REACTION_LIKE)] * 15 + [
+            ("blackwork", StyleMatchResponse.REACTION_LIKE)
+        ] * 15
+        clear_session, clear_scores = build_session("CLR", clear_reactions)
+        tied_session, tied_scores = build_session("TIE", tied_reactions)
+
+        clear_confidence = calculate_match_confidence(clear_session, clear_scores)
+        tied_confidence = calculate_match_confidence(tied_session, tied_scores)
+
+        self.assertEqual(clear_confidence, 98)
+        self.assertLess(tied_confidence, 78)
+        self.assertGreater(clear_confidence, tied_confidence)
 
     def test_verified_artist_is_ranked_from_booking_styles(self):
         card = make_card()

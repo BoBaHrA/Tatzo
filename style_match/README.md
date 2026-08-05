@@ -60,8 +60,16 @@ style and visual-trait weight is a number from `0` to `1`:
 }
 ```
 
-The canonical style and trait keys live in `style_match/styles.py`. The target
-session size defaults to 30 and can be changed with `STYLE_MATCH_CARD_COUNT`.
-Sessions automatically use all available approved cards until the library is
-large enough. A balanced round-robin prevents one style from dominating a
-session.
+The canonical style and trait keys live in `style_match/styles.py`. Sessions
+start with 30 cards by default. At the end of the base deck the server measures
+evidence, the gap between the leading styles, result strength and recent
+stability. If the profile is still ambiguous, it appends six unseen cards that
+separate the three leading style candidates. This can happen twice, with a
+default hard limit of 42 cards. The discovery API still exposes only card IDs,
+delivery URLs and neutral alt text; style metadata stays server-side.
+
+Deploy-specific Django settings may override `STYLE_MATCH_CARD_COUNT`,
+`STYLE_MATCH_CLARIFICATION_BATCH_SIZE`, `STYLE_MATCH_MAX_CARD_COUNT` and
+`STYLE_MATCH_CONFIDENCE_THRESHOLD`. Sessions use all available approved cards
+when the library is smaller than the requested base. A balanced round-robin
+prevents one style from dominating the base deck.
