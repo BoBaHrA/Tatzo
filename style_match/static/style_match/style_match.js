@@ -11,6 +11,7 @@
     saved: app.dataset.i18nSaved,
     unsaved: app.dataset.i18nUnsaved,
     loading: app.dataset.i18nLoading,
+    clarifying: app.dataset.i18nClarifying,
     analyzing: app.dataset.i18nAnalyzing,
     comparing: app.dataset.i18nComparing,
     artists: app.dataset.i18nArtists,
@@ -256,6 +257,14 @@
       const data = await request(state.reactUrl, { action, card_id: card.id });
       await new Promise((resolve) => window.setTimeout(resolve, 220));
       state.index += 1;
+      if (Array.isArray(data.cards) && data.cards.length) {
+        const knownIds = new Set(state.cards.map((item) => item.id));
+        data.cards.forEach((item) => {
+          if (!knownIds.has(item.id)) state.cards.push(item);
+        });
+      }
+      state.total = Number(data.total || state.total);
+      if (data.clarification) toast(i18n.clarifying);
       if (data.completed || state.index >= state.total) {
         runAnalysis();
         return;

@@ -1,6 +1,5 @@
 import json
 
-from django.conf import settings
 from django.db import transaction
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -13,10 +12,14 @@ from users.security import check_rate_limit, rate_limited_json
 
 from .models import StyleMatchResponse, StyleMatchSession, TattooCard
 from .services import (
+    calculate_session_scores,
+    cards_for_ids,
     cards_for_session,
+    clarification_card_ids,
     complete_session,
     result_payload,
     select_balanced_card_ids,
+    session_limits,
 )
 
 
@@ -50,6 +53,7 @@ def _json_body(request):
 
 @ensure_csrf_cookie
 def index(request):
+    base_count, _batch_size, max_count = session_limits()
     preview_cards = list(
         TattooCard.objects.filter(is_active=True, is_approved=True).order_by("card_id")[
             :3
@@ -66,7 +70,8 @@ def index(request):
         {
             "preview_cards": preview_cards,
             "has_cards": bool(preview_cards),
-            "target_count": getattr(settings, "STYLE_MATCH_CARD_COUNT", 30),
+            "base_count": base_count,
+            "max_count": max_count,
         },
     )
 
@@ -87,7 +92,7 @@ def start_session(request):
         )
 
     browser_key = _browser_session_key(request)
-    target_count = max(1, min(30, int(getattr(settings, "STYLE_MATCH_CARD_COUNT", 30))))
+    target_count, _batch_size, _max_count = session_limits()
     card_order = select_balanced_card_ids(target_count)
     if not card_order:
         return JsonResponse(
@@ -207,6 +212,28 @@ def react(request, session_id):
         session.current_index += 1
 
         if session.current_index >= len(session.card_order):
+            scores = calculate_session_scores(session)
+            extra_card_ids = clarification_card_ids(session, scores)
+            if extra_card_ids:
+                session.card_order = [*session.card_order, *extra_card_ids]
+                session.target_count = len(session.card_order)
+                session.save(
+                    update_fields=(
+                        "current_index",
+                        "card_order",
+                        "target_count",
+                        "updated_at",
+                    )
+                )
+                return JsonResponse(
+                    {
+                        "completed": False,
+                        "clarification": True,
+                        "current_index": session.current_index,
+                        "total": session.target_count,
+                        "cards": cards_for_ids(extra_card_ids),
+                    }
+                )
             complete_session(session)
             return JsonResponse(
                 {
