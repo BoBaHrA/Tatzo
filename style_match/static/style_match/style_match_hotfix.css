@@ -1,0 +1,67 @@
+.sm-wordmark {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+}
+
+.sm-official-logo {
+  display: block;
+  width: auto;
+  height: 34px;
+  object-fit: contain;
+}
+
+.sm-save-icon {
+  width: 23px;
+  height: 23px;
+  object-fit: contain;
+}
+
+.sm-save-active .sm-save-icon {
+  filter: drop-shadow(0 0 7px rgba(4, 197, 191, 0.55));
+}
+
+.sm-auth-cta {
+  margin-top: 28px;
+  padding: 22px;
+  border: 1px solid rgba(4, 197, 191, 0.28);
+  border-radius: 24px;
+  background: rgba(7, 28, 38, 0.92);
+  text-align: center;
+}
+
+.sm-auth-cta strong {
+  display: block;
+  margin-bottom: 16px;
+  color: #f4ffff;
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.sm-auth-cta > div {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.sm-auth-cta .sm-primary-button,
+.sm-auth-cta .sm-secondary-button {
+  width: auto;
+  min-width: 140px;
+  margin: 0;
+}
+
+@media (max-width: 620px) {
+  .sm-official-logo {
+    height: 29px;
+  }
+
+  .sm-auth-cta > div {
+    flex-direction: column;
+  }
+
+  .sm-auth-cta .sm-primary-button,
+  .sm-auth-cta .sm-secondary-button {
+    width: 100%;
+  }
+}
