@@ -25,6 +25,7 @@ def robots_txt(request):
             "Disallow: /calendar/",
             "Disallow: /artist/dashboard/",
             "Disallow: /chats/",
+            "Disallow: /healing/",
             "Disallow: /settings/",
             f"Sitemap: {settings.PUBLIC_SITE_URL}/sitemap.xml",
             f"Sitemap: {settings.PUBLIC_SITE_URL}/sitemap.txt",
@@ -79,5 +80,6 @@ urlpatterns = [
     path("posts/", include("posts.urls")),
     path("appointments/", include("appointments.urls")),
     path("style-match/", include("style_match.urls")),
+    path("healing/", include("healing.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
 ]

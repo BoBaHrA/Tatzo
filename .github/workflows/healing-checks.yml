@@ -1,0 +1,71 @@
+name: Healing checks
+
+on:
+  pull_request:
+    paths:
+      - "healing/**"
+      - "mytattooapp/settings.py"
+      - "mytattooapp/urls.py"
+      - "templates/base.html"
+      - ".github/workflows/healing-checks.yml"
+  workflow_dispatch:
+
+jobs:
+  healing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DEBUG: "True"
+      SECRET_KEY: "tatzo-healing-ci"
+      ALLOWED_HOSTS: "127.0.0.1,localhost,testserver"
+      USE_CONSOLE_EMAIL: "True"
+      USE_CLOUDINARY: "False"
+      TATZO_RATE_LIMIT_ENABLED: "False"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip && pip install -r requirements.txt
+
+      - name: Django system check
+        run: python manage.py check
+
+      - name: Verify migrations are committed
+        shell: bash
+        run: |
+          set +e
+          output=$(python manage.py makemigrations --check --dry-run --verbosity 3 2>&1)
+          status=$?
+          echo "$output"
+          if [ $status -ne 0 ]; then
+            compact=$(printf '%s' "$output" | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g; s/\n/%0A/g')
+            echo "::error file=healing/migrations/0001_initial.py::$compact"
+            exit $status
+          fi
+
+      - name: Run Healing tests
+        shell: bash
+        run: |
+          set +e
+          output=$(python manage.py test healing --verbosity 2 2>&1)
+          status=$?
+          echo "$output"
+          if [ $status -ne 0 ]; then
+            compact=$(printf '%s' "$output" | tail -c 12000 | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g; s/\n/%0A/g')
+            echo "::error file=healing/tests.py::$compact"
+            exit $status
+          fi
+
+      - name: Check JavaScript syntax
+        if: always()
+        run: |
+          node --check healing/static/healing/healing.js
+          node --check healing/static/healing/healing_bridge.js
