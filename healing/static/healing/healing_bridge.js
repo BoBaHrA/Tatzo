@@ -1,9 +1,20 @@
 (() => {
   "use strict";
 
+  const healingIconUrl = "/static/icons/healing.svg";
+
   function label() {
     const language = (document.documentElement.lang || "en").split("-")[0];
     return language === "ru" ? "Заживление" : language === "fr" ? "Cicatrisation" : "Healing";
+  }
+
+  function createHealingIcon(className = "healing-nav-icon") {
+    const icon = document.createElement("img");
+    icon.src = healingIconUrl;
+    icon.alt = "";
+    icon.className = className;
+    icon.setAttribute("aria-hidden", "true");
+    return icon;
   }
 
   function addNavigationLinks() {
@@ -15,12 +26,9 @@
       const link = document.createElement("a");
       link.href = "/healing/";
       if (window.location.pathname.startsWith("/healing/")) link.classList.add("active");
-      const icon = document.createElement("span");
-      icon.className = "healing-nav-heart";
-      icon.textContent = "♡";
       const text = document.createElement("span");
       text.textContent = label();
-      link.append(icon, text);
+      link.append(createHealingIcon(), text);
       item.appendChild(link);
       const calendarItem = Array.from(desktopMenu.children).find((row) => row.querySelector('a[href="/calendar/"]'));
       desktopMenu.insertBefore(item, calendarItem || null);
@@ -31,12 +39,9 @@
       const link = document.createElement("a");
       link.href = "/healing/";
       link.dataset.healingNav = "mobile";
-      const icon = document.createElement("span");
-      icon.className = "mobile-menu-emoji";
-      icon.textContent = "♡";
       const text = document.createElement("span");
       text.textContent = label();
-      link.append(icon, text);
+      link.append(createHealingIcon("healing-mobile-nav-icon"), text);
       mobileGrid.prepend(link);
     }
   }
@@ -59,8 +64,10 @@
         const context = document.createElement("a");
         context.id = "healing-chat-context";
         context.href = data.journey_url;
-        context.textContent = `♡ ${data.label}`;
-        context.style.cssText = "display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:10px 13px;border:1px solid rgba(4,197,191,.28);border-radius:14px;background:rgba(4,197,191,.08);color:#8df3ec;text-decoration:none;font-size:13px;font-weight:700";
+        context.className = "healing-chat-context-link";
+        const contextText = document.createElement("span");
+        contextText.textContent = data.label;
+        context.append(createHealingIcon("healing-chat-context-icon"), contextText);
         form.parentNode.insertBefore(context, form);
       }
       input.focus();
