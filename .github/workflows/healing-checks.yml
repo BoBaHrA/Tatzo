@@ -52,9 +52,20 @@ jobs:
           fi
 
       - name: Run Healing tests
-        run: python manage.py test healing --verbosity 2
+        shell: bash
+        run: |
+          set +e
+          output=$(python manage.py test healing --verbosity 2 2>&1)
+          status=$?
+          echo "$output"
+          if [ $status -ne 0 ]; then
+            compact=$(printf '%s' "$output" | tail -c 12000 | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g; s/\n/%0A/g')
+            echo "::error file=healing/tests.py::$compact"
+            exit $status
+          fi
 
       - name: Check JavaScript syntax
+        if: always()
         run: |
           node --check healing/static/healing/healing.js
           node --check healing/static/healing/healing_bridge.js
