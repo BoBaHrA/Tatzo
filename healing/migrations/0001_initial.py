@@ -59,11 +59,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="healingjourney",
-            index=models.Index(fields=["client", "status", "-started_on"], name="healing_hea_client__6dcc3d_idx"),
+            index=models.Index(fields=["client", "status", "-started_on"], name="healing_hea_client__e92473_idx"),
         ),
         migrations.AddIndex(
             model_name="healingjourney",
-            index=models.Index(fields=["artist", "status", "-started_on"], name="healing_hea_artist__278ef6_idx"),
+            index=models.Index(fields=["artist", "status", "-started_on"], name="healing_hea_artist__83182f_idx"),
         ),
         migrations.AddConstraint(
             model_name="healingcheckin",
@@ -71,7 +71,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="healingroutinecompletion",
-            index=models.Index(fields=["journey", "-date"], name="healing_hea_journey_61a8a4_idx"),
+            index=models.Index(fields=["journey", "-date"], name="healing_hea_journey_ac79be_idx"),
         ),
         migrations.AddConstraint(
             model_name="healingroutinecompletion",
