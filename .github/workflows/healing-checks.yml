@@ -24,10 +24,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -39,7 +39,17 @@ jobs:
         run: python manage.py check
 
       - name: Verify migrations are committed
-        run: python manage.py makemigrations --check --dry-run
+        shell: bash
+        run: |
+          set +e
+          output=$(python manage.py makemigrations --check --dry-run --verbosity 3 2>&1)
+          status=$?
+          echo "$output"
+          if [ $status -ne 0 ]; then
+            compact=$(printf '%s' "$output" | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g; s/\n/%0A/g')
+            echo "::error file=healing/migrations/0001_initial.py::$compact"
+            exit $status
+          fi
 
       - name: Run Healing tests
         run: python manage.py test healing --verbosity 2
