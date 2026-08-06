@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ copy.page_title }} | Tatzo{% endblock %}
+{% block meta_description %}{{ copy.page_subtitle }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'healing/healing.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+
+<main
+  class="healing-shell"
+  id="healing-app"
+  data-day-label="{{ copy.day }}"
+  {% if journey %}
+    data-task-url-template="{% url 'healing:toggle_task' journey.id '__slug__' %}"
+    data-routine-complete="{{ copy.routine_complete }}"
+    data-journey-status="{{ journey.status }}"
+  {% endif %}
+>
+  <section class="healing-page-head">
+    <div>
+      <p class="healing-eyebrow">{{ copy.page_eyebrow }}</p>
+      <h1>{% if is_artist_view %}{{ copy.artist_page_title }}{% else %}{{ copy.page_title }}{% endif %}</h1>
+      <p>{{ copy.page_subtitle }}</p>
+    </div>
+    {% if journey %}
+      <span class="healing-updated">{{ copy.updated }} · {{ journey.updated_at|date:"d.m.Y H:i" }}</span>
+    {% endif %}
+  </section>
+
+  {% if journeys %}
+    <nav class="healing-journey-switcher" aria-label="{{ copy.select_journey }}">
+      <strong>{{ copy.journeys_title }}</strong>
+      <div>
+        {% for item in journeys %}
+          <a href="{% url 'healing:dashboard' %}?journey={{ item.id }}" class="{% if journey.id == item.id %}is-active{% endif %}">
+            <span>{{ item.title }}</span>
+            <small>{{ copy.day }} {{ item.current_day }}</small>
+          </a>
+        {% endfor %}
+      </div>
+    </nav>
+  {% endif %}
+
+  {% if not journey %}
+    <section class="healing-empty glass-panel">
+      <div class="healing-empty-icon">♡</div>
+      <div>
+        <p class="healing-eyebrow">{{ copy.page_eyebrow }}</p>
+        <h2>{{ copy.empty_title }}</h2>
+        <p>{{ copy.empty_copy }}</p>
+      </div>
+      {% if eligible_appointments %}
+        <div class="healing-eligible-list">
+          {% for appointment in eligible_appointments %}
+            <article>
+              <div>
+                <strong>{{ appointment.localized_styles|default:appointment.artist.username }}</strong>
+                <span>{{ appointment.date }} · {{ appointment.localized_placement|default:"Tattoo" }}</span>
+              </div>
+              <form method="post" action="{% url 'healing:start_journey' appointment.id %}">
+                {% csrf_token %}
+                <button type="submit">{{ copy.start_tracker }}</button>
+              </form>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="healing-muted">{{ copy.no_appointments }}</p>
+      {% endif %}
+    </section>
+  {% else %}
+    {{ timeline_data|json_script:"healing-timeline-data" }}
+    {{ checkins_data|json_script:"healing-checkins-data" }}
+
+    <section class="healing-layout">
+      <aside class="healing-left-column">
+        <article class="healing-hero glass-panel {% if latest_checkin %}has-photo{% endif %}">
+          {% if latest_checkin %}
+            <img src="{{ latest_checkin.private_url }}" alt="{{ journey.title }}" class="healing-hero-image">
+          {% endif %}
+          <div class="healing-hero-shade"></div>
+          <div class="healing-hero-content">
+            <div class="healing-card-head">
+              <div>
+                <p class="healing-eyebrow">{{ copy.current_stage }}</p>
+                <h2>{{ copy.day }} {{ journey.current_day }}</h2>
+              </div>
+              <span class="healing-status is-{{ journey.status }}">
+                {% if journey.status == "healed" %}{{ copy.healed }}{% else %}{{ copy.active }}{% endif %}
+              </span>
+            </div>
+            <div class="healing-hero-bottom">
+              <div>
+                <strong>{{ journey.title }}</strong>
+                <span>{{ journey.appointment.date }} · @{{ journey.artist.username }}</span>
+              </div>
+              <div class="healing-progress" style="--progress: {{ journey.tracking_percent }}">
+                <svg viewBox="0 0 120 120" aria-hidden="true">
+                  <circle cx="60" cy="60" r="51"></circle>
+                  <circle class="value" cx="60" cy="60" r="51"></circle>
+                </svg>
+                <div><b>{{ journey.current_day }}</b><span>/ 30</span></div>
+              </div>
+            </div>
+            <small>{{ copy.tracking_window }}</small>
+          </div>
+        </article>
+
+        <article class="glass-panel healing-timeline-panel">
+          <div class="healing-section-head">
+            <div>
+              <p class="healing-eyebrow">{{ copy.timeline_eyebrow }}</p>
+              <h2>{{ copy.timeline_title }}</h2>
+            </div>
+            <span class="healing-icon-chip">⌁</span>
+          </div>
+          <div class="healing-timeline-tabs" role="tablist">
+            <button type="button" data-timeline-day="1" class="{% if journey.current_day < 3 %}is-active{% endif %}">{{ copy.day }} 1</button>
+            <button type="button" data-timeline-day="3" class="{% if journey.current_day >= 3 and journey.current_day < 7 %}is-active{% endif %}">{{ copy.day }} 3</button>
+            <button type="button" data-timeline-day="7" class="{% if journey.current_day >= 7 and journey.current_day < 14 %}is-active{% endif %}">{{ copy.day }} 7</button>
+            <button type="button" data-timeline-day="14" class="{% if journey.current_day >= 14 and journey.current_day < 30 %}is-active{% endif %}">{{ copy.day }} 14</button>
+            <button type="button" data-timeline-day="30" class="{% if journey.current_day >= 30 and journey.status != 'healed' %}is-active{% endif %}">{{ copy.day }} 30</button>
+            <button type="button" data-timeline-day="healed" class="{% if journey.status == 'healed' %}is-active{% endif %}">✓</button>
+          </div>
+          <div class="healing-timeline-copy">
+            <div><i></i><span id="healing-phase">{{ copy.phase_settling }}</span></div>
+            <h3 id="healing-timeline-heading"></h3>
+            <p id="healing-timeline-copy"></p>
+            <div id="healing-timeline-tags"></div>
+          </div>
+        </article>
+
+        <article class="glass-panel healing-routine">
+          <div class="healing-section-head">
+            <div>
+              <p class="healing-eyebrow healing-pink">{{ copy.today_eyebrow }}</p>
+              <h2>{{ copy.today_title }}</h2>
+            </div>
+            <strong id="healing-routine-count">{{ completed_tasks|length }}/{{ tasks|length }}</strong>
+          </div>
+          <div class="healing-task-list">
+            {% for slug, label in tasks %}
+              <button
+                type="button"
+                class="healing-task {% if slug in completed_tasks %}is-complete{% endif %}"
+                data-healing-task="{{ slug }}"
+                {% if is_artist_view or journey.status == "healed" %}disabled{% endif %}
+              >
+                <span class="healing-task-check">✓</span><span>{{ label }}</span>
+              </button>
+            {% endfor %}
+          </div>
+          {% if not is_artist_view and journey.status == "active" %}
+            <button type="button" class="healing-primary-button" id="healing-complete-routine">{{ copy.mark_remaining }}</button>
+          {% endif %}
+        </article>
+      </aside>
+
+      <section class="healing-main-column">
+        <div class="healing-top-grid">
+          <article class="glass-panel healing-photo-panel">
+            <div class="healing-section-head">
+              <div>
+                <p class="healing-eyebrow">{{ copy.photo_eyebrow }}</p>
+                <h2>{{ copy.photo_title }}</h2>
+              </div>
+              {% if not is_artist_view and journey.status == "active" %}
+                <label class="healing-upload-trigger" for="healing-photo-input">⌑ <span>{{ copy.upload_photo }}</span></label>
+              {% endif %}
+            </div>
+
+            {% if checkins %}
+              <div class="healing-photo-stage {% if first_checkin.id != latest_checkin.id %}is-comparison{% endif %}">
+                <img id="healing-before-photo" src="{{ first_checkin.private_url }}" alt="{{ copy.first_photo }}">
+                <div class="healing-after-wrap" id="healing-after-wrap">
+                  <img id="healing-after-photo" src="{{ latest_checkin.private_url }}" alt="{{ copy.latest_photo }}">
+                </div>
+                {% if first_checkin.id != latest_checkin.id %}
+                  <div class="healing-comparison-control" id="healing-comparison-control">↔</div>
+                  <input id="healing-comparison-range" type="range" min="0" max="100" value="54" aria-label="Compare check-in photos">
+                {% endif %}
+                <span class="healing-photo-label is-first">{{ copy.day }} {{ first_checkin.day_number }}</span>
+                <span class="healing-photo-label is-latest" id="healing-latest-label">{{ copy.day }} {{ latest_checkin.day_number }}</span>
+              </div>
+              <div class="healing-photo-tabs" id="healing-photo-tabs">
+                {% for checkin in checkins %}
+                  <button type="button" data-photo-index="{{ forloop.counter0 }}" class="{% if forloop.last %}is-active{% endif %}">
+                    <img src="{{ checkin.private_url }}" alt="{{ copy.day }} {{ checkin.day_number }}">
+                    <span>{{ copy.day }} {{ checkin.day_number }}</span>
+                  </button>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="healing-photo-empty"><span>⌑</span><p>{{ copy.no_photos }}</p></div>
+            {% endif %}
+
+            {% if not is_artist_view and journey.status == "active" %}
+              <form method="post" enctype="multipart/form-data" action="{% url 'healing:upload_checkin' journey.id %}" class="healing-upload-form" id="healing-upload-form">
+                {% csrf_token %}
+                <input id="healing-photo-input" type="file" name="photo" accept="image/jpeg,image/png,image/webp" required>
+                <textarea name="note" rows="2" maxlength="1000" placeholder="{{ copy.note_placeholder }}"></textarea>
+                <div class="healing-upload-footer">
+                  <span id="healing-upload-name">{{ copy.upload_photo }}</span>
+                  <button type="submit">{{ copy.save_photo }}</button>
+                </div>
+              </form>
+            {% endif %}
+          </article>
+
+          <div class="healing-guidance-stack">
+            <article class="glass-panel healing-care-card">
+              <div class="healing-section-head">
+                <div><p class="healing-eyebrow">{{ copy.care_eyebrow }}</p><h2>{{ copy.care_title }}</h2></div>
+                <span class="healing-icon-chip">♡</span>
+              </div>
+              <p>{{ copy.care_copy }}</p>
+              <div class="healing-care-tip">✓ {{ copy.care_tip }}</div>
+            </article>
+
+            <article class="glass-panel healing-signals-card">
+              <div class="healing-section-head">
+                <div><p class="healing-eyebrow healing-yellow">{{ copy.signals_eyebrow }}</p><h2>{{ copy.signals_title }}</h2></div>
+                <span class="healing-icon-chip is-warning">!</span>
+              </div>
+              <div><span>↗</span><p>{{ copy.signals_one }}</p></div>
+              <div><span>+</span><p>{{ copy.signals_two }}</p></div>
+            </article>
+          </div>
+        </div>
+
+        <section class="healing-stats-section">
+          <div class="healing-section-head">
+            <div><p class="healing-eyebrow">{{ copy.stats_eyebrow }}</p><h2>{{ copy.stats_title }}</h2></div><span>⌁</span>
+          </div>
+          <div class="healing-stats-grid">
+            <article><span>◌</span><strong>{{ journey.current_day }}</strong><small>{{ copy.current_day }}</small></article>
+            <article><span>▦</span><strong>{{ journey.days_remaining }}</strong><small>{{ copy.days_remaining }}</small></article>
+            <article><span>⌑</span><strong>{{ checkins|length }}</strong><small>{{ copy.checkins }}</small></article>
+            <article><span>♨</span><strong>{{ routine_streak }}</strong><small>{{ copy.routine_streak }}</small></article>
+            <article><span>◡</span><strong>{{ artist_reply_count }}</strong><small>{{ copy.artist_responses }}</small></article>
+          </div>
+        </section>
+
+        <div class="healing-lower-grid">
+          <article class="glass-panel healing-person-card">
+            <div class="healing-section-head">
+              <div>
+                <p class="healing-eyebrow">{% if is_artist_view %}{{ copy.client_eyebrow }}{% else %}{{ copy.artist_eyebrow }}{% endif %}</p>
+                <h2>{% if is_artist_view %}{{ copy.client_title }}{% else %}{{ copy.artist_title }}{% endif %}</h2>
+              </div><i></i>
+            </div>
+            <div class="healing-person">
+              <div class="healing-person-avatar">
+                {% if other_user.profile.profile_image %}<img src="{{ other_user.profile.profile_image.url }}" alt="{{ other_user.username }}">{% else %}<span>{{ other_user.username|first|upper }}</span>{% endif %}
+              </div>
+              <div>
+                <h3>{{ other_user.username }}</h3><small>@{{ other_user.username }}</small>
+                {% if latest_artist_message %}<blockquote>“{{ latest_artist_message.content|truncatechars:180 }}”</blockquote>{% else %}<p>{{ copy.no_artist_message }}</p>{% endif %}
+              </div>
+            </div>
+            <a href="{{ chat_url }}" class="healing-chat-button">➤ {% if is_artist_view %}{{ copy.message_client }}{% else %}{{ copy.message_artist }}{% endif %}</a>
+          </article>
+
+          <article class="glass-panel healing-achievements">
+            <div class="healing-section-head">
+              <div><p class="healing-eyebrow healing-yellow">{{ copy.achievements_eyebrow }}</p><h2>{{ copy.achievements_title }}</h2></div><span>♙</span>
+            </div>
+            <div class="healing-achievement-grid">
+              <div class="{% if achievement_first %}is-unlocked{% endif %}"><span>⌑</span><strong>{{ copy.first_checkin }}</strong><small>{% if achievement_first %}{{ copy.unlocked }}{% else %}{{ copy.locked }}{% endif %}</small></div>
+              <div class="{% if achievement_streak %}is-unlocked is-gold{% endif %}"><span>♨</span><strong>{{ copy.seven_day_streak }}</strong><small>{% if achievement_streak %}{{ copy.unlocked }}{% else %}{{ copy.locked }}{% endif %}</small></div>
+              <div class="{% if achievement_three %}is-unlocked{% endif %}"><span>♡</span><strong>{{ copy.three_checkins }}</strong><small>{% if achievement_three %}{{ copy.unlocked }}{% else %}{{ copy.locked }}{% endif %}</small></div>
+              <div class="{% if achievement_healed %}is-unlocked is-gold{% endif %}"><span>♕</span><strong>{{ copy.fully_healed }}</strong><small>{% if achievement_healed %}{{ copy.unlocked }}{% else %}{{ copy.locked }}{% endif %}</small></div>
+            </div>
+            {% if not is_artist_view and journey.status == "active" %}
+              <form method="post" action="{% url 'healing:mark_healed' journey.id %}">{% csrf_token %}<button type="submit" class="healing-secondary-button">{{ copy.mark_healed }}</button></form>
+            {% endif %}
+          </article>
+        </div>
+      </section>
+    </section>
+  {% endif %}
+</main>
+{% endblock %}
+
+{% block extra_js %}<script src="{% static 'healing/healing.js' %}"></script>{% endblock %}
