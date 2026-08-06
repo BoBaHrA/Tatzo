@@ -34,6 +34,7 @@ class HealingFoundationTests(TestCase):
             styles=["Fine Line"],
             placement="Left forearm",
         )
+        self.journey = HealingJourney.objects.get(appointment=self.appointment)
 
     def test_client_can_start_real_journey_from_completed_tattoo(self):
         self.client.force_login(self.client_user)
@@ -58,23 +59,19 @@ class HealingFoundationTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_daily_task_is_toggled_and_scoped_to_client(self):
-        journey = HealingJourney.objects.create(
-            appointment=self.appointment,
-            client=self.client_user,
-            artist=self.artist,
-            title="Fine Line",
-            started_on=timezone.localdate(),
-        )
         self.client.force_login(self.client_user)
         url = reverse(
             "healing:toggle_task",
-            kwargs={"journey_id": journey.pk, "task_slug": HealingRoutineCompletion.TASK_WASH},
+            kwargs={
+                "journey_id": self.journey.pk,
+                "task_slug": HealingRoutineCompletion.TASK_WASH,
+            },
         )
         response = self.client.post(url)
         self.assertTrue(response.json()["completed"])
         self.assertTrue(
             HealingRoutineCompletion.objects.filter(
-                journey=journey,
+                journey=self.journey,
                 task_slug=HealingRoutineCompletion.TASK_WASH,
             ).exists()
         )
@@ -82,15 +79,8 @@ class HealingFoundationTests(TestCase):
         self.assertFalse(response.json()["completed"])
 
     def test_private_checkin_photo_is_visible_only_to_participants(self):
-        journey = HealingJourney.objects.create(
-            appointment=self.appointment,
-            client=self.client_user,
-            artist=self.artist,
-            title="Fine Line",
-            started_on=timezone.localdate(),
-        )
         checkin = HealingCheckIn.objects.create(
-            journey=journey,
+            journey=self.journey,
             day_number=1,
             photo=SimpleUploadedFile(
                 "checkin.png",
@@ -107,32 +97,24 @@ class HealingFoundationTests(TestCase):
         self.assertEqual(self.client.get(url).status_code, 404)
 
     def test_chat_link_uses_existing_chat_core_and_returns_context_draft(self):
-        journey = HealingJourney.objects.create(
-            appointment=self.appointment,
-            client=self.client_user,
-            artist=self.artist,
-            title="Fine Line · Left forearm",
-            started_on=timezone.localdate(),
-        )
         self.client.force_login(self.client_user)
-        response = self.client.get(reverse("healing:open_chat", kwargs={"journey_id": journey.pk}))
+        response = self.client.get(
+            reverse("healing:open_chat", kwargs={"journey_id": self.journey.pk})
+        )
         thread = ChatThread.objects.get()
         self.assertIn(reverse("chat_thread", kwargs={"thread_id": thread.pk}), response.url)
-        self.assertIn(str(journey.pk), response.url)
+        self.assertIn(str(self.journey.pk), response.url)
 
-        draft = self.client.get(reverse("healing:chat_draft", kwargs={"journey_id": journey.pk})).json()
+        draft = self.client.get(
+            reverse("healing:chat_draft", kwargs={"journey_id": self.journey.pk})
+        ).json()
         self.assertIn("Fine Line", draft["draft"])
 
     def test_dashboard_contains_no_fake_ai_assistant(self):
-        journey = HealingJourney.objects.create(
-            appointment=self.appointment,
-            client=self.client_user,
-            artist=self.artist,
-            title="Fine Line",
-            started_on=timezone.localdate(),
-        )
         self.client.force_login(self.client_user)
-        response = self.client.get(f"{reverse('healing:dashboard')}?journey={journey.pk}")
+        response = self.client.get(
+            f"{reverse('healing:dashboard')}?journey={self.journey.pk}"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "Healing Assistant")
         self.assertNotContains(response, "confidence")
