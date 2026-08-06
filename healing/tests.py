@@ -13,7 +13,13 @@ from users.models import ChatThread
 from .models import HealingCheckIn, HealingJourney, HealingRoutineCompletion
 
 
-@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+TEST_STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp(), STORAGES=TEST_STORAGES)
 class HealingFoundationTests(TestCase):
     def setUp(self):
         self.client_user = User.objects.create_user(username="client", password="password123")
