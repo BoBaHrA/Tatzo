@@ -25,21 +25,9 @@ class HealingJourney(models.Model):
     )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    appointment = models.OneToOneField(
-        Appointment,
-        on_delete=models.CASCADE,
-        related_name="healing_journey",
-    )
-    client = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="healing_journeys_as_client",
-    )
-    artist = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="healing_journeys_as_artist",
-    )
+    appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE, related_name="healing_journey")
+    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="healing_journeys_as_client")
+    artist = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="healing_journeys_as_artist")
     title = models.CharField(max_length=160, blank=True)
     started_on = models.DateField()
     status = models.CharField(max_length=16, choices=STATUS_CHOICES, default=STATUS_ACTIVE)
@@ -77,6 +65,10 @@ class HealingJourney(models.Model):
         return min(100, round((self.current_day / 30) * 100))
 
     @property
+    def tracking_offset(self):
+        return round(320.5 * (1 - self.tracking_percent / 100), 2)
+
+    @property
     def days_remaining(self):
         return max(0, 30 - self.current_day)
 
@@ -87,16 +79,9 @@ class HealingJourney(models.Model):
 
 
 class HealingCheckIn(models.Model):
-    journey = models.ForeignKey(
-        HealingJourney,
-        on_delete=models.CASCADE,
-        related_name="checkins",
-    )
+    journey = models.ForeignKey(HealingJourney, on_delete=models.CASCADE, related_name="checkins")
     day_number = models.PositiveSmallIntegerField()
-    photo = models.ImageField(
-        upload_to=healing_checkin_upload_path,
-        storage=private_media_storage,
-    )
+    photo = models.ImageField(upload_to=healing_checkin_upload_path, storage=private_media_storage)
     note = models.CharField(max_length=1000, blank=True)
     symptoms = models.JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -104,12 +89,7 @@ class HealingCheckIn(models.Model):
 
     class Meta:
         ordering = ("day_number", "created_at")
-        constraints = [
-            models.UniqueConstraint(
-                fields=("journey", "day_number"),
-                name="unique_healing_checkin_day",
-            ),
-        ]
+        constraints = [models.UniqueConstraint(fields=("journey", "day_number"), name="unique_healing_checkin_day")]
 
     def __str__(self):
         return f"{self.journey_id} — day {self.day_number}"
@@ -132,23 +112,14 @@ class HealingRoutineCompletion(models.Model):
     )
     TASK_SLUGS = {choice[0] for choice in TASK_CHOICES}
 
-    journey = models.ForeignKey(
-        HealingJourney,
-        on_delete=models.CASCADE,
-        related_name="routine_completions",
-    )
+    journey = models.ForeignKey(HealingJourney, on_delete=models.CASCADE, related_name="routine_completions")
     date = models.DateField(default=timezone.localdate)
     task_slug = models.CharField(max_length=24, choices=TASK_CHOICES)
     completed_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ("-date", "task_slug")
-        constraints = [
-            models.UniqueConstraint(
-                fields=("journey", "date", "task_slug"),
-                name="unique_healing_routine_task_day",
-            ),
-        ]
+        constraints = [models.UniqueConstraint(fields=("journey", "date", "task_slug"), name="unique_healing_routine_task_day")]
         indexes = [models.Index(fields=("journey", "-date"))]
 
     def __str__(self):
