@@ -10,6 +10,10 @@ on:
       - ".github/workflows/healing-checks.yml"
   workflow_dispatch:
 
+concurrency:
+  group: healing-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   healing:
     runs-on: ubuntu-latest
