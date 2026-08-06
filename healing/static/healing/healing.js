@@ -3,6 +3,13 @@
   const app = document.getElementById("healing-app");
   if (!app) return;
 
+  const progress = document.querySelector(".healing-progress");
+  const progressCircle = progress?.querySelector("circle.value");
+  if (progress && progressCircle) {
+    const percent = Number.parseFloat(progress.style.getPropertyValue("--progress")) || 0;
+    progressCircle.style.strokeDashoffset = String(320.5 * (1 - Math.min(100, percent) / 100));
+  }
+
   const csrfToken = () => {
     const token = document.cookie.split(";").map((item) => item.trim()).find((item) => item.startsWith("csrftoken="));
     return token ? decodeURIComponent(token.split("=").slice(1).join("=")) : "";
