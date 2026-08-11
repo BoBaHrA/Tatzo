@@ -1,0 +1,1 @@
+Temporary implementation note for PR review: the Healing upload hotfix aligns the client/server image limit with Cloudinary's 10 MB Free-plan image limit, prevents storage exceptions from returning HTTP 500, preserves existing same-day check-ins until a replacement saves successfully, and adds multi-day upload regression coverage. This file can be removed before merge if desired.
