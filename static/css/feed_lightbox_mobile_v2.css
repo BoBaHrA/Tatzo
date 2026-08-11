@@ -1,0 +1,146 @@
+@media (max-width: 900px) {
+  .media-lightbox {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    padding: 0 !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    background: rgba(0, 4, 9, 0.97) !important;
+    z-index: 200000 !important;
+    overflow: hidden !important;
+  }
+
+  .media-lightbox.open {
+    display: flex !important;
+  }
+
+  .media-lightbox .lb-inner {
+    position: relative !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 100vw !important;
+    max-height: 100dvh !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #000814 !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+  }
+
+  .media-lightbox .lb-body {
+    position: absolute !important;
+    inset: 0 !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    padding:
+      calc(62px + env(safe-area-inset-top))
+      14px
+      calc(28px + env(safe-area-inset-bottom)) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+  }
+
+  .media-lightbox .lb-body::before {
+    inset: -28px !important;
+    transform: scale(1.06) !important;
+    filter: blur(22px) brightness(.52) saturate(.9) !important;
+    opacity: .55 !important;
+  }
+
+  .media-lightbox .lb-body::after {
+    background: rgba(0, 7, 13, .46) !important;
+  }
+
+  .media-lightbox .lb-body > img,
+  .media-lightbox .lb-body > video,
+  .media-lightbox img,
+  .media-lightbox video {
+    position: relative !important;
+    z-index: 2 !important;
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: calc(100vw - 28px) !important;
+    max-height: calc(100dvh - 118px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    margin: auto !important;
+    background: transparent !important;
+    border-radius: 12px !important;
+  }
+
+  .media-lightbox .lb-close {
+    position: fixed !important;
+    top: calc(10px + env(safe-area-inset-top)) !important;
+    right: 10px !important;
+    width: 42px !important;
+    height: 42px !important;
+    display: grid !important;
+    place-items: center !important;
+    border-radius: 50% !important;
+    background: rgba(0, 9, 17, .82) !important;
+    border: 1px solid rgba(255, 255, 255, .2) !important;
+    color: #fff !important;
+    box-shadow: 0 8px 26px rgba(0, 0, 0, .36) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    z-index: 200010 !important;
+  }
+
+  .media-lightbox .lb-nav {
+    position: fixed !important;
+    top: 50% !important;
+    width: 40px !important;
+    height: 40px !important;
+    display: grid !important;
+    place-items: center !important;
+    border-radius: 50% !important;
+    background: rgba(0, 9, 17, .58) !important;
+    color: #fff !important;
+    font-size: 24px !important;
+    transform: translateY(-50%) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    z-index: 200009 !important;
+  }
+
+  .media-lightbox .lb-prev {
+    left: 10px !important;
+  }
+
+  .media-lightbox .lb-next {
+    right: 10px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .media-lightbox .lb-body {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .media-lightbox .lb-body > img,
+  .media-lightbox .lb-body > video,
+  .media-lightbox img,
+  .media-lightbox video {
+    max-width: calc(100vw - 16px) !important;
+    border-radius: 10px !important;
+  }
+
+  .media-lightbox .lb-nav {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 22px !important;
+  }
+}
