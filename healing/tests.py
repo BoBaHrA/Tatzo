@@ -1,5 +1,6 @@
 import tempfile
-from datetime import time
+from datetime import date, time
+from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -95,6 +96,63 @@ class HealingFoundationTests(TestCase):
         outsider = User.objects.create_user(username="outsider-photo", password="password123")
         self.client.force_login(outsider)
         self.assertEqual(self.client.get(url).status_code, 404)
+
+    def test_client_can_upload_checkins_on_different_healing_days(self):
+        self.journey.started_on = date(2026, 8, 1)
+        self.journey.save(update_fields=("started_on", "updated_at"))
+        self.client.force_login(self.client_user)
+        url = reverse("healing:upload_checkin", kwargs={"journey_id": self.journey.pk})
+
+        with patch("healing.models.timezone.localdate", return_value=date(2026, 8, 7)):
+            response = self.client.post(
+                url,
+                {
+                    "photo": SimpleUploadedFile(
+                        "day-7.jpg",
+                        b"day-seven-photo",
+                        content_type="image/jpeg",
+                    )
+                },
+            )
+        self.assertEqual(response.status_code, 302)
+
+        with patch("healing.models.timezone.localdate", return_value=date(2026, 8, 12)):
+            response = self.client.post(
+                url,
+                {
+                    "photo": SimpleUploadedFile(
+                        "day-12.jpg",
+                        b"day-twelve-photo",
+                        content_type="image/jpeg",
+                    )
+                },
+            )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            list(
+                HealingCheckIn.objects.filter(journey=self.journey)
+                .order_by("day_number")
+                .values_list("day_number", flat=True)
+            ),
+            [7, 12],
+        )
+
+    def test_storage_failure_returns_to_healing_instead_of_500(self):
+        self.client.force_login(self.client_user)
+        url = reverse("healing:upload_checkin", kwargs={"journey_id": self.journey.pk})
+        with patch("healing.views.HealingCheckIn.save", side_effect=RuntimeError("storage unavailable")):
+            response = self.client.post(
+                url,
+                {
+                    "photo": SimpleUploadedFile(
+                        "checkin.jpg",
+                        b"photo",
+                        content_type="image/jpeg",
+                    )
+                },
+            )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(str(self.journey.pk), response.url)
 
     def test_chat_link_uses_existing_chat_core_and_returns_context_draft(self):
         self.client.force_login(self.client_user)

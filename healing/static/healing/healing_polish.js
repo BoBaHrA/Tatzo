@@ -2,6 +2,7 @@
   "use strict";
 
   const SVG_NS = "http://www.w3.org/2000/svg";
+  const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
   const ICONS = {
     activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
     "heart-pulse": '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l3.35-3.35"/><path d="M3.22 12H9l2-4 4 8 2-4h3.78"/>',
@@ -14,6 +15,11 @@
     users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
     send: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
   };
+
+  function language() {
+    const value = (document.documentElement.lang || "en").split("-")[0];
+    return ["en", "fr", "ru"].includes(value) ? value : "en";
+  }
 
   function icon(name, className = "healing-ui-icon") {
     const svg = document.createElementNS(SVG_NS, "svg");
@@ -50,7 +56,8 @@
       ["flame", "is-gold"],
       ["message-circle", "is-green"],
     ];
-    section.querySelectorAll(".healing-stats-grid article").forEach((card, index) => {
+    const cards = Array.from(section.querySelectorAll(".healing-stats-grid article"));
+    cards.forEach((card, index) => {
       const current = card.firstElementChild;
       const [name, tone] = definitions[index] || definitions[0];
       const holder = document.createElement("span");
@@ -59,6 +66,15 @@
       if (current) current.replaceWith(holder);
       else card.prepend(holder);
     });
+
+    const remainingLabel = cards[1]?.querySelector("small");
+    if (remainingLabel) {
+      remainingLabel.textContent = {
+        en: "Days remaining",
+        fr: "Jours restants",
+        ru: "Дней осталось",
+      }[language()];
+    }
   }
 
   function decorateAchievements() {
@@ -93,6 +109,24 @@
       label.textContent = text;
       button.replaceChildren(icon("send", "healing-ui-icon healing-send-icon"), label);
     }
+  }
+
+  function protectPhotoUpload() {
+    const input = document.getElementById("healing-photo-input");
+    if (!input) return;
+    input.addEventListener("change", () => {
+      const file = input.files?.[0];
+      if (!file || file.size <= MAX_PHOTO_BYTES) return;
+      const message = {
+        en: "This photo is larger than 10 MB. Please choose a smaller image.",
+        fr: "Cette photo dépasse 10 Mo. Choisissez une image plus légère.",
+        ru: "Это фото больше 10 МБ. Выберите изображение меньшего размера.",
+      }[language()];
+      input.value = "";
+      const filename = document.getElementById("healing-upload-name");
+      if (filename) filename.textContent = message;
+      window.alert(message);
+    });
   }
 
   function journeyId() {
@@ -199,6 +233,7 @@
     decorateStats();
     decorateAchievements();
     enhanceArtistCard();
+    protectPhotoUpload();
     addCommunity();
   }
 
