@@ -1,3 +1,4 @@
+import logging
 import mimetypes
 from datetime import timedelta
 from pathlib import Path
@@ -18,13 +19,46 @@ from .copy import get_copy
 from .models import HealingCheckIn, HealingJourney, HealingRoutineCompletion
 
 
+logger = logging.getLogger(__name__)
+
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 ALLOWED_IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
-MAX_IMAGE_SIZE = 12 * 1024 * 1024
+# Cloudinary Free currently caps image uploads at 10 MB. Keep our validation
+# at the same boundary so an accepted Tatzo upload cannot be rejected solely
+# because it exceeded the storage plan limit.
+MAX_IMAGE_SIZE = 10 * 1024 * 1024
+
+PHOTO_UPLOAD_COPY = {
+    "en": {
+        "invalid": "Please upload a JPG, PNG or WebP image up to 10 MB.",
+        "failed": "We could not save this photo. Please try again with another image or retry in a moment.",
+    },
+    "fr": {
+        "invalid": "Ajoutez une image JPG, PNG ou WebP de 10 Mo maximum.",
+        "failed": "Nous n'avons pas pu enregistrer cette photo. Réessayez avec une autre image ou dans un instant.",
+    },
+    "ru": {
+        "invalid": "Загрузите JPG, PNG или WebP размером до 10 МБ.",
+        "failed": "Не удалось сохранить фото. Попробуйте ещё раз через минуту или выберите другое изображение.",
+    },
+}
 
 
 def _copy(request):
     return get_copy(getattr(request, "LANGUAGE_CODE", "en"))
+
+
+def _language(request):
+    language = (getattr(request, "LANGUAGE_CODE", "en") or "en").split("-")[0]
+    return language if language in PHOTO_UPLOAD_COPY else "en"
+
+
+def _photo_message(request, key):
+    return PHOTO_UPLOAD_COPY[_language(request)][key]
+
+
+def _journey_redirect(journey):
+    return f"{reverse('healing:dashboard')}?journey={journey.pk}"
 
 
 def _journeys_for_user(user):
@@ -192,7 +226,7 @@ def start_journey(request, appointment_id):
         },
     )
     messages.success(request, copy["journey_started"])
-    return redirect(f"{reverse('healing:dashboard')}?journey={journey.pk}")
+    return redirect(_journey_redirect(journey))
 
 
 @login_required
@@ -212,25 +246,59 @@ def upload_checkin(request, journey_id):
         or suffix not in ALLOWED_IMAGE_SUFFIXES
         or (content_type and content_type not in ALLOWED_IMAGE_TYPES)
     ):
-        messages.error(request, copy["invalid_photo"])
-        return redirect(f"{reverse('healing:dashboard')}?journey={journey.pk}")
+        messages.error(request, _photo_message(request, "invalid"))
+        return redirect(_journey_redirect(journey))
 
     day_number = journey.current_day
-    checkin, created = HealingCheckIn.objects.get_or_create(
+    note = (request.POST.get("note") or "").strip()[:1000]
+    symptoms = request.POST.getlist("symptoms")[:12]
+
+    # Save the new object/file first. For a same-day replacement the previous
+    # private asset is only deleted after the new file and database row have
+    # been saved successfully, so a storage failure cannot destroy the user's
+    # existing check-in.
+    checkin = HealingCheckIn.objects.filter(
         journey=journey,
         day_number=day_number,
-        defaults={"photo": photo},
-    )
-    if not created:
-        if checkin.photo:
-            checkin.photo.delete(save=False)
-        checkin.photo = photo
-    checkin.note = (request.POST.get("note") or "").strip()[:1000]
-    checkin.symptoms = request.POST.getlist("symptoms")[:12]
-    checkin.save()
+    ).first()
+    old_photo_name = checkin.photo.name if checkin and checkin.photo else ""
+    if checkin is None:
+        checkin = HealingCheckIn(journey=journey, day_number=day_number)
+
+    checkin.photo = photo
+    checkin.note = note
+    checkin.symptoms = symptoms
+
+    try:
+        checkin.save()
+    except Exception:
+        logger.exception(
+            "Healing photo upload failed",
+            extra={
+                "journey_id": str(journey.pk),
+                "day_number": day_number,
+                "user_id": request.user.pk,
+                "photo_size": getattr(photo, "size", None),
+                "photo_suffix": suffix,
+            },
+        )
+        messages.error(request, _photo_message(request, "failed"))
+        return redirect(_journey_redirect(journey))
+
+    if old_photo_name and old_photo_name != checkin.photo.name:
+        try:
+            checkin.photo.storage.delete(old_photo_name)
+        except Exception:
+            # The new check-in is already safe and usable. A stale private
+            # object is preferable to failing the request or losing the new one.
+            logger.warning(
+                "Could not remove replaced Healing photo",
+                exc_info=True,
+                extra={"journey_id": str(journey.pk), "day_number": day_number},
+            )
 
     messages.success(request, copy["photo_saved"])
-    return redirect(f"{reverse('healing:dashboard')}?journey={journey.pk}")
+    return redirect(_journey_redirect(journey))
 
 
 @login_required
@@ -276,7 +344,7 @@ def mark_healed(request, journey_id):
         raise Http404
     journey.mark_healed()
     messages.success(request, copy["journey_healed"])
-    return redirect(f"{reverse('healing:dashboard')}?journey={journey.pk}")
+    return redirect(_journey_redirect(journey))
 
 
 @login_required
