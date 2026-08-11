@@ -1,0 +1,503 @@
+@media (max-width: 760px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .healing-shell {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    padding: 76px 8px calc(142px + env(safe-area-inset-bottom));
+  }
+
+  .healing-page-head {
+    margin: 0 2px 14px;
+    gap: 6px;
+  }
+
+  .healing-page-head h1 {
+    margin: 3px 0 5px;
+    font-size: clamp(25px, 7.2vw, 30px);
+    line-height: 1.06;
+  }
+
+  .healing-page-head > div > p:last-child {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .healing-eyebrow {
+    font-size: 9px;
+    letter-spacing: .13em;
+  }
+
+  .healing-journey-switcher {
+    margin: 0 2px 12px;
+  }
+
+  .healing-journey-switcher > strong {
+    margin-bottom: 7px;
+    font-size: 10px;
+  }
+
+  .healing-journey-switcher > div {
+    gap: 7px;
+    padding-bottom: 2px;
+  }
+
+  .healing-journey-switcher a {
+    min-width: min(72vw, 250px);
+    padding: 9px 11px;
+    border-radius: 13px;
+    font-size: 12px;
+  }
+
+  .healing-journey-switcher small {
+    font-size: 10px;
+  }
+
+  .healing-layout,
+  .healing-left-column,
+  .healing-main-column,
+  .healing-guidance-stack,
+  .healing-top-grid,
+  .healing-lower-grid {
+    width: 100%;
+    min-width: 0;
+    gap: 10px;
+  }
+
+  .healing-timeline-panel,
+  .healing-routine,
+  .healing-photo-panel,
+  .healing-care-card,
+  .healing-signals-card,
+  .healing-person-card,
+  .healing-achievements,
+  .healing-community-card,
+  .healing-empty {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 13px;
+    border-radius: 18px;
+  }
+
+  .healing-card-head,
+  .healing-section-head {
+    gap: 8px;
+  }
+
+  .healing-card-head h2,
+  .healing-section-head h2 {
+    font-size: 17px;
+    line-height: 1.18;
+  }
+
+  .healing-hero {
+    min-height: 238px;
+    border-radius: 18px;
+  }
+
+  .healing-hero-content {
+    min-height: 238px;
+    padding: 14px;
+  }
+
+  .healing-status {
+    padding: 5px 8px;
+    font-size: 9px;
+  }
+
+  .healing-hero-bottom {
+    grid-template-columns: minmax(0, 1fr) 76px;
+    gap: 8px;
+  }
+
+  .healing-hero-bottom strong {
+    font-size: 14px;
+    line-height: 1.25;
+  }
+
+  .healing-hero-bottom span,
+  .healing-hero-content > small {
+    font-size: 10px;
+  }
+
+  .healing-progress {
+    width: 76px;
+    height: 76px;
+    flex-basis: 76px;
+  }
+
+  .healing-progress b {
+    font-size: 20px;
+  }
+
+  .healing-progress span {
+    font-size: 10px;
+  }
+
+  .healing-timeline-tabs {
+    gap: 4px;
+    margin: 12px -5px 10px;
+    padding: 0 5px 4px;
+  }
+
+  .healing-timeline-tabs button {
+    min-width: 52px;
+    min-height: 38px;
+    padding: 7px 6px;
+    border-radius: 10px;
+    font-size: 9px;
+  }
+
+  .healing-timeline-copy {
+    padding: 11px;
+    border-radius: 13px;
+  }
+
+  .healing-timeline-copy > div:first-child {
+    font-size: 9px;
+  }
+
+  .healing-timeline-copy h3 {
+    margin: 9px 0 5px;
+    font-size: 15px;
+  }
+
+  .healing-timeline-copy p {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  #healing-timeline-tags {
+    gap: 5px;
+    margin-top: 9px;
+  }
+
+  #healing-timeline-tags span {
+    padding: 4px 7px;
+    font-size: 9px;
+  }
+
+  .healing-task-list {
+    gap: 6px;
+    margin: 12px 0;
+  }
+
+  .healing-task {
+    min-height: 43px;
+    padding: 9px 10px;
+    border-radius: 11px;
+    font-size: 10.5px;
+  }
+
+  .healing-task-check {
+    width: 19px;
+    height: 19px;
+    flex-basis: 19px;
+  }
+
+  .healing-primary-button,
+  .healing-secondary-button,
+  .healing-chat-button,
+  .healing-upload-footer button {
+    min-height: 43px;
+    border-radius: 11px;
+    font-size: 10.5px;
+  }
+
+  .healing-photo-panel {
+    padding: 12px;
+  }
+
+  .healing-photo-panel .healing-section-head {
+    margin-bottom: 9px;
+  }
+
+  .healing-upload-trigger {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    font-size: 10px;
+  }
+
+  .healing-photo-stage {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1.45 / 1;
+    border-radius: 15px;
+  }
+
+  .healing-comparison-control {
+    width: 34px;
+    height: 34px;
+    font-size: 12px;
+  }
+
+  .healing-photo-label {
+    bottom: 7px;
+    padding: 4px 7px;
+    border-radius: 7px;
+    font-size: 9px;
+  }
+
+  .healing-photo-label.is-first {
+    left: 7px;
+  }
+
+  .healing-photo-label.is-latest {
+    right: 7px;
+  }
+
+  .healing-photo-tabs {
+    gap: 6px;
+    margin: 8px -2px 0;
+    padding: 0 2px 2px;
+  }
+
+  .healing-photo-tabs button {
+    min-width: 82px;
+    padding: 5px;
+    border-radius: 10px;
+  }
+
+  .healing-photo-tabs img {
+    height: 42px;
+    border-radius: 7px;
+  }
+
+  .healing-photo-tabs span {
+    margin-top: 4px;
+    font-size: 9px;
+  }
+
+  .healing-upload-form {
+    gap: 7px;
+    margin-top: 9px;
+  }
+
+  .healing-upload-form textarea {
+    min-height: 60px;
+    padding: 8px 9px;
+    border-radius: 11px;
+    font-size: 10.5px;
+  }
+
+  .healing-upload-footer {
+    gap: 6px;
+  }
+
+  .healing-upload-footer span {
+    font-size: 9.5px;
+  }
+
+  .healing-care-card > p {
+    margin: 9px 0;
+    font-size: 10.5px;
+    line-height: 1.5;
+  }
+
+  .healing-care-tip,
+  .healing-signals-card > div:not(.healing-section-head) {
+    padding: 9px 10px;
+    border-radius: 11px;
+    font-size: 10px;
+    line-height: 1.45;
+  }
+
+  .healing-stats-section {
+    margin-top: 10px;
+  }
+
+  .healing-stats-grid {
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .healing-stats-grid article {
+    min-height: 82px;
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .healing-stat-icon {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 8px;
+    border-radius: 9px;
+  }
+
+  .healing-stat-icon .healing-ui-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .healing-stats-grid article > span.healing-stat-icon {
+    margin-bottom: 8px;
+  }
+
+  .healing-stats-grid strong {
+    font-size: 17px;
+  }
+
+  .healing-stats-grid small {
+    font-size: 8.5px;
+    line-height: 1.25;
+  }
+
+  .healing-lower-grid {
+    margin-top: 10px;
+  }
+
+  .healing-person {
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 9px;
+    margin-top: 8px;
+  }
+
+  .healing-person-avatar {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+  }
+
+  .healing-person-copy h3 {
+    font-size: 14px;
+  }
+
+  .healing-person-copy small {
+    font-size: 10px;
+  }
+
+  .healing-person-copy blockquote,
+  .healing-person-copy p {
+    margin-top: 6px;
+    padding: 8px 9px;
+    border-radius: 0 10px 10px 0;
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  .healing-chat-button {
+    margin-top: 9px;
+  }
+
+  .healing-achievements-wide {
+    margin-top: 10px;
+  }
+
+  .healing-achievement-grid {
+    gap: 6px;
+    margin-top: 11px;
+  }
+
+  .healing-achievement-grid > div {
+    min-height: 82px;
+    padding: 9px;
+    border-radius: 12px;
+  }
+
+  .healing-achievement-icon {
+    width: 17px;
+    height: 17px;
+    margin-bottom: 8px;
+  }
+
+  .healing-achievement-grid strong {
+    font-size: 9.5px;
+  }
+
+  .healing-achievement-grid small {
+    font-size: 8px;
+  }
+
+  .healing-community-card {
+    overflow: hidden;
+  }
+
+  .healing-community-subtitle {
+    margin: 7px 0 9px;
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  .healing-community-grid {
+    display: flex;
+    gap: 7px;
+    margin-right: -13px;
+    padding-right: 13px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .healing-community-item {
+    display: block;
+    min-width: 0;
+    flex: 0 0 148px;
+    scroll-snap-align: start;
+    border-radius: 12px;
+  }
+
+  .healing-community-item > img {
+    width: 100%;
+    height: 82px;
+  }
+
+  .healing-community-item > span {
+    padding: 7px 8px 8px;
+  }
+
+  .healing-community-item strong {
+    font-size: 9.5px;
+  }
+
+  .healing-community-item small {
+    font-size: 8px;
+  }
+
+  .healing-community-empty {
+    flex: 0 0 100%;
+    padding: 13px;
+  }
+
+  .healing-empty {
+    margin-top: 12px;
+  }
+
+  .healing-empty-icon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 12px;
+    border-radius: 20px;
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 390px) {
+  .healing-shell {
+    padding-inline: 6px;
+  }
+
+  .healing-page-head h1 {
+    font-size: 24px;
+  }
+
+  .healing-photo-stage {
+    aspect-ratio: 1.38 / 1;
+  }
+
+  .healing-progress {
+    width: 70px;
+    height: 70px;
+    flex-basis: 70px;
+  }
+
+  .healing-progress b {
+    font-size: 18px;
+  }
+}
