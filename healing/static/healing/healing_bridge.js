@@ -5,6 +5,7 @@
   const polishCssUrl = "/static/healing/healing_polish.css";
   const mobilePolishCssUrl = "/static/healing/healing_mobile_v2.css";
   const polishJsUrl = "/static/healing/healing_polish.js";
+  const feedModalCssUrl = "/static/css/feed_mobile_modal.css";
 
   function label() {
     const language = (document.documentElement.lang || "en").split("-")[0];
@@ -47,6 +48,50 @@
       script.dataset.healingPolish = "";
       document.head.appendChild(script);
     }
+  }
+
+  function installFeedModalFix() {
+    const modal = document.getElementById("post-modal");
+    const closeButton = document.getElementById("post-modal-close");
+    if (!modal || !closeButton || modal.dataset.mobileModalFix === "1") return;
+
+    modal.dataset.mobileModalFix = "1";
+    loadStylesheet(feedModalCssUrl, "data-feed-mobile-modal");
+
+    const syncOpenState = () => {
+      const open = modal.classList.contains("open");
+      document.documentElement.classList.toggle("tatzo-post-modal-open", open);
+      document.body.classList.toggle("tatzo-post-modal-open", open);
+      if (open && window.matchMedia("(max-width: 900px)").matches) {
+        window.requestAnimationFrame(() => {
+          try {
+            closeButton.focus({preventScroll: true});
+          } catch (_error) {
+            closeButton.focus();
+          }
+        });
+      }
+    };
+
+    const closeThroughExistingHandler = () => {
+      if (!modal.classList.contains("open")) return;
+      closeButton.click();
+    };
+
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) closeThroughExistingHandler();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeThroughExistingHandler();
+    });
+
+    new MutationObserver(syncOpenState).observe(modal, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    syncOpenState();
   }
 
   function addNavigationLinks() {
@@ -154,6 +199,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     loadHealingPageAssets();
+    installFeedModalFix();
     addNavigationLinks();
     addSessionContext();
     addChatDraft();
