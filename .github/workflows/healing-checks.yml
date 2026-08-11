@@ -69,3 +69,4 @@ jobs:
         run: |
           node --check healing/static/healing/healing.js
           node --check healing/static/healing/healing_bridge.js
+          node --check healing/static/healing/healing_polish.js
