@@ -27,19 +27,19 @@
     return wrapper;
   }
 
-  function loadStylesheet(url, dataName) {
-    if (document.querySelector(`link[data-${dataName}]`)) return;
+  function loadStylesheet(url, dataAttribute) {
+    if (document.querySelector(`link[${dataAttribute}]`)) return;
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = url;
-    link.dataset[dataName] = "";
+    link.setAttribute(dataAttribute, "");
     document.head.appendChild(link);
   }
 
   function loadHealingPageAssets() {
     if (!window.location.pathname.startsWith("/healing/")) return;
-    loadStylesheet(polishCssUrl, "healingPolish");
-    loadStylesheet(mobilePolishCssUrl, "healingMobileV2");
+    loadStylesheet(polishCssUrl, "data-healing-polish");
+    loadStylesheet(mobilePolishCssUrl, "data-healing-mobile-v2");
     if (!document.querySelector('script[data-healing-polish]')) {
       const script = document.createElement("script");
       script.src = polishJsUrl;
