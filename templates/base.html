@@ -16,6 +16,10 @@
     {% block extra_css %}{% endblock %}
     <link rel="stylesheet" href="{% static 'style_match/style_match_hotfix.css' %}">
     <link rel="stylesheet" href="{% static 'healing/healing_bridge.css' %}">
+    {% if request.resolver_match.app_name == 'healing' %}
+        <link rel="stylesheet" href="{% static 'healing/healing_polish.css' %}" data-healing-polish-static>
+        <link rel="stylesheet" href="{% static 'healing/healing_mobile_v2.css' %}" id="healing-mobile-v2-static" media="(max-width: 760px)">
+    {% endif %}
 
     <link rel="icon" type="image/png" href="{% static 'images/tatzo-icon.png' %}">
     <link rel="apple-touch-icon" href="{% static 'images/tatzo-icon.png' %}">
@@ -156,5 +160,15 @@
     {% endblock %}
     <script src="{% static 'style_match/style_match_hotfix.js' %}"></script>
     <script src="{% static 'healing/healing_bridge.js' %}"></script>
+    {% if request.resolver_match.app_name == 'healing' %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const mobileHealingStyles = document.getElementById("healing-mobile-v2-static");
+            if (mobileHealingStyles) {
+                document.head.appendChild(mobileHealingStyles);
+            }
+        });
+    </script>
+    {% endif %}
 </body>
 </html>
