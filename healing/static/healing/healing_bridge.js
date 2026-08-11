@@ -3,6 +3,7 @@
 
   const healingIconUrl = "/static/icons/healing.svg";
   const polishCssUrl = "/static/healing/healing_polish.css";
+  const mobilePolishCssUrl = "/static/healing/healing_mobile_v2.css";
   const polishJsUrl = "/static/healing/healing_polish.js";
 
   function label() {
@@ -26,15 +27,19 @@
     return wrapper;
   }
 
+  function loadStylesheet(url, dataAttribute) {
+    if (document.querySelector(`link[${dataAttribute}]`)) return;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = url;
+    link.setAttribute(dataAttribute, "");
+    document.head.appendChild(link);
+  }
+
   function loadHealingPageAssets() {
     if (!window.location.pathname.startsWith("/healing/")) return;
-    if (!document.querySelector('link[data-healing-polish]')) {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = polishCssUrl;
-      link.dataset.healingPolish = "";
-      document.head.appendChild(link);
-    }
+    loadStylesheet(polishCssUrl, "data-healing-polish");
+    loadStylesheet(mobilePolishCssUrl, "data-healing-mobile-v2");
     if (!document.querySelector('script[data-healing-polish]')) {
       const script = document.createElement("script");
       script.src = polishJsUrl;
