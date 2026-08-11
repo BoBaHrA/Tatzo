@@ -16,6 +16,7 @@
     {% block extra_css %}{% endblock %}
     <link rel="stylesheet" href="{% static 'style_match/style_match_hotfix.css' %}">
     <link rel="stylesheet" href="{% static 'healing/healing_bridge.css' %}">
+    <link rel="stylesheet" href="{% static 'css/feed_lightbox_mobile_v2.css' %}" media="(max-width: 900px)">
     {% if request.resolver_match.app_name == 'healing' %}
         <link rel="stylesheet" href="{% static 'healing/healing_polish.css' %}" data-healing-polish-static>
         <link rel="stylesheet" href="{% static 'healing/healing_mobile_v2.css' %}" id="healing-mobile-v2-static" media="(max-width: 760px)">
