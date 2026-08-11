@@ -40,6 +40,19 @@
     target.replaceChildren(icon(name, className));
   }
 
+  function fixComparisonDirection() {
+    const stage = document.querySelector(".healing-photo-stage.is-comparison");
+    const firstPhoto = document.getElementById("healing-before-photo");
+    const selectedPhoto = document.getElementById("healing-after-photo");
+    const clippedLayer = document.getElementById("healing-after-wrap");
+    if (!stage || !firstPhoto || !selectedPhoto || !clippedLayer || clippedLayer.contains(firstPhoto)) return;
+
+    // The first check-in belongs on the left. The selected/newer check-in stays
+    // underneath and is revealed on the right as the comparison handle moves.
+    stage.insertBefore(selectedPhoto, clippedLayer);
+    clippedLayer.appendChild(firstPhoto);
+  }
+
   function decorateStats() {
     const section = document.querySelector(".healing-stats-section");
     if (!section) return;
@@ -230,6 +243,7 @@
 
   function init() {
     if (!document.getElementById("healing-app")) return;
+    fixComparisonDirection();
     decorateStats();
     decorateAchievements();
     enhanceArtistCard();
