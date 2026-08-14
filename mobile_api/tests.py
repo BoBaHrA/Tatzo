@@ -5,6 +5,9 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from posts.models import Post, PostBookmark, PostComment, PostLike, PostMedia
+from users.models import UserBlock, UserFollow
+
 User = get_user_model()
 
 
@@ -130,3 +133,143 @@ class MobileAuthenticationTests(APITestCase):
         )
         self.assertEqual(deleted.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(User.objects.filter(pk=user.pk).exists())
+
+
+class MobileFeedTests(APITestCase):
+    def setUp(self):
+        self.viewer = User.objects.create_user(
+            "mobile-viewer",
+            email="viewer@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        self.author = User.objects.create_user(
+            "feed-artist",
+            email="artist@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        self.stranger = User.objects.create_user(
+            "feed-stranger",
+            email="stranger@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        self.author.profile.account_type = "tattoo_artist"
+        self.author.profile.verification_status = "approved"
+        self.author.profile.save(update_fields=("account_type", "verification_status"))
+        self.client.force_authenticate(self.viewer)
+
+    def test_feed_requires_authentication(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(reverse("mobile_api:feed"))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_feed_serializes_visible_post_media_and_viewer_state(self):
+        post = Post.objects.create(
+            user=self.author,
+            content="Fresh blackwork piece",
+            location="Clermont-Ferrand",
+            is_ad=True,
+        )
+        PostMedia.objects.create(
+            post=post,
+            file="posts/example/tattoo.jpg",
+            media_type=PostMedia.IMAGE,
+        )
+        PostLike.objects.create(post=post, user=self.viewer)
+        PostComment.objects.create(post=post, user=self.stranger, content="Great")
+        PostBookmark.objects.create(post=post, user=self.viewer)
+
+        response = self.client.get(reverse("mobile_api:feed"))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(response.data["has_more"])
+        item = response.data["results"][0]
+        self.assertEqual(item["id"], post.pk)
+        self.assertEqual(item["author"]["username"], self.author.username)
+        self.assertTrue(item["author"]["is_verified_artist"])
+        self.assertEqual(item["location"], "Clermont-Ferrand")
+        self.assertEqual(item["likes_count"], 1)
+        self.assertEqual(item["comments_count"], 1)
+        self.assertTrue(item["is_liked"])
+        self.assertTrue(item["is_bookmarked"])
+        self.assertFalse(item["is_owned"])
+        self.assertEqual(item["media"][0]["type"], "image")
+        self.assertTrue(item["media"][0]["url"].endswith("/posts/example/tattoo.jpg"))
+
+    def test_feed_applies_follow_visibility_and_blocks(self):
+        public = Post.objects.create(user=self.author, visibility="public")
+        followers = Post.objects.create(user=self.author, visibility="followers")
+        private = Post.objects.create(user=self.author, visibility="private")
+
+        first = self.client.get(reverse("mobile_api:feed"))
+        self.assertEqual(
+            {item["id"] for item in first.data["results"]},
+            {public.pk},
+        )
+
+        UserFollow.objects.create(follower=self.viewer, following=self.author)
+        followed = self.client.get(reverse("mobile_api:feed"))
+        self.assertEqual(
+            {item["id"] for item in followed.data["results"]},
+            {public.pk, followers.pk},
+        )
+        self.assertNotIn(private.pk, {item["id"] for item in followed.data["results"]})
+
+        UserBlock.objects.create(blocker=self.viewer, blocked=self.author)
+        blocked = self.client.get(reverse("mobile_api:feed"))
+        self.assertEqual(blocked.data["results"], [])
+
+    def test_feed_uses_cursor_pagination_without_duplicate_posts(self):
+        for index in range(7):
+            Post.objects.create(user=self.viewer, content=f"Post {index}")
+
+        first = self.client.get(reverse("mobile_api:feed"), {"limit": 3})
+        self.assertEqual(first.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(first.data["results"]), 3)
+        self.assertTrue(first.data["has_more"])
+        self.assertIsNotNone(first.data["next_cursor"])
+
+        second = self.client.get(
+            reverse("mobile_api:feed"),
+            {"limit": 3, "cursor": first.data["next_cursor"]},
+        )
+        self.assertEqual(second.status_code, status.HTTP_200_OK)
+        first_ids = {item["id"] for item in first.data["results"]}
+        second_ids = {item["id"] for item in second.data["results"]}
+        self.assertFalse(first_ids & second_ids)
+
+    def test_feed_like_and_bookmark_toggle(self):
+        post = Post.objects.create(user=self.author, content="Toggle me")
+
+        liked = self.client.post(reverse("mobile_api:feed_like", args=[post.pk]))
+        self.assertEqual(liked.status_code, status.HTTP_200_OK)
+        self.assertTrue(liked.data["liked"])
+        self.assertEqual(liked.data["likes_count"], 1)
+
+        unliked = self.client.post(reverse("mobile_api:feed_like", args=[post.pk]))
+        self.assertFalse(unliked.data["liked"])
+        self.assertEqual(unliked.data["likes_count"], 0)
+
+        saved = self.client.post(reverse("mobile_api:feed_bookmark", args=[post.pk]))
+        self.assertTrue(saved.data["bookmarked"])
+        self.assertTrue(
+            PostBookmark.objects.filter(user=self.viewer, post=post).exists()
+        )
+
+        unsaved = self.client.post(reverse("mobile_api:feed_bookmark", args=[post.pk]))
+        self.assertFalse(unsaved.data["bookmarked"])
+
+    def test_feed_actions_cannot_target_invisible_post(self):
+        private = Post.objects.create(
+            user=self.author,
+            content="Private",
+            visibility="private",
+        )
+        like = self.client.post(reverse("mobile_api:feed_like", args=[private.pk]))
+        bookmark = self.client.post(
+            reverse("mobile_api:feed_bookmark", args=[private.pk])
+        )
+        self.assertEqual(like.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(bookmark.status_code, status.HTTP_404_NOT_FOUND)

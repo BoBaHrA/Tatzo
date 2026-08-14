@@ -23,6 +23,8 @@ refresh tokens rotate and the replaced token is blacklisted by Django.
 - username or email login;
 - automatic access-token refresh;
 - authenticated profile read/edit;
-- secure sign out.
+- secure sign out;
+- authenticated cursor-paginated feed with Cloudinary-backed image/video media;
+- pull-to-refresh, infinite loading, likes, and bookmarks.
 
-The next slices are feed, artist profiles, Style Match, chat, booking, and map.
+The next slices are artist profiles, Style Match, chat, booking, and map.

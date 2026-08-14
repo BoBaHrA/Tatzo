@@ -196,3 +196,80 @@ class MeUpdateSerializer(serializers.Serializer):
             profile.save(update_fields=profile_fields)
 
         return User.objects.select_related("profile").get(pk=user.pk)
+
+
+class FeedAuthorSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    username = serializers.CharField(read_only=True)
+    tag = serializers.CharField(source="profile.tag", read_only=True, allow_null=True)
+    is_verified_artist = serializers.BooleanField(
+        source="profile.is_verified_artist",
+        read_only=True,
+    )
+    profile_image_url = serializers.SerializerMethodField()
+
+    def get_profile_image_url(self, user):
+        image = user.profile.profile_image
+        if not image:
+            return None
+
+        try:
+            url = image.url
+        except (ValueError, AttributeError):
+            return None
+
+        request = self.context.get("request")
+        return request.build_absolute_uri(url) if request else url
+
+
+class FeedMediaSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    type = serializers.CharField(source="media_type", read_only=True)
+    url = serializers.SerializerMethodField()
+    order = serializers.IntegerField(read_only=True)
+
+    def get_url(self, media):
+        url = media.media_url
+        if not url:
+            return ""
+
+        request = self.context.get("request")
+        if request and url.startswith("/"):
+            return request.build_absolute_uri(url)
+        return url
+
+
+class FeedPostSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    author = FeedAuthorSerializer(source="user", read_only=True)
+    content = serializers.CharField(read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
+    disable_comments = serializers.BooleanField(read_only=True)
+    is_ad = serializers.BooleanField(read_only=True)
+    visibility = serializers.CharField(read_only=True)
+    location = serializers.CharField(read_only=True)
+    layout = serializers.CharField(read_only=True)
+    media = FeedMediaSerializer(source="medias", many=True, read_only=True)
+    likes_count = serializers.SerializerMethodField()
+    comments_count = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+    is_bookmarked = serializers.SerializerMethodField()
+    is_owned = serializers.SerializerMethodField()
+
+    def get_likes_count(self, post):
+        count = getattr(post, "feed_likes_count", None)
+        return count if count is not None else post.likes.count()
+
+    def get_comments_count(self, post):
+        count = getattr(post, "feed_comments_count", None)
+        return count if count is not None else post.comments.count()
+
+    def get_is_liked(self, post):
+        return bool(getattr(post, "viewer_liked", False))
+
+    def get_is_bookmarked(self, post):
+        return bool(getattr(post, "viewer_bookmarked", False))
+
+    def get_is_owned(self, post):
+        request = self.context.get("request")
+        return bool(request and request.user.pk == post.user_id)

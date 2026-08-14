@@ -16,7 +16,7 @@ export default function Index() {
       </View>
     );
   }
-  return <Redirect href={status === 'authenticated' ? '/(tabs)/profile' : '/(auth)/login'} />;
+  return <Redirect href={status === 'authenticated' ? '/(tabs)/home' : '/(auth)/login'} />;
 }
 
 const styles = StyleSheet.create({

@@ -36,3 +36,51 @@ export type RegistrationPayload = {
 export type ProfileUpdate = Partial<
   Pick<TatzoUser, 'username' | 'tag' | 'bio' | 'timezone' | 'show_liked_posts'>
 >;
+
+export type FeedAuthor = {
+  id: number;
+  username: string;
+  tag: string | null;
+  is_verified_artist: boolean;
+  profile_image_url: string | null;
+};
+
+export type FeedMedia = {
+  id: number;
+  type: 'image' | 'video';
+  url: string;
+  order: number;
+};
+
+export type FeedPost = {
+  id: number;
+  author: FeedAuthor;
+  content: string;
+  created_at: string;
+  disable_comments: boolean;
+  is_ad: boolean;
+  visibility: 'public' | 'followers' | 'private';
+  location: string;
+  layout: 'grid' | 'carousel';
+  media: FeedMedia[];
+  likes_count: number;
+  comments_count: number;
+  is_liked: boolean;
+  is_bookmarked: boolean;
+  is_owned: boolean;
+};
+
+export type FeedPage = {
+  next_cursor: string | null;
+  has_more: boolean;
+  results: FeedPost[];
+};
+
+export type FeedLikeResult = {
+  liked: boolean;
+  likes_count: number;
+};
+
+export type FeedBookmarkResult = {
+  bookmarked: boolean;
+};

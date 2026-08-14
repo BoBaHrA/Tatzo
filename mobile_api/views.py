@@ -1,20 +1,29 @@
 import logging
+from urllib.parse import parse_qs, urlparse
 
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.models import update_last_login
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Count, Exists, OuterRef, Q
+from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
+from posts.models import Post, PostBookmark, PostComment, PostLike
 from users.security import check_rate_limit
 from users.utils import send_verification_email
 from users.views import delete_expired_unverified_duplicate_users
 
-from .serializers import MeSerializer, MeUpdateSerializer, RegistrationSerializer
+from .serializers import (
+    FeedPostSerializer,
+    MeSerializer,
+    MeUpdateSerializer,
+    RegistrationSerializer,
+)
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -221,3 +230,104 @@ class MeView(APIView):
         user = request.user
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FeedCursorPagination(CursorPagination):
+    page_size = 10
+    page_size_query_param = "limit"
+    max_page_size = 30
+    ordering = "-created_at"
+
+    @staticmethod
+    def _cursor_from_link(link):
+        if not link:
+            return None
+        return parse_qs(urlparse(link).query).get("cursor", [None])[0]
+
+    def get_paginated_response(self, data):
+        next_cursor = self._cursor_from_link(self.get_next_link())
+        return Response(
+            {
+                "next_cursor": next_cursor,
+                "has_more": next_cursor is not None,
+                "results": data,
+            }
+        )
+
+
+class FeedView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        posts = (
+            Post.objects.visible_to(request.user)
+            .select_related("user", "user__profile")
+            .prefetch_related("medias")
+            .annotate(
+                feed_likes_count=Count("likes", distinct=True),
+                feed_comments_count=Count("comments", distinct=True),
+                viewer_liked=Exists(
+                    PostLike.objects.filter(post_id=OuterRef("pk"), user=request.user)
+                ),
+                viewer_bookmarked=Exists(
+                    PostBookmark.objects.filter(
+                        post_id=OuterRef("pk"),
+                        user=request.user,
+                    )
+                ),
+            )
+        )
+
+        paginator = FeedCursorPagination()
+        page = paginator.paginate_queryset(posts, request, view=self)
+        serializer = FeedPostSerializer(
+            page,
+            many=True,
+            context={"request": request},
+        )
+        return paginator.get_paginated_response(serializer.data)
+
+
+class FeedLikeView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, post_id):
+        post = get_object_or_404(
+            Post.objects.visible_to(request.user),
+            pk=post_id,
+        )
+
+        with transaction.atomic():
+            like, created = PostLike.objects.get_or_create(
+                post=post,
+                user=request.user,
+            )
+            if not created:
+                like.delete()
+
+        return Response(
+            {
+                "liked": created,
+                "likes_count": PostLike.objects.filter(post=post).count(),
+            }
+        )
+
+
+class FeedBookmarkView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, post_id):
+        post = get_object_or_404(
+            Post.objects.visible_to(request.user),
+            pk=post_id,
+        )
+
+        with transaction.atomic():
+            bookmark, created = PostBookmark.objects.get_or_create(
+                post=post,
+                user=request.user,
+            )
+            if not created:
+                bookmark.delete()
+
+        return Response({"bookmarked": created})

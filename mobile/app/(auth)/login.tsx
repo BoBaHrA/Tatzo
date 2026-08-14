@@ -24,7 +24,7 @@ export default function LoginScreen() {
     setError('');
     try {
       await signIn(identifier.trim(), password);
-      router.replace('/(tabs)/profile');
+      router.replace('/(tabs)/home');
     } catch (caught) {
       setError(userFacingError(caught));
     } finally {

@@ -21,9 +21,15 @@ import { clearTokens, readTokens, writeTokens } from '@/auth/token-store';
 
 type AuthStatus = 'loading' | 'anonymous' | 'authenticated';
 
+export type AuthenticatedRequest = <T>(
+  path: string,
+  init?: RequestInit,
+) => Promise<T>;
+
 type AuthContextValue = {
   status: AuthStatus;
   user: TatzoUser | null;
+  request: AuthenticatedRequest;
   signIn: (identifier: string, password: string) => Promise<void>;
   register: (payload: RegistrationPayload) => Promise<string>;
   signOut: () => Promise<void>;
@@ -82,9 +88,25 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [user, setUser] = useState<TatzoUser | null>(null);
 
+  const request = useCallback(
+    async <T,>(path: string, init: RequestInit = {}): Promise<T> => {
+      try {
+        return await authenticatedRequest<T>(path, init);
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 401) {
+          await clearTokens();
+          setUser(null);
+          setStatus('anonymous');
+        }
+        throw error;
+      }
+    },
+    [],
+  );
+
   const bootstrap = useCallback(async () => {
     try {
-      const profile = await authenticatedRequest<TatzoUser>('/me/');
+      const profile = await request<TatzoUser>('/me/');
       setUser(profile);
       setStatus('authenticated');
     } catch {
@@ -92,7 +114,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setUser(null);
       setStatus('anonymous');
     }
-  }, []);
+  }, [request]);
 
   useEffect(() => {
     void bootstrap();
@@ -134,29 +156,30 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, []);
 
   const refreshProfile = useCallback(async () => {
-    const profile = await authenticatedRequest<TatzoUser>('/me/');
+    const profile = await request<TatzoUser>('/me/');
     setUser(profile);
-  }, []);
+  }, [request]);
 
   const updateProfile = useCallback(async (payload: ProfileUpdate) => {
-    const profile = await authenticatedRequest<TatzoUser>('/me/', {
+    const profile = await request<TatzoUser>('/me/', {
       method: 'PATCH',
       body: JSON.stringify(payload),
     });
     setUser(profile);
-  }, []);
+  }, [request]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       status,
       user,
+      request,
       signIn,
       register,
       signOut,
       refreshProfile,
       updateProfile,
     }),
-    [status, user, signIn, register, signOut, refreshProfile, updateProfile],
+    [status, user, request, signIn, register, signOut, refreshProfile, updateProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
