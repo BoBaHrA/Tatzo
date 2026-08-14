@@ -1,0 +1,70 @@
+import { router } from 'expo-router';
+import { Image, StyleSheet, Text, View } from 'react-native';
+
+import { useAuth } from '@/auth/auth-context';
+import { BrandHeader } from '@/components/brand-header';
+import { Button } from '@/components/button';
+import { Screen } from '@/components/screen';
+import { t } from '@/i18n';
+import { colors, radius, spacing } from '@/theme';
+
+
+export default function ProfileScreen() {
+  const { user, signOut } = useAuth();
+  if (!user) return null;
+
+  const accountLabel = user.is_verified_artist
+    ? t('verified')
+    : user.account_type === 'tattoo_artist'
+      ? t('pendingVerification')
+      : t('regularAccount');
+
+  return (
+    <Screen>
+      <BrandHeader />
+      <View style={styles.profileCard}>
+        {user.profile_image_url ? (
+          <Image source={{ uri: user.profile_image_url }} style={styles.avatar} />
+        ) : (
+          <View style={styles.avatarFallback}>
+            <Text style={styles.avatarLetter}>{user.username[0]?.toUpperCase()}</Text>
+          </View>
+        )}
+        <View style={styles.identity}>
+          <Text style={styles.username}>{user.username}</Text>
+          <Text style={styles.tag}>@{user.tag ?? user.username}</Text>
+          <View style={styles.badge}><Text style={styles.badgeText}>{accountLabel}</Text></View>
+        </View>
+      </View>
+      {user.bio ? <Text style={styles.bio}>{user.bio}</Text> : null}
+      <View style={styles.details}>
+        <Detail label={t('email')} value={user.email} />
+        <Detail label={t('account')} value={user.account_type} />
+        <Detail label="Timezone" value={user.timezone} />
+      </View>
+      <Button label={t('editProfile')} onPress={() => router.push('/edit-profile')} />
+      <Button label={t('signOut')} variant="secondary" onPress={() => void signOut()} />
+    </Screen>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return <View style={styles.detailRow}><Text style={styles.detailLabel}>{label}</Text><Text style={styles.detailValue}>{value}</Text></View>;
+}
+
+const styles = StyleSheet.create({
+  profileCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: colors.surface, borderRadius: radius.large, borderWidth: 1, borderColor: colors.border, padding: spacing.lg },
+  avatar: { width: 84, height: 84, borderRadius: 42 },
+  avatarFallback: { width: 84, height: 84, borderRadius: 42, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+  avatarLetter: { color: colors.backgroundDeep, fontSize: 34, fontWeight: '900' },
+  identity: { flex: 1, gap: 3 },
+  username: { color: colors.text, fontSize: 24, fontWeight: '900' },
+  tag: { color: colors.primary, fontWeight: '700' },
+  badge: { alignSelf: 'flex-start', backgroundColor: colors.backgroundDeep, borderRadius: radius.pill, paddingVertical: 5, paddingHorizontal: 10, marginTop: spacing.xs },
+  badgeText: { color: colors.textMuted, fontSize: 12, fontWeight: '700' },
+  bio: { color: colors.text, lineHeight: 22, paddingHorizontal: spacing.xs },
+  details: { backgroundColor: colors.surface, borderRadius: radius.medium, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
+  detailRow: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.md, padding: spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
+  detailLabel: { color: colors.textMuted },
+  detailValue: { color: colors.text, fontWeight: '700', flexShrink: 1, textAlign: 'right' },
+});
