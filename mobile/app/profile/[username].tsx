@@ -13,6 +13,8 @@ import {
 import { ApiError } from '@/api/client';
 import type { FeedPost, PublicProfile, ReportReason } from '@/api/types';
 import { useAuth } from '@/auth/auth-context';
+import { startChat } from '@/chat/chat-api';
+import { useChat } from '@/chat/chat-context';
 import { BrandHeader } from '@/components/brand-header';
 import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
@@ -31,10 +33,12 @@ export default function PublicProfileScreen() {
   const params = useLocalSearchParams<{ username?: string | string[] }>();
   const username = Array.isArray(params.username) ? params.username[0] : params.username;
   const { request, status } = useAuth();
+  const { refresh: refreshChats } = useChat();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [following, setFollowing] = useState(false);
   const [blocking, setBlocking] = useState(false);
+  const [chatStarting, setChatStarting] = useState(false);
   const [loadError, setLoadError] = useState('');
   const [actionError, setActionError] = useState('');
 
@@ -180,6 +184,24 @@ export default function PublicProfileScreen() {
     );
   };
 
+  const openChat = async () => {
+    if (!profile || profile.is_self || chatStarting) return;
+    setChatStarting(true);
+    setActionError('');
+    try {
+      const thread = await startChat(request, profile.username);
+      void refreshChats();
+      router.push({
+        pathname: '/chat/[threadId]',
+        params: { threadId: String(thread.id) },
+      });
+    } catch {
+      setActionError(t('chatStartError'));
+    } finally {
+      setChatStarting(false);
+    }
+  };
+
   return (
     <Screen contentStyle={styles.screen}>
       <Pressable
@@ -250,6 +272,11 @@ export default function PublicProfileScreen() {
               />
             ) : (
               <View style={styles.profileActions}>
+                <Button
+                  label={chatStarting ? t('chatStarting') : t('openChat')}
+                  loading={chatStarting}
+                  onPress={() => void openChat()}
+                />
                 <Button
                   label={profile.is_following ? t('following') : t('follow')}
                   loading={following}

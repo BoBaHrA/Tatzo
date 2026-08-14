@@ -30,5 +30,7 @@ refresh tokens rotate and the replaced token is blacklisted by Django.
 - block/unblock controls, blocked-user management, safety contact, and in-app account deletion;
 - native Style Match with resumable sessions, adaptive clarification cards, saved references,
   localized results, and artist recommendations.
+- native private chat with unread badges, background polling, read receipts, protected
+  photo/video/file attachments, message editing/deletion, and two-way block enforcement.
 
-The next slices are chat, booking, and map.
+The next slices are booking and map.

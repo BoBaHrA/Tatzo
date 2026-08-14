@@ -1,5 +1,10 @@
+import shutil
+import tempfile
+from urllib.parse import urlparse
+
 from django.contrib.auth import get_user_model
 from django.core import mail
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
 from django.test import override_settings
 from django.urls import reverse
@@ -16,7 +21,15 @@ from posts.models import (
     PostReport,
 )
 from style_match.models import StyleMatchResponse, StyleMatchSession, TattooCard
-from users.models import PortfolioWork, UserBlock, UserFollow
+from mytattooapp.storage_backends import private_media_storage
+from users.models import (
+    ChatAttachment,
+    ChatMessage,
+    ChatThread,
+    PortfolioWork,
+    UserBlock,
+    UserFollow,
+)
 
 User = get_user_model()
 
@@ -553,6 +566,226 @@ class MobileSafetyTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["code"], "cannot_block_self")
+
+
+@override_settings(TATZO_RATE_LIMIT_ENABLED=False, USE_CLOUDINARY=False)
+class MobileChatTests(APITestCase):
+    def setUp(self):
+        self.media_root = tempfile.mkdtemp(prefix="tatzo-mobile-chat-", dir="/tmp")
+        self.media_override = self.settings(MEDIA_ROOT=self.media_root)
+        self.media_override.enable()
+        private_media_storage._backend = None
+
+        self.viewer = User.objects.create_user(
+            "chat-viewer",
+            email="chat-viewer@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        self.target = User.objects.create_user(
+            "chat-target",
+            email="chat-target@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        self.stranger = User.objects.create_user(
+            "chat-stranger",
+            email="chat-stranger@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        for user in (self.viewer, self.target, self.stranger):
+            user.profile.is_email_verified = True
+            user.profile.save(update_fields=("is_email_verified",))
+
+        self.client.force_authenticate(self.viewer)
+
+    def tearDown(self):
+        private_media_storage._backend = None
+        self.media_override.disable()
+        shutil.rmtree(self.media_root, ignore_errors=True)
+
+    def start_chat(self):
+        return self.client.post(
+            reverse("mobile_api:chat_start", args=[self.target.username])
+        )
+
+    def send_message(self, thread_id, content="Hello from mobile"):
+        return self.client.post(
+            reverse("mobile_api:chat_message_create", args=[thread_id]),
+            {"content": content},
+            format="json",
+        )
+
+    def test_chat_requires_authentication(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(reverse("mobile_api:chat_list"))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_start_chat_rejects_self_unverified_and_blocked_users(self):
+        self_chat = self.client.post(
+            reverse("mobile_api:chat_start", args=[self.viewer.username])
+        )
+        self.assertEqual(self_chat.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(self_chat.data["code"], "cannot_chat_self")
+
+        self.target.profile.is_email_verified = False
+        self.target.profile.save(update_fields=("is_email_verified",))
+        unverified = self.start_chat()
+        self.assertEqual(unverified.status_code, status.HTTP_404_NOT_FOUND)
+
+        self.target.profile.is_email_verified = True
+        self.target.profile.save(update_fields=("is_email_verified",))
+        UserBlock.objects.create(blocker=self.target, blocked=self.viewer)
+        blocked = self.start_chat()
+        self.assertEqual(blocked.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_empty_chat_is_hidden_until_first_message_and_unread_is_cleared(self):
+        started = self.start_chat()
+        self.assertEqual(started.status_code, status.HTTP_200_OK)
+        thread_id = started.data["id"]
+
+        empty_list = self.client.get(reverse("mobile_api:chat_list"))
+        self.assertEqual(empty_list.data["results"], [])
+
+        sent = self.send_message(thread_id)
+        self.assertEqual(sent.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(sent.data["is_mine"])
+
+        sender_list = self.client.get(reverse("mobile_api:chat_list"))
+        self.assertEqual(len(sender_list.data["results"]), 1)
+        self.assertEqual(sender_list.data["unread_count"], 0)
+        self.assertEqual(
+            sender_list.data["results"][0]["last_message"]["content"],
+            "Hello from mobile",
+        )
+
+        self.client.force_authenticate(self.target)
+        recipient_list = self.client.get(reverse("mobile_api:chat_list"))
+        self.assertEqual(recipient_list.data["unread_count"], 1)
+        thread = self.client.get(reverse("mobile_api:chat_thread", args=[thread_id]))
+        self.assertEqual(thread.status_code, status.HTTP_200_OK)
+        self.assertEqual(thread.data["unread_count"], 0)
+        self.assertFalse(thread.data["messages"][0]["is_mine"])
+
+        refreshed_list = self.client.get(reverse("mobile_api:chat_list"))
+        self.assertEqual(refreshed_list.data["unread_count"], 0)
+
+        self.client.force_authenticate(self.viewer)
+        receipt = self.client.get(
+            reverse("mobile_api:chat_thread", args=[thread_id]),
+            {"after": sent.data["id"]},
+        )
+        self.assertEqual(receipt.data["last_read_message_id"], sent.data["id"])
+
+    def test_thread_poll_returns_only_messages_after_cursor(self):
+        thread_id = self.start_chat().data["id"]
+        first = self.send_message(thread_id, "First").data
+        second = self.send_message(thread_id, "Second").data
+
+        self.client.force_authenticate(self.target)
+        initial = self.client.get(reverse("mobile_api:chat_thread", args=[thread_id]))
+        self.assertEqual(
+            [message["id"] for message in initial.data["messages"]],
+            [first["id"], second["id"]],
+        )
+
+        self.client.force_authenticate(self.viewer)
+        third = self.send_message(thread_id, "Third").data
+        self.client.force_authenticate(self.target)
+        polled = self.client.get(
+            reverse("mobile_api:chat_thread", args=[thread_id]),
+            {"after": second["id"]},
+        )
+        self.assertEqual(
+            [message["id"] for message in polled.data["messages"]],
+            [third["id"]],
+        )
+
+    def test_non_participant_cannot_read_thread_and_block_prevents_sending(self):
+        thread_id = self.start_chat().data["id"]
+        self.client.force_authenticate(self.stranger)
+        hidden = self.client.get(reverse("mobile_api:chat_thread", args=[thread_id]))
+        self.assertEqual(hidden.status_code, status.HTTP_404_NOT_FOUND)
+
+        UserBlock.objects.create(blocker=self.target, blocked=self.viewer)
+        self.client.force_authenticate(self.viewer)
+        blocked = self.send_message(thread_id)
+        self.assertEqual(blocked.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(blocked.data["code"], "chat_blocked")
+
+    def test_sender_can_edit_and_delete_but_recipient_cannot(self):
+        thread_id = self.start_chat().data["id"]
+        sent = self.send_message(thread_id).data
+        message_url = reverse("mobile_api:chat_message", args=[sent["id"]])
+
+        self.client.force_authenticate(self.target)
+        forbidden_edit = self.client.patch(
+            message_url,
+            {"content": "Changed by recipient"},
+            format="json",
+        )
+        self.assertEqual(forbidden_edit.status_code, status.HTTP_404_NOT_FOUND)
+        forbidden_delete = self.client.delete(message_url)
+        self.assertEqual(forbidden_delete.status_code, status.HTTP_404_NOT_FOUND)
+
+        self.client.force_authenticate(self.viewer)
+        edited = self.client.patch(
+            message_url,
+            {"content": "Edited message"},
+            format="json",
+        )
+        self.assertEqual(edited.status_code, status.HTTP_200_OK)
+        self.assertEqual(edited.data["content"], "Edited message")
+        self.assertTrue(edited.data["is_edited"])
+
+        deleted = self.client.delete(message_url)
+        self.assertEqual(deleted.status_code, status.HTTP_204_NO_CONTENT)
+        message = ChatMessage.objects.get(pk=sent["id"])
+        self.assertTrue(message.is_deleted)
+        self.assertEqual(message.content, "")
+        self.assertEqual(
+            self.client.get(reverse("mobile_api:chat_list")).data["results"],
+            [],
+        )
+
+    def test_attachment_uses_expiring_signed_private_url(self):
+        thread_id = self.start_chat().data["id"]
+        attachment = SimpleUploadedFile(
+            "reference.png",
+            b"not-a-real-png-but-private",
+            content_type="image/png",
+        )
+        sent = self.client.post(
+            reverse("mobile_api:chat_message_create", args=[thread_id]),
+            {"content": "Reference", "attachments": attachment},
+            format="multipart",
+        )
+        self.assertEqual(sent.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(sent.data["attachments"][0]["type"], "image")
+        self.assertEqual(ChatAttachment.objects.count(), 1)
+
+        signed_url = urlparse(sent.data["attachments"][0]["url"])
+        self.client.force_authenticate(user=None)
+        download = self.client.get(f"{signed_url.path}?{signed_url.query}")
+        self.assertEqual(download.status_code, status.HTTP_200_OK)
+        self.assertEqual(download["X-Content-Type-Options"], "nosniff")
+
+        tampered = self.client.get(f"{signed_url.path}?{signed_url.query}x")
+        self.assertEqual(tampered.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_message_validation_rejects_empty_and_invalid_cursor(self):
+        thread_id = self.start_chat().data["id"]
+        empty = self.send_message(thread_id, "   ")
+        self.assertEqual(empty.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(empty.data["code"], "empty_message")
+
+        invalid_cursor = self.client.get(
+            reverse("mobile_api:chat_thread", args=[thread_id]),
+            {"after": "not-a-number"},
+        )
+        self.assertEqual(invalid_cursor.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(invalid_cursor.data["code"], "invalid_cursor")
 
 
 @override_settings(

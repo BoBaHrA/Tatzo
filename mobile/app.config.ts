@@ -28,6 +28,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-router',
     'expo-localization',
     [
+      'expo-image-picker',
+      {
+        photosPermission: 'Allow Tatzo to attach tattoo references to your messages.',
+        cameraPermission: false,
+        microphonePermission: false,
+      },
+    ],
+    [
       'expo-secure-store',
       {
         configureAndroidBackup: true,

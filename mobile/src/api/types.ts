@@ -148,6 +148,56 @@ export type BlockedUsersResponse = {
   results: BlockedUser[];
 };
 
+export type ChatUser = {
+  id: number;
+  username: string;
+  tag: string | null;
+  is_verified_artist: boolean;
+  profile_image_url: string | null;
+};
+
+export type ChatAttachment = {
+  id: number;
+  type: 'image' | 'video' | 'file';
+  name: string;
+  content_type: string;
+  url: string;
+};
+
+export type ChatMessage = {
+  id: number;
+  sender: ChatUser;
+  is_mine: boolean;
+  content: string;
+  is_read: boolean;
+  is_edited: boolean;
+  created_at: string;
+  edited_at: string | null;
+  attachments: ChatAttachment[];
+};
+
+export type ChatThreadSummary = {
+  id: number;
+  other_user: ChatUser;
+  last_message: ChatMessage | null;
+  unread_count: number;
+  last_read_message_id: number | null;
+  updated_at: string;
+  is_blocked_by_me: boolean;
+  has_blocked_me: boolean;
+  chat_blocked: boolean;
+};
+
+export type ChatListResponse = {
+  unread_count: number;
+  results: ChatThreadSummary[];
+};
+
+export type ChatThreadDetail = ChatThreadSummary & {
+  messages: ChatMessage[];
+  has_more: boolean;
+};
+
 export type StyleMatchCard = {
   id: number;
   card_id: string;

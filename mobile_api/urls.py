@@ -1,6 +1,15 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
+from .chat_views import (
+    ChatAttachmentView,
+    ChatListView,
+    ChatMessageCreateView,
+    ChatMessageView,
+    ChatThreadView,
+    StartChatView,
+)
+
 from .views import (
     BlockedUsersView,
     FeedBookmarkView,
@@ -29,6 +38,32 @@ urlpatterns = [
     path("auth/logout/", LogoutView.as_view(), name="logout"),
     path("me/", MeView.as_view(), name="me"),
     path("me/blocked-users/", BlockedUsersView.as_view(), name="blocked_users"),
+    path("chat/", ChatListView.as_view(), name="chat_list"),
+    path(
+        "chat/start/<str:username>/",
+        StartChatView.as_view(),
+        name="chat_start",
+    ),
+    path(
+        "chat/<int:thread_id>/",
+        ChatThreadView.as_view(),
+        name="chat_thread",
+    ),
+    path(
+        "chat/<int:thread_id>/messages/",
+        ChatMessageCreateView.as_view(),
+        name="chat_message_create",
+    ),
+    path(
+        "chat/messages/<int:message_id>/",
+        ChatMessageView.as_view(),
+        name="chat_message",
+    ),
+    path(
+        "chat/attachments/<int:attachment_id>/",
+        ChatAttachmentView.as_view(),
+        name="chat_attachment",
+    ),
     path(
         "profiles/<str:username>/",
         PublicProfileView.as_view(),
