@@ -1,8 +1,16 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
-import type { FeedPost } from '@/api/types';
+import type { FeedPost, ReportReason } from '@/api/types';
 import { t } from '@/i18n';
 import { colors, radius, spacing } from '@/theme';
 
@@ -13,7 +21,26 @@ type PostCardProps = {
   post: FeedPost;
   onLike: (post: FeedPost) => Promise<void>;
   onBookmark: (post: FeedPost) => Promise<void>;
+  onReport: (post: FeedPost, reason: ReportReason) => Promise<void>;
 };
+
+const REPORT_REASONS: ReportReason[] = [
+  'spam',
+  'harassment',
+  'hate_or_violence',
+  'sexual_content',
+  'other',
+];
+
+function reportReasonLabel(reason: ReportReason): string {
+  switch (reason) {
+    case 'spam': return t('reportSpam');
+    case 'harassment': return t('reportHarassment');
+    case 'hate_or_violence': return t('reportHateOrViolence');
+    case 'sexual_content': return t('reportSexualContent');
+    case 'other': return t('reportOther');
+  }
+}
 
 function formatPostDate(value: string): string {
   const date = new Date(value);
@@ -26,10 +53,12 @@ function formatPostDate(value: string): string {
   }).format(date);
 }
 
-export function PostCard({ post, onLike, onBookmark }: PostCardProps) {
+export function PostCard({ post, onLike, onBookmark, onReport }: PostCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [liking, setLiking] = useState(false);
   const [bookmarking, setBookmarking] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reporting, setReporting] = useState(false);
 
   const handleLike = async () => {
     setLiking(true);
@@ -46,6 +75,18 @@ export function PostCard({ post, onLike, onBookmark }: PostCardProps) {
       await onBookmark(post);
     } finally {
       setBookmarking(false);
+    }
+  };
+
+  const handleReport = async (reason: ReportReason) => {
+    setReporting(true);
+    try {
+      await onReport(post, reason);
+      setReportOpen(false);
+    } catch {
+      // The parent surface displays the localized action error.
+    } finally {
+      setReporting(false);
     }
   };
 
@@ -161,6 +202,64 @@ export function PostCard({ post, onLike, onBookmark }: PostCardProps) {
           </Text>
         </Pressable>
       </View>
+
+      {!post.is_owned ? (
+        <Pressable
+          accessibilityLabel={post.is_reported ? t('reported') : t('reportPost')}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: post.is_reported }}
+          disabled={post.is_reported}
+          onPress={() => setReportOpen(true)}
+          style={({ pressed }) => [
+            styles.reportTrigger,
+            post.is_reported && styles.reportedTrigger,
+            pressed && styles.actionPressed,
+          ]}
+        >
+          <Text style={[styles.reportLabel, post.is_reported && styles.reportedLabel]}>
+            {post.is_reported ? `✓ ${t('reported')}` : `⚑ ${t('report')}`}
+          </Text>
+        </Pressable>
+      ) : null}
+
+      <Modal
+        animationType="fade"
+        onRequestClose={() => !reporting && setReportOpen(false)}
+        transparent
+        visible={reportOpen}
+      >
+        <View style={styles.modalOverlay}>
+          <View accessibilityViewIsModal style={styles.reportSheet}>
+            <Text style={styles.reportTitle}>{t('reportPost')}</Text>
+            <Text style={styles.reportHint}>{t('reportPrompt')}</Text>
+            <View style={styles.reasonList}>
+              {REPORT_REASONS.map((reason) => (
+                <Pressable
+                  accessibilityRole="button"
+                  disabled={reporting}
+                  key={reason}
+                  onPress={() => void handleReport(reason)}
+                  style={({ pressed }) => [
+                    styles.reasonButton,
+                    pressed && styles.actionPressed,
+                  ]}
+                >
+                  <Text style={styles.reasonText}>{reportReasonLabel(reason)}</Text>
+                </Pressable>
+              ))}
+            </View>
+            {reporting ? <ActivityIndicator color={colors.primary} /> : null}
+            <Pressable
+              accessibilityRole="button"
+              disabled={reporting}
+              onPress={() => setReportOpen(false)}
+              style={({ pressed }) => [styles.cancelReport, pressed && styles.actionPressed]}
+            >
+              <Text style={styles.cancelReportText}>{t('cancel')}</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -260,4 +359,46 @@ const styles = StyleSheet.create({
   saveActionActive: { borderColor: colors.primary },
   saveLabel: { color: colors.textMuted, fontSize: 12, fontWeight: '800' },
   saveLabelActive: { color: colors.primary },
+  reportTrigger: {
+    alignSelf: 'flex-end',
+    minHeight: 36,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.pill,
+  },
+  reportedTrigger: { opacity: 0.74 },
+  reportLabel: { color: colors.textMuted, fontSize: 12, fontWeight: '800' },
+  reportedLabel: { color: colors.success },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 10, 18, 0.82)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.lg,
+  },
+  reportSheet: {
+    width: '100%',
+    maxWidth: 480,
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: radius.large,
+    padding: spacing.lg,
+    gap: spacing.md,
+  },
+  reportTitle: { color: colors.text, fontSize: 23, fontWeight: '900' },
+  reportHint: { color: colors.textMuted, lineHeight: 21 },
+  reasonList: { gap: spacing.sm },
+  reasonButton: {
+    minHeight: 48,
+    justifyContent: 'center',
+    backgroundColor: colors.backgroundDeep,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: radius.medium,
+    paddingHorizontal: spacing.md,
+  },
+  reasonText: { color: colors.text, fontSize: 15, fontWeight: '700' },
+  cancelReport: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  cancelReportText: { color: colors.primary, fontWeight: '800' },
 });

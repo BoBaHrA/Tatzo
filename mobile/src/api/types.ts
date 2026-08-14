@@ -67,6 +67,7 @@ export type FeedPost = {
   comments_count: number;
   is_liked: boolean;
   is_bookmarked: boolean;
+  is_reported: boolean;
   is_owned: boolean;
 };
 
@@ -83,6 +84,18 @@ export type FeedLikeResult = {
 
 export type FeedBookmarkResult = {
   bookmarked: boolean;
+};
+
+export type ReportReason =
+  | 'spam'
+  | 'harassment'
+  | 'hate_or_violence'
+  | 'sexual_content'
+  | 'other';
+
+export type FeedReportResult = {
+  reported: boolean;
+  created: boolean;
 };
 
 export type PortfolioWork = {
@@ -117,4 +130,20 @@ export type ProfileFollowResult = {
   is_following: boolean;
   followers_count: number;
   following_count: number;
+};
+
+export type ProfileBlockResult = {
+  is_blocked: boolean;
+};
+
+export type BlockedUser = {
+  id: number;
+  username: string;
+  tag: string | null;
+  is_verified_artist: boolean;
+  profile_image_url: string | null;
+};
+
+export type BlockedUsersResponse = {
+  results: BlockedUser[];
 };

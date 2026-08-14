@@ -2,6 +2,8 @@ import type {
   FeedBookmarkResult,
   FeedLikeResult,
   FeedPage,
+  FeedReportResult,
+  ReportReason,
 } from '@/api/types';
 import type { AuthenticatedRequest } from '@/auth/auth-context';
 
@@ -27,5 +29,16 @@ export function toggleFeedBookmark(
 ): Promise<FeedBookmarkResult> {
   return request<FeedBookmarkResult>(`/feed/${postId}/bookmark/`, {
     method: 'POST',
+  });
+}
+
+export function reportFeedPost(
+  request: AuthenticatedRequest,
+  postId: number,
+  reason: ReportReason,
+): Promise<FeedReportResult> {
+  return request<FeedReportResult>(`/feed/${postId}/report/`, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
   });
 }

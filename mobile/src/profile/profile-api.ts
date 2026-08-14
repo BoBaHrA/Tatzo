@@ -1,4 +1,8 @@
-import type { ProfileFollowResult, PublicProfile } from '@/api/types';
+import type {
+  ProfileBlockResult,
+  ProfileFollowResult,
+  PublicProfile,
+} from '@/api/types';
 import type { AuthenticatedRequest } from '@/auth/auth-context';
 
 
@@ -15,6 +19,16 @@ export function toggleProfileFollow(
 ): Promise<ProfileFollowResult> {
   return request<ProfileFollowResult>(
     `/profiles/${encodeURIComponent(username)}/follow/`,
+    { method: 'POST' },
+  );
+}
+
+export function toggleProfileBlock(
+  request: AuthenticatedRequest,
+  username: string,
+): Promise<ProfileBlockResult> {
+  return request<ProfileBlockResult>(
+    `/profiles/${encodeURIComponent(username)}/block/`,
     { method: 'POST' },
   );
 }

@@ -3,9 +3,9 @@ from urllib.parse import parse_qs, urlparse
 
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.models import update_last_login
-from django.http import Http404
 from django.db import transaction
 from django.db.models import Count, Exists, OuterRef, Q
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.pagination import CursorPagination
@@ -14,16 +14,18 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
-from posts.models import Post, PostBookmark, PostComment, PostLike
+from posts.models import Post, PostBookmark, PostComment, PostLike, PostReport
 from users.models import PortfolioWork, UserBlock, UserFollow
 from users.security import check_rate_limit
 from users.utils import send_verification_email
 from users.views import delete_expired_unverified_duplicate_users
 
 from .serializers import (
+    BlockedUserSerializer,
     FeedPostSerializer,
     MeSerializer,
     MeUpdateSerializer,
+    PostReportRequestSerializer,
     PublicProfileSerializer,
     RegistrationSerializer,
 )
@@ -52,6 +54,9 @@ def _visible_posts_for(viewer):
                     post_id=OuterRef("pk"),
                     user=viewer,
                 )
+            ),
+            viewer_reported=Exists(
+                PostReport.objects.filter(post_id=OuterRef("pk"), user=viewer)
             ),
         )
     )
@@ -361,6 +366,58 @@ class FeedBookmarkView(APIView):
         return Response({"bookmarked": created})
 
 
+class FeedReportView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, post_id):
+        post = get_object_or_404(
+            Post.objects.visible_to(request.user),
+            pk=post_id,
+        )
+        if post.user_id == request.user.pk:
+            return Response(
+                {
+                    "code": "cannot_report_own_post",
+                    "detail": "You cannot report your own post.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        allowed, retry_after = check_rate_limit(
+            request,
+            scope="mobile:reports:post",
+            limit=10,
+            window_seconds=60 * 60,
+            identity="user",
+        )
+        if not allowed:
+            return Response(
+                {
+                    "code": "rate_limited",
+                    "detail": "You are sending reports too quickly.",
+                    "retry_after": retry_after,
+                },
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        serializer = PostReportRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        reason = serializer.validated_data["reason"]
+        details = serializer.validated_data.get("details", "")
+        report_reason = f"{reason}: {details}" if details else reason
+
+        report, created = PostReport.objects.get_or_create(
+            post=post,
+            user=request.user,
+            defaults={"reason": report_reason[:255]},
+        )
+        if not created and details and not report.reason:
+            report.reason = report_reason[:255]
+            report.save(update_fields=("reason",))
+
+        return Response({"reported": True, "created": created})
+
+
 class PublicProfileView(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -429,3 +486,71 @@ class PublicProfileFollowView(APIView):
                 ).count(),
             }
         )
+
+
+class PublicProfileBlockView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, username):
+        target = get_object_or_404(
+            User.objects.select_related("profile"),
+            username=username,
+        )
+        if target.pk == request.user.pk:
+            return Response(
+                {
+                    "code": "cannot_block_self",
+                    "detail": "You cannot block yourself.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        existing = UserBlock.objects.filter(
+            blocker=request.user,
+            blocked=target,
+        ).first()
+        if existing:
+            existing.delete()
+            return Response({"is_blocked": False})
+
+        if (
+            (not target.is_active or not target.profile.is_email_verified)
+            and not request.user.is_staff
+        ):
+            raise Http404
+
+        if UserBlock.objects.filter(
+            blocker=target,
+            blocked=request.user,
+        ).exists():
+            raise Http404
+
+        with transaction.atomic():
+            UserBlock.objects.get_or_create(
+                blocker=request.user,
+                blocked=target,
+            )
+            UserFollow.objects.filter(
+                Q(follower=request.user, following=target)
+                | Q(follower=target, following=request.user)
+            ).delete()
+
+        return Response({"is_blocked": True})
+
+
+class BlockedUsersView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        relations = (
+            UserBlock.objects.filter(blocker=request.user)
+            .select_related("blocked", "blocked__profile")
+            .order_by("-created_at")
+        )
+        users = [relation.blocked for relation in relations]
+        serializer = BlockedUserSerializer(
+            users,
+            many=True,
+            context={"request": request},
+        )
+        return Response({"results": serializer.data})

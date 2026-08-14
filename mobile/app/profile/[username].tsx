@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import {
   ActivityIndicator,
+  Alert,
   Image,
   Pressable,
   StyleSheet,
@@ -10,15 +11,19 @@ import {
 } from 'react-native';
 
 import { ApiError } from '@/api/client';
-import type { FeedPost, PublicProfile } from '@/api/types';
+import type { FeedPost, PublicProfile, ReportReason } from '@/api/types';
 import { useAuth } from '@/auth/auth-context';
 import { BrandHeader } from '@/components/brand-header';
 import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
-import { toggleFeedBookmark, toggleFeedLike } from '@/feed/feed-api';
+import { reportFeedPost, toggleFeedBookmark, toggleFeedLike } from '@/feed/feed-api';
 import { PostCard } from '@/feed/post-card';
 import { t } from '@/i18n';
-import { fetchPublicProfile, toggleProfileFollow } from '@/profile/profile-api';
+import {
+  fetchPublicProfile,
+  toggleProfileBlock,
+  toggleProfileFollow,
+} from '@/profile/profile-api';
 import { colors, radius, spacing } from '@/theme';
 
 
@@ -29,6 +34,7 @@ export default function PublicProfileScreen() {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [following, setFollowing] = useState(false);
+  const [blocking, setBlocking] = useState(false);
   const [loadError, setLoadError] = useState('');
   const [actionError, setActionError] = useState('');
 
@@ -130,6 +136,50 @@ export default function PublicProfileScreen() {
     }
   };
 
+  const reportPost = async (post: FeedPost, reason: ReportReason) => {
+    setActionError('');
+    try {
+      await reportFeedPost(request, post.id, reason);
+      updateRecentPost(post.id, (current) => ({
+        ...current,
+        is_reported: true,
+      }));
+    } catch (error) {
+      setActionError(t('reportError'));
+      throw error;
+    }
+  };
+
+  const blockProfile = async () => {
+    if (!profile || blocking) return;
+    setBlocking(true);
+    setActionError('');
+    try {
+      const result = await toggleProfileBlock(request, profile.username);
+      if (result.is_blocked) router.replace('/(tabs)/home');
+    } catch {
+      setActionError(t('blockError'));
+    } finally {
+      setBlocking(false);
+    }
+  };
+
+  const confirmBlock = () => {
+    if (!profile) return;
+    Alert.alert(
+      t('blockUser'),
+      `${t('blockUserConfirm')} ${profile.username}?`,
+      [
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: t('block'),
+          style: 'destructive',
+          onPress: () => void blockProfile(),
+        },
+      ],
+    );
+  };
+
   return (
     <Screen contentStyle={styles.screen}>
       <Pressable
@@ -199,12 +249,20 @@ export default function PublicProfileScreen() {
                 variant="secondary"
               />
             ) : (
-              <Button
-                label={profile.is_following ? t('following') : t('follow')}
-                loading={following}
-                onPress={() => void followProfile()}
-                variant={profile.is_following ? 'secondary' : 'primary'}
-              />
+              <View style={styles.profileActions}>
+                <Button
+                  label={profile.is_following ? t('following') : t('follow')}
+                  loading={following}
+                  onPress={() => void followProfile()}
+                  variant={profile.is_following ? 'secondary' : 'primary'}
+                />
+                <Button
+                  label={t('blockUser')}
+                  loading={blocking}
+                  onPress={confirmBlock}
+                  variant="danger"
+                />
+              </View>
             )}
           </View>
 
@@ -256,6 +314,7 @@ export default function PublicProfileScreen() {
                 key={post.id}
                 onBookmark={bookmarkPost}
                 onLike={likePost}
+                onReport={reportPost}
                 post={post}
               />
             )) : <Text style={styles.mutedLeft}>{t('recentPostsEmpty')}</Text>}
@@ -328,6 +387,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   bio: { color: colors.text, fontSize: 15, lineHeight: 23 },
+  profileActions: { gap: spacing.sm },
   stats: {
     flexDirection: 'row',
     backgroundColor: colors.backgroundDeep,

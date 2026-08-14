@@ -254,6 +254,7 @@ class FeedPostSerializer(serializers.Serializer):
     comments_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
     is_bookmarked = serializers.SerializerMethodField()
+    is_reported = serializers.SerializerMethodField()
     is_owned = serializers.SerializerMethodField()
 
     def get_likes_count(self, post):
@@ -269,6 +270,9 @@ class FeedPostSerializer(serializers.Serializer):
 
     def get_is_bookmarked(self, post):
         return bool(getattr(post, "viewer_bookmarked", False))
+
+    def get_is_reported(self, post):
+        return bool(getattr(post, "viewer_reported", False))
 
     def get_is_owned(self, post):
         request = self.context.get("request")
@@ -307,6 +311,41 @@ class PublicProfileSerializer(serializers.Serializer):
     is_self = serializers.BooleanField(read_only=True)
     portfolio = PortfolioWorkSerializer(many=True, read_only=True)
     recent_posts = FeedPostSerializer(many=True, read_only=True)
+
+    def get_profile_image_url(self, user):
+        return _absolute_file_url(
+            user.profile.profile_image,
+            self.context.get("request"),
+        )
+
+
+class PostReportRequestSerializer(serializers.Serializer):
+    reason = serializers.ChoiceField(
+        choices=(
+            "spam",
+            "harassment",
+            "hate_or_violence",
+            "sexual_content",
+            "other",
+        )
+    )
+    details = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=180,
+        trim_whitespace=True,
+    )
+
+
+class BlockedUserSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    username = serializers.CharField(read_only=True)
+    tag = serializers.CharField(source="profile.tag", read_only=True, allow_null=True)
+    is_verified_artist = serializers.BooleanField(
+        source="profile.is_verified_artist",
+        read_only=True,
+    )
+    profile_image_url = serializers.SerializerMethodField()
 
     def get_profile_image_url(self, user):
         return _absolute_file_url(

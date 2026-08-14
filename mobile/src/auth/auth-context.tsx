@@ -33,6 +33,7 @@ type AuthContextValue = {
   signIn: (identifier: string, password: string) => Promise<void>;
   register: (payload: RegistrationPayload) => Promise<string>;
   signOut: () => Promise<void>;
+  deleteAccount: (password: string) => Promise<void>;
   refreshProfile: () => Promise<void>;
   updateProfile: (payload: ProfileUpdate) => Promise<void>;
 };
@@ -155,6 +156,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setStatus('anonymous');
   }, []);
 
+  const deleteAccount = useCallback(async (password: string) => {
+    await request<void>('/me/', {
+      method: 'DELETE',
+      body: JSON.stringify({ password }),
+    });
+    await clearTokens();
+    setUser(null);
+    setStatus('anonymous');
+  }, [request]);
+
   const refreshProfile = useCallback(async () => {
     const profile = await request<TatzoUser>('/me/');
     setUser(profile);
@@ -176,10 +187,21 @@ export function AuthProvider({ children }: PropsWithChildren) {
       signIn,
       register,
       signOut,
+      deleteAccount,
       refreshProfile,
       updateProfile,
     }),
-    [status, user, request, signIn, register, signOut, refreshProfile, updateProfile],
+    [
+      status,
+      user,
+      request,
+      signIn,
+      register,
+      signOut,
+      deleteAccount,
+      refreshProfile,
+      updateProfile,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

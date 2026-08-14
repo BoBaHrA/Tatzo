@@ -1,11 +1,19 @@
 from django.contrib.auth import get_user_model
 from django.core import mail
+from django.db.models import Q
 from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from posts.models import Post, PostBookmark, PostComment, PostLike, PostMedia
+from posts.models import (
+    Post,
+    PostBookmark,
+    PostComment,
+    PostLike,
+    PostMedia,
+    PostReport,
+)
 from users.models import PortfolioWork, UserBlock, UserFollow
 
 User = get_user_model()
@@ -194,6 +202,7 @@ class MobileFeedTests(APITestCase):
         self.assertEqual(item["comments_count"], 1)
         self.assertTrue(item["is_liked"])
         self.assertTrue(item["is_bookmarked"])
+        self.assertFalse(item["is_reported"])
         self.assertFalse(item["is_owned"])
         self.assertEqual(item["media"][0]["type"], "image")
         self.assertTrue(item["media"][0]["url"].endswith("/posts/example/tattoo.jpg"))
@@ -273,6 +282,54 @@ class MobileFeedTests(APITestCase):
         )
         self.assertEqual(like.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(bookmark.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_feed_report_is_idempotent_and_marks_viewer_state(self):
+        post = Post.objects.create(user=self.author, content="Report me")
+        url = reverse("mobile_api:feed_report", args=[post.pk])
+
+        first = self.client.post(url, {"reason": "spam"}, format="json")
+        self.assertEqual(first.status_code, status.HTTP_200_OK)
+        self.assertTrue(first.data["reported"])
+        self.assertTrue(first.data["created"])
+        self.assertEqual(
+            PostReport.objects.get(post=post, user=self.viewer).reason,
+            "spam",
+        )
+
+        duplicate = self.client.post(url, {"reason": "other"}, format="json")
+        self.assertEqual(duplicate.status_code, status.HTTP_200_OK)
+        self.assertFalse(duplicate.data["created"])
+        self.assertEqual(PostReport.objects.filter(post=post).count(), 1)
+
+        feed = self.client.get(reverse("mobile_api:feed"))
+        self.assertTrue(feed.data["results"][0]["is_reported"])
+
+    def test_feed_report_rejects_invalid_own_and_invisible_posts(self):
+        own = Post.objects.create(user=self.viewer, content="Mine")
+        invalid = self.client.post(
+            reverse("mobile_api:feed_report", args=[own.pk]),
+            {"reason": "not-a-reason"},
+            format="json",
+        )
+        self.assertEqual(invalid.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(invalid.data["code"], "cannot_report_own_post")
+
+        visible = Post.objects.create(user=self.author, content="Visible")
+        bad_reason = self.client.post(
+            reverse("mobile_api:feed_report", args=[visible.pk]),
+            {"reason": "not-a-reason"},
+            format="json",
+        )
+        self.assertEqual(bad_reason.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("reason", bad_reason.data)
+
+        private = Post.objects.create(user=self.author, visibility="private")
+        hidden = self.client.post(
+            reverse("mobile_api:feed_report", args=[private.pk]),
+            {"reason": "spam"},
+            format="json",
+        )
+        self.assertEqual(hidden.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class MobilePublicProfileTests(APITestCase):
@@ -409,3 +466,88 @@ class MobilePublicProfileTests(APITestCase):
             reverse("mobile_api:public_profile", args=[self.artist.username])
         )
         self.assertEqual(unverified.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class MobileSafetyTests(APITestCase):
+    def setUp(self):
+        self.viewer = User.objects.create_user(
+            "safety-viewer",
+            email="safety-viewer@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        self.target = User.objects.create_user(
+            "safety-target",
+            email="safety-target@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        self.target.profile.is_email_verified = True
+        self.target.profile.save(update_fields=("is_email_verified",))
+        self.client.force_authenticate(self.viewer)
+
+    def test_block_requires_authentication(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.post(
+            reverse("mobile_api:public_profile_block", args=[self.target.username])
+        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_block_hides_user_removes_follows_and_can_be_reversed(self):
+        post = Post.objects.create(user=self.target, content="Hidden after block")
+        UserFollow.objects.create(follower=self.viewer, following=self.target)
+        UserFollow.objects.create(follower=self.target, following=self.viewer)
+        block_url = reverse(
+            "mobile_api:public_profile_block",
+            args=[self.target.username],
+        )
+
+        blocked = self.client.post(block_url)
+        self.assertEqual(blocked.status_code, status.HTTP_200_OK)
+        self.assertTrue(blocked.data["is_blocked"])
+        self.assertTrue(
+            UserBlock.objects.filter(
+                blocker=self.viewer,
+                blocked=self.target,
+            ).exists()
+        )
+        self.assertFalse(
+            UserFollow.objects.filter(
+                Q(follower=self.viewer, following=self.target)
+                | Q(follower=self.target, following=self.viewer)
+            ).exists()
+        )
+
+        profile = self.client.get(
+            reverse("mobile_api:public_profile", args=[self.target.username])
+        )
+        self.assertEqual(profile.status_code, status.HTTP_404_NOT_FOUND)
+        feed = self.client.get(reverse("mobile_api:feed"))
+        self.assertNotIn(post.pk, {item["id"] for item in feed.data["results"]})
+
+        blocked_users = self.client.get(reverse("mobile_api:blocked_users"))
+        self.assertEqual(blocked_users.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            blocked_users.data["results"][0]["username"],
+            self.target.username,
+        )
+
+        unblocked = self.client.post(block_url)
+        self.assertFalse(unblocked.data["is_blocked"])
+        self.assertFalse(
+            UserBlock.objects.filter(
+                blocker=self.viewer,
+                blocked=self.target,
+            ).exists()
+        )
+        restored_profile = self.client.get(
+            reverse("mobile_api:public_profile", args=[self.target.username])
+        )
+        self.assertEqual(restored_profile.status_code, status.HTTP_200_OK)
+
+    def test_user_cannot_block_self(self):
+        response = self.client.post(
+            reverse("mobile_api:public_profile_block", args=[self.viewer.username])
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["code"], "cannot_block_self")

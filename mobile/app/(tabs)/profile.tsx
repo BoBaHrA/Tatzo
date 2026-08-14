@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, Linking, StyleSheet, Text, View } from 'react-native';
 
 import { useAuth } from '@/auth/auth-context';
 import { BrandHeader } from '@/components/brand-header';
@@ -43,6 +43,25 @@ export default function ProfileScreen() {
         <Detail label="Timezone" value={user.timezone} />
       </View>
       <Button label={t('editProfile')} onPress={() => router.push('/edit-profile')} />
+      <View style={styles.safetyCard}>
+        <Text style={styles.safetyTitle}>{t('safety')}</Text>
+        <Text style={styles.safetyText}>{t('safetySubtitle')}</Text>
+        <Button
+          label={t('blockedUsers')}
+          onPress={() => router.push('/blocked-users')}
+          variant="secondary"
+        />
+        <Button
+          label={t('contactSafetySupport')}
+          onPress={() => void Linking.openURL('mailto:contact@tatzo.eu')}
+          variant="secondary"
+        />
+        <Button
+          label={t('deleteAccount')}
+          onPress={() => router.push('/delete-account')}
+          variant="danger"
+        />
+      </View>
       <Button label={t('signOut')} variant="secondary" onPress={() => void signOut()} />
     </Screen>
   );
@@ -67,4 +86,7 @@ const styles = StyleSheet.create({
   detailRow: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.md, padding: spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
   detailLabel: { color: colors.textMuted },
   detailValue: { color: colors.text, fontWeight: '700', flexShrink: 1, textAlign: 'right' },
+  safetyCard: { backgroundColor: colors.surface, borderRadius: radius.medium, borderWidth: 1, borderColor: colors.border, padding: spacing.md, gap: spacing.sm },
+  safetyTitle: { color: colors.text, fontSize: 20, fontWeight: '900' },
+  safetyText: { color: colors.textMuted, lineHeight: 21 },
 });

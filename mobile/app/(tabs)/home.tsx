@@ -9,12 +9,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import type { FeedPost } from '@/api/types';
+import type { FeedPost, ReportReason } from '@/api/types';
 import { useAuth } from '@/auth/auth-context';
 import { BrandHeader } from '@/components/brand-header';
 import { Button } from '@/components/button';
 import {
   fetchFeed,
+  reportFeedPost,
   toggleFeedBookmark,
   toggleFeedLike,
 } from '@/feed/feed-api';
@@ -110,6 +111,19 @@ export default function HomeScreen() {
     }
   };
 
+  const reportPost = async (post: FeedPost, reason: ReportReason) => {
+    setActionError('');
+    try {
+      await reportFeedPost(request, post.id, reason);
+      setPosts((current) => current.map((item) => (
+        item.id === post.id ? { ...item, is_reported: true } : item
+      )));
+    } catch (error) {
+      setActionError(t('reportError'));
+      throw error;
+    }
+  };
+
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={styles.safe}>
       <FlatList
@@ -162,6 +176,7 @@ export default function HomeScreen() {
           <PostCard
             onBookmark={bookmarkPost}
             onLike={likePost}
+            onReport={reportPost}
             post={item}
           />
         )}
