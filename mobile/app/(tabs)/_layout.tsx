@@ -19,16 +19,17 @@ export default function TabsLayout() {
   }
   return (
     <Tabs
-      initialRouteName="home"
+      initialRouteName="map"
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: { backgroundColor: colors.backgroundDeep, borderTopColor: colors.border, height: 66, paddingTop: 8 },
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '700', paddingBottom: 6 },
+        tabBarLabelStyle: { fontSize: 10, fontWeight: '700', paddingBottom: 6 },
         sceneStyle: { backgroundColor: colors.background },
       }}
     >
+      <Tabs.Screen name="map" options={{ title: t('mapTab'), tabBarIcon: ({ color }) => <TabSymbol symbol="⌖" color={color} /> }} />
       <Tabs.Screen name="home" options={{ title: t('home'), tabBarIcon: ({ color }) => <TabSymbol symbol="⌂" color={color} /> }} />
       <Tabs.Screen name="match" options={{ title: t('styleMatch'), tabBarIcon: ({ color }) => <TabSymbol symbol="✦" color={color} /> }} />
       <Tabs.Screen name="bookings" options={{ title: t('bookings'), tabBarIcon: ({ color }) => <TabSymbol symbol="⌁" color={color} /> }} />

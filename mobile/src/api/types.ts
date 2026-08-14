@@ -148,6 +148,61 @@ export type BlockedUsersResponse = {
   results: BlockedUser[];
 };
 
+export type MapMarkerKind = 'artist' | 'studio';
+export type MapBookingMode = 'accepting' | 'online' | 'in_person';
+
+export type MapLocationMarker = {
+  marker_id: string;
+  location_id: number;
+  kind: MapMarkerKind;
+  name: string;
+  tag: string | null;
+  username: string | null;
+  avatar_url: string | null;
+  address: string;
+  city: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+  status: string;
+  styles: string[];
+  booking_modes: MapBookingMode[];
+  can_book: boolean;
+  portfolio_count: number;
+  website: string | null;
+  phone: string | null;
+  claimable: boolean;
+  claim_status: string | null;
+};
+
+export type MapLocationsResponse = {
+  results: MapLocationMarker[];
+  count: number;
+  total: number;
+  has_more: boolean;
+  next_offset: number | null;
+  viewport: {
+    artists: number;
+    studios: number;
+  };
+  filters: {
+    styles: string[];
+    booking: MapBookingMode[];
+  };
+  capabilities: {
+    availability: boolean;
+    distance: boolean;
+    rating: boolean;
+    price: boolean;
+  };
+};
+
+export type MapSubmissionResponse = {
+  id: number;
+  status: string;
+  detail: string;
+};
+
 export type ChatUser = {
   id: number;
   username: string;

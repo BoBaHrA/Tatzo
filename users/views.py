@@ -2027,11 +2027,47 @@ def submit_location_claim(request, location_id):
     proof_document = request.FILES.get("proof_document")
     message = (request.POST.get("message") or "").strip()
 
+    claim_checks = (
+        check_rate_limit(
+            request,
+            scope="maps:claim:user-or-ip",
+            limit=5,
+            window_seconds=24 * 60 * 60,
+            identity="user_or_ip",
+        ),
+        check_rate_limit(
+            request,
+            scope="maps:claim:email",
+            limit=5,
+            window_seconds=24 * 60 * 60,
+            value=contact_email,
+        ),
+        check_rate_limit(
+            request,
+            scope="maps:claim:ip",
+            limit=10,
+            window_seconds=60 * 60,
+            identity="ip",
+        ),
+    )
+    if not all(allowed for allowed, _retry_after in claim_checks):
+        messages.error(request, _("Too many claim requests. Please try again later."))
+        return redirect("maps_page")
+
     if not claimant_name or not contact_email or not relation:
         messages.error(
             request,
             _("Please provide your name, contact email and relation to this location."),
         )
+        return redirect("maps_page")
+
+    if (
+        len(claimant_name) > 160
+        or len(relation) > 160
+        or len(proof) > 3000
+        or len(message) > 3000
+    ):
+        messages.error(request, _("One or more claim fields are too long."))
         return redirect("maps_page")
 
     try:
@@ -2099,11 +2135,50 @@ def submit_location_request(request):
     longitude = (request.POST.get("longitude") or "").strip()
     message = (request.POST.get("message") or "").strip()
 
+    request_checks = (
+        check_rate_limit(
+            request,
+            scope="maps:location-request:user-or-ip",
+            limit=3,
+            window_seconds=24 * 60 * 60,
+            identity="user_or_ip",
+        ),
+        check_rate_limit(
+            request,
+            scope="maps:location-request:email",
+            limit=3,
+            window_seconds=24 * 60 * 60,
+            value=contact_email,
+        ),
+        check_rate_limit(
+            request,
+            scope="maps:location-request:ip",
+            limit=8,
+            window_seconds=60 * 60,
+            identity="ip",
+        ),
+    )
+    if not all(allowed for allowed, _retry_after in request_checks):
+        messages.error(request, _("Too many location requests. Please try again later."))
+        return redirect("maps_page")
+
     if not name or not city or not country or not full_address or not contact_email:
         messages.error(
             request,
             _("Please provide the location name, city, country, full street address, and contact email."),
         )
+        return redirect("maps_page")
+
+    if (
+        len(name) > 160
+        or len(city) > 120
+        or len(country) > 120
+        or len(full_address) > 1000
+        or len(website_or_map_link) > 500
+        or len(phone) > 60
+        or len(message) > 3000
+    ):
+        messages.error(request, _("One or more location fields are too long."))
         return redirect("maps_page")
 
     try:
@@ -2124,6 +2199,10 @@ def submit_location_request(request):
             longitude_value = Decimal(longitude)
         except (InvalidOperation, TypeError):
             messages.error(request, _("Please enter valid latitude and longitude values."))
+            return redirect("maps_page")
+
+        if not latitude_value.is_finite() or not longitude_value.is_finite():
+            messages.error(request, _("Please enter finite latitude and longitude values."))
             return redirect("maps_page")
 
         if not (Decimal("-90") <= latitude_value <= Decimal("90")) or not (
@@ -2232,7 +2311,7 @@ def maps_page(request):
     )
 
     artist_cards = []
-    for index, artist in enumerate(verified_artists[:36]):
+    for index, artist in enumerate(verified_artists):
         manual_request = getattr(artist, "manualverificationrequest", None)
         location_obj = (
             Location.objects
@@ -2284,14 +2363,14 @@ def maps_page(request):
         ]
 
         booking_modes = []
-        if booking_settings and booking_settings.bookings_enabled:
+        if booking_settings is None or booking_settings.bookings_enabled:
             booking_modes.append("Accepting new clients")
-            if booking_settings.online_consultation_enabled:
+            if booking_settings and booking_settings.online_consultation_enabled:
                 booking_modes.append("Online consult")
-            if booking_settings.studio_consultation_enabled:
+            if booking_settings and booking_settings.studio_consultation_enabled:
                 booking_modes.append("In-person")
 
-        can_book = bool(booking_settings and booking_settings.bookings_enabled)
+        can_book = booking_settings is None or booking_settings.bookings_enabled
         location_kind = (
             _("Registered Tatzo artist with verified/imported location")
             if source == "verified"
@@ -2310,7 +2389,11 @@ def maps_page(request):
             artist.profile,
             field_name="longitude",
         )
-        has_map_marker = bool(has_confirmed_location and latitude and longitude)
+        has_map_marker = bool(
+            has_confirmed_location
+            and latitude is not None
+            and longitude is not None
+        )
 
         artist_cards.append({
             "user": artist,

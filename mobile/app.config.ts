@@ -1,5 +1,13 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
+const androidMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY;
+const mapsPlugin: NonNullable<ExpoConfig['plugins']>[number] = androidMapsApiKey
+  ? [
+      'react-native-maps',
+      { androidGoogleMapsApiKey: androidMapsApiKey },
+    ]
+  : 'react-native-maps';
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Tatzo',
@@ -27,6 +35,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     'expo-router',
     'expo-localization',
+    mapsPlugin,
+    [
+      'expo-location',
+      {
+        locationWhenInUsePermission: 'Allow Tatzo to show tattoo artists and studios near you.',
+      },
+    ],
     [
       'expo-image-picker',
       {

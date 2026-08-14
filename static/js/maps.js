@@ -17,7 +17,7 @@
   let isPickingLocationPin = false;
   let pickedLocationMarker = null;
   let addLocationDialog = null;
-  const leafletMarkersByArtist = new Map();
+  const leafletMarkersByKey = new Map();
   const activeStyleFilters = new Set();
   const activeBookingFilters = new Set();
   const i18nNode = document.getElementById("maps-i18n");
@@ -113,7 +113,8 @@
   function safeExternalUrl(value) {
     if (!value) return "";
     try {
-      const url = new URL(value, window.location.origin);
+      const normalized = /^[a-z][a-z\d+.-]*:/i.test(value) ? value : `https://${value}`;
+      const url = new URL(normalized);
       return ["http:", "https:"].includes(url.protocol) ? url.href : "";
     } catch (_error) {
       return "";
@@ -315,7 +316,7 @@
       `);
 
       addMarkerToLayer(marker);
-      leafletMarkersByArtist.set(card.dataset.artist, marker);
+      leafletMarkersByKey.set(card.dataset.mapKey, marker);
       marker.on("click", () => {
         if (isMobileMapLayout()) {
           map.closePopup();
@@ -349,10 +350,10 @@
       const hidden = !(sourceMatch && textMatch && styleMatch && bookingMatch);
       card.classList.toggle("is-hidden", hidden);
       pins
-        .filter((pin) => pin.dataset.pinArtist === card.dataset.artist)
+        .filter((pin) => pin.dataset.pinKey === card.dataset.mapKey)
         .forEach((pin) => pin.classList.toggle("is-hidden", hidden));
 
-      const marker = leafletMarkersByArtist.get(card.dataset.artist);
+      const marker = leafletMarkersByKey.get(card.dataset.mapKey);
       if (leafletMap && marker) {
         if (hidden) {
           removeMarkerFromLayer(marker);

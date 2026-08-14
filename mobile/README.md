@@ -13,6 +13,11 @@ through the versioned JSON API under `/api/v1/`.
 2. Install dependencies with `npm ci`.
 3. Run `npm start`, then choose Android, iOS, or a development build.
 
+The native map uses Apple Maps on iOS and Google Maps on Android. Expo Go can
+render it without extra setup; store and standalone Android builds must provide
+`EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY`, restricted to `eu.tatzo.app` and the
+build signing certificate.
+
 Tokens are stored with `expo-secure-store`. Access tokens are short-lived;
 refresh tokens rotate and the replaced token is blacklisted by Django.
 
@@ -34,5 +39,8 @@ refresh tokens rotate and the replaced token is blacklisted by Django.
   photo/video/file attachments, message editing/deletion, and two-way block enforcement.
 - native four-step booking with artist availability, calendar exclusions, consultation
   rules, body placement, private reference images, request tracking, and artist actions.
+- native map-first discovery with viewport pagination, artist/studio markers, clustering,
+  map/list modes, style and booking filters, foreground geolocation, block-aware results,
+  private studio claims, and moderated add-location requests.
 
-The next slice is map discovery.
+The next slice is mobile notifications and artist-side workflow polish.

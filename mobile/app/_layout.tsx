@@ -24,6 +24,8 @@ export default function RootLayout() {
           <Stack.Screen name="chat/[threadId]" />
           <Stack.Screen name="booking/[username]" />
           <Stack.Screen name="appointment/[appointmentId]" />
+          <Stack.Screen name="map/add-location" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="map/claim/[locationId]" options={{ presentation: 'modal' }} />
         </Stack>
       </ChatProvider>
     </AuthProvider>

@@ -17,6 +17,11 @@ from .booking_views import (
     AppointmentReferenceUploadView,
     BookingArtistView,
 )
+from .map_views import (
+    MapLocationClaimView,
+    MapLocationListView,
+    MapLocationRequestView,
+)
 
 from .views import (
     BlockedUsersView,
@@ -46,6 +51,17 @@ urlpatterns = [
     path("auth/logout/", LogoutView.as_view(), name="logout"),
     path("me/", MeView.as_view(), name="me"),
     path("me/blocked-users/", BlockedUsersView.as_view(), name="blocked_users"),
+    path("map/locations/", MapLocationListView.as_view(), name="map_locations"),
+    path(
+        "map/locations/request/",
+        MapLocationRequestView.as_view(),
+        name="map_location_request",
+    ),
+    path(
+        "map/locations/<int:location_id>/claim/",
+        MapLocationClaimView.as_view(),
+        name="map_location_claim",
+    ),
     path("appointments/", AppointmentListView.as_view(), name="appointment_list"),
     path(
         "appointments/book/<str:username>/",

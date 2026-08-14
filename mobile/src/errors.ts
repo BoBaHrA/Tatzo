@@ -16,6 +16,12 @@ export function userFacingError(error: unknown): string {
   if (error.body.code === 'rate_limited') {
     return t('rateLimited');
   }
+  if (error.body.code === 'location_request_exists') {
+    return t('mapLocationAlreadyPending');
+  }
+  if (error.body.code === 'claim_exists') {
+    return t('mapClaimAlreadyPending');
+  }
 
   const fieldError = Object.values(error.body).find(Array.isArray);
   if (Array.isArray(fieldError) && typeof fieldError[0] === 'string') {
