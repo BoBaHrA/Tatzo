@@ -22,10 +22,17 @@ from .map_views import (
     MapLocationListView,
     MapLocationRequestView,
 )
+from .notification_views import (
+    NotificationListView,
+    NotificationReadAllView,
+    NotificationReadView,
+    NotificationUnreadCountView,
+)
 
 from .views import (
     BlockedUsersView,
     FeedBookmarkView,
+    FeedDetailView,
     FeedLikeView,
     FeedReportView,
     FeedView,
@@ -51,6 +58,22 @@ urlpatterns = [
     path("auth/logout/", LogoutView.as_view(), name="logout"),
     path("me/", MeView.as_view(), name="me"),
     path("me/blocked-users/", BlockedUsersView.as_view(), name="blocked_users"),
+    path("notifications/", NotificationListView.as_view(), name="notifications"),
+    path(
+        "notifications/unread-count/",
+        NotificationUnreadCountView.as_view(),
+        name="notification_unread_count",
+    ),
+    path(
+        "notifications/read-all/",
+        NotificationReadAllView.as_view(),
+        name="notification_read_all",
+    ),
+    path(
+        "notifications/<int:notification_id>/read/",
+        NotificationReadView.as_view(),
+        name="notification_read",
+    ),
     path("map/locations/", MapLocationListView.as_view(), name="map_locations"),
     path(
         "map/locations/request/",
@@ -130,6 +153,7 @@ urlpatterns = [
         name="public_profile_block",
     ),
     path("feed/", FeedView.as_view(), name="feed"),
+    path("feed/<int:post_id>/", FeedDetailView.as_view(), name="feed_detail"),
     path("feed/<int:post_id>/like/", FeedLikeView.as_view(), name="feed_like"),
     path(
         "feed/<int:post_id>/bookmark/",

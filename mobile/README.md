@@ -42,5 +42,7 @@ refresh tokens rotate and the replaced token is blacklisted by Django.
 - native map-first discovery with viewport pagination, artist/studio markers, clustering,
   map/list modes, style and booking filters, foreground geolocation, block-aware results,
   private studio claims, and moderated add-location requests.
+- native in-app notifications for follows, likes, comments, replies, chats, and booking
+  changes, with unread polling, cursor pagination, read controls, and protected deep links.
 
-The next slice is mobile notifications and artist-side workflow polish.
+The next slice is artist-side workflow polish and device push-token delivery.

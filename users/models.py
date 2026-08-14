@@ -424,7 +424,103 @@ class ChatMessage(models.Model):
 
     class Meta:
         ordering = ["created_at"]
-    
+
+
+class Notification(models.Model):
+    KIND_FOLLOW = "follow"
+    KIND_POST_LIKE = "post_like"
+    KIND_POST_COMMENT = "post_comment"
+    KIND_COMMENT_REPLY = "comment_reply"
+    KIND_CHAT_MESSAGE = "chat_message"
+    KIND_BOOKING_REQUEST = "booking_request"
+    KIND_BOOKING_UPDATE = "booking_update"
+
+    KIND_CHOICES = [
+        (KIND_FOLLOW, "Follow"),
+        (KIND_POST_LIKE, "Post like"),
+        (KIND_POST_COMMENT, "Post comment"),
+        (KIND_COMMENT_REPLY, "Comment reply"),
+        (KIND_CHAT_MESSAGE, "Chat message"),
+        (KIND_BOOKING_REQUEST, "Booking request"),
+        (KIND_BOOKING_UPDATE, "Booking update"),
+    ]
+
+    recipient = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="notifications",
+    )
+    actor = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name="triggered_notifications",
+        blank=True,
+        null=True,
+    )
+    kind = models.CharField(max_length=32, choices=KIND_CHOICES)
+    dedupe_key = models.CharField(max_length=120)
+    post = models.ForeignKey(
+        "posts.Post",
+        on_delete=models.CASCADE,
+        related_name="+",
+        blank=True,
+        null=True,
+    )
+    comment = models.ForeignKey(
+        "posts.PostComment",
+        on_delete=models.CASCADE,
+        related_name="+",
+        blank=True,
+        null=True,
+    )
+    appointment = models.ForeignKey(
+        "appointments.Appointment",
+        on_delete=models.CASCADE,
+        related_name="+",
+        blank=True,
+        null=True,
+    )
+    thread = models.ForeignKey(
+        ChatThread,
+        on_delete=models.CASCADE,
+        related_name="+",
+        blank=True,
+        null=True,
+    )
+    message = models.ForeignKey(
+        ChatMessage,
+        on_delete=models.CASCADE,
+        related_name="+",
+        blank=True,
+        null=True,
+    )
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=("recipient", "dedupe_key"),
+                name="users_notif_rec_dedupe_uniq",
+            )
+        ]
+        indexes = [
+            models.Index(
+                fields=("recipient", "is_read", "-created_at"),
+                name="users_notif_rec_read_idx",
+            ),
+            models.Index(
+                fields=("recipient", "-created_at"),
+                name="users_notif_rec_date_idx",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.kind} notification for {self.recipient.username}"
+
+
 class ChatAttachment(models.Model):
     
     MEDIA_TYPE_CHOICES = [

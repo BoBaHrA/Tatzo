@@ -397,6 +397,16 @@ class FeedView(APIView):
         return paginator.get_paginated_response(serializer.data)
 
 
+class FeedDetailView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, post_id):
+        post = get_object_or_404(_visible_posts_for(request.user), pk=post_id)
+        return Response(
+            FeedPostSerializer(post, context={"request": request}).data
+        )
+
+
 class FeedLikeView(APIView):
     permission_classes = (IsAuthenticated,)
 

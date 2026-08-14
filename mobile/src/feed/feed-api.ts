@@ -2,6 +2,7 @@ import type {
   FeedBookmarkResult,
   FeedLikeResult,
   FeedPage,
+  FeedPost,
   FeedReportResult,
   ReportReason,
 } from '@/api/types';
@@ -14,6 +15,13 @@ export function fetchFeed(
 ): Promise<FeedPage> {
   const cursorQuery = cursor ? `&cursor=${encodeURIComponent(cursor)}` : '';
   return request<FeedPage>(`/feed/?limit=10${cursorQuery}`);
+}
+
+export function fetchFeedPost(
+  request: AuthenticatedRequest,
+  postId: number,
+): Promise<FeedPost> {
+  return request<FeedPost>(`/feed/${postId}/`);
 }
 
 export function toggleFeedLike(

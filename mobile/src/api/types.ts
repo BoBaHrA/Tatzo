@@ -386,6 +386,53 @@ export type AppointmentListResponse = {
   results: Appointment[];
 };
 
+export type NotificationKind =
+  | 'follow'
+  | 'post_like'
+  | 'post_comment'
+  | 'comment_reply'
+  | 'chat_message'
+  | 'booking_request'
+  | 'booking_update';
+
+export type NotificationTarget =
+  | { type: 'profile'; username: string }
+  | { type: 'post'; id: number }
+  | { type: 'appointment'; id: number }
+  | { type: 'chat'; id: number }
+  | { type: 'none' };
+
+export type NotificationItem = {
+  id: number;
+  kind: NotificationKind;
+  actor: FeedAuthor | null;
+  target: NotificationTarget;
+  preview: string;
+  appointment_status: AppointmentStatus | null;
+  appointment_status_label: string | null;
+  appointment_date: string | null;
+  is_read: boolean;
+  created_at: string;
+  read_at: string | null;
+};
+
+export type NotificationPage = {
+  unread_count: number;
+  next_cursor: string | null;
+  has_more: boolean;
+  results: NotificationItem[];
+};
+
+export type NotificationCountResponse = {
+  unread_count: number;
+};
+
+export type NotificationReadResponse = NotificationCountResponse & {
+  id?: number;
+  is_read?: boolean;
+  updated?: number;
+};
+
 export type StyleMatchCard = {
   id: number;
   card_id: string;
