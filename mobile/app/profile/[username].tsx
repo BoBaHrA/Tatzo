@@ -272,10 +272,20 @@ export default function PublicProfileScreen() {
               />
             ) : (
               <View style={styles.profileActions}>
+                {profile.is_verified_artist ? (
+                  <Button
+                    label={t('bookNow')}
+                    onPress={() => router.push({
+                      pathname: '/booking/[username]',
+                      params: { username: profile.username },
+                    })}
+                  />
+                ) : null}
                 <Button
                   label={chatStarting ? t('chatStarting') : t('openChat')}
                   loading={chatStarting}
                   onPress={() => void openChat()}
+                  variant={profile.is_verified_artist ? 'secondary' : 'primary'}
                 />
                 <Button
                   label={profile.is_following ? t('following') : t('follow')}

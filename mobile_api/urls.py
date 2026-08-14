@@ -9,6 +9,14 @@ from .chat_views import (
     ChatThreadView,
     StartChatView,
 )
+from .booking_views import (
+    AppointmentActionView,
+    AppointmentDetailView,
+    AppointmentListView,
+    AppointmentReferenceView,
+    AppointmentReferenceUploadView,
+    BookingArtistView,
+)
 
 from .views import (
     BlockedUsersView,
@@ -38,6 +46,32 @@ urlpatterns = [
     path("auth/logout/", LogoutView.as_view(), name="logout"),
     path("me/", MeView.as_view(), name="me"),
     path("me/blocked-users/", BlockedUsersView.as_view(), name="blocked_users"),
+    path("appointments/", AppointmentListView.as_view(), name="appointment_list"),
+    path(
+        "appointments/book/<str:username>/",
+        BookingArtistView.as_view(),
+        name="appointment_booking",
+    ),
+    path(
+        "appointments/<int:appointment_id>/",
+        AppointmentDetailView.as_view(),
+        name="appointment_detail",
+    ),
+    path(
+        "appointments/<int:appointment_id>/action/",
+        AppointmentActionView.as_view(),
+        name="appointment_action",
+    ),
+    path(
+        "appointments/<int:appointment_id>/references/",
+        AppointmentReferenceUploadView.as_view(),
+        name="appointment_reference_upload",
+    ),
+    path(
+        "appointments/references/<int:reference_id>/",
+        AppointmentReferenceView.as_view(),
+        name="appointment_reference",
+    ),
     path("chat/", ChatListView.as_view(), name="chat_list"),
     path(
         "chat/start/<str:username>/",

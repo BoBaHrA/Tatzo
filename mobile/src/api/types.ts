@@ -198,6 +198,139 @@ export type ChatThreadDetail = ChatThreadSummary & {
   has_more: boolean;
 };
 
+export type BookingType =
+  | 'tattoo_session'
+  | 'consultation'
+  | 'online_consultation';
+
+export type AppointmentStatus =
+  | 'pending'
+  | 'accepted'
+  | 'declined'
+  | 'cancelled'
+  | 'completed'
+  | 'needs_references'
+  | 'consultation_required';
+
+export type AppointmentAction =
+  | 'accept'
+  | 'decline'
+  | 'need_references'
+  | 'consultation_required'
+  | 'complete'
+  | 'cancel';
+
+export type BookingUser = {
+  id: number;
+  username: string;
+  tag: string | null;
+  is_verified_artist: boolean;
+  profile_image_url: string | null;
+};
+
+export type BookingScheduleDay = {
+  open: string | null;
+  close: string | null;
+  breaks: [string, string][];
+};
+
+export type BookingOccupiedSlot = {
+  date: string;
+  start_time: string;
+  end_time: string;
+};
+
+export type BookingConfig = {
+  artist: BookingUser;
+  available: boolean;
+  unavailable_code: string | null;
+  unavailable_reason: string | null;
+  artist_timezone: string;
+  today: string;
+  settings: {
+    booking_status: string;
+    minimum_notice_hours: number;
+    maximum_booking_window_days: number;
+    slot_step_minutes: number;
+    default_session_minutes: number;
+    maximum_session_hours: number;
+    consultation_required_before_booking: boolean;
+    consultation_price: number;
+    online_consultation_price: number;
+    reference_images_required: boolean;
+    minimum_reference_images: number;
+    maximum_reference_images: number;
+    deposit_required: boolean;
+    deposit_amount: number;
+    booking_workflow: 'manual' | 'auto';
+  };
+  booking_types: BookingType[];
+  durations: number[];
+  styles: string[];
+  placements: string[];
+  sizes: string[];
+  budgets: string[];
+  option_labels: {
+    booking_types: Record<string, string>;
+    styles: Record<string, string>;
+    placements: Record<string, string>;
+    sizes: Record<string, string>;
+    budgets: Record<string, string>;
+  };
+  schedule: Record<string, BookingScheduleDay>;
+  vacations: string[];
+  occupied_slots: BookingOccupiedSlot[];
+  booked_minutes_by_date: Record<string, number>;
+};
+
+export type AppointmentReference = {
+  id: number;
+  name: string;
+  url: string;
+  order: number;
+};
+
+export type Appointment = {
+  id: number;
+  role: 'artist' | 'client';
+  artist: BookingUser;
+  client: BookingUser;
+  other_user: BookingUser;
+  booking_type: BookingType;
+  booking_type_label: string;
+  status: AppointmentStatus;
+  status_label: string;
+  date: string;
+  start_time: string;
+  end_time: string | null;
+  session_length_minutes: number | null;
+  client_comfort_limit: string;
+  styles: string[];
+  styles_label: string;
+  placement: string;
+  placement_label: string;
+  size: string;
+  size_label: string;
+  budget: string;
+  budget_label: string;
+  description: string;
+  consultation_already_completed: boolean;
+  consultation_note: string;
+  artist_note: string;
+  created_at: string;
+  updated_at: string;
+  responded_at: string | null;
+  reference_images: AppointmentReference[];
+  reference_limit: number;
+  can_add_references: boolean;
+  available_actions: AppointmentAction[];
+};
+
+export type AppointmentListResponse = {
+  attention_count: number;
+  results: Appointment[];
+};
+
 export type StyleMatchCard = {
   id: number;
   card_id: string;

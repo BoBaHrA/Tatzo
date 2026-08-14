@@ -1,0 +1,398 @@
+import { useCallback, useEffect, useState } from 'react';
+import * as ImagePicker from 'expo-image-picker';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+
+import type { Appointment, AppointmentAction } from '@/api/types';
+import { useAuth } from '@/auth/auth-context';
+import {
+  addAppointmentReferences,
+  applyAppointmentAction,
+  fetchAppointment,
+} from '@/booking/booking-api';
+import { startChat } from '@/chat/chat-api';
+import { useChat } from '@/chat/chat-context';
+import { BrandHeader } from '@/components/brand-header';
+import { Button } from '@/components/button';
+import { Screen } from '@/components/screen';
+import { appLanguage, t, type TranslationKey } from '@/i18n';
+import { colors, radius, spacing } from '@/theme';
+
+
+const ACTION_LABELS: Record<AppointmentAction, TranslationKey> = {
+  accept: 'acceptBooking',
+  decline: 'declineBooking',
+  need_references: 'needReferences',
+  consultation_required: 'requireConsultation',
+  complete: 'completeAppointment',
+  cancel: 'cancelAppointment',
+};
+
+function formatDate(appointment: Appointment) {
+  return `${new Intl.DateTimeFormat(appLanguage, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(`${appointment.date}T12:00:00Z`))} · ${appointment.start_time}${
+    appointment.end_time ? `–${appointment.end_time}` : ''
+  }`;
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  if (!value) return null;
+  return (
+    <View style={styles.detailRow}>
+      <Text style={styles.detailLabel}>{label}</Text>
+      <Text style={styles.detailValue}>{value}</Text>
+    </View>
+  );
+}
+
+export default function AppointmentDetailScreen() {
+  const params = useLocalSearchParams<{
+    appointmentId?: string | string[];
+    created?: string | string[];
+  }>();
+  const rawId = Array.isArray(params.appointmentId) ? params.appointmentId[0] : params.appointmentId;
+  const appointmentId = Number(rawId);
+  const created = (Array.isArray(params.created) ? params.created[0] : params.created) === 'true';
+  const { request, status } = useAuth();
+  const { refresh: refreshChats } = useChat();
+  const [appointment, setAppointment] = useState<Appointment | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [action, setAction] = useState<
+    AppointmentAction | 'chat' | 'references' | null
+  >(null);
+  const [actionError, setActionError] = useState('');
+
+  const load = useCallback(async () => {
+    if (status !== 'authenticated') return;
+    if (!Number.isInteger(appointmentId) || appointmentId <= 0) {
+      setLoadError(t('appointmentUnavailable'));
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setLoadError('');
+    try {
+      setAppointment(await fetchAppointment(request, appointmentId));
+    } catch {
+      setAppointment(null);
+      setLoadError(t('appointmentError'));
+    } finally {
+      setLoading(false);
+    }
+  }, [appointmentId, request, status]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  if (status === 'anonymous') return <Redirect href="/(auth)/login" />;
+
+  const goBack = () => {
+    if (router.canGoBack()) router.back();
+    else router.replace('/(tabs)/bookings');
+  };
+
+  const runAction = async (nextAction: AppointmentAction) => {
+    if (!appointment || action) return;
+    setAction(nextAction);
+    setActionError('');
+    try {
+      setAppointment(await applyAppointmentAction(request, appointment.id, nextAction));
+    } catch {
+      setActionError(t('appointmentActionError'));
+    } finally {
+      setAction(null);
+    }
+  };
+
+  const selectAction = (nextAction: AppointmentAction) => {
+    if (nextAction === 'decline' || nextAction === 'cancel' || nextAction === 'complete') {
+      Alert.alert(
+        t(ACTION_LABELS[nextAction]),
+        t('appointmentActionConfirm'),
+        [
+          { text: t('cancel'), style: 'cancel' },
+          {
+            text: t(ACTION_LABELS[nextAction]),
+            style: nextAction === 'complete' ? 'default' : 'destructive',
+            onPress: () => void runAction(nextAction),
+          },
+        ],
+      );
+      return;
+    }
+    void runAction(nextAction);
+  };
+
+  const openChat = async () => {
+    if (!appointment || action) return;
+    setAction('chat');
+    setActionError('');
+    try {
+      const thread = await startChat(request, appointment.other_user.username);
+      void refreshChats();
+      router.push({
+        pathname: '/chat/[threadId]',
+        params: { threadId: String(thread.id) },
+      });
+    } catch {
+      setActionError(t('chatStartError'));
+    } finally {
+      setAction(null);
+    }
+  };
+
+  const addReferences = async () => {
+    if (!appointment || action) return;
+    setActionError('');
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        setActionError(t('referencePickerError'));
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        allowsMultipleSelection: true,
+        mediaTypes: ['images'],
+        quality: 0.9,
+        selectionLimit: Math.max(
+          1,
+          appointment.reference_limit - appointment.reference_images.length,
+        ),
+      });
+      if (result.canceled) return;
+      setAction('references');
+      const references = result.assets.map((asset, index) => ({
+        key: `${Date.now()}-${index}-${asset.uri}`,
+        uri: asset.uri,
+        name: asset.fileName ?? `tatzo-reference-${Date.now()}-${index}.jpg`,
+        mimeType: asset.mimeType ?? 'image/jpeg',
+      }));
+      setAppointment(await addAppointmentReferences(
+        request,
+        appointment.id,
+        references,
+      ));
+    } catch {
+      setActionError(t('referencePickerError'));
+    } finally {
+      setAction(null);
+    }
+  };
+
+  return (
+    <Screen contentStyle={styles.screen}>
+      <Pressable onPress={goBack} style={styles.backButton}>
+        <Text style={styles.backText}>‹ {t('back')}</Text>
+      </Pressable>
+      <BrandHeader />
+      {loading || status === 'loading' ? (
+        <View style={styles.centerState}>
+          <ActivityIndicator color={colors.primary} size="large" />
+          <Text style={styles.muted}>{t('loadingAppointment')}</Text>
+        </View>
+      ) : !appointment ? (
+        <View style={styles.stateCard}>
+          <Text style={styles.stateTitle}>{t('appointmentUnavailable')}</Text>
+          <Text style={styles.muted}>{loadError || t('appointmentError')}</Text>
+          <Button label={t('retry')} onPress={() => void load()} />
+        </View>
+      ) : (
+        <>
+          {created ? (
+            <View style={styles.successNotice}>
+              <Text style={styles.successTitle}>✓ {t('bookingSent')}</Text>
+              <Text style={styles.successText}>{t('bookingSentHint')}</Text>
+            </View>
+          ) : null}
+          <View style={styles.hero}>
+            <View style={styles.identityRow}>
+              {appointment.other_user.profile_image_url ? (
+                <Image source={{ uri: appointment.other_user.profile_image_url }} style={styles.avatar} />
+              ) : (
+                <View style={styles.avatarFallback}>
+                  <Text style={styles.avatarLetter}>
+                    {appointment.other_user.username[0]?.toUpperCase()}
+                  </Text>
+                </View>
+              )}
+              <View style={styles.identity}>
+                <Text style={styles.eyebrow}>
+                  {appointment.role === 'artist' ? t('requestFromClient') : t('requestWithArtist')}
+                </Text>
+                <Text style={styles.username}>{appointment.other_user.username}</Text>
+                <Text style={styles.date}>{formatDate(appointment)}</Text>
+              </View>
+            </View>
+            <View style={styles.statusCard}>
+              <Text style={styles.statusLabel}>{t('appointmentStatus')}</Text>
+              <Text style={styles.statusValue}>{appointment.status_label}</Text>
+            </View>
+            <View style={styles.heroActions}>
+              <Button
+                label={t('openProfile')}
+                onPress={() => router.push({
+                  pathname: '/profile/[username]',
+                  params: { username: appointment.other_user.username },
+                })}
+                variant="secondary"
+                style={styles.flexButton}
+              />
+              <Button
+                label={t('openChat')}
+                loading={action === 'chat'}
+                onPress={() => void openChat()}
+                style={styles.flexButton}
+              />
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('appointmentDetails')}</Text>
+            <View style={styles.detailCard}>
+              <DetailRow label={t('bookingType')} value={appointment.booking_type_label} />
+              <DetailRow label={t('duration')} value={appointment.session_length_minutes ? `${appointment.session_length_minutes} min` : ''} />
+              <DetailRow label={t('chooseStyle')} value={appointment.styles_label} />
+              <DetailRow label={t('choosePlacement')} value={appointment.placement_label} />
+              <DetailRow label={t('chooseSize')} value={appointment.size_label} />
+              <DetailRow label={t('chooseBudget')} value={appointment.budget_label} />
+              <DetailRow label={t('comfortLimit')} value={appointment.client_comfort_limit} />
+              <DetailRow label={t('projectDescription')} value={appointment.description} />
+              <DetailRow label={t('consultationNote')} value={appointment.consultation_note} />
+            </View>
+          </View>
+
+          {appointment.reference_images.length || appointment.can_add_references ? (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t('bookingReferences')}</Text>
+              {appointment.reference_images.length ? (
+                <View style={styles.referenceGrid}>
+                  {appointment.reference_images.map((reference) => (
+                    <Image
+                      accessibilityLabel={reference.name}
+                      key={reference.id}
+                      source={{ uri: reference.url }}
+                      style={styles.referenceImage}
+                    />
+                  ))}
+                </View>
+              ) : null}
+              {appointment.can_add_references ? (
+                <>
+                  <Text style={styles.referenceRequest}>{t('referencesRequired')}</Text>
+                  <Button
+                    label={t('addReferences')}
+                    loading={action === 'references'}
+                    onPress={() => void addReferences()}
+                    variant="secondary"
+                  />
+                </>
+              ) : null}
+            </View>
+          ) : null}
+
+          {appointment.available_actions.length ? (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t('artistActions')}</Text>
+              <View style={styles.actions}>
+                {appointment.available_actions.map((availableAction) => (
+                  <Button
+                    key={availableAction}
+                    label={t(ACTION_LABELS[availableAction])}
+                    loading={action === availableAction}
+                    onPress={() => selectAction(availableAction)}
+                    variant={
+                      availableAction === 'decline' || availableAction === 'cancel'
+                        ? 'danger'
+                        : availableAction === 'accept' || availableAction === 'complete'
+                          ? 'primary'
+                          : 'secondary'
+                    }
+                  />
+                ))}
+              </View>
+            </View>
+          ) : null}
+          {actionError ? <Text style={styles.error}>{actionError}</Text> : null}
+        </>
+      )}
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: { paddingTop: spacing.sm, paddingBottom: spacing.xxl },
+  backButton: { alignSelf: 'flex-start', minHeight: 44, justifyContent: 'center' },
+  backText: { color: colors.primary, fontSize: 16, fontWeight: '800' },
+  centerState: { minHeight: 320, alignItems: 'center', justifyContent: 'center', gap: spacing.md },
+  muted: { color: colors.textMuted, lineHeight: 22, textAlign: 'center' },
+  stateCard: {
+    backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1,
+    borderRadius: radius.large, padding: spacing.xl, gap: spacing.md,
+  },
+  stateTitle: { color: colors.text, fontSize: 23, fontWeight: '900', textAlign: 'center' },
+  successNotice: {
+    backgroundColor: '#0a332d', borderColor: colors.success, borderWidth: 1,
+    borderRadius: radius.medium, padding: spacing.md, gap: spacing.xs,
+  },
+  successTitle: { color: colors.success, fontSize: 17, fontWeight: '900' },
+  successText: { color: colors.text, lineHeight: 21 },
+  hero: {
+    backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1,
+    borderRadius: radius.large, padding: spacing.lg, gap: spacing.md,
+  },
+  identityRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  avatar: { width: 72, height: 72, borderRadius: 36 },
+  avatarFallback: {
+    width: 72, height: 72, borderRadius: 36, alignItems: 'center',
+    justifyContent: 'center', backgroundColor: colors.primary,
+  },
+  avatarLetter: { color: colors.backgroundDeep, fontSize: 28, fontWeight: '900' },
+  identity: { flex: 1, gap: 3 },
+  eyebrow: { color: colors.primary, fontSize: 10, fontWeight: '900', letterSpacing: 1.5 },
+  username: { color: colors.text, fontSize: 23, fontWeight: '900' },
+  date: { color: colors.textMuted, fontSize: 12, lineHeight: 18 },
+  statusCard: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: colors.backgroundDeep, borderRadius: radius.medium,
+    borderWidth: 1, borderColor: colors.border, padding: spacing.md,
+  },
+  statusLabel: { color: colors.textMuted, fontSize: 12, fontWeight: '700' },
+  statusValue: { color: colors.primary, fontSize: 14, fontWeight: '900' },
+  heroActions: { flexDirection: 'row', gap: spacing.sm },
+  flexButton: { flex: 1 },
+  section: { gap: spacing.md },
+  sectionTitle: { color: colors.text, fontSize: 21, fontWeight: '900' },
+  detailCard: {
+    backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1,
+    borderRadius: radius.medium, overflow: 'hidden',
+  },
+  detailRow: {
+    padding: spacing.md, gap: spacing.xs, borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+  },
+  detailLabel: { color: colors.textMuted, fontSize: 11, fontWeight: '800', textTransform: 'uppercase' },
+  detailValue: { color: colors.text, fontSize: 14, lineHeight: 21, fontWeight: '700' },
+  referenceGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  referenceImage: { width: '48%', aspectRatio: 1, borderRadius: radius.medium, backgroundColor: colors.surface },
+  referenceRequest: { color: colors.accent, fontSize: 13, lineHeight: 20, fontWeight: '800' },
+  actions: { gap: spacing.sm },
+  error: {
+    color: colors.danger, borderColor: colors.danger, borderWidth: 1,
+    borderRadius: radius.medium, padding: spacing.sm, textAlign: 'center',
+  },
+});

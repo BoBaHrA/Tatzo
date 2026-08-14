@@ -22,6 +22,8 @@ export default function RootLayout() {
           <Stack.Screen name="delete-account" options={{ presentation: 'modal' }} />
           <Stack.Screen name="profile/[username]" />
           <Stack.Screen name="chat/[threadId]" />
+          <Stack.Screen name="booking/[username]" />
+          <Stack.Screen name="appointment/[appointmentId]" />
         </Stack>
       </ChatProvider>
     </AuthProvider>

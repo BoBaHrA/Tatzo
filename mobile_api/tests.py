@@ -1,17 +1,28 @@
+from datetime import datetime, time, timedelta
+from io import BytesIO
 import shutil
 import tempfile
 from urllib.parse import urlparse
 
+from PIL import Image
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
 from django.test import override_settings
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from appointments.models import ArtistBookingSettings
+from appointments.models import (
+    Appointment,
+    AppointmentReferenceImage,
+    ArtistAvailability,
+    ArtistBookingSettings,
+    ArtistTimeOff,
+    CalendarEvent,
+)
 from posts.models import (
     Post,
     PostBookmark,
@@ -786,6 +797,372 @@ class MobileChatTests(APITestCase):
         )
         self.assertEqual(invalid_cursor.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(invalid_cursor.data["code"], "invalid_cursor")
+
+
+@override_settings(TATZO_RATE_LIMIT_ENABLED=False, USE_CLOUDINARY=False)
+class MobileBookingTests(APITestCase):
+    def setUp(self):
+        self.media_root = tempfile.mkdtemp(prefix="tatzo-mobile-booking-", dir="/tmp")
+        self.media_override = self.settings(MEDIA_ROOT=self.media_root)
+        self.media_override.enable()
+        private_media_storage._backend = None
+
+        self.viewer = User.objects.create_user(
+            "booking-viewer",
+            email="booking-viewer@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        self.artist = User.objects.create_user(
+            "booking-artist",
+            email="booking-artist@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        self.stranger = User.objects.create_user(
+            "booking-stranger",
+            email="booking-stranger@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        for user in (self.viewer, self.artist, self.stranger):
+            user.profile.is_email_verified = True
+            user.profile.save(update_fields=("is_email_verified",))
+        self.artist.profile.account_type = "tattoo_artist"
+        self.artist.profile.verification_status = "approved"
+        self.artist.profile.timezone = "Europe/Paris"
+        self.artist.profile.save(
+            update_fields=("account_type", "verification_status", "timezone")
+        )
+
+        self.settings = ArtistBookingSettings.objects.update_or_create(
+            artist=self.artist,
+            defaults={
+                "minimum_notice_hours": 0,
+                "maximum_booking_window_days": 90,
+                "maximum_session_hours": 8,
+                "active_styles": ["Blackwork", "Fine Line"],
+                "booking_workflow": "manual",
+            },
+        )[0]
+        self.booking_date = timezone.localdate() + timedelta(days=14)
+        ArtistAvailability.objects.update_or_create(
+            artist=self.artist,
+            weekday=(self.booking_date.weekday() + 1) % 7,
+            defaults={
+                "is_closed": False,
+                "open_time": time(9),
+                "close_time": time(18),
+                "break_start": time(12),
+                "break_end": time(13),
+            },
+        )
+        self.client.force_authenticate(self.viewer)
+
+    def tearDown(self):
+        private_media_storage._backend = None
+        self.media_override.disable()
+        shutil.rmtree(self.media_root, ignore_errors=True)
+
+    @property
+    def booking_url(self):
+        return reverse("mobile_api:appointment_booking", args=[self.artist.username])
+
+    def booking_payload(self, **changes):
+        return {
+            "booking_type": Appointment.TYPE_TATTOO,
+            "date": self.booking_date.isoformat(),
+            "start_time": "09:00",
+            "session_length_minutes": 120,
+            "styles": ["Blackwork"],
+            "placements": ["Left arm"],
+            "size": "A5",
+            "budget": "€300–600",
+            "description": "Ornamental blackwork concept",
+            **changes,
+        }
+
+    @staticmethod
+    def reference_image(name="reference.png"):
+        output = BytesIO()
+        Image.new("RGB", (2, 2), color="black").save(output, format="PNG")
+        return SimpleUploadedFile(name, output.getvalue(), content_type="image/png")
+
+    def make_calendar_block(self, start_hour=15, end_hour=16):
+        artist_timezone = timezone.get_fixed_timezone(120)
+        return CalendarEvent.objects.create(
+            artist=self.artist,
+            event_type=CalendarEvent.TYPE_BLOCKED,
+            status=CalendarEvent.STATUS_PLANNED,
+            title="Blocked for studio work",
+            starts_at=timezone.make_aware(
+                datetime.combine(self.booking_date, time(start_hour)),
+                artist_timezone,
+            ),
+            ends_at=timezone.make_aware(
+                datetime.combine(self.booking_date, time(end_hour)),
+                artist_timezone,
+            ),
+        )
+
+    def test_booking_config_includes_rules_schedule_and_blocked_dates(self):
+        self.make_calendar_block()
+        vacation_date = self.booking_date + timedelta(days=1)
+        ArtistTimeOff.objects.create(artist=self.artist, date=vacation_date)
+
+        response = self.client.get(self.booking_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["available"])
+        self.assertEqual(response.data["artist"]["username"], self.artist.username)
+        self.assertIn(Appointment.TYPE_TATTOO, response.data["booking_types"])
+        self.assertEqual(response.data["settings"]["minimum_notice_hours"], 0)
+        weekday = str((self.booking_date.weekday() + 1) % 7)
+        self.assertEqual(response.data["schedule"][weekday]["open"], "09:00")
+        self.assertIn(vacation_date.isoformat(), response.data["vacations"])
+        self.assertIn(
+            {
+                "date": self.booking_date.isoformat(),
+                "start_time": "15:00",
+                "end_time": "16:00",
+            },
+            response.data["occupied_slots"],
+        )
+
+    def test_client_can_create_list_and_open_a_booking(self):
+        response = self.client.post(
+            self.booking_url, self.booking_payload(), format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        appointment = Appointment.objects.get()
+        self.assertEqual(appointment.status, Appointment.STATUS_PENDING)
+        self.assertEqual(appointment.placement, "Left arm")
+        self.assertEqual(response.data["role"], "client")
+        self.assertEqual(response.data["reference_images"], [])
+
+        listed = self.client.get(reverse("mobile_api:appointment_list"))
+        self.assertEqual(listed.status_code, status.HTTP_200_OK)
+        self.assertEqual(listed.data["results"][0]["id"], appointment.pk)
+
+        detail = self.client.get(
+            reverse("mobile_api:appointment_detail", args=[appointment.pk])
+        )
+        self.assertEqual(detail.status_code, status.HTTP_200_OK)
+        self.client.force_authenticate(self.stranger)
+        hidden = self.client.get(
+            reverse("mobile_api:appointment_detail", args=[appointment.pk])
+        )
+        self.assertEqual(hidden.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_required_reference_is_validated_and_served_with_signed_url(self):
+        self.settings.reference_images_required = True
+        self.settings.minimum_reference_images = 1
+        self.settings.maximum_reference_images = 2
+        self.settings.save(
+            update_fields=(
+                "reference_images_required",
+                "minimum_reference_images",
+                "maximum_reference_images",
+            )
+        )
+
+        missing = self.client.post(
+            self.booking_url, self.booking_payload(), format="json"
+        )
+        self.assertEqual(missing.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(missing.data["code"], "references_required")
+
+        created = self.client.post(
+            self.booking_url,
+            {**self.booking_payload(), "references": [self.reference_image()]},
+            format="multipart",
+        )
+        self.assertEqual(created.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(AppointmentReferenceImage.objects.count(), 1)
+        signed_url = urlparse(created.data["reference_images"][0]["url"])
+
+        self.client.force_authenticate(user=None)
+        download = self.client.get(f"{signed_url.path}?{signed_url.query}")
+        self.assertEqual(download.status_code, status.HTTP_200_OK)
+        self.assertEqual(download["Content-Type"], "image/png")
+        self.assertEqual(download["X-Content-Type-Options"], "nosniff")
+        tampered = self.client.get(f"{signed_url.path}?{signed_url.query}x")
+        self.assertEqual(tampered.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_calendar_break_and_vacation_slots_are_rejected(self):
+        self.make_calendar_block(start_hour=10, end_hour=11)
+        blocked = self.client.post(
+            self.booking_url,
+            self.booking_payload(start_time="10:00", session_length_minutes=60),
+            format="json",
+        )
+        self.assertEqual(blocked.status_code, status.HTTP_409_CONFLICT)
+        self.assertEqual(blocked.data["code"], "slot_unavailable")
+
+        break_overlap = self.client.post(
+            self.booking_url,
+            self.booking_payload(start_time="11:30", session_length_minutes=60),
+            format="json",
+        )
+        self.assertEqual(break_overlap.status_code, status.HTTP_409_CONFLICT)
+
+        ArtistTimeOff.objects.create(artist=self.artist, date=self.booking_date)
+        vacation = self.client.post(
+            self.booking_url, self.booking_payload(), format="json"
+        )
+        self.assertEqual(vacation.status_code, status.HTTP_409_CONFLICT)
+        self.assertEqual(vacation.data["code"], "date_blocked")
+
+    def test_calendar_reminders_do_not_consume_booking_time(self):
+        artist_timezone = timezone.get_fixed_timezone(120)
+        CalendarEvent.objects.create(
+            artist=self.artist,
+            event_type=CalendarEvent.TYPE_SKETCH_DEADLINE,
+            status=CalendarEvent.STATUS_PLANNED,
+            title="Sketch deadline",
+            starts_at=timezone.make_aware(
+                datetime.combine(self.booking_date, time(9)),
+                artist_timezone,
+            ),
+            ends_at=timezone.make_aware(
+                datetime.combine(self.booking_date, time(10)),
+                artist_timezone,
+            ),
+        )
+
+        response = self.client.post(
+            self.booking_url,
+            self.booking_payload(session_length_minutes=60),
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_daily_workload_capacity_is_enforced_and_exposed(self):
+        self.settings.maximum_session_hours = 2
+        self.settings.save(update_fields=("maximum_session_hours",))
+        first = self.client.post(
+            self.booking_url,
+            self.booking_payload(session_length_minutes=120),
+            format="json",
+        )
+        self.assertEqual(first.status_code, status.HTTP_201_CREATED)
+
+        config = self.client.get(self.booking_url)
+        self.assertEqual(
+            config.data["booked_minutes_by_date"][self.booking_date.isoformat()],
+            120,
+        )
+        over_capacity = self.client.post(
+            self.booking_url,
+            self.booking_payload(start_time="14:00", session_length_minutes=60),
+            format="json",
+        )
+        self.assertEqual(over_capacity.status_code, status.HTTP_409_CONFLICT)
+        self.assertEqual(over_capacity.data["code"], "slot_unavailable")
+
+    def test_consultation_only_mode_forces_one_hour_consultations(self):
+        self.settings.booking_status = (
+            ArtistBookingSettings.BOOKING_STATUS_CONSULTATION_ONLY
+        )
+        self.settings.save(update_fields=("booking_status",))
+
+        config = self.client.get(self.booking_url)
+        self.assertNotIn(Appointment.TYPE_TATTOO, config.data["booking_types"])
+        self.assertIn(Appointment.TYPE_CONSULTATION, config.data["booking_types"])
+
+        tattoo = self.client.post(
+            self.booking_url, self.booking_payload(), format="json"
+        )
+        self.assertEqual(tattoo.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(tattoo.data["code"], "invalid_booking_type")
+
+        consultation = self.client.post(
+            self.booking_url,
+            {
+                "booking_type": Appointment.TYPE_CONSULTATION,
+                "date": self.booking_date.isoformat(),
+                "start_time": "14:00",
+                "session_length_minutes": 180,
+                "description": "Discuss the concept",
+            },
+            format="json",
+        )
+        self.assertEqual(consultation.status_code, status.HTTP_201_CREATED)
+        appointment = Appointment.objects.get()
+        self.assertEqual(appointment.session_length_minutes, 60)
+        self.assertEqual(appointment.styles, [])
+
+    def test_booking_visibility_respects_blocks_and_artist_availability(self):
+        UserBlock.objects.create(blocker=self.artist, blocked=self.viewer)
+        hidden = self.client.get(self.booking_url)
+        self.assertEqual(hidden.status_code, status.HTTP_404_NOT_FOUND)
+
+        UserBlock.objects.all().delete()
+        self.settings.booking_status = ArtistBookingSettings.BOOKING_STATUS_PAUSED
+        self.settings.save(update_fields=("booking_status",))
+        config = self.client.get(self.booking_url)
+        self.assertFalse(config.data["available"])
+        self.assertEqual(config.data["unavailable_code"], "paused")
+        rejected = self.client.post(
+            self.booking_url, self.booking_payload(), format="json"
+        )
+        self.assertEqual(rejected.status_code, status.HTTP_409_CONFLICT)
+
+    def test_only_artist_can_apply_valid_status_actions(self):
+        created = self.client.post(
+            self.booking_url, self.booking_payload(), format="json"
+        )
+        appointment_id = created.data["id"]
+        action_url = reverse("mobile_api:appointment_action", args=[appointment_id])
+
+        forbidden = self.client.post(action_url, {"action": "accept"}, format="json")
+        self.assertEqual(forbidden.status_code, status.HTTP_404_NOT_FOUND)
+
+        self.client.force_authenticate(self.artist)
+        accepted = self.client.post(action_url, {"action": "accept"}, format="json")
+        self.assertEqual(accepted.status_code, status.HTTP_200_OK)
+        self.assertEqual(accepted.data["status"], Appointment.STATUS_ACCEPTED)
+        self.assertIn("complete", accepted.data["available_actions"])
+
+        completed = self.client.post(action_url, {"action": "complete"}, format="json")
+        self.assertEqual(completed.status_code, status.HTTP_200_OK)
+        self.assertEqual(completed.data["status"], Appointment.STATUS_COMPLETED)
+        invalid = self.client.post(action_url, {"action": "accept"}, format="json")
+        self.assertEqual(invalid.status_code, status.HTTP_409_CONFLICT)
+
+    def test_client_can_add_references_when_artist_requests_them(self):
+        created = self.client.post(
+            self.booking_url,
+            self.booking_payload(),
+            format="json",
+        )
+        appointment = Appointment.objects.get(pk=created.data["id"])
+        appointment.status = Appointment.STATUS_NEEDS_REFERENCES
+        appointment.save(update_fields=("status", "updated_at"))
+        upload_url = reverse(
+            "mobile_api:appointment_reference_upload",
+            args=[appointment.pk],
+        )
+
+        uploaded = self.client.post(
+            upload_url,
+            {"references": [self.reference_image("follow-up.png")]},
+            format="multipart",
+        )
+
+        self.assertEqual(uploaded.status_code, status.HTTP_200_OK)
+        self.assertEqual(uploaded.data["status"], Appointment.STATUS_PENDING)
+        self.assertFalse(uploaded.data["can_add_references"])
+        self.assertEqual(len(uploaded.data["reference_images"]), 1)
+        self.client.force_authenticate(self.artist)
+        artist_upload = self.client.post(
+            upload_url,
+            {"references": [self.reference_image("artist.png")]},
+            format="multipart",
+        )
+        self.assertEqual(artist_upload.status_code, status.HTTP_404_NOT_FOUND)
 
 
 @override_settings(

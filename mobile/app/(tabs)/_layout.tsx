@@ -31,6 +31,7 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="home" options={{ title: t('home'), tabBarIcon: ({ color }) => <TabSymbol symbol="⌂" color={color} /> }} />
       <Tabs.Screen name="match" options={{ title: t('styleMatch'), tabBarIcon: ({ color }) => <TabSymbol symbol="✦" color={color} /> }} />
+      <Tabs.Screen name="bookings" options={{ title: t('bookings'), tabBarIcon: ({ color }) => <TabSymbol symbol="⌁" color={color} /> }} />
       <Tabs.Screen
         name="chats"
         options={{
