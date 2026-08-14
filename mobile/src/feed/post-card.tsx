@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { router } from 'expo-router';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { FeedPost } from '@/api/types';
@@ -52,7 +53,15 @@ export function PostCard({ post, onLike, onBookmark }: PostCardProps) {
 
   return (
     <View style={styles.card}>
-      <View style={styles.header}>
+      <Pressable
+        accessibilityLabel={`${t('openProfile')} ${post.author.username}`}
+        accessibilityRole="button"
+        onPress={() => router.push({
+          pathname: '/profile/[username]',
+          params: { username: post.author.username },
+        })}
+        style={({ pressed }) => [styles.header, pressed && styles.headerPressed]}
+      >
         {post.author.profile_image_url ? (
           <Image source={{ uri: post.author.profile_image_url }} style={styles.avatar} />
         ) : (
@@ -72,7 +81,7 @@ export function PostCard({ post, onLike, onBookmark }: PostCardProps) {
             <Text style={styles.date}>{formatPostDate(post.created_at)}</Text>
           </View>
         </View>
-      </View>
+      </Pressable>
 
       {post.location ? <Text style={styles.location}>⌖ {post.location}</Text> : null}
 
@@ -166,6 +175,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   header: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  headerPressed: { opacity: 0.72 },
   avatar: { width: 46, height: 46, borderRadius: 23 },
   avatarFallback: {
     width: 46,

@@ -16,6 +16,7 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="edit-profile" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="profile/[username]" />
       </Stack>
     </AuthProvider>
   );

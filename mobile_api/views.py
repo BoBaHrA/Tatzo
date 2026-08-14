@@ -3,6 +3,7 @@ from urllib.parse import parse_qs, urlparse
 
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.models import update_last_login
+from django.http import Http404
 from django.db import transaction
 from django.db.models import Count, Exists, OuterRef, Q
 from django.shortcuts import get_object_or_404
@@ -14,6 +15,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 from posts.models import Post, PostBookmark, PostComment, PostLike
+from users.models import PortfolioWork, UserBlock, UserFollow
 from users.security import check_rate_limit
 from users.utils import send_verification_email
 from users.views import delete_expired_unverified_duplicate_users
@@ -22,6 +24,7 @@ from .serializers import (
     FeedPostSerializer,
     MeSerializer,
     MeUpdateSerializer,
+    PublicProfileSerializer,
     RegistrationSerializer,
 )
 
@@ -31,6 +34,48 @@ User = get_user_model()
 
 def _user_payload(user, request):
     return MeSerializer(user, context={"request": request}).data
+
+
+def _visible_posts_for(viewer):
+    return (
+        Post.objects.visible_to(viewer)
+        .select_related("user", "user__profile")
+        .prefetch_related("medias")
+        .annotate(
+            feed_likes_count=Count("likes", distinct=True),
+            feed_comments_count=Count("comments", distinct=True),
+            viewer_liked=Exists(
+                PostLike.objects.filter(post_id=OuterRef("pk"), user=viewer)
+            ),
+            viewer_bookmarked=Exists(
+                PostBookmark.objects.filter(
+                    post_id=OuterRef("pk"),
+                    user=viewer,
+                )
+            ),
+        )
+    )
+
+
+def _visible_profile_user(request, username):
+    target = get_object_or_404(
+        User.objects.select_related("profile"),
+        username=username,
+    )
+
+    if (
+        (not target.is_active or not target.profile.is_email_verified)
+        and not request.user.is_staff
+    ):
+        raise Http404
+
+    if target.pk != request.user.pk and UserBlock.objects.filter(
+        Q(blocker=request.user, blocked=target)
+        | Q(blocker=target, blocked=request.user)
+    ).exists():
+        raise Http404
+
+    return target
 
 
 class RegisterView(APIView):
@@ -259,24 +304,7 @@ class FeedView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        posts = (
-            Post.objects.visible_to(request.user)
-            .select_related("user", "user__profile")
-            .prefetch_related("medias")
-            .annotate(
-                feed_likes_count=Count("likes", distinct=True),
-                feed_comments_count=Count("comments", distinct=True),
-                viewer_liked=Exists(
-                    PostLike.objects.filter(post_id=OuterRef("pk"), user=request.user)
-                ),
-                viewer_bookmarked=Exists(
-                    PostBookmark.objects.filter(
-                        post_id=OuterRef("pk"),
-                        user=request.user,
-                    )
-                ),
-            )
-        )
+        posts = _visible_posts_for(request.user)
 
         paginator = FeedCursorPagination()
         page = paginator.paginate_queryset(posts, request, view=self)
@@ -331,3 +359,73 @@ class FeedBookmarkView(APIView):
                 bookmark.delete()
 
         return Response({"bookmarked": created})
+
+
+class PublicProfileView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, username):
+        target = _visible_profile_user(request, username)
+        posts = _visible_posts_for(request.user).filter(user=target)
+
+        portfolio_works = PortfolioWork.objects.none()
+        if target.profile.is_verified_artist:
+            portfolio_works = PortfolioWork.objects.filter(user=target).order_by(
+                "-created_at"
+            )
+
+        target.followers_count = UserFollow.objects.filter(following=target).count()
+        target.following_count = UserFollow.objects.filter(follower=target).count()
+        target.posts_count = posts.count()
+        target.portfolio_works_count = portfolio_works.count()
+        target.is_self = target.pk == request.user.pk
+        target.is_following = (
+            not target.is_self
+            and UserFollow.objects.filter(
+                follower=request.user,
+                following=target,
+            ).exists()
+        )
+        target.portfolio = list(portfolio_works[:18])
+        target.recent_posts = list(posts[:6])
+
+        serializer = PublicProfileSerializer(
+            target,
+            context={"request": request},
+        )
+        return Response(serializer.data)
+
+
+class PublicProfileFollowView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, username):
+        target = _visible_profile_user(request, username)
+        if target.pk == request.user.pk:
+            return Response(
+                {
+                    "code": "cannot_follow_self",
+                    "detail": "You cannot follow yourself.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        with transaction.atomic():
+            relation, created = UserFollow.objects.get_or_create(
+                follower=request.user,
+                following=target,
+            )
+            if not created:
+                relation.delete()
+
+        return Response(
+            {
+                "is_following": created,
+                "followers_count": UserFollow.objects.filter(
+                    following=target
+                ).count(),
+                "following_count": UserFollow.objects.filter(
+                    follower=target
+                ).count(),
+            }
+        )

@@ -84,3 +84,37 @@ export type FeedLikeResult = {
 export type FeedBookmarkResult = {
   bookmarked: boolean;
 };
+
+export type PortfolioWork = {
+  id: number;
+  title: string;
+  description: string;
+  style: string;
+  body_placement: string;
+  created_at: string;
+  image_url: string | null;
+};
+
+export type PublicProfile = {
+  id: number;
+  username: string;
+  tag: string | null;
+  bio: string | null;
+  account_type: AccountType;
+  is_verified_artist: boolean;
+  profile_image_url: string | null;
+  followers_count: number;
+  following_count: number;
+  posts_count: number;
+  portfolio_works_count: number;
+  is_following: boolean;
+  is_self: boolean;
+  portfolio: PortfolioWork[];
+  recent_posts: FeedPost[];
+};
+
+export type ProfileFollowResult = {
+  is_following: boolean;
+  followers_count: number;
+  following_count: number;
+};

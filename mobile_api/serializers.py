@@ -12,6 +12,20 @@ from users.models import Profile
 User = get_user_model()
 
 
+def _absolute_file_url(file_obj, request):
+    if not file_obj:
+        return None
+
+    try:
+        url = file_obj.url
+    except (ValueError, AttributeError):
+        return None
+
+    if request and url.startswith("/"):
+        return request.build_absolute_uri(url)
+    return url
+
+
 class RegistrationSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, trim_whitespace=True)
     email = serializers.EmailField()
@@ -112,17 +126,10 @@ class MeSerializer(serializers.Serializer):
     profile_image_url = serializers.SerializerMethodField()
 
     def get_profile_image_url(self, user):
-        image = user.profile.profile_image
-        if not image:
-            return None
-
-        try:
-            url = image.url
-        except (ValueError, AttributeError):
-            return None
-
-        request = self.context.get("request")
-        return request.build_absolute_uri(url) if request else url
+        return _absolute_file_url(
+            user.profile.profile_image,
+            self.context.get("request"),
+        )
 
 
 class MeUpdateSerializer(serializers.Serializer):
@@ -209,17 +216,10 @@ class FeedAuthorSerializer(serializers.Serializer):
     profile_image_url = serializers.SerializerMethodField()
 
     def get_profile_image_url(self, user):
-        image = user.profile.profile_image
-        if not image:
-            return None
-
-        try:
-            url = image.url
-        except (ValueError, AttributeError):
-            return None
-
-        request = self.context.get("request")
-        return request.build_absolute_uri(url) if request else url
+        return _absolute_file_url(
+            user.profile.profile_image,
+            self.context.get("request"),
+        )
 
 
 class FeedMediaSerializer(serializers.Serializer):
@@ -273,3 +273,43 @@ class FeedPostSerializer(serializers.Serializer):
     def get_is_owned(self, post):
         request = self.context.get("request")
         return bool(request and request.user.pk == post.user_id)
+
+
+class PortfolioWorkSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    title = serializers.CharField(read_only=True)
+    description = serializers.CharField(read_only=True)
+    style = serializers.CharField(read_only=True)
+    body_placement = serializers.CharField(read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
+    image_url = serializers.SerializerMethodField()
+
+    def get_image_url(self, work):
+        return _absolute_file_url(work.image, self.context.get("request"))
+
+
+class PublicProfileSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    username = serializers.CharField(read_only=True)
+    tag = serializers.CharField(source="profile.tag", read_only=True, allow_null=True)
+    bio = serializers.CharField(source="profile.bio", read_only=True, allow_null=True)
+    account_type = serializers.CharField(source="profile.account_type", read_only=True)
+    is_verified_artist = serializers.BooleanField(
+        source="profile.is_verified_artist",
+        read_only=True,
+    )
+    profile_image_url = serializers.SerializerMethodField()
+    followers_count = serializers.IntegerField(read_only=True)
+    following_count = serializers.IntegerField(read_only=True)
+    posts_count = serializers.IntegerField(read_only=True)
+    portfolio_works_count = serializers.IntegerField(read_only=True)
+    is_following = serializers.BooleanField(read_only=True)
+    is_self = serializers.BooleanField(read_only=True)
+    portfolio = PortfolioWorkSerializer(many=True, read_only=True)
+    recent_posts = FeedPostSerializer(many=True, read_only=True)
+
+    def get_profile_image_url(self, user):
+        return _absolute_file_url(
+            user.profile.profile_image,
+            self.context.get("request"),
+        )

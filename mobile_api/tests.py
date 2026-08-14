@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from posts.models import Post, PostBookmark, PostComment, PostLike, PostMedia
-from users.models import UserBlock, UserFollow
+from users.models import PortfolioWork, UserBlock, UserFollow
 
 User = get_user_model()
 
@@ -273,3 +273,139 @@ class MobileFeedTests(APITestCase):
         )
         self.assertEqual(like.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(bookmark.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class MobilePublicProfileTests(APITestCase):
+    def setUp(self):
+        self.viewer = User.objects.create_user(
+            "profile-viewer",
+            email="profile-viewer@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        self.artist = User.objects.create_user(
+            "profile-artist",
+            email="profile-artist@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        self.stranger = User.objects.create_user(
+            "profile-stranger",
+            email="profile-stranger@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        self.artist.profile.account_type = "tattoo_artist"
+        self.artist.profile.verification_status = "approved"
+        self.artist.profile.is_email_verified = True
+        self.artist.profile.bio = "Blackwork and ornamental tattoo artist"
+        self.artist.profile.save(
+            update_fields=(
+                "account_type",
+                "verification_status",
+                "is_email_verified",
+                "bio",
+            )
+        )
+        self.client.force_authenticate(self.viewer)
+
+    def test_public_profile_requires_authentication(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(
+            reverse("mobile_api:public_profile", args=[self.artist.username])
+        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_profile_returns_portfolio_stats_and_only_visible_recent_posts(self):
+        public_post = Post.objects.create(
+            user=self.artist,
+            content="Public profile post",
+            visibility="public",
+        )
+        Post.objects.create(
+            user=self.artist,
+            content="Followers-only post",
+            visibility="followers",
+        )
+        Post.objects.create(
+            user=self.artist,
+            content="Private post",
+            visibility="private",
+        )
+        work = PortfolioWork.objects.create(
+            user=self.artist,
+            image="portfolio/works/blackwork.jpg",
+            title="Ornamental sleeve",
+            style="Blackwork",
+        )
+        UserFollow.objects.create(follower=self.stranger, following=self.artist)
+
+        response = self.client.get(
+            reverse("mobile_api:public_profile", args=[self.artist.username])
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["username"], self.artist.username)
+        self.assertEqual(response.data["bio"], self.artist.profile.bio)
+        self.assertTrue(response.data["is_verified_artist"])
+        self.assertFalse(response.data["is_following"])
+        self.assertFalse(response.data["is_self"])
+        self.assertEqual(response.data["followers_count"], 1)
+        self.assertEqual(response.data["posts_count"], 1)
+        self.assertEqual(response.data["portfolio_works_count"], 1)
+        self.assertEqual(response.data["portfolio"][0]["id"], work.pk)
+        self.assertTrue(
+            response.data["portfolio"][0]["image_url"].endswith(
+                "/portfolio/works/blackwork.jpg"
+            )
+        )
+        self.assertEqual(
+            [post["id"] for post in response.data["recent_posts"]],
+            [public_post.pk],
+        )
+
+    def test_follow_toggle_updates_profile_state(self):
+        follow_url = reverse(
+            "mobile_api:public_profile_follow",
+            args=[self.artist.username],
+        )
+        followed = self.client.post(follow_url)
+        self.assertEqual(followed.status_code, status.HTTP_200_OK)
+        self.assertTrue(followed.data["is_following"])
+        self.assertEqual(followed.data["followers_count"], 1)
+
+        profile = self.client.get(
+            reverse("mobile_api:public_profile", args=[self.artist.username])
+        )
+        self.assertTrue(profile.data["is_following"])
+
+        unfollowed = self.client.post(follow_url)
+        self.assertFalse(unfollowed.data["is_following"])
+        self.assertEqual(unfollowed.data["followers_count"], 0)
+
+    def test_self_follow_is_rejected(self):
+        self.viewer.profile.is_email_verified = True
+        self.viewer.profile.save(update_fields=("is_email_verified",))
+        response = self.client.post(
+            reverse(
+                "mobile_api:public_profile_follow",
+                args=[self.viewer.username],
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["code"], "cannot_follow_self")
+
+    def test_blocked_and_unverified_profiles_are_hidden(self):
+        UserBlock.objects.create(blocker=self.artist, blocked=self.viewer)
+        blocked = self.client.get(
+            reverse("mobile_api:public_profile", args=[self.artist.username])
+        )
+        self.assertEqual(blocked.status_code, status.HTTP_404_NOT_FOUND)
+
+        UserBlock.objects.all().delete()
+        self.artist.profile.is_email_verified = False
+        self.artist.profile.save(update_fields=("is_email_verified",))
+        unverified = self.client.get(
+            reverse("mobile_api:public_profile", args=[self.artist.username])
+        )
+        self.assertEqual(unverified.status_code, status.HTTP_404_NOT_FOUND)
