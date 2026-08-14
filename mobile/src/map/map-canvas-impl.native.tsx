@@ -71,7 +71,7 @@ export function MapCanvas({
       rotateEnabled={false}
       showsCompass={false}
       showsMyLocationButton={false}
-      showsPointsOfInterest={false}
+      showsPointsOfInterests={false}
       showsUserLocation={showsUserLocation}
       style={styles.map}
       toolbarEnabled={false}
