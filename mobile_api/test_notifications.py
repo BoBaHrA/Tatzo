@@ -64,7 +64,7 @@ class MobileNotificationTests(APITestCase):
             parent=parent,
             content="You are welcome",
         )
-        thread, _created = ChatThread.get_or_create_for_users(self.owner, self.actor)
+        thread = ChatThread.get_or_create_for_users(self.owner, self.actor)
         ChatMessage.objects.create(
             thread=thread,
             sender=self.actor,
@@ -132,7 +132,7 @@ class MobileNotificationTests(APITestCase):
     def test_block_removes_existing_notifications_between_users(self):
         PostLike.objects.create(post=self.post, user=self.actor)
         ChatMessage.objects.create(
-            thread=ChatThread.get_or_create_for_users(self.owner, self.actor)[0],
+            thread=ChatThread.get_or_create_for_users(self.owner, self.actor),
             sender=self.actor,
             content="Hello",
         )
