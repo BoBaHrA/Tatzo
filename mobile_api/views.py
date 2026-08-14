@@ -15,6 +15,20 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 from posts.models import Post, PostBookmark, PostComment, PostLike, PostReport
+from style_match.models import (
+    StyleMatchResponse as MatchResponse,
+    StyleMatchSession,
+)
+from style_match.services import (
+    calculate_session_scores,
+    cards_for_ids,
+    cards_for_session,
+    clarification_card_ids,
+    complete_session,
+    result_payload,
+    select_balanced_card_ids,
+    session_limits,
+)
 from users.models import PortfolioWork, UserBlock, UserFollow
 from users.security import check_rate_limit
 from users.utils import send_verification_email
@@ -28,6 +42,7 @@ from .serializers import (
     PostReportRequestSerializer,
     PublicProfileSerializer,
     RegistrationSerializer,
+    StyleMatchReactionSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -81,6 +96,67 @@ def _visible_profile_user(request, username):
         raise Http404
 
     return target
+
+
+def _style_match_session_payload(session):
+    current_card_id = (
+        session.card_order[session.current_index]
+        if session.current_index < len(session.card_order)
+        else None
+    )
+    return {
+        "session_id": str(session.pk),
+        "current_index": session.current_index,
+        "total": session.target_count,
+        "cards": cards_for_session(session),
+        "current_saved": bool(
+            current_card_id
+            and session.responses.filter(
+                card_id=current_card_id,
+                saved=True,
+            ).exists()
+        ),
+    }
+
+
+def _style_match_result_payload(session, request):
+    payload = result_payload(session)
+    if payload is None:
+        return None
+
+    saved_responses = (
+        session.responses.filter(saved=True)
+        .select_related("card")
+        .order_by("position", "card__card_id")
+    )
+    payload["saved_cards"] = [
+        {
+            "id": response.card_id,
+            "card_id": response.card.card_id,
+            "image_url": response.card.delivery_url,
+            "alt": f"Tattoo reference {response.card.card_id}",
+        }
+        for response in saved_responses
+    ]
+
+    for artist in payload["artists"]:
+        image_url = artist.get("image_url", "")
+        if image_url.startswith("/"):
+            artist["image_url"] = request.build_absolute_uri(image_url)
+        artist.pop("profile_url", None)
+    block_pairs = UserBlock.objects.filter(
+        Q(blocker=request.user) | Q(blocked=request.user)
+    ).values_list("blocker__username", "blocked__username")
+    hidden_usernames = {
+        blocked_username if blocker_username == request.user.username else blocker_username
+        for blocker_username, blocked_username in block_pairs
+    }
+    payload["artists"] = [
+        artist
+        for artist in payload["artists"]
+        if artist["username"] not in hidden_usernames
+    ]
+    return payload
 
 
 class RegisterView(APIView):
@@ -554,3 +630,248 @@ class BlockedUsersView(APIView):
             context={"request": request},
         )
         return Response({"results": serializer.data})
+
+
+class StyleMatchView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        active_session = (
+            StyleMatchSession.objects.filter(
+                user=request.user,
+                status=StyleMatchSession.STATUS_ACTIVE,
+            )
+            .order_by("-started_at")
+            .first()
+        )
+        latest_session = (
+            StyleMatchSession.objects.filter(
+                user=request.user,
+                status=StyleMatchSession.STATUS_COMPLETED,
+            )
+            .order_by("-completed_at", "-started_at")
+            .first()
+        )
+        return Response(
+            {
+                "active_session": (
+                    _style_match_session_payload(active_session)
+                    if active_session
+                    else None
+                ),
+                "latest_result": (
+                    _style_match_result_payload(latest_session, request)
+                    if latest_session
+                    else None
+                ),
+            }
+        )
+
+    def post(self, request):
+        allowed, retry_after = check_rate_limit(
+            request,
+            scope="mobile:style-match:start",
+            limit=20,
+            window_seconds=60 * 60,
+            identity="user",
+        )
+        if not allowed:
+            return Response(
+                {
+                    "code": "rate_limited",
+                    "detail": "Too many Style Match sessions.",
+                    "retry_after": retry_after,
+                },
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        target_count, _batch_size, _max_count = session_limits()
+        card_order = select_balanced_card_ids(target_count)
+        if not card_order:
+            return Response(
+                {
+                    "code": "cards_unavailable",
+                    "detail": "Style Match cards are not available yet.",
+                },
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        with transaction.atomic():
+            User.objects.select_for_update().get(pk=request.user.pk)
+            StyleMatchSession.objects.filter(
+                user=request.user,
+                status=StyleMatchSession.STATUS_ACTIVE,
+            ).update(status=StyleMatchSession.STATUS_ABANDONED)
+            session = StyleMatchSession.objects.create(
+                user=request.user,
+                target_count=len(card_order),
+                card_order=card_order,
+            )
+        return Response(
+            _style_match_session_payload(session),
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class StyleMatchReactionView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, session_id):
+        serializer = StyleMatchReactionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        action = serializer.validated_data["action"]
+        card_id = serializer.validated_data["card_id"]
+
+        with transaction.atomic():
+            session = get_object_or_404(
+                StyleMatchSession.objects.select_for_update(),
+                pk=session_id,
+                user=request.user,
+            )
+            if session.is_complete:
+                return Response(
+                    {
+                        "completed": True,
+                        "current_index": session.current_index,
+                        "total": session.target_count,
+                        "result": _style_match_result_payload(session, request),
+                    }
+                )
+
+            if session.status != StyleMatchSession.STATUS_ACTIVE:
+                return Response(
+                    {
+                        "code": "match_abandoned",
+                        "detail": "This Style Match session is no longer active.",
+                    },
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+            if card_id not in session.card_order:
+                return Response(
+                    {
+                        "code": "invalid_card",
+                        "detail": "This card is not part of the session.",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            position = session.card_order.index(card_id)
+            existing = MatchResponse.objects.filter(
+                session=session,
+                card_id=card_id,
+            ).first()
+            if position < session.current_index and existing and existing.reaction:
+                return Response(
+                    {
+                        "completed": False,
+                        "current_index": session.current_index,
+                        "total": session.target_count,
+                        "saved": existing.saved,
+                    }
+                )
+
+            if session.current_index >= len(session.card_order):
+                return Response(
+                    {
+                        "code": "invalid_session_state",
+                        "detail": "This Style Match session cannot continue.",
+                    },
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+            current_card_id = session.card_order[session.current_index]
+            if card_id != current_card_id:
+                return Response(
+                    {
+                        "code": "current_card_required",
+                        "detail": "React to the current card first.",
+                    },
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+            response, _created = MatchResponse.objects.get_or_create(
+                session=session,
+                card_id=card_id,
+                defaults={"position": session.current_index},
+            )
+            if action == "save":
+                response.saved = serializer.validated_data["saved"]
+                response.save(update_fields=("saved", "responded_at"))
+                return Response(
+                    {
+                        "completed": False,
+                        "saved": response.saved,
+                        "current_index": session.current_index,
+                        "total": session.target_count,
+                    }
+                )
+
+            response.position = session.current_index
+            response.reaction = action
+            response.save(update_fields=("position", "reaction", "responded_at"))
+            session.current_index += 1
+
+            if session.current_index >= len(session.card_order):
+                scores = calculate_session_scores(session)
+                extra_card_ids = clarification_card_ids(session, scores)
+                if extra_card_ids:
+                    session.card_order = [*session.card_order, *extra_card_ids]
+                    session.target_count = len(session.card_order)
+                    session.save(
+                        update_fields=(
+                            "current_index",
+                            "card_order",
+                            "target_count",
+                            "updated_at",
+                        )
+                    )
+                    return Response(
+                        {
+                            "completed": False,
+                            "clarification": True,
+                            "current_index": session.current_index,
+                            "total": session.target_count,
+                            "cards": cards_for_ids(extra_card_ids),
+                        }
+                    )
+
+                complete_session(session)
+                return Response(
+                    {
+                        "completed": True,
+                        "current_index": session.current_index,
+                        "total": session.target_count,
+                        "result": _style_match_result_payload(session, request),
+                    }
+                )
+
+            session.save(update_fields=("current_index", "updated_at"))
+            return Response(
+                {
+                    "completed": False,
+                    "current_index": session.current_index,
+                    "total": session.target_count,
+                }
+            )
+
+
+class StyleMatchResultView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, session_id):
+        session = get_object_or_404(
+            StyleMatchSession,
+            pk=session_id,
+            user=request.user,
+        )
+        payload = _style_match_result_payload(session, request)
+        if payload is None:
+            return Response(
+                {
+                    "code": "match_incomplete",
+                    "detail": "This Style Match is not complete yet.",
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+        return Response(payload)

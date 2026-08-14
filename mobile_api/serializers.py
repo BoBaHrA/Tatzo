@@ -337,6 +337,14 @@ class PostReportRequestSerializer(serializers.Serializer):
     )
 
 
+class StyleMatchReactionSerializer(serializers.Serializer):
+    action = serializers.ChoiceField(
+        choices=("save", "reject", "like", "favorite")
+    )
+    card_id = serializers.IntegerField(min_value=1)
+    saved = serializers.BooleanField(required=False, default=True)
+
+
 class BlockedUserSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     username = serializers.CharField(read_only=True)

@@ -1,5 +1,7 @@
 import Constants from 'expo-constants';
 
+import { appLanguage } from '@/i18n';
+
 
 type ErrorBody = {
   code?: string;
@@ -31,6 +33,7 @@ export async function apiRequest<T>(
     headers.set('Content-Type', 'application/json');
   }
   headers.set('Accept', 'application/json');
+  headers.set('Accept-Language', appLanguage);
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,

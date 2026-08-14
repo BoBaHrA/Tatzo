@@ -6,6 +6,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from appointments.models import ArtistBookingSettings
 from posts.models import (
     Post,
     PostBookmark,
@@ -14,6 +15,7 @@ from posts.models import (
     PostMedia,
     PostReport,
 )
+from style_match.models import StyleMatchResponse, StyleMatchSession, TattooCard
 from users.models import PortfolioWork, UserBlock, UserFollow
 
 User = get_user_model()
@@ -551,3 +553,207 @@ class MobileSafetyTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["code"], "cannot_block_self")
+
+
+@override_settings(
+    TATZO_RATE_LIMIT_ENABLED=False,
+    STYLE_MATCH_CARD_COUNT=2,
+    STYLE_MATCH_MAX_CARD_COUNT=2,
+    STYLE_MATCH_CONFIDENCE_THRESHOLD=0,
+)
+class MobileStyleMatchTests(APITestCase):
+    def setUp(self):
+        TattooCard.objects.all().delete()
+        self.viewer = User.objects.create_user(
+            "match-viewer",
+            email="match-viewer@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        self.cards = [
+            self.make_card("MOBILE001", "fine_line"),
+            self.make_card("MOBILE002", "blackwork"),
+            self.make_card("MOBILE003", "geometric"),
+        ]
+        self.client.force_authenticate(self.viewer)
+
+    @staticmethod
+    def make_card(card_id, primary_style):
+        return TattooCard.objects.create(
+            card_id=card_id,
+            image_url=f"https://example.com/{card_id}.jpg",
+            cloudinary_public_id=f"style_match/cards/{card_id}",
+            primary_style=primary_style,
+            style_weights={primary_style: 0.9},
+            visual_traits={"organic": 0.8},
+            motifs=["reference"],
+            is_active=True,
+            is_approved=True,
+        )
+
+    def start(self):
+        return self.client.post(reverse("mobile_api:style_match"), {}, format="json")
+
+    def react(self, session_id, card_id, action, **payload):
+        return self.client.post(
+            reverse("mobile_api:style_match_react", args=[session_id]),
+            {"card_id": card_id, "action": action, **payload},
+            format="json",
+        )
+
+    def test_style_match_requires_authentication_and_resumes_active_session(self):
+        self.client.force_authenticate(user=None)
+        self.assertEqual(
+            self.client.get(reverse("mobile_api:style_match")).status_code,
+            status.HTTP_401_UNAUTHORIZED,
+        )
+        self.assertEqual(
+            self.client.post(reverse("mobile_api:style_match")).status_code,
+            status.HTTP_401_UNAUTHORIZED,
+        )
+
+        self.client.force_authenticate(self.viewer)
+        started = self.start()
+        self.assertEqual(started.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(started.data["total"], 2)
+        self.assertEqual(started.data["current_index"], 0)
+        self.assertNotIn("primary_style", started.data["cards"][0])
+        self.assertNotIn("style_weights", started.data["cards"][0])
+
+        overview = self.client.get(reverse("mobile_api:style_match"))
+        self.assertEqual(
+            overview.data["active_session"]["session_id"],
+            started.data["session_id"],
+        )
+
+        replacement = self.start()
+        self.assertNotEqual(replacement.data["session_id"], started.data["session_id"])
+        self.assertEqual(
+            StyleMatchSession.objects.get(pk=started.data["session_id"]).status,
+            StyleMatchSession.STATUS_ABANDONED,
+        )
+        abandoned = self.react(
+            started.data["session_id"],
+            started.data["cards"][0]["id"],
+            "like",
+        )
+        self.assertEqual(abandoned.status_code, status.HTTP_409_CONFLICT)
+        self.assertEqual(abandoned.data["code"], "match_abandoned")
+
+    def test_save_react_complete_and_load_latest_result(self):
+        started = self.start().data
+        first, second = started["cards"]
+        first_style = TattooCard.objects.get(pk=first["id"]).primary_style
+        hidden_artist = User.objects.create_user(
+            "hidden-match-artist",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        hidden_artist.profile.account_type = "tattoo_artist"
+        hidden_artist.profile.verification_status = "approved"
+        hidden_artist.profile.is_email_verified = True
+        hidden_artist.profile.save()
+        ArtistBookingSettings.objects.create(
+            artist=hidden_artist,
+            active_styles=[first_style],
+        )
+        UserBlock.objects.create(blocker=self.viewer, blocked=hidden_artist)
+
+        saved = self.react(
+            started["session_id"],
+            first["id"],
+            "save",
+            saved=True,
+        )
+        self.assertTrue(saved.data["saved"])
+        self.assertEqual(saved.data["current_index"], 0)
+        resumed = self.client.get(reverse("mobile_api:style_match"))
+        self.assertTrue(resumed.data["active_session"]["current_saved"])
+
+        first_reaction = self.react(
+            started["session_id"],
+            first["id"],
+            "favorite",
+        )
+        self.assertFalse(first_reaction.data["completed"])
+        completed = self.react(
+            started["session_id"],
+            second["id"],
+            "reject",
+        )
+        self.assertTrue(completed.data["completed"])
+        self.assertEqual(completed.data["result"]["saved_cards"][0]["id"], first["id"])
+        self.assertEqual(
+            completed.data["result"]["top_style"]["slug"],
+            first_style,
+        )
+        self.assertNotIn(
+            hidden_artist.username,
+            {artist["username"] for artist in completed.data["result"]["artists"]},
+        )
+
+        session = StyleMatchSession.objects.get(pk=started["session_id"])
+        self.assertEqual(session.status, StyleMatchSession.STATUS_COMPLETED)
+        self.assertTrue(
+            StyleMatchResponse.objects.get(session=session, card_id=first["id"]).saved
+        )
+
+        result = self.client.get(
+            reverse("mobile_api:style_match_result", args=[session.pk])
+        )
+        self.assertEqual(result.status_code, status.HTTP_200_OK)
+        overview = self.client.get(reverse("mobile_api:style_match"))
+        self.assertIsNone(overview.data["active_session"])
+        self.assertEqual(overview.data["latest_result"]["session_id"], str(session.pk))
+
+    def test_future_card_and_foreign_session_are_hidden(self):
+        started = self.start().data
+        future = self.react(
+            started["session_id"],
+            started["cards"][1]["id"],
+            "like",
+        )
+        self.assertEqual(future.status_code, status.HTTP_409_CONFLICT)
+        self.assertEqual(future.data["code"], "current_card_required")
+
+        stranger = User.objects.create_user(
+            "match-stranger",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        self.client.force_authenticate(stranger)
+        hidden = self.client.get(
+            reverse("mobile_api:style_match_result", args=[started["session_id"]])
+        )
+        self.assertEqual(hidden.status_code, status.HTTP_404_NOT_FOUND)
+
+    @override_settings(
+        STYLE_MATCH_CLARIFICATION_BATCH_SIZE=1,
+        STYLE_MATCH_MAX_CARD_COUNT=3,
+        STYLE_MATCH_CONFIDENCE_THRESHOLD=100,
+    )
+    def test_uncertain_mobile_match_receives_adaptive_card(self):
+        started = self.start().data
+        first = self.react(
+            started["session_id"],
+            started["cards"][0]["id"],
+            "like",
+        )
+        self.assertFalse(first.data["completed"])
+
+        extension = self.react(
+            started["session_id"],
+            started["cards"][1]["id"],
+            "like",
+        )
+        self.assertTrue(extension.data["clarification"])
+        self.assertEqual(extension.data["total"], 3)
+        self.assertEqual(len(extension.data["cards"]), 1)
+
+        completed = self.react(
+            started["session_id"],
+            extension.data["cards"][0]["id"],
+            "like",
+        )
+        self.assertTrue(completed.data["completed"])
+        self.assertEqual(completed.data["current_index"], 3)

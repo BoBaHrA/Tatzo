@@ -147,3 +147,68 @@ export type BlockedUser = {
 export type BlockedUsersResponse = {
   results: BlockedUser[];
 };
+
+export type StyleMatchCard = {
+  id: number;
+  card_id: string;
+  image_url: string;
+  alt: string;
+};
+
+export type StyleMatchSession = {
+  session_id: string;
+  current_index: number;
+  total: number;
+  cards: StyleMatchCard[];
+  current_saved: boolean;
+};
+
+export type StyleMatchStyle = {
+  slug: string;
+  label: string;
+  score: number;
+};
+
+export type StyleMatchArtist = {
+  username: string;
+  image_url: string;
+  location: string;
+  top_style: string;
+  score: number;
+};
+
+export type StyleMatchResult = {
+  session_id: string;
+  top_style: StyleMatchStyle;
+  styles: StyleMatchStyle[];
+  personality: {
+    slug: string;
+    label: string;
+    description: string;
+  };
+  drawn_to: string[];
+  tend_to_skip: string[];
+  artists: StyleMatchArtist[];
+  community_count: number;
+  completed_count: number;
+  saved_count: number;
+  saved_cards: StyleMatchCard[];
+  match_confidence: number;
+};
+
+export type StyleMatchOverview = {
+  active_session: StyleMatchSession | null;
+  latest_result: StyleMatchResult | null;
+};
+
+export type StyleMatchReaction = 'reject' | 'like' | 'favorite';
+
+export type StyleMatchReactionResult = {
+  completed: boolean;
+  current_index: number;
+  total: number;
+  saved?: boolean;
+  clarification?: boolean;
+  cards?: StyleMatchCard[];
+  result?: StyleMatchResult;
+};

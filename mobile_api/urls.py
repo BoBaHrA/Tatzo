@@ -14,6 +14,9 @@ from .views import (
     PublicProfileFollowView,
     PublicProfileView,
     RegisterView,
+    StyleMatchReactionView,
+    StyleMatchResultView,
+    StyleMatchView,
 )
 
 app_name = "mobile_api"
@@ -52,5 +55,16 @@ urlpatterns = [
         "feed/<int:post_id>/report/",
         FeedReportView.as_view(),
         name="feed_report",
+    ),
+    path("style-match/", StyleMatchView.as_view(), name="style_match"),
+    path(
+        "style-match/<uuid:session_id>/react/",
+        StyleMatchReactionView.as_view(),
+        name="style_match_react",
+    ),
+    path(
+        "style-match/<uuid:session_id>/result/",
+        StyleMatchResultView.as_view(),
+        name="style_match_result",
     ),
 ]

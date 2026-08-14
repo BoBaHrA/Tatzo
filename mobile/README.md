@@ -25,6 +25,10 @@ refresh tokens rotate and the replaced token is blacklisted by Django.
 - authenticated profile read/edit;
 - secure sign out;
 - authenticated cursor-paginated feed with Cloudinary-backed image/video media;
-- pull-to-refresh, infinite loading, likes, and bookmarks.
+- pull-to-refresh, infinite loading, likes, bookmarks, and post reports;
+- public artist profiles with follow, portfolio, recent posts, and two-way privacy;
+- block/unblock controls, blocked-user management, safety contact, and in-app account deletion;
+- native Style Match with resumable sessions, adaptive clarification cards, saved references,
+  localized results, and artist recommendations.
 
-The next slices are artist profiles, Style Match, chat, booking, and map.
+The next slices are chat, booking, and map.
