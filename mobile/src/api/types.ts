@@ -386,6 +386,90 @@ export type AppointmentListResponse = {
   results: Appointment[];
 };
 
+export type ArtistBookingStatus =
+  | 'open'
+  | 'paused'
+  | 'vacation'
+  | 'fully_booked'
+  | 'consultation_only'
+  | 'emergency';
+
+export type ArtistDashboardSettings = {
+  booking_status: ArtistBookingStatus;
+  booking_status_label: string;
+  booking_status_options: { value: ArtistBookingStatus; label: string }[];
+  bookings_enabled: boolean;
+  booking_workflow: 'manual' | 'auto';
+  maximum_session_hours: number;
+  minimum_notice_hours: number;
+  maximum_booking_window_days: number;
+};
+
+export type ArtistScheduleDay = {
+  weekday: number;
+  is_closed: boolean;
+  open_time: string | null;
+  close_time: string | null;
+  break_start: string | null;
+  break_end: string | null;
+};
+
+export type ArtistWorkloadDay = {
+  date: string;
+  booked_minutes: number;
+  capacity_minutes: number;
+  percent: number;
+  workload: 'empty' | 'light' | 'busy' | 'full' | 'closed' | 'time_off';
+};
+
+export type ArtistTimeOff = {
+  id: number;
+  date: string;
+  reason: string;
+};
+
+export type ArtistBlockedPeriod = {
+  id: number;
+  event_type: 'blocked' | 'vacation';
+  event_type_label: string;
+  date: string;
+  end_date: string;
+  start_time: string;
+  end_time: string;
+  title: string;
+};
+
+export type ArtistTimelineItem = {
+  id: string;
+  source: 'appointment' | 'calendar_event' | 'time_off';
+  appointment_id: number | null;
+  role: 'artist' | 'client';
+  date: string;
+  start_time: string | null;
+  end_time: string | null;
+  title: string;
+  status: string;
+  status_label: string;
+  other_user: BookingUser | null;
+};
+
+export type ArtistDashboard = {
+  artist_timezone: string;
+  today: string;
+  settings: ArtistDashboardSettings;
+  stats: {
+    today_sessions: number;
+    pending_requests: number;
+    upcoming_consultations: number;
+    unread_messages: number;
+  };
+  schedule: ArtistScheduleDay[];
+  workload: ArtistWorkloadDay[];
+  time_off: ArtistTimeOff[];
+  blocked_periods: ArtistBlockedPeriod[];
+  timeline: ArtistTimelineItem[];
+};
+
 export type NotificationKind =
   | 'follow'
   | 'post_like'

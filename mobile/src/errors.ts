@@ -22,6 +22,27 @@ export function userFacingError(error: unknown): string {
   if (error.body.code === 'claim_exists') {
     return t('mapClaimAlreadyPending');
   }
+  if (error.body.code === 'artist_dashboard_forbidden') {
+    return t('artistDashboardForbidden');
+  }
+  if (error.body.code === 'invalid_booking_status') {
+    return t('artistInvalidStatus');
+  }
+  if (error.body.code === 'invalid_schedule') {
+    return t('artistInvalidSchedule');
+  }
+  if (error.body.code === 'invalid_date') {
+    return t('artistInvalidDate');
+  }
+  if (error.body.code === 'past_date') {
+    return t('artistPastDate');
+  }
+  if (error.body.code === 'calendar_conflict') {
+    return t('artistCalendarConflict');
+  }
+  if (error.body.code === 'invalid_block') {
+    return t('artistInvalidBlock');
+  }
 
   const fieldError = Object.values(error.body).find(Array.isArray);
   if (Array.isArray(fieldError) && typeof fieldError[0] === 'string') {

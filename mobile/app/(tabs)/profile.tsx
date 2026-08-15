@@ -42,6 +42,17 @@ export default function ProfileScreen() {
         <Detail label={t('account')} value={user.account_type} />
         <Detail label="Timezone" value={user.timezone} />
       </View>
+      {user.is_verified_artist ? (
+        <View style={styles.artistCard}>
+          <Text style={styles.artistEyebrow}>{t('artistDashboardEyebrow')}</Text>
+          <Text style={styles.artistTitle}>{t('artistDashboard')}</Text>
+          <Text style={styles.artistText}>{t('artistDashboardSubtitle')}</Text>
+          <Button
+            label={t('artistDashboard')}
+            onPress={() => router.push('/artist-dashboard')}
+          />
+        </View>
+      ) : null}
       <Button label={t('editProfile')} onPress={() => router.push('/edit-profile')} />
       <View style={styles.safetyCard}>
         <Text style={styles.safetyTitle}>{t('safety')}</Text>
@@ -83,6 +94,10 @@ const styles = StyleSheet.create({
   badgeText: { color: colors.textMuted, fontSize: 12, fontWeight: '700' },
   bio: { color: colors.text, lineHeight: 22, paddingHorizontal: spacing.xs },
   details: { backgroundColor: colors.surface, borderRadius: radius.medium, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
+  artistCard: { backgroundColor: colors.surface, borderRadius: radius.large, borderWidth: 1, borderColor: colors.primaryMuted, padding: spacing.lg, gap: spacing.sm },
+  artistEyebrow: { color: colors.primary, fontSize: 10, fontWeight: '900', letterSpacing: 2 },
+  artistTitle: { color: colors.text, fontSize: 22, fontWeight: '900' },
+  artistText: { color: colors.textMuted, lineHeight: 20 },
   detailRow: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.md, padding: spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
   detailLabel: { color: colors.textMuted },
   detailValue: { color: colors.text, fontWeight: '700', flexShrink: 1, textAlign: 'right' },

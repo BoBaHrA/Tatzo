@@ -17,6 +17,14 @@ from .booking_views import (
     AppointmentReferenceUploadView,
     BookingArtistView,
 )
+from .artist_dashboard_views import (
+    ArtistBlockDetailView,
+    ArtistBlockListView,
+    ArtistDashboardView,
+    ArtistScheduleView,
+    ArtistTimeOffDetailView,
+    ArtistTimeOffListView,
+)
 from .map_views import (
     MapLocationClaimView,
     MapLocationListView,
@@ -86,6 +94,36 @@ urlpatterns = [
         name="map_location_claim",
     ),
     path("appointments/", AppointmentListView.as_view(), name="appointment_list"),
+    path(
+        "artist/dashboard/",
+        ArtistDashboardView.as_view(),
+        name="artist_dashboard",
+    ),
+    path(
+        "artist/dashboard/schedule/",
+        ArtistScheduleView.as_view(),
+        name="artist_schedule",
+    ),
+    path(
+        "artist/dashboard/time-off/",
+        ArtistTimeOffListView.as_view(),
+        name="artist_time_off_list",
+    ),
+    path(
+        "artist/dashboard/time-off/<int:time_off_id>/",
+        ArtistTimeOffDetailView.as_view(),
+        name="artist_time_off_detail",
+    ),
+    path(
+        "artist/dashboard/blocks/",
+        ArtistBlockListView.as_view(),
+        name="artist_block_list",
+    ),
+    path(
+        "artist/dashboard/blocks/<int:event_id>/",
+        ArtistBlockDetailView.as_view(),
+        name="artist_block_detail",
+    ),
     path(
         "appointments/book/<str:username>/",
         BookingArtistView.as_view(),

@@ -44,5 +44,8 @@ refresh tokens rotate and the replaced token is blacklisted by Django.
   private studio claims, and moderated add-location requests.
 - native in-app notifications for follows, likes, comments, replies, chats, and booking
   changes, with unread polling, cursor pagination, read controls, and protected deep links.
+- native verified-artist workspace with live booking status, booking/message stats,
+  14-day workload, a combined artist/client calendar timeline, weekly working-hour
+  editing, full-day time off, and collision-safe blocked periods.
 
-The next slice is artist-side workflow polish and device push-token delivery.
+The next slice is device push-token delivery and store-build release hardening.
