@@ -116,6 +116,14 @@ class AccountSecurityTests(TestCase):
         self.assertTrue(staff.is_active)
         self.assertTrue(Profile.objects.filter(user=staff).exists())
 
+    @override_settings(
+        STORAGES={
+            "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+            "staticfiles": {
+                "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+            },
+        }
+    )
     def test_delete_account_has_web_confirmation_and_requires_current_password(self):
         self.client.force_login(self.user)
         url = reverse("delete_account")
