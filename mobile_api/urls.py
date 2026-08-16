@@ -36,6 +36,7 @@ from .notification_views import (
     NotificationReadView,
     NotificationUnreadCountView,
 )
+from .push_views import PushDeviceView
 
 from .views import (
     BlockedUsersView,
@@ -67,6 +68,7 @@ urlpatterns = [
     path("me/", MeView.as_view(), name="me"),
     path("me/blocked-users/", BlockedUsersView.as_view(), name="blocked_users"),
     path("notifications/", NotificationListView.as_view(), name="notifications"),
+    path("push/devices/", PushDeviceView.as_view(), name="push_device"),
     path(
         "notifications/unread-count/",
         NotificationUnreadCountView.as_view(),

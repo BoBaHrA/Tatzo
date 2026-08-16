@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 
 from posts.models import Post
 from users.models import Notification, UserBlock
+from users.notification_targets import notification_target
 
 
 def _absolute_profile_image_url(user, request):
@@ -53,20 +54,6 @@ def _visible_notifications(user):
     )
 
 
-def _target_payload(notification):
-    if notification.kind == Notification.KIND_FOLLOW and notification.actor:
-        return {"type": "profile", "username": notification.actor.username}
-    if notification.post_id:
-        return {"type": "post", "id": notification.post_id}
-    if notification.appointment_id:
-        return {"type": "appointment", "id": notification.appointment_id}
-    if notification.thread_id:
-        return {"type": "chat", "id": notification.thread_id}
-    if notification.actor:
-        return {"type": "profile", "username": notification.actor.username}
-    return {"type": "none"}
-
-
 def _notification_payload(notification, request):
     actor = notification.actor
     preview = ""
@@ -91,7 +78,7 @@ def _notification_payload(notification, request):
             if actor
             else None
         ),
-        "target": _target_payload(notification),
+        "target": notification_target(notification),
         "preview": preview,
         "appointment_status": appointment.status if appointment else None,
         "appointment_status_label": (

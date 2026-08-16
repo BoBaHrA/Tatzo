@@ -17,6 +17,7 @@ import type {
   TokenPair,
 } from '@/api/types';
 import { clearTokens, readTokens, writeTokens } from '@/auth/token-store';
+import { unregisterPushDevice } from '@/notifications/push-notifications';
 
 
 type AuthStatus = 'loading' | 'anonymous' | 'authenticated';
@@ -142,6 +143,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const signOut = useCallback(async () => {
     const tokens = await readTokens();
     if (tokens) {
+      try {
+        await unregisterPushDevice(authenticatedRequest);
+      } catch {
+        // A stale device registration must not prevent local sign out.
+      }
       try {
         await authenticatedRequest<void>('/auth/logout/', {
           method: 'POST',

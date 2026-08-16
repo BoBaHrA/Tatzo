@@ -26,6 +26,7 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
 } from '@/notifications/notification-api';
+import { navigateToNotificationTarget } from '@/notifications/notification-navigation';
 import { colors, radius, spacing } from '@/theme';
 
 
@@ -182,31 +183,6 @@ export default function NotificationsScreen() {
     }
   };
 
-  const navigateToTarget = (notification: NotificationItem) => {
-    const target = notification.target;
-    if (target.type === 'profile') {
-      router.push({
-        pathname: '/profile/[username]',
-        params: { username: target.username },
-      });
-    } else if (target.type === 'post') {
-      router.push({
-        pathname: '/post/[postId]',
-        params: { postId: String(target.id) },
-      });
-    } else if (target.type === 'appointment') {
-      router.push({
-        pathname: '/appointment/[appointmentId]',
-        params: { appointmentId: String(target.id) },
-      });
-    } else if (target.type === 'chat') {
-      router.push({
-        pathname: '/chat/[threadId]',
-        params: { threadId: String(target.id) },
-      });
-    }
-  };
-
   const openNotification = async (notification: NotificationItem) => {
     setActionError('');
     if (!notification.is_read) {
@@ -221,7 +197,7 @@ export default function NotificationsScreen() {
         setActionError(t('notificationOpenError'));
       }
     }
-    navigateToTarget(notification);
+    navigateToNotificationTarget(notification.target);
   };
 
   const markAll = async () => {

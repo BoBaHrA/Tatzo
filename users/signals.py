@@ -46,7 +46,7 @@ def _create_notification(*, recipient_id, actor_id, kind, dedupe_key, **relation
         | Q(blocker_id=actor_id, blocked_id=recipient_id)
     ).exists():
         return
-    Notification.objects.get_or_create(
+    notification, created = Notification.objects.get_or_create(
         recipient_id=recipient_id,
         dedupe_key=dedupe_key,
         defaults={
@@ -55,6 +55,10 @@ def _create_notification(*, recipient_id, actor_id, kind, dedupe_key, **relation
             **relations,
         },
     )
+    if created:
+        from .push_notifications import queue_notification_push
+
+        queue_notification_push(notification)
 
 
 @receiver(post_save, sender=UserFollow)
