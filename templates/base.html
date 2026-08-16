@@ -159,6 +159,9 @@
     {% block extra_js %}
         <script src="{% static 'js/verification.js' %}"></script>
     {% endblock %}
+    {% if request.resolver_match.url_name == 'booking_wizard' %}
+        <script src="{% static 'js/booking_wizard_hotfix.js' %}"></script>
+    {% endif %}
     <script src="{% static 'style_match/style_match_hotfix.js' %}"></script>
     <script src="{% static 'healing/healing_bridge.js' %}"></script>
     {% if request.resolver_match.app_name == 'healing' %}
