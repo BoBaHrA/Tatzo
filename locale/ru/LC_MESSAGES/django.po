@@ -3632,3 +3632,24 @@ msgstr ""
 
 msgid "Thank you! Your report has been sent."
 msgstr "Спасибо! Ваше обращение отправлено."
+
+msgid "Delete account"
+msgstr "Удалить аккаунт"
+
+msgid "Permanently delete your Tatzo account and associated data."
+msgstr "Навсегда удалите аккаунт Tatzo и связанные с ним данные."
+
+msgid "Your profile, posts, portfolio, messages, bookings and associated data will be permanently deleted."
+msgstr "Ваш профиль, публикации, портфолио, сообщения, записи и связанные данные будут удалены навсегда."
+
+msgid "Enter your current password to confirm that this account belongs to you."
+msgstr "Введите текущий пароль, чтобы подтвердить, что аккаунт принадлежит вам."
+
+msgid "Delete your account permanently? This cannot be undone."
+msgstr "Удалить аккаунт навсегда? Это действие нельзя отменить."
+
+msgid "Enter your password to delete the account"
+msgstr "Введите пароль, чтобы удалить аккаунт."
+
+msgid "If you cannot access your account, contact"
+msgstr "Если вы не можете войти в аккаунт, напишите на"

@@ -6,6 +6,7 @@ import { BrandHeader } from '@/components/brand-header';
 import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
 import { t } from '@/i18n';
+import { PUBLIC_LINKS } from '@/public-links';
 import { colors, radius, spacing } from '@/theme';
 
 
@@ -55,6 +56,25 @@ export default function ProfileScreen() {
       ) : null}
       <Button label={t('editProfile')} onPress={() => router.push('/edit-profile')} />
       <View style={styles.safetyCard}>
+        <Text style={styles.safetyTitle}>{t('legal')}</Text>
+        <Text style={styles.safetyText}>{t('legalSubtitle')}</Text>
+        <Button
+          label={t('privacy')}
+          onPress={() => void Linking.openURL(PUBLIC_LINKS.privacy)}
+          variant="secondary"
+        />
+        <Button
+          label={t('terms')}
+          onPress={() => void Linking.openURL(PUBLIC_LINKS.terms)}
+          variant="secondary"
+        />
+        <Button
+          label={t('communityGuidelines')}
+          onPress={() => void Linking.openURL(PUBLIC_LINKS.communityGuidelines)}
+          variant="secondary"
+        />
+      </View>
+      <View style={styles.safetyCard}>
         <Text style={styles.safetyTitle}>{t('safety')}</Text>
         <Text style={styles.safetyText}>{t('safetySubtitle')}</Text>
         <Button
@@ -64,7 +84,7 @@ export default function ProfileScreen() {
         />
         <Button
           label={t('contactSafetySupport')}
-          onPress={() => void Linking.openURL('mailto:contact@tatzo.eu')}
+          onPress={() => void Linking.openURL(PUBLIC_LINKS.safetySupport)}
           variant="secondary"
         />
         <Button

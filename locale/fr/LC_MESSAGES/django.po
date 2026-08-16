@@ -3695,3 +3695,24 @@ msgstr ""
 
 msgid "Thank you! Your report has been sent."
 msgstr "Merci ! Votre signalement a été envoyé."
+
+msgid "Delete account"
+msgstr "Supprimer le compte"
+
+msgid "Permanently delete your Tatzo account and associated data."
+msgstr "Supprimez définitivement votre compte Tatzo et les données associées."
+
+msgid "Your profile, posts, portfolio, messages, bookings and associated data will be permanently deleted."
+msgstr "Votre profil, vos publications, votre portfolio, vos messages, vos réservations et les données associées seront définitivement supprimés."
+
+msgid "Enter your current password to confirm that this account belongs to you."
+msgstr "Saisissez votre mot de passe actuel pour confirmer que ce compte vous appartient."
+
+msgid "Delete your account permanently? This cannot be undone."
+msgstr "Supprimer définitivement votre compte ? Cette action est irréversible."
+
+msgid "Enter your password to delete the account"
+msgstr "Saisissez votre mot de passe pour supprimer le compte."
+
+msgid "If you cannot access your account, contact"
+msgstr "Si vous ne pouvez pas accéder à votre compte, contactez"

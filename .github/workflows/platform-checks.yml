@@ -59,6 +59,9 @@ jobs:
       - name: Type-check mobile client
         run: npm run typecheck --prefix mobile
 
+      - name: Check mobile release configuration
+        run: npm run release:check --prefix mobile
+
       - name: Export mobile bundles
         working-directory: mobile
         run: ./node_modules/.bin/expo export --platform all --output-dir /tmp/tatzo-mobile-export

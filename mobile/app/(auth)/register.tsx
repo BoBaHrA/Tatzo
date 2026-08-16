@@ -10,6 +10,7 @@ import { Field } from '@/components/field';
 import { Screen } from '@/components/screen';
 import { userFacingError } from '@/errors';
 import { t } from '@/i18n';
+import { PUBLIC_LINKS } from '@/public-links';
 import { colors, radius, spacing } from '@/theme';
 
 
@@ -80,9 +81,9 @@ export default function RegisterScreen() {
           <Switch value={accepted} onValueChange={setAccepted} trackColor={{ true: colors.primaryMuted }} thumbColor={accepted ? colors.primary : colors.textMuted} />
           <Text style={styles.termsText}>
             {t('acceptPrefix')}{' '}
-            <Text style={styles.link} onPress={() => void Linking.openURL('https://tatzo.eu/terms/')}>{t('terms')}</Text>{' '}
+            <Text style={styles.link} onPress={() => void Linking.openURL(PUBLIC_LINKS.terms)}>{t('terms')}</Text>{' '}
             {t('and')}{' '}
-            <Text style={styles.link} onPress={() => void Linking.openURL('https://tatzo.eu/privacy/')}>{t('privacy')}</Text>.
+            <Text style={styles.link} onPress={() => void Linking.openURL(PUBLIC_LINKS.privacy)}>{t('privacy')}</Text>.
           </Text>
         </View>
         {error ? <Text style={styles.error}>{error}</Text> : null}

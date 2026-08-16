@@ -15,22 +15,28 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   owner: process.env.EXPO_PUBLIC_EXPO_OWNER,
   version: '0.1.0',
   orientation: 'portrait',
-  icon: './assets/tatzo-icon.png',
+  icon: './assets/tatzo-app-icon.png',
   scheme: 'tatzo',
   userInterfaceStyle: 'dark',
   ios: {
     supportsTablet: false,
     bundleIdentifier: 'eu.tatzo.app',
+    icon: './assets/tatzo-app-icon.png',
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
     },
   },
   android: {
     package: 'eu.tatzo.app',
+    icon: './assets/tatzo-app-icon.png',
     adaptiveIcon: {
-      foregroundImage: './assets/tatzo-icon.png',
+      foregroundImage: './assets/tatzo-adaptive-icon.png',
+      monochromeImage: './assets/tatzo-monochrome-icon.png',
       backgroundColor: '#000d18',
     },
+  },
+  web: {
+    favicon: './assets/tatzo-app-icon.png',
   },
   plugins: [
     'expo-router',
@@ -61,7 +67,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-splash-screen',
       {
-        image: './assets/tatzo-icon.png',
+        image: './assets/tatzo-adaptive-icon.png',
         imageWidth: 180,
         resizeMode: 'contain',
         backgroundColor: '#000d18',

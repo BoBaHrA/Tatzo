@@ -22,7 +22,7 @@ from django.utils import timezone
 from django.utils.encoding import force_str
 from django.utils.translation import gettext as _, ngettext
 from django.utils.http import urlsafe_base64_decode
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods, require_POST
 from .security import check_rate_limit, is_new_account, rate_limited_json
 from .models import (
     Profile,
@@ -462,12 +462,15 @@ def user_profile(request):
 
 
 @login_required
-@require_POST
+@require_http_methods(["GET", "POST"])
 def delete_account(request):
+    if request.method == "GET":
+        return render(request, "users/delete_account.html")
+
     password = request.POST.get("password") or ""
     if not request.user.check_password(password):
         messages.error(request, _("The password you entered is incorrect."))
-        return redirect("edit_profile")
+        return redirect("delete_account")
 
     user = request.user
     auth_logout(request)

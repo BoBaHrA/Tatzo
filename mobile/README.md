@@ -54,7 +54,22 @@ refresh tokens rotate and the replaced token is blacklisted by Django.
   14-day workload, a combined artist/client calendar timeline, weekly working-hour
   editing, full-day time off, and collision-safe blocked periods.
 
-The next slice is store metadata, signing/credentials, release builds, and beta distribution.
+## Release preparation
+
+The repository contains store-ready icon layers, localized draft store copy, a
+data-safety engineering inventory, and a staged release checklist under `store/`.
+Run `npm run release:check` for structural validation. Before a real EAS store build,
+load the production EAS public values and run `npm run release:check:production`.
+
+Preview builds are internally distributed and produce an installable Android APK.
+Production builds keep the store-ready AAB/IPA defaults, auto-increment build numbers,
+and submit Android to the internal testing track first. Signing credentials, service
+account keys, APNs keys, FCM credentials, and `EXPO_TOKEN` must stay in EAS/GitHub
+secret storage and must never be committed.
+
+The remaining release work requires the real Apple, Google Play, and Expo accounts:
+credentials, physical-device beta testing, final screenshots, privacy-form approval,
+and store review. Follow `store/release-checklist.md` in order.
 
 ## Push delivery operations
 

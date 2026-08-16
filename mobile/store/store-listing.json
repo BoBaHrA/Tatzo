@@ -1,0 +1,41 @@
+{
+  "shared": {
+    "appName": "Tatzo",
+    "bundleIdentifier": "eu.tatzo.app",
+    "defaultLocale": "en-US",
+    "supportUrl": "https://tatzo.eu/",
+    "supportEmail": "contact@tatzo.eu",
+    "privacyPolicyUrl": "https://tatzo.eu/privacy/",
+    "termsOfUseUrl": "https://tatzo.eu/terms/",
+    "communityGuidelinesUrl": "https://tatzo.eu/community-guidelines/",
+    "accountDeletionUrl": "https://tatzo.eu/settings/delete-account/",
+    "applePrimaryCategory": "SOCIAL_NETWORKING",
+    "googlePlayCategory": "SOCIAL"
+  },
+  "locales": {
+    "en-US": {
+      "name": "Tatzo",
+      "subtitle": "Tattoo artists & bookings",
+      "shortDescription": "Discover tattoo artists, share inspiration, chat, and manage bookings.",
+      "promotionalText": "Find the right tattoo artist, turn inspiration into a clear brief, and keep chats, references, and bookings together.",
+      "keywords": "tattoo,artist,studio,booking,inspiration,portfolio,map,community",
+      "description": "Find tattoo artists and studios, explore work from the community, and turn an idea into a clear booking request.\n\nWith Tatzo you can:\n• discover artists and studios on the map;\n• explore posts and verified artist portfolios;\n• save inspiration and try Style Match;\n• chat privately and attach reference images;\n• request consultations and tattoo appointments;\n• follow booking updates and activity notifications;\n• control your privacy, block users, report content, and delete your account in the app.\n\nTatzo is available in English, French, and Russian."
+    },
+    "fr-FR": {
+      "name": "Tatzo",
+      "subtitle": "Tatoueurs et réservations",
+      "shortDescription": "Découvrez des tatoueurs, partagez vos idées, échangez et réservez.",
+      "promotionalText": "Trouvez le bon tatoueur, transformez votre inspiration en projet clair et centralisez échanges, références et réservations.",
+      "keywords": "tatouage,tatoueur,studio,rendez-vous,inspiration,portfolio,carte",
+      "description": "Trouvez des tatoueurs et des studios, explorez les créations de la communauté et transformez une idée en demande de réservation claire.\n\nAvec Tatzo, vous pouvez :\n• découvrir des tatoueurs et des studios sur la carte ;\n• explorer les publications et les portfolios de tatoueurs vérifiés ;\n• enregistrer vos inspirations et essayer Style Match ;\n• échanger en privé et joindre des images de référence ;\n• demander une consultation ou une séance de tatouage ;\n• suivre vos réservations et vos notifications d’activité ;\n• gérer votre confidentialité, bloquer des utilisateurs, signaler du contenu et supprimer votre compte dans l’application.\n\nTatzo est disponible en anglais, français et russe."
+    },
+    "ru-RU": {
+      "name": "Tatzo",
+      "subtitle": "Мастера, идеи и записи",
+      "shortDescription": "Находи тату-мастеров, делись идеями, общайся и управляй записями.",
+      "promotionalText": "Найди подходящего мастера, преврати идею в понятный бриф и храни переписку, референсы и записи в одном месте.",
+      "keywords": "тату,татуировка,мастер,студия,запись,эскиз,портфолио,карта",
+      "description": "Находи тату-мастеров и студии, изучай работы сообщества и превращай идею в понятную заявку.\n\nВ Tatzo можно:\n• искать мастеров и студии на карте;\n• смотреть публикации и портфолио проверенных мастеров;\n• сохранять идеи и проходить Style Match;\n• общаться в личных чатах и прикреплять референсы;\n• отправлять запросы на консультации и сеансы;\n• следить за статусами записей и уведомлениями;\n• управлять приватностью, блокировать пользователей, жаловаться на контент и удалять аккаунт прямо в приложении.\n\nTatzo доступен на английском, французском и русском языках."
+    }
+  }
+}
