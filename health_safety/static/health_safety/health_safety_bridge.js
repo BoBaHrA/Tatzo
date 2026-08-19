@@ -114,7 +114,9 @@
       }
     } else {
       const status = document.createElement("p");
-      status.textContent = data.active ? data.copy.client_shared : data.copy.client_not_shared;
+      status.textContent = data.active
+        ? (data.source === "quick" ? data.copy.client_quick_shared : data.copy.client_shared)
+        : data.copy.client_not_shared;
       card.appendChild(status);
 
       if (data.expires_on && data.active) {
