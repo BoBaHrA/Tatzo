@@ -140,21 +140,52 @@ document.addEventListener("DOMContentLoaded", () => {
     return form.querySelector('input[name="csrfmiddlewaretoken"]')?.value || "";
   }
 
+  function isTattooBooking() {
+    return (document.getElementById("booking-type")?.value || "tattoo_session") === "tattoo_session";
+  }
+
   function healthCardElement() {
     let card = reviewPanel.querySelector(".booking-health-card");
     if (!card) {
       card = document.createElement("section");
-      card.className = "booking-health-card";
+      card.className = "booking-health-card booking-health-card-v2";
       const review = document.getElementById("booking-review-card");
       reviewPanel.insertBefore(card, review || reviewPanel.firstChild?.nextSibling || null);
     }
     return card;
   }
 
+  function modeOption(value, text, checked = false) {
+    const label = document.createElement("label");
+    label.className = "booking-health-mode";
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "booking-health-mode";
+    input.value = value;
+    input.checked = checked;
+    const span = document.createElement("span");
+    span.textContent = text;
+    label.append(input, span);
+    return label;
+  }
+
+  function checkboxRow(name, text, className = "booking-health-check") {
+    const label = document.createElement("label");
+    label.className = className;
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.dataset.healthField = name;
+    const span = document.createElement("span");
+    span.textContent = text;
+    label.append(input, span);
+    return label;
+  }
+
   function renderHealthStatus(data) {
     statusData = data;
     const card = healthCardElement();
     card.replaceChildren();
+    card.hidden = !isTattooBooking();
 
     const heading = document.createElement("h3");
     heading.textContent = data.copy.booking_title;
@@ -162,17 +193,67 @@ document.addEventListener("DOMContentLoaded", () => {
     text.textContent = data.has_card ? data.copy.booking_ready : data.copy.booking_missing;
     card.append(heading, text);
 
+    const modes = document.createElement("div");
+    modes.className = "booking-health-modes";
     if (data.has_card) {
-      const label = document.createElement("label");
-      label.className = "booking-health-choice";
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.id = "booking-health-share";
-      const span = document.createElement("span");
-      span.textContent = data.copy.booking_share;
-      label.append(checkbox, span);
-      card.appendChild(label);
+      modes.appendChild(modeOption("card", data.copy.booking_share, true));
+      modes.appendChild(modeOption("quick", data.copy.booking_quick));
+      modes.appendChild(modeOption("none", data.copy.booking_none));
     } else {
+      modes.appendChild(modeOption("quick", data.copy.booking_quick, true));
+      modes.appendChild(modeOption("none", data.copy.booking_none));
+    }
+    card.appendChild(modes);
+
+    const quick = document.createElement("div");
+    quick.className = "booking-health-quick";
+    quick.hidden = data.has_card;
+
+    const intro = document.createElement("p");
+    intro.className = "booking-health-quick-intro";
+    intro.textContent = data.copy.booking_quick_intro;
+    quick.appendChild(intro);
+
+    const fields = document.createElement("div");
+    fields.className = "booking-health-field-grid";
+    Object.entries(data.field_labels || {}).forEach(([field, label]) => {
+      fields.appendChild(checkboxRow(field, label));
+    });
+    quick.appendChild(fields);
+
+    const otherLabel = document.createElement("label");
+    otherLabel.className = "booking-health-other-label";
+    const otherTitle = document.createElement("span");
+    otherTitle.textContent = data.copy.other;
+    const other = document.createElement("textarea");
+    other.id = "booking-health-other";
+    other.maxLength = 1000;
+    other.rows = 3;
+    const otherHelp = document.createElement("small");
+    otherHelp.textContent = data.copy.other_help;
+    otherLabel.append(otherTitle, other, otherHelp);
+    quick.appendChild(otherLabel);
+
+    const none = checkboxRow("confirmed_none", data.copy.booking_confirm_none, "booking-health-check is-none");
+    none.querySelector("input").id = "booking-health-confirmed-none";
+    quick.appendChild(none);
+
+    const consent = checkboxRow("share_consent", data.copy.booking_quick_consent, "booking-health-check is-consent");
+    consent.querySelector("input").id = "booking-health-share-consent";
+    quick.appendChild(consent);
+
+    const save = checkboxRow("save_to_card", data.copy.booking_save_quick, "booking-health-check is-save");
+    save.querySelector("input").id = "booking-health-save-card";
+    quick.appendChild(save);
+
+    const error = document.createElement("p");
+    error.className = "booking-form-error";
+    error.id = "booking-health-error";
+    error.hidden = true;
+    quick.appendChild(error);
+    card.appendChild(quick);
+
+    if (data.has_card) {
       const link = document.createElement("a");
       link.href = data.card_url;
       link.target = "_blank";
@@ -180,6 +261,40 @@ document.addEventListener("DOMContentLoaded", () => {
       link.textContent = data.copy.booking_create;
       card.appendChild(link);
     }
+
+    function selectedMode() {
+      return card.querySelector('[name="booking-health-mode"]:checked')?.value || "none";
+    }
+
+    function syncQuickVisibility() {
+      quick.hidden = selectedMode() !== "quick";
+    }
+
+    card.querySelectorAll('[name="booking-health-mode"]').forEach((input) => {
+      input.addEventListener("change", syncQuickVisibility);
+    });
+
+    const confirmedNone = quick.querySelector("#booking-health-confirmed-none");
+    const issueInputs = Array.from(
+      quick.querySelectorAll('[data-health-field]:not([data-health-field="confirmed_none"]):not([data-health-field="share_consent"]):not([data-health-field="save_to_card"])')
+    );
+
+    confirmedNone?.addEventListener("change", () => {
+      if (!confirmedNone.checked) return;
+      issueInputs.forEach((input) => { input.checked = false; });
+      other.value = "";
+    });
+
+    issueInputs.forEach((input) => {
+      input.addEventListener("change", () => {
+        if (input.checked && confirmedNone) confirmedNone.checked = false;
+      });
+    });
+    other.addEventListener("input", () => {
+      if (other.value.trim() && confirmedNone) confirmedNone.checked = false;
+    });
+
+    syncQuickVisibility();
   }
 
   async function loadHealthStatus() {
@@ -195,15 +310,62 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  async function saveIntent(share) {
+  function selectedMode() {
+    if (!isTattooBooking()) return "none";
+    return document.querySelector('[name="booking-health-mode"]:checked')?.value || "none";
+  }
+
+  function setHealthError(message) {
+    const error = document.getElementById("booking-health-error");
+    if (!error) return;
+    error.textContent = message || "";
+    error.hidden = !message;
+  }
+
+  function quickPayload() {
+    const values = {};
+    document.querySelectorAll(".booking-health-quick [data-health-field]").forEach((input) => {
+      values[input.dataset.healthField] = Boolean(input.checked);
+    });
+    values.other_relevant_information = document.getElementById("booking-health-other")?.value?.trim() || "";
+    return values;
+  }
+
+  function validateQuickHealth() {
+    if (selectedMode() !== "quick") {
+      setHealthError("");
+      return true;
+    }
+    const values = quickPayload();
+    const issueSelected = Object.entries(values).some(([key, value]) =>
+      !["confirmed_none", "share_consent", "save_to_card", "other_relevant_information"].includes(key) && value
+    );
+    const hasDeclaration = issueSelected || Boolean(values.other_relevant_information) || values.confirmed_none;
+    if (!hasDeclaration) {
+      setHealthError(statusData?.copy?.booking_validation || "Please complete the health declaration.");
+      return false;
+    }
+    if (!values.share_consent) {
+      setHealthError(statusData?.copy?.booking_consent_required || "Please confirm sharing consent.");
+      return false;
+    }
+    setHealthError("");
+    return true;
+  }
+
+  async function saveIntent() {
     const date = document.getElementById("booking-date")?.value || "";
     const startTime = document.getElementById("booking-time")?.value || "";
-    const body = new URLSearchParams({
-      artist,
-      date,
-      start_time: startTime,
-      share: share ? "true" : "false",
-    });
+    const mode = selectedMode();
+    const body = new URLSearchParams({artist, date, start_time: startTime, mode});
+
+    if (mode === "quick") {
+      const values = quickPayload();
+      Object.entries(values).forEach(([key, value]) => {
+        body.set(key, typeof value === "boolean" ? (value ? "true" : "false") : value);
+      });
+    }
+
     const response = await fetch("/health-safety/share-intent/", {
       method: "POST",
       credentials: "same-origin",
@@ -214,18 +376,23 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       body,
     });
-    if (!response.ok) throw new Error("health_share_intent_failed");
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "health_share_intent_failed");
   }
 
   form.addEventListener("submit", async (event) => {
     if (event.defaultPrevented || intentReady || preparingIntent) return;
+    if (!validateQuickHealth()) {
+      event.preventDefault();
+      document.querySelector(".booking-health-card")?.scrollIntoView({behavior: "smooth", block: "center"});
+      return;
+    }
 
     event.preventDefault();
     preparingIntent = true;
-    const share = Boolean(document.getElementById("booking-health-share")?.checked);
 
     try {
-      await saveIntent(share);
+      await saveIntent();
       intentReady = true;
       preparingIntent = false;
       form.requestSubmit();
@@ -234,6 +401,16 @@ document.addEventListener("DOMContentLoaded", () => {
       alert(statusData?.copy?.booking_error || "Could not confirm health-information sharing choice.");
     }
   });
+
+  function refreshVisibilitySoon() {
+    queueMicrotask(() => {
+      const card = document.querySelector(".booking-health-card");
+      if (card) card.hidden = !isTattooBooking();
+    });
+  }
+
+  document.getElementById("booking-consultation-toggle")?.addEventListener("change", refreshVisibilitySoon);
+  document.getElementById("booking-consultation-continue")?.addEventListener("click", refreshVisibilitySoon);
 
   window.addEventListener("focus", () => {
     loadHealthStatus();
