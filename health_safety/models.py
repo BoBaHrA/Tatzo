@@ -107,8 +107,11 @@ class HealthSafetyShareIntent(models.Model):
             )
         ]
         indexes = [
-            models.Index(fields=["client", "artist", "appointment_date", "start_time"]),
-            models.Index(fields=["created_at"]),
+            models.Index(
+                fields=["client", "artist", "appointment_date", "start_time"],
+                name="health_intent_slot_idx",
+            ),
+            models.Index(fields=["created_at"], name="health_intent_created_idx"),
         ]
 
     def __str__(self):
