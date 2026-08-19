@@ -3,6 +3,13 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+def disable_legacy_deposits(apps, schema_editor):
+    ArtistBookingSettings = apps.get_model("appointments", "ArtistBookingSettings")
+    ArtistBookingSettings.objects.filter(deposit_required=True).update(
+        deposit_required=False
+    )
+
+
 class Migration(migrations.Migration):
 
     initial = True
@@ -83,4 +90,5 @@ class Migration(migrations.Migration):
                 ],
             },
         ),
+        migrations.RunPython(disable_legacy_deposits, migrations.RunPython.noop),
     ]
