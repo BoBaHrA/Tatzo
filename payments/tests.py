@@ -34,17 +34,17 @@ class PaymentsFlowTests(TestCase):
             username="pay-outsider",
             password="password123",
         )
-        self.booking_settings = ArtistBookingSettings.objects.create(
-            artist=self.artist,
-            deposit_required=True,
-            deposit_amount="50.00",
-        )
         self.stripe_account = ArtistStripeAccount.objects.create(
             artist=self.artist,
             stripe_account_id="acct_artist",
             charges_enabled=True,
             payouts_enabled=True,
             details_submitted=True,
+        )
+        self.booking_settings = ArtistBookingSettings.objects.create(
+            artist=self.artist,
+            deposit_required=True,
+            deposit_amount="50.00",
         )
 
     def appointment(self, *, status=Appointment.STATUS_PENDING, start_hour=14):
@@ -94,6 +94,14 @@ class PaymentsFlowTests(TestCase):
     def test_unready_stripe_account_disables_deposit_setting(self):
         self.stripe_account.payouts_enabled = False
         self.stripe_account.save(update_fields=["payouts_enabled", "updated_at"])
+        self.booking_settings.refresh_from_db()
+        self.assertFalse(self.booking_settings.deposit_required)
+
+    def test_server_rejects_deposit_required_without_ready_stripe_account(self):
+        self.stripe_account.payouts_enabled = False
+        self.stripe_account.save(update_fields=["payouts_enabled", "updated_at"])
+        self.booking_settings.deposit_required = True
+        self.booking_settings.save(update_fields=["deposit_required", "updated_at"])
         self.booking_settings.refresh_from_db()
         self.assertFalse(self.booking_settings.deposit_required)
 
