@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from django.conf import settings
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
@@ -13,6 +13,20 @@ from .models import AppointmentDeposit, ArtistStripeAccount
 def _ready_stripe_account(artist):
     account = ArtistStripeAccount.objects.filter(artist=artist).first()
     return account if account and account.is_ready else None
+
+
+@receiver(
+    pre_save,
+    sender=ArtistBookingSettings,
+    dispatch_uid="payments.require_ready_stripe_for_deposits",
+)
+def require_ready_stripe_for_deposits(sender, instance, **kwargs):
+    if not instance.deposit_required or not instance.artist_id:
+        return
+
+    account = ArtistStripeAccount.objects.filter(artist_id=instance.artist_id).first()
+    if not account or not account.is_ready:
+        instance.deposit_required = False
 
 
 @receiver(post_save, sender=Appointment, dispatch_uid="payments.sync_appointment_deposit")
