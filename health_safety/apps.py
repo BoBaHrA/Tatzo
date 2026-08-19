@@ -8,3 +8,6 @@ class HealthSafetyConfig(AppConfig):
 
     def ready(self):
         from . import signals  # noqa: F401
+        from .legal_patch import apply_health_privacy_policy_patch
+
+        apply_health_privacy_policy_patch()
