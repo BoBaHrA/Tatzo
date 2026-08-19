@@ -77,8 +77,14 @@ class AppointmentDeposit(models.Model):
     class Meta:
         ordering = ["-created_at"]
         indexes = [
-            models.Index(fields=["status", "expires_at"]),
-            models.Index(fields=["connected_account_id"]),
+            models.Index(
+                fields=["status", "expires_at"],
+                name="payments_ap_status_752624_idx",
+            ),
+            models.Index(
+                fields=["connected_account_id"],
+                name="payments_ap_connect_d699a0_idx",
+            ),
         ]
 
     def __str__(self):
