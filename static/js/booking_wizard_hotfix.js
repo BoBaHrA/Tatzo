@@ -32,8 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
     durationButtons.forEach((button) => {
       button.addEventListener("click", () => {
         if (button.disabled || button.hidden) return;
-        // appointments.js updates the internal duration state first. This listener
-        // runs afterwards and keeps every visual selection class in sync.
         normalizeDurationSelection(button);
       });
     });
@@ -85,8 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (completed) consultationNote.value = completedConsultationNote;
     }
 
-    // Reuse the existing wizard handler so its private state and hidden fields
-    // stay authoritative. The modal remains hidden, so the user is not asked twice.
     consultationModal.hidden = true;
     consultationContinue.click();
     consultationModal.hidden = true;
@@ -100,17 +96,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!consultationDecision) return;
 
       queueMicrotask(() => {
-        // A user who confirmed an earlier consultation may temporarily choose
-        // to book another consultation. If they switch back, restore the fact
-        // that the required consultation was already completed.
         if (!consultationToggle.checked && consultationDecision === "completed") {
           restoreConsultationDecision();
           consultationToggle.checked = false;
           return;
         }
 
-        // If the initial decision was to book the required consultation, do not
-        // allow the optional toggle to silently bypass that requirement later.
         if (!consultationToggle.checked && consultationDecision === "book") {
           consultationToggle.checked = true;
           restoreConsultationDecision();
@@ -121,8 +112,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const modalObserver = new MutationObserver(() => {
     if (!consultationModal.hidden && consultationDecision && !restoringDecision) {
-      // validateConsultationRequirement() may try to show the same question on
-      // Next/Submit. Reapply the already-made choice silently instead.
       consultationModal.hidden = true;
       restoreConsultationDecision();
     }
@@ -132,4 +121,123 @@ document.addEventListener("DOMContentLoaded", () => {
     attributes: true,
     attributeFilter: ["hidden"],
   });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("booking-form");
+  const reviewPanel = document.querySelector('[data-booking-panel="4"]');
+  if (!form || !reviewPanel) return;
+
+  const artistMatch = form.action.match(/\/appointments\/artist\/([^/]+)\/book\/create\/?$/);
+  if (!artistMatch) return;
+  const artist = decodeURIComponent(artistMatch[1]);
+
+  let statusData = null;
+  let intentReady = false;
+  let preparingIntent = false;
+
+  function csrfToken() {
+    return form.querySelector('input[name="csrfmiddlewaretoken"]')?.value || "";
+  }
+
+  function healthCardElement() {
+    let card = reviewPanel.querySelector(".booking-health-card");
+    if (!card) {
+      card = document.createElement("section");
+      card.className = "booking-health-card";
+      const review = document.getElementById("booking-review-card");
+      reviewPanel.insertBefore(card, review || reviewPanel.firstChild?.nextSibling || null);
+    }
+    return card;
+  }
+
+  function renderHealthStatus(data) {
+    statusData = data;
+    const card = healthCardElement();
+    card.replaceChildren();
+
+    const heading = document.createElement("h3");
+    heading.textContent = data.copy.booking_title;
+    const text = document.createElement("p");
+    text.textContent = data.has_card ? data.copy.booking_ready : data.copy.booking_missing;
+    card.append(heading, text);
+
+    if (data.has_card) {
+      const label = document.createElement("label");
+      label.className = "booking-health-choice";
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.id = "booking-health-share";
+      const span = document.createElement("span");
+      span.textContent = data.copy.booking_share;
+      label.append(checkbox, span);
+      card.appendChild(label);
+    } else {
+      const link = document.createElement("a");
+      link.href = data.card_url;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = data.copy.booking_create;
+      card.appendChild(link);
+    }
+  }
+
+  async function loadHealthStatus() {
+    try {
+      const response = await fetch("/health-safety/status/", {
+        credentials: "same-origin",
+        headers: {Accept: "application/json"},
+      });
+      if (!response.ok) return;
+      renderHealthStatus(await response.json());
+    } catch (_error) {
+      // Health sharing is optional; booking remains usable if status cannot load.
+    }
+  }
+
+  async function saveIntent(share) {
+    const date = document.getElementById("booking-date")?.value || "";
+    const startTime = document.getElementById("booking-time")?.value || "";
+    const body = new URLSearchParams({
+      artist,
+      date,
+      start_time: startTime,
+      share: share ? "true" : "false",
+    });
+    const response = await fetch("/health-safety/share-intent/", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "X-CSRFToken": csrfToken(),
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+        Accept: "application/json",
+      },
+      body,
+    });
+    if (!response.ok) throw new Error("health_share_intent_failed");
+  }
+
+  form.addEventListener("submit", async (event) => {
+    if (event.defaultPrevented || intentReady || preparingIntent) return;
+
+    event.preventDefault();
+    preparingIntent = true;
+    const share = Boolean(document.getElementById("booking-health-share")?.checked);
+
+    try {
+      await saveIntent(share);
+      intentReady = true;
+      preparingIntent = false;
+      form.requestSubmit();
+    } catch (_error) {
+      preparingIntent = false;
+      alert(statusData?.copy?.booking_error || "Could not confirm health-information sharing choice.");
+    }
+  });
+
+  window.addEventListener("focus", () => {
+    loadHealthStatus();
+  });
+
+  loadHealthStatus();
 });
