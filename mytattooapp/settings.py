@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "appointments",
     "style_match.apps.StyleMatchConfig",
     "healing.apps.HealingConfig",
+    "payments.apps.PaymentsConfig",
 ]
 
 # Настройки middleware
@@ -196,15 +197,23 @@ else:
 
     EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
     EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
-    
+
     EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "15"))
 
     DEFAULT_FROM_EMAIL = os.getenv(
         "DEFAULT_FROM_EMAIL",
         "Tatzo <vladimir.procopisin@gmail.com>",
     )
-    
-    
+
+
+# Stripe Connect. Tatzo uses direct charges on artist connected accounts and
+# currently sets no application fee, so Tatzo commission is 0%.
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_CONNECT_WEBHOOK_SECRET = os.getenv("STRIPE_CONNECT_WEBHOOK_SECRET", "")
+STRIPE_API_BASE = os.getenv("STRIPE_API_BASE", "https://api.stripe.com").rstrip("/")
+STRIPE_DEPOSIT_DEADLINE_HOURS = int(os.getenv("STRIPE_DEPOSIT_DEADLINE_HOURS", "24"))
+
+
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.getenv(
