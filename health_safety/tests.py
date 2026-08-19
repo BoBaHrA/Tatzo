@@ -7,7 +7,12 @@ from django.utils import timezone
 
 from appointments.models import Appointment
 
-from .models import HealthSafetyCard, HealthSafetyShare, HealthSafetyShareIntent
+from .models import (
+    AppointmentHealthDeclaration,
+    HealthSafetyCard,
+    HealthSafetyShare,
+    HealthSafetyShareIntent,
+)
 
 
 class HealthSafetyPrivacyTests(TestCase):
@@ -97,7 +102,7 @@ class HealthSafetyPrivacyTests(TestCase):
         self.assertTrue(payload["has_card"])
         serialized = str(payload)
         self.assertNotIn("do-not-leak", serialized)
-        self.assertNotIn("blood_thinning_medication", serialized)
+        self.assertNotIn("blood_thinning_medication\': True", serialized)
 
     def test_client_can_share_and_artist_can_read_only_shared_card(self):
         self.make_card()
@@ -113,6 +118,7 @@ class HealthSafetyPrivacyTests(TestCase):
             reverse("health_safety:appointment_context", args=[appointment.pk])
         ).json()
         self.assertTrue(payload["active"])
+        self.assertEqual(payload["source"], "card")
         self.assertTrue(payload["items"])
         self.assertEqual(payload["other"], "Relevant private note")
 
@@ -188,7 +194,7 @@ class HealthSafetyPrivacyTests(TestCase):
                 "artist": self.artist.username,
                 "date": appointment_date.isoformat(),
                 "start_time": "13:30",
-                "share": "true",
+                "mode": "card",
             },
         )
         self.assertEqual(response.status_code, 200)
@@ -209,6 +215,110 @@ class HealthSafetyPrivacyTests(TestCase):
         )
         self.assertTrue(HealthSafetyShare.objects.filter(appointment=matching).exists())
         self.assertEqual(HealthSafetyShareIntent.objects.count(), 0)
+
+    def test_quick_declaration_requires_explicit_share_consent(self):
+        self.client.force_login(self.client_user)
+        response = self.client.post(
+            reverse("health_safety:share_intent"),
+            {
+                "artist": self.artist.username,
+                "date": (timezone.localdate() + timedelta(days=5)).isoformat(),
+                "start_time": "11:00",
+                "mode": "quick",
+                "relevant_skin_condition": "true",
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(HealthSafetyShareIntent.objects.exists())
+
+    def test_quick_declaration_is_attached_only_to_matching_appointment(self):
+        appointment_date = timezone.localdate() + timedelta(days=10)
+        self.client.force_login(self.client_user)
+        response = self.client.post(
+            reverse("health_safety:share_intent"),
+            {
+                "artist": self.artist.username,
+                "date": appointment_date.isoformat(),
+                "start_time": "15:30",
+                "mode": "quick",
+                "relevant_skin_condition": "true",
+                "other_relevant_information": "Sensitive skin near placement",
+                "share_consent": "true",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+
+        unrelated = self.make_appointment(
+            date=appointment_date,
+            start_time=time(14, 0),
+            end_time=time(15, 0),
+        )
+        self.assertFalse(
+            AppointmentHealthDeclaration.objects.filter(appointment=unrelated).exists()
+        )
+
+        matching = self.make_appointment(
+            date=appointment_date,
+            start_time=time(15, 30),
+            end_time=time(17, 30),
+        )
+        declaration = AppointmentHealthDeclaration.objects.get(appointment=matching)
+        self.assertTrue(declaration.relevant_skin_condition)
+        self.assertEqual(declaration.other_relevant_information, "Sensitive skin near placement")
+
+        self.client.force_login(self.artist)
+        payload = self.client.get(
+            reverse("health_safety:appointment_context", args=[matching.pk])
+        ).json()
+        self.assertTrue(payload["active"])
+        self.assertEqual(payload["source"], "quick")
+        self.assertIn("Sensitive skin near placement", payload["other"])
+
+    def test_quick_declaration_can_optionally_create_saved_card(self):
+        appointment_date = timezone.localdate() + timedelta(days=11)
+        self.client.force_login(self.client_user)
+        response = self.client.post(
+            reverse("health_safety:share_intent"),
+            {
+                "artist": self.artist.username,
+                "date": appointment_date.isoformat(),
+                "start_time": "10:00",
+                "mode": "quick",
+                "diabetes_or_blood_sugar_condition": "true",
+                "share_consent": "true",
+                "save_to_card": "true",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        appointment = self.make_appointment(
+            date=appointment_date,
+            start_time=time(10, 0),
+            end_time=time(12, 0),
+        )
+        self.assertTrue(AppointmentHealthDeclaration.objects.filter(appointment=appointment).exists())
+        card = HealthSafetyCard.objects.get(user=self.client_user)
+        self.assertTrue(card.explicit_storage_consent)
+        self.assertTrue(card.diabetes_or_blood_sugar_condition)
+
+    def test_quick_declaration_can_be_revoked(self):
+        appointment = self.make_appointment()
+        declaration = AppointmentHealthDeclaration.objects.create(
+            appointment=appointment,
+            confirmed_none=True,
+        )
+        self.client.force_login(self.client_user)
+        response = self.client.post(
+            reverse("health_safety:revoke_share", args=[appointment.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        declaration.refresh_from_db()
+        self.assertIsNotNone(declaration.revoked_at)
+
+        self.client.force_login(self.artist)
+        payload = self.client.get(
+            reverse("health_safety:appointment_context", args=[appointment.pk])
+        ).json()
+        self.assertFalse(payload["active"])
 
     def test_deleting_card_removes_all_artist_shares(self):
         card = self.make_card()
