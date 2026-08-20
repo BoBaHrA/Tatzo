@@ -1,3 +1,4 @@
+import os
 from urllib.parse import quote
 
 from django.conf import settings
@@ -40,5 +41,5 @@ def seo_context(request):
         "canonical_url": canonical,
         "public_site_url": settings.PUBLIC_SITE_URL,
         "seo_robots": "index,follow" if indexable else "noindex,nofollow",
-        "bing_site_verification": getattr(settings, "BING_SITE_VERIFICATION", ""),
+        "bing_site_verification": os.getenv("BING_SITE_VERIFICATION", "").strip(),
     }
