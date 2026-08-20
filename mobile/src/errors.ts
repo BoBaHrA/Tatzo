@@ -28,6 +28,12 @@ export function userFacingError(error: unknown): string {
   if (error.body.code === 'artist_portfolio_forbidden') {
     return t('portfolioManageForbidden');
   }
+  if (error.body.code === 'verification_forbidden') {
+    return t('verificationForbiddenBody');
+  }
+  if (error.body.code === 'verification_locked') {
+    return t('verificationPendingBody');
+  }
   if (error.body.code === 'invalid_booking_status') {
     return t('artistInvalidStatus');
   }

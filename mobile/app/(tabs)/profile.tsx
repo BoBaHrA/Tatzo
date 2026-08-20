@@ -10,6 +10,13 @@ import { PUBLIC_LINKS } from '@/public-links';
 import { colors, radius, spacing } from '@/theme';
 
 
+function artistStatusLabel(status: string) {
+  if (status === 'rejected') return t('verificationStatusRejected');
+  if (status === 'not_submitted') return t('verificationStatusNotSubmitted');
+  return t('pendingVerification');
+}
+
+
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   if (!user) return null;
@@ -17,7 +24,7 @@ export default function ProfileScreen() {
   const accountLabel = user.is_verified_artist
     ? t('verified')
     : user.account_type === 'tattoo_artist'
-      ? t('pendingVerification')
+      ? artistStatusLabel(user.verification_status)
       : t('regularAccount');
 
   return (
@@ -56,6 +63,23 @@ export default function ProfileScreen() {
             label={t('managePortfolio')}
             onPress={() => router.push('/manage-portfolio')}
             variant="secondary"
+          />
+        </View>
+      ) : null}
+      {user.account_type === 'tattoo_artist' && !user.is_verified_artist ? (
+        <View style={styles.verificationCard}>
+          <Text style={styles.artistEyebrow}>{t('verificationEyebrow')}</Text>
+          <Text style={styles.artistTitle}>{t('verificationProfileTitle')}</Text>
+          <Text style={styles.artistText}>
+            {user.verification_status === 'rejected'
+              ? t('verificationProfileRejectedBody')
+              : user.verification_status === 'not_submitted'
+                ? t('verificationProfileStartBody')
+                : t('verificationProfilePendingBody')}
+          </Text>
+          <Button
+            label={t('verificationOpen')}
+            onPress={() => router.push('/artist-verification')}
           />
         </View>
       ) : null}
@@ -120,6 +144,7 @@ const styles = StyleSheet.create({
   bio: { color: colors.text, lineHeight: 22, paddingHorizontal: spacing.xs },
   details: { backgroundColor: colors.surface, borderRadius: radius.medium, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
   artistCard: { backgroundColor: colors.surface, borderRadius: radius.large, borderWidth: 1, borderColor: colors.primaryMuted, padding: spacing.lg, gap: spacing.sm },
+  verificationCard: { backgroundColor: colors.surface, borderRadius: radius.large, borderWidth: 1, borderColor: colors.accent, padding: spacing.lg, gap: spacing.sm },
   artistEyebrow: { color: colors.primary, fontSize: 10, fontWeight: '900', letterSpacing: 2 },
   artistTitle: { color: colors.text, fontSize: 22, fontWeight: '900' },
   artistText: { color: colors.textMuted, lineHeight: 20 },

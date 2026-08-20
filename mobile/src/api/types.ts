@@ -1,5 +1,13 @@
 export type AccountType = 'regular' | 'tattoo_artist';
 
+export type VerificationStatus =
+  | 'not_submitted'
+  | 'pending_documents'
+  | 'pending_manual_review'
+  | 'pending'
+  | 'approved'
+  | 'rejected';
+
 export type TatzoUser = {
   id: number;
   username: string;
@@ -10,7 +18,7 @@ export type TatzoUser = {
   timezone: string;
   show_liked_posts: boolean;
   is_email_verified: boolean;
-  verification_status: string;
+  verification_status: VerificationStatus;
   is_verified_artist: boolean;
   is_staff: boolean;
   profile_image_url: string | null;
@@ -36,6 +44,34 @@ export type RegistrationPayload = {
 export type ProfileUpdate = Partial<
   Pick<TatzoUser, 'username' | 'tag' | 'bio' | 'timezone' | 'show_liked_posts'>
 >;
+
+export type VerificationChoice = {
+  value: string;
+  label: string;
+};
+
+export type ArtistVerification = {
+  account_type: AccountType;
+  status: VerificationStatus;
+  can_submit: boolean;
+  selected_path: 'documents' | 'manual' | null;
+  business_document_types: VerificationChoice[];
+  id_document_types: VerificationChoice[];
+  documents: {
+    business_document_type: string;
+    id_document_type: string;
+    has_business_document: boolean;
+    has_id_document: boolean;
+  } | null;
+  manual: {
+    portfolio_link: string;
+    social_link: string;
+    city_country: string;
+    explanation: string;
+    has_extra_file: boolean;
+    updated_at: string;
+  } | null;
+};
 
 export type FeedAuthor = {
   id: number;

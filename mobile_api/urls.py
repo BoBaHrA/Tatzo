@@ -61,6 +61,11 @@ from .publishing_views import (
     MyPostDetailView,
     MyPostListView,
 )
+from .verification_views import (
+    ArtistVerificationDocumentsView,
+    ArtistVerificationManualView,
+    ArtistVerificationView,
+)
 
 app_name = "mobile_api"
 
@@ -71,6 +76,21 @@ urlpatterns = [
     path("auth/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     path("auth/logout/", LogoutView.as_view(), name="logout"),
     path("me/", MeView.as_view(), name="me"),
+    path(
+        "me/verification/",
+        ArtistVerificationView.as_view(),
+        name="artist_verification",
+    ),
+    path(
+        "me/verification/documents/",
+        ArtistVerificationDocumentsView.as_view(),
+        name="artist_verification_documents",
+    ),
+    path(
+        "me/verification/manual/",
+        ArtistVerificationManualView.as_view(),
+        name="artist_verification_manual",
+    ),
     path("me/posts/", MyPostListView.as_view(), name="my_posts"),
     path(
         "me/posts/<int:post_id>/",

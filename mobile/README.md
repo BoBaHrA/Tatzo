@@ -32,6 +32,8 @@ refresh tokens rotate and the replaced token is blacklisted by Django.
 - username or email login;
 - automatic access-token refresh;
 - authenticated profile read/edit;
+- native artist verification through either private business/identity documents or a
+  manual portfolio review, with review-state locking and rejected-request resubmission;
 - secure sign out;
 - authenticated cursor-paginated feed with Cloudinary-backed image/video media;
 - pull-to-refresh, infinite loading, likes, bookmarks, and post reports;
