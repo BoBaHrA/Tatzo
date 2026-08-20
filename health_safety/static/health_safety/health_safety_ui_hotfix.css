@@ -1,0 +1,92 @@
+/* Health & Safety UI hotfixes kept separate from the feature foundation styles. */
+
+/* Tatzo-native checkboxes instead of the browser/OS default controls. */
+.health-check input[type="checkbox"],
+.health-consent input[type="checkbox"],
+.booking-health-choice input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  margin: 0;
+  border: 1px solid rgba(4, 197, 191, 0.52);
+  border-radius: 6px;
+  background: linear-gradient(145deg, rgba(4, 197, 191, 0.08), rgba(255, 255, 255, 0.02));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+  cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease, transform 0.12s ease;
+}
+
+.health-check input[type="checkbox"]::after,
+.health-consent input[type="checkbox"]::after,
+.booking-health-choice input[type="checkbox"]::after {
+  content: "";
+  width: 5px;
+  height: 9px;
+  border-right: 2px solid #001014;
+  border-bottom: 2px solid #001014;
+  transform: translateY(-1px) rotate(45deg) scale(0);
+  transform-origin: center;
+  transition: transform 0.14s ease;
+}
+
+.health-check input[type="checkbox"]:hover,
+.health-consent input[type="checkbox"]:hover,
+.booking-health-choice input[type="checkbox"]:hover {
+  border-color: rgba(81, 255, 245, 0.9);
+  box-shadow: 0 0 0 3px rgba(4, 197, 191, 0.08), 0 0 16px rgba(4, 197, 191, 0.12);
+}
+
+.health-check input[type="checkbox"]:checked,
+.health-consent input[type="checkbox"]:checked,
+.booking-health-choice input[type="checkbox"]:checked {
+  border-color: #55fff5;
+  background: linear-gradient(135deg, #04c5bf, #33e6de);
+  box-shadow: 0 0 0 3px rgba(4, 197, 191, 0.09), 0 0 18px rgba(4, 197, 191, 0.18);
+}
+
+.health-check input[type="checkbox"]:checked::after,
+.health-consent input[type="checkbox"]:checked::after,
+.booking-health-choice input[type="checkbox"]:checked::after {
+  transform: translateY(-1px) rotate(45deg) scale(1);
+}
+
+.health-check input[type="checkbox"]:active,
+.health-consent input[type="checkbox"]:active,
+.booking-health-choice input[type="checkbox"]:active {
+  transform: scale(0.94);
+}
+
+.health-check input[type="checkbox"]:focus-visible,
+.health-consent input[type="checkbox"]:focus-visible,
+.booking-health-choice input[type="checkbox"]:focus-visible {
+  outline: 2px solid rgba(238, 12, 111, 0.82);
+  outline-offset: 3px;
+}
+
+/* Keep Health & safety inside the Settings group and visually distinct when current. */
+.sidebar-more-menu .health-nav-injected {
+  margin: 10px 0 8px;
+}
+
+.sidebar-more-menu .health-nav-injected img {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+
+.sidebar-more-menu .health-nav-injected.is-current {
+  border-color: rgba(4, 197, 191, 0.48);
+  background: rgba(4, 197, 191, 0.1);
+  color: #67fff6;
+}
+
+.sidebar-more-menu .health-nav-injected.is-current:hover {
+  border-color: rgba(4, 197, 191, 0.7);
+  background: rgba(4, 197, 191, 0.14);
+  color: #8afff8;
+}
