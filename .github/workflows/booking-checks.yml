@@ -1,0 +1,25 @@
+name: Booking checks
+
+on:
+  pull_request:
+    paths:
+      - "static/js/appointments.js"
+      - "static/js/booking_wizard_hotfix.js"
+      - "templates/appointments/booking_wizard.html"
+      - "templates/base.html"
+      - ".github/workflows/booking-checks.yml"
+  workflow_dispatch:
+
+jobs:
+  booking:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Check booking JavaScript syntax
+        run: |
+          node --check static/js/appointments.js
+          node --check static/js/booking_wizard_hotfix.js

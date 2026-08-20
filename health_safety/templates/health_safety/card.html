@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ copy.nav }} | Tatzo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+
+<main class="health-page">
+  <div class="health-shell">
+    <header class="health-hero">
+      <div class="health-hero-icon" aria-hidden="true">
+        <img src="{% static 'icons/health-safety.svg' %}" alt="">
+      </div>
+      <div>
+        <p class="health-eyebrow">{{ copy.eyebrow }}</p>
+        <h1>{{ copy.title }}</h1>
+        <p class="health-intro">{{ copy.intro }}</p>
+      </div>
+    </header>
+
+    <div class="health-privacy-note">
+      <span aria-hidden="true">🔒</span>
+      <p>{{ copy.privacy }}</p>
+    </div>
+
+    <form method="post" class="health-card-form">
+      {% csrf_token %}
+
+      <div class="health-check-grid">
+        <label class="health-check">
+          <input type="checkbox" name="bleeding_clotting_condition" {% if form_state.bleeding_clotting_condition %}checked{% endif %}>
+          <span>{{ copy.bleeding }}</span>
+        </label>
+        <label class="health-check">
+          <input type="checkbox" name="blood_thinning_medication" {% if form_state.blood_thinning_medication %}checked{% endif %}>
+          <span>{{ copy.blood_thinners }}</span>
+        </label>
+        <label class="health-check">
+          <input type="checkbox" name="diabetes_or_blood_sugar_condition" {% if form_state.diabetes_or_blood_sugar_condition %}checked{% endif %}>
+          <span>{{ copy.diabetes }}</span>
+        </label>
+        <label class="health-check">
+          <input type="checkbox" name="relevant_skin_condition" {% if form_state.relevant_skin_condition %}checked{% endif %}>
+          <span>{{ copy.skin }}</span>
+        </label>
+        <label class="health-check">
+          <input type="checkbox" name="relevant_allergy_sensitivity" {% if form_state.relevant_allergy_sensitivity %}checked{% endif %}>
+          <span>{{ copy.allergy }}</span>
+        </label>
+        <label class="health-check">
+          <input type="checkbox" name="immune_or_healing_condition" {% if form_state.immune_or_healing_condition %}checked{% endif %}>
+          <span>{{ copy.immune }}</span>
+        </label>
+      </div>
+
+      <label class="health-other-label" for="health-other">{{ copy.other }}</label>
+      <textarea id="health-other" name="other_relevant_information" maxlength="1000" rows="5">{{ form_state.other_relevant_information }}</textarea>
+      <small class="health-help">{{ copy.other_help }}</small>
+
+      <label class="health-consent">
+        <input type="checkbox" name="explicit_storage_consent" required {% if form_state.explicit_storage_consent %}checked{% endif %}>
+        <span>{{ copy.consent }}</span>
+      </label>
+
+      <button type="submit" class="health-primary">{{ copy.save }}</button>
+    </form>
+
+    {% if card %}
+      <section class="health-shares">
+        <div class="health-section-head">
+          <h2>{{ copy.shared_with }}</h2>
+          <span>{{ card.declared_issue_count }}</span>
+        </div>
+
+        {% if shares %}
+          <div class="health-share-list">
+            {% for share in shares %}
+              <article class="health-share-row" data-health-share-row="{{ share.appointment_id }}">
+                <div>
+                  <strong>@{{ share.appointment.artist.username }}</strong>
+                  <span>{{ share.appointment.date }} · {{ share.appointment.start_time|time:"H:i" }}</span>
+                </div>
+                <button type="button" data-health-revoke="{{ share.appointment_id }}">{{ copy.revoke }}</button>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="health-empty">{{ copy.no_shares }}</p>
+        {% endif %}
+      </section>
+
+      <form method="post" action="{% url 'health_safety:delete_card' %}" class="health-delete-form">
+        {% csrf_token %}
+        <button type="submit">{{ copy.delete }}</button>
+      </form>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}
