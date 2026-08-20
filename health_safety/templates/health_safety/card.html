@@ -3,6 +3,10 @@
 
 {% block title %}{{ copy.nav }} | Tatzo{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
 {% block content %}
 {% include "partials/sidebar.html" %}
 
