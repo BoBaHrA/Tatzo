@@ -1,0 +1,70 @@
+name: Notify search engines with IndexNow
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  indexnow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Wait for the deployed IndexNow key
+        shell: bash
+        run: |
+          set -euo pipefail
+          key="c4f5cc0f03d99cb2b93e2c32203a770a"
+          key_url="https://tatzo.eu/${key}.txt"
+
+          for attempt in $(seq 1 20); do
+            body="$(curl --silent --show-error --fail --max-time 15 "$key_url" || true)"
+            if [ "$body" = "$key" ]; then
+              echo "Production exposes the current IndexNow key."
+              exit 0
+            fi
+            echo "Waiting for production deploy (${attempt}/20)..."
+            sleep 30
+          done
+
+          echo "Production did not expose the current IndexNow key in time."
+          exit 1
+
+      - name: Submit core public URLs to IndexNow
+        shell: bash
+        run: |
+          set -euo pipefail
+          key="c4f5cc0f03d99cb2b93e2c32203a770a"
+          payload=$(cat <<JSON
+          {
+            "host": "tatzo.eu",
+            "key": "${key}",
+            "keyLocation": "https://tatzo.eu/${key}.txt",
+            "urlList": [
+              "https://tatzo.eu/",
+              "https://tatzo.eu/search/",
+              "https://tatzo.eu/maps/",
+              "https://tatzo.eu/style-match/"
+            ]
+          }
+          JSON
+          )
+
+          status=$(curl \
+            --silent \
+            --show-error \
+            --output /tmp/indexnow-response.txt \
+            --write-out "%{http_code}" \
+            --request POST \
+            --header "Content-Type: application/json; charset=utf-8" \
+            --data "$payload" \
+            https://api.indexnow.org/indexnow)
+
+          cat /tmp/indexnow-response.txt || true
+          echo "IndexNow HTTP status: ${status}"
+
+          case "$status" in
+            200|202) exit 0 ;;
+            *) exit 1 ;;
+          esac
