@@ -1,4 +1,4 @@
-from django.test import Client, RequestFactory, SimpleTestCase, override_settings
+from django.test import Client, RequestFactory, TestCase, override_settings
 from django.urls import resolve
 
 from mytattooapp.indexnow import INDEXNOW_KEY
@@ -6,7 +6,7 @@ from mytattooapp.seo import seo_context
 
 
 @override_settings(PUBLIC_SITE_URL="https://tatzo.eu")
-class SeoFoundationTests(SimpleTestCase):
+class SeoFoundationTests(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
         self.client = Client()
