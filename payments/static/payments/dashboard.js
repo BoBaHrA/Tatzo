@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     status.textContent = data.label;
     card.append(title, intro, status);
 
-    if (data.configured && !data.ready) {
+    if (!data.ready) {
       const actions = document.createElement("div");
       actions.className = "tatzo-payment-actions";
       actions.appendChild(connectButton(data.copy, data.state));
