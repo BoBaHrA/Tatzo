@@ -25,6 +25,9 @@ export function userFacingError(error: unknown): string {
   if (error.body.code === 'artist_dashboard_forbidden') {
     return t('artistDashboardForbidden');
   }
+  if (error.body.code === 'artist_portfolio_forbidden') {
+    return t('portfolioManageForbidden');
+  }
   if (error.body.code === 'invalid_booking_status') {
     return t('artistInvalidStatus');
   }

@@ -108,6 +108,11 @@ export type PortfolioWork = {
   image_url: string | null;
 };
 
+export type PortfolioPage = {
+  count: number;
+  results: PortfolioWork[];
+};
+
 export type PublicProfile = {
   id: number;
   username: string;

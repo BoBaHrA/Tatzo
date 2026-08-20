@@ -52,6 +52,11 @@ export default function ProfileScreen() {
             label={t('artistDashboard')}
             onPress={() => router.push('/artist-dashboard')}
           />
+          <Button
+            label={t('managePortfolio')}
+            onPress={() => router.push('/manage-portfolio')}
+            variant="secondary"
+          />
         </View>
       ) : null}
       <Button label={t('editProfile')} onPress={() => router.push('/edit-profile')} />

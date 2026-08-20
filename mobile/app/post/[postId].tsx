@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ApiError } from '@/api/client';
 import type { FeedPost, ReportReason } from '@/api/types';
@@ -16,6 +16,7 @@ import {
 } from '@/feed/feed-api';
 import { PostCard } from '@/feed/post-card';
 import { t } from '@/i18n';
+import { deletePost } from '@/publishing/publishing-api';
 import { colors, radius, spacing } from '@/theme';
 
 
@@ -28,6 +29,7 @@ export default function PostDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [actionError, setActionError] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   const load = useCallback(async () => {
     if (status !== 'authenticated') return;
@@ -98,6 +100,30 @@ export default function PostDetailScreen() {
     }
   };
 
+  const remove = async (current: FeedPost) => {
+    setDeleting(true);
+    setActionError('');
+    try {
+      await deletePost(request, current.id);
+      router.replace('/(tabs)/home');
+    } catch {
+      setActionError(t('deletePostError'));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const confirmDelete = (current: FeedPost) => {
+    Alert.alert(t('deletePost'), t('deletePostConfirm'), [
+      { text: t('cancel'), style: 'cancel' },
+      {
+        text: t('delete'),
+        style: 'destructive',
+        onPress: () => void remove(current),
+      },
+    ]);
+  };
+
   return (
     <Screen contentStyle={styles.screen}>
       <Pressable
@@ -118,12 +144,22 @@ export default function PostDetailScreen() {
           <Text style={styles.muted}>{t('loadingPost')}</Text>
         </View>
       ) : post ? (
-        <PostCard
-          onBookmark={bookmark}
-          onLike={like}
-          onReport={report}
-          post={post}
-        />
+        <View style={styles.postBlock}>
+          <PostCard
+            onBookmark={bookmark}
+            onLike={like}
+            onReport={report}
+            post={post}
+          />
+          {post.is_owned ? (
+            <Button
+              label={t('deletePost')}
+              loading={deleting}
+              onPress={() => confirmDelete(post)}
+              variant="danger"
+            />
+          ) : null}
+        </View>
       ) : (
         <View style={styles.stateCard}>
           <Text style={styles.stateTitle}>{t('postUnavailable')}</Text>
@@ -159,4 +195,5 @@ const styles = StyleSheet.create({
   },
   stateTitle: { color: colors.text, fontSize: 22, fontWeight: '900', textAlign: 'center' },
   muted: { color: colors.textMuted, lineHeight: 22, textAlign: 'center' },
+  postBlock: { gap: spacing.md },
 });

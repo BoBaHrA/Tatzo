@@ -358,6 +358,186 @@ class MobileFeedTests(APITestCase):
         self.assertEqual(hidden.status_code, status.HTTP_404_NOT_FOUND)
 
 
+@override_settings(TATZO_RATE_LIMIT_ENABLED=False)
+class MobilePublishingTests(APITestCase):
+    def setUp(self):
+        self.media_root = tempfile.mkdtemp(prefix="tatzo-mobile-publishing-")
+        self.media_override = override_settings(MEDIA_ROOT=self.media_root)
+        self.media_override.enable()
+
+        self.artist = User.objects.create_user(
+            "publishing-artist",
+            email="publishing-artist@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        self.artist.profile.account_type = "tattoo_artist"
+        self.artist.profile.verification_status = "approved"
+        self.artist.profile.is_email_verified = True
+        self.artist.profile.save(
+            update_fields=(
+                "account_type",
+                "verification_status",
+                "is_email_verified",
+            )
+        )
+        self.regular = User.objects.create_user(
+            "publishing-client",
+            email="publishing-client@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        self.other = User.objects.create_user(
+            "publishing-other",
+            email="publishing-other@example.com",
+            password="StrongPassword123",
+            is_active=True,
+        )
+        self.client.force_authenticate(self.artist)
+
+    def tearDown(self):
+        self.media_override.disable()
+        shutil.rmtree(self.media_root, ignore_errors=True)
+
+    @staticmethod
+    def image_upload(name="tattoo.png"):
+        output = BytesIO()
+        Image.new("RGB", (3, 3), color="black").save(output, format="PNG")
+        return SimpleUploadedFile(
+            name,
+            output.getvalue(),
+            content_type="image/png",
+        )
+
+    def test_create_post_accepts_media_and_returns_owned_feed_payload(self):
+        response = self.client.post(
+            reverse("mobile_api:my_posts"),
+            {
+                "content": "Fresh ornamental piece",
+                "location": "Paris",
+                "visibility": "followers",
+                "disable_comments": "true",
+                "media": self.image_upload(),
+            },
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(response.data["is_owned"])
+        self.assertEqual(response.data["visibility"], "followers")
+        self.assertTrue(response.data["disable_comments"])
+        self.assertEqual(response.data["media"][0]["type"], "image")
+        post = Post.objects.get(pk=response.data["id"])
+        self.assertEqual(post.user, self.artist)
+        self.assertEqual(post.medias.count(), 1)
+
+    def test_create_post_rejects_empty_and_spoofed_image_uploads(self):
+        empty = self.client.post(
+            reverse("mobile_api:my_posts"),
+            {},
+            format="json",
+        )
+        self.assertEqual(empty.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(empty.data["code"], "empty_post")
+
+        spoofed = self.client.post(
+            reverse("mobile_api:my_posts"),
+            {
+                "media": SimpleUploadedFile(
+                    "not-an-image.png",
+                    b"definitely-not-an-image",
+                    content_type="image/png",
+                )
+            },
+            format="multipart",
+        )
+        self.assertEqual(spoofed.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(spoofed.data["code"], "invalid_image")
+        self.assertFalse(Post.objects.filter(user=self.artist).exists())
+
+    def test_post_update_and_delete_are_owner_only(self):
+        own = Post.objects.create(user=self.artist, content="Before")
+        stranger_post = Post.objects.create(user=self.other, content="Not mine")
+
+        updated = self.client.patch(
+            reverse("mobile_api:my_post_detail", args=[own.pk]),
+            {"content": "After", "visibility": "private"},
+            format="json",
+        )
+        self.assertEqual(updated.status_code, status.HTTP_200_OK)
+        self.assertEqual(updated.data["content"], "After")
+        self.assertEqual(updated.data["visibility"], "private")
+
+        forbidden = self.client.delete(
+            reverse("mobile_api:my_post_detail", args=[stranger_post.pk])
+        )
+        self.assertEqual(forbidden.status_code, status.HTTP_404_NOT_FOUND)
+
+        deleted = self.client.delete(
+            reverse("mobile_api:my_post_detail", args=[own.pk])
+        )
+        self.assertEqual(deleted.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Post.objects.filter(pk=own.pk).exists())
+
+    def test_verified_artist_can_create_edit_list_and_delete_portfolio_work(self):
+        created = self.client.post(
+            reverse("mobile_api:my_portfolio"),
+            {
+                "image": self.image_upload("portfolio.png"),
+                "title": "Ornamental sleeve",
+                "style": "Blackwork",
+                "body_placement": "Forearm",
+            },
+            format="multipart",
+        )
+        self.assertEqual(created.status_code, status.HTTP_201_CREATED)
+        work_id = created.data["id"]
+        self.assertEqual(created.data["style"], "Blackwork")
+
+        listed = self.client.get(reverse("mobile_api:my_portfolio"))
+        self.assertEqual(listed.status_code, status.HTTP_200_OK)
+        self.assertEqual(listed.data["count"], 1)
+        self.assertEqual(listed.data["results"][0]["id"], work_id)
+
+        updated = self.client.patch(
+            reverse("mobile_api:my_portfolio_detail", args=[work_id]),
+            {"title": "Finished sleeve", "body_placement": "Full arm"},
+            format="json",
+        )
+        self.assertEqual(updated.status_code, status.HTTP_200_OK)
+        self.assertEqual(updated.data["title"], "Finished sleeve")
+        self.assertEqual(updated.data["body_placement"], "Full arm")
+
+        deleted = self.client.delete(
+            reverse("mobile_api:my_portfolio_detail", args=[work_id])
+        )
+        self.assertEqual(deleted.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(PortfolioWork.objects.filter(pk=work_id).exists())
+
+    def test_portfolio_is_verified_artist_only_and_ownership_is_hidden(self):
+        other_work = PortfolioWork.objects.create(
+            user=self.other,
+            image="portfolio/works/other.png",
+        )
+        hidden = self.client.patch(
+            reverse("mobile_api:my_portfolio_detail", args=[other_work.pk]),
+            {"title": "Taken over"},
+            format="json",
+        )
+        self.assertEqual(hidden.status_code, status.HTTP_404_NOT_FOUND)
+
+        self.client.force_authenticate(self.regular)
+        listed = self.client.get(reverse("mobile_api:my_portfolio"))
+        created = self.client.post(
+            reverse("mobile_api:my_portfolio"),
+            {"image": self.image_upload()},
+            format="multipart",
+        )
+        self.assertEqual(listed.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(created.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(listed.data["code"], "artist_portfolio_forbidden")
+
+
 class MobilePublicProfileTests(APITestCase):
     def setUp(self):
         self.viewer = User.objects.create_user(

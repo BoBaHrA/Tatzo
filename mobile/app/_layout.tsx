@@ -20,6 +20,8 @@ export default function RootLayout() {
             <Stack.Screen name="(auth)" />
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="edit-profile" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="create-post" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="manage-portfolio" />
             <Stack.Screen name="blocked-users" />
             <Stack.Screen name="delete-account" options={{ presentation: 'modal' }} />
             <Stack.Screen name="notifications" />

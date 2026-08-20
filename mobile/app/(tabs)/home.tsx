@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
 import {
   ActivityIndicator,
   FlatList,
@@ -47,9 +48,9 @@ export default function HomeScreen() {
     }
   }, [request]);
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     void loadFirstPage();
-  }, [loadFirstPage]);
+  }, [loadFirstPage]));
 
   const refresh = async () => {
     setRefreshing(true);
@@ -157,6 +158,10 @@ export default function HomeScreen() {
               <Text style={styles.eyebrow}>TATZO</Text>
               <Text style={styles.title}>{t('feed')}</Text>
               <Text style={styles.subtitle}>{t('feedSubtitle')}</Text>
+              <Button
+                label={t('createPost')}
+                onPress={() => router.push('/create-post')}
+              />
             </View>
             {actionError ? <Text style={styles.inlineError}>{actionError}</Text> : null}
           </View>

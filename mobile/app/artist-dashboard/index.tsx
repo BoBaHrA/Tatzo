@@ -174,6 +174,11 @@ export default function ArtistDashboardScreen() {
           onPress={() => router.push('/artist-dashboard/calendar')}
           variant="secondary"
         />
+        <Button
+          label={t('managePortfolio')}
+          onPress={() => router.push('/manage-portfolio')}
+          variant="secondary"
+        />
       </View>
 
       <View style={styles.section}>

@@ -37,7 +37,6 @@ from .notification_views import (
     NotificationUnreadCountView,
 )
 from .push_views import PushDeviceView
-
 from .views import (
     BlockedUsersView,
     FeedBookmarkView,
@@ -56,6 +55,12 @@ from .views import (
     StyleMatchResultView,
     StyleMatchView,
 )
+from .publishing_views import (
+    MyPortfolioDetailView,
+    MyPortfolioView,
+    MyPostDetailView,
+    MyPostListView,
+)
 
 app_name = "mobile_api"
 
@@ -66,6 +71,18 @@ urlpatterns = [
     path("auth/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     path("auth/logout/", LogoutView.as_view(), name="logout"),
     path("me/", MeView.as_view(), name="me"),
+    path("me/posts/", MyPostListView.as_view(), name="my_posts"),
+    path(
+        "me/posts/<int:post_id>/",
+        MyPostDetailView.as_view(),
+        name="my_post_detail",
+    ),
+    path("me/portfolio/", MyPortfolioView.as_view(), name="my_portfolio"),
+    path(
+        "me/portfolio/<int:work_id>/",
+        MyPortfolioDetailView.as_view(),
+        name="my_portfolio_detail",
+    ),
     path("me/blocked-users/", BlockedUsersView.as_view(), name="blocked_users"),
     path("notifications/", NotificationListView.as_view(), name="notifications"),
     path("push/devices/", PushDeviceView.as_view(), name="push_device"),
