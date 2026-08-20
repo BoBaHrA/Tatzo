@@ -2,12 +2,22 @@
   "use strict";
 
   const language = (document.documentElement.lang || "en").split("-")[0];
+  const uiHotfixCssUrl = "/static/health_safety/health_safety_ui_hotfix.css";
   const navLabels = {
     en: "Health & safety",
     fr: "Santé et sécurité",
     ru: "Здоровье и безопасность",
   };
   const navLabel = navLabels[language] || navLabels.en;
+
+  function loadUiHotfixStyles() {
+    if (document.querySelector('link[data-health-safety-ui-hotfix]')) return;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = uiHotfixCssUrl;
+    link.dataset.healthSafetyUiHotfix = "";
+    document.head.appendChild(link);
+  }
 
   function csrfToken() {
     const hidden = document.querySelector('input[name="csrfmiddlewaretoken"]');
@@ -17,11 +27,13 @@
   }
 
   function addNavigation() {
+    const isHealthPage = window.location.pathname.startsWith("/health-safety/");
     const desktop = document.querySelector(".sidebar-more-menu");
     if (desktop && !desktop.querySelector('[data-health-nav="desktop"]')) {
       const link = document.createElement("a");
       link.href = "/health-safety/";
       link.className = "sidebar-more-link health-nav-injected";
+      if (isHealthPage) link.classList.add("is-current");
       link.dataset.healthNav = "desktop";
       const icon = document.createElement("img");
       icon.src = "/static/icons/health-safety.svg";
@@ -29,8 +41,9 @@
       const text = document.createElement("span");
       text.textContent = navLabel;
       link.append(icon, text);
+      const reportLink = desktop.querySelector(".sidebar-report-problem-btn");
       const legalHeading = desktop.querySelector(".sidebar-more-title-secondary");
-      desktop.insertBefore(link, legalHeading || null);
+      desktop.insertBefore(link, reportLink || legalHeading || null);
     }
 
     const mobile = document.querySelector(".mobile-menu-grid");
@@ -47,7 +60,7 @@
       mobile.appendChild(link);
     }
 
-    if (window.location.pathname.startsWith("/health-safety/")) {
+    if (isHealthPage) {
       const title = document.querySelector(".mobile-topbar-title");
       if (title) title.textContent = navLabel;
     }
@@ -83,7 +96,7 @@
     if (data.role === "artist" && !data.active) return;
 
     const card = document.createElement("section");
-    card.className = "appointment-health-card";
+    card.className = `appointment-health-card`;
     const heading = document.createElement("h2");
     heading.textContent = data.role === "artist" ? data.copy.artist_title : navLabel;
     card.appendChild(heading);
@@ -187,6 +200,7 @@
   }
 
   function init() {
+    loadUiHotfixStyles();
     addNavigation();
     loadAppointmentContext();
     bindCardRevokes();
