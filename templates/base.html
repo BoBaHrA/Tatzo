@@ -16,6 +16,10 @@
     {% block extra_css %}{% endblock %}
     <link rel="stylesheet" href="{% static 'style_match/style_match_hotfix.css' %}">
     <link rel="stylesheet" href="{% static 'healing/healing_bridge.css' %}">
+    <link rel="stylesheet" href="{% static 'health_safety/health_safety.css' %}">
+    {% if request.resolver_match.url_name == 'booking_wizard' %}
+        <link rel="stylesheet" href="{% static 'health_safety/booking_health.css' %}">
+    {% endif %}
     <link rel="stylesheet" href="{% static 'css/feed_lightbox_mobile_v2.css' %}" media="(max-width: 900px)">
     {% if request.resolver_match.app_name == 'healing' %}
         <link rel="stylesheet" href="{% static 'healing/healing_polish.css' %}" data-healing-polish-static>
@@ -164,6 +168,7 @@
     {% endif %}
     <script src="{% static 'style_match/style_match_hotfix.js' %}"></script>
     <script src="{% static 'healing/healing_bridge.js' %}"></script>
+    <script src="{% static 'health_safety/health_safety_bridge.js' %}"></script>
     {% if request.resolver_match.app_name == 'healing' %}
     <script>
         document.addEventListener("DOMContentLoaded", function () {
