@@ -35,6 +35,9 @@ jobs:
       - name: Verify migrations are committed
         run: python manage.py makemigrations --check --dry-run
 
+      - name: Collect static files
+        run: python manage.py collectstatic --noinput
+
       - name: Run backend tests
         run: python manage.py test --verbosity 1
 
