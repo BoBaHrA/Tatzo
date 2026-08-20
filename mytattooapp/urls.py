@@ -3,12 +3,12 @@ from django.http import HttpResponse
 from django.urls import include, path
 from django.contrib.sitemaps.views import sitemap
 from django.conf import settings
+from .indexnow import INDEXNOW_KEY
 from .sitemaps import ArtistSitemap, StaticSitemap
 from appointments import views as appointment_views
 
 
 SITEMAPS = {"static": StaticSitemap, "artists": ArtistSitemap}
-INDEXNOW_KEY = "c4f5cc0f03d99cb2b93e2c32203a770a"
 
 
 def healthz(request):
