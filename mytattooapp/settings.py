@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "appointments",
     "style_match.apps.StyleMatchConfig",
     "healing.apps.HealingConfig",
+    "health_safety.apps.HealthSafetyConfig",
     "payments.apps.PaymentsConfig",
 ]
 
