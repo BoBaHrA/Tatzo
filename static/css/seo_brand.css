@@ -1,0 +1,100 @@
+.seo-brand-hero {
+  margin-left: 250px;
+  margin-right: 280px;
+  padding: 28px 20px 0;
+}
+
+.seo-brand-hero__inner {
+  width: min(100%, 900px);
+  margin: 0 auto;
+  padding: 26px 28px;
+  border: 1px solid rgba(4, 197, 191, 0.18);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(238, 12, 111, 0.12), transparent 34%),
+    radial-gradient(circle at bottom left, rgba(4, 197, 191, 0.1), transparent 38%),
+    rgba(0, 10, 18, 0.78);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+}
+
+.seo-brand-hero__eyebrow {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: #04c5bf;
+  font-family: "Poppins", Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.seo-brand-hero h1 {
+  margin: 0;
+  max-width: 760px;
+  color: #f5ffff;
+  font-family: "Poppins", Arial, sans-serif;
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.08;
+  font-weight: 700;
+}
+
+.seo-brand-hero p {
+  max-width: 760px;
+  margin: 14px 0 0;
+  color: rgba(230, 246, 248, 0.72);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.seo-brand-hero__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.seo-brand-hero__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid rgba(4, 197, 191, 0.32);
+  border-radius: 999px;
+  color: #dffeff;
+  background: rgba(4, 197, 191, 0.08);
+  text-decoration: none;
+  font-family: "Poppins", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.seo-brand-hero__links a:hover,
+.seo-brand-hero__links a:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(4, 197, 191, 0.62);
+  background: rgba(4, 197, 191, 0.14);
+}
+
+@media (max-width: 1100px) {
+  .seo-brand-hero {
+    margin-left: 290px;
+    margin-right: 20px;
+    padding-left: 32px;
+  }
+}
+
+@media (max-width: 900px) {
+  .seo-brand-hero {
+    margin: 0;
+    padding: 18px 14px 0;
+  }
+
+  .seo-brand-hero__inner {
+    padding: 22px 18px;
+    border-radius: 20px;
+  }
+
+  .seo-brand-hero p {
+    font-size: 15px;
+  }
+}
