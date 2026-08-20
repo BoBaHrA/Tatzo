@@ -8,6 +8,7 @@ from appointments import views as appointment_views
 
 
 SITEMAPS = {"static": StaticSitemap, "artists": ArtistSitemap}
+INDEXNOW_KEY = "c4f5cc0f03d99cb2b93e2c32203a770a"
 
 
 def healthz(request):
@@ -34,6 +35,12 @@ def robots_txt(request):
         ]
     )
     return HttpResponse(body + "\n", content_type="text/plain")
+
+
+def indexnow_key(request):
+    response = HttpResponse(INDEXNOW_KEY, content_type="text/plain; charset=utf-8")
+    response["Cache-Control"] = "public, max-age=86400"
+    return response
 
 
 def sitemap_xml(request):
@@ -65,6 +72,7 @@ def sitemap_txt(request):
 urlpatterns = [
     path("healthz/", healthz, name="healthz"),
     path("robots.txt", robots_txt, name="robots_txt"),
+    path(f"{INDEXNOW_KEY}.txt", indexnow_key, name="indexnow_key"),
     path("sitemap.txt", sitemap_txt, name="sitemap_txt"),
     path(
         "sitemap.xml",
