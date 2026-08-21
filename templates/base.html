@@ -11,9 +11,58 @@
     <meta name="robots" content="{{ seo_robots }}">
     <link rel="canonical" href="{{ canonical_url }}">
 
+    <meta property="og:site_name" content="Tatzo">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ canonical_url }}">
+    <meta property="og:title" content="{% block og_title %}Tatzo — Find your tattoo artist{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Discover tattoo artists, explore portfolios and book your next tattoo with Tatzo.{% endblock %}">
+    <meta property="og:image" content="{{ public_site_url }}{% static 'images/tatzo5.png' %}">
+    <meta property="og:image:alt" content="Tatzo">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}Tatzo — Find your tattoo artist{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Discover tattoo artists, explore portfolios and book your next tattoo with Tatzo.{% endblock %}">
+    <meta name="twitter:image" content="{{ public_site_url }}{% static 'images/tatzo5.png' %}">
+
+    {% if bing_site_verification %}
+    <meta name="msvalidate.01" content="{{ bing_site_verification }}">
+    {% endif %}
+
+    {% if seo_robots == "index,follow" %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "@id": "{{ public_site_url }}/#website",
+      "url": "{{ public_site_url }}/",
+      "name": "Tatzo",
+      "alternateName": "TATZO",
+      "description": "Discover tattoo artists, explore portfolios and book your next tattoo with Tatzo.",
+      "publisher": {"@id": "{{ public_site_url }}/#organization"}
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "@id": "{{ public_site_url }}/#organization",
+      "name": "Tatzo",
+      "alternateName": "TATZO",
+      "url": "{{ public_site_url }}/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "{{ public_site_url }}{% static 'images/tatzo5.png' %}"
+      }
+    }
+    </script>
+    {% endif %}
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     {% block extra_css %}{% endblock %}
+    {% if request.resolver_match.url_name == 'home' %}
+        <link rel="stylesheet" href="{% static 'css/seo_brand.css' %}">
+    {% endif %}
     <link rel="stylesheet" href="{% static 'style_match/style_match_hotfix.css' %}">
     <link rel="stylesheet" href="{% static 'healing/healing_bridge.css' %}">
     <link rel="stylesheet" href="{% static 'health_safety/health_safety.css' %}">
@@ -42,6 +91,21 @@
             </div>
         {% endfor %}
     </div>
+    {% endif %}
+
+    {% if request.resolver_match.url_name == 'home' and not user.is_authenticated %}
+    <section class="seo-brand-hero" aria-labelledby="tatzo-home-heading">
+        <div class="seo-brand-hero__inner">
+            <span class="seo-brand-hero__eyebrow">TATZO</span>
+            <h1 id="tatzo-home-heading">{% trans "Find the right tattoo artist for your next tattoo." %}</h1>
+            <p>{% trans "Discover tattoo artists and studios, explore portfolios, compare styles and start your booking journey with Tatzo." %}</p>
+            <nav class="seo-brand-hero__links" aria-label="{% trans 'Explore Tatzo' %}">
+                <a href="{% url 'search_page' %}">{% trans "Find tattoo artists" %}</a>
+                <a href="{% url 'maps_page' %}">{% trans "Explore tattoo map" %}</a>
+                <a href="{% url 'style_match:index' %}">{% trans "Try Style Match" %}</a>
+            </nav>
+        </div>
+    </section>
     {% endif %}
 
     <div class="content">

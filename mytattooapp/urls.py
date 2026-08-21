@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.urls import include, path
 from django.contrib.sitemaps.views import sitemap
 from django.conf import settings
+from .indexnow import INDEXNOW_KEY
 from .sitemaps import ArtistSitemap, StaticSitemap
 from appointments import views as appointment_views
 
@@ -36,6 +37,12 @@ def robots_txt(request):
     return HttpResponse(body + "\n", content_type="text/plain")
 
 
+def indexnow_key(request):
+    response = HttpResponse(INDEXNOW_KEY, content_type="text/plain; charset=utf-8")
+    response["Cache-Control"] = "public, max-age=86400"
+    return response
+
+
 def sitemap_xml(request):
     response = sitemap(request, sitemaps=SITEMAPS)
     # Django marks sitemap responses as noindex by default. Although sitemap
@@ -65,6 +72,7 @@ def sitemap_txt(request):
 urlpatterns = [
     path("healthz/", healthz, name="healthz"),
     path("robots.txt", robots_txt, name="robots_txt"),
+    path(f"{INDEXNOW_KEY}.txt", indexnow_key, name="indexnow_key"),
     path("sitemap.txt", sitemap_txt, name="sitemap_txt"),
     path(
         "sitemap.xml",
