@@ -336,6 +336,110 @@ export type BookingOccupiedSlot = {
   end_time: string;
 };
 
+export type HealthSafetyFieldKey =
+  | 'bleeding_clotting_condition'
+  | 'blood_thinning_medication'
+  | 'diabetes_or_blood_sugar_condition'
+  | 'relevant_skin_condition'
+  | 'relevant_allergy_sensitivity'
+  | 'immune_or_healing_condition';
+
+export type HealthSafetyValues = Record<HealthSafetyFieldKey, boolean>;
+
+export type HealthSafetyField = {
+  key: HealthSafetyFieldKey;
+  label: string;
+};
+
+export type HealthSafetyCopy = Record<string, string>;
+
+export type BookingHealthSafety = {
+  has_card: boolean;
+  fields: HealthSafetyField[];
+  copy: HealthSafetyCopy;
+};
+
+export type HealthSafetySharedAppointment = {
+  appointment_id: number;
+  artist_username: string;
+  appointment_date: string;
+  expires_on: string;
+};
+
+export type HealthSafetyCard = {
+  has_card: boolean;
+  values: HealthSafetyValues;
+  other_relevant_information: string;
+  declared_count: number;
+  consent_version: string;
+  consented_at: string | null;
+  updated_at: string | null;
+  shared_appointments: HealthSafetySharedAppointment[];
+  fields: HealthSafetyField[];
+  copy: HealthSafetyCopy;
+};
+
+export type HealthSafetyShareMode = 'none' | 'card' | 'quick';
+
+export type AppointmentHealthSafety = {
+  role: 'artist' | 'client';
+  active: boolean;
+  source: 'card' | 'quick' | null;
+  shared: boolean;
+  expires_on: string | null;
+  fields: HealthSafetyField[];
+  copy: HealthSafetyCopy;
+  has_card?: boolean;
+  can_share_card?: boolean;
+  can_share_quick?: boolean;
+  items: string[];
+  other: string;
+  confirmed_none: boolean;
+};
+
+export type ArtistPaymentState =
+  | 'unavailable'
+  | 'not_connected'
+  | 'onboarding'
+  | 'ready';
+
+export type ArtistPaymentSettings = {
+  configured: boolean;
+  state: ArtistPaymentState;
+  label: string;
+  ready: boolean;
+  charges_enabled: boolean;
+  payouts_enabled: boolean;
+  details_submitted: boolean;
+  deposit_required: boolean;
+  deposit_amount: string;
+  copy: Record<string, string>;
+};
+
+export type DepositStatus =
+  | 'pending'
+  | 'checkout_created'
+  | 'paid'
+  | 'failed'
+  | 'refunded'
+  | 'cancelled'
+  | 'expired';
+
+export type AppointmentDeposit =
+  | { has_deposit: false }
+  | {
+      has_deposit: true;
+      role: 'artist' | 'client';
+      amount: string;
+      currency: string;
+      status: DepositStatus;
+      message: string;
+      can_pay: boolean;
+      expires_at: string | null;
+      action_label: string;
+      copy: Record<string, string>;
+    };
+
 export type BookingConfig = {
   artist: BookingUser;
   available: boolean;
@@ -377,6 +481,7 @@ export type BookingConfig = {
   vacations: string[];
   occupied_slots: BookingOccupiedSlot[];
   booked_minutes_by_date: Record<string, number>;
+  health_safety: BookingHealthSafety;
 };
 
 export type AppointmentReference = {

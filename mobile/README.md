@@ -47,8 +47,13 @@ refresh tokens rotate and the replaced token is blacklisted by Django.
   localized results, and artist recommendations.
 - native private chat with unread badges, background polling, read receipts, protected
   photo/video/file attachments, message editing/deletion, and two-way block enforcement.
-- native four-step booking with artist availability, calendar exclusions, consultation
-  rules, body placement, private reference images, request tracking, and artist actions.
+- native five-step booking with artist availability, calendar exclusions, consultation
+  rules, body placement, private reference images, optional Health & Safety sharing,
+  request tracking, and artist actions.
+- a private Health & Safety card with explicit consent, per-appointment sharing,
+  artist access limited to the relevant active appointment, and client revocation.
+- native Stripe Connect onboarding and deposit settings for verified artists, plus
+  hosted Stripe Checkout for clients; only verified webhooks can mark deposits paid.
 - native map-first discovery with viewport pagination, artist/studio markers, clustering,
   map/list modes, style and booking filters, foreground geolocation, block-aware results,
   private studio claims, and moderated add-location requests.
@@ -73,9 +78,10 @@ and submit Android to the internal testing track first. Signing credentials, ser
 account keys, APNs keys, FCM credentials, and `EXPO_TOKEN` must stay in EAS/GitHub
 secret storage and must never be committed.
 
-The remaining release work requires the real Apple, Google Play, and Expo accounts:
-credentials, physical-device beta testing, final screenshots, privacy-form approval,
-and store review. Follow `store/release-checklist.md` in order.
+The remaining release work requires the real Apple, Google Play, Expo, and Stripe
+accounts: credentials, production webhook setup, physical-device beta testing, final
+screenshots, privacy-form approval, and store review. Follow `store/release-checklist.md`
+in order.
 
 ## Push delivery operations
 

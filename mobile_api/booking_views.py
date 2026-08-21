@@ -3,7 +3,6 @@ import os
 from datetime import datetime, timedelta
 from urllib.parse import urlencode
 
-from PIL import Image, UnidentifiedImageError
 from django.contrib.auth import get_user_model
 from django.core import signing
 from django.db import transaction
@@ -13,6 +12,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import force_str
+from PIL import Image, UnidentifiedImageError
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -30,15 +30,24 @@ from appointments.views import (
     _artist_datetime,
     _artist_timezone,
     _build_schedule_payload,
-    _get_artist_settings,
     _get_artist_booked_minutes,
+    _get_artist_settings,
     _get_booking_status_block_message,
     _is_bookable_artist,
     _send_artist_auto_response,
     _validate_artist_slot,
 )
+from health_safety.models import HealthSafetyCard, HealthSafetyShareIntent
 from users.models import UserBlock
 from users.security import check_rate_limit
+
+from .health_safety_views import BOOKING_COPY_KEYS as HEALTH_BOOKING_COPY_KEYS
+from .health_safety_views import _copy_payload as _health_copy_payload
+from .health_safety_views import _field_payload as _health_field_payload
+from .health_safety_views import (
+    attach_health_submission,
+    validate_health_submission,
+)
 
 User = get_user_model()
 
@@ -378,6 +387,14 @@ def _booking_config_payload(artist, settings, request):
             today,
             end_date,
         ),
+        "health_safety": {
+            "has_card": HealthSafetyCard.objects.filter(
+                user=request.user,
+                explicit_storage_consent=True,
+            ).exists(),
+            "fields": _health_field_payload(request),
+            "copy": _health_copy_payload(request, HEALTH_BOOKING_COPY_KEYS),
+        },
     }
 
 
@@ -476,6 +493,18 @@ class BookingArtistView(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        health_submission, health_error = validate_health_submission(
+            request.data,
+            request.user,
+            booking_type,
+        )
+        if health_error:
+            error_status = (
+                status.HTTP_409_CONFLICT
+                if health_error["code"] == "health_card_required"
+                else status.HTTP_400_BAD_REQUEST
+            )
+            return Response(health_error, status=error_status)
         is_consultation = booking_type in (
             Appointment.TYPE_CONSULTATION,
             Appointment.TYPE_ONLINE_CONSULTATION,
@@ -647,6 +676,12 @@ class BookingArtistView(APIView):
                     {"code": "slot_unavailable", "detail": force_str(slot_error)},
                     status=status.HTTP_409_CONFLICT,
                 )
+            HealthSafetyShareIntent.objects.filter(
+                client=request.user,
+                artist=artist,
+                appointment_date=date_value,
+                start_time=start_time,
+            ).delete()
             appointment = Appointment.objects.create(
                 client=request.user,
                 artist=artist,
@@ -677,6 +712,7 @@ class BookingArtistView(APIView):
                     "consultation_note": consultation_note,
                 },
             )
+            attach_health_submission(appointment, health_submission)
             for index, uploaded_file in enumerate(files):
                 AppointmentReferenceImage.objects.create(
                     appointment=appointment,

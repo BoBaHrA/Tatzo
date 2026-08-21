@@ -1,6 +1,22 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
+from .artist_dashboard_views import (
+    ArtistBlockDetailView,
+    ArtistBlockListView,
+    ArtistDashboardView,
+    ArtistScheduleView,
+    ArtistTimeOffDetailView,
+    ArtistTimeOffListView,
+)
+from .booking_views import (
+    AppointmentActionView,
+    AppointmentDetailView,
+    AppointmentListView,
+    AppointmentReferenceUploadView,
+    AppointmentReferenceView,
+    BookingArtistView,
+)
 from .chat_views import (
     ChatAttachmentView,
     ChatListView,
@@ -9,21 +25,9 @@ from .chat_views import (
     ChatThreadView,
     StartChatView,
 )
-from .booking_views import (
-    AppointmentActionView,
-    AppointmentDetailView,
-    AppointmentListView,
-    AppointmentReferenceView,
-    AppointmentReferenceUploadView,
-    BookingArtistView,
-)
-from .artist_dashboard_views import (
-    ArtistBlockDetailView,
-    ArtistBlockListView,
-    ArtistDashboardView,
-    ArtistScheduleView,
-    ArtistTimeOffDetailView,
-    ArtistTimeOffListView,
+from .health_safety_views import (
+    AppointmentHealthSafetyView,
+    MyHealthSafetyCardView,
 )
 from .map_views import (
     MapLocationClaimView,
@@ -36,7 +40,25 @@ from .notification_views import (
     NotificationReadView,
     NotificationUnreadCountView,
 )
+from .payment_views import (
+    AppointmentDepositView,
+    ArtistPaymentConnectView,
+    ArtistPaymentSettingsView,
+    MobileDepositReturnView,
+    MobilePaymentReturnView,
+)
+from .publishing_views import (
+    MyPortfolioDetailView,
+    MyPortfolioView,
+    MyPostDetailView,
+    MyPostListView,
+)
 from .push_views import PushDeviceView
+from .verification_views import (
+    ArtistVerificationDocumentsView,
+    ArtistVerificationManualView,
+    ArtistVerificationView,
+)
 from .views import (
     BlockedUsersView,
     FeedBookmarkView,
@@ -55,17 +77,6 @@ from .views import (
     StyleMatchResultView,
     StyleMatchView,
 )
-from .publishing_views import (
-    MyPortfolioDetailView,
-    MyPortfolioView,
-    MyPostDetailView,
-    MyPostListView,
-)
-from .verification_views import (
-    ArtistVerificationDocumentsView,
-    ArtistVerificationManualView,
-    ArtistVerificationView,
-)
 
 app_name = "mobile_api"
 
@@ -76,6 +87,26 @@ urlpatterns = [
     path("auth/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     path("auth/logout/", LogoutView.as_view(), name="logout"),
     path("me/", MeView.as_view(), name="me"),
+    path(
+        "me/health-safety/",
+        MyHealthSafetyCardView.as_view(),
+        name="my_health_safety",
+    ),
+    path(
+        "artist/payments/",
+        ArtistPaymentSettingsView.as_view(),
+        name="artist_payments",
+    ),
+    path(
+        "artist/payments/connect/",
+        ArtistPaymentConnectView.as_view(),
+        name="artist_payments_connect",
+    ),
+    path(
+        "payments/mobile-return/",
+        MobilePaymentReturnView.as_view(),
+        name="mobile_payment_return",
+    ),
     path(
         "me/verification/",
         ArtistVerificationView.as_view(),
@@ -177,6 +208,21 @@ urlpatterns = [
         "appointments/<int:appointment_id>/action/",
         AppointmentActionView.as_view(),
         name="appointment_action",
+    ),
+    path(
+        "appointments/<int:appointment_id>/health-safety/",
+        AppointmentHealthSafetyView.as_view(),
+        name="appointment_health_safety",
+    ),
+    path(
+        "appointments/<int:appointment_id>/deposit/",
+        AppointmentDepositView.as_view(),
+        name="appointment_deposit",
+    ),
+    path(
+        "payments/appointments/<int:appointment_id>/return/",
+        MobileDepositReturnView.as_view(),
+        name="mobile_deposit_return",
     ),
     path(
         "appointments/<int:appointment_id>/references/",

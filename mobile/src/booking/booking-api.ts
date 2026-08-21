@@ -4,6 +4,8 @@ import type {
   AppointmentListResponse,
   BookingConfig,
   BookingType,
+  HealthSafetyShareMode,
+  HealthSafetyValues,
 } from '@/api/types';
 import type { AuthenticatedRequest } from '@/auth/auth-context';
 
@@ -29,6 +31,14 @@ export type BookingDraft = {
   consultationAlreadyCompleted: boolean;
   consultationNote: string;
   references: PendingBookingReference[];
+  healthSafety: {
+    mode: HealthSafetyShareMode;
+    values: HealthSafetyValues;
+    otherRelevantInformation: string;
+    confirmedNone: boolean;
+    shareConsent: boolean;
+    saveToCard: boolean;
+  };
 };
 
 function referenceBody(reference: PendingBookingReference): Blob {
@@ -69,6 +79,28 @@ export function createBooking(
     draft.consultationAlreadyCompleted ? 'true' : 'false',
   );
   body.append('consultation_note', draft.consultationNote);
+  body.append('health_mode', draft.healthSafety.mode);
+  if (draft.healthSafety.mode === 'quick') {
+    Object.entries(draft.healthSafety.values).forEach(([key, value]) => {
+      body.append(key, value ? 'true' : 'false');
+    });
+    body.append(
+      'health_other_relevant_information',
+      draft.healthSafety.otherRelevantInformation,
+    );
+    body.append(
+      'health_confirmed_none',
+      draft.healthSafety.confirmedNone ? 'true' : 'false',
+    );
+    body.append(
+      'health_share_consent',
+      draft.healthSafety.shareConsent ? 'true' : 'false',
+    );
+    body.append(
+      'health_save_to_card',
+      draft.healthSafety.saveToCard ? 'true' : 'false',
+    );
+  }
   draft.references.forEach((reference) => {
     body.append('references', referenceBody(reference));
   });

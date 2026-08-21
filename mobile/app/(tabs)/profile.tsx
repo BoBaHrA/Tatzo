@@ -85,6 +85,15 @@ export default function ProfileScreen() {
       ) : null}
       <Button label={t('editProfile')} onPress={() => router.push('/edit-profile')} />
       <View style={styles.safetyCard}>
+        <Text style={styles.safetyTitle}>{t('healthSafety')}</Text>
+        <Text style={styles.safetyText}>{t('healthSafetyProfileSubtitle')}</Text>
+        <Button
+          label={t('healthSafety')}
+          onPress={() => router.push('/health-safety')}
+          variant="secondary"
+        />
+      </View>
+      <View style={styles.safetyCard}>
         <Text style={styles.safetyTitle}>{t('legal')}</Text>
         <Text style={styles.safetyText}>{t('legalSubtitle')}</Text>
         <Button

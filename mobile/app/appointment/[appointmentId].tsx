@@ -1,17 +1,23 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
-import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { Redirect, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   ActivityIndicator,
   Alert,
   Image,
+  Linking,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 
-import type { Appointment, AppointmentAction } from '@/api/types';
+import type {
+  Appointment,
+  AppointmentAction,
+  AppointmentDeposit,
+  AppointmentHealthSafety,
+} from '@/api/types';
 import { useAuth } from '@/auth/auth-context';
 import {
   addAppointmentReferences,
@@ -23,7 +29,16 @@ import { useChat } from '@/chat/chat-context';
 import { BrandHeader } from '@/components/brand-header';
 import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
+import {
+  fetchAppointmentHealthSafety,
+  revokeAppointmentHealthSafety,
+  shareAppointmentHealthSafety,
+} from '@/health-safety/health-safety-api';
 import { appLanguage, t, type TranslationKey } from '@/i18n';
+import {
+  fetchAppointmentDeposit,
+  startAppointmentDepositCheckout,
+} from '@/payments/payment-api';
 import { colors, radius, spacing } from '@/theme';
 
 
@@ -69,12 +84,18 @@ export default function AppointmentDetailScreen() {
   const { request, status } = useAuth();
   const { refresh: refreshChats } = useChat();
   const [appointment, setAppointment] = useState<Appointment | null>(null);
+  const [health, setHealth] = useState<AppointmentHealthSafety | null>(null);
+  const [deposit, setDeposit] = useState<AppointmentDeposit | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [action, setAction] = useState<
     AppointmentAction | 'chat' | 'references' | null
   >(null);
   const [actionError, setActionError] = useState('');
+  const [healthAction, setHealthAction] = useState<'share' | 'revoke' | null>(null);
+  const [healthError, setHealthError] = useState('');
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState('');
 
   const load = useCallback(async () => {
     if (status !== 'authenticated') return;
@@ -86,7 +107,22 @@ export default function AppointmentDetailScreen() {
     setLoading(true);
     setLoadError('');
     try {
-      setAppointment(await fetchAppointment(request, appointmentId));
+      const nextAppointment = await fetchAppointment(request, appointmentId);
+      setAppointment(nextAppointment);
+      if (nextAppointment.booking_type === 'tattoo_session') {
+        try {
+          setHealth(await fetchAppointmentHealthSafety(request, appointmentId));
+        } catch {
+          setHealth(null);
+        }
+      } else {
+        setHealth(null);
+      }
+      try {
+        setDeposit(await fetchAppointmentDeposit(request, appointmentId));
+      } catch {
+        setDeposit(null);
+      }
     } catch {
       setAppointment(null);
       setLoadError(t('appointmentError'));
@@ -95,9 +131,9 @@ export default function AppointmentDetailScreen() {
     }
   }, [appointmentId, request, status]);
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     void load();
-  }, [load]);
+  }, [load]));
 
   if (status === 'anonymous') return <Redirect href="/(auth)/login" />;
 
@@ -191,6 +227,58 @@ export default function AppointmentDetailScreen() {
       setActionError(t('referencePickerError'));
     } finally {
       setAction(null);
+    }
+  };
+
+  const shareHealthCard = async () => {
+    if (!appointment || healthAction) return;
+    setHealthAction('share');
+    setHealthError('');
+    try {
+      setHealth(await shareAppointmentHealthSafety(
+        request,
+        appointment.id,
+        { mode: 'card' },
+      ));
+    } catch {
+      setHealthError(health?.copy.booking_error ?? t('healthSafetyUnavailable'));
+    } finally {
+      setHealthAction(null);
+    }
+  };
+
+  const revokeHealth = async () => {
+    if (!appointment || healthAction) return;
+    setHealthAction('revoke');
+    setHealthError('');
+    try {
+      await revokeAppointmentHealthSafety(request, appointment.id);
+      setHealth(await fetchAppointmentHealthSafety(request, appointment.id));
+    } catch {
+      setHealthError(health?.copy.booking_error ?? t('healthSafetyUnavailable'));
+    } finally {
+      setHealthAction(null);
+    }
+  };
+
+  const payDeposit = async () => {
+    if (!appointment || paymentLoading) return;
+    setPaymentLoading(true);
+    setPaymentError('');
+    try {
+      const { url } = await startAppointmentDepositCheckout(
+        request,
+        appointment.id,
+      );
+      await Linking.openURL(url);
+    } catch {
+      setPaymentError(
+        deposit?.has_deposit
+          ? deposit.copy.checkout_error
+          : t('artistPaymentsUnavailable'),
+      );
+    } finally {
+      setPaymentLoading(false);
     }
   };
 
@@ -305,6 +393,105 @@ export default function AppointmentDetailScreen() {
             </View>
           ) : null}
 
+          {appointment.booking_type === 'tattoo_session' && health ? (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>
+                {health.role === 'artist'
+                  ? health.copy.artist_title
+                  : health.copy.booking_title}
+              </Text>
+              <View style={styles.healthCard}>
+                {health.role === 'artist' ? (
+                  <>
+                    <Text style={styles.healthIntro}>{health.copy.artist_intro}</Text>
+                    {health.active ? (
+                      <>
+                        {health.items.map((item) => (
+                          <View key={item} style={styles.healthItemRow}>
+                            <Text style={styles.healthBullet}>•</Text>
+                            <Text style={styles.healthItem}>{item}</Text>
+                          </View>
+                        ))}
+                        {health.other ? (
+                          <Text style={styles.healthOther}>{health.other}</Text>
+                        ) : null}
+                        {health.confirmed_none ? (
+                          <Text style={styles.healthNone}>{health.copy.none_declared}</Text>
+                        ) : null}
+                      </>
+                    ) : (
+                      <Text style={styles.healthNone}>{health.copy.client_not_shared}</Text>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.healthIntro}>
+                      {health.active
+                        ? health.source === 'quick'
+                          ? health.copy.client_quick_shared
+                          : health.copy.client_shared
+                        : health.copy.client_not_shared}
+                    </Text>
+                    {health.expires_on ? (
+                      <Text style={styles.healthExpiry}>
+                        {health.copy.expires} {health.expires_on}
+                      </Text>
+                    ) : null}
+                    <Button
+                      label={health.copy.manage_card}
+                      onPress={() => router.push('/health-safety')}
+                      variant="secondary"
+                    />
+                    {health.can_share_card ? (
+                      <Button
+                        label={health.copy.share_now}
+                        loading={healthAction === 'share'}
+                        onPress={() => void shareHealthCard()}
+                      />
+                    ) : null}
+                    {health.active ? (
+                      <Button
+                        label={health.copy.revoke}
+                        loading={healthAction === 'revoke'}
+                        onPress={() => void revokeHealth()}
+                        variant="danger"
+                      />
+                    ) : null}
+                  </>
+                )}
+                {healthError ? <Text style={styles.error}>{healthError}</Text> : null}
+              </View>
+            </View>
+          ) : null}
+
+          {deposit?.has_deposit ? (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{deposit.copy.deposit_title}</Text>
+              <View style={styles.depositCard}>
+                <View style={styles.depositTopRow}>
+                  <Text style={styles.depositAmount}>
+                    {deposit.amount} {deposit.currency}
+                  </Text>
+                  <Text style={styles.depositStatus}>{deposit.status}</Text>
+                </View>
+                <Text style={styles.healthIntro}>{deposit.message}</Text>
+                {deposit.expires_at ? (
+                  <Text style={styles.healthExpiry}>
+                    {deposit.copy.deposit_due} · {deposit.expires_at}
+                  </Text>
+                ) : null}
+                {deposit.can_pay ? (
+                  <Button
+                    label={deposit.action_label}
+                    loading={paymentLoading}
+                    onPress={() => void payDeposit()}
+                  />
+                ) : null}
+                {paymentError ? <Text style={styles.error}>{paymentError}</Text> : null}
+              </View>
+            </View>
+          ) : null}
+
           {appointment.available_actions.length ? (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t('artistActions')}</Text>
@@ -391,6 +578,32 @@ const styles = StyleSheet.create({
   referenceImage: { width: '48%', aspectRatio: 1, borderRadius: radius.medium, backgroundColor: colors.surface },
   referenceRequest: { color: colors.accent, fontSize: 13, lineHeight: 20, fontWeight: '800' },
   actions: { gap: spacing.sm },
+  healthCard: {
+    backgroundColor: colors.surface, borderColor: colors.primaryMuted,
+    borderWidth: 1, borderRadius: radius.medium, padding: spacing.md, gap: spacing.sm,
+  },
+  healthIntro: { color: colors.textMuted, lineHeight: 21 },
+  healthItemRow: { flexDirection: 'row', gap: spacing.xs, alignItems: 'flex-start' },
+  healthBullet: { color: colors.primary, fontWeight: '900' },
+  healthItem: { flex: 1, color: colors.text, lineHeight: 20, fontWeight: '700' },
+  healthOther: {
+    color: colors.text, lineHeight: 20, backgroundColor: colors.backgroundDeep,
+    borderRadius: radius.medium, padding: spacing.sm,
+  },
+  healthNone: { color: colors.textMuted, fontStyle: 'italic', lineHeight: 20 },
+  healthExpiry: { color: colors.primary, fontSize: 12, fontWeight: '800' },
+  depositCard: {
+    backgroundColor: colors.surface, borderColor: colors.accent,
+    borderWidth: 1, borderRadius: radius.medium, padding: spacing.md, gap: spacing.sm,
+  },
+  depositTopRow: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    gap: spacing.sm,
+  },
+  depositAmount: { color: colors.text, fontSize: 22, fontWeight: '900' },
+  depositStatus: {
+    color: colors.accent, fontSize: 11, fontWeight: '900', textTransform: 'uppercase',
+  },
   error: {
     color: colors.danger, borderColor: colors.danger, borderWidth: 1,
     borderRadius: radius.medium, padding: spacing.sm, textAlign: 'center',

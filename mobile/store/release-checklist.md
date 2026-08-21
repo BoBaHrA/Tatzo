@@ -30,6 +30,9 @@ public production.
       SHA fingerprint used by preview/Play builds. Do not commit credential files.
 - [ ] Configure APNs and FCM v1 credentials in EAS, then verify push delivery on one
       physical iPhone and one physical Android phone.
+- [ ] Configure Stripe Connect in live mode, register the production webhook endpoint,
+      store the Stripe secret and webhook secret only on the backend, and complete one
+      end-to-end deposit plus refund test with a real-device release build.
 - [ ] Add App Store Connect and Google Play service credentials to EAS only when
       automated submission is desired. Keep them out of Expo public variables and Git.
 
@@ -39,7 +42,8 @@ public production.
 - [ ] Confirm the web account-deletion path lets a signed-out former app user sign
       in on the website and complete deletion without reinstalling the app.
 - [ ] Reconcile `store/data-safety.md` with the production backend, hosting logs,
-      Cloudinary, Expo push, and Google Maps before completing either privacy form.
+      Cloudinary, Expo push, Google Maps, Stripe, Health & Safety retention, and support
+      access before completing either privacy form.
 - [ ] Complete Apple App Privacy, Google Play Data safety, content-rating, age-rating,
       export-compliance, UGC, and advertising declarations with the account owner.
 - [ ] Prepare a review account with representative content and give reviewers concise
@@ -53,8 +57,9 @@ public production.
 2. Build `preview` for real-device smoke testing. Android preview intentionally produces
    an APK; production keeps EAS's store-ready AAB default.
 3. Test sign-up and verification, feed/media, public profiles, Style Match, map/location,
-   private chat attachments, booking flows, artist actions, notifications, blocking,
-   reporting, support links, sign-out, token revocation, and account deletion.
+   private chat attachments, booking flows, Health & Safety share/revoke, Stripe Connect,
+   deposit payment/webhook/refund, artist actions, notifications, blocking, reporting,
+   support links, sign-out, token revocation, and account deletion.
 4. Build `production` for both platforms.
 5. Submit iOS to TestFlight and Android to Google Play internal testing.
 6. Fix review/beta issues, repeat the smoke test, then move to closed/external beta.

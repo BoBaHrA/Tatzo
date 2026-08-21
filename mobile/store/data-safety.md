@@ -11,6 +11,8 @@ retention, support operations, and every enabled third-party service before subm
 | Messages and project details | Private chat, booking brief, consultation notes, comments | Tatzo API and database | Declare app functionality; verify retention after deletion |
 | Files and documents | Chat files and private location-claim evidence | Tatzo API and private media storage | Declare collection and confirm access controls/retention |
 | App activity | Likes, follows, bookmarks, Style Match answers, booking actions, reports | Tatzo API and database | Declare personalization/app functionality as applicable |
+| Health & Safety information | Optional conditions, medication, allergies/sensitivities, healing risks, and a free-text safety note | Tatzo API and database; explicitly shared with the artist for a specific appointment | Declare sensitive health data for app functionality/safety; verify consent, retention, access, and deletion answers |
+| Payment and deposit activity | Deposit amount, currency, status, deadline, Stripe Checkout session reference, and artist payout readiness | Tatzo API and database plus Stripe Connect/hosted Checkout; card and bank details are entered on Stripe-hosted pages | Declare purchase/payment activity as applicable; verify Stripe's processor disclosures and confirm Tatzo never receives card or bank credentials |
 | Location | Foreground GPS centers the native map; viewport bounds are queried for nearby results | Device, map provider, and Tatzo map endpoint | Treat as potentially collected location until console taxonomy is reviewed |
 | Device/app identifiers | Installation UUID, Expo push token, locale, platform | Tatzo API plus Expo push delivery | Declare notification functionality and verify provider disclosures |
 | Diagnostics and logs | No mobile analytics or crash-reporting SDK is currently present | Backend, CDN, hosting, and provider logs may still record network metadata | Audit production logs before selecting “not collected” answers |
@@ -21,6 +23,11 @@ retention, support operations, and every enabled third-party service before subm
 - Access and rotating refresh tokens are stored with `expo-secure-store`.
 - Private media endpoints enforce authorization; push lock-screen copy avoids message,
   booking, and profile details.
+- Health & Safety responses are non-cacheable, require explicit consent, are limited to
+  appointment participants, can be revoked by the client, and are hidden from the artist
+  when the appointment is cancelled, declined, or outside the access window.
+- Payment and bank credentials stay on Stripe-hosted onboarding and Checkout pages.
+  Tatzo accepts payment state only from the verified Stripe webhook, never from a redirect.
 - Users can block accounts, report posts, contact safety support, and permanently delete
   their account in-app after password confirmation.
 - The website also exposes authenticated account deletion at
@@ -31,8 +38,11 @@ retention, support operations, and every enabled third-party service before subm
 
 - Confirm deletion cascades, asynchronous media deletion, backups, legal-retention
   exceptions, and the maximum retention period.
-- Confirm whether Cloudinary, Expo, Google Maps, the production host, email delivery,
-  and any CDN constitute processors or sharing under each store's definitions.
+- Confirm whether Cloudinary, Expo, Google Maps, Stripe, the production host, email
+  delivery, and any CDN constitute processors or sharing under each store's definitions.
+- Confirm Health & Safety card/share retention, deletion, support access, audit access,
+  and the exact Apple App Privacy and Google Play Data safety categories with counsel or
+  the accountable store owner before submission.
 - Confirm whether map viewport queries must be declared as approximate or precise location.
 - Confirm encryption in transit for every production API/media URL and whether users can
   request data export, correction, and deletion through published support channels.

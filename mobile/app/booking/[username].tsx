@@ -12,7 +12,13 @@ import {
 } from 'react-native';
 
 import { ApiError } from '@/api/client';
-import type { BookingConfig, BookingType } from '@/api/types';
+import type {
+  BookingConfig,
+  BookingType,
+  HealthSafetyFieldKey,
+  HealthSafetyShareMode,
+  HealthSafetyValues,
+} from '@/api/types';
 import { useAuth } from '@/auth/auth-context';
 import { BodyPlacementPicker } from '@/booking/body-placement-picker';
 import {
@@ -28,11 +34,18 @@ import {
 import { BrandHeader } from '@/components/brand-header';
 import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
+import { EMPTY_HEALTH_VALUES } from '@/health-safety/health-safety-api';
 import { appLanguage, t } from '@/i18n';
 import { colors, radius, spacing } from '@/theme';
 
 
-const STEPS = ['bookingWhen', 'bookingProject', 'bookingReferences', 'bookingReview'] as const;
+const STEPS = [
+  'bookingWhen',
+  'bookingProject',
+  'bookingReferences',
+  'healthSafety',
+  'bookingReview',
+] as const;
 
 function toggleValue(values: string[], value: string) {
   return values.includes(value)
@@ -84,6 +97,35 @@ function FieldLabel({ children }: { children: string }) {
   return <Text style={styles.fieldLabel}>{children}</Text>;
 }
 
+function CheckRow({
+  checked,
+  label,
+  onPress,
+  hint,
+}: {
+  checked: boolean;
+  label: string;
+  onPress: () => void;
+  hint?: string;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked }}
+      onPress={onPress}
+      style={({ pressed }) => [styles.checkRow, pressed && styles.pressed]}
+    >
+      <View style={[styles.checkbox, checked && styles.checkboxActive]}>
+        <Text style={styles.checkmark}>{checked ? '✓' : ''}</Text>
+      </View>
+      <View style={styles.checkText}>
+        <Text style={styles.checkTitle}>{label}</Text>
+        {hint ? <Text style={styles.checkHint}>{hint}</Text> : null}
+      </View>
+    </Pressable>
+  );
+}
+
 function ReviewRow({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.reviewRow}>
@@ -114,6 +156,14 @@ export default function BookingScreen() {
   const [consultationCompleted, setConsultationCompleted] = useState(false);
   const [consultationNote, setConsultationNote] = useState('');
   const [references, setReferences] = useState<PendingBookingReference[]>([]);
+  const [healthMode, setHealthMode] = useState<HealthSafetyShareMode>('none');
+  const [healthValues, setHealthValues] = useState<HealthSafetyValues>({
+    ...EMPTY_HEALTH_VALUES,
+  });
+  const [healthOther, setHealthOther] = useState('');
+  const [healthConfirmedNone, setHealthConfirmedNone] = useState(false);
+  const [healthShareConsent, setHealthShareConsent] = useState(false);
+  const [healthSaveToCard, setHealthSaveToCard] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -168,6 +218,7 @@ export default function BookingScreen() {
     setBookingType(value);
     setDuration(value === 'tattoo_session' ? (config?.durations[0] ?? 60) : 60);
     setStartTime('');
+    if (value !== 'tattoo_session') setHealthMode('none');
     setError('');
   };
 
@@ -189,6 +240,25 @@ export default function BookingScreen() {
     ) {
       return `${t('minimumReferences')} ${config.settings.minimum_reference_images}.`;
     }
+    if (step === 3 && !isConsultation) {
+      if (healthMode === 'card' && !config?.health_safety.has_card) {
+        return config?.health_safety.copy.booking_missing ?? t('healthSafetyUnavailable');
+      }
+      if (healthMode === 'quick') {
+        const hasDeclaredItem = Object.values(healthValues).some(Boolean)
+          || Boolean(healthOther.trim());
+        if (healthConfirmedNone && hasDeclaredItem) {
+          return config?.health_safety.copy.booking_validation ?? t('healthSafetyUnavailable');
+        }
+        if (!healthConfirmedNone && !hasDeclaredItem) {
+          return config?.health_safety.copy.booking_validation ?? t('healthSafetyUnavailable');
+        }
+        if (!healthShareConsent) {
+          return config?.health_safety.copy.booking_consent_required
+            ?? t('healthSafetyUnavailable');
+        }
+      }
+    }
     return '';
   };
 
@@ -199,7 +269,7 @@ export default function BookingScreen() {
       return;
     }
     setError('');
-    setStep((current) => Math.min(3, current + 1));
+    setStep((current) => Math.min(4, current + 1));
   };
 
   const pickReferences = async () => {
@@ -258,6 +328,14 @@ export default function BookingScreen() {
       consultationAlreadyCompleted: !isConsultation && consultationCompleted,
       consultationNote,
       references,
+      healthSafety: {
+        mode: isConsultation ? 'none' : healthMode,
+        values: healthValues,
+        otherRelevantInformation: healthOther,
+        confirmedNone: healthConfirmedNone,
+        shareConsent: healthShareConsent,
+        saveToCard: healthSaveToCard,
+      },
     };
     setSubmitting(true);
     setError('');
@@ -551,6 +629,111 @@ export default function BookingScreen() {
 
             {step === 3 ? (
               <>
+                <Text style={styles.stepTitle}>{config.health_safety.copy.booking_title}</Text>
+                {isConsultation ? (
+                  <View style={styles.noticeBlock}>
+                    <Text style={styles.noticeTextLeft}>
+                      {config.health_safety.copy.booking_none}
+                    </Text>
+                  </View>
+                ) : (
+                  <>
+                    <Text style={styles.mutedLeft}>
+                      {config.health_safety.copy.booking_ready}
+                    </Text>
+                    <View style={styles.healthChoices}>
+                      <Choice
+                        active={healthMode === 'none'}
+                        label={config.health_safety.copy.booking_none}
+                        onPress={() => setHealthMode('none')}
+                      />
+                      {config.health_safety.has_card ? (
+                        <Choice
+                          active={healthMode === 'card'}
+                          label={config.health_safety.copy.booking_share}
+                          onPress={() => setHealthMode('card')}
+                        />
+                      ) : (
+                        <View style={styles.noticeBlock}>
+                          <Text style={styles.noticeTextLeft}>
+                            {config.health_safety.copy.booking_missing}
+                          </Text>
+                        </View>
+                      )}
+                      <Choice
+                        active={healthMode === 'quick'}
+                        label={config.health_safety.copy.booking_quick}
+                        onPress={() => setHealthMode('quick')}
+                      />
+                    </View>
+
+                    {healthMode === 'quick' ? (
+                      <>
+                        <Text style={styles.mutedLeft}>
+                          {config.health_safety.copy.booking_quick_intro}
+                        </Text>
+                        <View style={styles.choices}>
+                          {config.health_safety.fields.map((field) => (
+                            <Choice
+                              active={healthValues[field.key]}
+                              key={field.key}
+                              label={field.label}
+                              onPress={() => {
+                                const key: HealthSafetyFieldKey = field.key;
+                                setHealthValues((current) => ({
+                                  ...current,
+                                  [key]: !current[key],
+                                }));
+                                setHealthConfirmedNone(false);
+                              }}
+                            />
+                          ))}
+                        </View>
+                        <FieldLabel>{config.health_safety.copy.other}</FieldLabel>
+                        <TextInput
+                          maxLength={1000}
+                          multiline
+                          onChangeText={(value) => {
+                            setHealthOther(value);
+                            if (value.trim()) setHealthConfirmedNone(false);
+                          }}
+                          placeholder={config.health_safety.copy.other_help}
+                          placeholderTextColor={colors.textMuted}
+                          style={[styles.input, styles.textarea]}
+                          textAlignVertical="top"
+                          value={healthOther}
+                        />
+                        <CheckRow
+                          checked={healthConfirmedNone}
+                          label={config.health_safety.copy.booking_confirm_none}
+                          onPress={() => {
+                            const nextValue = !healthConfirmedNone;
+                            setHealthConfirmedNone(nextValue);
+                            if (nextValue) {
+                              setHealthValues({ ...EMPTY_HEALTH_VALUES });
+                              setHealthOther('');
+                            }
+                          }}
+                        />
+                        <CheckRow
+                          checked={healthShareConsent}
+                          label={config.health_safety.copy.booking_quick_consent}
+                          onPress={() => setHealthShareConsent((current) => !current)}
+                        />
+                        <CheckRow
+                          checked={healthSaveToCard}
+                          label={config.health_safety.copy.booking_save_quick}
+                          onPress={() => setHealthSaveToCard((current) => !current)}
+                        />
+                      </>
+                    ) : null}
+                  </>
+                )}
+              </>
+            ) : null}
+
+            {step === 4 ? (
+              <>
                 <Text style={styles.stepTitle}>{t('reviewBooking')}</Text>
                 <View style={styles.reviewCard}>
                   <ReviewRow label={t('bookingType')} value={optionLabel('booking_types', bookingType)} />
@@ -565,6 +748,18 @@ export default function BookingScreen() {
                     </>
                   ) : null}
                   <ReviewRow label={t('bookingReferences')} value={String(references.length)} />
+                  {!isConsultation ? (
+                    <ReviewRow
+                      label={config.health_safety.copy.booking_title}
+                      value={
+                        healthMode === 'card'
+                          ? config.health_safety.copy.booking_share
+                          : healthMode === 'quick'
+                            ? config.health_safety.copy.booking_quick
+                            : config.health_safety.copy.booking_none
+                      }
+                    />
+                  ) : null}
                 </View>
                 {config.settings.deposit_required ? (
                   <View style={styles.notice}>
@@ -596,9 +791,9 @@ export default function BookingScreen() {
               />
             ) : null}
             <Button
-              label={step === 3 ? t('submitBooking') : t('next')}
+              label={step === 4 ? t('submitBooking') : t('next')}
               loading={submitting}
-              onPress={() => step === 3 ? void submit() : next()}
+              onPress={() => step === 4 ? void submit() : next()}
               style={styles.navButton}
             />
           </View>
@@ -717,6 +912,12 @@ const styles = StyleSheet.create({
   },
   noticeTitle: { color: colors.text, fontWeight: '800' },
   noticeText: { color: colors.accent, fontSize: 18, fontWeight: '900' },
+  healthChoices: { gap: spacing.sm },
+  noticeBlock: {
+    backgroundColor: colors.backgroundDeep, borderRadius: radius.medium,
+    borderWidth: 1, borderColor: colors.border, padding: spacing.md,
+  },
+  noticeTextLeft: { color: colors.textMuted, lineHeight: 20 },
   error: {
     color: colors.danger, borderColor: colors.danger, borderWidth: 1,
     borderRadius: radius.medium, padding: spacing.sm, textAlign: 'center',
