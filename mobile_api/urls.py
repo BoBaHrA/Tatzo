@@ -25,6 +25,15 @@ from .chat_views import (
     ChatThreadView,
     StartChatView,
 )
+from .healing_views import (
+    HealingAppointmentStartView,
+    HealingCheckInMediaView,
+    HealingCheckInView,
+    HealingDetailView,
+    HealingListView,
+    HealingMarkHealedView,
+    HealingTaskView,
+)
 from .health_safety_views import (
     AppointmentHealthSafetyView,
     MyHealthSafetyCardView,
@@ -106,6 +115,37 @@ urlpatterns = [
         "payments/mobile-return/",
         MobilePaymentReturnView.as_view(),
         name="mobile_payment_return",
+    ),
+    path("healing/", HealingListView.as_view(), name="healing_list"),
+    path(
+        "healing/appointments/<int:appointment_id>/",
+        HealingAppointmentStartView.as_view(),
+        name="healing_appointment_start",
+    ),
+    path(
+        "healing/<uuid:journey_id>/",
+        HealingDetailView.as_view(),
+        name="healing_detail",
+    ),
+    path(
+        "healing/<uuid:journey_id>/check-ins/",
+        HealingCheckInView.as_view(),
+        name="healing_checkin",
+    ),
+    path(
+        "healing/<uuid:journey_id>/tasks/<slug:task_slug>/",
+        HealingTaskView.as_view(),
+        name="healing_task",
+    ),
+    path(
+        "healing/<uuid:journey_id>/mark-healed/",
+        HealingMarkHealedView.as_view(),
+        name="healing_mark_healed",
+    ),
+    path(
+        "healing/check-ins/<int:checkin_id>/media/",
+        HealingCheckInMediaView.as_view(),
+        name="healing_checkin_media",
     ),
     path(
         "me/verification/",

@@ -440,6 +440,104 @@ export type AppointmentDeposit =
       copy: Record<string, string>;
     };
 
+export type HealingStatus = 'active' | 'healed' | 'archived';
+
+export type HealingRole = 'client' | 'artist';
+
+export type HealingTaskSlug = 'wash' | 'moisturize' | 'sun' | 'friction';
+
+export type HealingUser = BookingUser;
+
+export type HealingJourneySummary = {
+  id: string;
+  appointment_id: number;
+  title: string;
+  role: HealingRole;
+  status: HealingStatus;
+  started_on: string;
+  healed_on: string | null;
+  current_day: number;
+  tracking_percent: number;
+  days_remaining: number;
+  checkin_count: number;
+  latest_photo_url: string | null;
+  other_user: HealingUser;
+  updated_at: string;
+};
+
+export type HealingEligibleAppointment = {
+  id: number;
+  title: string;
+  date: string;
+  artist: HealingUser;
+};
+
+export type HealingListResponse = {
+  language: string;
+  copy: Record<string, string>;
+  journeys: HealingJourneySummary[];
+  eligible_appointments: HealingEligibleAppointment[];
+};
+
+export type HealingCheckIn = {
+  id: number;
+  day_number: number;
+  url: string;
+  note: string;
+  symptoms: string[];
+  created_at: string;
+  updated_at: string;
+};
+
+export type HealingTask = {
+  slug: HealingTaskSlug;
+  label: string;
+  completed: boolean;
+};
+
+export type HealingTimelineItem = {
+  key: string;
+  day: number | null;
+  phase: string;
+  heading: string;
+  body: string;
+  tags: string[];
+  active: boolean;
+};
+
+export type HealingAchievements = {
+  first_checkin: boolean;
+  seven_day_streak: boolean;
+  three_checkins: boolean;
+  fully_healed: boolean;
+};
+
+export type HealingDetail = HealingJourneySummary & {
+  language: string;
+  copy: Record<string, string>;
+  timeline: {
+    current: string;
+    items: HealingTimelineItem[];
+  };
+  checkins: HealingCheckIn[];
+  tasks: HealingTask[];
+  routine_done_count: number;
+  routine_total: number;
+  routine_streak: number;
+  artist_reply_count: number;
+  symptom_options: { slug: string; label: string }[];
+  chat_draft: string;
+  can_edit: boolean;
+  achievements: HealingAchievements;
+};
+
+export type HealingTaskUpdate = {
+  slug: HealingTaskSlug;
+  completed: boolean;
+  done_count: number;
+  total: number;
+};
+
 export type BookingConfig = {
   artist: BookingUser;
   available: boolean;
@@ -525,6 +623,11 @@ export type Appointment = {
   reference_limit: number;
   can_add_references: boolean;
   available_actions: AppointmentAction[];
+  healing_journey: {
+    id: string;
+    status: HealingStatus;
+    current_day: number;
+  } | null;
 };
 
 export type AppointmentListResponse = {

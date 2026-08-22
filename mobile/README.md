@@ -54,6 +54,9 @@ refresh tokens rotate and the replaced token is blacklisted by Django.
   artist access limited to the relevant active appointment, and client revocation.
 - native Stripe Connect onboarding and deposit settings for verified artists, plus
   hosted Stripe Checkout for clients; only verified webhooks can mark deposits paid.
+- native post-session Healing journeys for completed tattoos with private daily photo
+  check-ins, optional notes and symptom tracking, care-task streaks, milestones,
+  participant-only artist access, contextual chat, and client-controlled completion.
 - native map-first discovery with viewport pagination, artist/studio markers, clustering,
   map/list modes, style and booking filters, foreground geolocation, block-aware results,
   private studio claims, and moderated add-location requests.

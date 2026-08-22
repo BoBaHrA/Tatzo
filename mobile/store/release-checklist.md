@@ -42,8 +42,8 @@ public production.
 - [ ] Confirm the web account-deletion path lets a signed-out former app user sign
       in on the website and complete deletion without reinstalling the app.
 - [ ] Reconcile `store/data-safety.md` with the production backend, hosting logs,
-      Cloudinary, Expo push, Google Maps, Stripe, Health & Safety retention, and support
-      access before completing either privacy form.
+      Cloudinary, Expo push, Google Maps, Stripe, Health & Safety/Healing retention, and
+      support access before completing either privacy form.
 - [ ] Complete Apple App Privacy, Google Play Data safety, content-rating, age-rating,
       export-compliance, UGC, and advertising declarations with the account owner.
 - [ ] Prepare a review account with representative content and give reviewers concise
@@ -57,9 +57,10 @@ public production.
 2. Build `preview` for real-device smoke testing. Android preview intentionally produces
    an APK; production keeps EAS's store-ready AAB default.
 3. Test sign-up and verification, feed/media, public profiles, Style Match, map/location,
-   private chat attachments, booking flows, Health & Safety share/revoke, Stripe Connect,
-   deposit payment/webhook/refund, artist actions, notifications, blocking, reporting,
-   support links, sign-out, token revocation, and account deletion.
+   private chat attachments, booking flows, Health & Safety share/revoke, Healing photo
+   check-ins/tasks/artist access/completion, Stripe Connect, deposit payment/webhook/refund,
+   artist actions, notifications, blocking, reporting, support links, sign-out, token
+   revocation, and account deletion.
 4. Build `production` for both platforms.
 5. Submit iOS to TestFlight and Android to Google Play internal testing.
 6. Fix review/beta issues, repeat the smoke test, then move to closed/external beta.

@@ -180,6 +180,11 @@ export default function ArtistDashboardScreen() {
           variant="secondary"
         />
         <Button
+          label={t('healingClients')}
+          onPress={() => router.push('/healing')}
+          variant="secondary"
+        />
+        <Button
           label={t('managePortfolio')}
           onPress={() => router.push('/manage-portfolio')}
           variant="secondary"

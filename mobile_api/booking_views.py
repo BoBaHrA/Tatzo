@@ -140,6 +140,7 @@ def _appointment_payload(appointment, request):
     reference_limit = (
         booking_settings.maximum_reference_images if booking_settings else 10
     )
+    healing_journey = getattr(appointment, "healing_journey", None)
     return {
         "id": appointment.pk,
         "role": role,
@@ -182,6 +183,15 @@ def _appointment_payload(appointment, request):
             and len(references) < reference_limit
         ),
         "available_actions": _available_actions(appointment, request.user),
+        "healing_journey": (
+            {
+                "id": str(healing_journey.pk),
+                "status": healing_journey.status,
+                "current_day": healing_journey.current_day,
+            }
+            if healing_journey
+            else None
+        ),
     }
 
 
@@ -193,6 +203,7 @@ def _appointment_or_404(appointment_id, user):
             "artist__booking_settings",
             "client",
             "client__profile",
+            "healing_journey",
         ).prefetch_related("reference_images"),
         pk=appointment_id,
     )

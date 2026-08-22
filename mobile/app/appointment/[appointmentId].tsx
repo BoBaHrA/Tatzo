@@ -393,6 +393,25 @@ export default function AppointmentDetailScreen() {
             </View>
           ) : null}
 
+          {appointment.healing_journey ? (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t('healing')}</Text>
+              <View style={styles.healingCard}>
+                <Text style={styles.healthIntro}>{t('healingAppointmentSubtitle')}</Text>
+                <Text style={styles.healthExpiry}>
+                  {t('healingDay')} {appointment.healing_journey.current_day}
+                </Text>
+                <Button
+                  label={t('healingOpen')}
+                  onPress={() => router.push({
+                    pathname: '/healing/[journeyId]',
+                    params: { journeyId: appointment.healing_journey!.id },
+                  })}
+                />
+              </View>
+            </View>
+          ) : null}
+
           {appointment.booking_type === 'tattoo_session' && health ? (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>
@@ -581,6 +600,10 @@ const styles = StyleSheet.create({
   healthCard: {
     backgroundColor: colors.surface, borderColor: colors.primaryMuted,
     borderWidth: 1, borderRadius: radius.medium, padding: spacing.md, gap: spacing.sm,
+  },
+  healingCard: {
+    backgroundColor: colors.surface, borderColor: colors.primaryMuted, borderWidth: 1,
+    borderRadius: radius.large, padding: spacing.md, gap: spacing.md,
   },
   healthIntro: { color: colors.textMuted, lineHeight: 21 },
   healthItemRow: { flexDirection: 'row', gap: spacing.xs, alignItems: 'flex-start' },

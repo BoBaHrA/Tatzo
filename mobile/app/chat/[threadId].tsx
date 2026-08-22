@@ -44,6 +44,7 @@ import { Button } from '@/components/button';
 import { appLanguage, t } from '@/i18n';
 import { toggleProfileBlock } from '@/profile/profile-api';
 import { colors, radius, spacing } from '@/theme';
+import { fetchHealingDetail } from '@/healing/healing-api';
 
 
 const MAX_ATTACHMENTS = 6;
@@ -163,8 +164,14 @@ function PendingAttachmentChip({
 }
 
 export default function ChatThreadScreen() {
-  const params = useLocalSearchParams<{ threadId?: string | string[] }>();
+  const params = useLocalSearchParams<{
+    threadId?: string | string[];
+    healingJourneyId?: string | string[];
+  }>();
   const rawThreadId = Array.isArray(params.threadId) ? params.threadId[0] : params.threadId;
+  const rawHealingJourneyId = Array.isArray(params.healingJourneyId)
+    ? params.healingJourneyId[0]
+    : params.healingJourneyId;
   const threadId = Number(rawThreadId);
   const validThreadId = Number.isInteger(threadId) && threadId > 0;
   const { request, status } = useAuth();
@@ -177,6 +184,10 @@ export default function ChatThreadScreen() {
   const [loadError, setLoadError] = useState('');
   const [actionError, setActionError] = useState('');
   const [content, setContent] = useState('');
+  const [healingDraft, setHealingDraft] = useState<{
+    otherUserId: number;
+    content: string;
+  } | null>(null);
   const [inputHeight, setInputHeight] = useState(INPUT_MIN_HEIGHT);
   const [pendingAttachments, setPendingAttachments] = useState<PendingChatAttachment[]>([]);
   const [sending, setSending] = useState(false);
@@ -196,6 +207,7 @@ export default function ChatThreadScreen() {
   const pollInFlight = useRef(false);
   const lastMessageId = useRef<number | null>(null);
   const shouldScrollToEnd = useRef(true);
+  const loadedHealingJourneyId = useRef<string | null>(null);
 
   useEffect(() => {
     lastMessageId.current = messages.at(-1)?.id ?? null;
@@ -232,6 +244,38 @@ export default function ChatThreadScreen() {
   useEffect(() => {
     void loadThread();
   }, [loadThread]);
+
+  useEffect(() => {
+    const journeyId = String(rawHealingJourneyId ?? '');
+    if (
+      status !== 'authenticated'
+      || !journeyId
+      || loadedHealingJourneyId.current === journeyId
+    ) return;
+    loadedHealingJourneyId.current = journeyId;
+    let cancelled = false;
+    void fetchHealingDetail(request, journeyId)
+      .then((healing) => {
+        if (!cancelled) {
+          setHealingDraft({
+            otherUserId: healing.other_user.id,
+            content: healing.chat_draft,
+          });
+        }
+      })
+      .catch(() => {
+        // The chat remains usable when the optional Healing context is unavailable.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [rawHealingJourneyId, request, status]);
+
+  useEffect(() => {
+    if (!thread || !healingDraft || thread.other_user.id !== healingDraft.otherUserId) return;
+    setContent((current) => current || healingDraft.content);
+    setHealingDraft(null);
+  }, [healingDraft, thread]);
 
   useEffect(() => {
     if (status !== 'authenticated' || !thread || !validThreadId) return undefined;
