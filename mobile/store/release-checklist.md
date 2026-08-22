@@ -60,8 +60,9 @@ public production.
    (including blocked users and posts with comments disabled), public profiles, Style Match, map/location,
    private chat attachments, booking flows, Health & Safety share/revoke, Healing photo
    check-ins/tasks/artist access/completion, Stripe Connect, deposit payment/webhook/refund,
-   artist actions, notifications, blocking, reporting, support links, sign-out, token
-   revocation, and account deletion.
+   artist actions, booking-preference changes reflected in the client booking flow,
+   notifications, blocking, reporting, support links, sign-out, token revocation, and
+   account deletion.
 4. Build `production` for both platforms.
 5. Submit iOS to TestFlight and Android to Google Play internal testing.
 6. Fix review/beta issues, repeat the smoke test, then move to closed/external beta.

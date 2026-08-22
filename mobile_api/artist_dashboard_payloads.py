@@ -13,15 +13,17 @@ from appointments.models import (
     CalendarEvent,
 )
 from appointments.views import (
+    DEFAULT_TATTOO_STYLES,
     _artist_timezone,
     _ensure_default_artist_availability,
     _get_artist_booked_minutes,
     _get_artist_settings,
     _get_booking_status_label,
+    _get_tattoo_style_label,
 )
 from users.models import ChatMessage
 
-from .booking_views import _booking_user_payload
+from .booking_views import BOOKING_DURATIONS, _booking_user_payload
 
 
 ACTIVE_APPOINTMENT_STATUSES = (
@@ -34,6 +36,7 @@ TIMELINE_APPOINTMENT_STATUSES = (
     Appointment.STATUS_ACCEPTED,
     Appointment.STATUS_CONSULTATION_REQUIRED,
 )
+SLOT_STEP_OPTIONS = (15, 30, 45, 60)
 
 
 def time_string(value):
@@ -55,6 +58,59 @@ def settings_payload(settings):
         "maximum_session_hours": settings.maximum_session_hours,
         "minimum_notice_hours": settings.minimum_notice_hours,
         "maximum_booking_window_days": settings.maximum_booking_window_days,
+    }
+
+
+def _decimal_string(value):
+    return f"{value:.2f}".rstrip("0").rstrip(".")
+
+
+def booking_preferences_payload(settings):
+    active_styles = settings.active_styles or list(DEFAULT_TATTOO_STYLES)
+    style_options = list(
+        dict.fromkeys([*DEFAULT_TATTOO_STYLES, *active_styles])
+    )
+    return {
+        "booking_workflow": settings.booking_workflow,
+        "booking_workflow_options": [
+            {"value": value, "label": force_str(label)}
+            for value, label in ArtistBookingSettings.BOOKING_WORKFLOW_CHOICES
+        ],
+        "minimum_notice_hours": settings.minimum_notice_hours,
+        "maximum_booking_window_days": settings.maximum_booking_window_days,
+        "slot_step_minutes": settings.slot_step_minutes,
+        "slot_step_options": list(SLOT_STEP_OPTIONS),
+        "default_session_minutes": settings.default_session_minutes,
+        "session_duration_options": list(BOOKING_DURATIONS),
+        "maximum_session_hours": settings.maximum_session_hours,
+        "consultation_enabled": settings.consultation_enabled,
+        "online_consultation_enabled": settings.online_consultation_enabled,
+        "studio_consultation_enabled": settings.studio_consultation_enabled,
+        "consultation_required_before_booking": (
+            settings.consultation_required_before_booking
+        ),
+        "consultation_price": _decimal_string(settings.consultation_price),
+        "online_consultation_price": _decimal_string(
+            settings.online_consultation_price
+        ),
+        "reference_images_required": settings.reference_images_required,
+        "minimum_reference_images": settings.minimum_reference_images,
+        "maximum_reference_images": settings.maximum_reference_images,
+        "active_styles": active_styles,
+        "style_options": [
+            {"value": value, "label": force_str(_get_tattoo_style_label(value))}
+            for value in style_options
+        ],
+        "auto_response_booking_received": settings.auto_response_booking_received,
+        "auto_response_consultation_required": (
+            settings.auto_response_consultation_required
+        ),
+        "auto_response_need_more_references": (
+            settings.auto_response_need_more_references
+        ),
+        "auto_response_booking_approved": settings.auto_response_booking_approved,
+        "auto_response_booking_declined": settings.auto_response_booking_declined,
+        "updated_at": settings.updated_at.isoformat(),
     }
 
 

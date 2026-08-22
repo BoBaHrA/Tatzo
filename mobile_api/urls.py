@@ -4,6 +4,7 @@ from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 from .artist_dashboard_views import (
     ArtistBlockDetailView,
     ArtistBlockListView,
+    ArtistBookingPreferencesView,
     ArtistDashboardView,
     ArtistScheduleView,
     ArtistTimeOffDetailView,
@@ -220,6 +221,11 @@ urlpatterns = [
         "artist/dashboard/schedule/",
         ArtistScheduleView.as_view(),
         name="artist_schedule",
+    ),
+    path(
+        "artist/dashboard/preferences/",
+        ArtistBookingPreferencesView.as_view(),
+        name="artist_booking_preferences",
     ),
     path(
         "artist/dashboard/time-off/",

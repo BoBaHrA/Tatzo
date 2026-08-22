@@ -699,16 +699,59 @@ export type ArtistBookingStatus =
   | 'consultation_only'
   | 'emergency';
 
+export type ArtistBookingWorkflow = 'manual' | 'auto';
+
 export type ArtistDashboardSettings = {
   booking_status: ArtistBookingStatus;
   booking_status_label: string;
   booking_status_options: { value: ArtistBookingStatus; label: string }[];
   bookings_enabled: boolean;
-  booking_workflow: 'manual' | 'auto';
+  booking_workflow: ArtistBookingWorkflow;
   maximum_session_hours: number;
   minimum_notice_hours: number;
   maximum_booking_window_days: number;
 };
+
+export type ArtistBookingPreferences = {
+  booking_workflow: ArtistBookingWorkflow;
+  booking_workflow_options: {
+    value: ArtistBookingWorkflow;
+    label: string;
+  }[];
+  minimum_notice_hours: number;
+  maximum_booking_window_days: number;
+  slot_step_minutes: number;
+  slot_step_options: number[];
+  default_session_minutes: number;
+  session_duration_options: number[];
+  maximum_session_hours: number;
+  consultation_enabled: boolean;
+  online_consultation_enabled: boolean;
+  studio_consultation_enabled: boolean;
+  consultation_required_before_booking: boolean;
+  consultation_price: string;
+  online_consultation_price: string;
+  reference_images_required: boolean;
+  minimum_reference_images: number;
+  maximum_reference_images: number;
+  active_styles: string[];
+  style_options: { value: string; label: string }[];
+  auto_response_booking_received: string;
+  auto_response_consultation_required: string;
+  auto_response_need_more_references: string;
+  auto_response_booking_approved: string;
+  auto_response_booking_declined: string;
+  updated_at: string;
+};
+
+export type ArtistBookingPreferencesUpdate = Omit<
+  ArtistBookingPreferences,
+  | 'booking_workflow_options'
+  | 'slot_step_options'
+  | 'session_duration_options'
+  | 'style_options'
+  | 'updated_at'
+>;
 
 export type ArtistScheduleDay = {
   weekday: number;

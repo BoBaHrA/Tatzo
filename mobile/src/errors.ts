@@ -37,6 +37,9 @@ export function userFacingError(error: unknown): string {
   if (error.body.code === 'invalid_booking_status') {
     return t('artistInvalidStatus');
   }
+  if (error.body.code === 'invalid_booking_preferences') {
+    return t('artistPreferencesValidationError');
+  }
   if (error.body.code === 'invalid_schedule') {
     return t('artistInvalidSchedule');
   }

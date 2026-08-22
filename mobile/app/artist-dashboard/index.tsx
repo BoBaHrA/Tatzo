@@ -165,6 +165,11 @@ export default function ArtistDashboardScreen() {
           onPress={() => router.push('/(tabs)/bookings')}
         />
         <Button
+          label={t('artistManagePreferences')}
+          onPress={() => router.push('/artist-dashboard/preferences')}
+          variant="secondary"
+        />
+        <Button
           label={t('artistManageSchedule')}
           onPress={() => router.push('/artist-dashboard/schedule')}
           variant="secondary"

@@ -1,5 +1,7 @@
 import type {
   ArtistBlockedPeriod,
+  ArtistBookingPreferences,
+  ArtistBookingPreferencesUpdate,
   ArtistBookingStatus,
   ArtistDashboard,
   ArtistDashboardSettings,
@@ -20,6 +22,20 @@ export function updateArtistBookingStatus(
   return request<ArtistDashboardSettings>('/artist/dashboard/', {
     method: 'PATCH',
     body: JSON.stringify({ booking_status: bookingStatus }),
+  });
+}
+
+export function fetchArtistBookingPreferences(request: AuthenticatedRequest) {
+  return request<ArtistBookingPreferences>('/artist/dashboard/preferences/');
+}
+
+export function saveArtistBookingPreferences(
+  request: AuthenticatedRequest,
+  payload: ArtistBookingPreferencesUpdate,
+) {
+  return request<ArtistBookingPreferences>('/artist/dashboard/preferences/', {
+    method: 'PUT',
+    body: JSON.stringify(payload),
   });
 }
 

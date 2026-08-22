@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -7,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import status
+from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -27,15 +29,165 @@ from appointments.views import (
 
 from .artist_dashboard_payloads import (
     ACTIVE_APPOINTMENT_STATUSES,
+    SLOT_STEP_OPTIONS,
     blocked_period_payload,
+    booking_preferences_payload,
     dashboard_payload,
     schedule_payload,
     settings_payload,
     time_off_payload,
 )
+from .booking_views import BOOKING_DURATIONS
 
 
 User = get_user_model()
+
+BOOKING_PREFERENCE_FIELDS = (
+    "booking_workflow",
+    "minimum_notice_hours",
+    "maximum_booking_window_days",
+    "slot_step_minutes",
+    "default_session_minutes",
+    "maximum_session_hours",
+    "consultation_enabled",
+    "online_consultation_enabled",
+    "studio_consultation_enabled",
+    "consultation_required_before_booking",
+    "consultation_price",
+    "online_consultation_price",
+    "reference_images_required",
+    "minimum_reference_images",
+    "maximum_reference_images",
+    "active_styles",
+    "auto_response_booking_received",
+    "auto_response_consultation_required",
+    "auto_response_need_more_references",
+    "auto_response_booking_approved",
+    "auto_response_booking_declined",
+)
+
+
+class ArtistBookingPreferencesSerializer(serializers.Serializer):
+    booking_workflow = serializers.ChoiceField(
+        choices=ArtistBookingSettings.BOOKING_WORKFLOW_CHOICES
+    )
+    minimum_notice_hours = serializers.IntegerField(min_value=0, max_value=2160)
+    maximum_booking_window_days = serializers.IntegerField(min_value=1, max_value=365)
+    slot_step_minutes = serializers.ChoiceField(choices=SLOT_STEP_OPTIONS)
+    default_session_minutes = serializers.ChoiceField(choices=BOOKING_DURATIONS)
+    maximum_session_hours = serializers.IntegerField(min_value=1, max_value=12)
+    consultation_enabled = serializers.BooleanField()
+    online_consultation_enabled = serializers.BooleanField()
+    studio_consultation_enabled = serializers.BooleanField()
+    consultation_required_before_booking = serializers.BooleanField()
+    consultation_price = serializers.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        min_value=Decimal("0"),
+        max_value=Decimal("999999.99"),
+    )
+    online_consultation_price = serializers.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        min_value=Decimal("0"),
+        max_value=Decimal("999999.99"),
+    )
+    reference_images_required = serializers.BooleanField()
+    minimum_reference_images = serializers.IntegerField(min_value=0, max_value=20)
+    maximum_reference_images = serializers.IntegerField(min_value=1, max_value=20)
+    active_styles = serializers.ListField(
+        child=serializers.CharField(max_length=80, trim_whitespace=True),
+        allow_empty=False,
+        max_length=30,
+    )
+    auto_response_booking_received = serializers.CharField(
+        allow_blank=True, max_length=2000, trim_whitespace=True
+    )
+    auto_response_consultation_required = serializers.CharField(
+        allow_blank=True, max_length=2000, trim_whitespace=True
+    )
+    auto_response_need_more_references = serializers.CharField(
+        allow_blank=True, max_length=2000, trim_whitespace=True
+    )
+    auto_response_booking_approved = serializers.CharField(
+        allow_blank=True, max_length=2000, trim_whitespace=True
+    )
+    auto_response_booking_declined = serializers.CharField(
+        allow_blank=True, max_length=2000, trim_whitespace=True
+    )
+
+    def validate_active_styles(self, values):
+        unique = []
+        seen = set()
+        for value in values:
+            key = value.casefold()
+            if key in seen:
+                continue
+            seen.add(key)
+            unique.append(value)
+        if not unique:
+            raise serializers.ValidationError("Choose at least one active style.")
+        return unique
+
+    def validate(self, attrs):
+        if attrs["default_session_minutes"] > attrs["maximum_session_hours"] * 60:
+            raise serializers.ValidationError(
+                {
+                    "default_session_minutes": (
+                        "The default session cannot exceed the maximum session length."
+                    )
+                }
+            )
+
+        supported_consultation = bool(
+            attrs["online_consultation_enabled"]
+            or attrs["studio_consultation_enabled"]
+        )
+        if attrs["consultation_enabled"] and not supported_consultation:
+            raise serializers.ValidationError(
+                {
+                    "consultation_enabled": (
+                        "Enable an online or in-studio consultation option."
+                    )
+                }
+            )
+        if attrs["consultation_required_before_booking"] and not (
+            attrs["consultation_enabled"] and supported_consultation
+        ):
+            raise serializers.ValidationError(
+                {
+                    "consultation_required_before_booking": (
+                        "Required consultations need an enabled consultation option."
+                    )
+                }
+            )
+
+        minimum_references = attrs["minimum_reference_images"]
+        maximum_references = attrs["maximum_reference_images"]
+        if minimum_references > maximum_references:
+            raise serializers.ValidationError(
+                {
+                    "minimum_reference_images": (
+                        "The minimum cannot exceed the maximum reference count."
+                    )
+                }
+            )
+        if attrs["reference_images_required"] and minimum_references < 1:
+            raise serializers.ValidationError(
+                {
+                    "minimum_reference_images": (
+                        "Require at least one reference image."
+                    )
+                }
+            )
+        return attrs
+
+
+class PrivateArtistResponseMixin:
+    def finalize_response(self, request, response, *args, **kwargs):
+        response = super().finalize_response(request, response, *args, **kwargs)
+        response["Cache-Control"] = "private, no-store"
+        return response
 
 
 def _artist_forbidden(request):
@@ -101,6 +253,50 @@ class ArtistDashboardView(APIView):
                 update_fields=("booking_status", "bookings_enabled", "updated_at")
             )
         return Response(settings_payload(settings))
+
+
+class ArtistBookingPreferencesView(PrivateArtistResponseMixin, APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        forbidden = _artist_forbidden(request)
+        if forbidden:
+            return forbidden
+        return Response(
+            booking_preferences_payload(_get_artist_settings(request.user))
+        )
+
+    def put(self, request):
+        forbidden = _artist_forbidden(request)
+        if forbidden:
+            return forbidden
+        serializer = ArtistBookingPreferencesSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                {
+                    "code": "invalid_booking_preferences",
+                    "detail": "Check the booking settings and try again.",
+                    "errors": serializer.errors,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        with transaction.atomic():
+            User.objects.select_for_update().get(pk=request.user.pk)
+            settings = (
+                ArtistBookingSettings.objects.select_for_update()
+                .filter(artist=request.user)
+                .first()
+            )
+            if settings is None:
+                settings = ArtistBookingSettings.objects.create(
+                    artist=request.user
+                )
+            for field in BOOKING_PREFERENCE_FIELDS:
+                setattr(settings, field, serializer.validated_data[field])
+            settings.save(update_fields=(*BOOKING_PREFERENCE_FIELDS, "updated_at"))
+
+        return Response(booking_preferences_payload(settings))
 
 
 class ArtistScheduleView(APIView):

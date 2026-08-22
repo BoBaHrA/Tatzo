@@ -32,8 +32,10 @@ export default function RootLayout() {
             <Stack.Screen name="booking/[username]" />
             <Stack.Screen name="appointment/[appointmentId]" />
             <Stack.Screen name="artist-dashboard/index" />
+            <Stack.Screen name="artist-dashboard/preferences" />
             <Stack.Screen name="artist-dashboard/schedule" />
             <Stack.Screen name="artist-dashboard/calendar" />
+            <Stack.Screen name="artist-dashboard/payments" />
             <Stack.Screen name="map/add-location" options={{ presentation: 'modal' }} />
             <Stack.Screen name="map/claim/[locationId]" options={{ presentation: 'modal' }} />
           </Stack>

@@ -217,6 +217,117 @@ class MobileArtistDashboardTests(APITestCase):
         tuesday.refresh_from_db()
         self.assertEqual(tuesday.break_end, time(13))
 
+    def test_booking_preferences_require_authentication_and_verified_artist(self):
+        url = reverse("mobile_api:artist_booking_preferences")
+        self.client.force_authenticate(user=None)
+        anonymous = self.client.get(url)
+        self.assertEqual(anonymous.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        self.client.force_authenticate(self.client_user)
+        regular = self.client.get(url)
+        self.assertEqual(regular.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(regular.data["code"], "artist_dashboard_forbidden")
+
+    def test_artist_can_read_and_update_booking_preferences(self):
+        url = reverse("mobile_api:artist_booking_preferences")
+        current = self.client.get(url, HTTP_ACCEPT_LANGUAGE="fr")
+
+        self.assertEqual(current.status_code, status.HTTP_200_OK)
+        self.assertEqual(current["Cache-Control"], "private, no-store")
+        self.assertEqual(current.data["booking_workflow"], "manual")
+        self.assertEqual(current.data["slot_step_options"], [15, 30, 45, 60])
+        self.assertIn("Blackwork", current.data["active_styles"])
+        self.assertTrue(current.data["style_options"])
+
+        self.settings.phone_consultation_enabled = True
+        self.settings.save(update_fields=("phone_consultation_enabled", "updated_at"))
+        payload = {
+            "booking_workflow": "auto",
+            "minimum_notice_hours": 12,
+            "maximum_booking_window_days": 120,
+            "slot_step_minutes": 45,
+            "default_session_minutes": 180,
+            "maximum_session_hours": 4,
+            "consultation_enabled": True,
+            "online_consultation_enabled": False,
+            "studio_consultation_enabled": True,
+            "consultation_required_before_booking": True,
+            "consultation_price": "30.50",
+            "online_consultation_price": "15",
+            "reference_images_required": True,
+            "minimum_reference_images": 2,
+            "maximum_reference_images": 6,
+            "active_styles": ["Blackwork", "blackwork", "Fine Line"],
+            "auto_response_booking_received": "Thanks — I have your request.",
+            "auto_response_consultation_required": "Let us consult first.",
+            "auto_response_need_more_references": "Please add more references.",
+            "auto_response_booking_approved": "Your request is approved.",
+            "auto_response_booking_declined": "I cannot take this project.",
+        }
+        updated = self.client.put(url, payload, format="json")
+
+        self.assertEqual(updated.status_code, status.HTTP_200_OK)
+        self.assertEqual(updated["Cache-Control"], "private, no-store")
+        self.assertEqual(updated.data["consultation_price"], "30.5")
+        self.assertEqual(updated.data["active_styles"], ["Blackwork", "Fine Line"])
+        self.settings.refresh_from_db()
+        self.assertEqual(self.settings.booking_workflow, "auto")
+        self.assertEqual(self.settings.slot_step_minutes, 45)
+        self.assertEqual(self.settings.default_session_minutes, 180)
+        self.assertTrue(self.settings.reference_images_required)
+        self.assertTrue(self.settings.phone_consultation_enabled)
+
+        self.client.force_authenticate(self.client_user)
+        booking = self.client.get(
+            reverse("mobile_api:appointment_booking", args=[self.artist.username])
+        )
+        self.assertEqual(booking.status_code, status.HTTP_200_OK)
+        self.assertEqual(booking.data["settings"]["booking_workflow"], "auto")
+        self.assertEqual(booking.data["settings"]["minimum_reference_images"], 2)
+        self.assertEqual(booking.data["styles"], ["Blackwork", "Fine Line"])
+        self.assertEqual(booking.data["durations"], [60, 120, 180])
+        self.assertIn(Appointment.TYPE_CONSULTATION, booking.data["booking_types"])
+        self.assertNotIn(
+            Appointment.TYPE_ONLINE_CONSULTATION,
+            booking.data["booking_types"],
+        )
+
+    def test_invalid_booking_preferences_are_not_partially_saved(self):
+        url = reverse("mobile_api:artist_booking_preferences")
+        payload = {
+            "booking_workflow": "auto",
+            "minimum_notice_hours": 6,
+            "maximum_booking_window_days": 30,
+            "slot_step_minutes": 30,
+            "default_session_minutes": 180,
+            "maximum_session_hours": 1,
+            "consultation_enabled": True,
+            "online_consultation_enabled": False,
+            "studio_consultation_enabled": False,
+            "consultation_required_before_booking": True,
+            "consultation_price": "0",
+            "online_consultation_price": "0",
+            "reference_images_required": True,
+            "minimum_reference_images": 4,
+            "maximum_reference_images": 2,
+            "active_styles": ["Blackwork"],
+            "auto_response_booking_received": "Changed",
+            "auto_response_consultation_required": "",
+            "auto_response_need_more_references": "",
+            "auto_response_booking_approved": "",
+            "auto_response_booking_declined": "",
+        }
+
+        rejected = self.client.put(url, payload, format="json")
+
+        self.assertEqual(rejected.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(rejected.data["code"], "invalid_booking_preferences")
+        self.assertIn("default_session_minutes", rejected.data["errors"])
+        self.settings.refresh_from_db()
+        self.assertEqual(self.settings.booking_workflow, "manual")
+        self.assertEqual(self.settings.minimum_notice_hours, 0)
+        self.assertEqual(self.settings.auto_response_booking_received, "")
+
     def test_artist_can_manage_time_off_and_non_overlapping_blocks(self):
         day_off_date = self.today + timedelta(days=8)
         time_off_url = reverse("mobile_api:artist_time_off_list")

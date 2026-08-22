@@ -68,7 +68,8 @@ refresh tokens rotate and the replaced token is blacklisted by Django.
   privacy-safe localized lock-screen copy, protected deep links, retries, and Expo receipts.
 - native verified-artist workspace with live booking status, booking/message stats,
   14-day workload, a combined artist/client calendar timeline, weekly working-hour
-  editing, full-day time off, and collision-safe blocked periods.
+  editing, full-day time off, collision-safe blocked periods, and complete booking
+  preferences for intake workflow, consultations, references, styles, and auto-replies.
 
 ## Release preparation
 
