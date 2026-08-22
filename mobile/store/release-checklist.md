@@ -56,7 +56,8 @@ public production.
 1. Run `npm run release:check:production` with the production public values loaded.
 2. Build `preview` for real-device smoke testing. Android preview intentionally produces
    an APK; production keeps EAS's store-ready AAB default.
-3. Test sign-up and verification, feed/media, public profiles, Style Match, map/location,
+3. Test sign-up and verification, feed/media, comment create/reply/like/edit/delete/report
+   (including blocked users and posts with comments disabled), public profiles, Style Match, map/location,
    private chat attachments, booking flows, Health & Safety share/revoke, Healing photo
    check-ins/tasks/artist access/completion, Stripe Connect, deposit payment/webhook/refund,
    artist actions, notifications, blocking, reporting, support links, sign-out, token

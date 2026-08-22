@@ -212,6 +212,8 @@ class MobileFeedTests(APITestCase):
             media_type=PostMedia.IMAGE,
         )
         PostLike.objects.create(post=post, user=self.viewer)
+        self.stranger.profile.is_email_verified = True
+        self.stranger.profile.save(update_fields=("is_email_verified",))
         PostComment.objects.create(post=post, user=self.stranger, content="Great")
         PostBookmark.objects.create(post=post, user=self.viewer)
 

@@ -54,13 +54,28 @@ def _user_payload(user, request):
 
 
 def _visible_posts_for(viewer):
+    blocked_user_ids = viewer.blocking_relations.values("blocked_id")
+    blocked_by_user_ids = viewer.blocked_by_relations.values("blocker_id")
+    visible_comments = (
+        Q(
+            comments__user__is_active=True,
+            comments__user__profile__is_email_verified=True,
+        )
+        & ~Q(comments__user_id__in=blocked_user_ids)
+        & ~Q(comments__user_id__in=blocked_by_user_ids)
+    )
+
     return (
         Post.objects.visible_to(viewer)
         .select_related("user", "user__profile")
         .prefetch_related("medias")
         .annotate(
             feed_likes_count=Count("likes", distinct=True),
-            feed_comments_count=Count("comments", distinct=True),
+            feed_comments_count=Count(
+                "comments",
+                filter=visible_comments,
+                distinct=True,
+            ),
             viewer_liked=Exists(
                 PostLike.objects.filter(post_id=OuterRef("pk"), user=viewer)
             ),

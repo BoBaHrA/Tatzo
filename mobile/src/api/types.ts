@@ -134,6 +134,62 @@ export type FeedReportResult = {
   created: boolean;
 };
 
+export type CommentItem = {
+  id: number;
+  author: FeedAuthor;
+  content: string;
+  created_at: string;
+  parent_id: number | null;
+  likes_count: number;
+  replies_count: number;
+  is_liked: boolean;
+  is_reported: boolean;
+  is_owned: boolean;
+  is_post_owner: boolean;
+};
+
+export type CommentPage = {
+  next_cursor: string | null;
+  has_more: boolean;
+  results: CommentItem[];
+  comments_count: number;
+  comments_enabled: boolean;
+};
+
+export type CommentReplyPage = {
+  next_cursor: string | null;
+  has_more: boolean;
+  results: CommentItem[];
+  root_id: number;
+  replies_count: number;
+};
+
+export type CommentCreateResult = {
+  comment: CommentItem;
+  comments_count: number;
+};
+
+export type CommentUpdateResult = {
+  comment: CommentItem;
+};
+
+export type CommentDeleteResult = {
+  deleted: boolean;
+  id: number;
+  parent_id: number | null;
+  comments_count: number;
+};
+
+export type CommentLikeResult = {
+  liked: boolean;
+  likes_count: number;
+};
+
+export type CommentReportResult = {
+  reported: boolean;
+  created: boolean;
+};
+
 export type PortfolioWork = {
   id: number;
   title: string;

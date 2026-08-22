@@ -22,6 +22,7 @@ type PostCardProps = {
   onLike: (post: FeedPost) => Promise<void>;
   onBookmark: (post: FeedPost) => Promise<void>;
   onReport: (post: FeedPost, reason: ReportReason) => Promise<void>;
+  onComments?: (post: FeedPost) => void;
 };
 
 const REPORT_REASONS: ReportReason[] = [
@@ -53,7 +54,13 @@ function formatPostDate(value: string): string {
   }).format(date);
 }
 
-export function PostCard({ post, onLike, onBookmark, onReport }: PostCardProps) {
+export function PostCard({
+  post,
+  onLike,
+  onBookmark,
+  onReport,
+  onComments,
+}: PostCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [liking, setLiking] = useState(false);
   const [bookmarking, setBookmarking] = useState(false);
@@ -91,6 +98,17 @@ export function PostCard({ post, onLike, onBookmark, onReport }: PostCardProps) 
   };
 
   const longContent = post.content.length > 220;
+
+  const openComments = () => {
+    if (onComments) {
+      onComments(post);
+      return;
+    }
+    router.push({
+      pathname: '/post/[postId]',
+      params: { postId: String(post.id) },
+    });
+  };
 
   return (
     <View style={styles.card}>
@@ -173,16 +191,17 @@ export function PostCard({ post, onLike, onBookmark, onReport }: PostCardProps) 
             <Text style={styles.actionText}>{post.likes_count}</Text>
           </Pressable>
 
-          {!post.disable_comments ? (
-            <View
-              accessibilityLabel={`${t('comments')}: ${post.comments_count}`}
-              accessible
-              style={styles.action}
-            >
-              <Text style={styles.commentIcon}>◯</Text>
-              <Text style={styles.actionText}>{post.comments_count}</Text>
-            </View>
-          ) : null}
+          <Pressable
+            accessibilityLabel={`${t('comments')}: ${post.comments_count}${
+              post.disable_comments ? `. ${t('commentsDisabled')}` : ''
+            }`}
+            accessibilityRole="button"
+            onPress={openComments}
+            style={({ pressed }) => [styles.action, pressed && styles.actionPressed]}
+          >
+            <Text style={styles.commentIcon}>{post.disable_comments ? '⊘' : '◯'}</Text>
+            <Text style={styles.actionText}>{post.comments_count}</Text>
+          </Pressable>
         </View>
 
         <Pressable

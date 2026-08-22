@@ -32,8 +32,9 @@ retention, support operations, and every enabled third-party service before subm
   with `private, no-store` responses.
 - Payment and bank credentials stay on Stripe-hosted onboarding and Checkout pages.
   Tatzo accepts payment state only from the verified Stripe webhook, never from a redirect.
-- Users can block accounts, report posts, contact safety support, and permanently delete
-  their account in-app after password confirmation.
+- Users can block accounts; report posts and comments; edit/delete their own comments;
+  contact safety support; and permanently delete their account in-app after password
+  confirmation.
 - The website also exposes authenticated account deletion at
   `https://tatzo.eu/settings/delete-account/` for users who no longer have the app.
 - There is no advertising or mobile analytics SDK in the current dependency manifest.

@@ -8,6 +8,7 @@ import { useAuth } from '@/auth/auth-context';
 import { BrandHeader } from '@/components/brand-header';
 import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
+import { CommentsSection } from '@/comments/comments-section';
 import {
   fetchFeedPost,
   reportFeedPost,
@@ -30,6 +31,7 @@ export default function PostDetailScreen() {
   const [loadError, setLoadError] = useState('');
   const [actionError, setActionError] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [commentFocusRequest, setCommentFocusRequest] = useState(0);
 
   const load = useCallback(async () => {
     if (status !== 'authenticated') return;
@@ -124,6 +126,13 @@ export default function PostDetailScreen() {
     ]);
   };
 
+  const updateCommentCount = useCallback((commentsCount: number) => {
+    setPost((current) => current ? {
+      ...current,
+      comments_count: commentsCount,
+    } : current);
+  }, []);
+
   return (
     <Screen contentStyle={styles.screen}>
       <Pressable
@@ -147,6 +156,7 @@ export default function PostDetailScreen() {
         <View style={styles.postBlock}>
           <PostCard
             onBookmark={bookmark}
+            onComments={() => setCommentFocusRequest((current) => current + 1)}
             onLike={like}
             onReport={report}
             post={post}
@@ -159,6 +169,11 @@ export default function PostDetailScreen() {
               variant="danger"
             />
           ) : null}
+          <CommentsSection
+            focusRequest={commentFocusRequest}
+            onCountChange={updateCommentCount}
+            post={post}
+          />
         </View>
       ) : (
         <View style={styles.stateCard}>

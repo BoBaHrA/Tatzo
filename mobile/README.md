@@ -37,6 +37,8 @@ refresh tokens rotate and the replaced token is blacklisted by Django.
 - secure sign out;
 - authenticated cursor-paginated feed with Cloudinary-backed image/video media;
 - pull-to-refresh, infinite loading, likes, bookmarks, and post reports;
+- native comment threads with paginated replies, likes, owner editing/deletion,
+  comment reports, blocked-user filtering, and notification-backed deep links;
 - native post publishing with multi-photo/video uploads, audience controls, comment
   controls, upload validation, and owner-only deletion;
 - public artist profiles with follow, portfolio, recent posts, and two-way privacy;

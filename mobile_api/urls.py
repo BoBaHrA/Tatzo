@@ -25,6 +25,13 @@ from .chat_views import (
     ChatThreadView,
     StartChatView,
 )
+from .comment_views import (
+    CommentDetailView,
+    CommentLikeView,
+    CommentListCreateView,
+    CommentReplyListView,
+    CommentReportView,
+)
 from .healing_views import (
     HealingAppointmentStartView,
     HealingCheckInMediaView,
@@ -317,6 +324,11 @@ urlpatterns = [
     ),
     path("feed/", FeedView.as_view(), name="feed"),
     path("feed/<int:post_id>/", FeedDetailView.as_view(), name="feed_detail"),
+    path(
+        "feed/<int:post_id>/comments/",
+        CommentListCreateView.as_view(),
+        name="comment_list_create",
+    ),
     path("feed/<int:post_id>/like/", FeedLikeView.as_view(), name="feed_like"),
     path(
         "feed/<int:post_id>/bookmark/",
@@ -327,6 +339,26 @@ urlpatterns = [
         "feed/<int:post_id>/report/",
         FeedReportView.as_view(),
         name="feed_report",
+    ),
+    path(
+        "comments/<int:comment_id>/",
+        CommentDetailView.as_view(),
+        name="comment_detail",
+    ),
+    path(
+        "comments/<int:comment_id>/replies/",
+        CommentReplyListView.as_view(),
+        name="comment_replies",
+    ),
+    path(
+        "comments/<int:comment_id>/like/",
+        CommentLikeView.as_view(),
+        name="comment_like",
+    ),
+    path(
+        "comments/<int:comment_id>/report/",
+        CommentReportView.as_view(),
+        name="comment_report",
     ),
     path("style-match/", StyleMatchView.as_view(), name="style_match"),
     path(
