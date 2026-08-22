@@ -391,3 +391,56 @@ class MobileArtistAppointmentTests(APITestCase):
         )
         self.assertEqual(rejected.status_code, status.HTTP_409_CONFLICT)
         self.assertEqual(rejected.data["code"], "appointment_not_reschedulable")
+
+    def test_artist_note_is_private_editable_and_non_cacheable(self):
+        date_value = self.today + timedelta(days=20)
+        appointment = self.appointment(date_value=date_value)
+        appointment.artist_note = "Old private preparation note"
+        appointment.save(update_fields=("artist_note", "updated_at"))
+        detail_url = reverse("mobile_api:appointment_detail", args=[appointment.pk])
+        note_url = reverse("mobile_api:appointment_artist_note", args=[appointment.pk])
+
+        artist_detail = self.client.get(detail_url)
+        self.assertEqual(artist_detail.data["artist_note"], appointment.artist_note)
+        self.assertTrue(artist_detail.data["can_edit_artist_note"])
+
+        updated = self.client.put(
+            note_url,
+            {"artist_note": "  Bring extra 9RL needles.  "},
+            format="json",
+        )
+        self.assertEqual(updated.status_code, status.HTTP_200_OK)
+        self.assertEqual(updated["Cache-Control"], "private, no-store")
+        self.assertEqual(updated.data["artist_note"], "Bring extra 9RL needles.")
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.artist_note, "Bring extra 9RL needles.")
+
+        self.client.force_authenticate(self.client_user)
+        client_detail = self.client.get(detail_url)
+        self.assertEqual(client_detail.status_code, status.HTTP_200_OK)
+        self.assertEqual(client_detail.data["artist_note"], "")
+        self.assertFalse(client_detail.data["can_edit_artist_note"])
+        forbidden = self.client.put(
+            note_url,
+            {"artist_note": "Client must not overwrite this."},
+            format="json",
+        )
+        self.assertEqual(forbidden.status_code, status.HTTP_404_NOT_FOUND)
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.artist_note, "Bring extra 9RL needles.")
+
+    def test_artist_note_rejects_oversized_content_without_mutation(self):
+        appointment = self.appointment(date_value=self.today + timedelta(days=21))
+        appointment.artist_note = "Keep me"
+        appointment.save(update_fields=("artist_note", "updated_at"))
+
+        response = self.client.put(
+            reverse("mobile_api:appointment_artist_note", args=[appointment.pk]),
+            {"artist_note": "x" * 4001},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["code"], "artist_note_too_long")
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.artist_note, "Keep me")

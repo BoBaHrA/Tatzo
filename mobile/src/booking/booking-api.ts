@@ -121,6 +121,17 @@ export function fetchAppointment(
   return request<Appointment>(`/appointments/${appointmentId}/`);
 }
 
+export function saveAppointmentArtistNote(
+  request: AuthenticatedRequest,
+  appointmentId: number,
+  artistNote: string,
+) {
+  return request<Appointment>(`/appointments/${appointmentId}/artist-note/`, {
+    method: 'PUT',
+    body: JSON.stringify({ artist_note: artistNote }),
+  });
+}
+
 export function applyAppointmentAction(
   request: AuthenticatedRequest,
   appointmentId: number,

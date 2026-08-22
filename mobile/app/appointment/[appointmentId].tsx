@@ -23,12 +23,15 @@ import {
   addAppointmentReferences,
   applyAppointmentAction,
   fetchAppointment,
+  saveAppointmentArtistNote,
 } from '@/booking/booking-api';
 import { startChat } from '@/chat/chat-api';
 import { useChat } from '@/chat/chat-context';
 import { BrandHeader } from '@/components/brand-header';
 import { Button } from '@/components/button';
+import { Field } from '@/components/field';
 import { Screen } from '@/components/screen';
+import { userFacingError } from '@/errors';
 import {
   fetchAppointmentHealthSafety,
   revokeAppointmentHealthSafety,
@@ -102,6 +105,9 @@ export default function AppointmentDetailScreen() {
   const [healthError, setHealthError] = useState('');
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentError, setPaymentError] = useState('');
+  const [artistNote, setArtistNote] = useState('');
+  const [artistNoteSaving, setArtistNoteSaving] = useState(false);
+  const [artistNoteError, setArtistNoteError] = useState('');
 
   const load = useCallback(async () => {
     if (status !== 'authenticated') return;
@@ -115,6 +121,7 @@ export default function AppointmentDetailScreen() {
     try {
       const nextAppointment = await fetchAppointment(request, appointmentId);
       setAppointment(nextAppointment);
+      setArtistNote(nextAppointment.artist_note);
       if (nextAppointment.booking_type === 'tattoo_session') {
         try {
           setHealth(await fetchAppointmentHealthSafety(request, appointmentId));
@@ -158,6 +165,25 @@ export default function AppointmentDetailScreen() {
       setActionError(t('appointmentActionError'));
     } finally {
       setAction(null);
+    }
+  };
+
+  const saveArtistNote = async () => {
+    if (!appointment || !appointment.can_edit_artist_note || artistNoteSaving) return;
+    try {
+      setArtistNoteSaving(true);
+      setArtistNoteError('');
+      const next = await saveAppointmentArtistNote(
+        request,
+        appointment.id,
+        artistNote,
+      );
+      setAppointment(next);
+      setArtistNote(next.artist_note);
+    } catch (caught) {
+      setArtistNoteError(userFacingError(caught));
+    } finally {
+      setArtistNoteSaving(false);
     }
   };
 
@@ -381,6 +407,34 @@ export default function AppointmentDetailScreen() {
               <DetailRow label={t('consultationNote')} value={appointment.consultation_note} />
             </View>
           </View>
+
+          {appointment.can_edit_artist_note ? (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t('artistPrivateNote')}</Text>
+              <View style={styles.noteCard}>
+                <Text style={styles.noteHint}>{t('artistPrivateNoteHint')}</Text>
+                <Field
+                  label={t('artistPrivateNoteLabel')}
+                  value={artistNote}
+                  onChangeText={(value) => {
+                    setArtistNote(value);
+                    setArtistNoteError('');
+                  }}
+                  multiline
+                  maxLength={4000}
+                  placeholder={t('artistPrivateNotePlaceholder')}
+                />
+                <Text style={styles.noteCounter}>{artistNote.length}/4000</Text>
+                {artistNoteError ? <Text style={styles.error}>{artistNoteError}</Text> : null}
+                <Button
+                  label={t('savePrivateNote')}
+                  loading={artistNoteSaving}
+                  onPress={() => void saveArtistNote()}
+                  variant="secondary"
+                />
+              </View>
+            </View>
+          ) : null}
 
           {appointment.reference_images.length || appointment.can_add_references ? (
             <View style={styles.section}>
@@ -624,6 +678,12 @@ const styles = StyleSheet.create({
   },
   detailLabel: { color: colors.textMuted, fontSize: 11, fontWeight: '800', textTransform: 'uppercase' },
   detailValue: { color: colors.text, fontSize: 14, lineHeight: 21, fontWeight: '700' },
+  noteCard: {
+    backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1,
+    borderRadius: radius.medium, padding: spacing.md, gap: spacing.sm,
+  },
+  noteHint: { color: colors.textMuted, fontSize: 13, lineHeight: 20 },
+  noteCounter: { color: colors.textMuted, fontSize: 11, textAlign: 'right' },
   referenceGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   referenceImage: { width: '48%', aspectRatio: 1, borderRadius: radius.medium, backgroundColor: colors.surface },
   referenceRequest: { color: colors.accent, fontSize: 13, lineHeight: 20, fontWeight: '800' },

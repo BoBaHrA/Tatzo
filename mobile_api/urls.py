@@ -15,6 +15,7 @@ from .artist_dashboard_views import (
 from .booking_views import (
     AppointmentActionView,
     AppointmentDetailView,
+    AppointmentArtistNoteView,
     AppointmentListView,
     AppointmentReferenceUploadView,
     AppointmentReferenceView,
@@ -273,6 +274,11 @@ urlpatterns = [
         "appointments/<int:appointment_id>/action/",
         AppointmentActionView.as_view(),
         name="appointment_action",
+    ),
+    path(
+        "appointments/<int:appointment_id>/artist-note/",
+        AppointmentArtistNoteView.as_view(),
+        name="appointment_artist_note",
     ),
     path(
         "appointments/<int:appointment_id>/health-safety/",

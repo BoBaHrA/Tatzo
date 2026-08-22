@@ -169,7 +169,8 @@ def _appointment_payload(appointment, request):
         "description": appointment.description,
         "consultation_already_completed": appointment.consultation_already_completed,
         "consultation_note": appointment.consultation_note,
-        "artist_note": appointment.artist_note,
+        "artist_note": appointment.artist_note if role == "artist" else "",
+        "can_edit_artist_note": role == "artist",
         "created_at": appointment.created_at,
         "updated_at": appointment.updated_at,
         "responded_at": appointment.responded_at,
@@ -802,6 +803,51 @@ class AppointmentDetailView(APIView):
 
     def get(self, request, appointment_id):
         appointment = _appointment_or_404(appointment_id, request.user)
+        return Response(_appointment_payload(appointment, request))
+
+
+class AppointmentArtistNoteView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        response = super().finalize_response(request, response, *args, **kwargs)
+        response["Cache-Control"] = "private, no-store"
+        return response
+
+    def put(self, request, appointment_id):
+        raw_note = request.data.get("artist_note", "")
+        if not isinstance(raw_note, str):
+            return Response(
+                {
+                    "code": "invalid_artist_note",
+                    "detail": "The private note must be text.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        note = raw_note.strip()
+        if len(note) > 4000:
+            return Response(
+                {
+                    "code": "artist_note_too_long",
+                    "detail": "The private note can contain up to 4,000 characters.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        with transaction.atomic():
+            appointment = get_object_or_404(
+                Appointment.objects.select_for_update().select_related(
+                    "artist",
+                    "artist__profile",
+                    "artist__booking_settings",
+                    "client",
+                    "client__profile",
+                ),
+                pk=appointment_id,
+                artist=request.user,
+            )
+            appointment.artist_note = note
+            appointment.save(update_fields=("artist_note", "updated_at"))
+        appointment = _appointment_or_404(appointment.pk, request.user)
         return Response(_appointment_payload(appointment, request))
 
 
