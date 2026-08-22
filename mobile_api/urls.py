@@ -2,6 +2,8 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
 from .artist_dashboard_views import (
+    ArtistAppointmentListView,
+    ArtistAppointmentScheduleView,
     ArtistBlockDetailView,
     ArtistBlockListView,
     ArtistBookingPreferencesView,
@@ -226,6 +228,16 @@ urlpatterns = [
         "artist/dashboard/preferences/",
         ArtistBookingPreferencesView.as_view(),
         name="artist_booking_preferences",
+    ),
+    path(
+        "artist/dashboard/appointments/",
+        ArtistAppointmentListView.as_view(),
+        name="artist_appointment_list",
+    ),
+    path(
+        "artist/dashboard/appointments/<int:appointment_id>/schedule/",
+        ArtistAppointmentScheduleView.as_view(),
+        name="artist_appointment_schedule",
     ),
     path(
         "artist/dashboard/time-off/",

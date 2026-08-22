@@ -70,6 +70,9 @@ refresh tokens rotate and the replaced token is blacklisted by Django.
   14-day workload, a combined artist/client calendar timeline, weekly working-hour
   editing, full-day time off, collision-safe blocked periods, and complete booking
   preferences for intake workflow, consultations, references, styles, and auto-replies.
+- verified artists can create confirmed appointments for existing Tatzo clients and
+  reschedule confirmed work from the native calendar; server-side availability checks,
+  linked calendar events, pending reschedule requests, and client notifications stay in sync.
 
 ## Release preparation
 

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
@@ -6,6 +6,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.encoding import force_str
 from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework import serializers
@@ -19,13 +20,20 @@ from appointments.models import (
     ArtistBookingSettings,
     ArtistTimeOff,
     CalendarEvent,
+    CalendarRescheduleRequest,
 )
 from appointments.views import (
+    DEFAULT_TATTOO_STYLES,
     _artist_datetime,
     _artist_timezone,
+    _build_schedule_payload,
+    _get_artist_booked_minutes,
     _get_artist_settings,
     _is_bookable_artist,
+    _validate_artist_slot,
 )
+from users.models import UserBlock
+from users.security import check_rate_limit
 
 from .artist_dashboard_payloads import (
     ACTIVE_APPOINTMENT_STATUSES,
@@ -37,10 +45,29 @@ from .artist_dashboard_payloads import (
     settings_payload,
     time_off_payload,
 )
-from .booking_views import BOOKING_DURATIONS
+from .booking_views import (
+    BOOKING_BUDGETS,
+    BOOKING_DURATIONS,
+    BOOKING_PLACEMENTS,
+    BOOKING_SIZES,
+    _appointment_or_404,
+    _appointment_payload,
+    _booking_user_payload,
+    _list_values,
+    _occupied_slots,
+    _option_labels,
+)
 
 
 User = get_user_model()
+
+MANUAL_BOOKING_WINDOW_DAYS = 365
+MANUAL_DURATION_MINUTES = 15
+MANUAL_DURATION_STEP_MINUTES = 15
+RESCHEDULABLE_APPOINTMENT_STATUSES = (
+    Appointment.STATUS_ACCEPTED,
+    Appointment.STATUS_CONSULTATION_REQUIRED,
+)
 
 BOOKING_PREFERENCE_FIELDS = (
     "booking_workflow",
@@ -218,6 +245,183 @@ def _parse_time(value):
         return None
 
 
+def _artist_appointment_config_payload(
+    artist,
+    request,
+    *,
+    exclude_appointment_id=None,
+):
+    settings = _get_artist_settings(artist)
+    artist_tz = _artist_timezone(artist)
+    today = timezone.localdate(timezone=artist_tz)
+    end_date = today + timedelta(days=MANUAL_BOOKING_WINDOW_DAYS)
+    active_styles = settings.active_styles or list(DEFAULT_TATTOO_STYLES)
+    booking_types = [value for value, _label in Appointment.BOOKING_TYPE_CHOICES]
+    duration_presets = sorted(
+        {
+            settings.default_session_minutes,
+            30,
+            45,
+            *BOOKING_DURATIONS,
+            90,
+            240,
+            360,
+        }
+    )
+    duration_presets = [
+        value
+        for value in duration_presets
+        if MANUAL_DURATION_MINUTES
+        <= value
+        <= settings.maximum_session_hours * 60
+    ]
+    return {
+        "artist": _booking_user_payload(artist, request),
+        "artist_timezone": str(artist_tz),
+        "today": today.isoformat(),
+        "settings": {
+            "minimum_notice_hours": 0,
+            "maximum_booking_window_days": MANUAL_BOOKING_WINDOW_DAYS,
+            "slot_step_minutes": settings.slot_step_minutes,
+            "default_session_minutes": settings.default_session_minutes,
+            "maximum_session_hours": settings.maximum_session_hours,
+        },
+        "booking_types": booking_types,
+        "durations": duration_presets,
+        "duration_minimum_minutes": MANUAL_DURATION_MINUTES,
+        "duration_step_minutes": MANUAL_DURATION_STEP_MINUTES,
+        "styles": active_styles,
+        "placements": list(BOOKING_PLACEMENTS),
+        "sizes": list(BOOKING_SIZES),
+        "budgets": list(BOOKING_BUDGETS),
+        "option_labels": {
+            "booking_types": {
+                value: force_str(dict(Appointment.BOOKING_TYPE_CHOICES)[value])
+                for value in booking_types
+            },
+            "styles": _option_labels(active_styles),
+            "placements": _option_labels(BOOKING_PLACEMENTS),
+            "sizes": _option_labels(BOOKING_SIZES),
+            "budgets": _option_labels(BOOKING_BUDGETS),
+        },
+        "schedule": _build_schedule_payload(artist),
+        "vacations": [
+            date_value.isoformat()
+            for date_value in ArtistTimeOff.objects.filter(
+                artist=artist,
+                date__gte=today,
+                date__lte=end_date,
+            ).values_list("date", flat=True)
+        ],
+        "occupied_slots": _occupied_slots(
+            artist,
+            today,
+            end_date,
+            exclude_appointment_id=exclude_appointment_id,
+        ),
+        "booked_minutes_by_date": _get_artist_booked_minutes(
+            artist,
+            today,
+            end_date,
+            exclude_appointment_id=exclude_appointment_id,
+        ),
+    }
+
+
+def _parse_artist_appointment_slot(data, artist, settings, *, exclude_id=None):
+    date_value = _parse_date(data.get("date"))
+    start_time = _parse_time(data.get("start_time"))
+    try:
+        duration = int(data.get("session_length_minutes") or 0)
+    except (TypeError, ValueError):
+        duration = 0
+
+    if not date_value or not start_time:
+        return None, Response(
+            {"code": "invalid_slot", "detail": "Choose a valid date and time."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if (
+        duration < MANUAL_DURATION_MINUTES
+        or duration % MANUAL_DURATION_STEP_MINUTES
+    ):
+        return None, Response(
+            {
+                "code": "invalid_duration",
+                "detail": "Session duration must use 15-minute increments.",
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if duration > settings.maximum_session_hours * 60:
+        return None, Response(
+            {
+                "code": "session_too_long",
+                "detail": "This session is longer than your booking settings allow.",
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    artist_tz = _artist_timezone(artist)
+    start_at = _artist_datetime(artist, date_value, start_time)
+    end_at = start_at + timedelta(minutes=duration)
+    latest_date = timezone.localdate(timezone=artist_tz) + timedelta(
+        days=MANUAL_BOOKING_WINDOW_DAYS
+    )
+    if start_at <= timezone.now():
+        return None, Response(
+            {
+                "code": "slot_unavailable",
+                "detail": "Manual appointments must start in the future.",
+            },
+            status=status.HTTP_409_CONFLICT,
+        )
+    if date_value > latest_date:
+        return None, Response(
+            {
+                "code": "date_too_far",
+                "detail": "Manual appointments can be scheduled up to one year ahead.",
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if end_at.date() != date_value:
+        return None, Response(
+            {
+                "code": "slot_unavailable",
+                "detail": "The appointment must start and end on the same day.",
+            },
+            status=status.HTTP_409_CONFLICT,
+        )
+    if ArtistTimeOff.objects.filter(artist=artist, date=date_value).exists():
+        return None, Response(
+            {
+                "code": "date_blocked",
+                "detail": "This date is blocked on your calendar.",
+            },
+            status=status.HTTP_409_CONFLICT,
+        )
+
+    slot_error = _validate_artist_slot(
+        artist,
+        date_value,
+        start_time,
+        end_at.time(),
+        exclude_appointment_id=exclude_id,
+    )
+    if slot_error:
+        return None, Response(
+            {"code": "slot_unavailable", "detail": force_str(slot_error)},
+            status=status.HTTP_409_CONFLICT,
+        )
+    return {
+        "date": date_value,
+        "start_time": start_time,
+        "end_time": end_at.time(),
+        "starts_at": start_at,
+        "ends_at": end_at,
+        "duration": duration,
+    }, None
+
+
 class ArtistDashboardView(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -297,6 +501,307 @@ class ArtistBookingPreferencesView(PrivateArtistResponseMixin, APIView):
             settings.save(update_fields=(*BOOKING_PREFERENCE_FIELDS, "updated_at"))
 
         return Response(booking_preferences_payload(settings))
+
+
+class ArtistAppointmentListView(PrivateArtistResponseMixin, APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        forbidden = _artist_forbidden(request)
+        if forbidden:
+            return forbidden
+
+        exclude_appointment_id = None
+        raw_exclusion = request.query_params.get("exclude_appointment_id")
+        if raw_exclusion not in (None, ""):
+            try:
+                exclude_appointment_id = int(raw_exclusion)
+            except (TypeError, ValueError):
+                return Response(
+                    {
+                        "code": "invalid_appointment",
+                        "detail": "Choose a valid appointment to reschedule.",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            appointment = get_object_or_404(
+                Appointment,
+                pk=exclude_appointment_id,
+                artist=request.user,
+            )
+            if appointment.status not in RESCHEDULABLE_APPOINTMENT_STATUSES:
+                return Response(
+                    {
+                        "code": "appointment_not_reschedulable",
+                        "detail": "This appointment cannot be rescheduled.",
+                    },
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+        return Response(
+            _artist_appointment_config_payload(
+                request.user,
+                request,
+                exclude_appointment_id=exclude_appointment_id,
+            )
+        )
+
+    def post(self, request):
+        forbidden = _artist_forbidden(request)
+        if forbidden:
+            return forbidden
+
+        allowed, retry_after = check_rate_limit(
+            request,
+            scope="mobile:artist:appointments:create",
+            limit=60,
+            window_seconds=60 * 60,
+            identity="user",
+        )
+        if not allowed:
+            return Response(
+                {
+                    "code": "rate_limited",
+                    "detail": "Too many appointments were created. Try again later.",
+                    "retry_after": retry_after,
+                },
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        client_username = str(request.data.get("client_username") or "").strip()
+        client = (
+            User.objects.select_related("profile")
+            .filter(
+                username__iexact=client_username,
+                is_active=True,
+                profile__is_email_verified=True,
+            )
+            .first()
+        )
+        if not client:
+            return Response(
+                {
+                    "code": "client_not_found",
+                    "detail": "No active client was found with that exact username.",
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        if client.pk == request.user.pk:
+            return Response(
+                {
+                    "code": "cannot_book_self",
+                    "detail": "You cannot create an appointment with yourself.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if UserBlock.objects.filter(
+            Q(blocker=request.user, blocked=client)
+            | Q(blocker=client, blocked=request.user)
+        ).exists():
+            return Response(
+                {
+                    "code": "client_not_found",
+                    "detail": "No active client was found with that exact username.",
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        booking_type = str(
+            request.data.get("booking_type") or Appointment.TYPE_TATTOO
+        )
+        if booking_type not in dict(Appointment.BOOKING_TYPE_CHOICES):
+            return Response(
+                {
+                    "code": "invalid_booking_type",
+                    "detail": "Choose a valid appointment type.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        styles = _list_values(request.data, "styles")
+        placements = _list_values(request.data, "placements")
+        size = str(request.data.get("size") or "").strip()
+        budget = str(request.data.get("budget") or "").strip()
+        settings = _get_artist_settings(request.user)
+        active_styles = set(settings.active_styles or DEFAULT_TATTOO_STYLES)
+        if len(styles) > 30 or any(item not in active_styles for item in styles):
+            return Response(
+                {
+                    "code": "invalid_styles",
+                    "detail": "Choose only styles from your active booking list.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if len(placements) > 20 or any(
+            item not in BOOKING_PLACEMENTS for item in placements
+        ):
+            return Response(
+                {
+                    "code": "invalid_placements",
+                    "detail": "Choose only available body placements.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if size and size not in BOOKING_SIZES:
+            return Response(
+                {"code": "invalid_size", "detail": "Choose a valid tattoo size."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if budget and budget not in BOOKING_BUDGETS:
+            return Response(
+                {"code": "invalid_budget", "detail": "Choose a valid budget."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        with transaction.atomic():
+            User.objects.select_for_update().get(pk=request.user.pk)
+            settings = _get_artist_settings(request.user)
+            slot, slot_response = _parse_artist_appointment_slot(
+                request.data,
+                request.user,
+                settings,
+            )
+            if slot_response is not None:
+                return slot_response
+
+            appointment = Appointment(
+                client=client,
+                artist=request.user,
+                booking_type=booking_type,
+                status=Appointment.STATUS_ACCEPTED,
+                date=slot["date"],
+                start_time=slot["start_time"],
+                end_time=slot["end_time"],
+                session_length_minutes=slot["duration"],
+                styles=styles,
+                placement=", ".join(placements),
+                size=size,
+                budget=budget,
+                description=str(request.data.get("description") or "").strip()[
+                    :3000
+                ],
+                responded_at=timezone.now(),
+                ai_ready_payload={
+                    "placement": placements,
+                    "styles": styles,
+                    "size": size,
+                    "budget": budget,
+                    "description": str(
+                        request.data.get("description") or ""
+                    ).strip()[:3000],
+                    "booking_type": booking_type,
+                    "created_by_artist": True,
+                },
+            )
+            appointment._notification_created_by_artist = True
+            appointment.save()
+
+        appointment = _appointment_or_404(appointment.pk, request.user)
+        return Response(
+            _appointment_payload(appointment, request),
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class ArtistAppointmentScheduleView(PrivateArtistResponseMixin, APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def put(self, request, appointment_id):
+        forbidden = _artist_forbidden(request)
+        if forbidden:
+            return forbidden
+
+        with transaction.atomic():
+            User.objects.select_for_update().get(pk=request.user.pk)
+            appointment = get_object_or_404(
+                Appointment.objects.select_for_update().select_related(
+                    "artist",
+                    "artist__profile",
+                    "artist__booking_settings",
+                    "client",
+                    "client__profile",
+                ),
+                pk=appointment_id,
+                artist=request.user,
+            )
+            if appointment.status not in RESCHEDULABLE_APPOINTMENT_STATUSES:
+                return Response(
+                    {
+                        "code": "appointment_not_reschedulable",
+                        "detail": "This appointment cannot be rescheduled.",
+                    },
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+            slot, slot_response = _parse_artist_appointment_slot(
+                request.data,
+                request.user,
+                _get_artist_settings(request.user),
+                exclude_id=appointment.pk,
+            )
+            if slot_response is not None:
+                return slot_response
+
+            appointment.date = slot["date"]
+            appointment.start_time = slot["start_time"]
+            appointment.end_time = slot["end_time"]
+            appointment.session_length_minutes = slot["duration"]
+            appointment._notification_schedule_changed = True
+            appointment.save(
+                update_fields=(
+                    "date",
+                    "start_time",
+                    "end_time",
+                    "session_length_minutes",
+                    "updated_at",
+                )
+            )
+
+            session_events = CalendarEvent.objects.select_for_update().filter(
+                project=appointment,
+                event_type__in=(
+                    CalendarEvent.TYPE_TATTOO_SESSION,
+                    CalendarEvent.TYPE_CONSULTATION,
+                ),
+            )
+            session_event_ids = list(
+                session_events.values_list("pk", flat=True)
+            )
+            event_type = (
+                CalendarEvent.TYPE_CONSULTATION
+                if appointment.booking_type
+                in (
+                    Appointment.TYPE_CONSULTATION,
+                    Appointment.TYPE_ONLINE_CONSULTATION,
+                )
+                or appointment.status == Appointment.STATUS_CONSULTATION_REQUIRED
+                else CalendarEvent.TYPE_TATTOO_SESSION
+            )
+            changed_at = timezone.now()
+            session_events.update(
+                artist=appointment.artist,
+                client=appointment.client,
+                event_type=event_type,
+                status=CalendarEvent.STATUS_CONFIRMED,
+                title=force_str(appointment.get_booking_type_display())[:160],
+                starts_at=slot["starts_at"],
+                ends_at=slot["ends_at"],
+                notes=appointment.description,
+                placement=appointment.placement,
+                tattoo_style=", ".join(appointment.styles or []),
+                updated_at=changed_at,
+            )
+            if session_event_ids:
+                CalendarRescheduleRequest.objects.filter(
+                    event_id__in=session_event_ids,
+                    status=CalendarRescheduleRequest.STATUS_PENDING,
+                ).update(
+                    status=CalendarRescheduleRequest.STATUS_ACCEPTED,
+                    resolved_at=changed_at,
+                )
+
+        appointment = _appointment_or_404(appointment.pk, request.user)
+        return Response(_appointment_payload(appointment, request))
 
 
 class ArtistScheduleView(APIView):

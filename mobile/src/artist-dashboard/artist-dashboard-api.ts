@@ -1,4 +1,6 @@
 import type {
+  Appointment,
+  ArtistAppointmentConfig,
   ArtistBlockedPeriod,
   ArtistBookingPreferences,
   ArtistBookingPreferencesUpdate,
@@ -37,6 +39,65 @@ export function saveArtistBookingPreferences(
     method: 'PUT',
     body: JSON.stringify(payload),
   });
+}
+
+export type ArtistAppointmentSchedulePayload = {
+  date: string;
+  startTime: string;
+  duration: number;
+};
+
+export type ArtistManualAppointmentPayload = ArtistAppointmentSchedulePayload & {
+  clientUsername: string;
+  bookingType: Appointment['booking_type'];
+  description: string;
+};
+
+export function fetchArtistAppointmentConfig(
+  request: AuthenticatedRequest,
+  excludeAppointmentId?: number,
+) {
+  const query = excludeAppointmentId
+    ? `?exclude_appointment_id=${excludeAppointmentId}`
+    : '';
+  return request<ArtistAppointmentConfig>(
+    `/artist/dashboard/appointments/${query}`,
+  );
+}
+
+export function createArtistAppointment(
+  request: AuthenticatedRequest,
+  payload: ArtistManualAppointmentPayload,
+) {
+  return request<Appointment>('/artist/dashboard/appointments/', {
+    method: 'POST',
+    body: JSON.stringify({
+      client_username: payload.clientUsername,
+      booking_type: payload.bookingType,
+      date: payload.date,
+      start_time: payload.startTime,
+      session_length_minutes: payload.duration,
+      description: payload.description,
+    }),
+  });
+}
+
+export function rescheduleArtistAppointment(
+  request: AuthenticatedRequest,
+  appointmentId: number,
+  payload: ArtistAppointmentSchedulePayload,
+) {
+  return request<Appointment>(
+    `/artist/dashboard/appointments/${appointmentId}/schedule/`,
+    {
+      method: 'PUT',
+      body: JSON.stringify({
+        date: payload.date,
+        start_time: payload.startTime,
+        session_length_minutes: payload.duration,
+      }),
+    },
+  );
 }
 
 export function saveArtistSchedule(

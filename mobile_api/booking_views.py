@@ -261,7 +261,13 @@ def _availability_state(settings):
     return True, None, None
 
 
-def _calendar_blocked_slots(artist, start_date, end_date):
+def _calendar_blocked_slots(
+    artist,
+    start_date,
+    end_date,
+    *,
+    exclude_appointment_id=None,
+):
     artist_tz = _artist_timezone(artist)
     start_at = timezone.make_aware(
         datetime.combine(start_date, datetime.min.time()), artist_tz
@@ -281,6 +287,8 @@ def _calendar_blocked_slots(artist, start_date, end_date):
         starts_at__lt=end_at,
         ends_at__gt=start_at,
     ).exclude(status=CalendarEvent.STATUS_CANCELLED)
+    if exclude_appointment_id:
+        events = events.exclude(project_id=exclude_appointment_id)
 
     slots = []
     for event in events:
@@ -308,7 +316,13 @@ def _calendar_blocked_slots(artist, start_date, end_date):
     return slots
 
 
-def _occupied_slots(artist, start_date, end_date):
+def _occupied_slots(
+    artist,
+    start_date,
+    end_date,
+    *,
+    exclude_appointment_id=None,
+):
     appointments = Appointment.objects.filter(
         artist=artist,
         status__in=(
@@ -320,7 +334,10 @@ def _occupied_slots(artist, start_date, end_date):
         date__gte=start_date,
         date__lte=end_date,
         end_time__isnull=False,
-    ).only("date", "start_time", "end_time")
+    )
+    if exclude_appointment_id:
+        appointments = appointments.exclude(pk=exclude_appointment_id)
+    appointments = appointments.only("date", "start_time", "end_time")
     slots = [
         {
             "date": appointment.date.isoformat(),
@@ -329,7 +346,15 @@ def _occupied_slots(artist, start_date, end_date):
         }
         for appointment in appointments
     ]
-    return [*slots, *_calendar_blocked_slots(artist, start_date, end_date)]
+    return [
+        *slots,
+        *_calendar_blocked_slots(
+            artist,
+            start_date,
+            end_date,
+            exclude_appointment_id=exclude_appointment_id,
+        ),
+    ]
 
 
 def _booking_config_payload(artist, settings, request):

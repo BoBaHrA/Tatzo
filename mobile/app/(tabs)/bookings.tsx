@@ -78,7 +78,7 @@ function AppointmentRow({ appointment }: { appointment: Appointment }) {
 }
 
 export default function BookingsScreen() {
-  const { request, status } = useAuth();
+  const { request, status, user } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [attentionCount, setAttentionCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -132,6 +132,13 @@ export default function BookingsScreen() {
                 ) : null}
               </View>
               <Text style={styles.subtitle}>{t('bookingsSubtitle')}</Text>
+              {user?.is_verified_artist ? (
+                <Button
+                  label={t('artistManualCreate')}
+                  onPress={() => router.push('/artist-dashboard/create-appointment')}
+                  variant="secondary"
+                />
+              ) : null}
             </View>
           </View>
         )}

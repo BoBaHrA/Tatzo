@@ -77,10 +77,16 @@ export default function AppointmentDetailScreen() {
   const params = useLocalSearchParams<{
     appointmentId?: string | string[];
     created?: string | string[];
+    rescheduled?: string | string[];
   }>();
   const rawId = Array.isArray(params.appointmentId) ? params.appointmentId[0] : params.appointmentId;
   const appointmentId = Number(rawId);
-  const created = (Array.isArray(params.created) ? params.created[0] : params.created) === 'true';
+  const createdValue = Array.isArray(params.created) ? params.created[0] : params.created;
+  const created = createdValue === 'true';
+  const manuallyCreated = createdValue === 'manual';
+  const rescheduled = (
+    Array.isArray(params.rescheduled) ? params.rescheduled[0] : params.rescheduled
+  ) === 'true';
   const { request, status } = useAuth();
   const { refresh: refreshChats } = useChat();
   const [appointment, setAppointment] = useState<Appointment | null>(null);
@@ -307,6 +313,18 @@ export default function AppointmentDetailScreen() {
               <Text style={styles.successText}>{t('bookingSentHint')}</Text>
             </View>
           ) : null}
+          {manuallyCreated ? (
+            <View style={styles.successNotice}>
+              <Text style={styles.successTitle}>✓ {t('artistManualCreated')}</Text>
+              <Text style={styles.successText}>{t('artistManualCreatedHint')}</Text>
+            </View>
+          ) : null}
+          {rescheduled ? (
+            <View style={styles.successNotice}>
+              <Text style={styles.successTitle}>✓ {t('artistRescheduleSaved')}</Text>
+              <Text style={styles.successText}>{t('artistRescheduleSavedHint')}</Text>
+            </View>
+          ) : null}
           <View style={styles.hero}>
             <View style={styles.identityRow}>
               {appointment.other_user.profile_image_url ? (
@@ -515,6 +533,19 @@ export default function AppointmentDetailScreen() {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t('artistActions')}</Text>
               <View style={styles.actions}>
+                {appointment.role === 'artist' && (
+                  appointment.status === 'accepted'
+                  || appointment.status === 'consultation_required'
+                ) ? (
+                  <Button
+                    label={t('artistRescheduleAction')}
+                    onPress={() => router.push({
+                      pathname: '/appointment/[appointmentId]/reschedule',
+                      params: { appointmentId: String(appointment.id) },
+                    })}
+                    variant="secondary"
+                  />
+                ) : null}
                 {appointment.available_actions.map((availableAction) => (
                   <Button
                     key={availableAction}

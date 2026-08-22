@@ -40,6 +40,30 @@ export function userFacingError(error: unknown): string {
   if (error.body.code === 'invalid_booking_preferences') {
     return t('artistPreferencesValidationError');
   }
+  if (error.body.code === 'client_not_found') {
+    return t('artistManualClientNotFound');
+  }
+  if (error.body.code === 'cannot_book_self') {
+    return t('artistManualCannotSelf');
+  }
+  if (
+    error.body.code === 'invalid_duration'
+    || error.body.code === 'session_too_long'
+  ) {
+    return t('artistManualDurationError');
+  }
+  if (error.body.code === 'date_too_far') {
+    return t('artistManualDateTooFar');
+  }
+  if (
+    error.body.code === 'slot_unavailable'
+    || error.body.code === 'date_blocked'
+  ) {
+    return t('artistSlotUnavailable');
+  }
+  if (error.body.code === 'appointment_not_reschedulable') {
+    return t('artistAppointmentNotReschedulable');
+  }
   if (error.body.code === 'invalid_schedule') {
     return t('artistInvalidSchedule');
   }

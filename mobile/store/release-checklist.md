@@ -60,7 +60,8 @@ public production.
    (including blocked users and posts with comments disabled), public profiles, Style Match, map/location,
    private chat attachments, booking flows, Health & Safety share/revoke, Healing photo
    check-ins/tasks/artist access/completion, Stripe Connect, deposit payment/webhook/refund,
-   artist actions, booking-preference changes reflected in the client booking flow,
+   artist actions, manual appointment creation, confirmed-appointment rescheduling,
+   booking-preference changes reflected in the client booking flow,
    notifications, blocking, reporting, support links, sign-out, token revocation, and
    account deletion.
 4. Build `production` for both platforms.

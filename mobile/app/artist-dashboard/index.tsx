@@ -161,8 +161,13 @@ export default function ArtistDashboardScreen() {
       <View style={styles.card}>
         <SectionHeading title={t('artistQuickActions')} hint={dashboard.artist_timezone} />
         <Button
+          label={t('artistManualCreate')}
+          onPress={() => router.push('/artist-dashboard/create-appointment')}
+        />
+        <Button
           label={t('artistViewRequests')}
           onPress={() => router.push('/(tabs)/bookings')}
+          variant="secondary"
         />
         <Button
           label={t('artistManagePreferences')}

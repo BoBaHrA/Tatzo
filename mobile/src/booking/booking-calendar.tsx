@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import type { BookingConfig } from '@/api/types';
+import type {
+  BookingOccupiedSlot,
+  BookingScheduleDay,
+} from '@/api/types';
 import { appLanguage, t } from '@/i18n';
 import { colors, radius, spacing } from '@/theme';
 
@@ -63,8 +66,23 @@ function zonedDateAndMinutes(date: Date, timeZone: string) {
   };
 }
 
+export type BookingCalendarConfig = {
+  artist_timezone: string;
+  today: string;
+  settings: {
+    minimum_notice_hours: number;
+    maximum_booking_window_days: number;
+    slot_step_minutes: number;
+    maximum_session_hours: number;
+  };
+  schedule: Record<string, BookingScheduleDay>;
+  vacations: string[];
+  occupied_slots: BookingOccupiedSlot[];
+  booked_minutes_by_date: Record<string, number>;
+};
+
 export function availableBookingTimes(
-  config: BookingConfig,
+  config: BookingCalendarConfig,
   date: string,
   duration: number,
 ) {
@@ -106,7 +124,7 @@ export function availableBookingTimes(
   return result;
 }
 
-function isOpenDate(config: BookingConfig, value: string) {
+function isOpenDate(config: BookingCalendarConfig, value: string) {
   if (value < config.today || config.vacations.includes(value)) return false;
   const lastDate = addDays(config.today, config.settings.maximum_booking_window_days);
   if (value > lastDate) return false;
@@ -115,7 +133,7 @@ function isOpenDate(config: BookingConfig, value: string) {
 }
 
 type BookingCalendarProps = {
-  config: BookingConfig;
+  config: BookingCalendarConfig;
   selectedDate: string;
   onSelect: (date: string) => void;
 };

@@ -31,7 +31,9 @@ export default function RootLayout() {
             <Stack.Screen name="chat/[threadId]" />
             <Stack.Screen name="booking/[username]" />
             <Stack.Screen name="appointment/[appointmentId]" />
+            <Stack.Screen name="appointment/[appointmentId]/reschedule" />
             <Stack.Screen name="artist-dashboard/index" />
+            <Stack.Screen name="artist-dashboard/create-appointment" />
             <Stack.Screen name="artist-dashboard/preferences" />
             <Stack.Screen name="artist-dashboard/schedule" />
             <Stack.Screen name="artist-dashboard/calendar" />

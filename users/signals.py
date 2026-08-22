@@ -167,33 +167,60 @@ def notify_appointment(sender, instance, created, raw=False, **kwargs):
     if raw:
         return
     if created:
+        created_by_artist = getattr(
+            instance,
+            "_notification_created_by_artist",
+            False,
+        )
         _create_notification(
-            recipient_id=instance.artist_id,
-            actor_id=instance.client_id,
-            kind=Notification.KIND_BOOKING_REQUEST,
-            dedupe_key=f"appointment:{instance.pk}:created",
+            recipient_id=(
+                instance.client_id if created_by_artist else instance.artist_id
+            ),
+            actor_id=(
+                instance.artist_id if created_by_artist else instance.client_id
+            ),
+            kind=(
+                Notification.KIND_BOOKING_UPDATE
+                if created_by_artist
+                else Notification.KIND_BOOKING_REQUEST
+            ),
+            dedupe_key=(
+                f"appointment:{instance.pk}:artist-created"
+                if created_by_artist
+                else f"appointment:{instance.pk}:created"
+            ),
             appointment_id=instance.pk,
         )
         return
 
     previous_status = getattr(instance, "_notification_previous_status", None)
-    if not previous_status or previous_status == instance.status:
+    if previous_status and previous_status != instance.status:
+        client_replied = (
+            previous_status == Appointment.STATUS_NEEDS_REFERENCES
+            and instance.status == Appointment.STATUS_PENDING
+        )
+        recipient_id = instance.artist_id if client_replied else instance.client_id
+        actor_id = instance.client_id if client_replied else instance.artist_id
+        _create_notification(
+            recipient_id=recipient_id,
+            actor_id=actor_id,
+            kind=Notification.KIND_BOOKING_UPDATE,
+            dedupe_key=(
+                f"appointment:{instance.pk}:{previous_status}:{instance.status}"
+            ),
+            appointment_id=instance.pk,
+        )
         return
-    client_replied = (
-        previous_status == Appointment.STATUS_NEEDS_REFERENCES
-        and instance.status == Appointment.STATUS_PENDING
-    )
-    recipient_id = instance.artist_id if client_replied else instance.client_id
-    actor_id = instance.client_id if client_replied else instance.artist_id
-    _create_notification(
-        recipient_id=recipient_id,
-        actor_id=actor_id,
-        kind=Notification.KIND_BOOKING_UPDATE,
-        dedupe_key=(
-            f"appointment:{instance.pk}:{previous_status}:{instance.status}"
-        ),
-        appointment_id=instance.pk,
-    )
+
+    if getattr(instance, "_notification_schedule_changed", False):
+        schedule_version = instance.updated_at.isoformat()
+        _create_notification(
+            recipient_id=instance.client_id,
+            actor_id=instance.artist_id,
+            kind=Notification.KIND_BOOKING_UPDATE,
+            dedupe_key=f"appointment:{instance.pk}:schedule:{schedule_version}",
+            appointment_id=instance.pk,
+        )
 
 
 @receiver(post_save, sender=UserBlock)

@@ -638,6 +638,38 @@ export type BookingConfig = {
   health_safety: BookingHealthSafety;
 };
 
+export type ArtistAppointmentConfig = {
+  artist: BookingUser;
+  artist_timezone: string;
+  today: string;
+  settings: {
+    minimum_notice_hours: number;
+    maximum_booking_window_days: number;
+    slot_step_minutes: number;
+    default_session_minutes: number;
+    maximum_session_hours: number;
+  };
+  booking_types: BookingType[];
+  durations: number[];
+  duration_minimum_minutes: number;
+  duration_step_minutes: number;
+  styles: string[];
+  placements: string[];
+  sizes: string[];
+  budgets: string[];
+  option_labels: {
+    booking_types: Record<string, string>;
+    styles: Record<string, string>;
+    placements: Record<string, string>;
+    sizes: Record<string, string>;
+    budgets: Record<string, string>;
+  };
+  schedule: Record<string, BookingScheduleDay>;
+  vacations: string[];
+  occupied_slots: BookingOccupiedSlot[];
+  booked_minutes_by_date: Record<string, number>;
+};
+
 export type AppointmentReference = {
   id: number;
   name: string;
