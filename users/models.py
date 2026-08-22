@@ -434,6 +434,7 @@ class Notification(models.Model):
     KIND_CHAT_MESSAGE = "chat_message"
     KIND_BOOKING_REQUEST = "booking_request"
     KIND_BOOKING_UPDATE = "booking_update"
+    KIND_BOOKING_REMINDER = "booking_reminder"
 
     KIND_CHOICES = [
         (KIND_FOLLOW, "Follow"),
@@ -443,6 +444,7 @@ class Notification(models.Model):
         (KIND_CHAT_MESSAGE, "Chat message"),
         (KIND_BOOKING_REQUEST, "Booking request"),
         (KIND_BOOKING_UPDATE, "Booking update"),
+        (KIND_BOOKING_REMINDER, "Booking reminder"),
     ]
 
     recipient = models.ForeignKey(

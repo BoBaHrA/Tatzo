@@ -102,8 +102,13 @@ as durable deliveries when Expo is unavailable. Run these commands from the prod
 scheduler:
 
 ```sh
+python manage.py send_booking_reminders --dispatch --limit 500
 python manage.py process_push_deliveries --limit 100
 python manage.py check_push_receipts --limit 1000
 ```
 
-Process pending deliveries every minute and check receipts every 15 minutes.
+Generate booking reminders every five minutes, process pending deliveries every minute,
+and check receipts every 15 minutes. Reminder creation is idempotent: accepted tattoo
+sessions and consultations receive one reminder per participant around 24 hours and two
+hours before the artist-local start time. Moving an appointment creates reminders for the
+new schedule version without duplicating repeated scheduler runs.

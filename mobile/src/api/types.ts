@@ -858,7 +858,8 @@ export type NotificationKind =
   | 'comment_reply'
   | 'chat_message'
   | 'booking_request'
-  | 'booking_update';
+  | 'booking_update'
+  | 'booking_reminder';
 
 export type NotificationTarget =
   | { type: 'profile'; username: string }

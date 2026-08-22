@@ -38,6 +38,7 @@ const KIND_LABELS: Record<NotificationKind, TranslationKey> = {
   chat_message: 'notificationChatMessage',
   booking_request: 'notificationBookingRequest',
   booking_update: 'notificationBookingUpdate',
+  booking_reminder: 'notificationBookingReminder',
 };
 
 const KIND_SYMBOLS: Record<NotificationKind, string> = {
@@ -48,6 +49,7 @@ const KIND_SYMBOLS: Record<NotificationKind, string> = {
   chat_message: '◇',
   booking_request: '⌁',
   booking_update: '✓',
+  booking_reminder: '◷',
 };
 
 function formatTime(value: string) {
@@ -68,6 +70,14 @@ function notificationTitle(notification: NotificationItem) {
 
 function notificationPreview(notification: NotificationItem) {
   if (notification.preview) return notification.preview;
+  if (notification.kind === 'booking_reminder' && notification.appointment_date) {
+    return new Intl.DateTimeFormat(appLanguage, {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      timeZone: 'UTC',
+    }).format(new Date(`${notification.appointment_date}T12:00:00Z`));
+  }
   if (notification.appointment_status_label) {
     return notification.appointment_status_label;
   }

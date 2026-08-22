@@ -21,6 +21,7 @@ PUSH_BODIES = {
         Notification.KIND_CHAT_MESSAGE: "You have a new message.",
         Notification.KIND_BOOKING_REQUEST: "You have a new booking request.",
         Notification.KIND_BOOKING_UPDATE: "A booking has been updated.",
+        Notification.KIND_BOOKING_REMINDER: "Your appointment is coming up.",
     },
     "fr": {
         Notification.KIND_FOLLOW: "Vous avez un nouvel abonné.",
@@ -32,6 +33,7 @@ PUSH_BODIES = {
             "Vous avez une nouvelle demande de réservation."
         ),
         Notification.KIND_BOOKING_UPDATE: "Une réservation a été mise à jour.",
+        Notification.KIND_BOOKING_REMINDER: "Votre rendez-vous approche.",
     },
     "ru": {
         Notification.KIND_FOLLOW: "У вас новый подписчик.",
@@ -41,6 +43,7 @@ PUSH_BODIES = {
         Notification.KIND_CHAT_MESSAGE: "У вас новое сообщение.",
         Notification.KIND_BOOKING_REQUEST: "У вас новый запрос на запись.",
         Notification.KIND_BOOKING_UPDATE: "Запись была обновлена.",
+        Notification.KIND_BOOKING_REMINDER: "Скоро начнётся ваша запись.",
     },
 }
 PUSH_FALLBACK_BODIES = {
@@ -93,7 +96,7 @@ def _message_for_delivery(delivery, unread_count):
     }
 
 
-def queue_notification_push(notification):
+def queue_notification_push(notification, *, dispatch=True):
     device_ids = PushDevice.objects.filter(
         user_id=notification.recipient_id,
         is_active=True,
@@ -105,7 +108,7 @@ def queue_notification_push(notification):
         ],
         ignore_conflicts=True,
     )
-    if getattr(settings, "TATZO_PUSH_ENABLED", True):
+    if dispatch and getattr(settings, "TATZO_PUSH_ENABLED", True):
         transaction.on_commit(
             lambda notification_id=notification.pk: dispatch_push_deliveries(
                 notification_id=notification_id,

@@ -62,6 +62,7 @@ public production.
    check-ins/tasks/artist access/completion, Stripe Connect, deposit payment/webhook/refund,
    artist actions, manual appointment creation, confirmed-appointment rescheduling,
    booking-preference changes reflected in the client booking flow,
+   in-app and system booking reminders at the 24-hour and 2-hour windows,
    notifications, blocking, reporting, support links, sign-out, token revocation, and
    account deletion.
 4. Build `production` for both platforms.
