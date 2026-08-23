@@ -98,17 +98,21 @@ in order.
 
 Set `TATZO_PUSH_ENABLED=True` on Django. If Expo enhanced push security is enabled,
 also set `EXPO_PUSH_ACCESS_TOKEN`. Notifications are attempted immediately and kept
-as durable deliveries when Expo is unavailable. Run these commands from the production
-scheduler:
+as durable deliveries when Expo is unavailable. Run one production cron job every
+minute (`* * * * *`) with:
 
 ```sh
-python manage.py send_booking_reminders --dispatch --limit 500
-python manage.py process_push_deliveries --limit 100
-python manage.py check_push_receipts --limit 1000
+python manage.py run_mobile_scheduler
 ```
 
-Generate booking reminders every five minutes, process pending deliveries every minute,
-and check receipts every 15 minutes. Reminder creation is idempotent: accepted tattoo
-sessions and consultations receive one reminder per participant around 24 hours and two
-hours before the artist-local start time. Moving an appointment creates reminders for the
-new schedule version without duplicating repeated scheduler runs.
+The command processes pending deliveries every minute, generates booking reminders on
+five-minute UTC boundaries, and checks eligible receipts on 15-minute UTC boundaries.
+It starts Django only once per run, so Render needs a single cron service instead of
+three. The individual `send_booking_reminders`, `process_push_deliveries`, and
+`check_push_receipts` commands remain available for diagnostics. Scheduler commands
+perform real writes and push delivery; do not trigger them as a dry run.
+
+Reminder creation is idempotent: accepted tattoo sessions and consultations receive one
+reminder per participant around 24 hours and two hours before the artist-local start
+time. Moving an appointment creates reminders for the new schedule version without
+duplicating repeated scheduler runs.
