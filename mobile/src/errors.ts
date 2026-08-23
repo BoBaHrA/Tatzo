@@ -1,0 +1,88 @@
+import { ApiError } from '@/api/client';
+import { t } from '@/i18n';
+
+
+export function userFacingError(error: unknown): string {
+  if (!(error instanceof ApiError)) {
+    return t('genericError');
+  }
+
+  if (error.body.code === 'invalid_credentials') {
+    return t('invalidCredentials');
+  }
+  if (error.body.code === 'email_not_verified') {
+    return t('emailNotVerified');
+  }
+  if (error.body.code === 'rate_limited') {
+    return t('rateLimited');
+  }
+  if (error.body.code === 'location_request_exists') {
+    return t('mapLocationAlreadyPending');
+  }
+  if (error.body.code === 'claim_exists') {
+    return t('mapClaimAlreadyPending');
+  }
+  if (error.body.code === 'artist_dashboard_forbidden') {
+    return t('artistDashboardForbidden');
+  }
+  if (error.body.code === 'artist_portfolio_forbidden') {
+    return t('portfolioManageForbidden');
+  }
+  if (error.body.code === 'verification_forbidden') {
+    return t('verificationForbiddenBody');
+  }
+  if (error.body.code === 'verification_locked') {
+    return t('verificationPendingBody');
+  }
+  if (error.body.code === 'invalid_booking_status') {
+    return t('artistInvalidStatus');
+  }
+  if (error.body.code === 'invalid_booking_preferences') {
+    return t('artistPreferencesValidationError');
+  }
+  if (error.body.code === 'client_not_found') {
+    return t('artistManualClientNotFound');
+  }
+  if (error.body.code === 'cannot_book_self') {
+    return t('artistManualCannotSelf');
+  }
+  if (
+    error.body.code === 'invalid_duration'
+    || error.body.code === 'session_too_long'
+  ) {
+    return t('artistManualDurationError');
+  }
+  if (error.body.code === 'date_too_far') {
+    return t('artistManualDateTooFar');
+  }
+  if (
+    error.body.code === 'slot_unavailable'
+    || error.body.code === 'date_blocked'
+  ) {
+    return t('artistSlotUnavailable');
+  }
+  if (error.body.code === 'appointment_not_reschedulable') {
+    return t('artistAppointmentNotReschedulable');
+  }
+  if (error.body.code === 'invalid_schedule') {
+    return t('artistInvalidSchedule');
+  }
+  if (error.body.code === 'invalid_date') {
+    return t('artistInvalidDate');
+  }
+  if (error.body.code === 'past_date') {
+    return t('artistPastDate');
+  }
+  if (error.body.code === 'calendar_conflict') {
+    return t('artistCalendarConflict');
+  }
+  if (error.body.code === 'invalid_block') {
+    return t('artistInvalidBlock');
+  }
+
+  const fieldError = Object.values(error.body).find(Array.isArray);
+  if (Array.isArray(fieldError) && typeof fieldError[0] === 'string') {
+    return fieldError[0];
+  }
+  return error.body.detail ?? t('genericError');
+}

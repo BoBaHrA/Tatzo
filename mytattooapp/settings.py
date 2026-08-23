@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 
 import dj_database_url
@@ -29,6 +30,8 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.sitemaps",
+    "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
     "posts",
     "users.apps.UsersConfig",
     "django.contrib.messages",
@@ -38,6 +41,7 @@ INSTALLED_APPS = [
     "appointments",
     "style_match.apps.StyleMatchConfig",
     "healing.apps.HealingConfig",
+    "mobile_api.apps.MobileApiConfig",
     "health_safety.apps.HealthSafetyConfig",
     "payments.apps.PaymentsConfig",
 ]
@@ -98,6 +102,13 @@ DATABASES = {
 
 TATZO_RATE_LIMIT_ENABLED = os.getenv("TATZO_RATE_LIMIT_ENABLED", "True") == "True"
 STYLE_MATCH_CARD_COUNT = int(os.getenv("STYLE_MATCH_CARD_COUNT", "30"))
+TATZO_PUSH_ENABLED = os.getenv("TATZO_PUSH_ENABLED", "True") == "True"
+EXPO_PUSH_ACCESS_TOKEN = os.getenv("EXPO_PUSH_ACCESS_TOKEN", "")
+EXPO_PUSH_TIMEOUT_SECONDS = int(os.getenv("EXPO_PUSH_TIMEOUT_SECONDS", "8"))
+EXPO_PUSH_MAX_ATTEMPTS = int(os.getenv("EXPO_PUSH_MAX_ATTEMPTS", "6"))
+EXPO_PUSH_RECEIPT_DELAY_MINUTES = int(
+    os.getenv("EXPO_PUSH_RECEIPT_DELAY_MINUTES", "15")
+)
 
 CACHES = {
     "default": {
@@ -107,6 +118,37 @@ CACHES = {
         ),
         "LOCATION": os.getenv("DJANGO_CACHE_LOCATION", "tatzo-rate-limit-cache"),
     }
+}
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+    "DEFAULT_RENDERER_CLASSES": (
+        "rest_framework.renderers.JSONRenderer",
+    ),
+    "DEFAULT_PARSER_CLASSES": (
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.FormParser",
+        "rest_framework.parsers.MultiPartParser",
+    ),
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=int(os.getenv("MOBILE_ACCESS_TOKEN_MINUTES", "15"))
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        days=int(os.getenv("MOBILE_REFRESH_TOKEN_DAYS", "30"))
+    ),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 # Настройки паролей
@@ -203,7 +245,7 @@ else:
 
     DEFAULT_FROM_EMAIL = os.getenv(
         "DEFAULT_FROM_EMAIL",
-        "Tatzo <vladimir.procopisin@gmail.com>",
+        "Tatzo <noreply@tatzo.eu>",
     )
 
 

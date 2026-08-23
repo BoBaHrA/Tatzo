@@ -24,6 +24,12 @@ COPY = {
         "payment_return": "Stripe returned you to Tatzo. Payment status is confirmed by Stripe and may take a moment to update.",
         "connect_error": "Stripe setup could not be started. Please try again.",
         "checkout_error": "The Stripe checkout could not be created. Please try again.",
+        "deposit_settings_title": "Booking deposits",
+        "deposit_settings_intro": "After Stripe is ready, you can require a fixed deposit when accepting tattoo bookings.",
+        "deposit_toggle": "Require a deposit for accepted tattoo bookings",
+        "deposit_amount_label": "Deposit amount in EUR",
+        "save_settings": "Save deposit settings",
+        "settings_saved": "Deposit settings saved.",
     },
     "fr": {
         "dashboard_title": "Paiements Stripe",
@@ -50,6 +56,12 @@ COPY = {
         "payment_return": "Stripe vous a redirigé vers Tatzo. Le statut est confirmé par Stripe et peut prendre quelques instants à se mettre à jour.",
         "connect_error": "Impossible de démarrer la configuration Stripe. Réessayez.",
         "checkout_error": "Impossible de créer le paiement Stripe. Réessayez.",
+        "deposit_settings_title": "Acomptes de réservation",
+        "deposit_settings_intro": "Une fois Stripe prêt, vous pouvez exiger un acompte fixe lors de l’acceptation d’une réservation de tatouage.",
+        "deposit_toggle": "Exiger un acompte pour les réservations de tatouage acceptées",
+        "deposit_amount_label": "Montant de l’acompte en EUR",
+        "save_settings": "Enregistrer les paramètres d’acompte",
+        "settings_saved": "Paramètres d’acompte enregistrés.",
     },
     "ru": {
         "dashboard_title": "Выплаты через Stripe",
@@ -76,6 +88,12 @@ COPY = {
         "payment_return": "Stripe вернул вас в Tatzo. Статус подтверждается webhook от Stripe и может обновиться через несколько секунд.",
         "connect_error": "Не удалось начать настройку Stripe. Попробуйте ещё раз.",
         "checkout_error": "Не удалось создать оплату Stripe. Попробуйте ещё раз.",
+        "deposit_settings_title": "Предоплата за записи",
+        "deposit_settings_intro": "После настройки Stripe можно требовать фиксированную предоплату при принятии заявки на тату-сеанс.",
+        "deposit_toggle": "Требовать предоплату для принятых записей на тату-сеанс",
+        "deposit_amount_label": "Сумма предоплаты в EUR",
+        "save_settings": "Сохранить настройки предоплаты",
+        "settings_saved": "Настройки предоплаты сохранены.",
     },
 }
 

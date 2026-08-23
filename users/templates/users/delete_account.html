@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Delete account" %} · Tatzo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+{% trans "Delete your account permanently? This cannot be undone." as delete_confirmation %}
+{% include "partials/sidebar.html" with mobile_only=True %}
+<main class="edit-profile-page">
+  <section class="edit-profile-card" aria-labelledby="delete-account-title">
+    <header class="edit-profile-header edit-profile-hero">
+      <div>
+        <h1 id="delete-account-title">{% trans "Delete account" %}</h1>
+        <p>{% trans "Permanently delete your Tatzo account and associated data." %}</p>
+      </div>
+    </header>
+
+    <div class="edit-profile-field edit-profile-field-card">
+      <h2>{% trans "This action cannot be undone." %}</h2>
+      <p>
+        {% trans "Your profile, posts, portfolio, messages, bookings and associated data will be permanently deleted." %}
+      </p>
+      <p>
+        {% trans "Enter your current password to confirm that this account belongs to you." %}
+      </p>
+    </div>
+
+    <form
+      method="post"
+      action="{% url 'delete_account' %}"
+      class="edit-profile-form"
+      onsubmit="return confirm('{{ delete_confirmation|escapejs }}');"
+    >
+      {% csrf_token %}
+      <div class="edit-profile-field edit-profile-clean-field">
+        <label for="delete-account-password">
+          {% trans "Enter your password to delete the account" %}
+        </label>
+        <div class="edit-profile-input-wrap">
+          <input
+            id="delete-account-password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            required
+          >
+        </div>
+      </div>
+
+      <div class="edit-profile-actions">
+        <a class="profile-btn profile-btn-secondary" href="{% url 'edit_profile' %}">
+          {% trans "Cancel" %}
+        </a>
+        <button class="profile-btn profile-btn-primary" type="submit">
+          {% trans "Delete account" %}
+        </button>
+      </div>
+    </form>
+
+    <p>
+      {% trans "If you cannot access your account, contact" %}
+      <a href="mailto:privacy@tatzo.eu">privacy@tatzo.eu</a>.
+    </p>
+  </section>
+</main>
+{% endblock %}

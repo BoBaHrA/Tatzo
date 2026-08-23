@@ -116,13 +116,34 @@ class AccountSecurityTests(TestCase):
         self.assertTrue(staff.is_active)
         self.assertTrue(Profile.objects.filter(user=staff).exists())
 
-    def test_delete_account_requires_post_and_current_password(self):
+    @override_settings(
+        STORAGES={
+            "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+            "staticfiles": {
+                "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+            },
+        }
+    )
+    def test_delete_account_has_web_confirmation_and_requires_current_password(self):
         self.client.force_login(self.user)
         url = reverse("delete_account")
-        self.assertEqual(self.client.get(url).status_code, 405)
+        page = self.client.get(url)
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, "Delete account")
+        self.assertContains(page, "privacy@tatzo.eu")
         response = self.client.post(url, {"password": "wrong"})
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, url)
         self.assertTrue(User.objects.filter(pk=self.user.pk).exists())
+
+    def test_delete_account_web_confirmation_redirects_signed_out_users_to_login(self):
+        url = reverse("delete_account")
+        response = self.client.get(url)
+        self.assertRedirects(
+            response,
+            f"{reverse('login')}?next={url}",
+            fetch_redirect_response=False,
+        )
 
     def test_delete_account_removes_user_with_correct_password(self):
         self.client.force_login(self.user)

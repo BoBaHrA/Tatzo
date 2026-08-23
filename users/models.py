@@ -424,7 +424,197 @@ class ChatMessage(models.Model):
 
     class Meta:
         ordering = ["created_at"]
-    
+
+
+class Notification(models.Model):
+    KIND_FOLLOW = "follow"
+    KIND_POST_LIKE = "post_like"
+    KIND_POST_COMMENT = "post_comment"
+    KIND_COMMENT_REPLY = "comment_reply"
+    KIND_CHAT_MESSAGE = "chat_message"
+    KIND_BOOKING_REQUEST = "booking_request"
+    KIND_BOOKING_UPDATE = "booking_update"
+    KIND_BOOKING_REMINDER = "booking_reminder"
+
+    KIND_CHOICES = [
+        (KIND_FOLLOW, "Follow"),
+        (KIND_POST_LIKE, "Post like"),
+        (KIND_POST_COMMENT, "Post comment"),
+        (KIND_COMMENT_REPLY, "Comment reply"),
+        (KIND_CHAT_MESSAGE, "Chat message"),
+        (KIND_BOOKING_REQUEST, "Booking request"),
+        (KIND_BOOKING_UPDATE, "Booking update"),
+        (KIND_BOOKING_REMINDER, "Booking reminder"),
+    ]
+
+    recipient = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="notifications",
+    )
+    actor = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name="triggered_notifications",
+        blank=True,
+        null=True,
+    )
+    kind = models.CharField(max_length=32, choices=KIND_CHOICES)
+    dedupe_key = models.CharField(max_length=120)
+    post = models.ForeignKey(
+        "posts.Post",
+        on_delete=models.CASCADE,
+        related_name="+",
+        blank=True,
+        null=True,
+    )
+    comment = models.ForeignKey(
+        "posts.PostComment",
+        on_delete=models.CASCADE,
+        related_name="+",
+        blank=True,
+        null=True,
+    )
+    appointment = models.ForeignKey(
+        "appointments.Appointment",
+        on_delete=models.CASCADE,
+        related_name="+",
+        blank=True,
+        null=True,
+    )
+    thread = models.ForeignKey(
+        ChatThread,
+        on_delete=models.CASCADE,
+        related_name="+",
+        blank=True,
+        null=True,
+    )
+    message = models.ForeignKey(
+        ChatMessage,
+        on_delete=models.CASCADE,
+        related_name="+",
+        blank=True,
+        null=True,
+    )
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=("recipient", "dedupe_key"),
+                name="users_notif_rec_dedupe_uniq",
+            )
+        ]
+        indexes = [
+            models.Index(
+                fields=("recipient", "is_read", "-created_at"),
+                name="users_notif_rec_read_idx",
+            ),
+            models.Index(
+                fields=("recipient", "-created_at"),
+                name="users_notif_rec_date_idx",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.kind} notification for {self.recipient.username}"
+
+
+class PushDevice(models.Model):
+    PLATFORM_IOS = "ios"
+    PLATFORM_ANDROID = "android"
+    PLATFORM_CHOICES = [
+        (PLATFORM_IOS, "iOS"),
+        (PLATFORM_ANDROID, "Android"),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="push_devices",
+    )
+    installation_id = models.UUIDField(unique=True)
+    expo_push_token = models.CharField(max_length=255, unique=True)
+    platform = models.CharField(max_length=12, choices=PLATFORM_CHOICES)
+    locale = models.CharField(max_length=8, default="en")
+    app_version = models.CharField(max_length=32, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_seen_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-last_seen_at", "-id")
+        indexes = [
+            models.Index(
+                fields=("user", "is_active"),
+                name="users_push_user_active_idx",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.platform} push device for {self.user.username}"
+
+
+class PushDelivery(models.Model):
+    STATUS_PENDING = "pending"
+    STATUS_RETRY = "retry"
+    STATUS_SENT = "sent"
+    STATUS_DELIVERED = "delivered"
+    STATUS_FAILED = "failed"
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "Pending"),
+        (STATUS_RETRY, "Retry"),
+        (STATUS_SENT, "Sent"),
+        (STATUS_DELIVERED, "Delivered"),
+        (STATUS_FAILED, "Failed"),
+    ]
+
+    notification = models.ForeignKey(
+        Notification,
+        on_delete=models.CASCADE,
+        related_name="push_deliveries",
+    )
+    device = models.ForeignKey(
+        PushDevice,
+        on_delete=models.CASCADE,
+        related_name="deliveries",
+    )
+    status = models.CharField(
+        max_length=12,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING,
+    )
+    attempt_count = models.PositiveSmallIntegerField(default=0)
+    next_attempt_at = models.DateTimeField(blank=True, null=True)
+    ticket_id = models.CharField(max_length=80, blank=True, db_index=True)
+    last_error = models.CharField(max_length=500, blank=True)
+    sent_at = models.DateTimeField(blank=True, null=True)
+    receipt_checked_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("created_at", "id")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("notification", "device"),
+                name="users_push_notif_device_uniq",
+            )
+        ]
+        indexes = [
+            models.Index(
+                fields=("status", "next_attempt_at", "created_at"),
+                name="users_push_status_retry_idx",
+            )
+        ]
+
+    def __str__(self):
+        return f"Push delivery {self.pk} ({self.status})"
+
+
 class ChatAttachment(models.Model):
     
     MEDIA_TYPE_CHOICES = [

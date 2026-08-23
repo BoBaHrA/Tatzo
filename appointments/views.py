@@ -158,7 +158,93 @@ ACTIVE_BOOKING_STATUSES = [
 ]
 
 
-def _validate_artist_slot(artist, date_value, start_time_value, end_time_value):
+def _get_artist_booked_minutes(
+    artist,
+    start_date,
+    end_date,
+    *,
+    exclude_appointment_id=None,
+):
+    """Return reserved workload per local date, excluding cancelled work."""
+    booked_minutes = {}
+    appointments = Appointment.objects.filter(
+        artist=artist,
+        status__in=ACTIVE_BOOKING_STATUSES,
+        date__gte=start_date,
+        date__lte=end_date,
+    )
+    if exclude_appointment_id:
+        appointments = appointments.exclude(pk=exclude_appointment_id)
+    appointments = appointments.only(
+        "date",
+        "start_time",
+        "end_time",
+        "session_length_minutes",
+    )
+    for appointment in appointments:
+        duration = appointment.session_length_minutes or 0
+        if not duration and appointment.end_time:
+            duration = int(
+                (
+                    datetime.combine(appointment.date, appointment.end_time)
+                    - datetime.combine(appointment.date, appointment.start_time)
+                ).total_seconds()
+                // 60
+            )
+        date_key = appointment.date.isoformat()
+        booked_minutes[date_key] = booked_minutes.get(date_key, 0) + max(0, duration)
+
+    artist_tz = _artist_timezone(artist)
+    range_start = timezone.make_aware(
+        datetime.combine(start_date, time.min),
+        artist_tz,
+    )
+    range_end = timezone.make_aware(
+        datetime.combine(end_date + timedelta(days=1), time.min),
+        artist_tz,
+    )
+    calendar_sessions = CalendarEvent.objects.filter(
+        artist=artist,
+        project__isnull=True,
+        event_type__in=[
+            CalendarEvent.TYPE_TATTOO_SESSION,
+            CalendarEvent.TYPE_CONSULTATION,
+        ],
+        starts_at__lt=range_end,
+        ends_at__gt=range_start,
+    ).exclude(status=CalendarEvent.STATUS_CANCELLED)
+    for event in calendar_sessions:
+        local_start = timezone.localtime(event.starts_at, artist_tz)
+        local_end = timezone.localtime(event.ends_at, artist_tz)
+        cursor = max(local_start.date(), start_date)
+        last_date = min((local_end - timedelta(microseconds=1)).date(), end_date)
+        while cursor <= last_date:
+            day_start = timezone.make_aware(
+                datetime.combine(cursor, time.min),
+                artist_tz,
+            )
+            day_end = day_start + timedelta(days=1)
+            segment_start = max(local_start, day_start)
+            segment_end = min(local_end, day_end)
+            duration = max(
+                0,
+                int((segment_end - segment_start).total_seconds() // 60),
+            )
+            date_key = cursor.isoformat()
+            booked_minutes[date_key] = booked_minutes.get(date_key, 0) + duration
+            cursor += timedelta(days=1)
+
+    return booked_minutes
+
+
+def _validate_artist_slot(
+    artist,
+    date_value,
+    start_time_value,
+    end_time_value,
+    *,
+    exclude_appointment_id=None,
+):
     """Validate working hours and collisions on the server."""
     weekday = (date_value.weekday() + 1) % 7  # Model uses Sunday=0.
     availability = ArtistAvailability.objects.filter(
@@ -185,14 +271,59 @@ def _validate_artist_slot(artist, date_value, start_time_value, end_time_value):
     ):
         return _("This time overlaps the artist's break.")
 
-    if Appointment.objects.filter(
+    appointment_overlap = Appointment.objects.filter(
         artist=artist,
         date=date_value,
         status__in=ACTIVE_BOOKING_STATUSES,
         start_time__lt=end_time_value,
         end_time__gt=start_time_value,
-    ).exists():
+    )
+    if exclude_appointment_id:
+        appointment_overlap = appointment_overlap.exclude(
+            pk=exclude_appointment_id
+        )
+    if appointment_overlap.exists():
         return _("This time slot is already booked.")
+
+    duration_minutes = int(
+        (
+            datetime.combine(date_value, end_time_value)
+            - datetime.combine(date_value, start_time_value)
+        ).total_seconds()
+        // 60
+    )
+    capacity_minutes = max(
+        1,
+        int(_get_artist_settings(artist).maximum_session_hours or 1),
+    ) * 60
+    booked_minutes = _get_artist_booked_minutes(
+        artist,
+        date_value,
+        date_value,
+        exclude_appointment_id=exclude_appointment_id,
+    ).get(date_value.isoformat(), 0)
+    if booked_minutes + duration_minutes > capacity_minutes:
+        return _("This day has reached the artist's booking capacity.")
+
+    starts_at = _artist_datetime(artist, date_value, start_time_value)
+    ends_at = _artist_datetime(artist, date_value, end_time_value)
+    calendar_overlap = CalendarEvent.objects.filter(
+        artist=artist,
+        event_type__in=[
+            CalendarEvent.TYPE_TATTOO_SESSION,
+            CalendarEvent.TYPE_CONSULTATION,
+            CalendarEvent.TYPE_BLOCKED,
+            CalendarEvent.TYPE_VACATION,
+        ],
+        starts_at__lt=ends_at,
+        ends_at__gt=starts_at,
+    ).exclude(status=CalendarEvent.STATUS_CANCELLED)
+    if exclude_appointment_id:
+        calendar_overlap = calendar_overlap.exclude(
+            project_id=exclude_appointment_id
+        )
+    if calendar_overlap.exists():
+        return _("This time slot is blocked in the artist's calendar.")
 
     return None
 
@@ -492,9 +623,9 @@ def create_appointment(request, username):
         messages.error(request, _("This session is longer than the artist allows."))
         return redirect("booking_wizard", username=artist.username)
 
-    latest_allowed_date = timezone.localdate(_artist_timezone(artist)) + timedelta(
-        days=booking_settings.maximum_booking_window_days
-    )
+    latest_allowed_date = timezone.localdate(
+        timezone=_artist_timezone(artist)
+    ) + timedelta(days=booking_settings.maximum_booking_window_days)
 
     if date_value > latest_allowed_date:
         messages.error(request, _("This date is too far in the future."))
@@ -684,28 +815,30 @@ def create_manual_appointment(request):
             messages.error(request, slot_error)
             return redirect("artist_booking_settings")
 
-        appointment = Appointment.objects.create(
+        appointment = Appointment(
             client=client,
             artist=request.user,
-        booking_type=booking_type,
-        status=Appointment.STATUS_ACCEPTED,
-        date=date_value,
-        start_time=start_time_value,
-        end_time=end_dt.time(),
-        session_length_minutes=duration,
-        styles=styles,
-        placement=request.POST.get("placement", ""),
-        size=request.POST.get("size", ""),
-        budget=request.POST.get("budget", ""),
-        description=request.POST.get("description", ""),
+            booking_type=booking_type,
+            status=Appointment.STATUS_ACCEPTED,
+            date=date_value,
+            start_time=start_time_value,
+            end_time=end_dt.time(),
+            session_length_minutes=duration,
+            styles=styles,
+            placement=request.POST.get("placement", ""),
+            size=request.POST.get("size", ""),
+            budget=request.POST.get("budget", ""),
+            description=request.POST.get("description", ""),
             ai_ready_payload={
-            "placement": request.POST.get("placement", ""),
-            "styles": request.POST.get("styles", ""),
-            "size": request.POST.get("size", ""),
-            "budget": request.POST.get("budget", ""),
-            "description": request.POST.get("description", ""),
+                "placement": request.POST.get("placement", ""),
+                "styles": request.POST.get("styles", ""),
+                "size": request.POST.get("size", ""),
+                "budget": request.POST.get("budget", ""),
+                "description": request.POST.get("description", ""),
             },
         )
+        appointment._notification_created_by_artist = True
+        appointment.save()
 
     messages.success(request, _("Manual booking created."))
     return redirect("appointment_detail", appointment_id=appointment.id)

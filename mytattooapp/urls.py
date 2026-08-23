@@ -80,6 +80,7 @@ urlpatterns = [
         name="django.contrib.sitemaps.views.sitemap",
     ),
     path("admin/", admin.site.urls),
+    path("api/v1/", include("mobile_api.urls")),
     path("calendar/", appointment_views.calendar_page, name="calendar"),
     path(
         "artist/dashboard/calendar/",
