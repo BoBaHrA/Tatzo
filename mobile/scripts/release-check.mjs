@@ -149,6 +149,7 @@ check(eas.build?.development?.environment === 'development', 'Development build 
 check(eas.build?.preview?.distribution === 'internal', 'Preview build is internally distributed');
 check(eas.build?.preview?.environment === 'preview', 'Preview build uses preview environment');
 check(eas.build?.preview?.channel === 'preview', 'Preview update channel is isolated');
+check(eas.build?.preview?.android?.image === 'latest', 'Android preview pins an EAS image for GitHub builds');
 check(eas.build?.preview?.android?.buildType === 'apk', 'Android preview produces an installable APK');
 check(eas.build?.production?.environment === 'production', 'Production build uses production environment');
 check(eas.build?.production?.channel === 'production', 'Production update channel is isolated');
