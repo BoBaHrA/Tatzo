@@ -106,7 +106,7 @@ const expo = loadExpoConfig();
 check(expo.name === 'Tatzo', 'App name is Tatzo');
 check(expo.owner === 'tatzo', 'Expo owner is linked to the Tatzo account');
 check(
-  expo.extra?.eas?.projectId === '38bcf2cb-ad7b-49bf-a0f4-3055e371caa2',
+  expo.extra?.eas?.projectId === '38bcf2cb-ad7b-49bf-a0f4-3855e371caa2',
   'Expo project ID is linked to the Tatzo EAS project',
 );
 check(/^\d+\.\d+\.\d+$/.test(expo.version || ''), 'App version uses semantic versioning');
