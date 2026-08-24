@@ -15,6 +15,7 @@
       "channel": "preview",
       "environment": "preview",
       "android": {
+        "image": "latest",
         "buildType": "apk"
       }
     },
