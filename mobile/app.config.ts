@@ -1,6 +1,8 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
 const androidMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY;
+const expoOwner = 'tatzo';
+const easProjectId = '38bcf2cb-ad7b-49bf-a0f4-3055e371caa2';
 const mapsPlugin: NonNullable<ExpoConfig['plugins']>[number] = androidMapsApiKey
   ? [
       'react-native-maps',
@@ -12,7 +14,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Tatzo',
   slug: 'tatzo',
-  owner: process.env.EXPO_PUBLIC_EXPO_OWNER,
+  owner: expoOwner,
   version: '0.1.0',
   orientation: 'portrait',
   icon: './assets/tatzo-app-icon.png',
@@ -84,7 +86,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     apiBaseUrl:
       process.env.EXPO_PUBLIC_API_BASE_URL ?? 'https://tatzo.eu/api/v1',
     eas: {
-      projectId: process.env.EXPO_PUBLIC_EAS_PROJECT_ID,
+      projectId: easProjectId,
     },
   },
 });

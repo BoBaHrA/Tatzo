@@ -11,6 +11,8 @@ public production.
 - [x] Separate development, preview, and production EAS environments/channels.
 - [x] Remote build-number management and automatic production increments.
 - [x] Google Play submissions default to the internal testing track.
+- [x] Expo project `tatzo/tatzo` is linked with project ID
+      `38bcf2cb-ad7b-49bf-a0f4-3055e371caa2`.
 - [x] Privacy policy, terms, community rules, safety contact, block/report tools,
       and permanent in-app account deletion are discoverable in the app.
 - [x] Localized draft store copy exists for English, French, and Russian.
@@ -22,10 +24,9 @@ public production.
       App Store Connect with bundle ID `eu.tatzo.app`.
 - [ ] Create the app in Google Play Console with package `eu.tatzo.app` and enable
       Play App Signing.
-- [ ] Create/link the Expo EAS project, then set
-      `EXPO_PUBLIC_EXPO_OWNER`, `EXPO_PUBLIC_EAS_PROJECT_ID`,
-      `EXPO_PUBLIC_API_BASE_URL=https://tatzo.eu/api/v1`, and
+- [ ] Set `EXPO_PUBLIC_API_BASE_URL=https://tatzo.eu/api/v1` and
       `EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY` in the matching EAS environments.
+      The public Expo owner and project ID are committed in `app.config.ts`.
 - [ ] Restrict the Android Maps key to `eu.tatzo.app` and every signing-certificate
       SHA fingerprint used by preview/Play builds. Do not commit credential files.
 - [ ] Configure APNs and FCM v1 credentials in EAS, then verify push delivery on one
