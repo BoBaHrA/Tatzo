@@ -18,10 +18,10 @@ they are public routing identifiers, not credentials. Remote push notifications
 require a development or store build; Expo Go on Android does not support remote
 push. Configure the FCM v1 and APNs credentials in EAS before device testing.
 
-The native map uses Apple Maps on iOS and Google Maps on Android. Expo Go can
-render it without extra setup; store and standalone Android builds must provide
-`EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY`, restricted to `eu.tatzo.app` and the
-build signing certificate.
+The mobile map follows the same mapping stack as Tatzo web: Leaflet rendered in an
+Expo DOM bridge with OpenStreetMap tiles. It does not require a Google Maps API key
+or Google Maps billing. Location permission is still used only when the user asks
+the app to center the map near their current position.
 
 Tokens are stored with `expo-secure-store`. Access tokens are short-lived;
 refresh tokens rotate and the replaced token is blacklisted by Django.
@@ -60,9 +60,10 @@ refresh tokens rotate and the replaced token is blacklisted by Django.
 - native post-session Healing journeys for completed tattoos with private daily photo
   check-ins, optional notes and symptom tracking, care-task streaks, milestones,
   participant-only artist access, contextual chat, and client-controlled completion.
-- native map-first discovery with viewport pagination, artist/studio markers, clustering,
-  map/list modes, style and booking filters, foreground geolocation, block-aware results,
-  private studio claims, and moderated add-location requests.
+- native map-first discovery using the same Leaflet/OpenStreetMap rendering approach as
+  Tatzo web, with viewport pagination, artist/studio markers, clustering, map/list modes,
+  style and booking filters, foreground geolocation, block-aware results, private studio
+  claims, and moderated add-location requests.
 - native in-app notifications for follows, likes, comments, replies, chats, and booking
   changes, with unread polling, cursor pagination, read controls, and protected deep links.
 - native system push for the same activity, with per-installation token lifecycle,
