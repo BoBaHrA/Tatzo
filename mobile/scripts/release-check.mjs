@@ -136,7 +136,7 @@ check(
 );
 check(nativeMapSource.includes("@/map/leaflet-map"), 'Native map renders the shared Leaflet bridge');
 check(leafletMapSource.includes("'use dom'"), 'Leaflet map runs in the Expo DOM bridge');
-check(leafletMapSource.includes('leaflet@1.9.4'), 'Mobile map pins Leaflet 1.9.4');
+check(leafletMapSource.includes("const LEAFLET_VERSION = '1.9.4'"), 'Mobile map pins Leaflet 1.9.4');
 check(leafletMapSource.includes('tile.openstreetmap.org'), 'Mobile map uses OpenStreetMap tiles like the web map');
 check(leafletMapSource.includes('OpenStreetMap</a> contributors'), 'OpenStreetMap attribution is present');
 
