@@ -82,10 +82,6 @@ function loadExpoConfig() {
       ...process.env,
       CI: process.env.CI || '1',
       EXPO_OFFLINE: '1',
-      EXPO_PUBLIC_EXPO_OWNER:
-        process.env.EXPO_PUBLIC_EXPO_OWNER || 'tatzo-release-check',
-      EXPO_PUBLIC_EAS_PROJECT_ID:
-        process.env.EXPO_PUBLIC_EAS_PROJECT_ID || '00000000-0000-4000-8000-000000000000',
       EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY:
         process.env.EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY || 'release-check-key',
     },
@@ -108,6 +104,11 @@ const listing = readJson('store/store-listing.json');
 const expo = loadExpoConfig();
 
 check(expo.name === 'Tatzo', 'App name is Tatzo');
+check(expo.owner === 'tatzo', 'Expo owner is linked to the Tatzo account');
+check(
+  expo.extra?.eas?.projectId === '38bcf2cb-ad7b-49bf-a0f4-3055e371caa2',
+  'Expo project ID is linked to the Tatzo EAS project',
+);
 check(/^\d+\.\d+\.\d+$/.test(expo.version || ''), 'App version uses semantic versioning');
 check(expo.scheme === 'tatzo', 'Deep-link scheme is tatzo');
 check(expo.ios?.bundleIdentifier === 'eu.tatzo.app', 'iOS bundle identifier is stable');
@@ -197,8 +198,6 @@ for (const locale of requiredLocales) {
 }
 
 const requiredProductionEnvironment = [
-  ['EXPO_PUBLIC_EXPO_OWNER', (value) => value.length > 1],
-  ['EXPO_PUBLIC_EAS_PROJECT_ID', (value) => /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(value)],
   ['EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY', (value) => /^AIza[\w-]{20,}$/.test(value)],
 ];
 

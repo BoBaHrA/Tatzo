@@ -13,9 +13,10 @@ through the versioned JSON API under `/api/v1/`.
 2. Install dependencies with `npm ci`.
 3. Run `npm start`, then choose Android, iOS, or a development build.
 
-Remote push notifications require `EXPO_PUBLIC_EAS_PROJECT_ID` and a development
-or store build; Expo Go on Android does not support remote push. Configure the
-FCM v1 and APNs credentials in EAS before device testing.
+The Expo project owner and EAS project ID are committed in `app.config.ts` because
+they are public routing identifiers, not credentials. Remote push notifications
+require a development or store build; Expo Go on Android does not support remote
+push. Configure the FCM v1 and APNs credentials in EAS before device testing.
 
 The native map uses Apple Maps on iOS and Google Maps on Android. Expo Go can
 render it without extra setup; store and standalone Android builds must provide
