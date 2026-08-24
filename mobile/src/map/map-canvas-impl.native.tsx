@@ -1,6 +1,6 @@
 import { useMemo, useRef } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import MapView, { Marker, type Region } from 'react-native-maps';
+import { Platform, StyleSheet, Text, View } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE, type Region } from 'react-native-maps';
 
 import type { MapLocationMarker } from '@/api/types';
 import type { MapRegion } from '@/map/map-api';
@@ -66,6 +66,7 @@ export function MapCanvas({
         longitudeDelta: Math.max(0.002, Math.min(180, next.longitudeDelta)),
       })}
       pitchEnabled={false}
+      provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
       ref={mapRef}
       region={region}
       rotateEnabled={false}
@@ -93,7 +94,7 @@ export function MapCanvas({
               if (cluster.markers.length > 1) openCluster(cluster);
               else onSelectMarker(marker);
             }}
-            tracksViewChanges
+            tracksViewChanges={false}
           >
             <View style={[
               styles.pin,
