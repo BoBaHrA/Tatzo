@@ -11,7 +11,7 @@ public production.
 - [x] Separate development, preview, and production EAS environments/channels.
 - [x] Remote build-number management and automatic production increments.
 - [x] Google Play submissions default to the internal testing track.
-- [x] Expo project `tatzo/tatzo` is linked with project ID
+- [x] Expo project `tatzo-team/tatzo` is linked with project ID
       `38bcf2cb-ad7b-49bf-a0f4-3855e371caa2`.
 - [x] Privacy policy, terms, community rules, safety contact, block/report tools,
       and permanent in-app account deletion are discoverable in the app.
