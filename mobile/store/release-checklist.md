@@ -17,6 +17,8 @@ public production.
       and permanent in-app account deletion are discoverable in the app.
 - [x] Localized draft store copy exists for English, French, and Russian.
 - [x] `npm run release:check` runs in pull-request CI.
+- [x] Mobile map uses Leaflet + OpenStreetMap like Tatzo web and has no Google Maps
+      API-key or billing dependency.
 
 ## One-time account setup
 
@@ -24,11 +26,9 @@ public production.
       App Store Connect with bundle ID `eu.tatzo.app`.
 - [ ] Create the app in Google Play Console with package `eu.tatzo.app` and enable
       Play App Signing.
-- [ ] Set `EXPO_PUBLIC_API_BASE_URL=https://tatzo.eu/api/v1` and
-      `EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY` in the matching EAS environments.
-      The public Expo owner and project ID are committed in `app.config.ts`.
-- [ ] Restrict the Android Maps key to `eu.tatzo.app` and every signing-certificate
-      SHA fingerprint used by preview/Play builds. Do not commit credential files.
+- [ ] Set `EXPO_PUBLIC_API_BASE_URL=https://tatzo.eu/api/v1` in the matching EAS
+      environments. The public Expo owner and project ID are committed in
+      `app.config.ts`.
 - [ ] Configure APNs and FCM v1 credentials in EAS, then verify push delivery on one
       physical iPhone and one physical Android phone.
 - [ ] Configure Stripe Connect in live mode, register the production webhook endpoint,
@@ -43,8 +43,8 @@ public production.
 - [ ] Confirm the web account-deletion path lets a signed-out former app user sign
       in on the website and complete deletion without reinstalling the app.
 - [ ] Reconcile `store/data-safety.md` with the production backend, hosting logs,
-      Cloudinary, Expo push, Google Maps, Stripe, Health & Safety/Healing retention, and
-      support access before completing either privacy form.
+      Cloudinary, Expo push, OpenStreetMap tile requests, Stripe, Health & Safety/Healing
+      retention, and support access before completing either privacy form.
 - [ ] Complete Apple App Privacy, Google Play Data safety, content-rating, age-rating,
       export-compliance, UGC, and advertising declarations with the account owner.
 - [ ] Prepare a review account with representative content and give reviewers concise
@@ -76,6 +76,7 @@ Official references:
 
 - [Expo EAS build profiles](https://docs.expo.dev/build/eas-json/)
 - [Expo EAS environments](https://docs.expo.dev/eas/environment-variables/)
+- [OpenStreetMap tile usage policy](https://operations.osmfoundation.org/policies/tiles/)
 - [Apple screenshot specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/)
 - [Google Play account deletion](https://support.google.com/googleplay/android-developer/answer/13327111)
 - [Google Play preview assets](https://support.google.com/googleplay/android-developer/answer/9866151)
