@@ -1,8 +1,17 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
 const androidMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY;
+const easBuildProfile = process.env.EAS_BUILD_PROFILE;
 const expoOwner = 'tatzo-team';
 const easProjectId = '38bcf2cb-ad7b-49bf-a0f4-3855e371caa2';
+
+if (easBuildProfile && !androidMapsApiKey) {
+  throw new Error(
+    `EAS build profile "${easBuildProfile}" requires EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY. ` +
+    'Set it in the matching Expo environment before building Tatzo.',
+  );
+}
+
 const mapsPlugin: NonNullable<ExpoConfig['plugins']>[number] = androidMapsApiKey
   ? [
       'react-native-maps',
@@ -36,6 +45,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       monochromeImage: './assets/tatzo-monochrome-icon.png',
       backgroundColor: '#000d18',
     },
+    ...(androidMapsApiKey ? {
+      config: {
+        googleMaps: {
+          apiKey: androidMapsApiKey,
+        },
+      },
+    } : {}),
   },
   web: {
     favicon: './assets/tatzo-app-icon.png',
@@ -85,6 +101,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   extra: {
     apiBaseUrl:
       process.env.EXPO_PUBLIC_API_BASE_URL ?? 'https://tatzo.eu/api/v1',
+    mapsConfigured: Boolean(androidMapsApiKey),
     eas: {
       projectId: easProjectId,
     },
