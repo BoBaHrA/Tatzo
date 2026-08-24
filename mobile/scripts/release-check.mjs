@@ -82,8 +82,6 @@ function loadExpoConfig() {
       ...process.env,
       CI: process.env.CI || '1',
       EXPO_OFFLINE: '1',
-      EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY:
-        process.env.EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY || 'release-check-key',
     },
   });
 
@@ -127,6 +125,20 @@ check(
 );
 check(expo.android?.adaptiveIcon?.backgroundColor === '#000d18', 'Android icon background is branded');
 check(isHttpsUrl(expo.extra?.apiBaseUrl), 'Release API URL uses HTTPS');
+
+const appConfigSource = readFileSync(join(projectRoot, 'app.config.ts'), 'utf8');
+const nativeMapSource = readFileSync(join(projectRoot, 'src', 'map', 'map-canvas-impl.native.tsx'), 'utf8');
+const leafletMapSource = readFileSync(join(projectRoot, 'src', 'map', 'leaflet-map.tsx'), 'utf8');
+check(
+  !appConfigSource.includes('EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY') &&
+    !appConfigSource.includes("'react-native-maps'"),
+  'Native app configuration has no Google Maps API-key requirement',
+);
+check(nativeMapSource.includes("@/map/leaflet-map"), 'Native map renders the shared Leaflet bridge');
+check(leafletMapSource.includes("'use dom'"), 'Leaflet map runs in the Expo DOM bridge');
+check(leafletMapSource.includes('leaflet@1.9.4'), 'Mobile map pins Leaflet 1.9.4');
+check(leafletMapSource.includes('tile.openstreetmap.org'), 'Mobile map uses OpenStreetMap tiles like the web map');
+check(leafletMapSource.includes('OpenStreetMap</a> contributors'), 'OpenStreetMap attribution is present');
 
 for (const [path, expectsAlpha] of [
   ['assets/tatzo-app-icon.png', false],
@@ -196,19 +208,6 @@ for (const locale of requiredLocales) {
     !JSON.stringify(metadata).match(/\b(?:TODO|TBD|PLACEHOLDER)\b/i),
     `${locale} metadata has no placeholders`,
   );
-}
-
-const requiredProductionEnvironment = [
-  ['EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY', (value) => /^AIza[\w-]{20,}$/.test(value)],
-];
-
-for (const [name, validate] of requiredProductionEnvironment) {
-  const value = process.env[name] || '';
-  if (productionMode) {
-    check(validate(value), `${name} is ready for a production build`);
-  } else {
-    warn(validate(value), `${name} is not set; structural checks pass, but a real EAS production build still needs it.`);
-  }
 }
 
 console.log(`\nTatzo mobile release check (${productionMode ? 'production' : 'structural'})`);
