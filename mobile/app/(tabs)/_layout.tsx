@@ -8,7 +8,7 @@ import { colors } from '@/theme';
 
 
 function TabSymbol({ symbol, color }: { symbol: string; color: ColorValue }) {
-  return <Text style={{ color, fontSize: 20 }}>{symbol}</Text>;
+  return <Text style={{ color, fontSize: 19, lineHeight: 21 }}>{symbol}</Text>;
 }
 
 export default function TabsLayout() {
@@ -19,18 +19,31 @@ export default function TabsLayout() {
   }
   return (
     <Tabs
-      initialRouteName="map"
+      initialRouteName="home"
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textMuted,
-        tabBarStyle: { backgroundColor: colors.backgroundDeep, borderTopColor: colors.border, height: 66, paddingTop: 8 },
-        tabBarLabelStyle: { fontSize: 10, fontWeight: '700', paddingBottom: 6 },
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.primary,
+        tabBarStyle: {
+          backgroundColor: colors.backgroundDeep,
+          borderTopColor: colors.border,
+          borderTopWidth: 1,
+          height: 64,
+          paddingTop: 6,
+        },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: '700',
+          paddingBottom: 5,
+        },
+        tabBarItemStyle: {
+          paddingHorizontal: 1,
+        },
         sceneStyle: { backgroundColor: colors.background },
       }}
     >
-      <Tabs.Screen name="map" options={{ title: t('mapTab'), tabBarIcon: ({ color }) => <TabSymbol symbol="⌖" color={color} /> }} />
       <Tabs.Screen name="home" options={{ title: t('home'), tabBarIcon: ({ color }) => <TabSymbol symbol="⌂" color={color} /> }} />
+      <Tabs.Screen name="map" options={{ title: t('mapTab'), tabBarIcon: ({ color }) => <TabSymbol symbol="⌖" color={color} /> }} />
       <Tabs.Screen name="match" options={{ title: t('styleMatch'), tabBarIcon: ({ color }) => <TabSymbol symbol="✦" color={color} /> }} />
       <Tabs.Screen name="bookings" options={{ title: t('bookings'), tabBarIcon: ({ color }) => <TabSymbol symbol="⌁" color={color} /> }} />
       <Tabs.Screen

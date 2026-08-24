@@ -3,6 +3,7 @@ import { router, useFocusEffect } from 'expo-router';
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   RefreshControl,
   StyleSheet,
   Text,
@@ -153,16 +154,20 @@ export default function HomeScreen() {
         ) : null}
         ListHeaderComponent={(
           <View style={styles.header}>
-            <BrandHeader />
-            <View style={styles.titleBlock}>
-              <Text style={styles.eyebrow}>TATZO</Text>
-              <Text style={styles.title}>{t('feed')}</Text>
-              <Text style={styles.subtitle}>{t('feedSubtitle')}</Text>
-              <Button
-                label={t('createPost')}
-                onPress={() => router.push('/create-post')}
-              />
-            </View>
+            <BrandHeader title={t('home')} showQuickMatch />
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push('/create-post')}
+              style={({ pressed }) => [styles.createStrip, pressed && styles.createStripPressed]}
+            >
+              <View style={styles.createCopy}>
+                <Text style={styles.eyebrow}>TATZO FEED</Text>
+                <Text style={styles.createLabel}>{t('createPost')}</Text>
+              </View>
+              <View style={styles.createPlus}>
+                <Text style={styles.createPlusText}>+</Text>
+              </View>
+            </Pressable>
             {actionError ? <Text style={styles.inlineError}>{actionError}</Text> : null}
           </View>
         )}
@@ -194,21 +199,52 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   list: { width: '100%', maxWidth: 620, alignSelf: 'center' },
-  listContent: { flexGrow: 1, padding: spacing.md, paddingBottom: spacing.xxl },
-  header: { gap: spacing.md, marginBottom: spacing.lg },
-  titleBlock: {
-    backgroundColor: colors.surface,
+  listContent: {
+    flexGrow: 1,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xxl,
+  },
+  header: { gap: spacing.md, marginBottom: spacing.md },
+  createStrip: {
+    minHeight: 62,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.surfaceSoft,
     borderColor: colors.border,
     borderWidth: 1,
     borderRadius: radius.large,
-    padding: spacing.lg,
-    gap: spacing.xs,
+    paddingVertical: spacing.sm,
+    paddingLeft: spacing.lg,
+    paddingRight: spacing.sm,
   },
-  eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '900', letterSpacing: 2 },
-  title: { color: colors.text, fontSize: 32, fontWeight: '900' },
-  subtitle: { color: colors.textMuted, fontSize: 15, lineHeight: 22 },
+  createStripPressed: { opacity: 0.82, transform: [{ scale: 0.993 }] },
+  createCopy: { flex: 1, gap: 2 },
+  eyebrow: {
+    color: colors.primary,
+    fontSize: 9,
+    lineHeight: 12,
+    fontWeight: '900',
+    letterSpacing: 1.7,
+  },
+  createLabel: { color: colors.text, fontSize: 15, lineHeight: 20, fontWeight: '700' },
+  createPlus: {
+    width: 42,
+    height: 42,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+  },
+  createPlusText: {
+    color: colors.backgroundDeep,
+    fontSize: 27,
+    lineHeight: 29,
+    fontWeight: '600',
+  },
   separator: { height: spacing.md },
-  centerState: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, minHeight: 280 },
+  centerState: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, minHeight: 240 },
   stateCard: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
@@ -218,8 +254,8 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     alignItems: 'stretch',
   },
-  stateTitle: { color: colors.text, fontSize: 22, fontWeight: '900', textAlign: 'center' },
-  muted: { color: colors.textMuted, lineHeight: 22, textAlign: 'center' },
+  stateTitle: { color: colors.text, fontSize: 20, fontWeight: '800', textAlign: 'center' },
+  muted: { color: colors.textMuted, lineHeight: 20, textAlign: 'center' },
   inlineError: {
     color: colors.danger,
     backgroundColor: colors.surface,

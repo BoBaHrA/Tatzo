@@ -6,7 +6,7 @@ import {
   type PressableProps,
 } from 'react-native';
 
-import { colors, radius, spacing } from '@/theme';
+import { colors, layout, radius, spacing } from '@/theme';
 
 
 type ButtonProps = PressableProps & {
@@ -37,7 +37,7 @@ export function Button({
       {...props}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? colors.background : colors.text} />
+        <ActivityIndicator color={variant === 'primary' ? colors.backgroundDeep : colors.text} />
       ) : (
         <Text style={[styles.label, variant === 'primary' && styles.primaryLabel]}>
           {label}
@@ -49,7 +49,7 @@ export function Button({
 
 const styles = StyleSheet.create({
   base: {
-    minHeight: 52,
+    minHeight: layout.controlHeight,
     borderRadius: radius.medium,
     alignItems: 'center',
     justifyContent: 'center',
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
   },
   secondary: {
-    backgroundColor: colors.surfaceRaised,
+    backgroundColor: colors.surfaceSoft,
     borderColor: colors.border,
   },
   danger: {
@@ -70,17 +70,18 @@ const styles = StyleSheet.create({
   },
   label: {
     color: colors.text,
-    fontSize: 16,
+    fontSize: 14,
+    lineHeight: 18,
     fontWeight: '700',
   },
   primaryLabel: {
     color: colors.backgroundDeep,
   },
   disabled: {
-    opacity: 0.5,
+    opacity: 0.46,
   },
   pressed: {
     transform: [{ scale: 0.985 }],
-    opacity: 0.9,
+    opacity: 0.88,
   },
 });
