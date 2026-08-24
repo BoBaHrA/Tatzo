@@ -1,6 +1,6 @@
 'use dom';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { MapLocationMarker } from '@/api/types';
 import type { MapRegion } from '@/map/map-api';
@@ -80,6 +80,15 @@ function regionFromLeaflet(map: any): MapRegion {
   };
 }
 
+function regionKey(region: MapRegion) {
+  return [
+    region.latitude.toFixed(6),
+    region.longitude.toFixed(6),
+    region.latitudeDelta.toFixed(6),
+    region.longitudeDelta.toFixed(6),
+  ].join(':');
+}
+
 function markerHtml(kind: 'artist' | 'studio' | 'mixed', count: number, selected: boolean) {
   const label = count > 1 ? String(count) : kind === 'artist' ? 'A' : kind === 'studio' ? 'S' : '•';
   return `<span class="tatzo-map-pin tatzo-map-pin--${kind}${selected ? ' is-selected' : ''}">${label}</span>`;
@@ -99,6 +108,7 @@ export default function LeafletMap({
   const propsRef = useRef({ markers, region, selectedMarkerId, onRegionChange, onSelectMarker });
   const suppressMoveRef = useRef(false);
   const lastAppliedRegionRef = useRef('');
+  const [ready, setReady] = useState(false);
 
   propsRef.current = { markers, region, selectedMarkerId, onRegionChange, onSelectMarker };
 
@@ -128,11 +138,14 @@ export default function LeafletMap({
 
       const emitRegion = () => {
         if (suppressMoveRef.current) return;
-        void propsRef.current.onRegionChange(regionFromLeaflet(map));
+        const nextRegion = regionFromLeaflet(map);
+        lastAppliedRegionRef.current = regionKey(nextRegion);
+        void propsRef.current.onRegionChange(nextRegion);
       };
       map.on('moveend', emitRegion);
 
       const initial = propsRef.current.region;
+      lastAppliedRegionRef.current = regionKey(initial);
       suppressMoveRef.current = true;
       map.fitBounds(regionBounds(initial), { animate: false, padding: [0, 0] });
       fallbackTimer = window.setTimeout(() => {
@@ -141,6 +154,7 @@ export default function LeafletMap({
       map.once('moveend', () => {
         suppressMoveRef.current = false;
       });
+      setReady(true);
     }).catch(() => {
       containerRef.current?.classList.add('is-unavailable');
     });
@@ -159,7 +173,7 @@ export default function LeafletMap({
     const map = mapRef.current;
     const L = leafletRef.current;
     const layer = layerRef.current;
-    if (!map || !L || !layer) return;
+    if (!ready || !map || !L || !layer) return;
 
     layer.clearLayers();
     const clusters = clusterMapMarkers(markers, region);
@@ -189,17 +203,12 @@ export default function LeafletMap({
       });
       leafletMarker.addTo(layer);
     }
-  }, [markers, region, selectedMarkerId]);
+  }, [markers, ready, region, selectedMarkerId]);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
-    const key = [
-      region.latitude.toFixed(6),
-      region.longitude.toFixed(6),
-      region.latitudeDelta.toFixed(6),
-      region.longitudeDelta.toFixed(6),
-    ].join(':');
+    if (!ready || !map) return;
+    const key = regionKey(region);
     if (key === lastAppliedRegionRef.current) return;
     lastAppliedRegionRef.current = key;
 
@@ -211,7 +220,7 @@ export default function LeafletMap({
     map.once('moveend', release);
     const timer = window.setTimeout(release, 180);
     return () => window.clearTimeout(timer);
-  }, [region]);
+  }, [ready, region]);
 
   return (
     <div className="tatzo-leaflet-root">
@@ -233,7 +242,7 @@ export default function LeafletMap({
         .tatzo-map-pin--mixed { background: #c71b43; color: #fff; }
         .tatzo-map-pin.is-selected { border-color: #fff; transform: scale(1.13); }
       `}</style>
-      <div className="tatzo-leaflet-map" ref={containerRef} />
+      <div aria-label="Tatzo map" className="tatzo-leaflet-map" ref={containerRef} />
     </div>
   );
 }
