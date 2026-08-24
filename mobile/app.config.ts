@@ -1,7 +1,7 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
 const androidMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY;
-const expoOwner = 'tatzo';
+const expoOwner = 'tatzo-team';
 const easProjectId = '38bcf2cb-ad7b-49bf-a0f4-3855e371caa2';
 const mapsPlugin: NonNullable<ExpoConfig['plugins']>[number] = androidMapsApiKey
   ? [
