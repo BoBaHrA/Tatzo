@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors, spacing } from '@/theme';
+import { colors, layout, spacing } from '@/theme';
 
 
 type ScreenProps = PropsWithChildren<{
@@ -54,9 +54,11 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     width: '100%',
-    maxWidth: 620,
+    maxWidth: 680,
     alignSelf: 'center',
-    padding: spacing.lg,
-    gap: spacing.md,
+    paddingHorizontal: layout.screenPadding,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xl,
+    gap: layout.sectionGap,
   },
 });
