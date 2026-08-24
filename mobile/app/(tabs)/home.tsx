@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 1.7,
   },
-  createLabel: { color: colors.text, fontSize: 15, lineHeight: 20, fontWeight: '750' },
+  createLabel: { color: colors.text, fontSize: 15, lineHeight: 20, fontWeight: '700' },
   createPlus: {
     width: 42,
     height: 42,
