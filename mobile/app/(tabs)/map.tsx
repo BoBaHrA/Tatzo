@@ -331,7 +331,7 @@ export default function MapScreen() {
 
           {stylesAvailable.length ? (
             <View style={styles.filterSection}>
-              <Text style={styles.sectionTitle}>Styles</Text>
+              <Text style={styles.sectionTitle}>{t('chooseStyle')}</Text>
               <View style={styles.wrapRow}>
                 {stylesAvailable.map((style) => (
                   <Chip
@@ -459,12 +459,7 @@ export default function MapScreen() {
         ) : null}
 
         <View style={styles.mapDock}>
-          <SheetTab
-            accessibilityLabel={t('mapSearch')}
-            active={sheetMode === 'search'}
-            icon="⌕"
-            onPress={() => setSheetMode('search')}
-          />
+          <SheetTab accessibilityLabel={t('mapSearch')} active={sheetMode === 'search'} icon="⌕" onPress={() => setSheetMode('search')} />
           <SheetTab
             accessibilityLabel={`${t('mapAll')} / ${t('mapArtists')} / ${t('mapStudios')}`}
             active={sheetMode === 'filters'}
@@ -472,38 +467,19 @@ export default function MapScreen() {
             icon="≡"
             onPress={() => setSheetMode('filters')}
           />
-          <SheetTab
-            accessibilityLabel={t('mapListMode')}
-            active={sheetMode === 'list'}
-            icon="☷"
-            onPress={() => setSheetMode('list')}
-          />
-          <SheetTab
-            accessibilityLabel={t('mapAdd')}
-            icon="＋"
-            onPress={openAddLocation}
-          />
+          <SheetTab accessibilityLabel={t('mapListMode')} active={sheetMode === 'list'} icon="☷" onPress={() => setSheetMode('list')} />
+          <SheetTab accessibilityLabel={t('mapAdd')} icon="＋" onPress={openAddLocation} />
         </View>
       </View>
 
-      <Modal
-        animationType="slide"
-        onRequestClose={() => setSheetMode(null)}
-        transparent
-        visible={sheetMode !== null}
-      >
+      <Modal animationType="slide" onRequestClose={() => setSheetMode(null)} transparent visible={sheetMode !== null}>
         <View style={styles.modalRoot}>
           <Pressable onPress={() => setSheetMode(null)} style={styles.modalBackdrop} />
           <View accessibilityViewIsModal style={styles.sheet}>
             <View style={styles.sheetHandle} />
             <View style={styles.sheetTopRow}>
               <View style={styles.sheetTabs}>
-                <SheetTab
-                  accessibilityLabel={t('mapSearch')}
-                  active={sheetMode === 'search'}
-                  icon="⌕"
-                  onPress={() => setSheetMode('search')}
-                />
+                <SheetTab accessibilityLabel={t('mapSearch')} active={sheetMode === 'search'} icon="⌕" onPress={() => setSheetMode('search')} />
                 <SheetTab
                   accessibilityLabel={`${t('mapAll')} / ${t('mapArtists')} / ${t('mapStudios')}`}
                   active={sheetMode === 'filters'}
@@ -511,20 +487,10 @@ export default function MapScreen() {
                   icon="≡"
                   onPress={() => setSheetMode('filters')}
                 />
-                <SheetTab
-                  accessibilityLabel={t('mapListMode')}
-                  active={sheetMode === 'list'}
-                  icon="☷"
-                  onPress={() => setSheetMode('list')}
-                />
+                <SheetTab accessibilityLabel={t('mapListMode')} active={sheetMode === 'list'} icon="☷" onPress={() => setSheetMode('list')} />
                 <SheetTab accessibilityLabel={t('mapAdd')} icon="＋" onPress={openAddLocation} />
               </View>
-              <Pressable
-                accessibilityLabel={t('close')}
-                accessibilityRole="button"
-                onPress={() => setSheetMode(null)}
-                style={({ pressed }) => [styles.sheetClose, pressed && styles.pressed]}
-              >
+              <Pressable accessibilityLabel={t('close')} accessibilityRole="button" onPress={() => setSheetMode(null)} style={({ pressed }) => [styles.sheetClose, pressed && styles.pressed]}>
                 <Text style={styles.sheetCloseText}>×</Text>
               </Pressable>
             </View>
@@ -538,148 +504,61 @@ export default function MapScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  header: {
-    backgroundColor: colors.background,
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.xs,
-  },
-  mapShell: {
-    flex: 1,
-    overflow: 'hidden',
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    backgroundColor: '#071317',
-  },
+  header: { backgroundColor: colors.background, paddingHorizontal: spacing.md, paddingBottom: spacing.xs },
+  mapShell: { flex: 1, overflow: 'hidden', borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: '#071317' },
   summaryPill: {
-    position: 'absolute',
-    left: spacing.sm,
-    top: spacing.sm,
-    borderRadius: radius.pill,
-    paddingHorizontal: 11,
-    paddingVertical: 7,
-    backgroundColor: 'rgba(0, 13, 24, 0.88)',
-    borderWidth: 1,
-    borderColor: 'rgba(4, 197, 191, 0.22)',
+    position: 'absolute', left: spacing.sm, top: spacing.sm, borderRadius: radius.pill,
+    paddingHorizontal: 11, paddingVertical: 7, backgroundColor: 'rgba(0, 13, 24, 0.88)',
+    borderWidth: 1, borderColor: 'rgba(4, 197, 191, 0.22)',
   },
   summaryText: { color: '#9bc0c4', fontSize: 10, fontWeight: '800' },
   floatingLocate: {
-    position: 'absolute',
-    right: spacing.sm,
-    top: spacing.sm,
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 22,
-    backgroundColor: 'rgba(7, 19, 23, 0.94)',
-    borderWidth: 1,
-    borderColor: 'rgba(4, 197, 191, 0.32)',
+    position: 'absolute', right: spacing.sm, top: spacing.sm, width: 44, height: 44,
+    alignItems: 'center', justifyContent: 'center', borderRadius: 22,
+    backgroundColor: 'rgba(7, 19, 23, 0.94)', borderWidth: 1, borderColor: 'rgba(4, 197, 191, 0.32)',
   },
   floatingLocateText: { color: colors.primary, fontSize: 23, fontWeight: '900' },
   mapDock: {
-    position: 'absolute',
-    left: '50%',
-    bottom: spacing.md,
-    marginLeft: -116,
-    width: 232,
-    minHeight: 58,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    paddingHorizontal: 6,
-    borderRadius: 29,
-    backgroundColor: 'rgba(7, 19, 23, 0.94)',
-    borderWidth: 1,
+    position: 'absolute', left: '50%', bottom: spacing.md, marginLeft: -116, width: 232, minHeight: 58,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', paddingHorizontal: 6,
+    borderRadius: 29, backgroundColor: 'rgba(7, 19, 23, 0.94)', borderWidth: 1,
     borderColor: 'rgba(4, 197, 191, 0.28)',
   },
-  sheetTab: {
-    width: 46,
-    height: 46,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 23,
-    position: 'relative',
-  },
+  sheetTab: { width: 46, height: 46, alignItems: 'center', justifyContent: 'center', borderRadius: 23, position: 'relative' },
   sheetTabActive: { backgroundColor: 'rgba(4, 197, 191, 0.14)' },
   sheetTabIcon: { color: '#9bc0c4', fontSize: 23, lineHeight: 25, fontWeight: '800' },
   sheetTabIconActive: { color: colors.primary },
   filterBadge: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    minWidth: 17,
-    height: 17,
-    borderRadius: 9,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.accent,
-    borderWidth: 2,
-    borderColor: '#071317',
+    position: 'absolute', right: 0, top: 0, minWidth: 17, height: 17, borderRadius: 9,
+    alignItems: 'center', justifyContent: 'center', backgroundColor: colors.accent,
+    borderWidth: 2, borderColor: '#071317',
   },
   filterBadgeText: { color: colors.white, fontSize: 9, fontWeight: '900' },
-  selectedCard: {
-    position: 'absolute',
-    left: spacing.sm,
-    right: spacing.sm,
-    bottom: 82,
-  },
+  selectedCard: { position: 'absolute', left: spacing.sm, right: spacing.sm, bottom: 82 },
   errorBanner: {
-    position: 'absolute',
-    left: spacing.md,
-    right: spacing.md,
-    top: 64,
-    borderColor: colors.danger,
-    borderWidth: 1,
-    borderRadius: radius.medium,
-    padding: spacing.sm,
-    backgroundColor: 'rgba(7, 19, 23, 0.96)',
+    position: 'absolute', left: spacing.md, right: spacing.md, top: 64, borderColor: colors.danger,
+    borderWidth: 1, borderRadius: radius.medium, padding: spacing.sm, backgroundColor: 'rgba(7, 19, 23, 0.96)',
   },
   errorText: { color: colors.danger, textAlign: 'center', fontSize: 12 },
   loadingOverlay: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    backgroundColor: 'rgba(0, 13, 24, 0.64)',
+    position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, alignItems: 'center',
+    justifyContent: 'center', gap: spacing.sm, backgroundColor: 'rgba(0, 13, 24, 0.64)',
   },
   loadingText: { color: colors.textMuted, textAlign: 'center', lineHeight: 20 },
   modalRoot: { flex: 1, justifyContent: 'flex-end' },
   modalBackdrop: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute', top: 0, right: 0, bottom: 0, left: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.38)',
   },
   sheet: {
-    height: '72%',
-    minHeight: 360,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    borderWidth: 1,
-    borderBottomWidth: 0,
-    borderColor: 'rgba(4, 197, 191, 0.24)',
-    backgroundColor: '#071317',
-    paddingTop: spacing.xs,
-    overflow: 'hidden',
+    height: '72%', minHeight: 360, borderTopLeftRadius: 28, borderTopRightRadius: 28,
+    borderWidth: 1, borderBottomWidth: 0, borderColor: 'rgba(4, 197, 191, 0.24)',
+    backgroundColor: '#071317', paddingTop: spacing.xs, overflow: 'hidden',
   },
-  sheetHandle: {
-    width: 42,
-    height: 4,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginTop: 4,
-    marginBottom: spacing.xs,
-    backgroundColor: 'rgba(155, 192, 196, 0.38)',
-  },
+  sheetHandle: { width: 42, height: 4, borderRadius: 2, alignSelf: 'center', marginTop: 4, marginBottom: spacing.xs, backgroundColor: 'rgba(155, 192, 196, 0.38)' },
   sheetTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.sm,
-    paddingBottom: spacing.xs,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(4, 197, 191, 0.12)',
+    flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.sm, paddingBottom: spacing.xs,
+    borderBottomWidth: 1, borderBottomColor: 'rgba(4, 197, 191, 0.12)',
   },
   sheetTabs: { flex: 1, flexDirection: 'row', justifyContent: 'space-around' },
   sheetClose: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center' },
@@ -687,14 +566,8 @@ const styles = StyleSheet.create({
   sheetBody: { flex: 1 },
   sheetScrollContent: { padding: spacing.md, paddingBottom: spacing.xxxl, gap: spacing.md },
   searchBox: {
-    minHeight: 48,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#030b10',
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingHorizontal: spacing.sm,
+    minHeight: 48, flexDirection: 'row', alignItems: 'center', backgroundColor: '#030b10',
+    borderColor: 'rgba(255, 255, 255, 0.12)', borderWidth: 1, borderRadius: 16, paddingHorizontal: spacing.sm,
   },
   searchIcon: { color: colors.primary, fontSize: 22, marginRight: spacing.xs },
   searchInput: { flex: 1, color: colors.text, fontSize: 15, minHeight: 46 },
@@ -703,48 +576,26 @@ const styles = StyleSheet.create({
   kindRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   wrapRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
   chip: {
-    minHeight: 36,
-    justifyContent: 'center',
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    paddingHorizontal: 11,
+    minHeight: 36, justifyContent: 'center', borderRadius: radius.pill, borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)', backgroundColor: 'rgba(255, 255, 255, 0.06)', paddingHorizontal: 11,
   },
-  chipActive: {
-    borderColor: 'rgba(255,255,255,0.18)',
-    backgroundColor: colors.primary,
-  },
+  chipActive: { borderColor: 'rgba(255,255,255,0.18)', backgroundColor: colors.primary },
   chipDisabled: { opacity: 0.42 },
   chipText: { color: colors.textMuted, fontSize: 12, fontWeight: '700' },
   chipTextActive: { color: colors.backgroundDeep, fontWeight: '900' },
   statGrid: { flexDirection: 'row', gap: spacing.sm },
-  statCard: {
-    flex: 1,
-    borderRadius: 16,
-    padding: spacing.md,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-  },
+  statCard: { flex: 1, borderRadius: 16, padding: spacing.md, backgroundColor: 'rgba(255, 255, 255, 0.06)' },
   statValue: { color: colors.text, fontSize: 22, fontWeight: '900' },
   statLabel: { color: '#9bc0c4', marginTop: 2, fontSize: 11, fontWeight: '700' },
   nearMeButton: {
-    minHeight: 46,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    borderRadius: radius.pill,
-    backgroundColor: colors.primary,
+    minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
+    borderRadius: radius.pill, backgroundColor: colors.primary,
   },
   nearMeIcon: { color: colors.backgroundDeep, fontSize: 21, fontWeight: '900' },
   nearMeText: { color: colors.backgroundDeep, fontSize: 13, fontWeight: '900' },
   filterSection: {
-    gap: spacing.sm,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    padding: spacing.md,
-    backgroundColor: 'rgba(255,255,255,0.025)',
+    gap: spacing.sm, borderRadius: 18, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)',
+    padding: spacing.md, backgroundColor: 'rgba(255,255,255,0.025)',
   },
   sectionTitle: { color: colors.text, fontSize: 13, fontWeight: '900' },
   listContent: { flexGrow: 1, padding: spacing.md, paddingBottom: spacing.xxxl },
