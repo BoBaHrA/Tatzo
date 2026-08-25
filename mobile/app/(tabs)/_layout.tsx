@@ -4,11 +4,11 @@ import { Text, type ColorValue } from 'react-native';
 import { useAuth } from '@/auth/auth-context';
 import { useChat } from '@/chat/chat-context';
 import { t } from '@/i18n';
-import { colors } from '@/theme';
+import { colors, radius } from '@/theme';
 
 
 function TabSymbol({ symbol, color }: { symbol: string; color: ColorValue }) {
-  return <Text style={{ color, fontSize: 19, lineHeight: 21 }}>{symbol}</Text>;
+  return <Text style={{ color, fontSize: 18, lineHeight: 20, fontWeight: '700' }}>{symbol}</Text>;
 }
 
 export default function TabsLayout() {
@@ -24,20 +24,26 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.primary,
+        tabBarActiveBackgroundColor: colors.accentSoft,
+        tabBarInactiveBackgroundColor: colors.backgroundDeep,
         tabBarStyle: {
           backgroundColor: colors.backgroundDeep,
           borderTopColor: colors.border,
           borderTopWidth: 1,
           height: 64,
-          paddingTop: 6,
+          paddingTop: 4,
+          paddingHorizontal: 4,
         },
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: '700',
-          paddingBottom: 5,
+          paddingBottom: 4,
         },
         tabBarItemStyle: {
-          paddingHorizontal: 1,
+          marginHorizontal: 1,
+          marginVertical: 3,
+          borderRadius: radius.medium,
+          overflow: 'hidden',
         },
         sceneStyle: { backgroundColor: colors.background },
       }}
@@ -51,7 +57,7 @@ export default function TabsLayout() {
         options={{
           title: t('chats'),
           tabBarBadge: unreadCount ? (unreadCount > 99 ? '99+' : unreadCount) : undefined,
-          tabBarBadgeStyle: { backgroundColor: colors.accent, color: colors.white },
+          tabBarBadgeStyle: { backgroundColor: colors.accent, color: colors.white, fontSize: 9 },
           tabBarIcon: ({ color }) => <TabSymbol symbol="◇" color={color} />,
         }}
       />
