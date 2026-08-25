@@ -15,10 +15,11 @@ import { colors, layout, spacing } from '@/theme';
 type ScreenProps = PropsWithChildren<{
   scroll?: boolean;
   contentStyle?: ViewStyle;
+  bottomInset?: boolean;
 }>;
 
-export function Screen({ children, scroll = true, contentStyle }: ScreenProps) {
-  const content = <View style={[styles.content, contentStyle]}>{children}</View>;
+export function Screen({ children, scroll = true, contentStyle, bottomInset = true }: ScreenProps) {
+  const content = <View style={[styles.content, !bottomInset && styles.noBottomInset, contentStyle]}>{children}</View>;
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
       <KeyboardAvoidingView
@@ -29,6 +30,7 @@ export function Screen({ children, scroll = true, contentStyle }: ScreenProps) {
           <ScrollView
             contentContainerStyle={styles.scroll}
             keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
             {content}
           </ScrollView>
@@ -54,11 +56,14 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     width: '100%',
-    maxWidth: 680,
+    maxWidth: layout.maxContentWidth,
     alignSelf: 'center',
     paddingHorizontal: layout.screenPadding,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.xl,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xxl,
     gap: layout.sectionGap,
+  },
+  noBottomInset: {
+    paddingBottom: 0,
   },
 });
