@@ -5,6 +5,7 @@ import {
   Image,
   Modal,
   Pressable,
+  Share,
   StyleSheet,
   Text,
   View,
@@ -12,7 +13,7 @@ import {
 
 import type { FeedPost, ReportReason } from '@/api/types';
 import { t } from '@/i18n';
-import { colors, radius, spacing } from '@/theme';
+import { colors, radius, spacing, typography } from '@/theme';
 
 import { PostMedia } from './post-media';
 
@@ -22,6 +23,7 @@ type PostCardProps = {
   onLike: (post: FeedPost) => Promise<void>;
   onBookmark: (post: FeedPost) => Promise<void>;
   onReport: (post: FeedPost, reason: ReportReason) => Promise<void>;
+  onDelete?: (post: FeedPost) => Promise<void>;
   onComments?: (post: FeedPost) => void;
 };
 
@@ -59,13 +61,16 @@ export function PostCard({
   onLike,
   onBookmark,
   onReport,
+  onDelete,
   onComments,
 }: PostCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [liking, setLiking] = useState(false);
   const [bookmarking, setBookmarking] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [reporting, setReporting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleLike = async () => {
     setLiking(true);
@@ -85,11 +90,23 @@ export function PostCard({
     }
   };
 
+  const handleDelete = async () => {
+    if (!onDelete) return;
+    setDeleting(true);
+    try {
+      await onDelete(post);
+      setMenuOpen(false);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const handleReport = async (reason: ReportReason) => {
     setReporting(true);
     try {
       await onReport(post, reason);
       setReportOpen(false);
+      setMenuOpen(false);
     } catch {
       // The parent surface displays the localized action error.
     } finally {
@@ -97,7 +114,19 @@ export function PostCard({
     }
   };
 
+  const sharePost = async () => {
+    const message = post.content.trim()
+      ? `${post.content.trim()}\n\nTatzo — https://tatzo.eu/`
+      : 'Tatzo — https://tatzo.eu/';
+    try {
+      await Share.share({ message });
+    } catch {
+      // Native share cancellation/failure should not interrupt feed interaction.
+    }
+  };
+
   const longContent = post.content.length > 220;
+  const owned = post.is_owned;
 
   const openComments = () => {
     if (onComments) {
@@ -110,68 +139,93 @@ export function PostCard({
     });
   };
 
+  const openProfile = () => router.push({
+    pathname: '/profile/[username]',
+    params: { username: post.author.username },
+  });
+
   return (
-    <View style={styles.card}>
-      <Pressable
-        accessibilityLabel={`${t('openProfile')} ${post.author.username}`}
-        accessibilityRole="button"
-        onPress={() => router.push({
-          pathname: '/profile/[username]',
-          params: { username: post.author.username },
-        })}
-        style={({ pressed }) => [styles.header, pressed && styles.headerPressed]}
-      >
-        {post.author.profile_image_url ? (
-          <Image source={{ uri: post.author.profile_image_url }} style={styles.avatar} />
-        ) : (
-          <View style={styles.avatarFallback}>
-            <Text style={styles.avatarLetter}>{post.author.username[0]?.toUpperCase()}</Text>
-          </View>
-        )}
-        <View style={styles.authorBlock}>
-          <View style={styles.authorLine}>
-            <Text numberOfLines={1} style={styles.author}>{post.author.username}</Text>
-            {post.author.is_verified_artist ? (
-              <Text accessibilityLabel={t('verified')} style={styles.verified}>✓</Text>
+    <View style={styles.post}>
+      <View style={[styles.messageRow, owned && styles.messageRowOwned]}>
+        <Pressable
+          accessibilityLabel={`${t('openProfile')} ${post.author.username}`}
+          accessibilityRole="button"
+          onPress={openProfile}
+          style={({ pressed }) => [styles.avatarButton, pressed && styles.pressed]}
+        >
+          {post.author.profile_image_url ? (
+            <Image source={{ uri: post.author.profile_image_url }} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatarFallback}>
+              <Text style={styles.avatarLetter}>{post.author.username[0]?.toUpperCase()}</Text>
+            </View>
+          )}
+        </Pressable>
+
+        <View style={[
+          styles.bubble,
+          owned ? styles.bubbleOwned : styles.bubbleOther,
+        ]}>
+          <View style={styles.header}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={openProfile}
+              style={({ pressed }) => [styles.authorBlock, pressed && styles.pressed]}
+            >
+              <View style={styles.authorLine}>
+                <Text numberOfLines={1} style={styles.author}>{post.author.username}</Text>
+                {post.author.is_verified_artist ? (
+                  <View accessibilityLabel={t('verified')} style={styles.verifiedBadge}>
+                    <Text style={styles.verifiedText}>✓</Text>
+                  </View>
+                ) : null}
+              </View>
+              <View style={styles.metaLine}>
+                {post.author.tag ? <Text style={styles.tag}>@{post.author.tag}</Text> : null}
+                <Text style={styles.date}>{formatPostDate(post.created_at)}</Text>
+              </View>
+            </Pressable>
+
+            {(owned ? Boolean(onDelete) : true) ? (
+              <Pressable
+                accessibilityLabel={owned ? t('deletePost') : t('reportPost')}
+                accessibilityRole="button"
+                onPress={() => setMenuOpen(true)}
+                style={({ pressed }) => [styles.menuButton, pressed && styles.pressed]}
+              >
+                <Text style={styles.menuText}>⋯</Text>
+              </Pressable>
             ) : null}
           </View>
-          <View style={styles.metaLine}>
-            {post.author.tag ? <Text style={styles.tag}>@{post.author.tag}</Text> : null}
-            <Text style={styles.date}>{formatPostDate(post.created_at)}</Text>
-          </View>
-        </View>
-      </Pressable>
 
-      {post.location ? <Text style={styles.location}>⌖ {post.location}</Text> : null}
+          {post.location ? <Text style={styles.location}>⌖ {post.location}</Text> : null}
 
-      {post.is_ad || post.visibility !== 'public' ? (
-        <View style={styles.badges}>
-          {post.is_ad ? <Text style={[styles.badge, styles.adBadge]}>{t('ad')}</Text> : null}
-          {post.visibility === 'followers' ? (
-            <Text style={styles.badge}>{t('followersOnly')}</Text>
+          {post.is_ad || post.visibility !== 'public' ? (
+            <View style={styles.badges}>
+              {post.is_ad ? <Text style={[styles.badge, styles.adBadge]}>{t('ad')}</Text> : null}
+              {post.visibility === 'followers' ? <Text style={styles.badge}>{t('followersOnly')}</Text> : null}
+              {post.visibility === 'private' ? <Text style={styles.badge}>{t('privatePost')}</Text> : null}
+            </View>
           ) : null}
-          {post.visibility === 'private' ? (
-            <Text style={styles.badge}>{t('privatePost')}</Text>
-          ) : null}
-        </View>
-      ) : null}
 
-      <PostMedia media={post.media} />
+          <PostMedia media={post.media} />
 
-      {post.content ? (
-        <View style={styles.contentBlock}>
-          <Text numberOfLines={expanded ? undefined : 5} style={styles.content}>
-            {post.content}
-          </Text>
-          {longContent ? (
-            <Pressable onPress={() => setExpanded((current) => !current)}>
-              <Text style={styles.more}>{expanded ? t('showLess') : t('showMore')}</Text>
-            </Pressable>
+          {post.content ? (
+            <View style={styles.contentBlock}>
+              <Text numberOfLines={expanded ? undefined : 5} style={styles.content}>
+                {post.content}
+              </Text>
+              {longContent ? (
+                <Pressable onPress={() => setExpanded((current) => !current)}>
+                  <Text style={styles.more}>{expanded ? t('showLess') : t('showMore')}</Text>
+                </Pressable>
+              ) : null}
+            </View>
           ) : null}
         </View>
-      ) : null}
+      </View>
 
-      <View style={styles.actions}>
+      <View style={[styles.actions, owned ? styles.actionsOwned : styles.actionsOther]}>
         <View style={styles.actionGroup}>
           <Pressable
             accessibilityLabel={post.is_liked ? t('unlike') : t('like')}
@@ -179,28 +233,35 @@ export function PostCard({
             accessibilityState={{ busy: liking, selected: post.is_liked }}
             disabled={liking}
             onPress={() => void handleLike()}
-            style={({ pressed }) => [
-              styles.action,
-              post.is_liked && styles.actionLiked,
-              pressed && styles.actionPressed,
-            ]}
+            style={({ pressed }) => [styles.actionButton, pressed && styles.actionPressed]}
           >
-            <Text style={[styles.actionIcon, post.is_liked && styles.likeIconActive]}>
+            <Text style={[styles.likeIcon, post.is_liked && styles.likeIconActive]}>
               {post.is_liked ? '♥' : '♡'}
             </Text>
-            <Text style={styles.actionText}>{post.likes_count}</Text>
+            {post.likes_count > 0 ? <Text style={styles.actionCount}>{post.likes_count}</Text> : null}
           </Pressable>
 
           <Pressable
-            accessibilityLabel={`${t('comments')}: ${post.comments_count}${
-              post.disable_comments ? `. ${t('commentsDisabled')}` : ''
-            }`}
+            accessibilityLabel={`${t('comments')}: ${post.comments_count}`}
             accessibilityRole="button"
             onPress={openComments}
-            style={({ pressed }) => [styles.action, pressed && styles.actionPressed]}
+            style={({ pressed }) => [styles.actionButton, pressed && styles.actionPressed]}
           >
-            <Text style={styles.commentIcon}>{post.disable_comments ? '⊘' : '◯'}</Text>
-            <Text style={styles.actionText}>{post.comments_count}</Text>
+            <Text style={[styles.commentIcon, post.disable_comments && styles.disabledIcon]}>
+              {post.disable_comments ? '⊘' : '◯'}
+            </Text>
+            {!post.disable_comments && post.comments_count > 0 ? (
+              <Text style={styles.actionCount}>{post.comments_count}</Text>
+            ) : null}
+          </Pressable>
+
+          <Pressable
+            accessibilityLabel="Share"
+            accessibilityRole="button"
+            onPress={() => void sharePost()}
+            style={({ pressed }) => [styles.actionButton, pressed && styles.actionPressed]}
+          >
+            <Text style={styles.shareIcon}>↗</Text>
           </Pressable>
         </View>
 
@@ -210,36 +271,59 @@ export function PostCard({
           accessibilityState={{ busy: bookmarking, selected: post.is_bookmarked }}
           disabled={bookmarking}
           onPress={() => void handleBookmark()}
-          style={({ pressed }) => [
-            styles.saveAction,
-            post.is_bookmarked && styles.saveActionActive,
-            pressed && styles.actionPressed,
-          ]}
+          style={({ pressed }) => [styles.bookmarkButton, pressed && styles.actionPressed]}
         >
-          <Text style={[styles.saveLabel, post.is_bookmarked && styles.saveLabelActive]}>
-            {post.is_bookmarked ? t('saved') : t('bookmark')}
+          <Text style={[styles.bookmarkIcon, post.is_bookmarked && styles.bookmarkActive]}>
+            {post.is_bookmarked ? '◆' : '◇'}
           </Text>
         </Pressable>
       </View>
 
-      {!post.is_owned ? (
-        <Pressable
-          accessibilityLabel={post.is_reported ? t('reported') : t('reportPost')}
-          accessibilityRole="button"
-          accessibilityState={{ disabled: post.is_reported }}
-          disabled={post.is_reported}
-          onPress={() => setReportOpen(true)}
-          style={({ pressed }) => [
-            styles.reportTrigger,
-            post.is_reported && styles.reportedTrigger,
-            pressed && styles.actionPressed,
-          ]}
-        >
-          <Text style={[styles.reportLabel, post.is_reported && styles.reportedLabel]}>
-            {post.is_reported ? `✓ ${t('reported')}` : `⚑ ${t('report')}`}
-          </Text>
+      <Modal
+        animationType="fade"
+        onRequestClose={() => !deleting && setMenuOpen(false)}
+        transparent
+        visible={menuOpen}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => !deleting && setMenuOpen(false)}>
+          <View accessibilityViewIsModal style={styles.menuSheet}>
+            {owned && onDelete ? (
+              <Pressable
+                accessibilityRole="button"
+                disabled={deleting}
+                onPress={() => void handleDelete()}
+                style={({ pressed }) => [styles.menuAction, pressed && styles.pressed]}
+              >
+                {deleting ? <ActivityIndicator color={colors.danger} /> : (
+                  <Text style={styles.deleteMenuText}>{t('deletePost')}</Text>
+                )}
+              </Pressable>
+            ) : (
+              <Pressable
+                accessibilityRole="button"
+                disabled={post.is_reported}
+                onPress={() => {
+                  setMenuOpen(false);
+                  setReportOpen(true);
+                }}
+                style={({ pressed }) => [styles.menuAction, pressed && styles.pressed]}
+              >
+                <Text style={post.is_reported ? styles.reportedMenuText : styles.menuActionText}>
+                  {post.is_reported ? `✓ ${t('reported')}` : t('reportPost')}
+                </Text>
+              </Pressable>
+            )}
+            <Pressable
+              accessibilityRole="button"
+              disabled={deleting}
+              onPress={() => setMenuOpen(false)}
+              style={({ pressed }) => [styles.menuAction, pressed && styles.pressed]}
+            >
+              <Text style={styles.cancelMenuText}>{t('cancel')}</Text>
+            </Pressable>
+          </View>
         </Pressable>
-      ) : null}
+      </Modal>
 
       <Modal
         animationType="fade"
@@ -258,10 +342,7 @@ export function PostCard({
                   disabled={reporting}
                   key={reason}
                   onPress={() => void handleReport(reason)}
-                  style={({ pressed }) => [
-                    styles.reasonButton,
-                    pressed && styles.actionPressed,
-                  ]}
+                  style={({ pressed }) => [styles.reasonButton, pressed && styles.pressed]}
                 >
                   <Text style={styles.reasonText}>{reportReasonLabel(reason)}</Text>
                 </Pressable>
@@ -272,7 +353,7 @@ export function PostCard({
               accessibilityRole="button"
               disabled={reporting}
               onPress={() => setReportOpen(false)}
-              style={({ pressed }) => [styles.cancelReport, pressed && styles.actionPressed]}
+              style={({ pressed }) => [styles.cancelReport, pressed && styles.pressed]}
             >
               <Text style={styles.cancelReportText}>{t('cancel')}</Text>
             </Pressable>
@@ -284,117 +365,157 @@ export function PostCard({
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
+  post: {
+    width: '100%',
+  },
+  messageRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+  },
+  messageRowOwned: {
+    flexDirection: 'row-reverse',
+  },
+  avatarButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    marginTop: spacing.sm,
+  },
+  avatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  avatarFallback: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surfaceInteractive,
+    borderWidth: 1,
+    borderColor: colors.primaryMuted,
+  },
+  avatarLetter: { color: colors.primary, fontSize: 15, fontWeight: '900' },
+  bubble: {
+    flex: 1,
+    minWidth: 0,
+    backgroundColor: colors.surfaceRaised,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: radius.large,
     padding: spacing.md,
     gap: spacing.sm,
   },
-  header: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  headerPressed: { opacity: 0.72 },
-  avatar: { width: 46, height: 46, borderRadius: 23 },
-  avatarFallback: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primaryMuted,
+  bubbleOther: { borderTopLeftRadius: 4 },
+  bubbleOwned: { borderTopRightRadius: 4 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
   },
-  avatarLetter: { color: colors.text, fontSize: 20, fontWeight: '900' },
   authorBlock: { flex: 1, gap: 2 },
   authorLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  author: { color: colors.text, fontSize: 16, fontWeight: '900', flexShrink: 1 },
-  verified: {
-    color: colors.backgroundDeep,
-    backgroundColor: colors.primary,
+  author: { color: colors.text, fontSize: 15, fontWeight: '900', flexShrink: 1 },
+  verifiedBadge: {
     width: 17,
     height: 17,
     borderRadius: 9,
-    textAlign: 'center',
-    fontSize: 12,
-    fontWeight: '900',
-    overflow: 'hidden',
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  verifiedText: { color: colors.backgroundDeep, fontSize: 11, lineHeight: 13, fontWeight: '900' },
   metaLine: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flexWrap: 'wrap' },
-  tag: { color: colors.primary, fontSize: 12, fontWeight: '700' },
-  date: { color: colors.textMuted, fontSize: 12 },
-  location: { color: colors.textMuted, fontSize: 13, paddingHorizontal: 2 },
+  tag: { color: colors.primary, ...typography.caption, fontWeight: '700' },
+  date: { color: colors.textMuted, ...typography.caption },
+  menuButton: {
+    width: 34,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -4,
+    marginRight: -4,
+  },
+  menuText: { color: colors.textMuted, fontSize: 24, lineHeight: 24, fontWeight: '800' },
+  location: { color: colors.textMuted, fontSize: 12, paddingHorizontal: 1 },
   badges: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   badge: {
     color: colors.textMuted,
     borderColor: colors.border,
     borderWidth: 1,
     borderRadius: radius.pill,
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    fontSize: 11,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    fontSize: 10,
     fontWeight: '800',
     overflow: 'hidden',
   },
   adBadge: { color: colors.accent, borderColor: colors.accent },
-  contentBlock: { gap: spacing.xs, paddingHorizontal: 2 },
-  content: { color: colors.text, fontSize: 15, lineHeight: 22 },
-  more: { color: colors.primary, fontWeight: '800' },
+  contentBlock: { gap: spacing.xs, paddingHorizontal: 1 },
+  content: { color: colors.text, fontSize: 14, lineHeight: 20 },
+  more: { color: colors.primary, fontSize: 12, fontWeight: '800' },
   actions: {
-    minHeight: 42,
+    minHeight: 40,
+    marginTop: spacing.xs,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  actionGroup: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  action: {
-    minWidth: 58,
-    minHeight: 40,
+  actionsOther: { paddingLeft: 46 },
+  actionsOwned: { paddingRight: 46 },
+  actionGroup: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  actionButton: {
+    minHeight: 38,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    backgroundColor: colors.backgroundDeep,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: spacing.sm,
+    gap: 4,
+    paddingHorizontal: 2,
   },
-  actionLiked: { borderColor: colors.accent },
-  actionPressed: { opacity: 0.7, transform: [{ scale: 0.96 }] },
-  actionIcon: { color: colors.textMuted, fontSize: 24, lineHeight: 26 },
+  actionPressed: { opacity: 0.58, transform: [{ scale: 0.94 }] },
+  likeIcon: { color: colors.textMuted, fontSize: 27, lineHeight: 29 },
   likeIconActive: { color: colors.accent },
-  commentIcon: { color: colors.primary, fontSize: 20, lineHeight: 22 },
-  actionText: { color: colors.text, fontWeight: '800' },
-  saveAction: {
-    minWidth: 72,
-    height: 42,
-    borderRadius: 21,
+  commentIcon: { color: colors.primary, fontSize: 21, lineHeight: 23 },
+  disabledIcon: { color: colors.textSubtle },
+  shareIcon: { color: colors.primary, fontSize: 22, lineHeight: 24, fontWeight: '700' },
+  actionCount: { color: colors.textMuted, fontSize: 12, fontWeight: '800' },
+  bookmarkButton: {
+    minWidth: 38,
+    minHeight: 38,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.backgroundDeep,
-    paddingHorizontal: spacing.sm,
   },
-  saveActionActive: { borderColor: colors.primary },
-  saveLabel: { color: colors.textMuted, fontSize: 12, fontWeight: '800' },
-  saveLabelActive: { color: colors.primary },
-  reportTrigger: {
-    alignSelf: 'flex-end',
-    minHeight: 36,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.sm,
-    borderRadius: radius.pill,
-  },
-  reportedTrigger: { opacity: 0.74 },
-  reportLabel: { color: colors.textMuted, fontSize: 12, fontWeight: '800' },
-  reportedLabel: { color: colors.success },
+  bookmarkIcon: { color: colors.textMuted, fontSize: 20, lineHeight: 22 },
+  bookmarkActive: { color: colors.primary },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 10, 18, 0.82)',
+    backgroundColor: 'rgba(0, 9, 17, 0.82)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.lg,
   },
+  menuSheet: {
+    width: '100%',
+    maxWidth: 420,
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: radius.large,
+    padding: spacing.xs,
+  },
+  menuAction: {
+    minHeight: 48,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.medium,
+  },
+  menuActionText: { color: colors.text, ...typography.bodyStrong },
+  deleteMenuText: { color: colors.danger, ...typography.bodyStrong },
+  reportedMenuText: { color: colors.success, ...typography.bodyStrong },
+  cancelMenuText: { color: colors.textMuted, ...typography.bodyStrong },
   reportSheet: {
     width: '100%',
     maxWidth: 480,
@@ -405,11 +526,11 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.md,
   },
-  reportTitle: { color: colors.text, fontSize: 23, fontWeight: '900' },
-  reportHint: { color: colors.textMuted, lineHeight: 21 },
-  reasonList: { gap: spacing.sm },
+  reportTitle: { color: colors.text, fontSize: 21, fontWeight: '900' },
+  reportHint: { color: colors.textMuted, lineHeight: 20 },
+  reasonList: { gap: spacing.xs },
   reasonButton: {
-    minHeight: 48,
+    minHeight: 44,
     justifyContent: 'center',
     backgroundColor: colors.backgroundDeep,
     borderColor: colors.border,
@@ -417,7 +538,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.medium,
     paddingHorizontal: spacing.md,
   },
-  reasonText: { color: colors.text, fontSize: 15, fontWeight: '700' },
-  cancelReport: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  reasonText: { color: colors.text, fontSize: 14, fontWeight: '700' },
+  cancelReport: { minHeight: 42, alignItems: 'center', justifyContent: 'center' },
   cancelReportText: { color: colors.primary, fontWeight: '800' },
+  pressed: { opacity: 0.72 },
 });
