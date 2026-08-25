@@ -1,44 +1,49 @@
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useAuth } from '@/auth/auth-context';
-import { BrandHeader } from '@/components/brand-header';
+import { authCopy, authError } from '@/auth/auth-copy';
+import { AuthPasswordField } from '@/auth/auth-password-field';
+import { AuthShell } from '@/auth/auth-shell';
 import { Button } from '@/components/button';
 import { Field } from '@/components/field';
-import { Screen } from '@/components/screen';
-import { userFacingError } from '@/errors';
-import { t } from '@/i18n';
-import { colors, radius, spacing } from '@/theme';
+import { useLanguage } from '@/localization/language-context';
+import { PUBLIC_LINKS } from '@/public-links';
+import { colors, spacing, typography } from '@/theme';
 
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
+  const { language } = useLanguage();
+  const copy = authCopy(language);
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
+    if (!identifier.trim() || !password || loading) return;
     setLoading(true);
     setError('');
     try {
       await signIn(identifier.trim(), password);
       router.replace('/(tabs)/home');
     } catch (caught) {
-      setError(userFacingError(caught));
+      setError(authError(caught, language));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Screen contentStyle={styles.centered}>
-      <BrandHeader />
-      <View style={styles.card}>
-        <Text style={styles.title}>{t('signIn')}</Text>
+    <AuthShell centered>
+      <Text style={styles.title}>{copy.welcome}</Text>
+      <View style={styles.form}>
         <Field
-          label={t('identifier')}
+          tone="auth"
+          label={copy.username}
+          placeholder={copy.identifierPlaceholder}
           value={identifier}
           onChangeText={setIdentifier}
           autoCapitalize="none"
@@ -46,46 +51,82 @@ export default function LoginScreen() {
           textContentType="username"
           returnKeyType="next"
         />
-        <Field
-          label={t('password')}
+        <AuthPasswordField
+          label={copy.password}
+          placeholder={copy.passwordPlaceholder}
           value={password}
           onChangeText={setPassword}
-          secureTextEntry
+          showLabel={copy.showPassword}
+          hideLabel={copy.hidePassword}
           textContentType="password"
           returnKeyType="done"
           onSubmitEditing={() => void submit()}
         />
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-        <Button
-          label={t('signIn')}
-          loading={loading}
-          disabled={!identifier.trim() || !password}
-          onPress={() => void submit()}
-        />
-        <View style={styles.switchRow}>
-          <Text style={styles.muted}>{t('noAccount')}</Text>
-          <Link href="/(auth)/register" style={styles.link}>
-            {t('signUp')}
-          </Link>
-        </View>
       </View>
-    </Screen>
+      {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
+      <Button
+        variant="accent"
+        label={copy.signIn}
+        loading={loading}
+        disabled={!identifier.trim() || !password}
+        onPress={() => void submit()}
+      />
+      <View style={styles.links}>
+        <View style={styles.switchRow}>
+          <Text style={styles.muted}>{copy.noAccount}</Text>
+          <Link href="/(auth)/register" style={styles.link}>{copy.createAccount}</Link>
+        </View>
+        <Pressable
+          accessibilityRole="link"
+          onPress={() => void Linking.openURL(PUBLIC_LINKS.passwordReset)}
+          style={({ pressed }) => pressed && styles.pressed}
+        >
+          <Text style={styles.smallLink}>{copy.forgotPassword}</Text>
+        </Pressable>
+      </View>
+    </AuthShell>
   );
 }
 
 const styles = StyleSheet.create({
-  centered: { justifyContent: 'center' },
-  card: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: radius.large,
-    padding: spacing.lg,
+  title: {
+    color: colors.accent,
+    ...typography.title,
+    textAlign: 'center',
+    marginBottom: spacing.xs,
+  },
+  form: {
     gap: spacing.md,
   },
-  title: { color: colors.text, fontSize: 28, fontWeight: '800' },
-  error: { color: colors.danger, lineHeight: 20 },
-  switchRow: { flexDirection: 'row', justifyContent: 'center', gap: spacing.xs, flexWrap: 'wrap' },
-  muted: { color: colors.textMuted },
-  link: { color: colors.primary, fontWeight: '700' },
+  error: {
+    color: colors.danger,
+    ...typography.caption,
+    textAlign: 'center',
+  },
+  links: {
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  switchRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    flexWrap: 'wrap',
+  },
+  muted: {
+    color: colors.textMuted,
+    ...typography.body,
+  },
+  link: {
+    color: colors.accent,
+    ...typography.bodyStrong,
+  },
+  smallLink: {
+    color: colors.primary,
+    ...typography.caption,
+    fontWeight: '700',
+  },
+  pressed: {
+    opacity: 0.65,
+  },
 });
