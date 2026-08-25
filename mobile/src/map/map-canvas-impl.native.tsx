@@ -5,11 +5,16 @@ import LeafletMap from '@/map/leaflet-map';
 import type { MapRegion } from '@/map/map-api';
 
 
+type UserLocation = {
+  latitude: number;
+  longitude: number;
+};
+
 export type MapCanvasProps = {
   markers: MapLocationMarker[];
   region: MapRegion;
   selectedMarkerId: string | null;
-  showsUserLocation?: boolean;
+  userLocation?: UserLocation | null;
   onRegionChange: (region: MapRegion) => void;
   onSelectMarker: (marker: MapLocationMarker) => void;
 };
@@ -18,7 +23,7 @@ export function MapCanvas({
   markers,
   region,
   selectedMarkerId,
-  showsUserLocation = false,
+  userLocation = null,
   onRegionChange,
   onSelectMarker,
 }: MapCanvasProps) {
@@ -39,7 +44,7 @@ export function MapCanvas({
         }}
         region={region}
         selectedMarkerId={selectedMarkerId}
-        showsUserLocation={showsUserLocation}
+        userLocation={userLocation}
       />
     </View>
   );
