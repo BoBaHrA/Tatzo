@@ -37,7 +37,10 @@ export function PostMedia({ media }: PostMediaProps) {
   const items = media.filter((item) => Boolean(item.url));
   const [frameWidth, setFrameWidth] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
-  const frameHeight = Math.min(Math.max(frameWidth * 1.08, 320), 560);
+
+  // Keep feed media close to the mobile web treatment: compact enough that
+  // author/content/actions remain visible, while still leaving room for tattoo detail.
+  const frameHeight = Math.min(Math.max(frameWidth * 0.82, 210), 310);
 
   if (items.length === 0) return null;
 
@@ -102,23 +105,23 @@ export function PostMedia({ media }: PostMediaProps) {
 const styles = StyleSheet.create({
   frame: {
     width: '100%',
-    minHeight: 320,
+    minHeight: 210,
     overflow: 'hidden',
-    backgroundColor: colors.backgroundDeep,
-    borderRadius: radius.medium,
+    backgroundColor: colors.black,
+    borderRadius: 14,
   },
   counter: {
     position: 'absolute',
     top: spacing.sm,
     right: spacing.sm,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(0, 10, 18, 0.78)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    backgroundColor: 'rgba(0, 8, 14, 0.78)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   counterText: {
-    color: colors.text,
-    fontSize: 12,
+    color: colors.white,
+    fontSize: 11,
     fontWeight: '800',
   },
   dots: {
@@ -131,13 +134,13 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   dot: {
-    width: 6,
-    height: 6,
+    width: 5,
+    height: 5,
     borderRadius: 3,
-    backgroundColor: 'rgba(255, 255, 255, 0.42)',
+    backgroundColor: 'rgba(255, 255, 255, 0.48)',
   },
   dotActive: {
-    width: 16,
+    width: 14,
     backgroundColor: colors.primary,
   },
 });
