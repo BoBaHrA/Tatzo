@@ -117,7 +117,7 @@ export default function PostDetailScreen() {
 
   const confirmDelete = (current: FeedPost): Promise<void> => new Promise((resolve) => {
     Alert.alert(t('deletePost'), t('deletePostConfirm'), [
-      { text: t('cancel'), style: 'cancel', onPress: resolve },
+      { text: t('cancel'), style: 'cancel', onPress: () => resolve() },
       {
         text: t('delete'),
         style: 'destructive',
