@@ -12,7 +12,7 @@ import { colors, layout, radius, spacing, typography } from '@/theme';
 type ButtonProps = PressableProps & {
   label: string;
   loading?: boolean;
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  variant?: 'primary' | 'accent' | 'secondary' | 'ghost' | 'danger';
   size?: 'compact' | 'default';
 };
 
@@ -26,6 +26,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const isDisabled = Boolean(disabled || loading);
+  const darkLabel = variant === 'primary';
   return (
     <Pressable
       accessibilityRole="button"
@@ -41,13 +42,13 @@ export function Button({
       {...props}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? colors.backgroundDeep : colors.text} />
+        <ActivityIndicator color={darkLabel ? colors.backgroundDeep : colors.text} />
       ) : (
         <Text
           numberOfLines={1}
           style={[
             styles.label,
-            variant === 'primary' && styles.primaryLabel,
+            darkLabel && styles.primaryLabel,
             variant === 'danger' && styles.dangerLabel,
           ]}
         >
@@ -76,6 +77,10 @@ const styles = StyleSheet.create({
   primary: {
     backgroundColor: colors.primary,
     borderColor: colors.primary,
+  },
+  accent: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
   },
   secondary: {
     backgroundColor: colors.surfaceSoft,
