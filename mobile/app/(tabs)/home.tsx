@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Pressable,
   RefreshControl,
@@ -23,7 +24,8 @@ import {
 } from '@/feed/feed-api';
 import { PostCard } from '@/feed/post-card';
 import { t } from '@/i18n';
-import { colors, radius, spacing } from '@/theme';
+import { deletePost } from '@/publishing/publishing-api';
+import { colors, radius, spacing, typography } from '@/theme';
 
 
 export default function HomeScreen() {
@@ -126,6 +128,29 @@ export default function HomeScreen() {
     }
   };
 
+  const removePost = (post: FeedPost): Promise<void> => new Promise((resolve) => {
+    Alert.alert(t('deletePost'), t('deletePostConfirm'), [
+      { text: t('cancel'), style: 'cancel', onPress: resolve },
+      {
+        text: t('delete'),
+        style: 'destructive',
+        onPress: () => {
+          void (async () => {
+            setActionError('');
+            try {
+              await deletePost(request, post.id);
+              setPosts((current) => current.filter((item) => item.id !== post.id));
+            } catch {
+              setActionError(t('deletePostError'));
+            } finally {
+              resolve();
+            }
+          })();
+        },
+      },
+    ]);
+  });
+
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={styles.safe}>
       <FlatList
@@ -160,10 +185,9 @@ export default function HomeScreen() {
               onPress={() => router.push('/create-post')}
               style={({ pressed }) => [styles.createStrip, pressed && styles.createStripPressed]}
             >
-              <View style={styles.createCopy}>
-                <Text style={styles.eyebrow}>TATZO FEED</Text>
-                <Text style={styles.createLabel}>{t('createPost')}</Text>
-              </View>
+              <Text numberOfLines={1} style={styles.createPlaceholder}>
+                {t('postCaptionPlaceholder')}
+              </Text>
               <View style={styles.createPlus}>
                 <Text style={styles.createPlusText}>+</Text>
               </View>
@@ -185,6 +209,7 @@ export default function HomeScreen() {
         renderItem={({ item }) => (
           <PostCard
             onBookmark={bookmarkPost}
+            onDelete={removePost}
             onLike={likePost}
             onReport={reportPost}
             post={item}
@@ -198,52 +223,47 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  list: { width: '100%', maxWidth: 620, alignSelf: 'center' },
+  list: { width: '100%', maxWidth: 700, alignSelf: 'center' },
   listContent: {
     flexGrow: 1,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.xs,
     paddingBottom: spacing.xxl,
   },
-  header: { gap: spacing.md, marginBottom: spacing.md },
+  header: { gap: spacing.sm, marginBottom: spacing.md },
   createStrip: {
-    minHeight: 62,
+    minHeight: 46,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.surfaceSoft,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: radius.large,
-    paddingVertical: spacing.sm,
+    gap: spacing.sm,
+    backgroundColor: '#005351',
+    borderRadius: radius.pill,
     paddingLeft: spacing.lg,
-    paddingRight: spacing.sm,
+    paddingRight: spacing.xs,
+    borderWidth: 1,
+    borderColor: 'rgba(4, 197, 191, 0.32)',
   },
-  createStripPressed: { opacity: 0.82, transform: [{ scale: 0.993 }] },
-  createCopy: { flex: 1, gap: 2 },
-  eyebrow: {
-    color: colors.primary,
-    fontSize: 9,
-    lineHeight: 12,
-    fontWeight: '900',
-    letterSpacing: 1.7,
+  createStripPressed: { opacity: 0.82, transform: [{ scale: 0.995 }] },
+  createPlaceholder: {
+    flex: 1,
+    color: '#8bd2d1',
+    ...typography.body,
   },
-  createLabel: { color: colors.text, fontSize: 15, lineHeight: 20, fontWeight: '700' },
   createPlus: {
-    width: 42,
-    height: 42,
-    borderRadius: 13,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primary,
+    backgroundColor: 'rgba(0, 9, 17, 0.26)',
   },
   createPlusText: {
-    color: colors.backgroundDeep,
-    fontSize: 27,
-    lineHeight: 29,
-    fontWeight: '600',
+    color: colors.primary,
+    fontSize: 26,
+    lineHeight: 27,
+    fontWeight: '500',
   },
-  separator: { height: spacing.md },
+  separator: { height: spacing.lg },
   centerState: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, minHeight: 240 },
   stateCard: {
     backgroundColor: colors.surface,
