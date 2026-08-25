@@ -12,7 +12,7 @@ type AuthShellProps = PropsWithChildren<{
 
 export function AuthShell({ children, centered = false }: AuthShellProps) {
   return (
-    <Screen contentStyle={[styles.screen, centered && styles.centered]}>
+    <Screen contentStyle={centered ? styles.centeredScreen : styles.screen}>
       <View style={styles.frame}>
         <AuthLanguageSwitcher />
         <Image
@@ -31,7 +31,8 @@ const styles = StyleSheet.create({
   screen: {
     paddingTop: spacing.sm,
   },
-  centered: {
+  centeredScreen: {
+    paddingTop: spacing.sm,
     justifyContent: 'center',
   },
   frame: {
