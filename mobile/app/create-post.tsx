@@ -7,7 +7,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   View,
 } from 'react-native';
@@ -16,6 +15,7 @@ import type { FeedPost } from '@/api/types';
 import { useAuth } from '@/auth/auth-context';
 import { BrandHeader } from '@/components/brand-header';
 import { Button } from '@/components/button';
+import { Checkbox } from '@/components/checkbox';
 import { Field } from '@/components/field';
 import { Screen } from '@/components/screen';
 import { userFacingError } from '@/errors';
@@ -24,7 +24,7 @@ import {
   createPost,
   type PendingPublishMedia,
 } from '@/publishing/publishing-api';
-import { colors, radius, spacing } from '@/theme';
+import { colors, radius, spacing, typography } from '@/theme';
 
 
 const MAX_MEDIA = 10;
@@ -127,19 +127,21 @@ export default function CreatePostScreen() {
 
   return (
     <Screen contentStyle={styles.screen}>
-      <BrandHeader />
-      <View style={styles.header}>
-        <View style={styles.headingCopy}>
-          <Text style={styles.eyebrow}>{t('createPostEyebrow')}</Text>
-          <Text style={styles.title}>{t('createPost')}</Text>
-          <Text style={styles.subtitle}>{t('createPostSubtitle')}</Text>
+      <View style={styles.topRow}>
+        <View style={styles.headerWrap}>
+          <BrandHeader title={t('createPost')} showNotifications={false} />
         </View>
-        <Pressable accessibilityLabel={t('close')} onPress={close} style={styles.close}>
+        <Pressable
+          accessibilityLabel={t('close')}
+          accessibilityRole="button"
+          onPress={close}
+          style={({ pressed }) => [styles.close, pressed && styles.pressed]}
+        >
           <Text style={styles.closeText}>×</Text>
         </Pressable>
       </View>
 
-      <View style={styles.card}>
+      <View style={styles.composer}>
         <Field
           label={t('postCaption')}
           maxLength={5000}
@@ -147,7 +149,62 @@ export default function CreatePostScreen() {
           onChangeText={setContent}
           placeholder={t('postCaptionPlaceholder')}
           value={content}
+          style={styles.captionInput}
         />
+
+        <View style={styles.mediaToolbar}>
+          <View style={styles.mediaCopy}>
+            <Text style={styles.mediaTitle}>{t('postMedia')}</Text>
+            <Text style={styles.mediaHint}>{media.length}/{MAX_MEDIA}</Text>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            disabled={media.length >= MAX_MEDIA}
+            onPress={() => void pickMedia()}
+            style={({ pressed }) => [
+              styles.addMedia,
+              media.length >= MAX_MEDIA && styles.disabled,
+              pressed && styles.pressed,
+            ]}
+          >
+            <Text style={styles.addMediaPlus}>+</Text>
+            <Text style={styles.addMediaText}>
+              {media.length ? t('addMoreMedia') : t('choosePostMedia')}
+            </Text>
+          </Pressable>
+        </View>
+
+        {media.length ? (
+          <ScrollView
+            contentContainerStyle={styles.previewRow}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          >
+            {media.map((item) => (
+              <View key={item.key} style={styles.previewCard}>
+                {item.type === 'image' ? (
+                  <Image source={{ uri: item.uri }} style={styles.previewImage} />
+                ) : (
+                  <View style={styles.videoPreview}>
+                    <Text style={styles.videoIcon}>▶</Text>
+                    <Text style={styles.videoLabel}>{t('video')}</Text>
+                  </View>
+                )}
+                <Pressable
+                  accessibilityLabel={t('removeMedia')}
+                  accessibilityRole="button"
+                  onPress={() => setMedia((current) => current.filter((value) => value.key !== item.key))}
+                  style={({ pressed }) => [styles.removeButton, pressed && styles.pressed]}
+                >
+                  <Text style={styles.removeText}>×</Text>
+                </Pressable>
+              </View>
+            ))}
+          </ScrollView>
+        ) : null}
+
+        <View style={styles.divider} />
+
         <Field
           label={t('postLocationOptional')}
           maxLength={120}
@@ -156,52 +213,8 @@ export default function CreatePostScreen() {
           value={location}
         />
 
-        <View style={styles.section}>
-          <View style={styles.sectionTop}>
-            <View style={styles.sectionCopy}>
-              <Text style={styles.sectionTitle}>{t('postMedia')}</Text>
-              <Text style={styles.hint}>{t('postMediaHint')}</Text>
-            </View>
-            <Text style={styles.counter}>{media.length}/{MAX_MEDIA}</Text>
-          </View>
-          {media.length ? (
-            <ScrollView
-              contentContainerStyle={styles.previewRow}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-            >
-              {media.map((item) => (
-                <View key={item.key} style={styles.previewCard}>
-                  {item.type === 'image' ? (
-                    <Image source={{ uri: item.uri }} style={styles.previewImage} />
-                  ) : (
-                    <View style={styles.videoPreview}>
-                      <Text style={styles.videoIcon}>▶</Text>
-                      <Text style={styles.videoLabel}>{t('video')}</Text>
-                    </View>
-                  )}
-                  <Pressable
-                    accessibilityLabel={t('removeMedia')}
-                    accessibilityRole="button"
-                    onPress={() => setMedia((current) => current.filter((value) => value.key !== item.key))}
-                    style={styles.removeButton}
-                  >
-                    <Text style={styles.removeText}>×</Text>
-                  </Pressable>
-                </View>
-              ))}
-            </ScrollView>
-          ) : null}
-          <Button
-            disabled={media.length >= MAX_MEDIA}
-            label={media.length ? t('addMoreMedia') : t('choosePostMedia')}
-            onPress={() => void pickMedia()}
-            variant="secondary"
-          />
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('postVisibility')}</Text>
+        <View style={styles.optionSection}>
+          <Text style={styles.optionLabel}>{t('postVisibility')}</Text>
           <View style={styles.visibilityRow}>
             {VISIBILITY_OPTIONS.map((option) => (
               <Pressable
@@ -223,27 +236,36 @@ export default function CreatePostScreen() {
           </View>
         </View>
 
-        <View style={styles.switchRow}>
-          <View style={styles.switchCopy}>
-            <Text style={styles.switchTitle}>{t('disableComments')}</Text>
-            <Text style={styles.hint}>{t('disableCommentsHint')}</Text>
-          </View>
-          <Switch
-            accessibilityLabel={t('disableComments')}
-            onValueChange={setDisableComments}
-            thumbColor={disableComments ? colors.primary : colors.textMuted}
-            trackColor={{ true: colors.primaryMuted }}
-            value={disableComments}
-          />
+        <Checkbox
+          checked={disableComments}
+          hint={t('disableCommentsHint')}
+          label={t('disableComments')}
+          onChange={setDisableComments}
+        />
+
+        <View style={styles.soonRow}>
+          <View style={styles.soonChip}><Text style={styles.soonText}>⌖ {t('postLocationOptional')}</Text></View>
+          <View style={styles.soonChip}><Text style={styles.soonText}>≡ Poll</Text></View>
+          <View style={styles.soonChip}><Text style={styles.soonText}>◷ Schedule</Text></View>
         </View>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        <Button
-          label={t('publishPost')}
-          loading={submitting}
-          onPress={() => void publish()}
-        />
-        <Button label={t('cancel')} onPress={close} variant="secondary" />
+
+        <View style={styles.submitRow}>
+          <Button
+            label={t('cancel')}
+            onPress={close}
+            size="compact"
+            variant="ghost"
+          />
+          <View style={styles.publishButton}>
+            <Button
+              label={t('publishPost')}
+              loading={submitting}
+              onPress={() => void publish()}
+            />
+          </View>
+        </View>
       </View>
     </Screen>
   );
@@ -251,43 +273,67 @@ export default function CreatePostScreen() {
 
 const styles = StyleSheet.create({
   screen: { paddingBottom: spacing.xxl },
-  header: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
-  headingCopy: { flex: 1, gap: spacing.xs },
-  eyebrow: { color: colors.primary, fontSize: 10, fontWeight: '900', letterSpacing: 2 },
-  title: { color: colors.text, fontSize: 30, fontWeight: '900' },
-  subtitle: { color: colors.textMuted, lineHeight: 21 },
-  close: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
-  closeText: { color: colors.textMuted, fontSize: 36, lineHeight: 38 },
-  card: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
+  topRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  headerWrap: { flex: 1 },
+  close: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center' },
+  closeText: { color: colors.textMuted, fontSize: 30, lineHeight: 32, fontWeight: '400' },
+  composer: {
+    backgroundColor: '#003c3c',
+    borderColor: 'rgba(4, 197, 191, 0.30)',
     borderWidth: 1,
     borderRadius: radius.large,
-    padding: spacing.lg,
-    gap: spacing.lg,
+    padding: spacing.md,
+    gap: spacing.md,
   },
-  section: { gap: spacing.sm },
-  sectionTop: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
-  sectionCopy: { flex: 1, gap: 3 },
-  sectionTitle: { color: colors.text, fontSize: 16, fontWeight: '800' },
-  hint: { color: colors.textMuted, fontSize: 13, lineHeight: 18 },
-  counter: { color: colors.primary, fontWeight: '800' },
+  captionInput: {
+    minHeight: 120,
+    backgroundColor: 'rgba(0, 9, 17, 0.42)',
+  },
+  mediaToolbar: {
+    minHeight: 42,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  mediaCopy: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  mediaTitle: { color: colors.text, ...typography.bodyStrong },
+  mediaHint: { color: colors.textMuted, ...typography.caption },
+  addMedia: {
+    minHeight: 38,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.pill,
+    backgroundColor: 'rgba(0, 9, 17, 0.32)',
+    borderWidth: 1,
+    borderColor: 'rgba(4, 197, 191, 0.28)',
+  },
+  addMediaPlus: { color: colors.primary, fontSize: 22, lineHeight: 23 },
+  addMediaText: { color: colors.primary, ...typography.caption, fontWeight: '800' },
   previewRow: { gap: spacing.sm, paddingVertical: spacing.xs },
-  previewCard: { width: 118, height: 118, borderRadius: radius.medium, overflow: 'hidden' },
+  previewCard: { width: 104, height: 104, borderRadius: radius.medium, overflow: 'hidden' },
   previewImage: { width: '100%', height: '100%', backgroundColor: colors.backgroundDeep },
   videoPreview: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.xs, backgroundColor: colors.backgroundDeep },
-  videoIcon: { color: colors.primary, fontSize: 30 },
+  videoIcon: { color: colors.primary, fontSize: 26 },
   videoLabel: { color: colors.textMuted, fontWeight: '700' },
-  removeButton: { position: 'absolute', top: 6, right: 6, width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 16, backgroundColor: 'rgba(0, 10, 18, 0.88)' },
-  removeText: { color: colors.text, fontSize: 24, lineHeight: 26 },
+  removeButton: { position: 'absolute', top: 5, right: 5, width: 28, height: 28, alignItems: 'center', justifyContent: 'center', borderRadius: 14, backgroundColor: 'rgba(0, 10, 18, 0.88)' },
+  removeText: { color: colors.text, fontSize: 21, lineHeight: 22 },
+  divider: { height: 1, backgroundColor: 'rgba(4, 197, 191, 0.18)' },
+  optionSection: { gap: spacing.xs },
+  optionLabel: { color: colors.textMuted, ...typography.caption, fontWeight: '700' },
   visibilityRow: { flexDirection: 'row', gap: spacing.xs },
-  visibilityButton: { flex: 1, minHeight: 46, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, borderRadius: radius.medium, backgroundColor: colors.backgroundDeep, paddingHorizontal: spacing.xs },
-  visibilitySelected: { borderColor: colors.primary, backgroundColor: colors.primaryMuted },
-  visibilityText: { color: colors.textMuted, fontSize: 12, fontWeight: '700', textAlign: 'center' },
-  visibilitySelectedText: { color: colors.text, fontSize: 12, fontWeight: '900', textAlign: 'center' },
-  switchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  switchCopy: { flex: 1, gap: 3 },
-  switchTitle: { color: colors.text, fontWeight: '800' },
+  visibilityButton: { flex: 1, minHeight: 40, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(4, 197, 191, 0.20)', borderRadius: radius.medium, backgroundColor: 'rgba(0, 9, 17, 0.36)', paddingHorizontal: spacing.xs },
+  visibilitySelected: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
+  visibilityText: { color: colors.textMuted, fontSize: 11, fontWeight: '700', textAlign: 'center' },
+  visibilitySelectedText: { color: colors.primary, fontSize: 11, fontWeight: '900', textAlign: 'center' },
+  soonRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
+  soonChip: { minHeight: 32, justifyContent: 'center', paddingHorizontal: spacing.sm, borderRadius: radius.medium, backgroundColor: 'rgba(4, 197, 191, 0.08)', borderWidth: 1, borderColor: 'rgba(4, 197, 191, 0.14)' },
+  soonText: { color: colors.textSubtle, fontSize: 10, fontWeight: '700' },
   error: { color: colors.danger, lineHeight: 20 },
-  pressed: { opacity: 0.72 },
+  submitRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: spacing.sm },
+  publishButton: { minWidth: 132 },
+  disabled: { opacity: 0.45 },
+  pressed: { opacity: 0.7 },
 });
