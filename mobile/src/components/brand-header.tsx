@@ -6,7 +6,7 @@ import { Avatar } from '@/components/avatar';
 import { IconButton } from '@/components/icon-button';
 import { t } from '@/i18n';
 import { useNotifications } from '@/notifications/notification-context';
-import { colors, spacing, typography } from '@/theme';
+import { colors, layout, spacing, typography } from '@/theme';
 
 
 type BrandHeaderProps = {
@@ -62,19 +62,20 @@ export function BrandHeader({
           />
         ) : null}
         {showNotifications && status === 'authenticated' ? (
-          <View>
-            <IconButton
-              accessibilityLabel={t('notifications')}
-              onPress={() => router.push('/notifications')}
-              symbol="◡"
-              filled
-            />
+          <Pressable
+            accessibilityLabel={t('notifications')}
+            accessibilityRole="button"
+            onPress={() => router.push('/notifications')}
+            style={({ pressed }) => [styles.notificationButton, pressed && styles.pressed]}
+          >
+            <View style={styles.bellBody} />
+            <View style={styles.bellClapper} />
             {unreadCount ? (
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>{badge}</Text>
               </View>
             ) : null}
-          </View>
+          </Pressable>
         ) : null}
       </View>
     </View>
@@ -113,6 +114,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xxs,
+  },
+  notificationButton: {
+    width: layout.touchTarget,
+    height: layout.touchTarget,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: layout.touchTarget / 2,
+  },
+  bellBody: {
+    width: 17,
+    height: 16,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    borderBottomLeftRadius: 5,
+    borderBottomRightRadius: 5,
+  },
+  bellClapper: {
+    width: 5,
+    height: 3,
+    marginTop: 2,
+    borderRadius: 3,
+    backgroundColor: colors.primary,
   },
   badge: {
     position: 'absolute',
