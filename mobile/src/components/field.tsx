@@ -1,24 +1,53 @@
+import { useState } from 'react';
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 
-import { colors, layout, radius, spacing } from '@/theme';
+import { colors, layout, radius, spacing, typography } from '@/theme';
 
 
 type FieldProps = TextInputProps & {
   label: string;
+  helperText?: string;
+  errorText?: string;
 };
 
-export function Field({ label, multiline, style, ...props }: FieldProps) {
+export function Field({
+  label,
+  helperText,
+  errorText,
+  multiline,
+  style,
+  onFocus,
+  onBlur,
+  ...props
+}: FieldProps) {
+  const [focused, setFocused] = useState(false);
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
         accessibilityLabel={label}
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={colors.textSubtle}
         selectionColor={colors.primary}
         multiline={multiline}
-        style={[styles.input, multiline && styles.multiline, style]}
+        onFocus={(event) => {
+          setFocused(true);
+          onFocus?.(event);
+        }}
+        onBlur={(event) => {
+          setFocused(false);
+          onBlur?.(event);
+        }}
+        style={[
+          styles.input,
+          focused && styles.focused,
+          Boolean(errorText) && styles.errorInput,
+          multiline && styles.multiline,
+          style,
+        ]}
         {...props}
       />
+      {errorText ? <Text style={styles.errorText}>{errorText}</Text> : null}
+      {!errorText && helperText ? <Text style={styles.helperText}>{helperText}</Text> : null}
     </View>
   );
 }
@@ -29,9 +58,8 @@ const styles = StyleSheet.create({
   },
   label: {
     color: colors.textMuted,
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: '600',
+    ...typography.caption,
+    fontWeight: '700',
   },
   input: {
     minHeight: layout.controlHeight,
@@ -42,10 +70,26 @@ const styles = StyleSheet.create({
     borderRadius: radius.medium,
     paddingHorizontal: spacing.md,
     fontSize: 15,
+    lineHeight: 20,
+  },
+  focused: {
+    borderColor: colors.primary,
+    backgroundColor: colors.surfaceSoft,
+  },
+  errorInput: {
+    borderColor: colors.danger,
   },
   multiline: {
-    minHeight: 108,
+    minHeight: 104,
     paddingTop: spacing.md,
     textAlignVertical: 'top',
+  },
+  helperText: {
+    color: colors.textSubtle,
+    ...typography.caption,
+  },
+  errorText: {
+    color: colors.danger,
+    ...typography.caption,
   },
 });
