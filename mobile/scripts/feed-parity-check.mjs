@@ -36,6 +36,7 @@ check(postCard.includes('messageRowOwned'), 'Owned posts reverse the avatar/bubb
 check(postCard.includes("styles.actionsOwned"), 'Owned post actions account for the right-side avatar');
 check(postCard.includes("styles.actionsOther"), 'Other-user post actions account for the left-side avatar');
 check(postCard.includes('backgroundColor: colors.primary'), 'Post bubble uses the Tatzo web turquoise surface');
+check(postCard.includes("color: colors.heading"), 'Post author keeps the Tatzo heading accent on the turquoise bubble');
 check(postCard.includes("Share.share"), 'Post actions include native sharing');
 check(postCard.includes('⋯'), 'Post menu uses the web-style ellipsis trigger');
 check(!postCard.includes('saveAction'), 'Legacy large save pill is removed from post cards');
