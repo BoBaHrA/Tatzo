@@ -4,16 +4,20 @@ import { useEffect, useRef, useState } from 'react';
 
 import type { MapLocationMarker } from '@/api/types';
 import type { MapRegion } from '@/map/map-api';
-import { clusterMapMarkers, regionAroundCluster } from '@/map/map-clusters';
 
 
 type LeafletGlobal = any;
+
+type UserLocation = {
+  latitude: number;
+  longitude: number;
+};
 
 type LeafletMapProps = {
   markers: MapLocationMarker[];
   region: MapRegion;
   selectedMarkerId: string | null;
-  showsUserLocation?: boolean;
+  userLocation?: UserLocation | null;
   onRegionChange: (region: MapRegion) => Promise<void>;
   onSelectMarker: (marker: MapLocationMarker) => Promise<void>;
   dom?: import('expo/dom').DOMProps;
@@ -22,44 +26,62 @@ type LeafletMapProps = {
 declare global {
   interface Window {
     L?: LeafletGlobal;
-    __tatzoLeafletPromise?: Promise<LeafletGlobal>;
+    __tatzoLeafletStackPromise?: Promise<LeafletGlobal>;
   }
 }
 
 const LEAFLET_VERSION = '1.9.4';
+const CLUSTER_VERSION = '1.5.3';
 const LEAFLET_JS = `https://unpkg.com/leaflet@${LEAFLET_VERSION}/dist/leaflet.js`;
 const LEAFLET_CSS = `https://unpkg.com/leaflet@${LEAFLET_VERSION}/dist/leaflet.css`;
-const OSM_TILES = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const CLUSTER_JS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/dist/leaflet.markercluster.js`;
+const CLUSTER_CSS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/dist/MarkerCluster.css`;
+const CLUSTER_DEFAULT_CSS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/dist/MarkerCluster.Default.css`;
+const CARTO_TILES = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
 
-function loadLeaflet() {
-  if (window.L) return Promise.resolve(window.L);
-  if (window.__tatzoLeafletPromise) return window.__tatzoLeafletPromise;
+function ensureStylesheet(href: string) {
+  if (document.querySelector(`link[href="${href}"]`)) return;
+  const stylesheet = document.createElement('link');
+  stylesheet.rel = 'stylesheet';
+  stylesheet.href = href;
+  stylesheet.crossOrigin = '';
+  document.head.appendChild(stylesheet);
+}
 
-  window.__tatzoLeafletPromise = new Promise<LeafletGlobal>((resolve, reject) => {
-    if (!document.querySelector(`link[href="${LEAFLET_CSS}"]`)) {
-      const stylesheet = document.createElement('link');
-      stylesheet.rel = 'stylesheet';
-      stylesheet.href = LEAFLET_CSS;
-      stylesheet.crossOrigin = '';
-      document.head.appendChild(stylesheet);
-    }
-
-    const existingScript = document.querySelector<HTMLScriptElement>(`script[src="${LEAFLET_JS}"]`);
-    if (existingScript) {
-      existingScript.addEventListener('load', () => window.L ? resolve(window.L) : reject(new Error('Leaflet did not initialize.')), { once: true });
-      existingScript.addEventListener('error', () => reject(new Error('Leaflet failed to load.')), { once: true });
+function loadScript(src: string, ready: () => boolean): Promise<void> {
+  if (ready()) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`);
+    if (existing) {
+      existing.addEventListener('load', () => ready() ? resolve() : reject(new Error(`${src} did not initialize.`)), { once: true });
+      existing.addEventListener('error', () => reject(new Error(`${src} failed to load.`)), { once: true });
       return;
     }
-
     const script = document.createElement('script');
-    script.src = LEAFLET_JS;
+    script.src = src;
     script.crossOrigin = '';
-    script.onload = () => window.L ? resolve(window.L) : reject(new Error('Leaflet did not initialize.'));
-    script.onerror = () => reject(new Error('Leaflet failed to load.'));
+    script.onload = () => ready() ? resolve() : reject(new Error(`${src} did not initialize.`));
+    script.onerror = () => reject(new Error(`${src} failed to load.`));
     document.head.appendChild(script);
   });
+}
 
-  return window.__tatzoLeafletPromise;
+function loadLeafletStack() {
+  if (window.L?.markerClusterGroup) return Promise.resolve(window.L);
+  if (window.__tatzoLeafletStackPromise) return window.__tatzoLeafletStackPromise;
+
+  ensureStylesheet(LEAFLET_CSS);
+  ensureStylesheet(CLUSTER_CSS);
+  ensureStylesheet(CLUSTER_DEFAULT_CSS);
+
+  window.__tatzoLeafletStackPromise = (async () => {
+    await loadScript(LEAFLET_JS, () => Boolean(window.L));
+    await loadScript(CLUSTER_JS, () => Boolean(window.L?.markerClusterGroup));
+    if (!window.L?.markerClusterGroup) throw new Error('Leaflet MarkerCluster did not initialize.');
+    return window.L;
+  })();
+
+  return window.__tatzoLeafletStackPromise;
 }
 
 function regionBounds(region: MapRegion) {
@@ -89,51 +111,83 @@ function regionKey(region: MapRegion) {
   ].join(':');
 }
 
-function markerHtml(kind: 'artist' | 'studio' | 'mixed', count: number, selected: boolean) {
-  const label = count > 1 ? String(count) : kind === 'artist' ? 'A' : kind === 'studio' ? 'S' : '•';
-  return `<span class="tatzo-map-pin tatzo-map-pin--${kind}${selected ? ' is-selected' : ''}">${label}</span>`;
+function pointMarkerHtml(marker: MapLocationMarker, selected: boolean) {
+  const sourceClass = marker.kind === 'artist' ? 'verified' : 'unclaimed';
+  const glyph = marker.kind === 'artist' ? '✓' : '•';
+  return `<span class="tatzo-map-marker tatzo-map-marker-${sourceClass}${selected ? ' is-selected' : ''}"><span>${glyph}</span></span>`;
+}
+
+function clusterKind(cluster: any) {
+  const markers = cluster.getAllChildMarkers();
+  const hasArtist = markers.some((marker: any) => marker.options.tatzoKind === 'artist');
+  const hasStudio = markers.some((marker: any) => marker.options.tatzoKind === 'studio');
+  if (hasArtist && hasStudio) return 'mixed';
+  return hasArtist ? 'verified' : 'unclaimed';
 }
 
 export default function LeafletMap({
   markers,
   region,
   selectedMarkerId,
+  userLocation = null,
   onRegionChange,
   onSelectMarker,
 }: LeafletMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const layerRef = useRef<any>(null);
+  const userLayerRef = useRef<any>(null);
   const leafletRef = useRef<LeafletGlobal | null>(null);
-  const propsRef = useRef({ markers, region, selectedMarkerId, onRegionChange, onSelectMarker });
+  const propsRef = useRef({ markers, region, selectedMarkerId, userLocation, onRegionChange, onSelectMarker });
   const suppressMoveRef = useRef(false);
   const lastAppliedRegionRef = useRef('');
   const [ready, setReady] = useState(false);
 
-  propsRef.current = { markers, region, selectedMarkerId, onRegionChange, onSelectMarker };
+  propsRef.current = { markers, region, selectedMarkerId, userLocation, onRegionChange, onSelectMarker };
 
   useEffect(() => {
     let disposed = false;
     let fallbackTimer: number | undefined;
 
-    void loadLeaflet().then((L) => {
+    void loadLeafletStack().then((L) => {
       if (disposed || !containerRef.current || mapRef.current) return;
       leafletRef.current = L;
 
+      const worldBounds = L.latLngBounds([[-85, -180], [85, 180]]);
       const map = L.map(containerRef.current, {
         attributionControl: true,
         zoomControl: true,
         minZoom: 3,
         maxZoom: 19,
-        preferCanvas: true,
+        maxBounds: worldBounds,
+        maxBoundsViscosity: 1,
+        worldCopyJump: false,
       });
 
-      L.tileLayer(OSM_TILES, {
+      L.tileLayer(CARTO_TILES, {
+        minZoom: 2,
         maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        noWrap: true,
+        bounds: worldBounds,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
       }).addTo(map);
 
-      layerRef.current = L.layerGroup().addTo(map);
+      layerRef.current = L.markerClusterGroup({
+        showCoverageOnHover: false,
+        spiderfyOnMaxZoom: true,
+        zoomToBoundsOnClick: true,
+        removeOutsideVisibleBounds: true,
+        animate: true,
+        animateAddingMarkers: true,
+        maxClusterRadius: 46,
+        iconCreateFunction: (cluster: any) => L.divIcon({
+          className: `tatzo-cluster tatzo-cluster-${clusterKind(cluster)}`,
+          html: `<span>${cluster.getChildCount()}</span>`,
+          iconSize: [42, 42],
+          iconAnchor: [21, 21],
+        }),
+      }).addTo(map);
+      userLayerRef.current = L.layerGroup().addTo(map);
       mapRef.current = map;
 
       const emitRegion = () => {
@@ -150,7 +204,7 @@ export default function LeafletMap({
       map.fitBounds(regionBounds(initial), { animate: false, padding: [0, 0] });
       fallbackTimer = window.setTimeout(() => {
         suppressMoveRef.current = false;
-      }, 180);
+      }, 220);
       map.once('moveend', () => {
         suppressMoveRef.current = false;
       });
@@ -165,45 +219,57 @@ export default function LeafletMap({
       mapRef.current?.remove();
       mapRef.current = null;
       layerRef.current = null;
+      userLayerRef.current = null;
       leafletRef.current = null;
     };
   }, []);
 
   useEffect(() => {
-    const map = mapRef.current;
     const L = leafletRef.current;
     const layer = layerRef.current;
-    if (!ready || !map || !L || !layer) return;
+    if (!ready || !L || !layer) return;
 
     layer.clearLayers();
-    const clusters = clusterMapMarkers(markers, region);
-
-    for (const cluster of clusters) {
-      const marker = cluster.markers[0];
-      const selected = cluster.markers.some((item) => item.marker_id === selectedMarkerId);
+    for (const marker of markers) {
+      const selected = marker.marker_id === selectedMarkerId;
       const icon = L.divIcon({
         className: 'tatzo-map-marker-shell',
-        html: markerHtml(cluster.kind, cluster.markers.length, selected),
-        iconSize: [40, 40],
-        iconAnchor: [20, 20],
+        html: pointMarkerHtml(marker, selected),
+        iconSize: [34, 34],
+        iconAnchor: [17, 17],
+        popupAnchor: [0, -18],
       });
-      const leafletMarker = L.marker([cluster.latitude, cluster.longitude], {
+      const leafletMarker = L.marker([marker.latitude, marker.longitude], {
         icon,
         keyboard: true,
-        title: cluster.markers.length > 1 ? `${cluster.markers.length} locations` : marker.name,
+        title: marker.name,
+        tatzoKind: marker.kind,
       });
-
       leafletMarker.on('click', () => {
-        if (cluster.markers.length > 1) {
-          const next = regionAroundCluster(cluster, propsRef.current.region);
-          map.fitBounds(regionBounds(next), { animate: true, duration: 0.24, padding: [18, 18] });
-          return;
-        }
         void propsRef.current.onSelectMarker(marker);
       });
-      leafletMarker.addTo(layer);
+      layer.addLayer(leafletMarker);
     }
-  }, [markers, ready, region, selectedMarkerId]);
+  }, [markers, ready, selectedMarkerId]);
+
+  useEffect(() => {
+    const L = leafletRef.current;
+    const userLayer = userLayerRef.current;
+    if (!ready || !L || !userLayer) return;
+    userLayer.clearLayers();
+    if (!userLocation) return;
+    const pulse = L.divIcon({
+      className: 'tatzo-user-location-shell',
+      html: '<span class="tatzo-user-location"><i></i></span>',
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+    });
+    L.marker([userLocation.latitude, userLocation.longitude], {
+      icon: pulse,
+      interactive: false,
+      keyboard: false,
+    }).addTo(userLayer);
+  }, [ready, userLocation]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -213,12 +279,12 @@ export default function LeafletMap({
     lastAppliedRegionRef.current = key;
 
     suppressMoveRef.current = true;
-    map.fitBounds(regionBounds(region), { animate: false, padding: [0, 0] });
+    map.fitBounds(regionBounds(region), { animate: true, duration: 0.28, padding: [0, 0] });
     const release = () => {
       suppressMoveRef.current = false;
     };
     map.once('moveend', release);
-    const timer = window.setTimeout(release, 180);
+    const timer = window.setTimeout(release, 360);
     return () => window.clearTimeout(timer);
   }, [ready, region]);
 
@@ -228,19 +294,32 @@ export default function LeafletMap({
         html, body, #root { width: 100%; height: 100%; margin: 0; background: #000d18; overflow: hidden; }
         * { box-sizing: border-box; }
         .tatzo-leaflet-root { width: 100%; height: 100%; min-height: 360px; background: #000d18; }
-        .tatzo-leaflet-map { width: 100%; height: 100%; min-height: 360px; background: #071a22; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-        .tatzo-leaflet-map.is-unavailable::after { content: "Map unavailable"; position: absolute; inset: 0; display: grid; place-items: center; z-index: 1000; color: #9bb0b6; background: #000d18; }
-        .leaflet-container { background: #071a22; }
-        .leaflet-tile-pane { filter: brightness(.72) saturate(.52) contrast(1.16) hue-rotate(168deg); }
-        .leaflet-control-zoom, .leaflet-control-attribution { border: 1px solid rgba(4,197,191,.28) !important; background: rgba(0,13,24,.92) !important; box-shadow: none !important; }
-        .leaflet-control-zoom a { color: #04c5bf !important; background: #001b24 !important; border-color: rgba(4,197,191,.22) !important; }
-        .leaflet-control-attribution, .leaflet-control-attribution a { color: #73939b !important; font-size: 9px !important; }
+        .tatzo-leaflet-map { width: 100%; height: 100%; min-height: 360px; background: #071317; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        .tatzo-leaflet-map.is-unavailable::after { content: "Map unavailable"; position: absolute; inset: 0; display: grid; place-items: center; z-index: 1000; color: #9bc0c4; background: #000d18; }
+        .leaflet-container { background: #071317; }
+        .leaflet-control-zoom, .leaflet-control-attribution { border: 1px solid rgba(4,197,191,.24) !important; background: rgba(0,13,24,.92) !important; box-shadow: none !important; }
+        .leaflet-control-zoom a { color: #04c5bf !important; background: #071317 !important; border-color: rgba(4,197,191,.18) !important; }
+        .leaflet-control-attribution { opacity: .62; transition: opacity .18s ease; }
+        .leaflet-control-attribution:hover, .leaflet-control-attribution:focus-within { opacity: .96; }
+        .leaflet-control-attribution, .leaflet-control-attribution a { color: #9bc0c4 !important; font-size: 9px !important; }
         .tatzo-map-marker-shell { background: transparent !important; border: 0 !important; }
-        .tatzo-map-pin { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 999px; border: 3px solid #000d18; color: #000d18; font-size: 13px; font-weight: 900; box-shadow: 0 5px 16px rgba(0,0,0,.32); transform-origin: center; transition: transform .16s ease, border-color .16s ease; }
-        .tatzo-map-pin--artist { background: #04c5bf; }
-        .tatzo-map-pin--studio { background: #ee0c6f; }
-        .tatzo-map-pin--mixed { background: #c71b43; color: #fff; }
-        .tatzo-map-pin.is-selected { border-color: #fff; transform: scale(1.13); }
+        .tatzo-map-marker { width: 34px; height: 34px; border: 3px solid rgba(255,255,255,.86); border-radius: 50%; box-shadow: 0 10px 26px rgba(0,0,0,.36), 0 0 0 6px rgba(4,197,191,.12); display: grid; place-items: center; transform-origin: center; transition: transform .18s ease, box-shadow .18s ease; }
+        .tatzo-map-marker span { color: #001316; font-size: 13px; font-weight: 900; line-height: 1; }
+        .tatzo-map-marker-verified { background: #04c5bf; }
+        .tatzo-map-marker-unclaimed { background: #ee0c6f; box-shadow: 0 10px 26px rgba(0,0,0,.36), 0 0 0 6px rgba(238,12,111,.16); }
+        .tatzo-map-marker-unclaimed span { color: #fff; font-size: 20px; line-height: .8; }
+        .tatzo-map-marker.is-selected { transform: scale(1.18); box-shadow: 0 10px 30px rgba(0,0,0,.42), 0 0 0 7px rgba(255,255,255,.18); }
+        .tatzo-cluster { border: 3px solid rgba(255,255,255,.82) !important; border-radius: 50%; box-shadow: 0 12px 30px rgba(0,0,0,.38), 0 0 0 7px rgba(255,255,255,.05); display: grid !important; place-items: center; color: #fff; transition: transform .2s ease; }
+        .tatzo-cluster span { color: #fff; font-size: 13px; font-weight: 900; line-height: 1; }
+        .tatzo-cluster-verified { background: radial-gradient(circle at 35% 28%, #8ffefa, #04c5bf) !important; }
+        .tatzo-cluster-unclaimed { background: radial-gradient(circle at 35% 28%, #ff9bc5, #ee0c6f) !important; }
+        .tatzo-cluster-mixed { background: linear-gradient(135deg, #04c5bf, #ee0c6f) !important; }
+        .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background: transparent !important; }
+        .marker-cluster div { margin: 0 !important; width: 100% !important; height: 100% !important; }
+        .tatzo-user-location-shell { background: transparent !important; border: 0 !important; }
+        .tatzo-user-location { position: relative; width: 18px; height: 18px; display: block; border-radius: 50%; background: #fff; border: 4px solid #04c5bf; box-shadow: 0 0 0 4px rgba(4,197,191,.18); }
+        .tatzo-user-location::after { content: ""; position: absolute; inset: -9px; border: 2px solid rgba(4,197,191,.44); border-radius: 50%; animation: tatzoUserPulse 1.8s ease-out infinite; }
+        @keyframes tatzoUserPulse { 0% { transform: scale(.55); opacity: .9; } 100% { transform: scale(1.5); opacity: 0; } }
       `}</style>
       <div aria-label="Tatzo map" className="tatzo-leaflet-map" ref={containerRef} />
     </div>
