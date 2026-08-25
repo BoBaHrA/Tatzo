@@ -8,7 +8,7 @@ import { useAuth } from '@/auth/auth-context';
 import { BrandHeader } from '@/components/brand-header';
 import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
-import { CommentsSection } from '@/comments/comments-section';
+import { CommentsSectionV2 } from '@/comments/comments-section-v2';
 import {
   fetchFeedPost,
   reportFeedPost,
@@ -170,7 +170,7 @@ export default function PostDetailScreen() {
           />
           {deleting ? <ActivityIndicator color={colors.danger} /> : null}
           <View style={styles.divider} />
-          <CommentsSection
+          <CommentsSectionV2
             focusRequest={commentFocusRequest}
             onCountChange={updateCommentCount}
             post={post}
