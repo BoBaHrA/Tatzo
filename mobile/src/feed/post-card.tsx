@@ -72,6 +72,25 @@ export function PostCard({
   const [reporting, setReporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const owned = post.is_owned;
+  const longContent = post.content.length > 220;
+
+  const openProfile = () => router.push({
+    pathname: '/profile/[username]',
+    params: { username: post.author.username },
+  });
+
+  const openComments = () => {
+    if (onComments) {
+      onComments(post);
+      return;
+    }
+    router.push({
+      pathname: '/post/[postId]',
+      params: { postId: String(post.id) },
+    });
+  };
+
   const handleLike = async () => {
     setLiking(true);
     try {
@@ -108,7 +127,7 @@ export function PostCard({
       setReportOpen(false);
       setMenuOpen(false);
     } catch {
-      // The parent surface displays the localized action error.
+      // The parent surface owns the localized action error.
     } finally {
       setReporting(false);
     }
@@ -121,28 +140,9 @@ export function PostCard({
     try {
       await Share.share({ message });
     } catch {
-      // Native share cancellation/failure should not interrupt feed interaction.
+      // Cancelling the native share sheet must not disturb the feed.
     }
   };
-
-  const longContent = post.content.length > 220;
-  const owned = post.is_owned;
-
-  const openComments = () => {
-    if (onComments) {
-      onComments(post);
-      return;
-    }
-    router.push({
-      pathname: '/post/[postId]',
-      params: { postId: String(post.id) },
-    });
-  };
-
-  const openProfile = () => router.push({
-    pathname: '/profile/[username]',
-    params: { username: post.author.username },
-  });
 
   return (
     <View style={styles.post}>
@@ -162,10 +162,7 @@ export function PostCard({
           )}
         </Pressable>
 
-        <View style={[
-          styles.bubble,
-          owned ? styles.bubbleOwned : styles.bubbleOther,
-        ]}>
+        <View style={[styles.bubble, owned ? styles.bubbleOwned : styles.bubbleOther]}>
           <View style={styles.header}>
             <Pressable
               accessibilityRole="button"
@@ -248,7 +245,7 @@ export function PostCard({
             style={({ pressed }) => [styles.actionButton, pressed && styles.actionPressed]}
           >
             <Text style={[styles.commentIcon, post.disable_comments && styles.disabledIcon]}>
-              {post.disable_comments ? '⊘' : '◯'}
+              {post.disable_comments ? '⊘' : '○'}
             </Text>
             {!post.disable_comments && post.comments_count > 0 ? (
               <Text style={styles.actionCount}>{post.comments_count}</Text>
@@ -365,126 +362,128 @@ export function PostCard({
 }
 
 const styles = StyleSheet.create({
-  post: {
-    width: '100%',
-  },
+  post: { width: '100%' },
   messageRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.sm,
   },
-  messageRowOwned: {
-    flexDirection: 'row-reverse',
-  },
+  messageRowOwned: { flexDirection: 'row-reverse' },
   avatarButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    marginTop: spacing.sm,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginTop: 10,
   },
   avatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: colors.primary,
   },
   avatarFallback: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surfaceInteractive,
+    backgroundColor: colors.backgroundDeep,
     borderWidth: 1,
     borderColor: colors.primaryMuted,
   },
-  avatarLetter: { color: colors.primary, fontSize: 15, fontWeight: '900' },
+  avatarLetter: { color: colors.primary, fontSize: 14, fontWeight: '900' },
   bubble: {
     flex: 1,
     minWidth: 0,
-    backgroundColor: colors.surfaceRaised,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.large,
-    padding: spacing.md,
+    backgroundColor: colors.primary,
+    borderRadius: 15,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     gap: spacing.sm,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  bubbleOther: { borderTopLeftRadius: 4 },
-  bubbleOwned: { borderTopRightRadius: 4 },
+  bubbleOther: { borderTopLeftRadius: 2 },
+  bubbleOwned: { borderTopRightRadius: 2 },
   header: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.sm,
   },
-  authorBlock: { flex: 1, gap: 2 },
+  authorBlock: { flex: 1, gap: 1 },
   authorLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  author: { color: colors.text, fontSize: 15, fontWeight: '900', flexShrink: 1 },
+  author: { color: colors.heading, fontSize: 15, fontWeight: '900', flexShrink: 1 },
   verifiedBadge: {
-    width: 17,
-    height: 17,
-    borderRadius: 9,
-    backgroundColor: colors.primary,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: 'rgba(0, 13, 24, 0.78)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  verifiedText: { color: colors.backgroundDeep, fontSize: 11, lineHeight: 13, fontWeight: '900' },
+  verifiedText: { color: colors.primary, fontSize: 10, lineHeight: 12, fontWeight: '900' },
   metaLine: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flexWrap: 'wrap' },
-  tag: { color: colors.primary, ...typography.caption, fontWeight: '700' },
-  date: { color: colors.textMuted, ...typography.caption },
+  tag: { color: '#064e51', ...typography.caption, fontWeight: '800' },
+  date: { color: '#07545b', ...typography.caption },
   menuButton: {
-    width: 34,
-    height: 30,
+    width: 32,
+    height: 28,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: -4,
     marginRight: -4,
   },
-  menuText: { color: colors.textMuted, fontSize: 24, lineHeight: 24, fontWeight: '800' },
-  location: { color: colors.textMuted, fontSize: 12, paddingHorizontal: 1 },
+  menuText: { color: '#06474b', fontSize: 24, lineHeight: 24, fontWeight: '900' },
+  location: { color: '#064e51', fontSize: 12 },
   badges: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   badge: {
-    color: colors.textMuted,
-    borderColor: colors.border,
+    color: '#00383b',
+    borderColor: 'rgba(0, 13, 24, 0.24)',
     borderWidth: 1,
     borderRadius: radius.pill,
     paddingHorizontal: 8,
     paddingVertical: 3,
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: '900',
     overflow: 'hidden',
   },
-  adBadge: { color: colors.accent, borderColor: colors.accent },
-  contentBlock: { gap: spacing.xs, paddingHorizontal: 1 },
-  content: { color: colors.text, fontSize: 14, lineHeight: 20 },
-  more: { color: colors.primary, fontSize: 12, fontWeight: '800' },
+  adBadge: { color: colors.heading, borderColor: colors.heading },
+  contentBlock: { gap: spacing.xs },
+  content: { color: '#001014', fontSize: 14, lineHeight: 20 },
+  more: { color: colors.heading, fontSize: 12, fontWeight: '900' },
   actions: {
-    minHeight: 40,
-    marginTop: spacing.xs,
+    minHeight: 38,
+    marginTop: 6,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  actionsOther: { paddingLeft: 46 },
-  actionsOwned: { paddingRight: 46 },
+  actionsOther: { paddingLeft: 44 },
+  actionsOwned: { paddingRight: 44 },
   actionGroup: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   actionButton: {
-    minHeight: 38,
+    minWidth: 30,
+    minHeight: 36,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 4,
-    paddingHorizontal: 2,
+    paddingHorizontal: 1,
   },
   actionPressed: { opacity: 0.58, transform: [{ scale: 0.94 }] },
   likeIcon: { color: colors.textMuted, fontSize: 27, lineHeight: 29 },
   likeIconActive: { color: colors.accent },
-  commentIcon: { color: colors.primary, fontSize: 21, lineHeight: 23 },
+  commentIcon: { color: colors.primary, fontSize: 22, lineHeight: 24 },
   disabledIcon: { color: colors.textSubtle },
-  shareIcon: { color: colors.primary, fontSize: 22, lineHeight: 24, fontWeight: '700' },
+  shareIcon: { color: colors.primary, fontSize: 23, lineHeight: 25, fontWeight: '700' },
   actionCount: { color: colors.textMuted, fontSize: 12, fontWeight: '800' },
   bookmarkButton: {
-    minWidth: 38,
-    minHeight: 38,
+    minWidth: 36,
+    minHeight: 36,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -492,7 +491,7 @@ const styles = StyleSheet.create({
   bookmarkActive: { color: colors.primary },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 9, 17, 0.82)',
+    backgroundColor: colors.overlay,
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.lg,
