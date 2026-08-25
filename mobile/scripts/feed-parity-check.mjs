@@ -24,6 +24,7 @@ function check(condition, label) {
 
 const home = source('app/(tabs)/home.tsx');
 const postCard = source('src/feed/post-card.tsx');
+const media = source('src/feed/post-media.tsx');
 const composer = source('app/create-post.tsx');
 const detail = source('app/post/[postId].tsx');
 const comments = source('src/comments/comments-section-v2.tsx');
@@ -34,9 +35,12 @@ check(home.includes("t('postCaptionPlaceholder')"), 'Home uses the compact web-s
 check(postCard.includes('messageRowOwned'), 'Owned posts reverse the avatar/bubble row');
 check(postCard.includes("styles.actionsOwned"), 'Owned post actions account for the right-side avatar');
 check(postCard.includes("styles.actionsOther"), 'Other-user post actions account for the left-side avatar');
+check(postCard.includes('backgroundColor: colors.primary'), 'Post bubble uses the Tatzo web turquoise surface');
 check(postCard.includes("Share.share"), 'Post actions include native sharing');
 check(postCard.includes('⋯'), 'Post menu uses the web-style ellipsis trigger');
 check(!postCard.includes('saveAction'), 'Legacy large save pill is removed from post cards');
+check(media.includes('frameWidth * 0.82'), 'Feed media keeps compact mobile-web proportions');
+check(media.includes('pagingEnabled'), 'Multiple post media remain swipeable');
 check(composer.includes("@/components/checkbox"), 'Publishing uses the Tatzo checkbox primitive');
 check(!composer.includes('Switch'), 'Publishing no longer uses the platform switch for comments');
 check(composer.includes("backgroundColor: '#003c3c'"), 'Publishing keeps the Tatzo web composer surface');
