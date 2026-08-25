@@ -115,16 +115,18 @@ export default function PostDetailScreen() {
     }
   };
 
-  const confirmDelete = (current: FeedPost) => {
+  const confirmDelete = (current: FeedPost): Promise<void> => new Promise((resolve) => {
     Alert.alert(t('deletePost'), t('deletePostConfirm'), [
-      { text: t('cancel'), style: 'cancel' },
+      { text: t('cancel'), style: 'cancel', onPress: resolve },
       {
         text: t('delete'),
         style: 'destructive',
-        onPress: () => void remove(current),
+        onPress: () => {
+          void remove(current).finally(resolve);
+        },
       },
     ]);
-  };
+  });
 
   const updateCommentCount = useCallback((commentsCount: number) => {
     setPost((current) => current ? {
@@ -135,16 +137,20 @@ export default function PostDetailScreen() {
 
   return (
     <Screen contentStyle={styles.screen}>
-      <Pressable
-        accessibilityLabel={t('back')}
-        accessibilityRole="button"
-        onPress={goBack}
-        style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
-      >
-        <Text style={styles.backText}>‹ {t('back')}</Text>
-      </Pressable>
-      <BrandHeader />
-      <Text style={styles.title}>{t('postDetailTitle')}</Text>
+      <View style={styles.topRow}>
+        <Pressable
+          accessibilityLabel={t('back')}
+          accessibilityRole="button"
+          onPress={goBack}
+          style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
+        >
+          <Text style={styles.backText}>‹</Text>
+        </Pressable>
+        <View style={styles.headerWrap}>
+          <BrandHeader title={t('postDetailTitle')} showNotifications={false} />
+        </View>
+      </View>
+
       {actionError ? <Text style={styles.inlineError}>{actionError}</Text> : null}
 
       {loading || status === 'loading' ? (
@@ -157,18 +163,13 @@ export default function PostDetailScreen() {
           <PostCard
             onBookmark={bookmark}
             onComments={() => setCommentFocusRequest((current) => current + 1)}
+            onDelete={post.is_owned ? confirmDelete : undefined}
             onLike={like}
             onReport={report}
             post={post}
           />
-          {post.is_owned ? (
-            <Button
-              label={t('deletePost')}
-              loading={deleting}
-              onPress={() => confirmDelete(post)}
-              variant="danger"
-            />
-          ) : null}
+          {deleting ? <ActivityIndicator color={colors.danger} /> : null}
+          <View style={styles.divider} />
           <CommentsSection
             focusRequest={commentFocusRequest}
             onCountChange={updateCommentCount}
@@ -188,13 +189,16 @@ export default function PostDetailScreen() {
 
 const styles = StyleSheet.create({
   screen: { padding: spacing.md, paddingBottom: spacing.xxl },
-  backButton: { alignSelf: 'flex-start', paddingVertical: spacing.xs },
-  backText: { color: colors.primary, fontSize: 16, fontWeight: '800' },
-  title: { color: colors.text, fontSize: 28, fontWeight: '900' },
+  topRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  backButton: { width: 38, height: 44, alignItems: 'center', justifyContent: 'center' },
+  backText: { color: colors.primary, fontSize: 34, lineHeight: 36, fontWeight: '400' },
+  headerWrap: { flex: 1 },
   pressed: { opacity: 0.72 },
   inlineError: {
     color: colors.danger,
     backgroundColor: colors.surface,
+    borderColor: colors.danger,
+    borderWidth: 1,
     borderRadius: radius.small,
     padding: spacing.sm,
   },
@@ -211,4 +215,5 @@ const styles = StyleSheet.create({
   stateTitle: { color: colors.text, fontSize: 22, fontWeight: '900', textAlign: 'center' },
   muted: { color: colors.textMuted, lineHeight: 22, textAlign: 'center' },
   postBlock: { gap: spacing.md },
+  divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.xs },
 });
