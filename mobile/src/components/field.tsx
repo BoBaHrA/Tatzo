@@ -8,12 +8,14 @@ type FieldProps = TextInputProps & {
   label: string;
   helperText?: string;
   errorText?: string;
+  tone?: 'default' | 'auth';
 };
 
 export function Field({
   label,
   helperText,
   errorText,
+  tone = 'default',
   multiline,
   style,
   onFocus,
@@ -21,9 +23,10 @@ export function Field({
   ...props
 }: FieldProps) {
   const [focused, setFocused] = useState(false);
+  const auth = tone === 'auth';
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, auth && styles.authLabel]}>{label}</Text>
       <TextInput
         accessibilityLabel={label}
         placeholderTextColor={colors.textSubtle}
@@ -39,6 +42,7 @@ export function Field({
         }}
         style={[
           styles.input,
+          auth && styles.authInput,
           focused && styles.focused,
           Boolean(errorText) && styles.errorInput,
           multiline && styles.multiline,
@@ -61,6 +65,9 @@ const styles = StyleSheet.create({
     ...typography.caption,
     fontWeight: '700',
   },
+  authLabel: {
+    color: colors.primary,
+  },
   input: {
     minHeight: layout.controlHeight,
     borderWidth: 1,
@@ -72,9 +79,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 20,
   },
+  authInput: {
+    borderColor: colors.primary,
+    borderRadius: radius.small,
+    backgroundColor: colors.surfaceSoft,
+  },
   focused: {
     borderColor: colors.primary,
-    backgroundColor: colors.surfaceSoft,
+    backgroundColor: colors.surfaceInteractive,
   },
   errorInput: {
     borderColor: colors.danger,
