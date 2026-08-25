@@ -59,6 +59,7 @@ function ChatRow({ thread }: { thread: ChatThreadSummary }) {
           <Text style={styles.avatarLetter}>{user.username[0]?.toUpperCase()}</Text>
         </View>
       )}
+
       <View style={styles.rowBody}>
         <View style={styles.rowTop}>
           <View style={styles.usernameLine}>
@@ -67,22 +68,21 @@ function ChatRow({ thread }: { thread: ChatThreadSummary }) {
           </View>
           <Text style={styles.time}>{formatChatTime(thread.updated_at)}</Text>
         </View>
-        <View style={styles.previewLine}>
-          <Text
-            numberOfLines={1}
-            style={[styles.preview, thread.unread_count > 0 && styles.previewUnread]}
-          >
-            {lastMessagePreview(thread)}
-          </Text>
-          {thread.unread_count ? (
-            <View style={styles.unreadBadge}>
-              <Text style={styles.unreadText}>
-                {thread.unread_count > 99 ? '99+' : thread.unread_count}
-              </Text>
-            </View>
-          ) : null}
-        </View>
+        <Text
+          numberOfLines={1}
+          style={[styles.preview, thread.unread_count > 0 && styles.previewUnread]}
+        >
+          {lastMessagePreview(thread)}
+        </Text>
       </View>
+
+      {thread.unread_count ? (
+        <View style={styles.unreadBadge}>
+          <Text style={styles.unreadText}>
+            {thread.unread_count > 99 ? '99+' : thread.unread_count}
+          </Text>
+        </View>
+      ) : null}
     </Pressable>
   );
 }
@@ -105,12 +105,7 @@ export default function ChatsScreen() {
         keyExtractor={(thread) => String(thread.id)}
         ListHeaderComponent={(
           <View style={styles.header}>
-            <BrandHeader />
-            <View style={styles.titleCard}>
-              <Text style={styles.eyebrow}>PRIVATE</Text>
-              <Text style={styles.title}>{t('chats')}</Text>
-              <Text style={styles.subtitle}>{t('chatsSubtitle')}</Text>
-            </View>
+            <BrandHeader title={t('chats')} />
           </View>
         )}
         ListEmptyComponent={loading ? (
@@ -131,7 +126,6 @@ export default function ChatsScreen() {
             <Text style={styles.muted}>{t('chatsEmptyHint')}</Text>
           </View>
         )}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
         refreshControl={(
           <RefreshControl
             colors={[colors.primary]}
@@ -140,7 +134,12 @@ export default function ChatsScreen() {
             tintColor={colors.primary}
           />
         )}
-        renderItem={({ item }) => <ChatRow thread={item} />}
+        renderItem={({ item, index }) => (
+          <View style={[styles.rowShell, index === 0 && styles.rowShellFirst]}>
+            <ChatRow thread={item} />
+          </View>
+        )}
+        style={styles.list}
       />
     </SafeAreaView>
   );
@@ -148,73 +147,86 @@ export default function ChatsScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
+  list: { flex: 1 },
   content: {
     flexGrow: 1,
     width: '100%',
-    maxWidth: 620,
+    maxWidth: 680,
     alignSelf: 'center',
-    padding: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.xs,
     paddingBottom: spacing.xxl,
   },
-  header: { gap: spacing.md, marginBottom: spacing.lg },
-  titleCard: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: radius.large,
-    padding: spacing.lg,
-    gap: spacing.xs,
+  header: {
+    marginBottom: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(4, 197, 191, 0.12)',
   },
-  eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '900', letterSpacing: 2 },
-  title: { color: colors.text, fontSize: 32, fontWeight: '900' },
-  subtitle: { color: colors.textMuted, fontSize: 15, lineHeight: 22 },
+  rowShell: {
+    backgroundColor: 'rgba(0, 18, 28, 0.96)',
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: 'rgba(4, 197, 191, 0.12)',
+  },
+  rowShellFirst: {
+    borderTopWidth: 1,
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+    overflow: 'hidden',
+  },
   row: {
-    minHeight: 82,
+    position: 'relative',
+    minHeight: 76,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    padding: spacing.md,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.medium,
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    backgroundColor: 'transparent',
   },
-  pressed: { opacity: 0.72, transform: [{ scale: 0.992 }] },
-  avatar: { width: 56, height: 56, borderRadius: 28 },
+  pressed: { backgroundColor: 'rgba(4, 197, 191, 0.055)' },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: colors.primary,
+  },
   avatarFallback: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primary,
+    backgroundColor: 'rgba(4, 197, 191, 0.09)',
+    borderWidth: 2,
+    borderColor: colors.primary,
   },
-  avatarLetter: { color: colors.backgroundDeep, fontSize: 22, fontWeight: '900' },
-  rowBody: { flex: 1, minWidth: 0, gap: 7 },
+  avatarLetter: { color: colors.primary, fontSize: 18, fontWeight: '900' },
+  rowBody: { flex: 1, minWidth: 0, gap: 5, paddingRight: 4 },
   rowTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   usernameLine: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 5 },
-  username: { flexShrink: 1, color: colors.text, fontSize: 16, fontWeight: '900' },
+  username: { flexShrink: 1, color: colors.white, fontSize: 16, fontWeight: '900' },
   verified: { color: colors.primary, fontSize: 14, fontWeight: '900' },
-  time: { color: colors.textMuted, fontSize: 11, fontWeight: '700' },
-  previewLine: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  preview: { flex: 1, color: colors.textMuted, fontSize: 13 },
+  time: { color: 'rgba(223, 252, 255, 0.48)', fontSize: 11 },
+  preview: { color: 'rgba(223, 252, 255, 0.62)', fontSize: 13 },
   previewUnread: { color: colors.text, fontWeight: '800' },
   unreadBadge: {
-    minWidth: 22,
-    height: 22,
-    paddingHorizontal: 6,
-    borderRadius: 11,
+    minWidth: 24,
+    height: 24,
+    paddingHorizontal: 7,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.accent,
   },
   unreadText: { color: colors.white, fontSize: 11, fontWeight: '900' },
-  separator: { height: spacing.sm },
   centerState: { minHeight: 260, alignItems: 'center', justifyContent: 'center', gap: spacing.md },
   stateCard: {
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
+    backgroundColor: 'rgba(0, 18, 28, 0.96)',
+    borderColor: 'rgba(4, 197, 191, 0.18)',
     borderWidth: 1,
     borderRadius: radius.large,
     padding: spacing.xl,
