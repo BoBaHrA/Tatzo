@@ -1,35 +1,67 @@
 import { Link, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { BrandHeader } from '@/components/brand-header';
-import { Screen } from '@/components/screen';
-import { t } from '@/i18n';
-import { colors, radius, spacing } from '@/theme';
+import { authCopy } from '@/auth/auth-copy';
+import { AuthShell } from '@/auth/auth-shell';
+import { useLanguage } from '@/localization/language-context';
+import { colors, radius, spacing, typography } from '@/theme';
 
 
 export default function VerifyEmailScreen() {
   const params = useLocalSearchParams<{ email?: string }>();
+  const { language } = useLanguage();
+  const copy = authCopy(language);
+
   return (
-    <Screen contentStyle={styles.centered}>
-      <BrandHeader />
-      <View style={styles.card}>
+    <AuthShell centered>
+      <View style={styles.iconWrap}>
         <Text style={styles.icon}>✉</Text>
-        <Text style={styles.title}>{t('verifyTitle')}</Text>
-        <Text style={styles.body}>{t('verifyBody')}</Text>
-        <Text style={styles.email}>{params.email ?? ''}</Text>
-        <Text style={styles.body}>{t('verifyHint')}</Text>
-        <Link href="/(auth)/login" replace style={styles.link}>{t('backToLogin')}</Link>
       </View>
-    </Screen>
+      <Text style={styles.title}>{copy.verifyTitle}</Text>
+      <Text style={styles.body}>{copy.verifyBody}</Text>
+      <Text style={styles.email}>{params.email ?? ''}</Text>
+      <Text style={styles.body}>{copy.verifyHint}</Text>
+      <Link href="/(auth)/login" replace style={styles.link}>{copy.backToLogin}</Link>
+    </AuthShell>
   );
 }
 
 const styles = StyleSheet.create({
-  centered: { justifyContent: 'center' },
-  card: { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: radius.large, padding: spacing.xl, gap: spacing.md, alignItems: 'center' },
-  icon: { fontSize: 42, color: colors.primary },
-  title: { color: colors.text, fontSize: 28, fontWeight: '800', textAlign: 'center' },
-  body: { color: colors.textMuted, textAlign: 'center', lineHeight: 22 },
-  email: { color: colors.primary, fontWeight: '800', fontSize: 17, textAlign: 'center' },
-  link: { color: colors.primary, fontWeight: '800', marginTop: spacing.sm },
+  iconWrap: {
+    width: 56,
+    height: 56,
+    alignSelf: 'center',
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySoft,
+  },
+  icon: {
+    color: colors.primary,
+    fontSize: 27,
+  },
+  title: {
+    color: colors.accent,
+    ...typography.title,
+    textAlign: 'center',
+  },
+  body: {
+    color: colors.textMuted,
+    ...typography.body,
+    textAlign: 'center',
+  },
+  email: {
+    color: colors.primary,
+    ...typography.bodyStrong,
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  link: {
+    color: colors.accent,
+    ...typography.bodyStrong,
+    textAlign: 'center',
+    marginTop: spacing.xs,
+  },
 });
