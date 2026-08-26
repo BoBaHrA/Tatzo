@@ -1,379 +1,450 @@
-import { router } from 'expo-router';
-import { Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
+import type { FeedPost, PublicProfile } from '@/api/types';
 import { useAuth } from '@/auth/auth-context';
-import { BrandHeader } from '@/components/brand-header';
 import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
-import { t } from '@/i18n';
-import { PUBLIC_LINKS } from '@/public-links';
-import { colors, radius, shadow, spacing, typography } from '@/theme';
+import { appLanguage, t } from '@/i18n';
+import { fetchProfileContent, fetchPublicProfile } from '@/profile/profile-api';
+import type { ProfileContentTab } from '@/profile/profile-types';
+import { colors, radius, spacing } from '@/theme';
 
 
-function artistStatusLabel(status: string) {
+function copy(en: string, fr: string, ru: string) {
+  if (appLanguage === 'fr') return fr;
+  if (appLanguage === 'ru') return ru;
+  return en;
+}
+
+function verificationLabel(status: string) {
+  if (status === 'approved') return t('verified');
   if (status === 'rejected') return t('verificationStatusRejected');
   if (status === 'not_submitted') return t('verificationStatusNotSubmitted');
   return t('pendingVerification');
 }
 
 export default function ProfileScreen() {
-  const { user, signOut } = useAuth();
-  if (!user) return null;
+  const { request, user } = useAuth();
+  const [profile, setProfile] = useState<PublicProfile | null>(null);
+  const [tab, setTab] = useState<ProfileContentTab>('posts');
+  const [posts, setPosts] = useState<FeedPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [contentLoading, setContentLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const accountLabel = user.is_verified_artist
-    ? t('verified')
-    : user.account_type === 'tattoo_artist'
-      ? artistStatusLabel(user.verification_status)
-      : t('regularAccount');
+  const load = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    setError('');
+    try {
+      const [nextProfile, content] = await Promise.all([
+        fetchPublicProfile(request, user.username),
+        fetchProfileContent(request, user.username, tab),
+      ]);
+      setProfile(nextProfile);
+      setPosts(content.results);
+    } catch {
+      setError(t('profileLoadError'));
+    } finally {
+      setLoading(false);
+      setContentLoading(false);
+    }
+  }, [request, tab, user]);
+
+  useFocusEffect(useCallback(() => {
+    void load();
+  }, [load]));
+
+  const selectTab = async (nextTab: ProfileContentTab) => {
+    if (!user || nextTab === tab) return;
+    setTab(nextTab);
+    setContentLoading(true);
+    setError('');
+    try {
+      const content = await fetchProfileContent(request, user.username, nextTab);
+      setPosts(content.results);
+    } catch {
+      setError(t('profileLoadError'));
+    } finally {
+      setContentLoading(false);
+    }
+  };
+
+  if (!user) return null;
 
   return (
     <Screen contentStyle={styles.screen}>
-      <BrandHeader showQuickMatch />
-
-      <View style={styles.profileHero}>
-        <View style={styles.identityRow}>
-          {user.profile_image_url ? (
-            <Image source={{ uri: user.profile_image_url }} style={styles.avatar} />
-          ) : (
-            <View style={styles.avatarFallback}>
-              <Text style={styles.avatarLetter}>{user.username[0]?.toUpperCase()}</Text>
-            </View>
-          )}
-          <View style={styles.identity}>
-            <View style={styles.nameLine}>
-              <Text numberOfLines={1} style={styles.username}>{user.username}</Text>
-              {user.is_verified_artist ? <Text style={styles.verified}>✓</Text> : null}
-            </View>
-            <Text style={styles.tag}>@{user.tag ?? user.username}</Text>
-            <View style={styles.badge}>
-              <Text numberOfLines={1} style={styles.badgeText}>{accountLabel}</Text>
-            </View>
-          </View>
-        </View>
-
-        {user.bio ? <Text style={styles.bio}>{user.bio}</Text> : null}
-
+      <View style={styles.topbar}>
+        <Image
+          accessibilityLabel="Tatzo"
+          resizeMode="contain"
+          source={require('../../assets/tatzo7.png')}
+          style={styles.logo}
+        />
         <Pressable
+          accessibilityLabel={copy('Settings', 'Paramètres', 'Настройки')}
           accessibilityRole="button"
-          onPress={() => router.push('/edit-profile')}
-          style={({ pressed }) => [styles.editAction, pressed && styles.pressed]}
+          onPress={() => router.push('/settings')}
+          style={({ pressed }) => [styles.settingsButton, pressed && styles.pressed]}
         >
-          <Text style={styles.editActionText}>{t('editProfile')}</Text>
-          <Text style={styles.actionChevron}>›</Text>
+          <Text style={styles.settingsIcon}>⚙</Text>
         </Pressable>
       </View>
 
-      {user.is_verified_artist ? (
-        <View style={styles.workspaceCard}>
-          <View style={styles.workspaceGlow} />
-          <Text style={styles.artistEyebrow}>{t('artistDashboardEyebrow')}</Text>
-          <Text style={styles.workspaceTitle}>{t('artistDashboard')}</Text>
-          <Text style={styles.workspaceText}>{t('artistDashboardSubtitle')}</Text>
-          <Button
-            label={t('artistDashboard')}
-            onPress={() => router.push('/artist-dashboard')}
-          />
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.push('/manage-portfolio')}
-            style={({ pressed }) => [styles.workspaceSecondary, pressed && styles.pressed]}
-          >
-            <Text style={styles.workspaceSecondaryText}>{t('managePortfolio')}</Text>
-            <Text style={styles.actionChevron}>›</Text>
-          </Pressable>
+      {loading && !profile ? (
+        <View style={styles.loadingState}>
+          <ActivityIndicator color={colors.primary} size="large" />
         </View>
-      ) : null}
+      ) : profile ? (
+        <>
+          <View style={styles.profileHeader}>
+            <View style={styles.avatarWrap}>
+              {profile.profile_image_url ? (
+                <Image source={{ uri: profile.profile_image_url }} style={styles.avatar} />
+              ) : (
+                <View style={[styles.avatar, styles.avatarFallback]}>
+                  <Text style={styles.avatarLetter}>{profile.username[0]?.toUpperCase()}</Text>
+                </View>
+              )}
+            </View>
 
-      {user.account_type === 'tattoo_artist' && !user.is_verified_artist ? (
-        <View style={styles.verificationCard}>
-          <Text style={styles.verificationEyebrow}>{t('verificationEyebrow')}</Text>
-          <Text style={styles.sectionTitle}>{t('verificationProfileTitle')}</Text>
-          <Text style={styles.sectionText}>
-            {user.verification_status === 'rejected'
-              ? t('verificationProfileRejectedBody')
-              : user.verification_status === 'not_submitted'
-                ? t('verificationProfileStartBody')
-                : t('verificationProfilePendingBody')}
-          </Text>
-          <Button
-            label={t('verificationOpen')}
-            onPress={() => router.push('/artist-verification')}
-          />
+            <View style={styles.profileMain}>
+              <View style={styles.nameRow}>
+                <Text numberOfLines={1} style={styles.username}>{profile.username}</Text>
+                {profile.account_type === 'tattoo_artist' ? (
+                  <View style={[styles.badge, styles.artistBadge]}>
+                    <Text style={styles.artistBadgeText}>{copy('Tattoo Artist', 'Tatoueur', 'Тату-мастер')}</Text>
+                  </View>
+                ) : null}
+                {profile.is_verified_artist ? (
+                  <View style={[styles.badge, styles.verifiedBadge]}>
+                    <Text style={styles.verifiedBadgeText}>{t('verified')}</Text>
+                  </View>
+                ) : null}
+              </View>
+
+              <Text style={styles.subline}>
+                {profile.account_type === 'tattoo_artist'
+                  ? copy('Professional portfolio', 'Portfolio professionnel', 'Профессиональное портфолио')
+                  : copy('Community profile', 'Profil communautaire', 'Профиль сообщества')}
+              </Text>
+
+              <Button
+                label={t('editProfile')}
+                onPress={() => router.push('/edit-profile')}
+                size="compact"
+              />
+
+              <View style={styles.stats}>
+                <Stat value={profile.posts_count} label={t('posts')} />
+                <Stat value={profile.followers_count} label={t('followers')} />
+                <Stat value={profile.following_count} label={t('followingLabel')} />
+              </View>
+
+              <View style={styles.bioCard}>
+                <Text style={profile.bio ? styles.bio : styles.muted}>
+                  {profile.bio || copy('No bio yet.', 'Pas encore de bio.', 'Описание пока не добавлено.')}
+                </Text>
+              </View>
+
+              {profile.account_type === 'tattoo_artist' ? (
+                <View style={styles.artistInfoGrid}>
+                  <ArtistInfoCard
+                    title={copy('Verification', 'Vérification', 'Верификация')}
+                    value={verificationLabel(user.verification_status)}
+                    onPress={user.verification_status === 'not_submitted'
+                      ? () => router.push('/artist-verification')
+                      : undefined}
+                  />
+                  <ArtistInfoCard
+                    title={t('portfolio')}
+                    value={profile.portfolio_works_count
+                      ? t('managePortfolio')
+                      : copy('Add your works', 'Ajouter vos œuvres', 'Добавить работы')}
+                    onPress={() => router.push('/manage-portfolio')}
+                  />
+                  <ArtistInfoCard
+                    title={copy('Booking', 'Réservation', 'Запись')}
+                    value={profile.is_verified_artist
+                      ? copy('Manage appointments', 'Gérer les rendez-vous', 'Управлять записями')
+                      : copy('Available after verification', 'Disponible après vérification', 'Доступно после верификации')}
+                    onPress={profile.is_verified_artist ? () => router.push('/(tabs)/bookings') : undefined}
+                  />
+                </View>
+              ) : null}
+            </View>
+          </View>
+
+          <View style={styles.tabs}>
+            <ProfileTab
+              active={tab === 'posts'}
+              label={copy('Posts', 'Publications', 'Публикации')}
+              onPress={() => void selectTab('posts')}
+            />
+            <ProfileTab
+              active={tab === 'liked'}
+              label={copy('Liked', 'Aimées', 'Понравившиеся')}
+              onPress={() => void selectTab('liked')}
+            />
+          </View>
+
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+
+          {contentLoading ? (
+            <ActivityIndicator color={colors.primary} style={styles.contentLoader} />
+          ) : posts.length ? (
+            <View style={styles.postsGrid}>
+              {posts.map((post) => <PostTile key={post.id} post={post} />)}
+            </View>
+          ) : (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyTitle}>
+                {tab === 'posts'
+                  ? copy('No posts yet', 'Aucune publication', 'Публикаций пока нет')
+                  : copy('No liked posts yet', 'Aucune publication aimée', 'Понравившихся публикаций пока нет')}
+              </Text>
+              <Text style={styles.muted}>
+                {tab === 'posts'
+                  ? copy('Your posts will appear here.', 'Vos publications apparaîtront ici.', 'Твои публикации появятся здесь.')
+                  : copy('Posts you like will appear here.', 'Les publications aimées apparaîtront ici.', 'Здесь появятся публикации, которые тебе понравились.')}
+              </Text>
+            </View>
+          )}
+        </>
+      ) : (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyTitle}>{t('profileUnavailable')}</Text>
+          <Text style={styles.muted}>{error || t('profileLoadError')}</Text>
+          <Button label={t('retry')} onPress={() => void load()} />
         </View>
-      ) : null}
-
-      <View style={styles.infoCard}>
-        <Text style={styles.groupEyebrow}>{t('account')}</Text>
-        <Detail label={t('email')} value={user.email} />
-        <Detail label={t('account')} value={user.account_type} />
-        <Detail label="Timezone" value={user.timezone} last />
-      </View>
-
-      <SettingsGroup title={t('healing')}>
-        <ActionRow
-          label={t('healingOpen')}
-          meta={t('healingProfileSubtitle')}
-          onPress={() => router.push('/healing')}
-          symbol="✦"
-        />
-        <ActionRow
-          label={t('healthSafety')}
-          meta={t('healthSafetyProfileSubtitle')}
-          onPress={() => router.push('/health-safety')}
-          symbol="＋"
-          last
-        />
-      </SettingsGroup>
-
-      <SettingsGroup title={t('legal')}>
-        <ActionRow label={t('privacy')} onPress={() => void Linking.openURL(PUBLIC_LINKS.privacy)} symbol="⌁" />
-        <ActionRow label={t('terms')} onPress={() => void Linking.openURL(PUBLIC_LINKS.terms)} symbol="⌁" />
-        <ActionRow label={t('communityGuidelines')} onPress={() => void Linking.openURL(PUBLIC_LINKS.communityGuidelines)} symbol="⌁" last />
-      </SettingsGroup>
-
-      <SettingsGroup title={t('safety')}>
-        <ActionRow label={t('blockedUsers')} onPress={() => router.push('/blocked-users')} symbol="⊘" />
-        <ActionRow label={t('contactSafetySupport')} onPress={() => void Linking.openURL(PUBLIC_LINKS.safetySupport)} symbol="?" />
-        <ActionRow label={t('deleteAccount')} onPress={() => router.push('/delete-account')} symbol="×" danger last />
-      </SettingsGroup>
-
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => void signOut()}
-        style={({ pressed }) => [styles.signOut, pressed && styles.pressed]}
-      >
-        <Text style={styles.signOutText}>{t('signOut')}</Text>
-      </Pressable>
+      )}
     </Screen>
   );
 }
 
-function Detail({
-  label,
+function Stat({ value, label }: { value: number; label: string }) {
+  return (
+    <View style={styles.stat}>
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+}
+
+function ArtistInfoCard({
+  title,
   value,
-  last = false,
-}: {
-  label: string;
-  value: string;
-  last?: boolean;
-}) {
-  return (
-    <View style={[styles.detailRow, last && styles.rowLast]}>
-      <Text style={styles.detailLabel}>{label}</Text>
-      <Text numberOfLines={1} style={styles.detailValue}>{value}</Text>
-    </View>
-  );
-}
-
-function SettingsGroup({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <View style={styles.settingsGroup}>
-      <Text style={styles.groupEyebrow}>{title}</Text>
-      <View style={styles.settingsSurface}>{children}</View>
-    </View>
-  );
-}
-
-function ActionRow({
-  label,
-  meta,
   onPress,
-  symbol,
-  danger = false,
-  last = false,
 }: {
-  label: string;
-  meta?: string;
-  onPress: () => void;
-  symbol: string;
-  danger?: boolean;
-  last?: boolean;
+  title: string;
+  value: string;
+  onPress?: () => void;
 }) {
-  return (
+  const content = (
+    <>
+      <Text style={styles.artistInfoTitle}>{title}</Text>
+      <Text style={[styles.artistInfoValue, onPress && styles.artistInfoLink]}>{value}</Text>
+    </>
+  );
+  return onPress ? (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.actionRow,
-        last && styles.rowLast,
-        pressed && styles.actionPressed,
-      ]}
+      style={({ pressed }) => [styles.artistInfoCard, pressed && styles.pressed]}
     >
-      <View style={[styles.actionIcon, danger && styles.actionIconDanger]}>
-        <Text style={[styles.actionIconText, danger && styles.dangerText]}>{symbol}</Text>
-      </View>
-      <View style={styles.actionCopy}>
-        <Text style={[styles.actionLabel, danger && styles.dangerText]}>{label}</Text>
-        {meta ? <Text numberOfLines={2} style={styles.actionMeta}>{meta}</Text> : null}
-      </View>
-      <Text style={[styles.actionChevron, danger && styles.dangerText]}>›</Text>
+      {content}
+    </Pressable>
+  ) : <View style={styles.artistInfoCard}>{content}</View>;
+}
+
+function ProfileTab({ active, label, onPress }: { active: boolean; label: string; onPress: () => void }) {
+  return (
+    <Pressable
+      accessibilityRole="tab"
+      accessibilityState={{ selected: active }}
+      onPress={onPress}
+      style={({ pressed }) => [styles.tab, active && styles.tabActive, pressed && styles.pressed]}
+    >
+      <Text style={[styles.tabText, active && styles.tabTextActive]}>{label}</Text>
+    </Pressable>
+  );
+}
+
+function PostTile({ post }: { post: FeedPost }) {
+  const media = post.media[0];
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => router.push({ pathname: '/post/[postId]', params: { postId: String(post.id) } })}
+      style={({ pressed }) => [styles.postTile, pressed && styles.tilePressed]}
+    >
+      {media?.type === 'image' ? (
+        <Image source={{ uri: media.url }} style={styles.postMedia} />
+      ) : media?.type === 'video' ? (
+        <View style={[styles.postMedia, styles.videoTile]}>
+          <Text style={styles.videoIcon}>▶</Text>
+        </View>
+      ) : (
+        <View style={[styles.postMedia, styles.noMedia]}>
+          <Text numberOfLines={4} style={styles.noMediaText}>{post.content || 'Tatzo'}</Text>
+        </View>
+      )}
+      {post.media.length > 1 ? (
+        <View style={styles.mediaCount}>
+          <Text style={styles.mediaCountText}>{post.media.length}</Text>
+        </View>
+      ) : null}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { paddingBottom: spacing.xxl },
-  profileHero: {
-    backgroundColor: 'rgba(0, 18, 28, 0.96)',
-    borderColor: 'rgba(4, 197, 191, 0.18)',
-    borderWidth: 1,
-    borderRadius: radius.panel,
-    padding: spacing.lg,
-    gap: spacing.md,
-    ...shadow.panel,
-  },
-  identityRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  avatar: { width: 76, height: 76, borderRadius: 38, borderWidth: 2, borderColor: colors.primary },
-  avatarFallback: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
-    backgroundColor: colors.primarySoft,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarLetter: { color: colors.primary, fontSize: 30, fontWeight: '900' },
-  identity: { flex: 1, minWidth: 0, gap: 3 },
-  nameLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  username: { flexShrink: 1, color: colors.text, fontSize: 25, lineHeight: 30, fontWeight: '900', letterSpacing: -0.4 },
-  verified: { color: colors.primary, fontSize: 17, fontWeight: '900' },
-  tag: { color: colors.primary, fontSize: 13, fontWeight: '800' },
-  badge: {
-    alignSelf: 'flex-start',
-    marginTop: spacing.xs,
-    backgroundColor: colors.backgroundDeep,
-    borderColor: 'rgba(4, 197, 191, 0.14)',
-    borderWidth: 1,
-    borderRadius: radius.pill,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-  },
-  badgeText: { color: colors.textMuted, fontSize: 11, fontWeight: '800' },
-  bio: { color: colors.text, fontSize: 14, lineHeight: 21 },
-  editAction: {
-    minHeight: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(4, 197, 191, 0.12)',
-    paddingTop: spacing.sm,
-  },
-  editActionText: { color: colors.primary, fontSize: 13, fontWeight: '900' },
-  workspaceCard: {
-    position: 'relative',
-    overflow: 'hidden',
-    backgroundColor: '#06272d',
-    borderColor: 'rgba(4, 197, 191, 0.36)',
-    borderWidth: 1,
-    borderRadius: radius.panel,
-    padding: spacing.lg,
-    gap: spacing.sm,
-    ...shadow.panel,
-  },
-  workspaceGlow: {
-    position: 'absolute',
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    right: -70,
-    top: -75,
-    backgroundColor: 'rgba(4, 197, 191, 0.10)',
-  },
-  artistEyebrow: { color: colors.primary, ...typography.eyebrow },
-  workspaceTitle: { color: colors.text, fontSize: 25, lineHeight: 30, fontWeight: '900' },
-  workspaceText: { color: colors.textMuted, lineHeight: 20, paddingBottom: spacing.xs },
-  workspaceSecondary: {
-    minHeight: 42,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.sm,
-  },
-  workspaceSecondaryText: { color: colors.text, fontSize: 13, fontWeight: '800' },
-  verificationCard: {
-    backgroundColor: 'rgba(0, 18, 28, 0.96)',
-    borderRadius: radius.panel,
-    borderWidth: 1,
-    borderColor: 'rgba(238, 12, 111, 0.42)',
-    padding: spacing.lg,
-    gap: spacing.sm,
-  },
-  verificationEyebrow: { color: colors.accent, ...typography.eyebrow },
-  sectionTitle: { color: colors.text, fontSize: 21, fontWeight: '900' },
-  sectionText: { color: colors.textMuted, lineHeight: 20 },
-  infoCard: {
-    backgroundColor: 'rgba(0, 18, 28, 0.72)',
-    borderColor: 'rgba(4, 197, 191, 0.12)',
-    borderWidth: 1,
-    borderRadius: radius.large,
-    overflow: 'hidden',
-    paddingTop: spacing.sm,
-  },
-  groupEyebrow: {
-    color: colors.textSubtle,
-    ...typography.eyebrow,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-  },
-  detailRow: {
-    minHeight: 46,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-    paddingHorizontal: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(4, 197, 191, 0.10)',
-  },
-  detailLabel: { color: colors.textMuted, fontSize: 12 },
-  detailValue: { color: colors.text, fontSize: 12, fontWeight: '800', flexShrink: 1, textAlign: 'right' },
-  settingsGroup: { gap: spacing.xs },
-  settingsSurface: {
-    overflow: 'hidden',
-    backgroundColor: 'rgba(0, 18, 28, 0.72)',
-    borderColor: 'rgba(4, 197, 191, 0.12)',
-    borderWidth: 1,
-    borderRadius: radius.large,
-  },
-  actionRow: {
-    minHeight: 54,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(4, 197, 191, 0.10)',
-  },
-  rowLast: { borderBottomWidth: 0 },
-  actionPressed: { backgroundColor: 'rgba(4, 197, 191, 0.05)' },
-  actionIcon: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 10,
-    backgroundColor: colors.primarySoft,
-  },
-  actionIconDanger: { backgroundColor: 'rgba(255, 87, 127, 0.10)' },
-  actionIconText: { color: colors.primary, fontSize: 15, fontWeight: '900' },
-  actionCopy: { flex: 1, minWidth: 0, gap: 2 },
-  actionLabel: { color: colors.text, fontSize: 13, fontWeight: '800' },
-  actionMeta: { color: colors.textMuted, fontSize: 10, lineHeight: 14 },
-  actionChevron: { color: colors.textSubtle, fontSize: 23, lineHeight: 25 },
-  dangerText: { color: colors.danger },
-  signOut: {
+  screen: { paddingTop: spacing.xs, paddingBottom: spacing.xxl },
+  topbar: {
     minHeight: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
+  logo: { width: 122, height: 34 },
+  settingsButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(4, 197, 191, 0.14)',
-    borderRadius: radius.medium,
-    backgroundColor: 'rgba(0, 18, 28, 0.55)',
+    borderColor: 'rgba(4, 197, 191, 0.18)',
+    backgroundColor: '#00131d',
   },
-  signOutText: { color: colors.textMuted, fontSize: 13, fontWeight: '800' },
-  pressed: { opacity: 0.72, transform: [{ scale: 0.99 }] },
+  settingsIcon: { color: colors.primary, fontSize: 20 },
+  loadingState: { minHeight: 380, alignItems: 'center', justifyContent: 'center' },
+  profileHeader: {
+    backgroundColor: '#00131d',
+    borderWidth: 1,
+    borderColor: '#012c35',
+    borderRadius: 22,
+    padding: spacing.lg,
+    gap: spacing.md,
+  },
+  avatarWrap: { alignItems: 'center' },
+  avatar: {
+    width: 116,
+    height: 116,
+    borderRadius: 58,
+    borderWidth: 3,
+    borderColor: colors.primary,
+  },
+  avatarFallback: { alignItems: 'center', justifyContent: 'center', backgroundColor: '#031720' },
+  avatarLetter: { color: colors.primary, fontSize: 42, fontWeight: '900' },
+  profileMain: { gap: spacing.md },
+  nameRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.xs },
+  username: { color: '#f4ffff', fontSize: 31, lineHeight: 35, fontWeight: '900', letterSpacing: -0.7, flexShrink: 1 },
+  subline: { color: 'rgba(223, 252, 255, 0.72)', fontSize: 15, lineHeight: 22 },
+  badge: { borderRadius: 999, paddingVertical: 5, paddingHorizontal: 9, borderWidth: 1 },
+  artistBadge: { backgroundColor: 'rgba(4, 197, 191, 0.12)', borderColor: 'rgba(4, 197, 191, 0.25)' },
+  artistBadgeText: { color: '#6ef6f0', fontSize: 11, fontWeight: '800' },
+  verifiedBadge: { backgroundColor: 'rgba(238, 12, 111, 0.12)', borderColor: 'rgba(238, 12, 111, 0.25)' },
+  verifiedBadgeText: { color: '#ff6b96', fontSize: 11, fontWeight: '800' },
+  stats: { flexDirection: 'row', gap: spacing.sm },
+  stat: {
+    flex: 1,
+    minWidth: 0,
+    paddingVertical: 10,
+    paddingHorizontal: 9,
+    borderRadius: 14,
+    backgroundColor: '#031b27',
+    borderWidth: 1,
+    borderColor: 'rgba(4, 197, 191, 0.08)',
+  },
+  statValue: { color: colors.white, fontSize: 18, fontWeight: '900' },
+  statLabel: { color: '#84aeb2', fontSize: 11, marginTop: 3 },
+  bioCard: {
+    padding: 14,
+    borderRadius: 16,
+    backgroundColor: '#031b27',
+    borderWidth: 1,
+    borderColor: 'rgba(4, 197, 191, 0.08)',
+  },
+  bio: { color: '#d9eeee', lineHeight: 21 },
+  muted: { color: '#7fa7ab', lineHeight: 20 },
+  artistInfoGrid: { flexDirection: 'row', gap: spacing.sm },
+  artistInfoCard: {
+    flex: 1,
+    minWidth: 0,
+    padding: 11,
+    borderRadius: 15,
+    backgroundColor: '#031b27',
+    borderWidth: 1,
+    borderColor: 'rgba(4, 197, 191, 0.08)',
+    gap: 5,
+  },
+  artistInfoTitle: { color: '#7fa7ab', fontSize: 10 },
+  artistInfoValue: { color: '#ecffff', fontSize: 12, fontWeight: '800' },
+  artistInfoLink: { color: colors.primary },
+  tabs: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+    padding: 7,
+    backgroundColor: '#00131d',
+    borderWidth: 1,
+    borderColor: '#012c35',
+    borderRadius: 16,
+  },
+  tab: { flex: 1, alignItems: 'center', paddingVertical: 10, borderRadius: 12 },
+  tabActive: { backgroundColor: 'rgba(4, 197, 191, 0.14)' },
+  tabText: { color: '#77a8ad', fontWeight: '800' },
+  tabTextActive: { color: '#dffefe' },
+  contentLoader: { marginVertical: 48 },
+  postsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  postTile: {
+    width: '31.7%',
+    aspectRatio: 1,
+    borderRadius: 15,
+    overflow: 'hidden',
+    backgroundColor: '#021722',
+    borderWidth: 1,
+    borderColor: 'rgba(4, 197, 191, 0.08)',
+  },
+  postMedia: { width: '100%', height: '100%' },
+  videoTile: { alignItems: 'center', justifyContent: 'center', backgroundColor: '#031b27' },
+  videoIcon: { color: colors.primary, fontSize: 22 },
+  noMedia: { padding: 8, alignItems: 'center', justifyContent: 'center' },
+  noMediaText: { color: colors.textMuted, fontSize: 10, textAlign: 'center' },
+  mediaCount: {
+    position: 'absolute',
+    right: 6,
+    top: 6,
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    paddingHorizontal: 5,
+    backgroundColor: 'rgba(0, 9, 17, 0.78)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mediaCountText: { color: colors.white, fontSize: 10, fontWeight: '900' },
+  tilePressed: { opacity: 0.72, transform: [{ scale: 0.985 }] },
+  emptyState: {
+    padding: spacing.xl,
+    borderRadius: radius.large,
+    borderWidth: 1,
+    borderColor: 'rgba(4, 197, 191, 0.10)',
+    backgroundColor: '#00131d',
+    gap: spacing.sm,
+    alignItems: 'center',
+  },
+  emptyTitle: { color: colors.text, fontSize: 18, fontWeight: '900', textAlign: 'center' },
+  error: { color: colors.danger, textAlign: 'center', padding: spacing.sm },
+  pressed: { opacity: 0.7 },
 });
