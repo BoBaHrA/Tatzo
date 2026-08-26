@@ -32,6 +32,13 @@ class ProfileSearchView(APIView):
             .filter(is_active=True, profile__is_email_verified=True)
             .exclude(blocked_by_relations__blocker=request.user)
             .exclude(blocking_relations__blocked=request.user)
+            .annotate(
+                verified_rank=Case(
+                    When(profile__verification_status="approved", then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField(),
+                )
+            )
         )
 
         if normalized_query:
@@ -60,7 +67,7 @@ class ProfileSearchView(APIView):
 
         users = users.order_by(
             "-exact_match",
-            "-profile__verification_status",
+            "-verified_rank",
             "username",
         )[:30]
 
