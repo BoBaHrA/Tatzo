@@ -25,6 +25,7 @@ const field = source('src/components/field.tsx');
 const language = source('src/localization/language-context.tsx');
 const client = source('src/api/client.ts');
 const links = source('src/public-links.ts');
+const passwordFocusedStyle = passwordField.match(/focused:\s*\{([\s\S]*?)\n\s*\},/)?.[1] ?? '';
 
 check(shell.includes("tatzo7.png"), 'Auth shell uses current Tatzo wordmark');
 check(shell.includes('AuthLanguageSwitcher'), 'Auth shell exposes the language switcher');
@@ -49,6 +50,13 @@ check(
   field.includes("autoComplete={androidAuth ? 'off' : autoComplete}")
     && field.includes("importantForAutofill={androidAuth ? 'no' : importantForAutofill}"),
   'Android auth identity fields suppress autofill focus hijacking',
+);
+check(
+  !passwordFocusedStyle.includes('shadowColor')
+    && !passwordFocusedStyle.includes('shadowOpacity')
+    && !passwordFocusedStyle.includes('shadowRadius')
+    && !passwordFocusedStyle.includes('elevation'),
+  'Password focus style does not mutate parent shadow/elevation under Fabric',
 );
 check(links.includes("passwordReset: 'https://tatzo.eu/password-reset/'"), 'Password reset points to the Tatzo web flow');
 
