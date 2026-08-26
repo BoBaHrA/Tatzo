@@ -21,6 +21,7 @@ const register = source('app/(auth)/register.tsx');
 const verify = source('app/(auth)/verify-email.tsx');
 const shell = source('src/auth/auth-shell.tsx');
 const passwordField = source('src/auth/auth-password-field.tsx');
+const field = source('src/components/field.tsx');
 const language = source('src/localization/language-context.tsx');
 const client = source('src/api/client.ts');
 const links = source('src/public-links.ts');
@@ -39,6 +40,16 @@ check(language.includes("'en' | 'fr' | 'ru'"), 'Language preference supports EN,
 check(language.includes('SecureStore.setItemAsync'), 'Language preference persists between launches');
 check(client.includes('getPreferredLanguage()'), 'API requests use the selected language');
 check(passwordField.includes('secureTextEntry={!visible}'), 'Password field can show and hide its value');
+check(
+  passwordField.includes("autoComplete={android ? 'off' : autoComplete}")
+    && passwordField.includes("importantForAutofill={android ? 'no' : importantForAutofill}"),
+  'Android password input suppresses autofill focus hijacking',
+);
+check(
+  field.includes("autoComplete={androidAuth ? 'off' : autoComplete}")
+    && field.includes("importantForAutofill={androidAuth ? 'no' : importantForAutofill}"),
+  'Android auth identity fields suppress autofill focus hijacking',
+);
 check(links.includes("passwordReset: 'https://tatzo.eu/password-reset/'"), 'Password reset points to the Tatzo web flow');
 
 console.log('\nTatzo mobile auth parity check');
