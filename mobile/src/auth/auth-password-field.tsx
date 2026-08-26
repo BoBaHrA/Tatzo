@@ -97,13 +97,12 @@ const styles = StyleSheet.create({
     borderRadius: radius.small,
     backgroundColor: colors.surfaceSoft,
   },
+  // Keep this focus transition layout-only. Under React Native's new
+  // architecture, adding/removing elevation or shadow props on the TextInput
+  // parent during onFocus can immediately blur the native input.
   focused: {
     borderColor: colors.primary,
     backgroundColor: colors.surfaceInteractive,
-    shadowColor: colors.primary,
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 1,
   },
   errorInput: {
     borderColor: colors.danger,
