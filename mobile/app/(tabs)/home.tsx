@@ -1,10 +1,9 @@
 import { useCallback, useState } from 'react';
-import { router, useFocusEffect } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import {
   ActivityIndicator,
   Alert,
   FlatList,
-  Pressable,
   RefreshControl,
   StyleSheet,
   Text,
@@ -25,7 +24,8 @@ import {
 import { PostCard } from '@/feed/post-card';
 import { t } from '@/i18n';
 import { deletePost } from '@/publishing/publishing-api';
-import { colors, radius, spacing, typography } from '@/theme';
+import { InlinePostComposer } from '@/publishing/inline-post-composer';
+import { colors, radius, spacing } from '@/theme';
 
 
 export default function HomeScreen() {
@@ -151,6 +151,10 @@ export default function HomeScreen() {
     ]);
   });
 
+  const published = (post: FeedPost) => {
+    setPosts((current) => [post, ...current.filter((item) => item.id !== post.id)]);
+  };
+
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={styles.safe}>
       <FlatList
@@ -180,18 +184,7 @@ export default function HomeScreen() {
         ListHeaderComponent={(
           <View style={styles.header}>
             <BrandHeader title={t('home')} showQuickMatch />
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => router.push('/create-post')}
-              style={({ pressed }) => [styles.createStrip, pressed && styles.createStripPressed]}
-            >
-              <Text numberOfLines={1} style={styles.createPlaceholder}>
-                {t('postCaptionPlaceholder')}
-              </Text>
-              <View style={styles.createPlus}>
-                <Text style={styles.createPlusText}>+</Text>
-              </View>
-            </Pressable>
+            <InlinePostComposer onPublished={published} request={request} />
             {actionError ? <Text style={styles.inlineError}>{actionError}</Text> : null}
           </View>
         )}
@@ -231,38 +224,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxl,
   },
   header: { gap: spacing.sm, marginBottom: spacing.md },
-  createStrip: {
-    minHeight: 46,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: '#005351',
-    borderRadius: radius.pill,
-    paddingLeft: spacing.lg,
-    paddingRight: spacing.xs,
-    borderWidth: 1,
-    borderColor: 'rgba(4, 197, 191, 0.32)',
-  },
-  createStripPressed: { opacity: 0.82, transform: [{ scale: 0.995 }] },
-  createPlaceholder: {
-    flex: 1,
-    color: '#8bd2d1',
-    ...typography.body,
-  },
-  createPlus: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 9, 17, 0.26)',
-  },
-  createPlusText: {
-    color: colors.primary,
-    fontSize: 26,
-    lineHeight: 27,
-    fontWeight: '500',
-  },
   separator: { height: spacing.lg },
   centerState: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, minHeight: 240 },
   stateCard: {
