@@ -91,12 +91,12 @@ export default function ArtistDashboardScreen() {
 
   const destinations = useMemo<DashboardDestination[]>(() => [
     { key: 'dashboard', label: copy('Dashboard', 'Tableau', 'Главная'), icon: WEB_DASH_ICONS.dashboard, active: true, onPress: () => undefined },
-    { key: 'calendar', label: t('calendar'), icon: WEB_DASH_ICONS.calendar, onPress: () => router.push('/artist-dashboard/calendar') },
+    { key: 'calendar', label: copy('Calendar', 'Calendrier', 'Календарь'), icon: WEB_DASH_ICONS.calendar, onPress: () => router.push('/artist-dashboard/calendar') },
     { key: 'bookings', label: t('bookings'), icon: WEB_DASH_ICONS.bookings, onPress: () => router.push('/(tabs)/bookings') },
     { key: 'messages', label: t('chats'), icon: WEB_DASH_ICONS.messages, onPress: () => router.push('/(tabs)/chats') },
     { key: 'portfolio', label: t('portfolio'), icon: WEB_DASH_ICONS.portfolio, onPress: () => router.push('/manage-portfolio') },
     { key: 'clients', label: t('healingClients'), icon: WEB_DASH_ICONS.clients, onPress: () => router.push('/healing') },
-    { key: 'settings', label: t('settings'), icon: WEB_DASH_ICONS.settings, onPress: () => router.push('/artist-dashboard/preferences') },
+    { key: 'settings', label: copy('Settings', 'Paramètres', 'Настройки'), icon: WEB_DASH_ICONS.settings, onPress: () => router.push('/artist-dashboard/preferences') },
   ], []);
 
   if (status === 'anonymous') return <Redirect href="/(auth)/login" />;
@@ -184,7 +184,7 @@ export default function ArtistDashboardScreen() {
       </View>
 
       <View style={styles.section}><View style={styles.sectionHead}><Text style={styles.sectionTitle}>{t('artistWorkload')}</Text><Pressable onPress={() => router.push('/artist-dashboard/schedule')}><Text style={styles.sectionLink}>{t('artistManageSchedule')}</Text></Pressable></View><WorkloadStrip days={dashboard.workload} /></View>
-      <View style={styles.section}><View style={styles.sectionHead}><Text style={styles.sectionTitle}>{t('artistUpcoming')}</Text><Pressable onPress={() => router.push('/artist-dashboard/calendar')}><Text style={styles.sectionLink}>{t('calendar')}</Text></Pressable></View><ArtistTimeline items={dashboard.timeline} /></View>
+      <View style={styles.section}><View style={styles.sectionHead}><Text style={styles.sectionTitle}>{t('artistUpcoming')}</Text><Pressable onPress={() => router.push('/artist-dashboard/calendar')}><Text style={styles.sectionLink}>{copy('Calendar', 'Calendrier', 'Календарь')}</Text></Pressable></View><ArtistTimeline items={dashboard.timeline} /></View>
     </Screen>
   );
 }
