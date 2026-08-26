@@ -16,16 +16,13 @@ import {
   fetchArtistDashboard,
   updateArtistBookingStatus,
 } from '@/artist-dashboard/artist-dashboard-api';
-import {
-  ArtistTimeline,
-  WorkloadStrip,
-} from '@/artist-dashboard/dashboard-components';
+import { ArtistTimeline, WorkloadStrip } from '@/artist-dashboard/dashboard-components';
 import { useAuth } from '@/auth/auth-context';
 import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
 import { userFacingError } from '@/errors';
 import { appLanguage, t } from '@/i18n';
-import { colors, radius, spacing } from '@/theme';
+import { colors, spacing } from '@/theme';
 
 
 type DashboardDestination = {
@@ -96,49 +93,13 @@ export default function ArtistDashboardScreen() {
   }, [load]));
 
   const destinations = useMemo<DashboardDestination[]>(() => [
-    {
-      key: 'dashboard',
-      label: copy('Dashboard', 'Tableau', 'Главная'),
-      icon: WEB_DASH_ICONS.dashboard,
-      active: true,
-      onPress: () => undefined,
-    },
-    {
-      key: 'calendar',
-      label: t('calendar'),
-      icon: WEB_DASH_ICONS.calendar,
-      onPress: () => router.push('/artist-dashboard/calendar'),
-    },
-    {
-      key: 'bookings',
-      label: t('bookings'),
-      icon: WEB_DASH_ICONS.bookings,
-      onPress: () => router.push('/(tabs)/bookings'),
-    },
-    {
-      key: 'messages',
-      label: t('chats'),
-      icon: WEB_DASH_ICONS.messages,
-      onPress: () => router.push('/(tabs)/chats'),
-    },
-    {
-      key: 'portfolio',
-      label: t('portfolio'),
-      icon: WEB_DASH_ICONS.portfolio,
-      onPress: () => router.push('/manage-portfolio'),
-    },
-    {
-      key: 'clients',
-      label: t('healingClients'),
-      icon: WEB_DASH_ICONS.clients,
-      onPress: () => router.push('/healing'),
-    },
-    {
-      key: 'settings',
-      label: t('settings'),
-      icon: WEB_DASH_ICONS.settings,
-      onPress: () => router.push('/artist-dashboard/preferences'),
-    },
+    { key: 'dashboard', label: copy('Dashboard', 'Tableau', 'Главная'), icon: WEB_DASH_ICONS.dashboard, active: true, onPress: () => undefined },
+    { key: 'calendar', label: t('calendar'), icon: WEB_DASH_ICONS.calendar, onPress: () => router.push('/artist-dashboard/calendar') },
+    { key: 'bookings', label: t('bookings'), icon: WEB_DASH_ICONS.bookings, onPress: () => router.push('/(tabs)/bookings') },
+    { key: 'messages', label: t('chats'), icon: WEB_DASH_ICONS.messages, onPress: () => router.push('/(tabs)/chats') },
+    { key: 'portfolio', label: t('portfolio'), icon: WEB_DASH_ICONS.portfolio, onPress: () => router.push('/manage-portfolio') },
+    { key: 'clients', label: t('healingClients'), icon: WEB_DASH_ICONS.clients, onPress: () => router.push('/healing') },
+    { key: 'settings', label: t('settings'), icon: WEB_DASH_ICONS.settings, onPress: () => router.push('/artist-dashboard/preferences') },
   ], []);
 
   if (status === 'anonymous') return <Redirect href="/(auth)/login" />;
@@ -189,36 +150,15 @@ export default function ArtistDashboardScreen() {
     <Screen contentStyle={styles.screen}>
       <View style={styles.brandRow}>
         <Image source={require('../../assets/tatzo7.png')} resizeMode="contain" style={styles.logo} />
-        <Pressable
-          accessibilityLabel={t('close')}
-          accessibilityRole="button"
-          onPress={() => router.back()}
-          style={({ pressed }) => [styles.close, pressed && styles.pressed]}
-        >
+        <Pressable accessibilityLabel={t('close')} accessibilityRole="button" onPress={() => router.back()} style={({ pressed }) => [styles.close, pressed && styles.pressed]}>
           <Text style={styles.closeText}>×</Text>
         </Pressable>
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.navContent}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.navRail}
-      >
+      <ScrollView contentContainerStyle={styles.navContent} horizontal showsHorizontalScrollIndicator={false} style={styles.navRail}>
         {destinations.map((item) => (
-          <Pressable
-            accessibilityLabel={item.label}
-            accessibilityRole="button"
-            accessibilityState={{ selected: item.active }}
-            key={item.key}
-            onPress={item.onPress}
-            style={({ pressed }) => [styles.navItem, item.active && styles.navItemActive, pressed && styles.pressed]}
-          >
-            <Image
-              source={item.icon}
-              resizeMode="contain"
-              style={[styles.navIcon, { tintColor: item.active ? colors.primary : '#8ca8ad' }]}
-            />
+          <Pressable accessibilityLabel={item.label} accessibilityRole="button" accessibilityState={{ selected: item.active }} key={item.key} onPress={item.onPress} style={({ pressed }) => [styles.navItem, item.active && styles.navItemActive, pressed && styles.pressed]}>
+            <Image source={item.icon} resizeMode="contain" style={[styles.navIcon, { tintColor: item.active ? colors.primary : '#8ca8ad' }]} />
             <Text numberOfLines={1} style={[styles.navLabel, item.active && styles.navLabelActive]}>{item.label}</Text>
           </Pressable>
         ))}
@@ -229,12 +169,7 @@ export default function ArtistDashboardScreen() {
           <Text style={styles.heading}>{greeting(user.username)}</Text>
           <Text style={styles.date}>{todayLabel()}</Text>
         </View>
-        <Pressable
-          accessibilityLabel={t('artistManualCreate')}
-          accessibilityRole="button"
-          onPress={() => router.push('/artist-dashboard/create-appointment')}
-          style={({ pressed }) => [styles.plus, pressed && styles.pressed]}
-        >
+        <Pressable accessibilityLabel={t('artistManualCreate')} accessibilityRole="button" onPress={() => router.push('/artist-dashboard/create-appointment')} style={({ pressed }) => [styles.plus, pressed && styles.pressed]}>
           <Text style={styles.plusText}>+</Text>
         </Pressable>
       </View>
@@ -252,19 +187,8 @@ export default function ArtistDashboardScreen() {
             const selected = option.value === dashboard.settings.booking_status;
             const updating = updatingStatus === option.value;
             return (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
-                disabled={Boolean(updatingStatus)}
-                key={option.value}
-                onPress={() => void changeStatus(option.value)}
-                style={({ pressed }) => [styles.statusChip, selected && styles.statusChipSelected, pressed && styles.pressed]}
-              >
-                {updating ? (
-                  <ActivityIndicator color={selected ? '#001014' : colors.primary} size="small" />
-                ) : (
-                  <Text style={[styles.statusChipText, selected && styles.statusChipTextSelected]}>{option.label}</Text>
-                )}
+              <Pressable accessibilityRole="button" accessibilityState={{ selected }} disabled={Boolean(updatingStatus)} key={option.value} onPress={() => void changeStatus(option.value)} style={({ pressed }) => [styles.statusChip, selected && styles.statusChipSelected, pressed && styles.pressed]}>
+                {updating ? <ActivityIndicator color={selected ? '#001014' : colors.primary} size="small" /> : <Text style={[styles.statusChipText, selected && styles.statusChipTextSelected]}>{option.label}</Text>}
               </Pressable>
             );
           })}
@@ -286,45 +210,19 @@ export default function ArtistDashboardScreen() {
 
       <Text style={styles.sectionTitle}>✦ {copy('Smart insights', 'Conseils intelligents', 'Умные подсказки')}</Text>
       <View style={styles.insightStack}>
-        <Insight accent text={copy(
-          'Your booking settings are connected to the client booking wizard.',
-          'Vos paramètres de réservation sont connectés au parcours client.',
-          'Настройки записи напрямую связаны с формой бронирования клиента.',
-        )} />
-        <Insight text={copy(
-          'Active styles are shown directly in your public booking form.',
-          'Les styles actifs apparaissent dans votre formulaire public.',
-          'Активные стили отображаются прямо в публичной форме записи.',
-        )} />
-        <Insight accent text={copy(
-          'Pending requests should be answered quickly to improve conversion.',
-          'Répondez rapidement aux demandes en attente pour améliorer la conversion.',
-          'На ожидающие заявки лучше отвечать быстро — это повышает конверсию.',
-        )} />
-        <Insight text={copy(
-          'Add portfolio works to make your booking page more convincing.',
-          'Ajoutez des œuvres au portfolio pour renforcer votre page de réservation.',
-          'Добавляй работы в портфолио — так страница записи будет убедительнее.',
-        )} />
+        <Insight accent text={copy('Your booking settings are connected to the client booking wizard.', 'Vos paramètres de réservation sont connectés au parcours client.', 'Настройки записи напрямую связаны с формой бронирования клиента.')} />
+        <Insight text={copy('Active styles are shown directly in your public booking form.', 'Les styles actifs apparaissent dans votre formulaire public.', 'Активные стили отображаются прямо в публичной форме записи.')} />
+        <Insight accent text={copy('Pending requests should be answered quickly to improve conversion.', 'Répondez rapidement aux demandes en attente pour améliorer la conversion.', 'На ожидающие заявки лучше отвечать быстро — это повышает конверсию.')} />
+        <Insight text={copy('Add portfolio works to make your booking page more convincing.', 'Ajoutez des œuvres au portfolio pour renforcer votre page de réservation.', 'Добавляй работы в портфолио — так страница записи будет убедительнее.')} />
       </View>
 
       <View style={styles.section}>
-        <View style={styles.sectionHead}>
-          <Text style={styles.sectionTitle}>{t('artistWorkload')}</Text>
-          <Pressable onPress={() => router.push('/artist-dashboard/schedule')}>
-            <Text style={styles.sectionLink}>{t('artistManageSchedule')}</Text>
-          </Pressable>
-        </View>
+        <View style={styles.sectionHead}><Text style={styles.sectionTitle}>{t('artistWorkload')}</Text><Pressable onPress={() => router.push('/artist-dashboard/schedule')}><Text style={styles.sectionLink}>{t('artistManageSchedule')}</Text></Pressable></View>
         <WorkloadStrip days={dashboard.workload} />
       </View>
 
       <View style={styles.section}>
-        <View style={styles.sectionHead}>
-          <Text style={styles.sectionTitle}>{t('artistUpcoming')}</Text>
-          <Pressable onPress={() => router.push('/artist-dashboard/calendar')}>
-            <Text style={styles.sectionLink}>{t('calendar')}</Text>
-          </Pressable>
-        </View>
+        <View style={styles.sectionHead}><Text style={styles.sectionTitle}>{t('artistUpcoming')}</Text><Pressable onPress={() => router.push('/artist-dashboard/calendar')}><Text style={styles.sectionLink}>{t('calendar')}</Text></Pressable></View>
         <ArtistTimeline items={dashboard.timeline} />
       </View>
     </Screen>
@@ -332,11 +230,7 @@ export default function ArtistDashboardScreen() {
 }
 
 function Insight({ text, accent = false }: { text: string; accent?: boolean }) {
-  return (
-    <View style={[styles.insight, accent && styles.insightAccent]}>
-      <Text style={styles.insightText}>{text}</Text>
-    </View>
-  );
+  return <View style={[styles.insight, accent && styles.insightAccent]}><Text style={styles.insightText}>{text}</Text></View>;
 }
 
 const styles = StyleSheet.create({
@@ -350,7 +244,7 @@ const styles = StyleSheet.create({
   closeText: { color: colors.textMuted, fontSize: 27, lineHeight: 29 },
   navRail: { marginHorizontal: -spacing.md },
   navContent: { paddingHorizontal: spacing.md, gap: 6, paddingVertical: 8 },
-  navItem: { minWidth: 66, height: 54, borderRadius: 14, alignItems: 'center', justifyContent: 'center', gap: 3, paddingHorizontal: 8, backgroundColor: 'transparent' },
+  navItem: { minWidth: 66, height: 54, borderRadius: 14, alignItems: 'center', justifyContent: 'center', gap: 3, paddingHorizontal: 8 },
   navItemActive: { backgroundColor: 'rgba(4,197,191,.12)', borderLeftWidth: 2, borderLeftColor: colors.primary },
   navIcon: { width: 19, height: 19 },
   navLabel: { color: '#8ca8ad', fontSize: 9, fontWeight: '800' },
