@@ -362,7 +362,13 @@ export default function StyleMatchScreenV2() {
 
         <View style={styles.previewDeck} accessibilityElementsHidden>
           {[0, 1, 2].map((index) => (
-            <View key={index} style={[styles.previewCard, styles[`preview${index}`]]}>
+            <View
+              key={index}
+              style={[
+                styles.previewCard,
+                index === 0 ? styles.preview0 : index === 1 ? styles.preview1 : styles.preview2,
+              ]}
+            >
               {previews[index] ? (
                 <Image source={{ uri: previews[index].image_url }} style={styles.previewImage} />
               ) : (
@@ -500,7 +506,16 @@ const styles = StyleSheet.create({
   deckBackOne: { position: 'absolute', width: '84%', height: 410, borderRadius: 26, backgroundColor: '#06232d', transform: [{ rotate: '4deg' }, { translateY: 6 }] },
   card: { width: '88%', height: 425, borderRadius: 26, overflow: 'hidden', backgroundColor: '#031b27', borderWidth: 1, borderColor: 'rgba(255,255,255,.12)' },
   cardImage: { width: '100%', height: '100%' },
-  imageLoader: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', backgroundColor: '#031b27' },
+  imageLoader: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#031b27',
+  },
   actions: { flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start', gap: 12 },
   actionWrap: { width: 68, alignItems: 'center', gap: 6 },
   actionButton: { width: 58, height: 58, borderRadius: 29, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, backgroundColor: '#00131d' },
