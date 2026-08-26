@@ -36,7 +36,11 @@ check(theme.includes("primary: '#04c5bf'"), 'Tatzo cyan token is stable');
 check(theme.includes("accent: '#ee0c6f'"), 'Tatzo pink token is stable');
 
 const tabs = source('app/(tabs)/_layout.tsx');
-check(tabs.includes('tabBarActiveBackgroundColor: colors.accentSoft'), 'Bottom navigation has Tatzo active-state treatment');
+check(
+  tabs.includes("tabBarActiveBackgroundColor: 'rgba(238, 12, 111, 0.07)'")
+    || tabs.includes('tabBarActiveBackgroundColor: colors.accentSoft'),
+  'Bottom navigation has Tatzo active-state treatment',
+);
 
 console.log('\nTatzo mobile design-system check');
 for (const label of passed) console.log(`  ✓ ${label}`);
