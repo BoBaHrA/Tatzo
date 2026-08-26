@@ -90,9 +90,9 @@ export function StyleMatchResult({
         )}
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('styleMatchArtists')}</Text>
-        {result.artists.length ? (
+      {result.artists.length ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('styleMatchArtists')}</Text>
           <View style={styles.artistList}>
             {result.artists.map((artist) => (
               <Pressable
@@ -131,10 +131,8 @@ export function StyleMatchResult({
               </Pressable>
             ))}
           </View>
-        ) : (
-          <Text style={styles.muted}>{t('styleMatchNoArtists')}</Text>
-        )}
-      </View>
+        </View>
+      ) : null}
 
       <View style={styles.actions}>
         <Button
@@ -264,16 +262,13 @@ const styles = StyleSheet.create({
   sectionHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
   sectionTitle: { color: colors.text, fontSize: 19, lineHeight: 24, fontWeight: '900' },
   sectionCount: {
-    minWidth: 28,
-    height: 28,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 14,
+    paddingVertical: 4,
+    paddingHorizontal: 9,
+    borderRadius: 13,
     backgroundColor: colors.primarySoft,
     color: colors.primary,
     fontSize: 12,
-    lineHeight: 28,
+    lineHeight: 18,
     fontWeight: '900',
     textAlign: 'center',
   },
