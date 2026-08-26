@@ -67,6 +67,7 @@ from .payment_views import (
     MobileDepositReturnView,
     MobilePaymentReturnView,
 )
+from .profile_views import ProfileContentView
 from .publishing_views import (
     MyPortfolioDetailView,
     MyPortfolioView,
@@ -337,6 +338,11 @@ urlpatterns = [
         "profiles/<str:username>/",
         PublicProfileView.as_view(),
         name="public_profile",
+    ),
+    path(
+        "profiles/<str:username>/content/",
+        ProfileContentView.as_view(),
+        name="profile_content",
     ),
     path(
         "profiles/<str:username>/follow/",
