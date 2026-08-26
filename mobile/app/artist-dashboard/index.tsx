@@ -24,7 +24,7 @@ import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
 import { userFacingError } from '@/errors';
 import { t } from '@/i18n';
-import { colors, radius, spacing } from '@/theme';
+import { colors, radius, shadow, spacing, typography } from '@/theme';
 
 
 function SectionHeading({ title, hint }: { title: string; hint: string }) {
@@ -103,14 +103,21 @@ export default function ArtistDashboardScreen() {
 
   return (
     <Screen contentStyle={styles.screen}>
-      <BrandHeader />
+      <BrandHeader title={t('artistDashboard')} />
+
       <View style={styles.hero}>
+        <View style={styles.heroGlow} />
         <View style={styles.heroTop}>
           <View style={styles.headingCopy}>
             <Text style={styles.eyebrow}>{t('artistDashboardEyebrow')}</Text>
-            <Text style={styles.title}>{t('artistDashboard')}</Text>
+            <Text style={styles.heroStatus}>{dashboard.settings.booking_status_label}</Text>
           </View>
-          <Pressable accessibilityLabel={t('close')} onPress={() => router.back()} style={styles.close}>
+          <Pressable
+            accessibilityLabel={t('close')}
+            accessibilityRole="button"
+            onPress={() => router.back()}
+            style={({ pressed }) => [styles.close, pressed && styles.pressed]}
+          >
             <Text style={styles.closeText}>×</Text>
           </Pressable>
         </View>
@@ -121,7 +128,7 @@ export default function ArtistDashboardScreen() {
         </View>
       </View>
 
-      <View style={styles.card}>
+      <View style={styles.statusSurface}>
         <SectionHeading title={t('artistBookingStatus')} hint={t('artistBookingStatusHint')} />
         <View style={styles.statusOptions}>
           {dashboard.settings.booking_status_options.map((option) => {
@@ -130,6 +137,7 @@ export default function ArtistDashboardScreen() {
             return (
               <Pressable
                 accessibilityRole="button"
+                accessibilityState={{ selected }}
                 disabled={Boolean(updatingStatus)}
                 key={option.value}
                 onPress={() => void changeStatus(option.value)}
@@ -158,47 +166,53 @@ export default function ArtistDashboardScreen() {
         <WorkloadStrip days={dashboard.workload} />
       </View>
 
-      <View style={styles.card}>
+      <View style={styles.primaryActions}>
         <SectionHeading title={t('artistQuickActions')} hint={dashboard.artist_timezone} />
         <Button
           label={t('artistManualCreate')}
           onPress={() => router.push('/artist-dashboard/create-appointment')}
         />
-        <Button
+        <QuickAction
           label={t('artistViewRequests')}
           onPress={() => router.push('/(tabs)/bookings')}
-          variant="secondary"
+          symbol="⌁"
+          emphasis
         />
-        <Button
-          label={t('artistManagePreferences')}
-          onPress={() => router.push('/artist-dashboard/preferences')}
-          variant="secondary"
-        />
-        <Button
-          label={t('artistManageSchedule')}
-          onPress={() => router.push('/artist-dashboard/schedule')}
-          variant="secondary"
-        />
-        <Button
-          label={t('artistManageTimeOff')}
-          onPress={() => router.push('/artist-dashboard/calendar')}
-          variant="secondary"
-        />
-        <Button
-          label={t('artistPayments')}
-          onPress={() => router.push('/artist-dashboard/payments')}
-          variant="secondary"
-        />
-        <Button
-          label={t('healingClients')}
-          onPress={() => router.push('/healing')}
-          variant="secondary"
-        />
-        <Button
-          label={t('managePortfolio')}
-          onPress={() => router.push('/manage-portfolio')}
-          variant="secondary"
-        />
+      </View>
+
+      <View style={styles.toolsSection}>
+        <View style={styles.toolsGrid}>
+          <QuickAction
+            label={t('artistManagePreferences')}
+            onPress={() => router.push('/artist-dashboard/preferences')}
+            symbol="◎"
+          />
+          <QuickAction
+            label={t('artistManageSchedule')}
+            onPress={() => router.push('/artist-dashboard/schedule')}
+            symbol="◷"
+          />
+          <QuickAction
+            label={t('artistManageTimeOff')}
+            onPress={() => router.push('/artist-dashboard/calendar')}
+            symbol="—"
+          />
+          <QuickAction
+            label={t('artistPayments')}
+            onPress={() => router.push('/artist-dashboard/payments')}
+            symbol="€"
+          />
+          <QuickAction
+            label={t('healingClients')}
+            onPress={() => router.push('/healing')}
+            symbol="＋"
+          />
+          <QuickAction
+            label={t('managePortfolio')}
+            onPress={() => router.push('/manage-portfolio')}
+            symbol="◇"
+          />
+        </View>
       </View>
 
       <View style={styles.section}>
@@ -209,29 +223,96 @@ export default function ArtistDashboardScreen() {
   );
 }
 
+function QuickAction({
+  label,
+  onPress,
+  symbol,
+  emphasis = false,
+}: {
+  label: string;
+  onPress: () => void;
+  symbol: string;
+  emphasis?: boolean;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.quickAction,
+        emphasis && styles.quickActionEmphasis,
+        pressed && styles.pressed,
+      ]}
+    >
+      <View style={[styles.quickIcon, emphasis && styles.quickIconEmphasis]}>
+        <Text style={[styles.quickIconText, emphasis && styles.quickIconTextEmphasis]}>{symbol}</Text>
+      </View>
+      <Text numberOfLines={2} style={styles.quickLabel}>{label}</Text>
+      <Text style={styles.quickChevron}>›</Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: { paddingTop: spacing.sm, paddingBottom: spacing.xxl },
   centerState: { alignItems: 'center', justifyContent: 'center', gap: spacing.md },
   stateTitle: { color: colors.text, fontSize: 24, fontWeight: '900', textAlign: 'center' },
   muted: { color: colors.textMuted, textAlign: 'center', lineHeight: 21 },
   hero: {
-    backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1,
-    borderRadius: radius.large, padding: spacing.lg, gap: spacing.sm,
+    position: 'relative',
+    overflow: 'hidden',
+    backgroundColor: '#06272d',
+    borderColor: 'rgba(4, 197, 191, 0.34)',
+    borderWidth: 1,
+    borderRadius: radius.panel,
+    padding: spacing.lg,
+    gap: spacing.sm,
+    ...shadow.panel,
+  },
+  heroGlow: {
+    position: 'absolute',
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    right: -80,
+    top: -90,
+    backgroundColor: 'rgba(4, 197, 191, 0.11)',
   },
   heroTop: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
   headingCopy: { flex: 1, gap: spacing.xs },
-  eyebrow: { color: colors.primary, fontSize: 10, fontWeight: '900', letterSpacing: 2 },
-  title: { color: colors.text, fontSize: 31, fontWeight: '900' },
-  close: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center' },
-  closeText: { color: colors.textMuted, fontSize: 32 },
-  subtitle: { color: colors.textMuted, lineHeight: 21 },
-  liveStatus: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs },
-  liveDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: colors.success },
+  eyebrow: { color: colors.primary, ...typography.eyebrow },
+  heroStatus: { color: colors.text, fontSize: 25, lineHeight: 30, fontWeight: '900' },
+  close: {
+    width: 38,
+    height: 38,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 9, 17, 0.38)',
+  },
+  closeText: { color: colors.textMuted, fontSize: 28, lineHeight: 30 },
+  subtitle: { color: colors.textMuted, lineHeight: 20, maxWidth: 560 },
+  liveStatus: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: radius.pill,
+    backgroundColor: 'rgba(0, 9, 17, 0.42)',
+  },
+  liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.success },
   liveDotPaused: { backgroundColor: colors.accent },
-  liveStatusText: { color: colors.text, fontSize: 13, fontWeight: '900' },
-  card: {
-    backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1,
-    borderRadius: radius.large, padding: spacing.md, gap: spacing.md,
+  liveStatusText: { color: colors.text, fontSize: 11, fontWeight: '900' },
+  statusSurface: {
+    backgroundColor: 'rgba(0, 18, 28, 0.72)',
+    borderColor: 'rgba(4, 197, 191, 0.14)',
+    borderWidth: 1,
+    borderRadius: radius.large,
+    padding: spacing.md,
+    gap: spacing.md,
   },
   section: { gap: spacing.sm },
   sectionHeading: { gap: 3 },
@@ -239,13 +320,60 @@ const styles = StyleSheet.create({
   sectionHint: { color: colors.textMuted, fontSize: 12, lineHeight: 18 },
   statusOptions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   statusChip: {
-    minHeight: 42, justifyContent: 'center', borderRadius: radius.pill,
-    borderWidth: 1, borderColor: colors.border, backgroundColor: colors.backgroundDeep,
-    paddingHorizontal: spacing.md, paddingVertical: spacing.xs,
+    minHeight: 38,
+    justifyContent: 'center',
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: 'rgba(4, 197, 191, 0.14)',
+    backgroundColor: colors.backgroundDeep,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
   },
   statusChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
-  statusChipText: { color: colors.textMuted, fontSize: 12, fontWeight: '800' },
+  statusChipText: { color: colors.textMuted, fontSize: 11, fontWeight: '800' },
   statusChipTextSelected: { color: colors.backgroundDeep },
+  primaryActions: {
+    backgroundColor: 'rgba(0, 18, 28, 0.72)',
+    borderColor: 'rgba(4, 197, 191, 0.14)',
+    borderWidth: 1,
+    borderRadius: radius.large,
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  toolsSection: { gap: spacing.sm },
+  toolsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  quickAction: {
+    width: '48%',
+    flexGrow: 1,
+    minHeight: 74,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: 'rgba(0, 18, 28, 0.72)',
+    borderColor: 'rgba(4, 197, 191, 0.14)',
+    borderWidth: 1,
+    borderRadius: radius.medium,
+    padding: spacing.sm,
+  },
+  quickActionEmphasis: {
+    width: '100%',
+    minHeight: 54,
+    borderColor: 'rgba(238, 12, 111, 0.26)',
+    backgroundColor: 'rgba(238, 12, 111, 0.055)',
+  },
+  quickIcon: {
+    width: 34,
+    height: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 11,
+    backgroundColor: colors.primarySoft,
+  },
+  quickIconEmphasis: { backgroundColor: colors.accentSoft },
+  quickIconText: { color: colors.primary, fontSize: 16, fontWeight: '900' },
+  quickIconTextEmphasis: { color: colors.accent },
+  quickLabel: { flex: 1, color: colors.text, fontSize: 12, lineHeight: 16, fontWeight: '800' },
+  quickChevron: { color: colors.textSubtle, fontSize: 22 },
   error: { color: colors.danger, lineHeight: 20 },
   pressed: { opacity: 0.72, transform: [{ scale: 0.985 }] },
 });
