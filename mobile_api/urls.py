@@ -74,6 +74,7 @@ from .publishing_views import (
     MyPostListView,
 )
 from .push_views import PushDeviceView
+from .search_views import ProfileSearchView
 from .verification_views import (
     ArtistVerificationDocumentsView,
     ArtistVerificationManualView,
@@ -331,6 +332,7 @@ urlpatterns = [
         ChatAttachmentView.as_view(),
         name="chat_attachment",
     ),
+    path("search/", ProfileSearchView.as_view(), name="profile_search"),
     path(
         "profiles/<str:username>/",
         PublicProfileView.as_view(),
