@@ -7,11 +7,16 @@ import { clusterMapMarkers, regionAroundCluster } from '@/map/map-clusters';
 import { colors, radius, spacing } from '@/theme';
 
 
+type UserLocation = {
+  latitude: number;
+  longitude: number;
+};
+
 export type MapCanvasProps = {
   markers: MapLocationMarker[];
   region: MapRegion;
   selectedMarkerId: string | null;
-  showsUserLocation?: boolean;
+  userLocation?: UserLocation | null;
   onRegionChange: (region: MapRegion) => void;
   onSelectMarker: (marker: MapLocationMarker) => void;
 };
