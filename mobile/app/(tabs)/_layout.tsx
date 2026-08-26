@@ -3,7 +3,7 @@ import { Image, type ColorValue, type ImageSourcePropType } from 'react-native';
 
 import { useAuth } from '@/auth/auth-context';
 import { useChat } from '@/chat/chat-context';
-import { t } from '@/i18n';
+import { appLanguage, t } from '@/i18n';
 import { colors } from '@/theme';
 
 
@@ -14,6 +14,16 @@ const WEB_ICONS = {
   chats: require('../../assets/web-icons/chats.png'),
   calendar: require('../../assets/web-icons/calendar.png'),
 } satisfies Record<string, ImageSourcePropType>;
+
+const SHELL_COPY = {
+  en: { search: 'Search', calendar: 'Calendar' },
+  fr: { search: 'Recherche', calendar: 'Calendrier' },
+  ru: { search: 'Поиск', calendar: 'Календарь' },
+} as const;
+
+function shellCopy() {
+  return SHELL_COPY[appLanguage as keyof typeof SHELL_COPY] ?? SHELL_COPY.en;
+}
 
 function WebTabIcon({
   source,
@@ -34,6 +44,7 @@ function WebTabIcon({
 export default function TabsLayout() {
   const { status } = useAuth();
   const { unreadCount } = useChat();
+  const copy = shellCopy();
 
   if (status === 'anonymous') {
     return <Redirect href="/(auth)/login" />;
@@ -82,7 +93,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="search"
         options={{
-          title: t('search'),
+          title: copy.search,
           tabBarIcon: ({ color }) => <WebTabIcon color={color} source={WEB_ICONS.search} />,
         }}
       />
@@ -109,7 +120,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="calendar"
         options={{
-          title: t('calendar'),
+          title: copy.calendar,
           tabBarIcon: ({ color }) => <WebTabIcon color={color} source={WEB_ICONS.calendar} />,
         }}
       />
