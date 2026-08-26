@@ -68,8 +68,11 @@ export function BrandHeader({
             onPress={() => router.push('/notifications')}
             style={({ pressed }) => [styles.notificationButton, pressed && styles.pressed]}
           >
-            <View style={styles.bellBody} />
-            <View style={styles.bellClapper} />
+            <Image
+              source={require('../../assets/web-icons/notifications.png')}
+              resizeMode="contain"
+              style={styles.notificationIcon}
+            />
             {unreadCount ? (
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>{badge}</Text>
@@ -122,22 +125,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: layout.touchTarget / 2,
   },
-  bellBody: {
-    width: 17,
-    height: 16,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    borderBottomLeftRadius: 5,
-    borderBottomRightRadius: 5,
-  },
-  bellClapper: {
-    width: 5,
-    height: 3,
-    marginTop: 2,
-    borderRadius: 3,
-    backgroundColor: colors.primary,
+  notificationIcon: {
+    width: 24,
+    height: 24,
+    tintColor: colors.primary,
   },
   badge: {
     position: 'absolute',
