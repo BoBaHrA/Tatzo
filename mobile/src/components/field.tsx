@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  type TextInputProps,
+} from 'react-native';
 
 import { colors, layout, radius, spacing, typography } from '@/theme';
 
@@ -20,10 +27,15 @@ export function Field({
   style,
   onFocus,
   onBlur,
+  autoComplete,
+  importantForAutofill,
+  textContentType,
   ...props
 }: FieldProps) {
   const [focused, setFocused] = useState(false);
   const auth = tone === 'auth';
+  const androidAuth = auth && Platform.OS === 'android';
+
   return (
     <View style={styles.container}>
       <Text style={[styles.label, auth && styles.authLabel]}>{label}</Text>
@@ -32,6 +44,9 @@ export function Field({
         placeholderTextColor={colors.textSubtle}
         selectionColor={colors.primary}
         multiline={multiline}
+        autoComplete={androidAuth ? 'off' : autoComplete}
+        importantForAutofill={androidAuth ? 'no' : importantForAutofill}
+        textContentType={androidAuth ? undefined : textContentType}
         onFocus={(event) => {
           setFocused(true);
           onFocus?.(event);
