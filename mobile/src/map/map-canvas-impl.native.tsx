@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import type { MapLocationMarker } from '@/api/types';
-import LeafletMap from '@/map/leaflet-map';
+import LeafletMap from '@/map/leaflet-map-stable';
 import type { MapRegion } from '@/map/map-api';
 
 
