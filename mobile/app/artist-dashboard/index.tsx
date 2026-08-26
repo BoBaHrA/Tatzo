@@ -12,10 +12,7 @@ import {
 } from 'react-native';
 
 import type { ArtistBookingStatus, ArtistDashboard } from '@/api/types';
-import {
-  fetchArtistDashboard,
-  updateArtistBookingStatus,
-} from '@/artist-dashboard/artist-dashboard-api';
+import { fetchArtistDashboard, updateArtistBookingStatus } from '@/artist-dashboard/artist-dashboard-api';
 import { ArtistTimeline, WorkloadStrip } from '@/artist-dashboard/dashboard-components';
 import { useAuth } from '@/auth/auth-context';
 import { Button } from '@/components/button';
@@ -120,12 +117,7 @@ export default function ArtistDashboardScreen() {
   };
 
   if (loading || status === 'loading') {
-    return (
-      <Screen contentStyle={styles.centerState}>
-        <ActivityIndicator color={colors.primary} size="large" />
-        <Text style={styles.muted}>{t('artistDashboardLoading')}</Text>
-      </Screen>
-    );
+    return <Screen contentStyle={styles.centerState}><ActivityIndicator color={colors.primary} size="large" /><Text style={styles.muted}>{t('artistDashboardLoading')}</Text></Screen>;
   }
 
   if (loadError || !dashboard || !user) {
@@ -150,9 +142,7 @@ export default function ArtistDashboardScreen() {
     <Screen contentStyle={styles.screen}>
       <View style={styles.brandRow}>
         <Image source={require('../../assets/tatzo7.png')} resizeMode="contain" style={styles.logo} />
-        <Pressable accessibilityLabel={t('close')} accessibilityRole="button" onPress={() => router.back()} style={({ pressed }) => [styles.close, pressed && styles.pressed]}>
-          <Text style={styles.closeText}>×</Text>
-        </Pressable>
+        <Pressable accessibilityLabel={t('close')} accessibilityRole="button" onPress={() => router.back()} style={({ pressed }) => [styles.close, pressed && styles.pressed]}><Text style={styles.closeText}>×</Text></Pressable>
       </View>
 
       <ScrollView contentContainerStyle={styles.navContent} horizontal showsHorizontalScrollIndicator={false} style={styles.navRail}>
@@ -165,47 +155,24 @@ export default function ArtistDashboardScreen() {
       </ScrollView>
 
       <View style={styles.header}>
-        <View style={styles.headerCopy}>
-          <Text style={styles.heading}>{greeting(user.username)}</Text>
-          <Text style={styles.date}>{todayLabel()}</Text>
-        </View>
-        <Pressable accessibilityLabel={t('artistManualCreate')} accessibilityRole="button" onPress={() => router.push('/artist-dashboard/create-appointment')} style={({ pressed }) => [styles.plus, pressed && styles.pressed]}>
-          <Text style={styles.plusText}>+</Text>
-        </Pressable>
+        <View style={styles.headerCopy}><Text style={styles.heading}>{greeting(user.username)}</Text><Text style={styles.date}>{todayLabel()}</Text></View>
+        <Pressable accessibilityLabel={t('artistManualCreate')} accessibilityRole="button" onPress={() => router.push('/artist-dashboard/create-appointment')} style={({ pressed }) => [styles.plus, pressed && styles.pressed]}><Text style={styles.plusText}>+</Text></Pressable>
       </View>
 
       <View style={styles.statusBar}>
-        <View style={styles.statusCopy}>
-          <View style={[styles.statusDot, !dashboard.settings.bookings_enabled && styles.statusDotPaused]} />
-          <View style={styles.statusTextWrap}>
-            <Text style={styles.statusTitle}>{dashboard.settings.booking_status_label}</Text>
-            <Text style={styles.statusHint}>{t('artistBookingStatusHint')}</Text>
-          </View>
-        </View>
+        <View style={styles.statusCopy}><View style={[styles.statusDot, !dashboard.settings.bookings_enabled && styles.statusDotPaused]} /><View style={styles.statusTextWrap}><Text style={styles.statusTitle}>{dashboard.settings.booking_status_label}</Text><Text style={styles.statusHint}>{t('artistBookingStatusHint')}</Text></View></View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statusOptions}>
           {dashboard.settings.booking_status_options.map((option) => {
             const selected = option.value === dashboard.settings.booking_status;
             const updating = updatingStatus === option.value;
-            return (
-              <Pressable accessibilityRole="button" accessibilityState={{ selected }} disabled={Boolean(updatingStatus)} key={option.value} onPress={() => void changeStatus(option.value)} style={({ pressed }) => [styles.statusChip, selected && styles.statusChipSelected, pressed && styles.pressed]}>
-                {updating ? <ActivityIndicator color={selected ? '#001014' : colors.primary} size="small" /> : <Text style={[styles.statusChipText, selected && styles.statusChipTextSelected]}>{option.label}</Text>}
-              </Pressable>
-            );
+            return <Pressable accessibilityRole="button" accessibilityState={{ selected }} disabled={Boolean(updatingStatus)} key={option.value} onPress={() => void changeStatus(option.value)} style={({ pressed }) => [styles.statusChip, selected && styles.statusChipSelected, pressed && styles.pressed]}>{updating ? <ActivityIndicator color={selected ? '#001014' : colors.primary} size="small" /> : <Text style={[styles.statusChipText, selected && styles.statusChipTextSelected]}>{option.label}</Text>}</Pressable>;
           })}
         </ScrollView>
       </View>
       {actionError ? <Text style={styles.error}>{actionError}</Text> : null}
 
       <View style={styles.statStack}>
-        {stats.map((stat) => (
-          <View key={stat.label} style={styles.statCard}>
-            <Image source={stat.icon} resizeMode="contain" style={[styles.statIcon, { tintColor: stat.accent ? colors.accent : colors.primary }]} />
-            <View style={styles.statCopy}>
-              <Text style={styles.statValue}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
-            </View>
-          </View>
-        ))}
+        {stats.map((stat) => <View key={stat.label} style={styles.statCard}><Image source={stat.icon} resizeMode="contain" style={[styles.statIcon, { tintColor: stat.accent ? colors.accent : colors.primary }]} /><View style={styles.statCopy}><Text style={styles.statValue}>{stat.value}</Text><Text style={styles.statLabel}>{stat.label}</Text></View></View>)}
       </View>
 
       <Text style={styles.sectionTitle}>✦ {copy('Smart insights', 'Conseils intelligents', 'Умные подсказки')}</Text>
@@ -216,15 +183,8 @@ export default function ArtistDashboardScreen() {
         <Insight text={copy('Add portfolio works to make your booking page more convincing.', 'Ajoutez des œuvres au portfolio pour renforcer votre page de réservation.', 'Добавляй работы в портфолио — так страница записи будет убедительнее.')} />
       </View>
 
-      <View style={styles.section}>
-        <View style={styles.sectionHead}><Text style={styles.sectionTitle}>{t('artistWorkload')}</Text><Pressable onPress={() => router.push('/artist-dashboard/schedule')}><Text style={styles.sectionLink}>{t('artistManageSchedule')}</Text></Pressable></View>
-        <WorkloadStrip days={dashboard.workload} />
-      </View>
-
-      <View style={styles.section}>
-        <View style={styles.sectionHead}><Text style={styles.sectionTitle}>{t('artistUpcoming')}</Text><Pressable onPress={() => router.push('/artist-dashboard/calendar')}><Text style={styles.sectionLink}>{t('calendar')}</Text></Pressable></View>
-        <ArtistTimeline items={dashboard.timeline} />
-      </View>
+      <View style={styles.section}><View style={styles.sectionHead}><Text style={styles.sectionTitle}>{t('artistWorkload')}</Text><Pressable onPress={() => router.push('/artist-dashboard/schedule')}><Text style={styles.sectionLink}>{t('artistManageSchedule')}</Text></Pressable></View><WorkloadStrip days={dashboard.workload} /></View>
+      <View style={styles.section}><View style={styles.sectionHead}><Text style={styles.sectionTitle}>{t('artistUpcoming')}</Text><Pressable onPress={() => router.push('/artist-dashboard/calendar')}><Text style={styles.sectionLink}>{t('calendar')}</Text></Pressable></View><ArtistTimeline items={dashboard.timeline} /></View>
     </Screen>
   );
 }
