@@ -41,16 +41,17 @@ check(settings.includes('PUBLIC_LINKS.privacy') && settings.includes('PUBLIC_LIN
 check(settings.includes("router.push('/blocked-users')") && settings.includes('PUBLIC_LINKS.safetySupport'), 'Blocking and safety support moved to Settings');
 check(settings.includes("router.push('/delete-account')") && settings.includes('signOut()'), 'Account deletion and sign out moved to Settings');
 
-check(dashboard.includes('BrandHeader title={t(\'artistDashboard\')}'), 'Artist workspace uses the shared section-header hierarchy');
-check(dashboard.includes('heroStatus') && dashboard.includes('liveStatus'), 'Booking intake status is prominent at the top');
-check(dashboard.includes('QuickAction') && dashboard.includes('toolsGrid'), 'Workspace tools use compact action tiles instead of a stack of identical buttons');
-check(dashboard.includes("router.push('/artist-dashboard/create-appointment')"), 'Manual appointment creation remains available');
-check(dashboard.includes("router.push('/(tabs)/bookings')"), 'Booking requests remain available');
-check(dashboard.includes("router.push('/artist-dashboard/preferences')") && dashboard.includes("router.push('/artist-dashboard/schedule')"), 'Booking preferences and schedule remain available');
-check(dashboard.includes("router.push('/artist-dashboard/calendar')") && dashboard.includes("router.push('/artist-dashboard/payments')"), 'Time off and payments remain available');
-check(dashboard.includes("router.push('/healing')") && dashboard.includes("router.push('/manage-portfolio')"), 'Healing clients and portfolio remain available');
-check(dashboard.includes('fetchArtistDashboard(') && dashboard.includes('updateArtistBookingStatus('), 'Artist workspace remains backed by the real dashboard APIs');
-check(dashboard.includes('<ArtistStats') && dashboard.includes('<WorkloadStrip') && dashboard.includes('<ArtistTimeline'), 'Stats, workload and upcoming timeline remain visible');
+check(dashboard.includes('WEB_DASH_ICONS') && dashboard.includes('dashboard-icons/dashboard.png'), 'Dashboard uses exact artwork imported from Tatzo web');
+check(dashboard.includes('navRail') && dashboard.includes('destinations.map'), 'Dashboard mirrors the mobile web horizontal navigation rail');
+check(dashboard.includes('greeting(user.username)') && dashboard.includes('todayLabel()'), 'Dashboard opens with the web greeting/date header');
+check(dashboard.includes("router.push('/artist-dashboard/create-appointment')"), 'Dashboard keeps the web plus action for manual booking');
+check(dashboard.includes('statStack') && dashboard.includes('dashboard.stats.today_sessions'), 'Dashboard exposes the four web-style stat cards');
+check(dashboard.includes("copy('Smart insights'") && dashboard.includes('Insight accent'), 'Dashboard mirrors the web Smart insights section');
+check(dashboard.includes('updateArtistBookingStatus('), 'Booking status remains backed by the real API');
+check(dashboard.includes("router.push('/artist-dashboard/calendar')"), 'Calendar stays available from dashboard navigation');
+check(dashboard.includes("router.push('/(tabs)/bookings')") && dashboard.includes("router.push('/(tabs)/chats')"), 'Bookings and messages stay available from dashboard navigation');
+check(dashboard.includes("router.push('/manage-portfolio')") && dashboard.includes("router.push('/healing')"), 'Portfolio and clients remain available from dashboard navigation');
+check(dashboard.includes('<WorkloadStrip') && dashboard.includes('<ArtistTimeline'), 'Workload and upcoming timeline remain available below the web overview');
 
 console.log('\nTatzo mobile profile/dashboard parity check');
 for (const label of passed) console.log(`  ✓ ${label}`);
