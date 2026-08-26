@@ -1,5 +1,13 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  type TextInputProps,
+} from 'react-native';
 
 import { colors, layout, radius, spacing, typography } from '@/theme';
 
@@ -21,10 +29,14 @@ export function AuthPasswordField({
   style,
   onFocus,
   onBlur,
+  autoComplete,
+  importantForAutofill,
+  textContentType,
   ...props
 }: AuthPasswordFieldProps) {
   const [visible, setVisible] = useState(false);
   const [focused, setFocused] = useState(false);
+  const android = Platform.OS === 'android';
 
   return (
     <View style={styles.container}>
@@ -36,6 +48,9 @@ export function AuthPasswordField({
           secureTextEntry={!visible}
           placeholderTextColor={colors.textSubtle}
           selectionColor={colors.primary}
+          autoComplete={android ? 'off' : autoComplete}
+          importantForAutofill={android ? 'no' : importantForAutofill}
+          textContentType={android ? undefined : textContentType}
           onFocus={(event) => {
             setFocused(true);
             onFocus?.(event);
