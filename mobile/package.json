@@ -9,8 +9,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
-    "release:check": "node ./scripts/release-check.mjs && node ./scripts/design-system-check.mjs && node ./scripts/auth-parity-check.mjs && node ./scripts/feed-parity-check.mjs && node ./scripts/map-parity-check.mjs && node ./scripts/chat-parity-check.mjs && node ./scripts/style-match-parity-check.mjs && node ./scripts/profile-dashboard-parity-check.mjs",
-    "release:check:production": "node ./scripts/release-check.mjs --production && node ./scripts/design-system-check.mjs && node ./scripts/auth-parity-check.mjs && node ./scripts/feed-parity-check.mjs && node ./scripts/map-parity-check.mjs && node ./scripts/chat-parity-check.mjs && node ./scripts/style-match-parity-check.mjs && node ./scripts/profile-dashboard-parity-check.mjs"
+    "release:check": "node ./scripts/release-check.mjs && node ./scripts/design-system-check.mjs && node ./scripts/shell-parity-check.mjs && node ./scripts/auth-parity-check.mjs && node ./scripts/feed-parity-check.mjs && node ./scripts/map-parity-check.mjs && node ./scripts/chat-parity-check.mjs && node ./scripts/style-match-parity-check.mjs && node ./scripts/profile-dashboard-parity-check.mjs",
+    "release:check:production": "node ./scripts/release-check.mjs --production && node ./scripts/design-system-check.mjs && node ./scripts/shell-parity-check.mjs && node ./scripts/auth-parity-check.mjs && node ./scripts/feed-parity-check.mjs && node ./scripts/map-parity-check.mjs && node ./scripts/chat-parity-check.mjs && node ./scripts/style-match-parity-check.mjs && node ./scripts/profile-dashboard-parity-check.mjs"
   },
   "dependencies": {
     "@expo/metro-runtime": "~57.0.12",
