@@ -30,6 +30,7 @@ class ProfileSearchView(APIView):
         users = (
             User.objects.select_related("profile")
             .filter(is_active=True, profile__is_email_verified=True)
+            .exclude(pk=request.user.pk)
             .exclude(blocked_by_relations__blocker=request.user)
             .exclude(blocking_relations__blocked=request.user)
             .annotate(
