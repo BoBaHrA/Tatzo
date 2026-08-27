@@ -156,6 +156,24 @@ export default function ProfileScreen() {
                 </Text>
               </View>
 
+              {profile.is_verified_artist ? (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => router.push('/artist-dashboard')}
+                  style={({ pressed }) => [styles.dashboardEntry, pressed && styles.pressed]}
+                >
+                  <View style={styles.dashboardEntryIcon}>
+                    <Image source={require('../../assets/dashboard-icons/dashboard.png')} resizeMode="contain" style={styles.dashboardEntryIconImage} />
+                  </View>
+                  <View style={styles.dashboardEntryCopy}>
+                    <Text style={styles.dashboardEntryEyebrow}>{copy('ARTIST TOOLS', 'OUTILS ARTISTE', 'ИНСТРУМЕНТЫ МАСТЕРА')}</Text>
+                    <Text style={styles.dashboardEntryTitle}>{copy('Open Dashboard', 'Ouvrir le tableau de bord', 'Открыть кабинет мастера')}</Text>
+                    <Text style={styles.dashboardEntryHint}>{copy('Bookings, calendar, projects, clients, statistics and settings.', 'Réservations, calendrier, projets, clients, statistiques et paramètres.', 'Записи, календарь, проекты, клиенты, статистика и настройки.')}</Text>
+                  </View>
+                  <Text style={styles.dashboardEntryChevron}>›</Text>
+                </Pressable>
+              ) : null}
+
               {profile.account_type === 'tattoo_artist' ? (
                 <View style={styles.artistInfoGrid}>
                   <ArtistInfoCard
@@ -378,6 +396,31 @@ const styles = StyleSheet.create({
   },
   bio: { color: '#d9eeee', lineHeight: 21 },
   muted: { color: '#7fa7ab', lineHeight: 20 },
+  dashboardEntry: {
+    minHeight: 84,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 14,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(4, 197, 191, 0.24)',
+    backgroundColor: 'rgba(4, 197, 191, 0.075)',
+  },
+  dashboardEntryIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(4, 197, 191, 0.12)',
+  },
+  dashboardEntryIconImage: { width: 22, height: 22, tintColor: colors.primary },
+  dashboardEntryCopy: { flex: 1, minWidth: 0, gap: 3 },
+  dashboardEntryEyebrow: { color: colors.primary, fontSize: 9, fontWeight: '900', letterSpacing: 1.2 },
+  dashboardEntryTitle: { color: colors.white, fontSize: 15, fontWeight: '900' },
+  dashboardEntryHint: { color: '#89afb3', fontSize: 10, lineHeight: 15 },
+  dashboardEntryChevron: { color: colors.primary, fontSize: 28, lineHeight: 30 },
   artistInfoGrid: { flexDirection: 'row', gap: spacing.sm },
   artistInfoCard: {
     flex: 1,
