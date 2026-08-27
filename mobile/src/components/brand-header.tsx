@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Text,
   View,
+  type ImageSourcePropType,
 } from 'react-native';
 
 import { useAuth } from '@/auth/auth-context';
@@ -38,6 +39,15 @@ type ProfileSearchResponse = {
   count: number;
   results: RecommendedProfile[];
 };
+
+const MENU_ICONS = {
+  healing: require('../../assets/web-icons/healing.png'),
+  styleMatch: require('../../assets/web-icons/palette.png'),
+  bookmarks: require('../../assets/web-icons/bookmark.png'),
+  contests: require('../../assets/web-icons/trophy.png'),
+  cleanSlate: require('../../assets/web-icons/sprout.png'),
+  healthSafety: require('../../assets/web-icons/health-safety.png'),
+} as const;
 
 const COPY = {
   en: {
@@ -307,13 +317,13 @@ export function BrandHeader({
             </View>
 
             <View style={styles.menuGrid}>
-              <MenuTile label={ui.healing} symbol="⌁" onPress={() => closeMenuAndGo('/healing')} />
-              <MenuTile label={ui.styleMatch} symbol="◉" onPress={() => closeMenuAndGo('/(tabs)/match')} />
-              <MenuTile label={ui.bookmarks} symbol="♡" onPress={() => comingSoon(ui.bookmarks)} />
-              <MenuTile label={ui.contests} symbol="♕" onPress={() => comingSoon(ui.contests)} />
-              <MenuTile label={ui.cleanSlate} symbol="⌇" onPress={() => comingSoon(ui.cleanSlate)} />
-              <MenuTile label={ui.reportProblem} symbol="⚠" accent onPress={() => comingSoon(ui.reportProblem)} />
-              <MenuTile label={ui.healthSafety} symbol="＋" onPress={() => closeMenuAndGo('/health-safety')} />
+              <MenuTile icon={MENU_ICONS.healing} label={ui.healing} onPress={() => closeMenuAndGo('/healing')} />
+              <MenuTile icon={MENU_ICONS.styleMatch} label={ui.styleMatch} onPress={() => closeMenuAndGo('/(tabs)/match')} />
+              <MenuTile icon={MENU_ICONS.bookmarks} label={ui.bookmarks} onPress={() => comingSoon(ui.bookmarks)} />
+              <MenuTile icon={MENU_ICONS.contests} label={ui.contests} onPress={() => comingSoon(ui.contests)} />
+              <MenuTile icon={MENU_ICONS.cleanSlate} label={ui.cleanSlate} onPress={() => comingSoon(ui.cleanSlate)} />
+              <MenuTile accent label={ui.reportProblem} symbol="⚠" onPress={() => comingSoon(ui.reportProblem)} />
+              <MenuTile icon={MENU_ICONS.healthSafety} label={ui.healthSafety} onPress={() => closeMenuAndGo('/health-safety')} />
             </View>
 
             <View style={styles.divider} />
@@ -358,19 +368,24 @@ export function BrandHeader({
 
 type MenuTileProps = {
   label: string;
-  symbol: string;
   onPress: () => void;
+  icon?: ImageSourcePropType;
+  symbol?: string;
   accent?: boolean;
 };
 
-function MenuTile({ label, symbol, onPress, accent = false }: MenuTileProps) {
+function MenuTile({ label, onPress, icon, symbol, accent = false }: MenuTileProps) {
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
       style={({ pressed }) => [styles.menuTile, pressed && styles.pressed]}
     >
-      <Text style={[styles.menuTileSymbol, accent && styles.menuTileSymbolAccent]}>{symbol}</Text>
+      {icon ? (
+        <Image accessibilityIgnoresInvertColors resizeMode="contain" source={icon} style={styles.menuTileIcon} />
+      ) : (
+        <Text style={[styles.menuTileSymbol, accent && styles.menuTileSymbolAccent]}>{symbol}</Text>
+      )}
       <Text numberOfLines={2} style={styles.menuTileText}>{label}</Text>
     </Pressable>
   );
@@ -491,6 +506,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 13, paddingVertical: 12, borderRadius: 17,
     backgroundColor: 'rgba(4,197,191,.07)', borderWidth: 1, borderColor: 'rgba(4,197,191,.14)',
   },
+  menuTileIcon: { width: 28, height: 28, flexShrink: 0 },
   menuTileSymbol: { width: 28, color: colors.primary, fontSize: 23, textAlign: 'center', fontWeight: '700' },
   menuTileSymbolAccent: { color: colors.accent },
   menuTileText: { flex: 1, color: colors.text, fontSize: 12, lineHeight: 16, fontWeight: '800' },
