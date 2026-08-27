@@ -1,16 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useRef, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import {
+  Animated,
+  Easing,
   Image,
   Keyboard,
-  LayoutAnimation,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  UIManager,
   View,
 } from 'react-native';
 
@@ -18,33 +17,59 @@ import type { FeedPost } from '@/api/types';
 import type { AuthenticatedRequest } from '@/auth/auth-context';
 import { Checkbox } from '@/components/checkbox';
 import { userFacingError } from '@/errors';
-import { t } from '@/i18n';
+import { appLanguage, t } from '@/i18n';
 import { createPost, type PendingPublishMedia } from '@/publishing/publishing-api';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, spacing } from '@/theme';
 
 
 const MAX_MEDIA = 10;
+const EXPANDED_MAX_HEIGHT = 680;
 const VISIBILITY_OPTIONS: FeedPost['visibility'][] = ['public', 'followers', 'private'];
+
+const COPY = {
+  en: {
+    addLocation: 'Add location',
+    locationHint: 'Studio or city',
+    whoCanSee: 'Who can see this',
+    createPoll: 'Create poll',
+    schedule: 'Schedule post',
+    coauthors: 'Invite co-authors',
+    additional: 'Additional options',
+    later: 'Coming soon',
+    photoVideo: 'Photos and videos',
+  },
+  fr: {
+    addLocation: 'Ajouter un lieu',
+    locationHint: 'Studio ou ville',
+    whoCanSee: 'Qui peut voir ceci',
+    createPoll: 'Créer un sondage',
+    schedule: 'Programmer la publication',
+    coauthors: 'Inviter des co-auteurs',
+    additional: 'Options supplémentaires',
+    later: 'Bientôt disponible',
+    photoVideo: 'Photos et vidéos',
+  },
+  ru: {
+    addLocation: 'Добавить место',
+    locationHint: 'Студия или город',
+    whoCanSee: 'Кто увидит публикацию',
+    createPoll: 'Создать опрос',
+    schedule: 'Запланировать публикацию',
+    coauthors: 'Пригласить соавторов',
+    additional: 'Дополнительные настройки',
+    later: 'Скоро',
+    photoVideo: 'Фото и видео',
+  },
+} as const;
+
+function copy() {
+  return COPY[appLanguage as keyof typeof COPY] ?? COPY.en;
+}
 
 function visibilityLabel(value: FeedPost['visibility']) {
   if (value === 'followers') return t('postVisibilityFollowers');
   if (value === 'private') return t('postVisibilityPrivate');
   return t('postVisibilityPublic');
-}
-
-function animateLayout() {
-  LayoutAnimation.configureNext({
-    duration: 260,
-    create: {
-      type: LayoutAnimation.Types.easeInEaseOut,
-      property: LayoutAnimation.Properties.opacity,
-    },
-    update: { type: LayoutAnimation.Types.easeInEaseOut },
-    delete: {
-      type: LayoutAnimation.Types.easeInEaseOut,
-      property: LayoutAnimation.Properties.opacity,
-    },
-  });
 }
 
 type InlinePostComposerProps = {
@@ -53,36 +78,49 @@ type InlinePostComposerProps = {
 };
 
 export function InlinePostComposer({ request, onPublished }: InlinePostComposerProps) {
+  const ui = copy();
+  const progress = useRef(new Animated.Value(0)).current;
   const [expanded, setExpanded] = useState(false);
+  const [renderBody, setRenderBody] = useState(false);
   const [content, setContent] = useState('');
   const [location, setLocation] = useState('');
+  const [locationOpen, setLocationOpen] = useState(false);
   const [visibility, setVisibility] = useState<FeedPost['visibility']>('public');
   const [disableComments, setDisableComments] = useState(false);
   const [media, setMedia] = useState<PendingPublishMedia[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-      UIManager.setLayoutAnimationEnabledExperimental(true);
-    }
-  }, []);
+  const animateTo = (value: 0 | 1, completion?: () => void) => {
+    Animated.timing(progress, {
+      toValue: value,
+      duration: value ? 320 : 240,
+      easing: value ? Easing.out(Easing.cubic) : Easing.inOut(Easing.quad),
+      useNativeDriver: false,
+    }).start(({ finished }) => {
+      if (finished) completion?.();
+    });
+  };
 
   const open = () => {
     if (expanded) return;
-    animateLayout();
     setExpanded(true);
+    setRenderBody(true);
+    requestAnimationFrame(() => animateTo(1));
   };
 
   const collapse = () => {
     Keyboard.dismiss();
-    animateLayout();
-    setExpanded(false);
+    animateTo(0, () => {
+      setRenderBody(false);
+      setExpanded(false);
+    });
   };
 
   const reset = () => {
     setContent('');
     setLocation('');
+    setLocationOpen(false);
     setVisibility('public');
     setDisableComments(false);
     setMedia([]);
@@ -128,11 +166,17 @@ export function InlinePostComposer({ request, onPublished }: InlinePostComposerP
           type,
         } satisfies PendingPublishMedia;
       });
-      animateLayout();
       setMedia((current) => [...current, ...selected]);
     } catch {
       setError(t('postMediaPickerError'));
     }
+  };
+
+  const cycleVisibility = () => {
+    setVisibility((current) => {
+      const index = VISIBILITY_OPTIONS.indexOf(current);
+      return VISIBILITY_OPTIONS[(index + 1) % VISIBILITY_OPTIONS.length];
+    });
   };
 
   const publish = async () => {
@@ -161,8 +205,27 @@ export function InlinePostComposer({ request, onPublished }: InlinePostComposerP
     }
   };
 
+  const shellMaxHeight = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [58, EXPANDED_MAX_HEIGHT],
+  });
+  const bodyOpacity = progress.interpolate({
+    inputRange: [0, 0.18, 1],
+    outputRange: [0, 0, 1],
+  });
+  const bodyTranslate = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-12, 0],
+  });
+
   return (
-    <View style={[styles.shell, expanded && styles.shellExpanded]}>
+    <Animated.View
+      style={[
+        styles.shell,
+        expanded && styles.shellExpanded,
+        { maxHeight: shellMaxHeight },
+      ]}
+    >
       <Pressable
         accessibilityRole="button"
         onPress={open}
@@ -191,7 +254,7 @@ export function InlinePostComposer({ request, onPublished }: InlinePostComposerP
         >
           <Text style={styles.plus}>+</Text>
         </Pressable>
-        {expanded ? (
+        {renderBody ? (
           <Pressable
             accessibilityLabel={t('close')}
             accessibilityRole="button"
@@ -207,8 +270,13 @@ export function InlinePostComposer({ request, onPublished }: InlinePostComposerP
         ) : null}
       </Pressable>
 
-      {expanded ? (
-        <View style={styles.expandedBody}>
+      {renderBody ? (
+        <Animated.View
+          style={[
+            styles.expandedBody,
+            { opacity: bodyOpacity, transform: [{ translateY: bodyTranslate }] },
+          ]}
+        >
           {media.length ? (
             <ScrollView
               contentContainerStyle={styles.previewRow}
@@ -226,10 +294,7 @@ export function InlinePostComposer({ request, onPublished }: InlinePostComposerP
                   )}
                   <Pressable
                     accessibilityLabel={t('removeMedia')}
-                    onPress={() => {
-                      animateLayout();
-                      setMedia((current) => current.filter((candidate) => candidate.key !== item.key));
-                    }}
+                    onPress={() => setMedia((current) => current.filter((candidate) => candidate.key !== item.key))}
                     style={styles.remove}
                   >
                     <Text style={styles.removeText}>×</Text>
@@ -239,56 +304,48 @@ export function InlinePostComposer({ request, onPublished }: InlinePostComposerP
             </ScrollView>
           ) : null}
 
-          <View style={styles.rowBetween}>
-            <Text style={styles.sectionTitle}>{t('postMedia')}</Text>
+          <View style={styles.sectionHead}>
+            <Text style={styles.sectionTitle}>{ui.photoVideo}</Text>
             <Text style={styles.counter}>{media.length}/{MAX_MEDIA}</Text>
           </View>
 
-          <TextInput
-            editable={!submitting}
-            maxLength={120}
-            onChangeText={setLocation}
-            placeholder={t('postLocationPlaceholder')}
-            placeholderTextColor={colors.textSubtle}
-            style={styles.locationInput}
-            value={location}
+          <OptionRow
+            label={ui.addLocation}
+            detail={location || ui.locationHint}
+            onPress={() => setLocationOpen((current) => !current)}
+          />
+          {locationOpen ? (
+            <TextInput
+              autoFocus
+              editable={!submitting}
+              maxLength={120}
+              onChangeText={setLocation}
+              placeholder={ui.locationHint}
+              placeholderTextColor={colors.textSubtle}
+              style={styles.locationInput}
+              value={location}
+            />
+          ) : null}
+
+          <OptionRow
+            label={ui.whoCanSee}
+            detail={visibilityLabel(visibility)}
+            onPress={cycleVisibility}
           />
 
-          <View style={styles.visibilityRow}>
-            {VISIBILITY_OPTIONS.map((option) => {
-              const selected = option === visibility;
-              return (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  key={option}
-                  onPress={() => setVisibility(option)}
-                  style={({ pressed }) => [
-                    styles.visibility,
-                    selected && styles.visibilitySelected,
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <Text style={[styles.visibilityText, selected && styles.visibilityTextSelected]}>
-                    {visibilityLabel(option)}
-                  </Text>
-                </Pressable>
-              );
-            })}
+          <View style={styles.checkboxCard}>
+            <Checkbox
+              checked={disableComments}
+              hint={t('disableCommentsHint')}
+              label={t('disableComments')}
+              onChange={setDisableComments}
+            />
           </View>
 
-          <Checkbox
-            checked={disableComments}
-            hint={t('disableCommentsHint')}
-            label={t('disableComments')}
-            onChange={setDisableComments}
-          />
-
-          <View style={styles.soonRow}>
-            <Text style={styles.soon}>⌖ {t('postLocationOptional')}</Text>
-            <Text style={styles.soon}>≡ Poll</Text>
-            <Text style={styles.soon}>◷ Schedule</Text>
-          </View>
+          <OptionRow label={ui.createPoll} detail={ui.later} disabled />
+          <OptionRow label={ui.schedule} detail={ui.later} disabled />
+          <OptionRow label={ui.coauthors} detail={ui.later} disabled />
+          <OptionRow label={ui.additional} detail={ui.later} disabled />
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -314,130 +371,185 @@ export function InlinePostComposer({ request, onPublished }: InlinePostComposerP
               <Text style={styles.publishText}>{submitting ? t('loading') : t('publishPost')}</Text>
             </Pressable>
           </View>
-        </View>
+        </Animated.View>
       ) : null}
-    </View>
+    </Animated.View>
+  );
+}
+
+type OptionRowProps = {
+  label: string;
+  detail: string;
+  onPress?: () => void;
+  disabled?: boolean;
+};
+
+function OptionRow({ label, detail, onPress, disabled = false }: OptionRowProps) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [styles.optionRow, disabled && styles.optionDisabled, pressed && styles.pressed]}
+    >
+      <View style={styles.optionIcon}>
+        <Text style={styles.optionIconText}>✦</Text>
+      </View>
+      <View style={styles.optionMain}>
+        <Text style={styles.optionLabel}>{label}</Text>
+        <Text numberOfLines={1} style={styles.optionDetail}>{detail}</Text>
+      </View>
+      {!disabled ? <Text style={styles.chevron}>›</Text> : null}
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   shell: {
+    width: '100%',
     overflow: 'hidden',
-    backgroundColor: '#005351',
-    borderRadius: radius.pill,
+    borderRadius: 24,
     borderWidth: 1,
-    borderColor: 'rgba(4, 197, 191, 0.34)',
+    borderColor: 'rgba(4, 197, 191, 0.18)',
+    backgroundColor: '#002e30',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.22,
+    shadowRadius: 20,
+    elevation: 3,
   },
   shellExpanded: {
-    borderRadius: 20,
-    backgroundColor: '#004744',
+    borderColor: 'rgba(4, 197, 191, 0.34)',
     shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.22,
-    shadowRadius: 14,
+    shadowOpacity: 0.16,
     elevation: 5,
   },
   head: {
-    minHeight: 48,
+    minHeight: 58,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingLeft: spacing.lg,
-    paddingRight: spacing.xs,
-    gap: spacing.xs,
+    paddingLeft: 16,
+    paddingRight: 9,
+    gap: 9,
   },
   input: {
     flex: 1,
-    minHeight: 40,
-    color: '#d6ffff',
-    ...typography.body,
-    paddingVertical: 8,
+    minHeight: 42,
+    color: '#dffcff',
+    fontSize: 15,
+    lineHeight: 20,
+    paddingVertical: 9,
     textAlignVertical: 'center',
   },
   inputExpanded: {
-    minHeight: 92,
-    paddingTop: spacing.md,
+    minHeight: 48,
     textAlignVertical: 'top',
   },
   plusButton: {
-    width: 38,
-    height: 38,
+    width: 40,
+    height: 40,
+    minWidth: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 19,
-    backgroundColor: 'rgba(0, 9, 17, 0.26)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(4, 197, 191, 0.45)',
+    backgroundColor: 'rgba(0, 13, 24, 0.32)',
   },
-  plus: { color: colors.primary, fontSize: 28, lineHeight: 29, fontWeight: '600' },
-  closeButton: { width: 34, height: 38, alignItems: 'center', justifyContent: 'center' },
-  close: { color: colors.textMuted, fontSize: 25, lineHeight: 26 },
-  expandedBody: { gap: spacing.md, paddingHorizontal: spacing.md, paddingBottom: spacing.md },
-  previewRow: { gap: spacing.sm, paddingVertical: spacing.xs },
-  preview: { width: 92, height: 92, borderRadius: 12, overflow: 'hidden', position: 'relative' },
+  plus: { color: colors.primary, fontSize: 29, lineHeight: 30, fontWeight: '500' },
+  closeButton: {
+    width: 40,
+    height: 40,
+    minWidth: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,.05)',
+  },
+  close: { color: colors.text, fontSize: 28, lineHeight: 30 },
+  expandedBody: {
+    gap: 10,
+    paddingHorizontal: 12,
+    paddingBottom: 12,
+  },
+  previewRow: { gap: 10, paddingVertical: 3 },
+  preview: {
+    width: 108,
+    height: 108,
+    borderRadius: 14,
+    overflow: 'hidden',
+    position: 'relative',
+    backgroundColor: colors.backgroundDeep,
+  },
   previewImage: { width: '100%', height: '100%' },
   videoPreview: { flex: 1, backgroundColor: colors.backgroundDeep, alignItems: 'center', justifyContent: 'center' },
   videoMark: { color: colors.primary, fontSize: 24 },
   remove: {
-    position: 'absolute',
-    top: 5,
-    right: 5,
-    width: 24,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 12,
-    backgroundColor: 'rgba(0, 9, 17, 0.82)',
+    position: 'absolute', top: 6, right: 6, width: 25, height: 25,
+    alignItems: 'center', justifyContent: 'center', borderRadius: 13,
+    backgroundColor: 'rgba(0, 9, 17, 0.86)',
   },
-  removeText: { color: colors.white, fontSize: 17, lineHeight: 18 },
-  rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  removeText: { color: colors.white, fontSize: 18, lineHeight: 19 },
+  sectionHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 2 },
   sectionTitle: { color: colors.text, fontSize: 13, fontWeight: '900' },
   counter: { color: colors.textMuted, fontSize: 12 },
-  locationInput: {
-    minHeight: 46,
-    borderRadius: 13,
+  optionRow: {
+    width: '100%',
+    minHeight: 56,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 11,
+    paddingHorizontal: 13,
+    paddingVertical: 9,
+    borderRadius: 15,
     borderWidth: 1,
-    borderColor: 'rgba(4, 197, 191, 0.24)',
+    borderColor: 'rgba(4, 197, 191, 0.15)',
+    backgroundColor: 'rgba(0,13,24,.46)',
+  },
+  optionDisabled: { opacity: 0.52 },
+  optionIcon: {
+    width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 10,
+    backgroundColor: 'rgba(4,197,191,.09)',
+  },
+  optionIconText: { color: colors.primary, fontSize: 16 },
+  optionMain: { flex: 1, minWidth: 0 },
+  optionLabel: { color: colors.text, fontSize: 13, fontWeight: '800' },
+  optionDetail: { color: colors.textMuted, fontSize: 11, marginTop: 2 },
+  chevron: { color: colors.textSubtle, fontSize: 23 },
+  locationInput: {
+    minHeight: 48,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: 'rgba(4, 197, 191, 0.26)',
     backgroundColor: colors.backgroundDeep,
     color: colors.text,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: 14,
   },
-  visibilityRow: { flexDirection: 'row', gap: spacing.xs },
-  visibility: {
-    flex: 1,
-    minHeight: 40,
-    alignItems: 'center',
+  checkboxCard: {
+    width: '100%',
+    minHeight: 58,
     justifyContent: 'center',
-    borderRadius: 12,
-    backgroundColor: colors.backgroundDeep,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 15,
     borderWidth: 1,
-    borderColor: 'rgba(4, 197, 191, 0.14)',
-    paddingHorizontal: 6,
-  },
-  visibilitySelected: { borderColor: colors.primary, backgroundColor: 'rgba(4, 197, 191, 0.10)' },
-  visibilityText: { color: colors.textMuted, fontSize: 10.5, fontWeight: '800', textAlign: 'center' },
-  visibilityTextSelected: { color: colors.primary },
-  soonRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
-  soon: {
-    color: colors.textSubtle,
-    fontSize: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(4, 197, 191, 0.12)',
-    borderRadius: radius.pill,
-    paddingHorizontal: 9,
-    paddingVertical: 6,
+    borderColor: 'rgba(4,197,191,.15)',
+    backgroundColor: 'rgba(0,13,24,.46)',
   },
   error: { color: colors.danger, fontSize: 12, fontWeight: '700' },
-  actions: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: spacing.sm },
-  cancelButton: { minHeight: 42, paddingHorizontal: spacing.lg, alignItems: 'center', justifyContent: 'center' },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 2 },
+  cancelButton: { minHeight: 48, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' },
   cancelText: { color: colors.text, fontWeight: '900' },
   publishButton: {
-    minHeight: 44,
-    minWidth: 142,
-    paddingHorizontal: spacing.xl,
+    flex: 1,
+    minHeight: 48,
+    paddingHorizontal: spacing.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 13,
+    borderRadius: 16,
     backgroundColor: colors.primary,
   },
   publishText: { color: colors.black, fontWeight: '900' },
   disabled: { opacity: 0.5 },
-  pressed: { opacity: 0.76, transform: [{ scale: 0.995 }] },
+  pressed: { opacity: 0.74, transform: [{ scale: 0.99 }] },
 });

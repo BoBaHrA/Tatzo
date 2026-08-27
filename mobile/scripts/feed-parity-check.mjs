@@ -23,6 +23,7 @@ function check(condition, label) {
 }
 
 const home = source('app/(tabs)/home.tsx');
+const brandHeader = source('src/components/brand-header.tsx');
 const postCardExport = source('src/feed/post-card.tsx');
 const postCard = source('src/feed/web-post-card.tsx');
 const media = source('src/feed/post-media.tsx');
@@ -38,17 +39,23 @@ for (const icon of ['post-heart.png', 'post-comments.png', 'post-share.png', 'po
 check(home.includes("onDelete={removePost}"), 'Feed supports deleting owned posts from the post menu');
 check(home.includes('InlinePostComposer'), 'Post creation expands inline inside the feed');
 check(!home.includes("router.push('/create-post')"), 'Feed no longer navigates away to create a post');
-check(composer.includes('LayoutAnimation.configureNext'), 'Inline composer animates between collapsed and expanded states');
+check(composer.includes('Animated.timing') && composer.includes('maxHeight: shellMaxHeight'), 'Inline composer uses explicit height animation on Android');
+check(composer.includes('Easing.out(Easing.cubic)'), 'Inline composer preserves the smooth web-style opening curve');
 check(composer.includes('createPost(request'), 'Inline composer publishes through the real mobile API');
 check(composer.includes("@/components/checkbox"), 'Publishing uses the Tatzo checkbox primitive');
 check(!composer.includes('Switch'), 'Publishing no longer uses the platform switch for comments');
 check(postCardExport.includes("WebPostCard as PostCard"), 'All post surfaces use the web-parity post card');
 check(postCard.includes('messageRowOwned'), 'Owned posts reverse the avatar/bubble row');
-check(postCard.includes('backgroundColor: colors.primary'), 'Post bubble uses the Tatzo web turquoise surface');
+check(postCard.includes("backgroundColor: '#001f26'"), 'Post bubble uses the current dark Tatzo mobile-web surface');
+check(postCard.includes("borderColor: 'rgba(4,197,191,.34)'"), 'Post bubble keeps the current teal glass border');
+check(postCard.includes('LIKED_HEART') && !postCard.includes('iconLiked'), 'Liked state uses the dedicated web artwork instead of tinting the whole icon');
+check(postCard.includes('BOOKMARKED') && !postCard.includes('iconBookmarked'), 'Saved state uses dedicated web artwork instead of tinting the whole icon');
 check(postCard.includes("post-heart.png") && postCard.includes("post-comments.png"), 'Like and comment actions use the exact web artwork');
 check(postCard.includes("post-share.png") && postCard.includes("post-bookmark.png"), 'Share and bookmark actions use the exact web artwork');
 check(postCard.includes("Share.share"), 'Post actions include native sharing');
 check(postCard.includes('⋯'), 'Post menu uses the web-style ellipsis trigger');
+check(brandHeader.includes("'/search/?type=artists'"), 'Topbar star opens artist recommendations instead of Style Match');
+check(brandHeader.includes('menuOpen') && brandHeader.includes('☰'), 'Topbar exposes the web-style More menu');
 check(media.includes('frameWidth * 0.82'), 'Feed media keeps compact mobile-web proportions');
 check(media.includes('pagingEnabled'), 'Multiple post media remain swipeable');
 check(detail.includes('CommentsSectionV2'), 'Post detail uses the compact comments parity surface');
