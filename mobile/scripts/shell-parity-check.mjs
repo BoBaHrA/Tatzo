@@ -53,7 +53,16 @@ check(search.includes("request<SearchResponse>(`/search/?${params.toString()}`)"
 check(search.includes("web-icons/loupe.png"), 'Search input uses the web loupe asset');
 check(search.includes('requestVersion.current') && search.includes('version !== requestVersion.current'), 'Search ignores stale request responses');
 check(search.includes('accessibilityRole="button"') && search.includes('accessibilityState={{ selected: active }}'), 'Search filters expose button role and selection state');
-check(calendar.includes("import BookingsScreen from './bookings'"), 'Calendar route remains connected to appointment data while calendar parity is staged');
+
+check(!calendar.includes("import BookingsScreen from './bookings'"), 'Calendar is no longer an appointments-list alias');
+check(calendar.includes('fetchAppointments(request)'), 'Calendar stays backed by real appointment data');
+check(calendar.includes("type CalendarViewMode = 'month' | 'week' | 'day'"), 'Calendar exposes Month / Week / Day views');
+check(calendar.includes('buildMonthDays') && calendar.includes('length: 42'), 'Calendar renders a complete six-week month grid');
+check(calendar.includes("['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']"), 'Calendar follows the web Monday-first week');
+check(calendar.includes('goMonth(-1)') && calendar.includes('goMonth(1)') && calendar.includes('goToday'), 'Calendar keeps previous / Today / next controls');
+check(calendar.includes("pathname: '/appointment/[appointmentId]'"), 'Calendar events open the real appointment detail route');
+check(calendar.includes('currentMonthAppointments') && calendar.includes('Insight'), 'Calendar includes the web-style monthly insights section');
+check(calendar.includes('LegendRow'), 'Calendar includes the web-style event status legend');
 
 console.log('\nTatzo mobile shell parity check');
 for (const label of passed) console.log(`  ✓ ${label}`);

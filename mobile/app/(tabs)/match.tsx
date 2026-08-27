@@ -1,1 +1,1 @@
-export { default } from '@/style-match/style-match-screen-v2';
+export { default } from '@/style-match/style-match-screen-v3';

@@ -34,8 +34,11 @@ check(leaflet.includes('basemaps.cartocdn.com/dark_all'), 'Map uses the same CAR
 check(leaflet.includes('L.markerClusterGroup'), 'Map uses Leaflet MarkerCluster');
 check(leaflet.includes('animateAddingMarkers: false'), 'Cluster additions avoid the Android double-animation path');
 check(leaflet.includes('markerEntriesRef') && !leaflet.includes('cluster.clearLayers()'), 'Marker updates are diffed instead of clearing the whole cluster layer');
-check(leaflet.includes("/Android/i.test"), 'Android disables expensive Leaflet zoom/marker animation');
+check(leaflet.includes("/Android/i.test") && leaflet.includes('markerZoomAnimation: !isAndroid && clusterMotionEnabled'), 'Android keeps expensive marker animation disabled while cluster motion remains available');
+check(leaflet.includes("prefers-reduced-motion: reduce") && leaflet.includes('const clusterMotionEnabled = !reduceMotion'), 'Cluster motion respects reduced-motion accessibility');
+check(leaflet.includes('zoomAnimation: clusterMotionEnabled') && leaflet.includes('animate: clusterMotionEnabled'), 'Cluster zoom restores smooth split motion on Android');
 check(leaflet.includes('zoomToBoundsOnClick: false') && leaflet.includes("cluster.on('clusterclick'"), 'Cluster zoom is controlled explicitly instead of competing animations');
+check(leaflet.includes('duration: isAndroid ? 0.22 : 0.3'), 'Android cluster zoom uses the tuned short motion duration');
 check(leaflet.includes('maxClusterRadius: 46'), 'Cluster radius matches web behavior');
 check(leaflet.includes('tatzo-cluster-mixed'), 'Mixed Tatzo cluster styling is present');
 check(leaflet.includes('tatzo-user-location'), 'Map renders the real user-location pulse');

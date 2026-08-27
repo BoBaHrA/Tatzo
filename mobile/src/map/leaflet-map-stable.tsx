@@ -154,6 +154,10 @@ export default function LeafletMapStable({
       if (disposed || !containerRef.current || mapRef.current) return;
       leafletRef.current = L;
       const isAndroid = /Android/i.test(navigator.userAgent || '');
+      const reduceMotion = Boolean(
+        window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+      );
+      const clusterMotionEnabled = !reduceMotion;
       const worldBounds = L.latLngBounds([[-85, -180], [85, 180]]);
       const map = L.map(containerRef.current, {
         attributionControl: true,
@@ -163,9 +167,9 @@ export default function LeafletMapStable({
         maxBounds: worldBounds,
         maxBoundsViscosity: 1,
         worldCopyJump: false,
-        zoomAnimation: !isAndroid,
-        fadeAnimation: !isAndroid,
-        markerZoomAnimation: !isAndroid,
+        zoomAnimation: clusterMotionEnabled,
+        fadeAnimation: !isAndroid && clusterMotionEnabled,
+        markerZoomAnimation: !isAndroid && clusterMotionEnabled,
       });
 
       L.tileLayer(CARTO_TILES, {
@@ -183,7 +187,7 @@ export default function LeafletMapStable({
         spiderfyOnMaxZoom: true,
         zoomToBoundsOnClick: false,
         removeOutsideVisibleBounds: true,
-        animate: !isAndroid,
+        animate: clusterMotionEnabled,
         animateAddingMarkers: false,
         maxClusterRadius: 46,
         iconCreateFunction: (group: any) => L.divIcon({
@@ -202,8 +206,8 @@ export default function LeafletMapStable({
         }
         suppressMoveRef.current = true;
         map.fitBounds(group.getBounds(), {
-          animate: !isAndroid,
-          duration: 0.18,
+          animate: clusterMotionEnabled,
+          duration: isAndroid ? 0.22 : 0.3,
           padding: [28, 28],
         });
         const release = () => { suppressMoveRef.current = false; };
@@ -211,7 +215,7 @@ export default function LeafletMapStable({
           release();
           void propsRef.current.onRegionChange(regionFromMap(map));
         });
-        window.setTimeout(release, 280);
+        window.setTimeout(release, isAndroid ? 360 : 420);
       });
 
       clusterRef.current = cluster;
