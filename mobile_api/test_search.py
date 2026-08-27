@@ -47,6 +47,12 @@ class MobileProfileSearchTests(APITestCase):
         self.assertIn("MedusaTattoo", usernames)
         self.assertIn("medusa_fan", usernames)
 
+    def test_search_excludes_authenticated_user(self):
+        response = self.client.get(reverse("mobile_api:profile_search"), {"q": "viewer"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        usernames = [item["username"] for item in response.data["results"]]
+        self.assertNotIn("viewer", usernames)
+
     def test_artist_filter_returns_only_artists(self):
         response = self.client.get(
             reverse("mobile_api:profile_search"),
