@@ -51,6 +51,8 @@ check(header.includes("web-icons/notifications.png"), 'Top bar uses the exact we
 check(header.includes("router.push('/(tabs)/profile')"), 'Top bar avatar keeps profile access');
 check(search.includes("request<SearchResponse>(`/search/?${params.toString()}`)"), 'Native search is backed by the mobile search API');
 check(search.includes("web-icons/loupe.png"), 'Search input uses the web loupe asset');
+check(search.includes('requestVersion.current') && search.includes('version !== requestVersion.current'), 'Search ignores stale request responses');
+check(search.includes('accessibilityRole="button"') && search.includes('accessibilityState={{ selected: active }}'), 'Search filters expose button role and selection state');
 check(calendar.includes("import BookingsScreen from './bookings'"), 'Calendar route remains connected to appointment data while calendar parity is staged');
 
 console.log('\nTatzo mobile shell parity check');
