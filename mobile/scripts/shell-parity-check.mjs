@@ -32,8 +32,13 @@ const tabs = source('app/(tabs)/_layout.tsx');
 const header = source('src/components/brand-header.tsx');
 const search = source('app/(tabs)/search.tsx');
 const calendar = source('app/(tabs)/calendar.tsx');
+const healing = source('app/healing/index.tsx');
 
 for (const icon of ['house', 'loupe', 'maps', 'chats', 'calendar', 'notifications']) {
+  exists(`assets/web-icons/${icon}.png`);
+}
+
+for (const icon of ['palette', 'healing', 'health-safety', 'bookmark', 'trophy', 'sprout']) {
   exists(`assets/web-icons/${icon}.png`);
 }
 
@@ -49,6 +54,13 @@ check(tabs.includes('height: 76') && tabs.includes("borderTopColor: 'rgba(4, 197
 check(tabs.includes("tabBarActiveBackgroundColor: 'rgba(238, 12, 111, 0.07)'"), 'Active tab keeps the web pink treatment');
 check(header.includes("web-icons/notifications.png"), 'Top bar uses the exact web notification asset');
 check(header.includes("router.push('/(tabs)/profile')"), 'Top bar avatar keeps profile access');
+check(header.includes('MENU_ICONS.styleMatch') && header.includes("palette.png"), 'Style Match menu tile uses the canonical palette artwork');
+check(header.includes('MENU_ICONS.healing') && header.includes("healing.png"), 'Healing menu tile uses the canonical Healing artwork');
+check(header.includes('MENU_ICONS.bookmarks') && header.includes('MENU_ICONS.contests') && header.includes('MENU_ICONS.cleanSlate'), 'Bookmarks, contests and clean slate use current web artwork');
+check(header.includes('MENU_ICONS.healthSafety'), 'Health & safety uses canonical artwork');
+check(!header.includes('label={ui.styleMatch} symbol="◉"'), 'Style Match no longer falls back to a font glyph');
+check(!header.includes('label={ui.healing} symbol="⌁"'), 'Healing no longer falls back to a font glyph');
+check(healing.includes('HEALING_ICON') && healing.includes('<HealingMark'), 'Healing empty and fallback states reuse the canonical Healing mark');
 check(search.includes("request<SearchResponse>(`/search/?${params.toString()}`)"), 'Native search is backed by the mobile search API');
 check(search.includes("web-icons/loupe.png"), 'Search input uses the web loupe asset');
 check(search.includes('requestVersion.current') && search.includes('version !== requestVersion.current'), 'Search ignores stale request responses');

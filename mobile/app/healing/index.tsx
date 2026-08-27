@@ -27,12 +27,25 @@ import { appLanguage, t } from '@/i18n';
 import { colors, radius, spacing } from '@/theme';
 
 
+const HEALING_ICON = require('../../assets/web-icons/healing.png');
+
 function formatDate(value: string) {
   return new Intl.DateTimeFormat(appLanguage, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   }).format(new Date(`${value}T12:00:00`));
+}
+
+function HealingMark({ size = 48 }: { size?: number }) {
+  return (
+    <Image
+      accessibilityIgnoresInvertColors
+      resizeMode="contain"
+      source={HEALING_ICON}
+      style={{ width: size, height: size }}
+    />
+  );
 }
 
 function JourneyCard({
@@ -55,7 +68,7 @@ function JourneyCard({
         <Image source={{ uri: journey.latest_photo_url }} style={styles.journeyImage} />
       ) : (
         <View style={styles.journeyImageFallback}>
-          <Text style={styles.journeySymbol}>♡</Text>
+          <HealingMark size={54} />
         </View>
       )}
       <View style={styles.journeyBody}>
@@ -190,6 +203,9 @@ export default function HealingIndexScreen() {
       ) : (
         <>
           <View style={styles.hero}>
+            <View style={styles.heroMark}>
+              <HealingMark size={30} />
+            </View>
             <Text style={styles.eyebrow}>{copy.page_eyebrow}</Text>
             <Text style={styles.title}>{copy.page_title}</Text>
             <Text style={styles.body}>{copy.page_subtitle}</Text>
@@ -224,7 +240,7 @@ export default function HealingIndexScreen() {
 
           {!data.journeys.length && !data.eligible_appointments.length ? (
             <View style={styles.stateCard}>
-              <Text style={styles.stateSymbol}>♡</Text>
+              <View style={styles.stateMark}><HealingMark size={58} /></View>
               <Text style={styles.stateTitle}>{copy.empty_title}</Text>
               <Text style={styles.muted}>{copy.no_appointments}</Text>
             </View>
@@ -247,6 +263,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface, borderColor: colors.primaryMuted, borderWidth: 1,
     borderRadius: radius.large, padding: spacing.lg, gap: spacing.sm,
   },
+  heroMark: {
+    width: 46, height: 46, alignItems: 'center', justifyContent: 'center',
+    borderRadius: 16, backgroundColor: 'rgba(4,197,191,.08)',
+    borderWidth: 1, borderColor: 'rgba(4,197,191,.18)', marginBottom: spacing.xs,
+  },
   eyebrow: { color: colors.primary, fontSize: 10, fontWeight: '900', letterSpacing: 2 },
   title: { color: colors.text, fontSize: 29, lineHeight: 35, fontWeight: '900' },
   body: { color: colors.textMuted, lineHeight: 21 },
@@ -261,7 +282,6 @@ const styles = StyleSheet.create({
     height: 116, alignItems: 'center', justifyContent: 'center',
     backgroundColor: colors.backgroundDeep,
   },
-  journeySymbol: { color: colors.primary, fontSize: 42, fontWeight: '300' },
   journeyBody: { padding: spacing.md, gap: spacing.sm },
   titleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
   journeyTitle: { flex: 1, color: colors.text, fontSize: 18, fontWeight: '900' },
@@ -297,7 +317,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1,
     borderRadius: radius.large, padding: spacing.xl, gap: spacing.md,
   },
-  stateSymbol: { color: colors.primary, fontSize: 44, textAlign: 'center' },
+  stateMark: { alignItems: 'center', justifyContent: 'center', marginBottom: spacing.xs },
   stateTitle: { color: colors.text, fontSize: 22, fontWeight: '900', textAlign: 'center' },
   error: {
     color: colors.danger, borderColor: colors.danger, borderWidth: 1,
