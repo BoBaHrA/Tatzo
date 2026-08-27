@@ -35,9 +35,6 @@ export default function SettingsScreen() {
       <SettingsGroup title={t('account')}>
         <ActionRow label={t('editProfile')} onPress={() => router.push('/edit-profile')} symbol="✎" />
         {user.is_verified_artist ? (
-          <ActionRow label={t('artistDashboard')} onPress={() => router.push('/artist-dashboard')} symbol="✦" />
-        ) : null}
-        {user.is_verified_artist ? (
           <ActionRow label={t('managePortfolio')} onPress={() => router.push('/manage-portfolio')} symbol="▦" last />
         ) : (
           <ActionRow label={t('verificationOpen')} onPress={() => router.push('/artist-verification')} symbol="✓" last={user.account_type === 'tattoo_artist'} />
