@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { router } from 'expo-router';
 import {
   ActivityIndicator,
@@ -98,11 +98,20 @@ export default function SearchScreen() {
   const [results, setResults] = useState<SearchUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const requestVersion = useRef(0);
 
   const trimmed = useMemo(() => query.trim(), [query]);
 
-  const runSearch = useCallback(async (value: string, nextFilter: SearchAccountFilter) => {
+  const runSearch = useCallback(async (
+    value: string,
+    nextFilter: SearchAccountFilter,
+    expectedVersion?: number,
+  ) => {
+    const version = expectedVersion ?? ++requestVersion.current;
     const clean = value.trim();
+
+    if (version !== requestVersion.current) return;
+
     if (!clean) {
       setResults([]);
       setLoading(false);
@@ -115,21 +124,32 @@ export default function SearchScreen() {
     try {
       const params = new URLSearchParams({ q: clean, type: nextFilter });
       const response = await request<SearchResponse>(`/search/?${params.toString()}`);
+      if (version !== requestVersion.current) return;
       setResults(response.results);
     } catch {
+      if (version !== requestVersion.current) return;
       setResults([]);
       setError(true);
     } finally {
-      setLoading(false);
+      if (version === requestVersion.current) setLoading(false);
     }
   }, [request]);
 
   useEffect(() => {
+    const version = ++requestVersion.current;
+
+    if (!trimmed) {
+      setResults([]);
+      setLoading(false);
+      setError(false);
+      return;
+    }
+
     const timer = setTimeout(() => {
-      void runSearch(query, filter);
+      void runSearch(query, filter, version);
     }, 260);
     return () => clearTimeout(timer);
-  }, [filter, query, runSearch]);
+  }, [filter, query, runSearch, trimmed]);
 
   const setAccountFilter = (next: SearchAccountFilter) => {
     setFilter(next);
@@ -174,6 +194,8 @@ export default function SearchScreen() {
                 const active = filter === value;
                 return (
                   <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
                     key={value}
                     onPress={() => setAccountFilter(value)}
                     style={({ pressed }) => [
@@ -201,7 +223,7 @@ export default function SearchScreen() {
         ) : error ? (
           <View style={styles.state}>
             <Text style={styles.stateTitle}>{ui.unavailable}</Text>
-            <Pressable onPress={() => void runSearch(query, filter)}>
+            <Pressable accessibilityRole="button" onPress={() => void runSearch(query, filter)}>
               <Text style={styles.retry}>{t('retry')}</Text>
             </Pressable>
           </View>
@@ -218,6 +240,8 @@ export default function SearchScreen() {
         )}
         renderItem={({ item }) => (
           <Pressable
+            accessibilityLabel={`${ui.viewProfile}: ${item.username}`}
+            accessibilityRole="button"
             onPress={() => router.push({ pathname: '/profile/[username]', params: { username: item.username } })}
             style={({ pressed }) => [styles.card, pressed && styles.pressed]}
           >
