@@ -51,7 +51,7 @@ check(match.includes('const WEB_EXIT_MS = 220'), 'Accepted swipes use the web 22
 check(match.includes("outputRange: ['-10deg', '0deg', '10deg']"), 'Card rotation follows the web drag geometry');
 check(match.includes('likeStampOpacity') && match.includes('nopeStampOpacity'), 'LIKE and NOPE stamps track swipe direction');
 check(match.includes('DeckBackCard') && match.includes('nextCard') && match.includes('thirdCard'), 'Layered deck previews the real next cards');
-check(match.includes('actionButtonLike') && match.includes('width: 64') && match.includes("backgroundColor: '#ed0b70'"), 'Like remains the larger pink primary action from current web');
+check(match.includes('actionButtonLike') && match.includes('width: 58') && match.includes("backgroundColor: '#ed0b70'"), 'Like remains the larger pink primary action from the current web hotfix');
 check(match.includes('current_saved') && match.includes('toggleSaved'), 'Save remains independent from the reaction choice');
 check(match.includes('fetchStyleMatchOverview(') && match.includes('startStyleMatch('), 'Style Match overview and fresh-session start APIs remain wired');
 check(match.includes('reactToStyleMatch(') && match.includes('fetchStyleMatchResult('), 'Reactions and final result stay backed by the real API');
