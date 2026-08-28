@@ -17,6 +17,12 @@ function source(relativePath) {
   return readFileSync(absolutePath, 'utf8');
 }
 
+function exists(relativePath) {
+  const ok = existsSync(join(projectRoot, relativePath));
+  if (ok) passed.push(`${relativePath} exists`);
+  else failures.push(`${relativePath} exists`);
+}
+
 function check(condition, label) {
   if (condition) passed.push(label);
   else failures.push(label);
@@ -26,6 +32,10 @@ const profile = source('app/(tabs)/profile.tsx');
 const settings = source('app/settings.tsx');
 const profileApi = source('src/profile/profile-api.ts');
 const dashboard = source('app/artist-dashboard/index.tsx');
+
+for (const icon of ['dashboard', 'calendar', 'inbox', 'message', 'image', 'clients', 'reviews', 'statistics', 'setting', 'stat-gradient']) {
+  exists(`assets/dashboard-icons/${icon}.png`);
+}
 
 check(profile.includes('profileHeader') && profile.includes('avatarWrap') && profile.includes('nameRow'), 'Profile follows the web identity header hierarchy');
 check(profile.includes('styles.stats') && profile.includes('styles.bioCard'), 'Profile keeps web stats and bio surfaces');
@@ -49,12 +59,21 @@ for (const panel of webPanels) {
 }
 check(dashboard.includes("useState<DashboardPanelKey>('dashboard')") && dashboard.includes('setActivePanel(item.key)'), 'Dashboard navigation swaps panels inside one native shell');
 check(!dashboard.includes("router.push('/(tabs)/bookings')") && !dashboard.includes("router.push('/(tabs)/chats')"), 'Dashboard tabs no longer eject users into global Bookings or Chats screens');
+check(dashboard.includes('navRail: { height: 74, flexGrow: 0, flexShrink: 0'), 'Dashboard navigation rail is height-bounded and cannot create the old giant empty gap');
+check(dashboard.includes('screen: { flex: 0'), 'Dashboard screen content no longer stretches panels vertically');
+check(dashboard.includes("projects: require('../../assets/web-icons/palette.png')"), 'Projects uses the canonical web palette icon');
+check(dashboard.includes("reviews: require('../../assets/dashboard-icons/reviews.png')"), 'Reviews uses dedicated star artwork');
+check(dashboard.includes("statistics: require('../../assets/dashboard-icons/statistics.png')"), 'Statistics uses dedicated graph artwork');
+check(dashboard.includes('STAT_GRADIENT') && dashboard.includes('stat-gradient.png') && dashboard.includes('resizeMode="stretch"'), 'Statistics bars use the teal-to-pink web gradient artwork');
 check(dashboard.includes('BookingsPanel') && dashboard.includes('ProjectsPanel') && dashboard.includes('MessagesPanel'), 'Bookings, Projects and Messages render as Dashboard panels');
 check(dashboard.includes('PortfolioPanel') && dashboard.includes('ClientsPanel') && dashboard.includes('ReviewsPanel'), 'Portfolio, Clients and Reviews render as Dashboard panels');
 check(dashboard.includes('StatisticsPanel') && dashboard.includes('SettingsPanel') && dashboard.includes('CalendarPanel'), 'Statistics, Settings and Calendar render as Dashboard panels');
 check(dashboard.includes('fetchAppointments(') && dashboard.includes('fetchChats(') && dashboard.includes('fetchPortfolio('), 'Dashboard panels use real native APIs instead of placeholder navigation');
+check(dashboard.includes('fetchArtistBookingPreferences(') && dashboard.includes('saveArtistBookingPreferences('), 'Dashboard Settings reads and saves the real booking preferences API');
+check(dashboard.includes("copy('Booking settings'") && dashboard.includes("copy('Booking rules'"), 'Booking settings and Booking rules live together inside the Dashboard Settings panel');
+check(dashboard.includes('booking_workflow_options') && dashboard.includes('consultation_enabled') && dashboard.includes('reference_images_required'), 'Dashboard Settings exposes the current web booking controls');
+check(dashboard.includes('booking_status_options.map') && dashboard.includes('RULE_TONES'), 'Booking rules expose every server status with the web tone mapping');
 check(dashboard.includes('accessibilityLabel={copy(\'Back to profile\''), 'Dashboard has an explicit back control');
-check(dashboard.includes('WEB_DASH_ICONS') && dashboard.includes('dashboard-icons/dashboard.png'), 'Dashboard keeps the repaired Tatzo dashboard artwork');
 check(dashboard.includes('greeting(user.username)') && dashboard.includes('todayLabel()'), 'Dashboard overview keeps the web greeting/date header');
 check(dashboard.includes("router.push('/artist-dashboard/create-appointment')"), 'Dashboard keeps the web plus action for manual booking');
 check(dashboard.includes('dashboard.stats.today_sessions') && dashboard.includes('updateArtistBookingStatus('), 'Dashboard overview remains backed by the real API');
