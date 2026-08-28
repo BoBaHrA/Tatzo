@@ -86,15 +86,83 @@
 @media (max-width: 900px) {
   .seo-brand-hero {
     margin: 0;
-    padding: 18px 14px 0;
+    padding: 14px 12px 0;
   }
 
   .seo-brand-hero__inner {
-    padding: 22px 18px;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 20px 18px;
     border-radius: 20px;
   }
 
+  .seo-brand-hero h1 {
+    max-width: 13ch;
+    font-size: clamp(30px, 8vw, 40px);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+  }
+
   .seo-brand-hero p {
-    font-size: 15px;
+    max-width: 34rem;
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .seo-brand-hero__links {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 9px;
+    margin-top: 16px;
+  }
+
+  .seo-brand-hero__links a {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 46px;
+    justify-content: center;
+    padding: 0 14px;
+    font-size: 13px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 430px) {
+  .seo-brand-hero {
+    padding: 10px 8px 0;
+  }
+
+  .seo-brand-hero__inner {
+    padding: 17px 16px 16px;
+    border-radius: 18px;
+  }
+
+  .seo-brand-hero__eyebrow {
+    margin-bottom: 7px;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+  }
+
+  .seo-brand-hero h1 {
+    max-width: 12ch;
+    font-size: clamp(27px, 8.2vw, 34px);
+    line-height: 1;
+  }
+
+  .seo-brand-hero p {
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .seo-brand-hero__links {
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .seo-brand-hero__links a {
+    min-height: 44px;
+    font-size: 12.5px;
   }
 }
