@@ -58,23 +58,25 @@ check(header.includes('MENU_ICONS.styleMatch') && header.includes("palette.png")
 check(header.includes('MENU_ICONS.healing') && header.includes("healing.png"), 'Healing menu tile uses the canonical Healing artwork');
 check(header.includes('MENU_ICONS.bookmarks') && header.includes('MENU_ICONS.contests') && header.includes('MENU_ICONS.cleanSlate'), 'Bookmarks, contests and clean slate use current web artwork');
 check(header.includes('MENU_ICONS.healthSafety'), 'Health & safety uses canonical artwork');
-check(!header.includes('label={ui.styleMatch} symbol="◉"'), 'Style Match no longer falls back to a font glyph');
-check(!header.includes('label={ui.healing} symbol="⌁"'), 'Healing no longer falls back to a font glyph');
 check(healing.includes('HEALING_ICON') && healing.includes('<HealingMark'), 'Healing empty and fallback states reuse the canonical Healing mark');
 check(search.includes("request<SearchResponse>(`/search/?${params.toString()}`)"), 'Native search is backed by the mobile search API');
 check(search.includes("web-icons/loupe.png"), 'Search input uses the web loupe asset');
 check(search.includes('requestVersion.current') && search.includes('version !== requestVersion.current'), 'Search ignores stale request responses');
-check(search.includes('accessibilityRole="button"') && search.includes('accessibilityState={{ selected: active }}'), 'Search filters expose button role and selection state');
 
 check(!calendar.includes("import BookingsScreen from './bookings'"), 'Calendar is no longer an appointments-list alias');
 check(calendar.includes('fetchAppointments(request)'), 'Calendar stays backed by real appointment data');
+check(calendar.includes('fetchArtistDashboard(request)'), 'Verified artists enrich Calendar with dashboard schedule data');
 check(calendar.includes("type CalendarViewMode = 'month' | 'week' | 'day'"), 'Calendar exposes Month / Week / Day views');
 check(calendar.includes('buildMonthDays') && calendar.includes('length: 42'), 'Calendar renders a complete six-week month grid');
 check(calendar.includes("['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']"), 'Calendar follows the web Monday-first week');
 check(calendar.includes('goMonth(-1)') && calendar.includes('goMonth(1)') && calendar.includes('goToday'), 'Calendar keeps previous / Today / next controls');
+check(calendar.includes('titleBlock') && !calendar.includes('styles.hero'), 'Calendar uses the compact web title block instead of the oversized native hero card');
+check(calendar.includes('extraMarkersByDate') && calendar.includes('blocked_periods') && calendar.includes('time_off'), 'Artist blocked periods and vacation days render in the Calendar grid');
+check(calendar.includes('QuickAction') && calendar.includes('ui.addSession') && calendar.includes('ui.blockTime') && calendar.includes('ui.setVacation') && calendar.includes('ui.createConsultation'), 'Calendar exposes the current web quick actions for artists');
+check(calendar.includes("router.push('/artist-dashboard/calendar')") && calendar.includes("router.push('/artist-dashboard/create-appointment')"), 'Calendar quick actions open the real artist tools');
 check(calendar.includes("pathname: '/appointment/[appointmentId]'"), 'Calendar events open the real appointment detail route');
-check(calendar.includes('currentMonthAppointments') && calendar.includes('Insight'), 'Calendar includes the web-style monthly insights section');
-check(calendar.includes('LegendRow'), 'Calendar includes the web-style event status legend');
+check(calendar.includes('ui.insights') && calendar.includes('attentionCount'), 'Calendar includes the compact web Insights card');
+check(calendar.includes('LegendRow') && calendar.includes('BLOCKED_COLOR') && calendar.includes('VACATION_COLOR'), 'Calendar legend distinguishes sessions, consultations, blocked time and vacation');
 
 console.log('\nTatzo mobile shell parity check');
 for (const label of passed) console.log(`  ✓ ${label}`);

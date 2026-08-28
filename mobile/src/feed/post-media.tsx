@@ -71,6 +71,19 @@ function FeedVideo({
   );
 }
 
+function VideoThumbnail({ url }: { url: string }) {
+  return (
+    <View style={styles.videoThumb}>
+      <FeedVideo controls={false} fit="cover" url={url} />
+      <View pointerEvents="none" style={styles.videoThumbOverlay}>
+        <View style={styles.videoThumbPlayBadge}>
+          <Text style={styles.videoThumbText}>▶</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 function MediaCell({
   item,
   style,
@@ -258,6 +271,8 @@ function CarouselMedia({ items }: { items: FeedMedia[] }) {
   const [width, setWidth] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
   const height = clamp(width * 0.76, 230, 335);
+  const largeThumbSet = items.length >= 6;
+  const thumbRailHeight = largeThumbSet ? 140 : 120;
 
   const setMeasuredWidth = (next: number) => {
     if (Math.abs(next - width) > 1) setWidth(next);
@@ -311,9 +326,21 @@ function CarouselMedia({ items }: { items: FeedMedia[] }) {
           </View>
 
           {items.length > 1 ? (
-            <View style={styles.thumbsRow}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={[styles.thumbsViewport, { height: thumbRailHeight }]}
+              contentContainerStyle={[
+                styles.thumbsRow,
+                !largeThumbSet && styles.thumbsRowCentered,
+                { minHeight: thumbRailHeight },
+              ]}
+            >
               {items.map((item, index) => {
                 const active = index === activeIndex;
+                const thumbSize = largeThumbSet
+                  ? (active ? 140 : 82)
+                  : (active ? 120 : 90);
                 return (
                   <Pressable
                     accessibilityLabel={`Media ${index + 1}`}
@@ -323,21 +350,19 @@ function CarouselMedia({ items }: { items: FeedMedia[] }) {
                     style={({ pressed }) => [
                       styles.thumb,
                       active && styles.thumbActive,
-                      { flex: active ? 2 : 1 },
+                      { width: thumbSize, height: thumbSize },
                       pressed && styles.thumbPressed,
                     ]}
                   >
                     {item.type === 'image' ? (
                       <Image resizeMode="cover" source={{ uri: item.url }} style={StyleSheet.absoluteFill} />
                     ) : (
-                      <View style={styles.videoThumb}>
-                        <Text style={styles.videoThumbText}>▶</Text>
-                      </View>
+                      <VideoThumbnail url={item.url} />
                     )}
                   </Pressable>
                 );
               })}
-            </View>
+            </ScrollView>
           ) : null}
         </>
       ) : (
@@ -430,22 +455,31 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
   },
-  thumbsRow: {
+  thumbsViewport: {
     width: '100%',
-    height: 58,
+  },
+  thumbsRow: {
     flexDirection: 'row',
-    alignItems: 'stretch',
-    gap: 7,
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 2,
+  },
+  thumbsRowCentered: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   thumb: {
-    minWidth: 28,
-    borderRadius: 11,
+    flexGrow: 0,
+    flexShrink: 0,
+    borderRadius: 14,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,.09)',
     backgroundColor: '#002b2a',
+    opacity: 0.75,
   },
   thumbActive: {
+    opacity: 1,
     borderColor: colors.primary,
     shadowColor: '#000',
     shadowOpacity: 0.35,
@@ -458,12 +492,33 @@ const styles = StyleSheet.create({
   },
   videoThumb: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    position: 'relative',
+    overflow: 'hidden',
     backgroundColor: '#001b1a',
   },
+  videoThumbOverlay: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,.12)',
+  },
+  videoThumbPlayBadge: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,.52)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,.22)',
+  },
   videoThumbText: {
-    color: colors.primary,
-    fontSize: 16,
+    color: colors.white,
+    fontSize: 11,
+    marginLeft: 1,
   },
 });
