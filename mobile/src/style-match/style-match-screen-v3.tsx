@@ -10,6 +10,7 @@ import {
   Text,
   View,
   useWindowDimensions,
+  type ImageSourcePropType,
 } from 'react-native';
 
 import type {
@@ -35,12 +36,19 @@ import { colors, spacing } from '@/theme';
 type MatchMode = 'intro' | 'quiz' | 'analysis' | 'result';
 type BusyAction = StyleMatchReaction | 'save' | '';
 type SwipeDirection = 'left' | 'right';
+type ActionVariant = 'reject' | 'save' | 'saveActive' | 'like' | 'favorite';
 
 const WEB_SWIPE_THRESHOLD = 90;
 const WEB_LONG_PRESS_MS = 650;
 const WEB_EXIT_MS = 220;
 const DOUBLE_TAP_MS = 280;
 const GESTURE_MOVE_CANCEL = 12;
+const ACTION_ICONS = {
+  reject: require('../../assets/style-match-icons/reject.png'),
+  save: require('../../assets/style-match-icons/save.png'),
+  like: require('../../assets/style-match-icons/like.png'),
+  favorite: require('../../assets/style-match-icons/favorite.png'),
+} as const;
 
 function copy(en: string, fr: string, ru: string) {
   if (appLanguage === 'fr') return fr;
@@ -114,10 +122,7 @@ export default function StyleMatchScreenV3() {
     },
     onPanResponderMove: (_event, gesture) => {
       if (busyRef.current) return;
-      if (
-        Math.abs(gesture.dx) > GESTURE_MOVE_CANCEL
-        || Math.abs(gesture.dy) > GESTURE_MOVE_CANCEL
-      ) {
+      if (Math.abs(gesture.dx) > GESTURE_MOVE_CANCEL || Math.abs(gesture.dy) > GESTURE_MOVE_CANCEL) {
         if (longPressTimerRef.current) {
           clearTimeout(longPressTimerRef.current);
           longPressTimerRef.current = null;
@@ -143,11 +148,9 @@ export default function StyleMatchScreenV3() {
         reactRef.current('reject', 'left');
         return;
       }
-      const shortTap = (
-        Math.abs(gesture.dx) < 8
+      const shortTap = Math.abs(gesture.dx) < 8
         && Math.abs(gesture.dy) < 8
-        && Date.now() - gestureStartedAtRef.current < 260
-      );
+        && Date.now() - gestureStartedAtRef.current < 260;
       if (shortTap) {
         const now = Date.now();
         if (now - lastTapRef.current <= DOUBLE_TAP_MS) {
@@ -180,8 +183,6 @@ export default function StyleMatchScreenV3() {
         ?? overview.latest_result?.saved_cards.slice(0, 3)
         ?? [];
       setPreviewCards(previews);
-      // Web always opens on the explanatory onboarding screen. Starting from
-      // there intentionally creates a fresh session and abandons any old one.
       setSession(null);
       setMode('intro');
     } catch {
@@ -191,9 +192,7 @@ export default function StyleMatchScreenV3() {
     }
   }, [request, status]);
 
-  useEffect(() => {
-    void loadOverview();
-  }, [loadOverview]);
+  useEffect(() => { void loadOverview(); }, [loadOverview]);
 
   const currentCard = session?.cards[session.current_index] ?? null;
   const nextCard = session?.cards[session.current_index + 1] ?? null;
@@ -268,26 +267,11 @@ export default function StyleMatchScreenV3() {
     setBusyAction(reaction);
     setError('');
     const exitX = Math.max(windowWidth, 360) * (direction === 'right' ? 1.25 : -1.25);
-    const requestPromise = reactToStyleMatch(
-      request,
-      session.session_id,
-      currentCard.id,
-      reaction,
-    );
+    const requestPromise = reactToStyleMatch(request, session.session_id, currentCard.id, reaction);
     const motionPromise = new Promise<void>((resolve) => {
       Animated.parallel([
-        Animated.timing(pan.x, {
-          toValue: exitX,
-          duration: WEB_EXIT_MS,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(pan.y, {
-          toValue: -18,
-          duration: WEB_EXIT_MS,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
+        Animated.timing(pan.x, { toValue: exitX, duration: WEB_EXIT_MS, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+        Animated.timing(pan.y, { toValue: -18, duration: WEB_EXIT_MS, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
       ]).start(() => resolve());
     });
 
@@ -323,17 +307,8 @@ export default function StyleMatchScreenV3() {
     setBusyAction('save');
     setError('');
     try {
-      const response = await reactToStyleMatch(
-        request,
-        session.session_id,
-        currentCard.id,
-        'save',
-        nextSaved,
-      );
-      setSession((current) => current ? {
-        ...current,
-        current_saved: response.saved ?? nextSaved,
-      } : current);
+      const response = await reactToStyleMatch(request, session.session_id, currentCard.id, 'save', nextSaved);
+      setSession((current) => current ? { ...current, current_saved: response.saved ?? nextSaved } : current);
       setNotice(nextSaved
         ? copy('Saved to your collection', 'Enregistré dans votre collection', 'Сохранено в коллекцию')
         : copy('Removed from your collection', 'Retiré de votre collection', 'Удалено из коллекции'));
@@ -348,13 +323,7 @@ export default function StyleMatchScreenV3() {
   saveRef.current = () => { void toggleSaved(); };
 
   if (loading || status === 'loading') {
-    return (
-      <Screen contentStyle={styles.centerScreen}>
-        <Wordmark />
-        <View style={styles.loadingOrb}><ActivityIndicator color={colors.primary} size="large" /></View>
-        <Text style={styles.muted}>{t('styleMatchLoading')}</Text>
-      </Screen>
-    );
+    return <Screen contentStyle={styles.centerScreen}><Wordmark /><View style={styles.loadingOrb}><ActivityIndicator color={colors.primary} size="large" /></View><Text style={styles.muted}>{t('styleMatchLoading')}</Text></Screen>;
   }
 
   if (mode === 'analysis') {
@@ -370,9 +339,7 @@ export default function StyleMatchScreenV3() {
         <Wordmark />
         <View style={styles.analysisCard}>
           <Animated.View style={[styles.analysisOrb, { transform: [{ rotate: rotation }] }]}>
-            <View style={styles.orbRingOne} />
-            <View style={styles.orbRingTwo} />
-            <Text style={styles.orbGlyph}>◎</Text>
+            <View style={styles.orbRingOne} /><View style={styles.orbRingTwo} /><Text style={styles.orbGlyph}>◎</Text>
           </Animated.View>
           <Text style={styles.eyebrow}>{copy('TATZO INTELLIGENCE', 'INTELLIGENCE TATZO', 'TATZO INTELLIGENCE')}</Text>
           <Text style={styles.analysisTitle}>{copy('Discovering your tattoo personality', 'Découverte de votre personnalité tattoo', 'Определяем твою тату-персональность')}</Text>
@@ -394,31 +361,11 @@ export default function StyleMatchScreenV3() {
 
   if (mode === 'quiz' && session) {
     const progress = Math.round((session.current_index / Math.max(1, session.total)) * 100);
-    const rotation = pan.x.interpolate({
-      inputRange: [-180, 0, 180],
-      outputRange: ['-10deg', '0deg', '10deg'],
-      extrapolate: 'clamp',
-    });
-    const dampedY = pan.y.interpolate({
-      inputRange: [-240, 0, 240],
-      outputRange: [-29, 0, 29],
-      extrapolate: 'clamp',
-    });
-    const swipeOpacity = pan.x.interpolate({
-      inputRange: [-Math.max(windowWidth, 360) * 1.2, 0, Math.max(windowWidth, 360) * 1.2],
-      outputRange: [0, 1, 0],
-      extrapolate: 'clamp',
-    });
-    const likeStampOpacity = pan.x.interpolate({
-      inputRange: [0, 100],
-      outputRange: [0, 1],
-      extrapolate: 'clamp',
-    });
-    const nopeStampOpacity = pan.x.interpolate({
-      inputRange: [-100, 0],
-      outputRange: [1, 0],
-      extrapolate: 'clamp',
-    });
+    const rotation = pan.x.interpolate({ inputRange: [-180, 0, 180], outputRange: ['-10deg', '0deg', '10deg'], extrapolate: 'clamp' });
+    const dampedY = pan.y.interpolate({ inputRange: [-240, 0, 240], outputRange: [-29, 0, 29], extrapolate: 'clamp' });
+    const swipeOpacity = pan.x.interpolate({ inputRange: [-Math.max(windowWidth, 360) * 1.2, 0, Math.max(windowWidth, 360) * 1.2], outputRange: [0, 1, 0], extrapolate: 'clamp' });
+    const likeStampOpacity = pan.x.interpolate({ inputRange: [0, 100], outputRange: [0, 1], extrapolate: 'clamp' });
+    const nopeStampOpacity = pan.x.interpolate({ inputRange: [-100, 0], outputRange: [1, 0], extrapolate: 'clamp' });
     const introTranslate = cardIntro.interpolate({ inputRange: [0, 1], outputRange: [18, 0] });
     const introScale = cardIntro.interpolate({ inputRange: [0, 1], outputRange: [.97, 1] });
 
@@ -433,7 +380,6 @@ export default function StyleMatchScreenV3() {
           </View>
         </View>
         <View style={styles.progressTrack}><View style={[styles.progressFill, { width: `${progress}%` }]} /></View>
-
         {notice ? <View style={styles.toast}><Text style={styles.toastText}>{notice}</Text></View> : null}
 
         {currentCard ? (
@@ -446,78 +392,28 @@ export default function StyleMatchScreenV3() {
                 accessibilityLabel={currentCard.alt}
                 style={[
                   styles.card,
-                  {
-                    opacity: Animated.multiply(cardIntro, swipeOpacity),
-                    transform: [
-                      { translateX: pan.x },
-                      { translateY: dampedY },
-                      { translateY: introTranslate },
-                      { rotate: rotation },
-                      { scale: introScale },
-                    ],
-                  },
+                  { opacity: Animated.multiply(cardIntro, swipeOpacity), transform: [{ translateX: pan.x }, { translateY: dampedY }, { translateY: introTranslate }, { rotate: rotation }, { scale: introScale }] },
                 ]}
               >
-                <Image
-                  onLoadEnd={() => setImageLoading(false)}
-                  onLoadStart={() => setImageLoading(true)}
-                  resizeMode="cover"
-                  source={{ uri: currentCard.image_url }}
-                  style={styles.cardImage}
-                />
+                <Image onLoadEnd={() => setImageLoading(false)} onLoadStart={() => setImageLoading(true)} resizeMode="cover" source={{ uri: currentCard.image_url }} style={styles.cardImage} />
                 <View pointerEvents="none" style={styles.cardShade} />
-                <Animated.View pointerEvents="none" style={[styles.stamp, styles.likeStamp, { opacity: likeStampOpacity }]}>
-                  <Text style={styles.likeStampText}>LIKE</Text>
-                </Animated.View>
-                <Animated.View pointerEvents="none" style={[styles.stamp, styles.nopeStamp, { opacity: nopeStampOpacity }]}>
-                  <Text style={styles.nopeStampText}>NOPE</Text>
-                </Animated.View>
+                <Animated.View pointerEvents="none" style={[styles.stamp, styles.likeStamp, { opacity: likeStampOpacity }]}><Text style={styles.likeStampText}>LIKE</Text></Animated.View>
+                <Animated.View pointerEvents="none" style={[styles.stamp, styles.nopeStamp, { opacity: nopeStampOpacity }]}><Text style={styles.nopeStampText}>NOPE</Text></Animated.View>
                 {session.current_saved ? <View style={styles.savedBadge}><Text style={styles.savedBadgeText}>✓</Text></View> : null}
                 {imageLoading ? <View style={styles.imageLoader}><ActivityIndicator color={colors.primary} size="large" /></View> : null}
               </Animated.View>
             </View>
 
             <View style={styles.actions}>
-              <ActionButton
-                label={t('styleMatchReject')}
-                symbol="×"
-                variant="reject"
-                disabled={Boolean(busyAction)}
-                loading={busyAction === 'reject'}
-                onPress={() => void react('reject', 'left')}
-              />
-              <ActionButton
-                label={session.current_saved ? t('styleMatchSaved') : t('styleMatchSave')}
-                symbol="⌑"
-                variant={session.current_saved ? 'saveActive' : 'save'}
-                disabled={Boolean(busyAction)}
-                loading={busyAction === 'save'}
-                onPress={() => void toggleSaved()}
-              />
-              <ActionButton
-                label={t('styleMatchLike')}
-                symbol="♡"
-                variant="like"
-                disabled={Boolean(busyAction)}
-                loading={busyAction === 'like'}
-                onPress={() => void react('like', 'right')}
-              />
-              <ActionButton
-                label={t('styleMatchFavorite')}
-                symbol="✦"
-                variant="favorite"
-                disabled={Boolean(busyAction)}
-                loading={busyAction === 'favorite'}
-                onPress={() => void react('favorite', 'right')}
-              />
+              <ActionButton icon={ACTION_ICONS.reject} label={t('styleMatchReject')} variant="reject" disabled={Boolean(busyAction)} loading={busyAction === 'reject'} onPress={() => void react('reject', 'left')} />
+              <ActionButton icon={ACTION_ICONS.save} label={session.current_saved ? t('styleMatchSaved') : t('styleMatchSave')} variant={session.current_saved ? 'saveActive' : 'save'} disabled={Boolean(busyAction)} loading={busyAction === 'save'} onPress={() => void toggleSaved()} />
+              <ActionButton icon={ACTION_ICONS.like} label={t('styleMatchLike')} variant="like" disabled={Boolean(busyAction)} loading={busyAction === 'like'} onPress={() => void react('like', 'right')} />
+              <ActionButton icon={ACTION_ICONS.favorite} label={t('styleMatchFavorite')} variant="favorite" disabled={Boolean(busyAction)} loading={busyAction === 'favorite'} onPress={() => void react('favorite', 'right')} />
             </View>
             <Text style={styles.hint}>{copy('Swipe to choose · hold to save · double tap to favorite', 'Glissez pour choisir · maintenez pour enregistrer · double tap pour favori', 'Свайп — выбрать · удержание — сохранить · двойной тап — в избранное')}</Text>
           </>
         ) : (
-          <View style={styles.stateCard}>
-            <Text style={styles.stateTitle}>{t('styleMatchUnavailable')}</Text>
-            <Button label={t('retry')} onPress={() => void loadOverview()} />
-          </View>
+          <View style={styles.stateCard}><Text style={styles.stateTitle}>{t('styleMatchUnavailable')}</Text><Button label={t('retry')} onPress={() => void loadOverview()} /></View>
         )}
         {error ? <Text style={styles.error}>{error}</Text> : null}
       </Screen>
@@ -528,123 +424,65 @@ export default function StyleMatchScreenV3() {
     <Screen contentStyle={styles.onboardingScreen}>
       <Ambient />
       <View style={styles.onboardingCard}>
-        <View style={styles.brandRow}>
-          <Wordmark />
-          <View style={styles.kicker}><Text style={styles.kickerText}>Style Match</Text></View>
-        </View>
-
+        <View style={styles.brandRow}><Wordmark /><View style={styles.kicker}><Text style={styles.kickerText}>Style Match</Text></View></View>
         <View style={styles.previewDeck} accessibilityElementsHidden>
           {[0, 1, 2].map((index) => {
             const preview = previewCards[index];
             return (
-              <View
-                key={index}
-                style={[
-                  styles.previewCard,
-                  index === 0 ? styles.previewCenter : index === 1 ? styles.previewLeft : styles.previewRight,
-                ]}
-              >
-                {preview ? (
-                  <Image source={{ uri: preview.image_url }} style={styles.previewImage} />
-                ) : (
-                  <View style={styles.previewFallback}><View style={styles.previewSheen} /></View>
-                )}
+              <View key={index} style={[styles.previewCard, index === 0 ? styles.previewCenter : index === 1 ? styles.previewLeft : styles.previewRight]}>
+                {preview ? <Image source={{ uri: preview.image_url }} style={styles.previewImage} /> : <View style={styles.previewFallback}><View style={styles.previewSheen} /></View>}
               </View>
             );
           })}
           <View style={styles.visualPill}><Text style={styles.visualPillText}>{copy('Your taste, decoded', 'Votre goût, décodé', 'Твой вкус — расшифрован')}</Text></View>
         </View>
-
         <View style={styles.onboardingCopy}>
           <Text style={styles.eyebrow}>{copy('A NEW WAY TO DISCOVER', 'UNE NOUVELLE FAÇON DE DÉCOUVRIR', 'НОВЫЙ СПОСОБ НАЙТИ СВОЁ')}</Text>
           <Text style={styles.onboardingTitle}>{copy('Not sure what tattoo style fits you?', 'Vous ne savez pas quel style vous correspond ?', 'Не знаешь, какой стиль тату тебе подходит?')}</Text>
-          <Text style={styles.onboardingBody}>{copy(
-            'Swipe through tattoos and we’ll discover your taste — no labels and no pressure.',
-            'Parcourez les tattoos et nous découvrirons votre goût — sans étiquettes ni pression.',
-            'Листай татуировки, а мы определим твой вкус — без ярлыков и давления.',
-          )}</Text>
+          <Text style={styles.onboardingBody}>{copy('Swipe through tattoos and we’ll discover your taste — no labels and no pressure.', 'Parcourez les tattoos et nous découvrirons votre goût — sans étiquettes ni pression.', 'Листай татуировки, а мы определим твой вкус — без ярлыков и давления.')}</Text>
         </View>
-
-        <Pressable
-          accessibilityRole="button"
-          disabled={starting}
-          onPress={() => void beginMatch()}
-          style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryPressed, starting && styles.disabled]}
-        >
-          {starting ? <ActivityIndicator color="#001317" /> : (
-            <>
-              <Text style={styles.primaryButtonText}>{copy('Discover my style', 'Découvrir mon style', 'Найти мой стиль')}</Text>
-              <Text style={styles.primaryButtonStar}>✦</Text>
-            </>
-          )}
+        <Pressable accessibilityRole="button" disabled={starting} onPress={() => void beginMatch()} style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryPressed, starting && styles.disabled]}>
+          {starting ? <ActivityIndicator color="#001317" /> : <><Text style={styles.primaryButtonText}>{copy('Discover my style', 'Découvrir mon style', 'Найти мой стиль')}</Text><Text style={styles.primaryButtonStar}>✦</Text></>}
         </Pressable>
         <Text style={styles.footnote}>{copy('Usually a short set of choices · more only when your taste needs a closer look', 'Habituellement quelques choix · davantage seulement si nécessaire', 'Обычно достаточно короткой серии · больше только если вкус нужно уточнить')}</Text>
       </View>
-      {latestResult ? (
-        <Text style={styles.latestHint}>{copy('Your previous result stays saved in Tatzo.', 'Votre résultat précédent reste enregistré dans Tatzo.', 'Предыдущий результат остаётся сохранён в Tatzo.')}</Text>
-      ) : null}
+      {latestResult ? <Text style={styles.latestHint}>{copy('Your previous result stays saved in Tatzo.', 'Votre résultat précédent reste enregistré dans Tatzo.', 'Предыдущий результат остаётся сохранён в Tatzo.')}</Text> : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
     </Screen>
   );
 }
 
 function Wordmark() {
-  return <Text accessibilityLabel="Tatzo" style={styles.wordmark}>tatzo<Text style={styles.wordmarkDot}>.</Text></Text>;
+  return <Image accessibilityLabel="Tatzo" resizeMode="contain" source={require('../../assets/tatzo7.png')} style={styles.wordmark} />;
 }
 
 function Ambient() {
-  return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <View style={styles.ambientTeal} />
-      <View style={styles.ambientPink} />
-    </View>
-  );
+  return <View pointerEvents="none" style={StyleSheet.absoluteFill}><View style={styles.ambientTeal} /><View style={styles.ambientPink} /></View>;
 }
 
 function DeckBackCard({ card, depth }: { card: StyleMatchCard; depth: 1 | 2 }) {
-  return (
-    <View style={[styles.deckBack, depth === 1 ? styles.deckBackOne : styles.deckBackTwo]} pointerEvents="none">
-      <Image source={{ uri: card.image_url }} resizeMode="cover" style={styles.cardImage} />
-      <View style={styles.backTint} />
-    </View>
-  );
+  return <View style={[styles.deckBack, depth === 1 ? styles.deckBackOne : styles.deckBackTwo]} pointerEvents="none"><Image source={{ uri: card.image_url }} resizeMode="cover" style={styles.cardImage} /><View style={styles.backTint} /></View>;
 }
 
-function ActionButton({
-  label,
-  symbol,
-  variant,
-  disabled,
-  loading,
-  onPress,
-}: {
+function ActionButton({ label, icon, variant, disabled, loading, onPress }: {
   label: string;
-  symbol: string;
-  variant: 'reject' | 'save' | 'saveActive' | 'like' | 'favorite';
+  icon: ImageSourcePropType;
+  variant: ActionVariant;
   disabled: boolean;
   loading: boolean;
   onPress: () => void;
 }) {
   const isLike = variant === 'like';
+  const activeSave = variant === 'saveActive';
   return (
     <Pressable
       accessibilityLabel={label}
       accessibilityRole="button"
       disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.actionButton,
-        isLike && styles.actionButtonLike,
-        variant === 'saveActive' && styles.actionButtonSaveActive,
-        disabled && styles.disabled,
-        pressed && styles.actionPressed,
-      ]}
+      style={({ pressed }) => [styles.actionButton, isLike && styles.actionButtonLike, activeSave && styles.actionButtonSaveActive, disabled && styles.disabled, pressed && styles.actionPressed]}
     >
-      {loading ? (
-        <ActivityIndicator color={isLike ? colors.white : colors.primary} />
-      ) : (
-        <Text style={[styles.actionSymbol, isLike && styles.actionSymbolLike, variant === 'saveActive' && styles.actionSymbolSaveActive]}>{symbol}</Text>
-      )}
+      {loading ? <ActivityIndicator color={isLike ? colors.white : colors.primary} /> : <Image accessibilityIgnoresInvertColors source={icon} resizeMode="contain" style={[styles.actionIcon, { tintColor: activeSave ? colors.primary : '#d9edf0' }]} />}
     </Pressable>
   );
 }
@@ -654,8 +492,7 @@ const styles = StyleSheet.create({
   resultScreen: { paddingTop: spacing.sm, paddingBottom: spacing.xxl },
   discoveryScreen: { paddingTop: spacing.sm, paddingBottom: spacing.xxl, gap: 14, overflow: 'hidden' },
   onboardingScreen: { paddingTop: 18, paddingBottom: spacing.xxl, overflow: 'hidden' },
-  wordmark: { color: colors.white, fontSize: 22, lineHeight: 26, fontWeight: '800', letterSpacing: -1.3 },
-  wordmarkDot: { color: colors.primary },
+  wordmark: { width: 92, height: 34 },
   loadingOrb: { width: 92, height: 92, borderRadius: 46, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(4,197,191,.08)', borderWidth: 1, borderColor: 'rgba(4,197,191,.25)' },
   muted: { color: colors.textMuted, lineHeight: 20, textAlign: 'center' },
   ambientTeal: { position: 'absolute', width: 350, height: 350, borderRadius: 175, backgroundColor: 'rgba(9,200,194,.12)', top: -190, left: -190 },
@@ -708,13 +545,11 @@ const styles = StyleSheet.create({
   nopeStampText: { color: '#ff6294', fontSize: 19, fontWeight: '900', letterSpacing: 2.2 },
   savedBadge: { position: 'absolute', right: 18, bottom: 18, width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary },
   savedBadgeText: { color: '#001317', fontSize: 20, fontWeight: '900' },
-  actions: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 14, marginTop: 4 },
+  actions: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10, marginTop: 4 },
   actionButton: { width: 54, height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(150,230,232,.20)', backgroundColor: 'rgba(14,34,42,.92)' },
-  actionButtonLike: { width: 64, height: 64, borderRadius: 32, borderColor: '#ed0b70', backgroundColor: '#ed0b70' },
+  actionButtonLike: { width: 58, height: 58, borderRadius: 29, borderColor: '#ed0b70', backgroundColor: '#ed0b70' },
   actionButtonSaveActive: { borderColor: colors.primary },
-  actionSymbol: { color: '#d9edf0', fontSize: 25, lineHeight: 29, fontWeight: '500' },
-  actionSymbolLike: { color: colors.white, fontSize: 29 },
-  actionSymbolSaveActive: { color: colors.primary },
+  actionIcon: { width: 24, height: 24 },
   disabled: { opacity: .5 },
   actionPressed: { transform: [{ translateY: -3 }] },
   hint: { color: '#77959d', fontSize: 12, textAlign: 'center', lineHeight: 17, marginTop: 2 },

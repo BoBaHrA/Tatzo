@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   View,
+  type ImageSourcePropType,
 } from 'react-native';
 
 import type {
@@ -27,11 +28,19 @@ import {
   startStyleMatch,
 } from '@/style-match/style-match-api';
 import { StyleMatchResultV2 } from '@/style-match/style-match-result-v2';
-import { colors, radius, spacing } from '@/theme';
+import { colors, spacing } from '@/theme';
 
 
 type MatchMode = 'intro' | 'quiz' | 'analysis' | 'result';
 type BusyAction = StyleMatchReaction | 'save' | '';
+type ActionVariant = 'reject' | 'save' | 'saveActive' | 'like' | 'favorite';
+
+const ACTION_ICONS = {
+  reject: require('../../assets/style-match-icons/reject.png'),
+  save: require('../../assets/style-match-icons/save.png'),
+  like: require('../../assets/style-match-icons/like.png'),
+  favorite: require('../../assets/style-match-icons/favorite.png'),
+} as const;
 
 function copy(en: string, fr: string, ru: string) {
   if (appLanguage === 'fr') return fr;
@@ -152,12 +161,7 @@ export default function StyleMatchScreenV2() {
     setBusyAction(reaction);
     setError('');
     try {
-      const response = await reactToStyleMatch(
-        request,
-        session.session_id,
-        currentCard.id,
-        reaction,
-      );
+      const response = await reactToStyleMatch(request, session.session_id, currentCard.id, reaction);
       if (response.completed) {
         const completed = response.result ?? await fetchStyleMatchResult(request, session.session_id);
         setPendingResult(completed);
@@ -187,13 +191,7 @@ export default function StyleMatchScreenV2() {
     setBusyAction('save');
     setError('');
     try {
-      const response = await reactToStyleMatch(
-        request,
-        session.session_id,
-        currentCard.id,
-        'save',
-        nextSaved,
-      );
+      const response = await reactToStyleMatch(request, session.session_id, currentCard.id, 'save', nextSaved);
       setSession((current) => current ? { ...current, current_saved: response.saved ?? nextSaved } : current);
       setNotice(nextSaved ? copy('Saved to your collection', 'Enregistré dans votre collection', 'Сохранено в коллекцию') : '');
     } catch {
@@ -305,32 +303,32 @@ export default function StyleMatchScreenV2() {
 
             <View style={styles.actions}>
               <ActionButton
+                icon={ACTION_ICONS.reject}
                 label={t('styleMatchReject')}
-                symbol="×"
                 variant="reject"
                 disabled={Boolean(busyAction)}
                 loading={busyAction === 'reject'}
                 onPress={() => void react('reject')}
               />
               <ActionButton
+                icon={ACTION_ICONS.save}
                 label={session.current_saved ? t('styleMatchSaved') : t('styleMatchSave')}
-                symbol="⌑"
                 variant={session.current_saved ? 'saveActive' : 'save'}
                 disabled={Boolean(busyAction)}
                 loading={busyAction === 'save'}
                 onPress={() => void toggleSaved()}
               />
               <ActionButton
+                icon={ACTION_ICONS.like}
                 label={t('styleMatchLike')}
-                symbol="♡"
                 variant="like"
                 disabled={Boolean(busyAction)}
                 loading={busyAction === 'like'}
                 onPress={() => void react('like')}
               />
               <ActionButton
+                icon={ACTION_ICONS.favorite}
                 label={t('styleMatchFavorite')}
-                symbol="✦"
                 variant="favorite"
                 disabled={Boolean(busyAction)}
                 loading={busyAction === 'favorite'}
@@ -372,7 +370,7 @@ export default function StyleMatchScreenV2() {
               {previews[index] ? (
                 <Image source={{ uri: previews[index].image_url }} style={styles.previewImage} />
               ) : (
-                <View style={styles.previewFallback}><Text style={styles.previewGlyph}>{['×', '♡', '✦'][index]}</Text></View>
+                <View style={styles.previewFallback}><Image source={[ACTION_ICONS.reject, ACTION_ICONS.like, ACTION_ICONS.favorite][index]} style={styles.previewIcon} /></View>
               )}
             </View>
           ))}
@@ -412,7 +410,7 @@ export default function StyleMatchScreenV2() {
 }
 
 function Wordmark() {
-  return <Text accessibilityLabel="Tatzo" style={styles.wordmark}>tatzo<Text style={styles.wordmarkDot}>.</Text></Text>;
+  return <Image accessibilityLabel="Tatzo" resizeMode="contain" source={require('../../assets/tatzo7.png')} style={styles.wordmark} />;
 }
 
 function Ambient() {
@@ -426,32 +424,34 @@ function Ambient() {
 
 function ActionButton({
   label,
-  symbol,
+  icon,
   variant,
   disabled,
   loading,
   onPress,
 }: {
   label: string;
-  symbol: string;
-  variant: 'reject' | 'save' | 'saveActive' | 'like' | 'favorite';
+  icon: ImageSourcePropType;
+  variant: ActionVariant;
   disabled: boolean;
   loading: boolean;
   onPress: () => void;
 }) {
+  const iconColor = variant === 'saveActive' ? colors.primary : colors.white;
   return (
-    <View style={styles.actionWrap}>
-      <Pressable
-        accessibilityLabel={label}
-        accessibilityRole="button"
-        disabled={disabled}
-        onPress={onPress}
-        style={({ pressed }) => [styles.actionButton, styles[variant], disabled && styles.disabled, pressed && styles.actionPressed]}
-      >
-        {loading ? <ActivityIndicator color={variant === 'favorite' ? colors.white : colors.primary} /> : <Text style={[styles.actionSymbol, variant === 'favorite' && styles.favoriteSymbol]}>{symbol}</Text>}
-      </Pressable>
-      <Text numberOfLines={1} style={styles.actionLabel}>{label}</Text>
-    </View>
+    <Pressable
+      accessibilityLabel={label}
+      accessibilityRole="button"
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [styles.actionButton, styles[variant], disabled && styles.disabled, pressed && styles.actionPressed]}
+    >
+      {loading ? (
+        <ActivityIndicator color={variant === 'like' ? colors.white : colors.primary} />
+      ) : (
+        <Image accessibilityIgnoresInvertColors resizeMode="contain" source={icon} style={[styles.actionIcon, { tintColor: iconColor }]} />
+      )}
+    </Pressable>
   );
 }
 
@@ -460,8 +460,7 @@ const styles = StyleSheet.create({
   resultScreen: { paddingTop: spacing.sm, paddingBottom: spacing.xxl },
   discoveryScreen: { paddingTop: spacing.sm, paddingBottom: spacing.xxl, gap: 14, overflow: 'hidden' },
   onboardingScreen: { paddingTop: spacing.md, paddingBottom: spacing.xxl, overflow: 'hidden' },
-  wordmark: { color: colors.white, fontSize: 31, lineHeight: 35, fontWeight: '900', letterSpacing: -1.8 },
-  wordmarkDot: { color: colors.accent },
+  wordmark: { width: 92, height: 34 },
   loadingOrb: { width: 92, height: 92, borderRadius: 46, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(4,197,191,.08)', borderWidth: 1, borderColor: 'rgba(4,197,191,.25)' },
   muted: { color: colors.textMuted, lineHeight: 20, textAlign: 'center' },
   ambientTeal: { position: 'absolute', width: 320, height: 320, borderRadius: 160, backgroundColor: 'rgba(4,197,191,.08)', top: -120, right: -150 },
@@ -477,7 +476,7 @@ const styles = StyleSheet.create({
   preview2: { transform: [{ rotate: '10deg' }, { translateX: 56 }, { translateY: 13 }] },
   previewImage: { width: '100%', height: '100%' },
   previewFallback: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#06212a' },
-  previewGlyph: { color: colors.primary, fontSize: 38, fontWeight: '600' },
+  previewIcon: { width: 34, height: 34, tintColor: colors.primary },
   visualPill: { position: 'absolute', zIndex: 5, bottom: 3, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999, backgroundColor: '#00131d', borderWidth: 1, borderColor: 'rgba(4,197,191,.22)' },
   visualPillText: { color: colors.primary, fontSize: 10, fontWeight: '900' },
   onboardingCopy: { gap: spacing.sm },
@@ -494,8 +493,8 @@ const styles = StyleSheet.create({
   progressCopy: { alignItems: 'flex-end', gap: 2 },
   progressLabel: { color: colors.textMuted, fontSize: 9, fontWeight: '900', letterSpacing: 1 },
   progressCount: { color: colors.white, fontSize: 15, fontWeight: '900' },
-  progressTrack: { height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,.08)', overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: colors.primary, borderRadius: 2 },
+  progressTrack: { height: 5, borderRadius: 3, backgroundColor: 'rgba(190,225,229,.18)', overflow: 'hidden' },
+  progressFill: { height: '100%', backgroundColor: colors.primary, borderRadius: 3 },
   discoveryCopy: { gap: 5, paddingVertical: spacing.xs },
   discoveryTitle: { color: colors.white, fontSize: 22, lineHeight: 27, fontWeight: '900', letterSpacing: -.5 },
   discoverySubtitle: { color: colors.textMuted, fontSize: 12, lineHeight: 18 },
@@ -506,27 +505,15 @@ const styles = StyleSheet.create({
   deckBackOne: { position: 'absolute', width: '84%', height: 410, borderRadius: 26, backgroundColor: '#06232d', transform: [{ rotate: '4deg' }, { translateY: 6 }] },
   card: { width: '88%', height: 425, borderRadius: 26, overflow: 'hidden', backgroundColor: '#031b27', borderWidth: 1, borderColor: 'rgba(255,255,255,.12)' },
   cardImage: { width: '100%', height: '100%' },
-  imageLoader: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#031b27',
-  },
-  actions: { flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start', gap: 12 },
-  actionWrap: { width: 68, alignItems: 'center', gap: 6 },
-  actionButton: { width: 58, height: 58, borderRadius: 29, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, backgroundColor: '#00131d' },
-  reject: { borderColor: 'rgba(255,255,255,.18)' },
-  save: { borderColor: 'rgba(4,197,191,.34)' },
-  saveActive: { borderColor: colors.primary, backgroundColor: 'rgba(4,197,191,.12)' },
-  like: { borderColor: 'rgba(4,197,191,.48)' },
-  favorite: { borderColor: colors.accent, backgroundColor: colors.accent },
-  actionSymbol: { color: colors.primary, fontSize: 27, lineHeight: 31, fontWeight: '600' },
-  favoriteSymbol: { color: colors.white },
-  actionLabel: { color: colors.textMuted, fontSize: 9, fontWeight: '800', textAlign: 'center' },
+  imageLoader: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: '#031b27' },
+  actions: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12, marginTop: 2 },
+  actionButton: { width: 58, height: 58, borderRadius: 29, alignItems: 'center', justifyContent: 'center', borderWidth: 1.3, backgroundColor: 'rgba(14,34,42,.92)' },
+  reject: { borderColor: 'rgba(150,230,232,.20)' },
+  save: { borderColor: 'rgba(150,230,232,.20)' },
+  saveActive: { borderColor: colors.primary, backgroundColor: 'rgba(4,197,191,.11)' },
+  like: { borderColor: colors.accent, backgroundColor: colors.accent, transform: [{ scale: 1.08 }] },
+  favorite: { borderColor: 'rgba(150,230,232,.20)' },
+  actionIcon: { width: 24, height: 24 },
   disabled: { opacity: .48 },
   actionPressed: { transform: [{ scale: .92 }], opacity: .78 },
   hint: { color: colors.textSubtle, fontSize: 9, textAlign: 'center', lineHeight: 14 },
