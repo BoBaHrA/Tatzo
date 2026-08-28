@@ -71,6 +71,19 @@ function FeedVideo({
   );
 }
 
+function VideoThumbnail({ url }: { url: string }) {
+  return (
+    <View style={styles.videoThumb}>
+      <FeedVideo controls={false} fit="cover" url={url} />
+      <View pointerEvents="none" style={styles.videoThumbOverlay}>
+        <View style={styles.videoThumbPlayBadge}>
+          <Text style={styles.videoThumbText}>▶</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 function MediaCell({
   item,
   style,
@@ -330,9 +343,7 @@ function CarouselMedia({ items }: { items: FeedMedia[] }) {
                     {item.type === 'image' ? (
                       <Image resizeMode="cover" source={{ uri: item.url }} style={StyleSheet.absoluteFill} />
                     ) : (
-                      <View style={styles.videoThumb}>
-                        <Text style={styles.videoThumbText}>▶</Text>
-                      </View>
+                      <VideoThumbnail url={item.url} />
                     )}
                   </Pressable>
                 );
@@ -458,12 +469,29 @@ const styles = StyleSheet.create({
   },
   videoThumb: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    position: 'relative',
+    overflow: 'hidden',
     backgroundColor: '#001b1a',
   },
+  videoThumbOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,.12)',
+  },
+  videoThumbPlayBadge: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,.52)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,.22)',
+  },
   videoThumbText: {
-    color: colors.primary,
-    fontSize: 16,
+    color: colors.white,
+    fontSize: 11,
+    marginLeft: 1,
   },
 });
