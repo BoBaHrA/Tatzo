@@ -37,7 +37,8 @@ const LEAFLET_CSS = `https://unpkg.com/leaflet@${LEAFLET_VERSION}/dist/leaflet.c
 const CLUSTER_JS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/dist/leaflet.markercluster.js`;
 const CLUSTER_CSS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/dist/MarkerCluster.css`;
 const CLUSTER_DEFAULT_CSS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/dist/MarkerCluster.Default.css`;
-const CARTO_TILES = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+const CARTO_BASEMAP_API_KEY = (process.env.EXPO_PUBLIC_CARTO_BASEMAP_API_KEY ?? '').trim();
+const CARTO_TILES = `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png${CARTO_BASEMAP_API_KEY ? `?key=${encodeURIComponent(CARTO_BASEMAP_API_KEY)}` : ''}`;
 
 function ensureStylesheet(href: string) {
   if (document.querySelector(`link[href="${href}"]`)) return;
