@@ -42,4 +42,5 @@ def seo_context(request):
         "public_site_url": settings.PUBLIC_SITE_URL,
         "seo_robots": "index,follow" if indexable else "noindex,nofollow",
         "bing_site_verification": os.getenv("BING_SITE_VERIFICATION", "").strip(),
+        "carto_basemap_api_key": os.getenv("CARTO_BASEMAP_API_KEY", "").strip(),
     }

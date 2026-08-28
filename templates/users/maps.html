@@ -14,7 +14,7 @@
 {% block content %}
 {% include "partials/sidebar.html" %}
 
-<main class="maps-shell" data-verified-count="{{ imported_count }}" data-unclaimed-count="{{ unclaimed_count }}" data-default-lat="46.8" data-default-lng="2.5" data-default-zoom="5">
+<main class="maps-shell" data-verified-count="{{ imported_count }}" data-unclaimed-count="{{ unclaimed_count }}" data-default-lat="46.8" data-default-lng="2.5" data-default-zoom="5" data-carto-basemap-api-key="{{ carto_basemap_api_key|escape }}">
   <section class="maps-hero">
     <div>
       <p class="maps-kicker">Tatzo Maps</p>
@@ -193,5 +193,6 @@
 {{ maps_i18n|json_script:"maps-i18n" }}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" defer></script>
+<script src="{% static 'js/carto-basemap-key.js' %}" defer></script>
 <script src="{% static 'js/maps.js' %}" defer></script>
 {% endblock %}
