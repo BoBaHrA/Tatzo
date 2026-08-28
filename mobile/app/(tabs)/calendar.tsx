@@ -11,12 +11,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import type { Appointment } from '@/api/types';
+import type { Appointment, ArtistDashboard } from '@/api/types';
+import { fetchArtistDashboard } from '@/artist-dashboard/artist-dashboard-api';
 import { useAuth } from '@/auth/auth-context';
 import { fetchAppointments } from '@/booking/booking-api';
 import { BrandHeader } from '@/components/brand-header';
 import { appLanguage } from '@/i18n';
-import { colors, radius, spacing } from '@/theme';
+import { colors, spacing } from '@/theme';
 
 
 type CalendarViewMode = 'month' | 'week' | 'day';
@@ -26,6 +27,14 @@ type CalendarDay = {
   date: Date;
   inCurrentMonth: boolean;
 };
+
+type CalendarMarker = {
+  key: string;
+  color: string;
+};
+
+const VACATION_COLOR = '#8c74ff';
+const BLOCKED_COLOR = '#667983';
 
 const WEEKDAYS = {
   en: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -37,75 +46,78 @@ const COPY = {
   en: {
     calendar: 'Calendar',
     eyebrow: 'Tatzo',
-    subtitle: 'Your appointments, sessions and booking requests in one view.',
     today: 'Today',
     month: 'Month',
     week: 'Week',
     day: 'Day',
-    appointments: 'Appointments',
-    selectedDay: 'Selected day',
-    noEvents: 'No events',
-    noEventsHint: 'Nothing is scheduled for this day yet.',
-    thisMonth: 'This month',
     insights: 'Insights',
-    total: 'Events',
-    confirmed: 'Confirmed',
-    attention: 'Needs attention',
-    legend: 'Event status',
-    pending: 'Pending',
-    accepted: 'Confirmed',
-    needsAttention: 'Action needed',
-    closed: 'Completed / closed',
+    noAlerts: 'No alerts right now.',
+    attention: 'booking requests need attention.',
+    quickActions: 'Quick actions',
+    addSession: 'Add session',
+    blockTime: 'Block time',
+    setVacation: 'Set vacation',
+    createConsultation: 'Create consultation',
+    appointments: 'View appointments',
+    legend: 'Legend',
+    tattooSession: 'Tattoo session',
+    consultation: 'Consultation',
+    blocked: 'Blocked',
+    vacation: 'Vacation',
+    events: 'Events',
+    noEvents: 'No events scheduled.',
     loadError: 'Calendar is unavailable right now.',
     retry: 'Retry',
   },
   fr: {
     calendar: 'Calendrier',
     eyebrow: 'Tatzo',
-    subtitle: 'Vos rendez-vous, séances et demandes de réservation dans une seule vue.',
     today: 'Aujourd’hui',
     month: 'Mois',
     week: 'Semaine',
     day: 'Jour',
-    appointments: 'Rendez-vous',
-    selectedDay: 'Jour sélectionné',
-    noEvents: 'Aucun événement',
-    noEventsHint: 'Rien n’est prévu pour cette journée.',
-    thisMonth: 'Ce mois-ci',
     insights: 'Aperçu',
-    total: 'Événements',
-    confirmed: 'Confirmés',
-    attention: 'À traiter',
-    legend: 'Statut des événements',
-    pending: 'En attente',
-    accepted: 'Confirmé',
-    needsAttention: 'Action requise',
-    closed: 'Terminé / fermé',
+    noAlerts: 'Aucune alerte pour le moment.',
+    attention: 'demandes nécessitent votre attention.',
+    quickActions: 'Actions rapides',
+    addSession: 'Ajouter une séance',
+    blockTime: 'Bloquer un créneau',
+    setVacation: 'Définir des congés',
+    createConsultation: 'Créer une consultation',
+    appointments: 'Voir les rendez-vous',
+    legend: 'Légende',
+    tattooSession: 'Séance tattoo',
+    consultation: 'Consultation',
+    blocked: 'Bloqué',
+    vacation: 'Congés',
+    events: 'Événements',
+    noEvents: 'Aucun événement prévu.',
     loadError: 'Le calendrier est indisponible pour le moment.',
     retry: 'Réessayer',
   },
   ru: {
     calendar: 'Календарь',
     eyebrow: 'Tatzo',
-    subtitle: 'Записи, сеансы и запросы на бронирование — в одном месте.',
     today: 'Сегодня',
     month: 'Месяц',
     week: 'Неделя',
     day: 'День',
-    appointments: 'Записи',
-    selectedDay: 'Выбранный день',
-    noEvents: 'Событий нет',
-    noEventsHint: 'На этот день пока ничего не запланировано.',
-    thisMonth: 'Этот месяц',
     insights: 'Сводка',
-    total: 'События',
-    confirmed: 'Подтверждено',
-    attention: 'Требуют внимания',
-    legend: 'Статус событий',
-    pending: 'Ожидает',
-    accepted: 'Подтверждено',
-    needsAttention: 'Нужно действие',
-    closed: 'Завершено / закрыто',
+    noAlerts: 'Сейчас нет предупреждений.',
+    attention: 'заявок требуют внимания.',
+    quickActions: 'Быстрые действия',
+    addSession: 'Добавить сеанс',
+    blockTime: 'Заблокировать время',
+    setVacation: 'Указать отпуск',
+    createConsultation: 'Создать консультацию',
+    appointments: 'Открыть записи',
+    legend: 'Легенда',
+    tattooSession: 'Тату-сеанс',
+    consultation: 'Консультация',
+    blocked: 'Заблокировано',
+    vacation: 'Отпуск',
+    events: 'События',
+    noEvents: 'Событий не запланировано.',
     loadError: 'Календарь сейчас недоступен.',
     retry: 'Повторить',
   },
@@ -200,11 +212,8 @@ function formatLongDate(iso: string) {
   }).format(dateFromIso(iso));
 }
 
-function appointmentColor(status: Appointment['status']) {
-  if (status === 'accepted') return colors.success;
-  if (status === 'completed' || status === 'cancelled' || status === 'declined') return colors.textSubtle;
-  if (status === 'needs_references' || status === 'consultation_required') return colors.accent;
-  return colors.primary;
+function appointmentColor(appointment: Appointment) {
+  return appointment.booking_type === 'tattoo_session' ? colors.primary : colors.accent;
 }
 
 function timeRange(appointment: Appointment) {
@@ -212,21 +221,23 @@ function timeRange(appointment: Appointment) {
   return `${appointment.start_time}–${appointment.end_time}`;
 }
 
-function appointmentNeedsAttention(appointment: Appointment) {
-  return appointment.status === 'pending'
-    || appointment.status === 'needs_references'
-    || appointment.status === 'consultation_required';
-}
-
-function appointmentConfirmed(appointment: Appointment) {
-  return appointment.status === 'accepted' || appointment.status === 'completed';
+function datesBetween(start: string, end: string) {
+  const current = dateFromIso(start);
+  const last = dateFromIso(end || start);
+  const dates: string[] = [];
+  while (current <= last) {
+    dates.push(isoDate(current));
+    current.setUTCDate(current.getUTCDate() + 1);
+  }
+  return dates;
 }
 
 export default function CalendarScreen() {
   const ui = copy();
-  const { request, status } = useAuth();
+  const { request, status, user } = useAuth();
   const today = localTodayIso();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [artistDashboard, setArtistDashboard] = useState<ArtistDashboard | null>(null);
   const [attentionCount, setAttentionCount] = useState(0);
   const [anchor, setAnchor] = useState(() => monthAnchor(today));
   const [selectedDate, setSelectedDate] = useState(today);
@@ -240,16 +251,21 @@ export default function CalendarScreen() {
     if (!quiet) setLoading(true);
     setError(false);
     try {
-      const response = await fetchAppointments(request);
-      setAppointments(response.results);
-      setAttentionCount(response.attention_count);
+      const appointmentPromise = fetchAppointments(request);
+      const dashboardPromise = user?.is_verified_artist
+        ? fetchArtistDashboard(request)
+        : Promise.resolve(null);
+      const [appointmentResult, dashboardResult] = await Promise.all([appointmentPromise, dashboardPromise]);
+      setAppointments(appointmentResult.results);
+      setAttentionCount(appointmentResult.attention_count);
+      setArtistDashboard(dashboardResult);
     } catch {
       setError(true);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [request, status]);
+  }, [request, status, user?.is_verified_artist]);
 
   useFocusEffect(useCallback(() => {
     void load();
@@ -268,6 +284,27 @@ export default function CalendarScreen() {
     return grouped;
   }, [appointments]);
 
+  const extraMarkersByDate = useMemo(() => {
+    const grouped = new Map<string, CalendarMarker[]>();
+    if (!artistDashboard) return grouped;
+
+    for (const timeOff of artistDashboard.time_off) {
+      grouped.set(timeOff.date, [
+        ...(grouped.get(timeOff.date) ?? []),
+        { key: `vacation-${timeOff.id}`, color: VACATION_COLOR },
+      ]);
+    }
+    for (const blocked of artistDashboard.blocked_periods) {
+      for (const iso of datesBetween(blocked.date, blocked.end_date)) {
+        grouped.set(iso, [
+          ...(grouped.get(iso) ?? []),
+          { key: `blocked-${blocked.id}-${iso}`, color: blocked.event_type === 'vacation' ? VACATION_COLOR : BLOCKED_COLOR },
+        ]);
+      }
+    }
+    return grouped;
+  }, [artistDashboard]);
+
   const visibleDays = useMemo(() => {
     if (viewMode === 'day') {
       const date = dateFromIso(selectedDate);
@@ -278,11 +315,6 @@ export default function CalendarScreen() {
   }, [anchor, selectedDate, viewMode]);
 
   const selectedAppointments = appointmentsByDate.get(selectedDate) ?? [];
-  const currentMonthAppointments = useMemo(() => appointments.filter((appointment) => {
-    const date = dateFromIso(appointment.date);
-    return date.getUTCFullYear() === anchor.getUTCFullYear()
-      && date.getUTCMonth() === anchor.getUTCMonth();
-  }), [anchor, appointments]);
 
   const goMonth = (amount: number) => {
     const next = addMonths(anchor, amount);
@@ -321,66 +353,54 @@ export default function CalendarScreen() {
       >
         <BrandHeader title={ui.calendar} showQuickMatch />
 
-        <View style={styles.hero}>
-          <View style={styles.heroCopy}>
-            <Text style={styles.eyebrow}>{ui.eyebrow}</Text>
-            <Text style={styles.title}>{ui.calendar}</Text>
-            <Text style={styles.subtitle}>{ui.subtitle}</Text>
-          </View>
+        <View style={styles.titleBlock}>
+          <Text style={styles.eyebrow}>{ui.eyebrow}</Text>
+          <Text style={styles.title}>{ui.calendar}</Text>
+        </View>
+
+        <View style={styles.navigationControls}>
           <Pressable
+            accessibilityLabel="Previous month"
             accessibilityRole="button"
-            onPress={() => router.push('/(tabs)/bookings')}
-            style={({ pressed }) => [styles.appointmentsLink, pressed && styles.pressed]}
+            onPress={() => goMonth(-1)}
+            style={({ pressed }) => [styles.navButton, pressed && styles.pressed]}
           >
-            <Text style={styles.appointmentsLinkText}>{ui.appointments}</Text>
-            {attentionCount ? <View style={styles.attentionBadge}><Text style={styles.attentionBadgeText}>{attentionCount}</Text></View> : null}
+            <Text style={styles.navButtonText}>‹</Text>
+          </Pressable>
+          <Pressable accessibilityRole="button" onPress={goToday} style={({ pressed }) => [styles.todayButton, pressed && styles.pressed]}>
+            <Text style={styles.todayButtonText}>{ui.today}</Text>
+          </Pressable>
+          <Pressable
+            accessibilityLabel="Next month"
+            accessibilityRole="button"
+            onPress={() => goMonth(1)}
+            style={({ pressed }) => [styles.navButton, pressed && styles.pressed]}
+          >
+            <Text style={styles.navButtonText}>›</Text>
           </Pressable>
         </View>
 
-        <View style={styles.calendarCard}>
-          <View style={styles.monthControls}>
-            <Pressable
-              accessibilityLabel="Previous month"
-              accessibilityRole="button"
-              onPress={() => goMonth(-1)}
-              style={({ pressed }) => [styles.circleButton, pressed && styles.pressed]}
-            >
-              <Text style={styles.circleButtonText}>‹</Text>
-            </Pressable>
-            <View style={styles.monthTitleWrap}>
-              <Text numberOfLines={1} style={styles.monthTitle}>{formatMonth(anchor)}</Text>
-              <Pressable accessibilityRole="button" onPress={goToday}>
-                <Text style={styles.todayLink}>{ui.today}</Text>
+        <Text numberOfLines={1} style={styles.monthTitle}>{formatMonth(anchor)}</Text>
+
+        <View style={styles.viewToggle} accessibilityRole="tablist">
+          {(['month', 'week', 'day'] as CalendarViewMode[]).map((mode) => {
+            const active = viewMode === mode;
+            const label = mode === 'month' ? ui.month : mode === 'week' ? ui.week : ui.day;
+            return (
+              <Pressable
+                accessibilityRole="tab"
+                accessibilityState={{ selected: active }}
+                key={mode}
+                onPress={() => setViewMode(mode)}
+                style={({ pressed }) => [styles.viewToggleItem, active && styles.viewToggleActive, pressed && styles.pressed]}
+              >
+                <Text style={[styles.viewToggleText, active && styles.viewToggleTextActive]}>{label}</Text>
               </Pressable>
-            </View>
-            <Pressable
-              accessibilityLabel="Next month"
-              accessibilityRole="button"
-              onPress={() => goMonth(1)}
-              style={({ pressed }) => [styles.circleButton, pressed && styles.pressed]}
-            >
-              <Text style={styles.circleButtonText}>›</Text>
-            </Pressable>
-          </View>
+            );
+          })}
+        </View>
 
-          <View style={styles.viewToggle} accessibilityRole="tablist">
-            {(['month', 'week', 'day'] as CalendarViewMode[]).map((mode) => {
-              const active = viewMode === mode;
-              const label = mode === 'month' ? ui.month : mode === 'week' ? ui.week : ui.day;
-              return (
-                <Pressable
-                  accessibilityRole="tab"
-                  accessibilityState={{ selected: active }}
-                  key={mode}
-                  onPress={() => setViewMode(mode)}
-                  style={({ pressed }) => [styles.viewToggleItem, active && styles.viewToggleActive, pressed && styles.pressed]}
-                >
-                  <Text style={[styles.viewToggleText, active && styles.viewToggleTextActive]}>{label}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-
+        <View style={styles.calendarFrame}>
           {viewMode !== 'day' ? (
             <View style={styles.weekdays}>
               {weekdayLabels().map((weekday) => <Text key={weekday} style={styles.weekday}>{weekday}</Text>)}
@@ -404,6 +424,7 @@ export default function CalendarScreen() {
                 <CalendarDayCell
                   appointments={appointmentsByDate.get(day.iso) ?? []}
                   day={day}
+                  extraMarkers={extraMarkersByDate.get(day.iso) ?? []}
                   isSelected={day.iso === selectedDate}
                   isToday={day.iso === today}
                   key={day.iso}
@@ -415,47 +436,44 @@ export default function CalendarScreen() {
           )}
         </View>
 
-        <View style={styles.selectedCard}>
-          <View style={styles.sectionHeading}>
-            <View style={styles.sectionHeadingCopy}>
-              <Text style={styles.sectionEyebrow}>{ui.selectedDay}</Text>
-              <Text style={styles.sectionTitle}>{formatLongDate(selectedDate)}</Text>
-            </View>
-            <View style={styles.dayCountBadge}>
-              <Text style={styles.dayCountText}>{selectedAppointments.length}</Text>
-            </View>
+        {viewMode !== 'month' ? (
+          <View style={styles.eventsCard}>
+            <Text style={styles.cardTitle}>{ui.events} · {formatLongDate(selectedDate)}</Text>
+            {selectedAppointments.length ? selectedAppointments.map((appointment) => (
+              <AppointmentRow appointment={appointment} key={appointment.id} />
+            )) : <Text style={styles.cardMuted}>{ui.noEvents}</Text>}
           </View>
+        ) : null}
 
-          {selectedAppointments.length ? (
-            <View style={styles.eventList}>
-              {selectedAppointments.map((appointment) => (
-                <AppointmentPill appointment={appointment} key={appointment.id} />
-              ))}
-            </View>
-          ) : (
-            <View style={styles.emptyDay}>
-              <Text style={styles.emptyDayTitle}>{ui.noEvents}</Text>
-              <Text style={styles.emptyDayHint}>{ui.noEventsHint}</Text>
-            </View>
-          )}
+        <View style={styles.infoCard}>
+          <Text style={styles.cardTitle}>{ui.insights}</Text>
+          <Text style={styles.cardMuted}>
+            {attentionCount ? `${attentionCount} ${ui.attention}` : ui.noAlerts}
+          </Text>
         </View>
 
-        <View style={styles.insightsCard}>
-          <Text style={styles.sectionEyebrow}>{ui.insights}</Text>
-          <Text style={styles.sectionTitle}>{ui.thisMonth}</Text>
-          <View style={styles.insightGrid}>
-            <Insight value={currentMonthAppointments.length} label={ui.total} />
-            <Insight value={currentMonthAppointments.filter(appointmentConfirmed).length} label={ui.confirmed} />
-            <Insight value={currentMonthAppointments.filter(appointmentNeedsAttention).length} label={ui.attention} />
+        <View style={styles.infoCard}>
+          <Text style={styles.cardTitle}>{ui.quickActions}</Text>
+          <View style={styles.quickActions}>
+            {user?.is_verified_artist ? (
+              <>
+                <QuickAction label={ui.addSession} onPress={() => router.push('/artist-dashboard/create-appointment')} />
+                <QuickAction label={ui.blockTime} onPress={() => router.push('/artist-dashboard/calendar')} />
+                <QuickAction label={ui.setVacation} onPress={() => router.push('/artist-dashboard/calendar')} />
+                <QuickAction label={ui.createConsultation} onPress={() => router.push('/artist-dashboard/create-appointment')} />
+              </>
+            ) : (
+              <QuickAction label={ui.appointments} onPress={() => router.push('/(tabs)/bookings')} />
+            )}
           </View>
         </View>
 
-        <View style={styles.legendCard}>
-          <Text style={styles.sectionEyebrow}>{ui.legend}</Text>
-          <LegendRow color={colors.primary} label={ui.pending} />
-          <LegendRow color={colors.success} label={ui.accepted} />
-          <LegendRow color={colors.accent} label={ui.needsAttention} />
-          <LegendRow color={colors.textSubtle} label={ui.closed} />
+        <View style={styles.infoCard}>
+          <Text style={styles.cardTitle}>{ui.legend}</Text>
+          <LegendRow color={colors.primary} label={ui.tattooSession} />
+          <LegendRow color={colors.accent} label={ui.consultation} />
+          <LegendRow color={BLOCKED_COLOR} label={ui.blocked} />
+          <LegendRow color={VACATION_COLOR} label={ui.vacation} />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -465,6 +483,7 @@ export default function CalendarScreen() {
 function CalendarDayCell({
   day,
   appointments,
+  extraMarkers,
   isSelected,
   isToday,
   mode,
@@ -472,14 +491,20 @@ function CalendarDayCell({
 }: {
   day: CalendarDay;
   appointments: Appointment[];
+  extraMarkers: CalendarMarker[];
   isSelected: boolean;
   isToday: boolean;
   mode: CalendarViewMode;
   onPress: () => void;
 }) {
+  const markers = [
+    ...appointments.map((appointment) => ({ key: `appointment-${appointment.id}`, color: appointmentColor(appointment) })),
+    ...extraMarkers,
+  ];
+
   return (
     <Pressable
-      accessibilityLabel={`${day.iso}, ${appointments.length} events`}
+      accessibilityLabel={`${day.iso}, ${markers.length} events`}
       accessibilityRole="button"
       accessibilityState={{ selected: isSelected }}
       onPress={onPress}
@@ -501,49 +526,37 @@ function CalendarDayCell({
       ]}>
         {day.date.getUTCDate()}
       </Text>
-      {mode === 'day' ? (
-        <Text style={styles.dayModeLong}>{formatLongDate(day.iso)}</Text>
-      ) : null}
+      {mode === 'day' ? <Text style={styles.dayModeLong}>{formatLongDate(day.iso)}</Text> : null}
       <View style={styles.dayDots}>
-        {appointments.slice(0, 3).map((appointment) => (
-          <View key={appointment.id} style={[styles.dayDot, { backgroundColor: appointmentColor(appointment.status) }]} />
-        ))}
-        {appointments.length > 3 ? <Text style={styles.moreCount}>+{appointments.length - 3}</Text> : null}
+        {markers.slice(0, 3).map((marker) => <View key={marker.key} style={[styles.dayDot, { backgroundColor: marker.color }]} />)}
+        {markers.length > 3 ? <Text style={styles.moreCount}>+{markers.length - 3}</Text> : null}
       </View>
     </Pressable>
   );
 }
 
-function AppointmentPill({ appointment }: { appointment: Appointment }) {
-  const color = appointmentColor(appointment.status);
+function AppointmentRow({ appointment }: { appointment: Appointment }) {
+  const color = appointmentColor(appointment);
   return (
     <Pressable
       accessibilityRole="button"
-      onPress={() => router.push({
-        pathname: '/appointment/[appointmentId]',
-        params: { appointmentId: String(appointment.id) },
-      })}
-      style={({ pressed }) => [styles.eventPill, { borderLeftColor: color }, pressed && styles.pressed]}
+      onPress={() => router.push({ pathname: '/appointment/[appointmentId]', params: { appointmentId: String(appointment.id) } })}
+      style={({ pressed }) => [styles.appointmentRow, pressed && styles.pressed]}
     >
-      <View style={styles.eventTimeWrap}>
-        <Text style={[styles.eventTime, { color }]}>{timeRange(appointment)}</Text>
-        <View style={[styles.eventStatusDot, { backgroundColor: color }]} />
-      </View>
-      <Text numberOfLines={1} style={styles.eventType}>{appointment.booking_type_label}</Text>
-      <Text numberOfLines={1} style={styles.eventPerson}>{appointment.other_user.username}</Text>
-      <View style={[styles.eventStatusBadge, { borderColor: color }]}>
-        <Text numberOfLines={1} style={[styles.eventStatusText, { color }]}>{appointment.status_label}</Text>
+      <View style={[styles.appointmentMark, { backgroundColor: color }]} />
+      <View style={styles.appointmentCopy}>
+        <Text style={styles.appointmentTitle}>{appointment.booking_type_label}</Text>
+        <Text style={styles.appointmentMeta}>{timeRange(appointment)} · {appointment.other_user.username}</Text>
       </View>
     </Pressable>
   );
 }
 
-function Insight({ value, label }: { value: number; label: string }) {
+function QuickAction({ label, onPress }: { label: string; onPress: () => void }) {
   return (
-    <View style={styles.insight}>
-      <Text style={styles.insightValue}>{value}</Text>
-      <Text numberOfLines={2} style={styles.insightLabel}>{label}</Text>
-    </View>
+    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.quickAction, pressed && styles.pressed]}>
+      <Text style={styles.quickActionText}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -565,119 +578,60 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingTop: spacing.xs,
     paddingBottom: spacing.xxl,
-    gap: spacing.md,
+    gap: 14,
   },
-  hero: {
-    padding: spacing.lg,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(4,197,191,.18)',
-    backgroundColor: '#00131d',
-    gap: spacing.md,
-  },
-  heroCopy: { gap: 5 },
-  eyebrow: { color: colors.primary, fontSize: 11, fontWeight: '900', letterSpacing: 2.2, textTransform: 'uppercase' },
-  title: { color: colors.text, fontSize: 34, lineHeight: 38, fontWeight: '900', letterSpacing: -0.8 },
-  subtitle: { color: colors.textMuted, fontSize: 14, lineHeight: 21, maxWidth: 480 },
-  appointmentsLink: {
-    alignSelf: 'flex-start', minHeight: 42, flexDirection: 'row', alignItems: 'center', gap: 8,
-    paddingHorizontal: 15, borderRadius: 999, borderWidth: 1,
-    borderColor: 'rgba(4,197,191,.24)', backgroundColor: 'rgba(4,197,191,.07)',
-  },
-  appointmentsLinkText: { color: colors.primary, fontSize: 12, fontWeight: '900' },
-  attentionBadge: { minWidth: 20, height: 20, paddingHorizontal: 5, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.accent },
-  attentionBadgeText: { color: colors.white, fontSize: 9, fontWeight: '900' },
-  calendarCard: {
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(4,197,191,.18)',
-    backgroundColor: '#00131d',
-    padding: 12,
-    gap: 12,
-  },
-  monthControls: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
-  circleButton: {
-    width: 42, height: 42, alignItems: 'center', justifyContent: 'center', borderRadius: 21,
-    borderWidth: 1, borderColor: 'rgba(4,197,191,.22)', backgroundColor: '#031b27',
-  },
-  circleButtonText: { color: colors.primary, fontSize: 29, lineHeight: 31, fontWeight: '500' },
-  monthTitleWrap: { flex: 1, alignItems: 'center', gap: 2 },
-  monthTitle: { color: colors.text, fontSize: 18, fontWeight: '900', textTransform: 'capitalize' },
-  todayLink: { color: colors.primary, fontSize: 11, fontWeight: '900' },
-  viewToggle: {
-    minHeight: 42, flexDirection: 'row', padding: 4, borderRadius: 14,
-    borderWidth: 1, borderColor: 'rgba(4,197,191,.13)', backgroundColor: '#000d18',
-  },
-  viewToggleItem: { flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 10, paddingHorizontal: 6 },
-  viewToggleActive: { backgroundColor: 'rgba(4,197,191,.12)', borderWidth: 1, borderColor: 'rgba(4,197,191,.30)' },
-  viewToggleText: { color: colors.textMuted, fontSize: 11, fontWeight: '800' },
-  viewToggleTextActive: { color: colors.primary },
-  weekdays: { flexDirection: 'row', paddingHorizontal: 2 },
-  weekday: { width: '14.2857%', textAlign: 'center', color: colors.textSubtle, fontSize: 9, fontWeight: '900', textTransform: 'uppercase' },
+  titleBlock: { gap: 4, paddingTop: 2 },
+  eyebrow: { color: colors.primary, fontSize: 10, fontWeight: '900', letterSpacing: 2.2, textTransform: 'uppercase' },
+  title: { color: colors.text, fontSize: 31, lineHeight: 36, fontWeight: '900', letterSpacing: -.8 },
+  navigationControls: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  navButton: { width: 44, height: 44, borderRadius: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(4,197,191,.13)', backgroundColor: '#071820' },
+  navButtonText: { color: colors.text, fontSize: 24, lineHeight: 27 },
+  todayButton: { flex: 1, height: 44, borderRadius: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(4,197,191,.13)', backgroundColor: '#071820' },
+  todayButtonText: { color: colors.text, fontSize: 13, fontWeight: '700' },
+  monthTitle: { color: colors.text, fontSize: 21, fontWeight: '900', textAlign: 'center', textTransform: 'capitalize', marginTop: 2 },
+  viewToggle: { minHeight: 48, flexDirection: 'row', gap: 7 },
+  viewToggleItem: { flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 10, borderWidth: 1, borderColor: 'rgba(4,197,191,.12)', backgroundColor: '#071820' },
+  viewToggleActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  viewToggleText: { color: colors.text, fontSize: 12, fontWeight: '800' },
+  viewToggleTextActive: { color: '#001014' },
+  calendarFrame: { borderRadius: 18, borderWidth: 1, borderColor: 'rgba(4,197,191,.12)', padding: 8, backgroundColor: '#000d16', gap: 7 },
+  weekdays: { flexDirection: 'row', paddingHorizontal: 1 },
+  weekday: { width: '14.2857%', textAlign: 'center', color: colors.textMuted, fontSize: 9, fontWeight: '900', textTransform: 'uppercase' },
   loadingState: { minHeight: 300, alignItems: 'center', justifyContent: 'center' },
   errorState: { minHeight: 240, alignItems: 'center', justifyContent: 'center', gap: 14, padding: 20 },
   errorText: { color: colors.textMuted, textAlign: 'center', lineHeight: 20 },
-  retryButton: { minHeight: 42, justifyContent: 'center', paddingHorizontal: 18, borderRadius: 14, backgroundColor: colors.primary },
+  retryButton: { minHeight: 42, justifyContent: 'center', paddingHorizontal: 18, borderRadius: 12, backgroundColor: colors.primary },
   retryText: { color: colors.black, fontWeight: '900' },
-  dayGrid: { flexDirection: 'row', flexWrap: 'wrap', overflow: 'hidden', borderRadius: 17, borderWidth: 1, borderColor: 'rgba(4,197,191,.10)' },
+  dayGrid: { flexDirection: 'row', flexWrap: 'wrap', overflow: 'hidden', borderRadius: 14 },
   dayGridSingle: { borderWidth: 0 },
-  dayCell: {
-    width: '14.2857%', minHeight: 61, paddingVertical: 7, paddingHorizontal: 4,
-    alignItems: 'center', gap: 7, borderRightWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(4,197,191,.10)', backgroundColor: '#001822',
-  },
-  dayCellWeek: { minHeight: 82 },
-  dayCellDay: { width: '100%', minHeight: 122, justifyContent: 'center', borderWidth: 1, borderRadius: 18, borderColor: 'rgba(4,197,191,.12)' },
-  dayCellMuted: { opacity: 0.42, backgroundColor: '#000f18' },
-  dayCellToday: { backgroundColor: 'rgba(238,12,111,.08)' },
-  dayCellSelected: { backgroundColor: 'rgba(4,197,191,.13)', borderColor: colors.primary, borderWidth: 1 },
+  dayCell: { width: '14.2857%', minHeight: 62, paddingVertical: 7, paddingHorizontal: 3, alignItems: 'center', gap: 8, borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(4,197,191,.08)', backgroundColor: '#00121c' },
+  dayCellWeek: { minHeight: 84 },
+  dayCellDay: { width: '100%', minHeight: 128, justifyContent: 'center', borderWidth: 1, borderRadius: 15 },
+  dayCellMuted: { opacity: .38 },
+  dayCellToday: { backgroundColor: 'rgba(4,197,191,.05)' },
+  dayCellSelected: { borderColor: colors.primary, borderWidth: 1.2, backgroundColor: 'rgba(4,197,191,.08)' },
   dayNumber: { color: colors.text, fontSize: 12, fontWeight: '800' },
   dayNumberMuted: { color: colors.textSubtle },
-  dayNumberToday: { color: colors.accent },
-  dayNumberSelected: { color: colors.primary, fontWeight: '900' },
+  dayNumberToday: { color: colors.primary },
+  dayNumberSelected: { color: colors.text, fontWeight: '900' },
   dayModeLong: { color: colors.textMuted, fontSize: 13, textAlign: 'center', textTransform: 'capitalize' },
-  dayDots: { minHeight: 11, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 3, flexWrap: 'wrap' },
+  dayDots: { minHeight: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 3 },
   dayDot: { width: 5, height: 5, borderRadius: 3 },
   moreCount: { color: colors.textSubtle, fontSize: 7, fontWeight: '900' },
-  selectedCard: {
-    borderRadius: 22, borderWidth: 1, borderColor: 'rgba(4,197,191,.16)',
-    backgroundColor: '#00131d', padding: spacing.lg, gap: spacing.md,
-  },
-  sectionHeading: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  sectionHeadingCopy: { flex: 1, minWidth: 0, gap: 4 },
-  sectionEyebrow: { color: colors.primary, fontSize: 10, fontWeight: '900', letterSpacing: 1.4, textTransform: 'uppercase' },
-  sectionTitle: { color: colors.text, fontSize: 18, lineHeight: 23, fontWeight: '900', textTransform: 'capitalize' },
-  dayCountBadge: { minWidth: 34, height: 34, paddingHorizontal: 8, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(4,197,191,.11)', borderWidth: 1, borderColor: 'rgba(4,197,191,.22)' },
-  dayCountText: { color: colors.primary, fontWeight: '900' },
-  eventList: { gap: 9 },
-  eventPill: {
-    minHeight: 90, padding: 12, paddingLeft: 14, borderRadius: 15, borderWidth: 1,
-    borderColor: 'rgba(4,197,191,.10)', borderLeftWidth: 3, backgroundColor: '#031b27', gap: 4,
-  },
-  eventTimeWrap: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  eventTime: { fontSize: 11, fontWeight: '900' },
-  eventStatusDot: { width: 6, height: 6, borderRadius: 3 },
-  eventType: { color: colors.text, fontSize: 14, fontWeight: '900' },
-  eventPerson: { color: colors.textMuted, fontSize: 12 },
-  eventStatusBadge: { alignSelf: 'flex-start', marginTop: 3, borderWidth: 1, borderRadius: 999, paddingHorizontal: 7, paddingVertical: 3 },
-  eventStatusText: { fontSize: 8, fontWeight: '900', textTransform: 'uppercase' },
-  emptyDay: { minHeight: 110, justifyContent: 'center', alignItems: 'center', gap: 5, borderRadius: 16, backgroundColor: '#031b27', padding: spacing.md },
-  emptyDayTitle: { color: colors.text, fontSize: 15, fontWeight: '900' },
-  emptyDayHint: { color: colors.textMuted, textAlign: 'center', fontSize: 12, lineHeight: 18 },
-  insightsCard: {
-    borderRadius: 22, borderWidth: 1, borderColor: 'rgba(4,197,191,.16)',
-    backgroundColor: '#00131d', padding: spacing.lg, gap: 9,
-  },
-  insightGrid: { flexDirection: 'row', gap: 8, marginTop: 3 },
-  insight: { flex: 1, minWidth: 0, minHeight: 80, justifyContent: 'center', padding: 10, borderRadius: 15, backgroundColor: '#031b27', borderWidth: 1, borderColor: 'rgba(4,197,191,.08)' },
-  insightValue: { color: colors.text, fontSize: 23, fontWeight: '900' },
-  insightLabel: { color: colors.textMuted, fontSize: 9, lineHeight: 13, marginTop: 3 },
-  legendCard: {
-    borderRadius: 22, borderWidth: 1, borderColor: 'rgba(4,197,191,.16)',
-    backgroundColor: '#00131d', padding: spacing.lg, gap: 10,
-  },
-  legendRow: { minHeight: 31, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  legendDot: { width: 9, height: 9, borderRadius: 5 },
-  legendText: { color: colors.textMuted, fontSize: 12, fontWeight: '700' },
-  pressed: { opacity: 0.68, transform: [{ scale: 0.985 }] },
+  eventsCard: { borderRadius: 16, borderWidth: 1, borderColor: 'rgba(4,197,191,.11)', backgroundColor: '#00121c', padding: 14, gap: 8 },
+  infoCard: { borderRadius: 16, borderWidth: 1, borderColor: 'rgba(4,197,191,.11)', backgroundColor: '#00121c', padding: 14, gap: 12 },
+  cardTitle: { color: colors.text, fontSize: 15, fontWeight: '900' },
+  cardMuted: { color: colors.textMuted, fontSize: 12, lineHeight: 18 },
+  appointmentRow: { minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(255,255,255,.07)', paddingVertical: 8 },
+  appointmentMark: { width: 6, height: 34, borderRadius: 3 },
+  appointmentCopy: { flex: 1, gap: 2 },
+  appointmentTitle: { color: colors.text, fontSize: 13, fontWeight: '900' },
+  appointmentMeta: { color: colors.textMuted, fontSize: 11 },
+  quickActions: { gap: 8 },
+  quickAction: { minHeight: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 9, borderWidth: 1, borderColor: 'rgba(255,255,255,.08)', backgroundColor: '#091820' },
+  quickActionText: { color: colors.text, fontSize: 12, fontWeight: '700' },
+  legendRow: { minHeight: 30, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  legendDot: { width: 7, height: 7, borderRadius: 4 },
+  legendText: { color: colors.textMuted, fontSize: 12 },
+  pressed: { opacity: .68, transform: [{ scale: .985 }] },
 });
