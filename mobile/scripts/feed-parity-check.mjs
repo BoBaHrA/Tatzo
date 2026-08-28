@@ -60,6 +60,8 @@ check(media.includes("layout === 'carousel'"), 'Saved post layout switches betwe
 check(media.includes('total === 3') && media.includes('total === 5') && media.includes('total === 8') && media.includes('total === 9'), 'Grid renderer preserves the special 3/5/8/9-media web compositions');
 check(media.includes('total === 7 || total >= 10') && media.includes('stripRow'), 'Grid renderer preserves the 7 and 10+ two-up plus strip composition');
 check(media.includes('pagingEnabled') && media.includes('thumbsRow'), 'Carousel keeps swipe paging plus the web thumbnail rail');
+check(media.includes('VideoThumbnail') && media.includes('<FeedVideo controls={false} fit="cover" url={url} />'), 'Carousel video thumbnails render the actual video frame instead of an empty play tile');
+check(!media.includes('<View style={styles.videoThumb}>\n                        <Text style={styles.videoThumbText}>▶</Text>'), 'Carousel no longer falls back to a blank text-only video thumbnail');
 check(media.includes('blurRadius={26}') && media.includes('contain'), 'Single and carousel media keep the web-style contained image over a blurred frame');
 check(detail.includes('CommentsSectionV2'), 'Post detail uses the compact comments parity surface');
 check(comments.includes('replyList'), 'Comments preserve nested replies');
