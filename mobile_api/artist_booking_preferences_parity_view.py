@@ -128,7 +128,23 @@ class ArtistBookingPreferencesView(PrivateArtistResponseMixin, APIView):
         forbidden = _artist_forbidden(request)
         if forbidden:
             return forbidden
-        serializer = ArtistBookingPreferencesParitySerializer(data=request.data)
+
+        # Preserve the pre-parity contract for older mobile clients. New web-parity
+        # fields default to the artist's current persisted values when omitted, so
+        # an older full PUT cannot accidentally reset them.
+        current = _get_artist_settings(request.user)
+        payload = request.data.copy()
+        current_values = {
+            "bookings_enabled": current.bookings_enabled,
+            "phone_consultation_enabled": current.phone_consultation_enabled,
+            "deposit_required": current.deposit_required,
+            "deposit_amount": _decimal_string(current.deposit_amount),
+        }
+        for field, value in current_values.items():
+            if field not in payload:
+                payload[field] = value
+
+        serializer = ArtistBookingPreferencesParitySerializer(data=payload)
         if not serializer.is_valid():
             return Response(
                 {
