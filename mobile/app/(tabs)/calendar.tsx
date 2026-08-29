@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
 import {
   ActivityIndicator,
@@ -245,6 +245,9 @@ export default function CalendarScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
+  const eventsY = useRef(0);
+  const calendarTouchX = useRef<number | null>(null);
 
   const load = useCallback(async (quiet = false) => {
     if (status !== 'authenticated') return;
@@ -330,6 +333,9 @@ export default function CalendarScreen() {
   const selectDay = (day: CalendarDay) => {
     setSelectedDate(day.iso);
     if (!day.inCurrentMonth) setAnchor(monthAnchor(day.iso));
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ y: Math.max(0, eventsY.current - 110), animated: true });
+    });
   };
 
   const refresh = () => {
@@ -340,6 +346,7 @@ export default function CalendarScreen() {
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={styles.safe}>
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={styles.content}
         refreshControl={(
           <RefreshControl
@@ -400,7 +407,18 @@ export default function CalendarScreen() {
           })}
         </View>
 
-        <View style={styles.calendarFrame}>
+        <View
+          onTouchStart={(event) => { calendarTouchX.current = event.nativeEvent.pageX; }}
+          onTouchEnd={(event) => {
+            const start = calendarTouchX.current;
+            calendarTouchX.current = null;
+            if (start === null) return;
+            const delta = event.nativeEvent.pageX - start;
+            if (Math.abs(delta) < 55) return;
+            goMonth(delta > 0 ? -1 : 1);
+          }}
+          style={styles.calendarFrame}
+        >
           {viewMode !== 'day' ? (
             <View style={styles.weekdays}>
               {weekdayLabels().map((weekday) => <Text key={weekday} style={styles.weekday}>{weekday}</Text>)}
@@ -436,14 +454,15 @@ export default function CalendarScreen() {
           )}
         </View>
 
-        {viewMode !== 'month' ? (
-          <View style={styles.eventsCard}>
-            <Text style={styles.cardTitle}>{ui.events} · {formatLongDate(selectedDate)}</Text>
-            {selectedAppointments.length ? selectedAppointments.map((appointment) => (
-              <AppointmentRow appointment={appointment} key={appointment.id} />
-            )) : <Text style={styles.cardMuted}>{ui.noEvents}</Text>}
-          </View>
-        ) : null}
+        <View
+          onLayout={(event) => { eventsY.current = event.nativeEvent.layout.y; }}
+          style={styles.eventsCard}
+        >
+          <Text style={styles.cardTitle}>{ui.events} · {formatLongDate(selectedDate)}</Text>
+          {selectedAppointments.length ? selectedAppointments.map((appointment) => (
+            <AppointmentRow appointment={appointment} key={appointment.id} />
+          )) : <Text style={styles.cardMuted}>{ui.noEvents}</Text>}
+        </View>
 
         <View style={styles.infoCard}>
           <Text style={styles.cardTitle}>{ui.insights}</Text>

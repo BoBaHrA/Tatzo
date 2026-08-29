@@ -458,7 +458,16 @@ function Wordmark() {
 }
 
 function Ambient() {
-  return <View pointerEvents="none" style={StyleSheet.absoluteFill}><View style={styles.ambientTeal} /><View style={styles.ambientPink} /></View>;
+  return (
+    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      <View style={[styles.ambientGlow, styles.ambientTealOuter]} />
+      <View style={[styles.ambientGlow, styles.ambientTealMid]} />
+      <View style={[styles.ambientGlow, styles.ambientTealCore]} />
+      <View style={[styles.ambientGlow, styles.ambientPinkOuter]} />
+      <View style={[styles.ambientGlow, styles.ambientPinkMid]} />
+      <View style={[styles.ambientGlow, styles.ambientPinkCore]} />
+    </View>
+  );
 }
 
 function DeckBackCard({ card, depth }: { card: StyleMatchCard; depth: 1 | 2 }) {
@@ -501,13 +510,18 @@ function ActionButton({ label, icon, variant, disabled, loading, onPress }: {
 const styles = StyleSheet.create({
   centerScreen: { justifyContent: 'center', alignItems: 'center', gap: spacing.lg, paddingBottom: spacing.xxl },
   resultScreen: { paddingTop: spacing.sm, paddingBottom: spacing.xxl },
-  discoveryScreen: { paddingTop: spacing.sm, paddingBottom: spacing.xxl, gap: 14, overflow: 'hidden' },
+  discoveryScreen: { paddingTop: spacing.sm, paddingBottom: 8, gap: 10, overflow: 'hidden' },
   onboardingScreen: { paddingTop: 18, paddingBottom: spacing.xxl, overflow: 'hidden' },
   wordmark: { width: 92, height: 34 },
   loadingOrb: { width: 92, height: 92, borderRadius: 46, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(4,197,191,.08)', borderWidth: 1, borderColor: 'rgba(4,197,191,.25)' },
   muted: { color: colors.textMuted, lineHeight: 20, textAlign: 'center' },
-  ambientTeal: { position: 'absolute', width: 350, height: 350, borderRadius: 175, backgroundColor: 'rgba(9,200,194,.12)', top: -190, left: -190 },
-  ambientPink: { position: 'absolute', width: 350, height: 350, borderRadius: 175, backgroundColor: 'rgba(237,11,112,.10)', bottom: -150, right: -200 },
+  ambientGlow: { position: 'absolute' },
+  ambientTealOuter: { width: 540, height: 430, borderRadius: 270, backgroundColor: 'rgba(4,197,191,.025)', top: -235, left: -245 },
+  ambientTealMid: { width: 410, height: 335, borderRadius: 205, backgroundColor: 'rgba(4,197,191,.045)', top: -185, left: -190 },
+  ambientTealCore: { width: 275, height: 235, borderRadius: 138, backgroundColor: 'rgba(4,197,191,.075)', top: -135, left: -130 },
+  ambientPinkOuter: { width: 560, height: 450, borderRadius: 280, backgroundColor: 'rgba(238,12,111,.022)', bottom: -235, right: -260 },
+  ambientPinkMid: { width: 420, height: 345, borderRadius: 210, backgroundColor: 'rgba(238,12,111,.040)', bottom: -180, right: -195 },
+  ambientPinkCore: { width: 285, height: 235, borderRadius: 143, backgroundColor: 'rgba(238,12,111,.070)', bottom: -125, right: -130 },
   onboardingCard: { backgroundColor: 'rgba(0,15,24,.92)', borderWidth: 1, borderColor: 'rgba(150,230,232,.20)', borderRadius: 28, padding: 22, gap: 18 },
   brandRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
   kicker: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, borderWidth: 1, borderColor: 'rgba(141,243,236,.20)', backgroundColor: 'rgba(7,28,38,.74)' },
@@ -540,12 +554,12 @@ const styles = StyleSheet.create({
   progressFill: { height: '100%', backgroundColor: colors.primary, borderRadius: 999 },
   toast: { alignSelf: 'center', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: '#08202a', borderWidth: 1, borderColor: 'rgba(150,230,232,.20)' },
   toastText: { color: colors.white, fontSize: 11, fontWeight: '700' },
-  deck: { minHeight: 492, width: '100%', alignItems: 'center', justifyContent: 'center', position: 'relative' },
-  deckBack: { position: 'absolute', width: '88%', height: 440, borderRadius: 30, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(210,255,255,.14)', backgroundColor: '#10242b' },
+  deck: { minHeight: 438, width: '100%', alignItems: 'center', justifyContent: 'center', position: 'relative' },
+  deckBack: { position: 'absolute', width: '88%', height: 390, borderRadius: 30, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(210,255,255,.14)', backgroundColor: '#10242b' },
   deckBackTwo: { transform: [{ translateY: 20 }, { scale: .91 }], opacity: .46 },
   deckBackOne: { transform: [{ translateY: 10 }, { scale: .96 }], opacity: .78 },
   backTint: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: 'rgba(0,11,19,.18)' },
-  card: { zIndex: 5, width: '88%', height: 440, borderRadius: 30, overflow: 'hidden', backgroundColor: '#10242b', borderWidth: 1, borderColor: 'rgba(210,255,255,.22)' },
+  card: { zIndex: 5, width: '88%', height: 390, borderRadius: 30, overflow: 'hidden', backgroundColor: '#10242b', borderWidth: 1, borderColor: 'rgba(210,255,255,.22)' },
   cardImage: { width: '100%', height: '100%' },
   cardShade: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '30%', backgroundColor: 'rgba(0,6,10,.18)' },
   imageLoader: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: '#10242b' },
@@ -556,7 +570,7 @@ const styles = StyleSheet.create({
   nopeStampText: { color: '#ff6294', fontSize: 19, fontWeight: '900', letterSpacing: 2.2 },
   savedBadge: { position: 'absolute', right: 18, bottom: 18, width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary },
   savedBadgeText: { color: '#001317', fontSize: 20, fontWeight: '900' },
-  actions: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 14, marginTop: 28 },
+  actions: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 14, marginTop: 10 },
   actionButton: { width: 54, height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(150,230,232,.20)', backgroundColor: 'rgba(14,34,42,.92)' },
   actionButtonLike: { width: 64, height: 64, borderRadius: 32, borderColor: '#ee0c6f', backgroundColor: '#ee0c6f' },
   actionButtonSaveActive: { borderColor: colors.primary },
@@ -564,7 +578,7 @@ const styles = StyleSheet.create({
   actionIconLike: { width: 29, height: 29 },
   disabled: { opacity: .5 },
   actionPressed: { transform: [{ translateY: -3 }] },
-  hint: { color: '#77959d', fontSize: 12, textAlign: 'center', lineHeight: 17, marginTop: 17 },
+  hint: { color: '#77959d', fontSize: 12, textAlign: 'center', lineHeight: 17, marginTop: 4, paddingHorizontal: 8 },
   stateCard: { padding: spacing.xl, borderRadius: 24, backgroundColor: '#071c26', borderWidth: 1, borderColor: 'rgba(150,230,232,.20)', gap: spacing.md },
   stateTitle: { color: colors.white, fontSize: 20, fontWeight: '900', textAlign: 'center' },
   analysisCard: { width: '100%', alignItems: 'center', gap: spacing.md, padding: spacing.xl, borderRadius: 28, backgroundColor: '#071c26', borderWidth: 1, borderColor: 'rgba(150,230,232,.20)' },
