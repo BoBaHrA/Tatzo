@@ -10,7 +10,6 @@ import {
   Text,
   View,
   useWindowDimensions,
-  type ImageSourcePropType,
 } from 'react-native';
 
 import type {
@@ -25,6 +24,7 @@ import { Screen } from '@/components/screen';
 import { appLanguage, t } from '@/i18n';
 import {
   fetchStyleMatchOverview,
+  fetchStyleMatchPreview,
   fetchStyleMatchResult,
   reactToStyleMatch,
   startStyleMatch,
@@ -43,12 +43,6 @@ const WEB_LONG_PRESS_MS = 650;
 const WEB_EXIT_MS = 220;
 const DOUBLE_TAP_MS = 280;
 const GESTURE_MOVE_CANCEL = 12;
-const ACTION_ICONS = {
-  reject: require('../../assets/style-match-icons/reject.png'),
-  save: require('../../assets/style-match-icons/save.png'),
-  like: require('../../assets/style-match-icons/like.png'),
-  favorite: require('../../assets/style-match-icons/favorite.png'),
-} as const;
 
 function copy(en: string, fr: string, ru: string) {
   if (appLanguage === 'fr') return fr;
@@ -177,12 +171,12 @@ export default function StyleMatchScreenV3() {
     setLoading(true);
     setError('');
     try {
-      const overview = await fetchStyleMatchOverview(request);
+      const [overview, preview] = await Promise.all([
+        fetchStyleMatchOverview(request),
+        fetchStyleMatchPreview(request),
+      ]);
       setLatestResult(overview.latest_result);
-      const previews = overview.active_session?.cards.slice(0, 3)
-        ?? overview.latest_result?.saved_cards.slice(0, 3)
-        ?? [];
-      setPreviewCards(previews);
+      setPreviewCards(preview.cards.slice(0, 3));
       setSession(null);
       setMode('intro');
     } catch {
@@ -405,10 +399,10 @@ export default function StyleMatchScreenV3() {
             </View>
 
             <View style={styles.actions}>
-              <ActionButton icon={ACTION_ICONS.reject} label={t('styleMatchReject')} variant="reject" disabled={Boolean(busyAction)} loading={busyAction === 'reject'} onPress={() => void react('reject', 'left')} />
-              <ActionButton icon={ACTION_ICONS.save} label={session.current_saved ? t('styleMatchSaved') : t('styleMatchSave')} variant={session.current_saved ? 'saveActive' : 'save'} disabled={Boolean(busyAction)} loading={busyAction === 'save'} onPress={() => void toggleSaved()} />
-              <ActionButton icon={ACTION_ICONS.like} label={t('styleMatchLike')} variant="like" disabled={Boolean(busyAction)} loading={busyAction === 'like'} onPress={() => void react('like', 'right')} />
-              <ActionButton icon={ACTION_ICONS.favorite} label={t('styleMatchFavorite')} variant="favorite" disabled={Boolean(busyAction)} loading={busyAction === 'favorite'} onPress={() => void react('favorite', 'right')} />
+              <ActionButton glyph="×" label={t('styleMatchReject')} variant="reject" disabled={Boolean(busyAction)} loading={busyAction === 'reject'} onPress={() => void react('reject', 'left')} />
+              <ActionButton glyph="⌑" label={session.current_saved ? t('styleMatchSaved') : t('styleMatchSave')} variant={session.current_saved ? 'saveActive' : 'save'} disabled={Boolean(busyAction)} loading={busyAction === 'save'} onPress={() => void toggleSaved()} />
+              <ActionButton glyph="♡" label={t('styleMatchLike')} variant="like" disabled={Boolean(busyAction)} loading={busyAction === 'like'} onPress={() => void react('like', 'right')} />
+              <ActionButton glyph="✦" label={t('styleMatchFavorite')} variant="favorite" disabled={Boolean(busyAction)} loading={busyAction === 'favorite'} onPress={() => void react('favorite', 'right')} />
             </View>
             <Text style={styles.hint}>{copy('Swipe to choose · hold to save · double tap to favorite', 'Glissez pour choisir · maintenez pour enregistrer · double tap pour favori', 'Свайп — выбрать · удержание — сохранить · двойной тап — в избранное')}</Text>
           </>
@@ -464,9 +458,9 @@ function DeckBackCard({ card, depth }: { card: StyleMatchCard; depth: 1 | 2 }) {
   return <View style={[styles.deckBack, depth === 1 ? styles.deckBackOne : styles.deckBackTwo]} pointerEvents="none"><Image source={{ uri: card.image_url }} resizeMode="cover" style={styles.cardImage} /><View style={styles.backTint} /></View>;
 }
 
-function ActionButton({ label, icon, variant, disabled, loading, onPress }: {
+function ActionButton({ label, glyph, variant, disabled, loading, onPress }: {
   label: string;
-  icon: ImageSourcePropType;
+  glyph: string;
   variant: ActionVariant;
   disabled: boolean;
   loading: boolean;
@@ -482,7 +476,11 @@ function ActionButton({ label, icon, variant, disabled, loading, onPress }: {
       onPress={onPress}
       style={({ pressed }) => [styles.actionButton, isLike && styles.actionButtonLike, activeSave && styles.actionButtonSaveActive, disabled && styles.disabled, pressed && styles.actionPressed]}
     >
-      {loading ? <ActivityIndicator color={isLike ? colors.white : colors.primary} /> : <Image accessibilityIgnoresInvertColors source={icon} resizeMode="contain" style={[styles.actionIcon, { tintColor: activeSave ? colors.primary : '#d9edf0' }]} />}
+      {loading ? (
+        <ActivityIndicator color={isLike ? colors.white : colors.primary} />
+      ) : (
+        <Text style={[styles.actionGlyph, isLike && styles.actionGlyphLike, activeSave && styles.actionGlyphActive]}>{glyph}</Text>
+      )}
     </Pressable>
   );
 }
@@ -545,14 +543,16 @@ const styles = StyleSheet.create({
   nopeStampText: { color: '#ff6294', fontSize: 19, fontWeight: '900', letterSpacing: 2.2 },
   savedBadge: { position: 'absolute', right: 18, bottom: 18, width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary },
   savedBadgeText: { color: '#001317', fontSize: 20, fontWeight: '900' },
-  actions: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10, marginTop: 4 },
+  actions: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 14, marginTop: 28 },
   actionButton: { width: 54, height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(150,230,232,.20)', backgroundColor: 'rgba(14,34,42,.92)' },
-  actionButtonLike: { width: 58, height: 58, borderRadius: 29, borderColor: '#ed0b70', backgroundColor: '#ed0b70' },
+  actionButtonLike: { width: 64, height: 64, borderRadius: 32, borderColor: '#ee0c6f', backgroundColor: '#ee0c6f' },
   actionButtonSaveActive: { borderColor: colors.primary },
-  actionIcon: { width: 24, height: 24 },
+  actionGlyph: { color: '#d9edf0', fontSize: 25, lineHeight: 29, fontWeight: '400', textAlign: 'center' },
+  actionGlyphLike: { color: colors.white, fontSize: 29 },
+  actionGlyphActive: { color: colors.primary },
   disabled: { opacity: .5 },
   actionPressed: { transform: [{ translateY: -3 }] },
-  hint: { color: '#77959d', fontSize: 12, textAlign: 'center', lineHeight: 17, marginTop: 2 },
+  hint: { color: '#77959d', fontSize: 12, textAlign: 'center', lineHeight: 17, marginTop: 17 },
   stateCard: { padding: spacing.xl, borderRadius: 24, backgroundColor: '#071c26', borderWidth: 1, borderColor: 'rgba(150,230,232,.20)', gap: spacing.md },
   stateTitle: { color: colors.white, fontSize: 20, fontWeight: '900', textAlign: 'center' },
   analysisCard: { width: '100%', alignItems: 'center', gap: spacing.md, padding: spacing.xl, borderRadius: 28, backgroundColor: '#071c26', borderWidth: 1, borderColor: 'rgba(150,230,232,.20)' },
