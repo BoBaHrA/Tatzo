@@ -107,6 +107,8 @@ export default function CreatePostScreen() {
         location: location.trim(),
         visibility,
         disableComments,
+        isAd: false,
+        layout: 'grid',
         media,
       });
       Alert.alert(t('postPublished'), t('postPublishedHint'), [
