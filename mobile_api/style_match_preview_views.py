@@ -3,15 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from style_match.models import TattooCard
-
-
-def _preview_card_payload(card):
-    return {
-        "id": card.pk,
-        "card_id": card.card_id,
-        "image_url": card.delivery_url,
-        "alt": f"Tattoo inspiration {card.card_id}",
-    }
+from style_match.services import serialize_card
 
 
 def _preview_cards():
@@ -29,6 +21,4 @@ class StyleMatchPreviewView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        return Response(
-            {"cards": [_preview_card_payload(card) for card in _preview_cards()]}
-        )
+        return Response({"cards": [serialize_card(card) for card in _preview_cards()]})
