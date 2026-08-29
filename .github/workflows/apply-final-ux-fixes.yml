@@ -1,0 +1,171 @@
+name: Apply final mobile UX fixes
+
+on:
+  push:
+    branches:
+      - codex/mobile-final-ux-fixes
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+      - name: Apply focused mobile fixes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              if old not in text:
+                  raise SystemExit(f'target not found in {path}: {old[:90]!r}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          # 1) Style Match: fit actions/hint above bottom navigation and replace flat circles with layered glow blobs.
+          style = 'mobile/src/style-match/style-match-screen-v3.tsx'
+          replace_once(
+              style,
+              'function Ambient() {\n  return <View pointerEvents="none" style={StyleSheet.absoluteFill}><View style={styles.ambientTeal} /><View style={styles.ambientPink} /></View>;\n}',
+              '''function Ambient() {
+  return (
+    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      <View style={[styles.ambientGlow, styles.ambientTealOuter]} />
+      <View style={[styles.ambientGlow, styles.ambientTealMid]} />
+      <View style={[styles.ambientGlow, styles.ambientTealCore]} />
+      <View style={[styles.ambientGlow, styles.ambientPinkOuter]} />
+      <View style={[styles.ambientGlow, styles.ambientPinkMid]} />
+      <View style={[styles.ambientGlow, styles.ambientPinkCore]} />
+    </View>
+  );
+}'''
+          )
+          replace_once(
+              style,
+              "  discoveryScreen: { paddingTop: spacing.sm, paddingBottom: spacing.xxl, gap: 14, overflow: 'hidden' },",
+              "  discoveryScreen: { paddingTop: spacing.sm, paddingBottom: 8, gap: 10, overflow: 'hidden' },"
+          )
+          replace_once(
+              style,
+              "  ambientTeal: { position: 'absolute', width: 350, height: 350, borderRadius: 175, backgroundColor: 'rgba(9,200,194,.12)', top: -190, left: -190 },\n  ambientPink: { position: 'absolute', width: 350, height: 350, borderRadius: 175, backgroundColor: 'rgba(237,11,112,.10)', bottom: -150, right: -200 },",
+              """  ambientGlow: { position: 'absolute' },
+  ambientTealOuter: { width: 540, height: 430, borderRadius: 270, backgroundColor: 'rgba(4,197,191,.025)', top: -235, left: -245 },
+  ambientTealMid: { width: 410, height: 335, borderRadius: 205, backgroundColor: 'rgba(4,197,191,.045)', top: -185, left: -190 },
+  ambientTealCore: { width: 275, height: 235, borderRadius: 138, backgroundColor: 'rgba(4,197,191,.075)', top: -135, left: -130 },
+  ambientPinkOuter: { width: 560, height: 450, borderRadius: 280, backgroundColor: 'rgba(238,12,111,.022)', bottom: -235, right: -260 },
+  ambientPinkMid: { width: 420, height: 345, borderRadius: 210, backgroundColor: 'rgba(238,12,111,.040)', bottom: -180, right: -195 },
+  ambientPinkCore: { width: 285, height: 235, borderRadius: 143, backgroundColor: 'rgba(238,12,111,.070)', bottom: -125, right: -130 },"""
+          )
+          replace_once(style, "  deck: { minHeight: 492, width: '100%', alignItems: 'center', justifyContent: 'center', position: 'relative' },", "  deck: { minHeight: 438, width: '100%', alignItems: 'center', justifyContent: 'center', position: 'relative' },")
+          replace_once(style, "  deckBack: { position: 'absolute', width: '88%', height: 440, borderRadius: 30, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(210,255,255,.14)', backgroundColor: '#10242b' },", "  deckBack: { position: 'absolute', width: '88%', height: 390, borderRadius: 30, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(210,255,255,.14)', backgroundColor: '#10242b' },")
+          replace_once(style, "  card: { zIndex: 5, width: '88%', height: 440, borderRadius: 30, overflow: 'hidden', backgroundColor: '#10242b', borderWidth: 1, borderColor: 'rgba(210,255,255,.22)' },", "  card: { zIndex: 5, width: '88%', height: 390, borderRadius: 30, overflow: 'hidden', backgroundColor: '#10242b', borderWidth: 1, borderColor: 'rgba(210,255,255,.22)' },")
+          replace_once(style, "  actions: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 14, marginTop: 28 },", "  actions: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 14, marginTop: 10 },")
+          replace_once(style, "  hint: { color: '#77959d', fontSize: 12, textAlign: 'center', lineHeight: 17, marginTop: 17 },", "  hint: { color: '#77959d', fontSize: 12, textAlign: 'center', lineHeight: 17, marginTop: 4, paddingHorizontal: 8 },")
+
+          # 2) Post composer: the publish button already exists, but the expanded shell clipped it at 820dp.
+          composer = 'mobile/src/publishing/inline-post-composer.tsx'
+          replace_once(composer, 'const EXPANDED_MAX_HEIGHT = 820;', 'const EXPANDED_MAX_HEIGHT = 1800;')
+
+          # 3) Calendar: keep the clean web-like month visual, add horizontal month swipes and reveal the selected day's sessions.
+          calendar = 'mobile/app/(tabs)/calendar.tsx'
+          replace_once(calendar, "import { useCallback, useMemo, useState } from 'react';", "import { useCallback, useMemo, useRef, useState } from 'react';")
+          replace_once(
+              calendar,
+              "  const [error, setError] = useState(false);",
+              "  const [error, setError] = useState(false);\n  const scrollRef = useRef<ScrollView>(null);\n  const eventsY = useRef(0);\n  const calendarTouchX = useRef<number | null>(null);"
+          )
+          replace_once(
+              calendar,
+              "  const selectDay = (day: CalendarDay) => {\n    setSelectedDate(day.iso);\n    if (!day.inCurrentMonth) setAnchor(monthAnchor(day.iso));\n  };",
+              """  const selectDay = (day: CalendarDay) => {
+    setSelectedDate(day.iso);
+    if (!day.inCurrentMonth) setAnchor(monthAnchor(day.iso));
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ y: Math.max(0, eventsY.current - 110), animated: true });
+    });
+  };"""
+          )
+          replace_once(
+              calendar,
+              "      <ScrollView\n        contentContainerStyle={styles.content}",
+              "      <ScrollView\n        ref={scrollRef}\n        contentContainerStyle={styles.content}"
+          )
+          replace_once(
+              calendar,
+              "        <View style={styles.calendarFrame}>",
+              """        <View
+          onTouchStart={(event) => { calendarTouchX.current = event.nativeEvent.pageX; }}
+          onTouchEnd={(event) => {
+            const start = calendarTouchX.current;
+            calendarTouchX.current = null;
+            if (start === null) return;
+            const delta = event.nativeEvent.pageX - start;
+            if (Math.abs(delta) < 55) return;
+            goMonth(delta > 0 ? -1 : 1);
+          }}
+          style={styles.calendarFrame}
+        >"""
+          )
+          replace_once(
+              calendar,
+              """        {viewMode !== 'month' ? (
+          <View style={styles.eventsCard}>
+            <Text style={styles.cardTitle}>{ui.events} · {formatLongDate(selectedDate)}</Text>
+            {selectedAppointments.length ? selectedAppointments.map((appointment) => (
+              <AppointmentRow appointment={appointment} key={appointment.id} />
+            )) : <Text style={styles.cardMuted}>{ui.noEvents}</Text>}
+          </View>
+        ) : null}""",
+              """        <View
+          onLayout={(event) => { eventsY.current = event.nativeEvent.layout.y; }}
+          style={styles.eventsCard}
+        >
+          <Text style={styles.cardTitle}>{ui.events} · {formatLongDate(selectedDate)}</Text>
+          {selectedAppointments.length ? selectedAppointments.map((appointment) => (
+            <AppointmentRow appointment={appointment} key={appointment.id} />
+          )) : <Text style={styles.cardMuted}>{ui.noEvents}</Text>}
+        </View>"""
+          )
+
+          # Strengthen parity guards around the regressions reported from the APK.
+          feed_check = 'mobile/scripts/feed-parity-check.mjs'
+          p = Path(feed_check)
+          text = p.read_text(encoding='utf-8')
+          anchor = "check(composer.includes('layout: media.length > 1 ? layout : \'grid\''), 'Publishing sends the selected media layout');"
+          if anchor in text and 'EXPANDED_MAX_HEIGHT = 1800' not in text:
+              text = text.replace(anchor, anchor + "\ncheck(composer.includes('EXPANDED_MAX_HEIGHT = 1800') && composer.includes('publishPost'), 'Expanded composer no longer clips the publish action');", 1)
+              p.write_text(text, encoding='utf-8')
+
+          shell_check = 'mobile/scripts/shell-parity-check.mjs'
+          p = Path(shell_check)
+          text = p.read_text(encoding='utf-8')
+          anchor = "check(calendar.includes('dayCellHasEvents') && calendar.includes(\"justifyContent: 'space-between'\") && calendar.includes('extraMarkersByDate') && calendar.includes('blocked_periods') && calendar.includes('time_off'), 'Calendar uses separated rounded event tiles like the deployed mobile website');"
+          if anchor in text and 'calendarTouchX' not in text:
+              text = text.replace(anchor, anchor + "\ncheck(calendar.includes('calendarTouchX') && calendar.includes('goMonth(delta > 0 ? -1 : 1)') && calendar.includes('eventsY.current'), 'Month Calendar supports swipe paging and reveals the selected day details');", 1)
+              p.write_text(text, encoding='utf-8')
+
+          style_check = 'mobile/scripts/style-match-parity-check.mjs'
+          p = Path(style_check)
+          text = p.read_text(encoding='utf-8')
+          anchor = "check(match.includes('actionIcon') && match.includes('width: 25') && match.includes('actionIconLike'), 'Action icon sizing follows the current web control');"
+          if anchor in text and 'ambientTealOuter' not in text:
+              text = text.replace(anchor, anchor + "\ncheck(match.includes('ambientTealOuter') && match.includes('ambientPinkOuter') && match.includes('deck: { minHeight: 438'), 'Style Match keeps diffuse ambient glows and fits action guidance above the bottom navigation');", 1)
+              p.write_text(text, encoding='utf-8')
+          PY
+          git diff --check
+      - name: Commit final UX fixes
+        shell: bash
+        run: |
+          git rm .github/workflows/apply-final-ux-fixes.yml
+          git add -A
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Fix final mobile Style Match, composer and Calendar UX"
+          git push origin HEAD:${{ github.ref_name }}
