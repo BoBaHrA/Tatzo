@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from appointments.models import ArtistBookingSettings
+from appointments.views import _get_artist_settings
 
 from .artist_dashboard_payloads import booking_preferences_payload
 from .artist_dashboard_views import (
@@ -40,6 +41,60 @@ class ArtistBookingPreferencesParitySerializer(ArtistBookingPreferencesSerialize
         max_value=Decimal("999999.99"),
     )
 
+    def validate(self, attrs):
+        if attrs["default_session_minutes"] > attrs["maximum_session_hours"] * 60:
+            raise serializers.ValidationError(
+                {
+                    "default_session_minutes": (
+                        "The default session cannot exceed the maximum session length."
+                    )
+                }
+            )
+
+        supported_consultation = bool(
+            attrs["online_consultation_enabled"]
+            or attrs["phone_consultation_enabled"]
+            or attrs["studio_consultation_enabled"]
+        )
+        if attrs["consultation_enabled"] and not supported_consultation:
+            raise serializers.ValidationError(
+                {
+                    "consultation_enabled": (
+                        "Enable an online, phone, or in-studio consultation option."
+                    )
+                }
+            )
+        if attrs["consultation_required_before_booking"] and not (
+            attrs["consultation_enabled"] and supported_consultation
+        ):
+            raise serializers.ValidationError(
+                {
+                    "consultation_required_before_booking": (
+                        "Required consultations need an enabled consultation option."
+                    )
+                }
+            )
+
+        minimum_references = attrs["minimum_reference_images"]
+        maximum_references = attrs["maximum_reference_images"]
+        if minimum_references > maximum_references:
+            raise serializers.ValidationError(
+                {
+                    "minimum_reference_images": (
+                        "The minimum cannot exceed the maximum reference count."
+                    )
+                }
+            )
+        if attrs["reference_images_required"] and minimum_references < 1:
+            raise serializers.ValidationError(
+                {
+                    "minimum_reference_images": (
+                        "Require at least one reference image."
+                    )
+                }
+            )
+        return attrs
+
 
 def _decimal_string(value):
     return f"{value:.2f}".rstrip("0").rstrip(".")
@@ -65,10 +120,9 @@ class ArtistBookingPreferencesView(PrivateArtistResponseMixin, APIView):
         forbidden = _artist_forbidden(request)
         if forbidden:
             return forbidden
-        settings = ArtistBookingSettings.objects.filter(artist=request.user).first()
-        if settings is None:
-            settings = ArtistBookingSettings.objects.create(artist=request.user)
-        return Response(booking_preferences_parity_payload(settings))
+        return Response(
+            booking_preferences_parity_payload(_get_artist_settings(request.user))
+        )
 
     def put(self, request):
         forbidden = _artist_forbidden(request)
