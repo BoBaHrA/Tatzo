@@ -23,7 +23,7 @@ import { colors, spacing } from '@/theme';
 
 
 const MAX_MEDIA = 10;
-const EXPANDED_MAX_HEIGHT = 820;
+const EXPANDED_MAX_HEIGHT = 1800;
 const VISIBILITY_OPTIONS: FeedPost['visibility'][] = ['public', 'followers', 'private'];
 
 const COPY = {

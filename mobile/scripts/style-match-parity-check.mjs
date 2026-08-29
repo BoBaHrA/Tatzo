@@ -56,6 +56,7 @@ check(match.includes('likeStampOpacity') && match.includes('nopeStampOpacity'), 
 check(match.includes('DeckBackCard') && match.includes('nextCard') && match.includes('thirdCard'), 'Layered deck previews the real next cards');
 check(match.includes('actionButtonLike') && match.includes('width: 64') && match.includes("backgroundColor: '#ee0c6f'"), 'Like uses the larger pink primary action geometry from the current web screen');
 check(match.includes('actionIcon') && match.includes('width: 25') && match.includes('actionIconLike'), 'Action icon sizing follows the current web control');
+check(match.includes('ambientTealOuter') && match.includes('ambientPinkOuter') && match.includes("deck: { minHeight: 438"), 'Style Match keeps diffuse ambient glows and fits action guidance above the bottom navigation');
 check(match.includes('current_saved') && match.includes('toggleSaved'), 'Save remains independent from the reaction choice');
 check(match.includes('fetchStyleMatchOverview(') && match.includes('startStyleMatch('), 'Style Match overview and fresh-session start APIs remain wired');
 check(match.includes('reactToStyleMatch(') && match.includes('fetchStyleMatchResult('), 'Reactions and final result stay backed by the real API');
