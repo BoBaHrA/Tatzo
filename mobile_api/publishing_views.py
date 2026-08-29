@@ -54,6 +54,7 @@ class PostMutationSerializer(serializers.Serializer):
         trim_whitespace=True,
     )
     disable_comments = serializers.BooleanField(required=False)
+    is_ad = serializers.BooleanField(required=False)
     visibility = serializers.ChoiceField(
         choices=("public", "followers", "private"),
         required=False,
@@ -247,6 +248,7 @@ class MyPostListView(APIView):
                 content=values.get("content", ""),
                 location=values.get("location", ""),
                 disable_comments=values.get("disable_comments", False),
+                is_ad=values.get("is_ad", False),
                 visibility=values.get("visibility", "public"),
                 layout=values.get("layout", "carousel" if len(files) > 1 else "grid"),
             )

@@ -23,7 +23,7 @@ import { colors, spacing } from '@/theme';
 
 
 const MAX_MEDIA = 10;
-const EXPANDED_MAX_HEIGHT = 680;
+const EXPANDED_MAX_HEIGHT = 820;
 const VISIBILITY_OPTIONS: FeedPost['visibility'][] = ['public', 'followers', 'private'];
 
 const COPY = {
@@ -37,6 +37,11 @@ const COPY = {
     additional: 'Additional options',
     later: 'Coming soon',
     photoVideo: 'Photos and videos',
+    mediaLayout: 'Media layout',
+    grid: 'Grid',
+    carousel: 'Carousel',
+    markAsAd: 'Mark as Ad',
+    markAsAdHint: 'Label this post as promotional content.',
   },
   fr: {
     addLocation: 'Ajouter un lieu',
@@ -48,6 +53,11 @@ const COPY = {
     additional: 'Options supplémentaires',
     later: 'Bientôt disponible',
     photoVideo: 'Photos et vidéos',
+    mediaLayout: 'Disposition des médias',
+    grid: 'Grille',
+    carousel: 'Carrousel',
+    markAsAd: 'Marquer comme publicité',
+    markAsAdHint: 'Identifie cette publication comme contenu promotionnel.',
   },
   ru: {
     addLocation: 'Добавить место',
@@ -59,6 +69,11 @@ const COPY = {
     additional: 'Дополнительные настройки',
     later: 'Скоро',
     photoVideo: 'Фото и видео',
+    mediaLayout: 'Расположение медиа',
+    grid: 'Сетка',
+    carousel: 'Карусель',
+    markAsAd: 'Отметить как рекламу',
+    markAsAdHint: 'Пометить публикацию как рекламный контент.',
   },
 } as const;
 
@@ -87,6 +102,8 @@ export function InlinePostComposer({ request, onPublished }: InlinePostComposerP
   const [locationOpen, setLocationOpen] = useState(false);
   const [visibility, setVisibility] = useState<FeedPost['visibility']>('public');
   const [disableComments, setDisableComments] = useState(false);
+  const [isAd, setIsAd] = useState(false);
+  const [layout, setLayout] = useState<FeedPost['layout']>('grid');
   const [media, setMedia] = useState<PendingPublishMedia[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -123,6 +140,8 @@ export function InlinePostComposer({ request, onPublished }: InlinePostComposerP
     setLocationOpen(false);
     setVisibility('public');
     setDisableComments(false);
+    setIsAd(false);
+    setLayout('grid');
     setMedia([]);
     setError('');
   };
@@ -193,6 +212,8 @@ export function InlinePostComposer({ request, onPublished }: InlinePostComposerP
         location: location.trim(),
         visibility,
         disableComments,
+        isAd,
+        layout: media.length > 1 ? layout : 'grid',
         media,
       });
       onPublished(post);
@@ -309,6 +330,30 @@ export function InlinePostComposer({ request, onPublished }: InlinePostComposerP
             <Text style={styles.counter}>{media.length}/{MAX_MEDIA}</Text>
           </View>
 
+          {media.length > 1 ? (
+            <View style={styles.layoutCard}>
+              <Text style={styles.optionLabel}>{ui.mediaLayout}</Text>
+              <View accessibilityRole="tablist" style={styles.layoutToggle}>
+                {(['grid', 'carousel'] as FeedPost['layout'][]).map((value) => {
+                  const selected = layout === value;
+                  return (
+                    <Pressable
+                      accessibilityRole="tab"
+                      accessibilityState={{ selected }}
+                      key={value}
+                      onPress={() => setLayout(value)}
+                      style={[styles.layoutButton, selected && styles.layoutButtonActive]}
+                    >
+                      <Text style={[styles.layoutButtonText, selected && styles.layoutButtonTextActive]}>
+                        {value === 'grid' ? ui.grid : ui.carousel}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+          ) : null}
+
           <OptionRow
             label={ui.addLocation}
             detail={location || ui.locationHint}
@@ -339,6 +384,15 @@ export function InlinePostComposer({ request, onPublished }: InlinePostComposerP
               hint={t('disableCommentsHint')}
               label={t('disableComments')}
               onChange={setDisableComments}
+            />
+          </View>
+
+          <View style={styles.checkboxCard}>
+            <Checkbox
+              checked={isAd}
+              hint={ui.markAsAdHint}
+              label={ui.markAsAd}
+              onChange={setIsAd}
             />
           </View>
 
@@ -493,6 +547,29 @@ const styles = StyleSheet.create({
   sectionHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 2 },
   sectionTitle: { color: colors.text, fontSize: 13, fontWeight: '900' },
   counter: { color: colors.textMuted, fontSize: 12 },
+  layoutCard: {
+    width: '100%',
+    gap: 9,
+    padding: 12,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: 'rgba(4,197,191,.15)',
+    backgroundColor: 'rgba(0,13,24,.46)',
+  },
+  layoutToggle: { flexDirection: 'row', gap: 8 },
+  layoutButton: {
+    flex: 1,
+    minHeight: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(4,197,191,.18)',
+    backgroundColor: 'rgba(4,197,191,.05)',
+  },
+  layoutButtonActive: { borderColor: colors.primary, backgroundColor: colors.primary },
+  layoutButtonText: { color: colors.textMuted, fontSize: 12, fontWeight: '900' },
+  layoutButtonTextActive: { color: colors.black },
   optionRow: {
     width: '100%',
     minHeight: 56,
