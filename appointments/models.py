@@ -268,6 +268,7 @@ class Appointment(models.Model):
     )
 
     artist_note = models.TextField(blank=True)
+    client_rating = models.PositiveSmallIntegerField(blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

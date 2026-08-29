@@ -34,11 +34,14 @@ const matchApi = source('src/style-match/style-match-api.ts');
 const result = source('src/style-match/style-match-result-v2.tsx');
 
 exists('assets/tatzo7.png');
+for (const icon of ['reject', 'save', 'like', 'favorite']) {
+  exists(`assets/style-match-icons/${icon}.png`);
+}
 
 check(route.includes("@/style-match/style-match-screen-v3"), 'Style Match route uses the active gesture-parity v3 screen');
 check(match.includes("require('../../assets/tatzo7.png')"), 'Active Style Match uses the official Tatzo logo artwork');
-check(match.includes('glyph="×"') && match.includes('glyph="⌑"') && match.includes('glyph="♡"') && match.includes('glyph="✦"'), 'Discovery actions use the exact current web glyphs');
-check(!match.includes('ACTION_ICONS') && !match.includes('style-match-icons/reject.png'), 'Discovery no longer substitutes raster action artwork for web glyphs');
+check(match.includes('ACTION_ICONS') && match.includes('style-match-icons/reject.png') && match.includes('style-match-icons/save.png') && match.includes('style-match-icons/like.png') && match.includes('style-match-icons/favorite.png'), 'Discovery actions use deterministic native artwork instead of platform-dependent font glyphs');
+check(match.includes('ImageSourcePropType') && match.includes('actionIcon'), 'Style Match action artwork renders through tintable native image controls');
 check(match.includes('previewDeck') && match.includes('visualPill') && match.includes('previewCenter'), 'Onboarding keeps the current web preview deck');
 check(match.includes('fetchStyleMatchPreview(request)') && match.includes('setPreviewCards(preview.cards.slice(0, 3))'), 'Onboarding loads dedicated global preview cards like the website');
 check(matchApi.includes("'/style-match/preview/'") && matchApi.includes('StyleMatchCard[]'), 'Style Match preview endpoint is wired into the native API client');
@@ -52,7 +55,7 @@ check(match.includes("outputRange: ['-10deg', '0deg', '10deg']"), 'Card rotation
 check(match.includes('likeStampOpacity') && match.includes('nopeStampOpacity'), 'LIKE and NOPE stamps track swipe direction');
 check(match.includes('DeckBackCard') && match.includes('nextCard') && match.includes('thirdCard'), 'Layered deck previews the real next cards');
 check(match.includes('actionButtonLike') && match.includes('width: 64') && match.includes("backgroundColor: '#ee0c6f'"), 'Like uses the larger pink primary action geometry from the current web screen');
-check(match.includes('actionGlyph') && match.includes('fontSize: 25'), 'Action glyph sizing follows the current web control');
+check(match.includes('actionIcon') && match.includes('width: 25') && match.includes('actionIconLike'), 'Action icon sizing follows the current web control');
 check(match.includes('current_saved') && match.includes('toggleSaved'), 'Save remains independent from the reaction choice');
 check(match.includes('fetchStyleMatchOverview(') && match.includes('startStyleMatch('), 'Style Match overview and fresh-session start APIs remain wired');
 check(match.includes('reactToStyleMatch(') && match.includes('fetchStyleMatchResult('), 'Reactions and final result stay backed by the real API');

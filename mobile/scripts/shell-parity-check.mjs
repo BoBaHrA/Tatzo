@@ -66,12 +66,12 @@ check(search.includes('requestVersion.current') && search.includes('version !== 
 check(!calendar.includes("import BookingsScreen from './bookings'"), 'Calendar is no longer an appointments-list alias');
 check(calendar.includes('fetchAppointments(request)'), 'Calendar stays backed by real appointment data');
 check(calendar.includes('fetchArtistDashboard(request)'), 'Verified artists enrich Calendar with dashboard schedule data');
-check(calendar.includes("type CalendarViewMode = 'month' | 'week' | 'day'"), 'Calendar exposes Month / Week / Day views');
+check(calendar.includes("type CalendarViewMode = 'month' | 'week' | 'day'"), 'Calendar keeps alternate views available in the implementation');
 check(calendar.includes('buildMonthDays') && calendar.includes('length: 42'), 'Calendar renders a complete six-week month grid');
 check(calendar.includes("['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']"), 'Calendar follows the web Monday-first week');
-check(calendar.includes('goMonth(-1)') && calendar.includes('goMonth(1)') && calendar.includes('goToday'), 'Calendar keeps previous / Today / next controls');
-check(calendar.includes('titleBlock') && !calendar.includes('styles.hero'), 'Calendar uses the compact web title block instead of the oversized native hero card');
-check(calendar.includes('extraMarkersByDate') && calendar.includes('blocked_periods') && calendar.includes('time_off'), 'Artist blocked periods and vacation days render in the Calendar grid');
+check(calendar.includes("navigationControls: { display: 'none' }") && calendar.includes("viewToggle: { display: 'none' }"), 'Primary mobile Calendar hides the desktop-style control stack to match the deployed web view');
+check(calendar.includes("titleBlock: { display: 'none' }") && !calendar.includes('styles.hero'), 'Calendar relies on the shared web-like header without a duplicate native title');
+check(calendar.includes('dayCellHasEvents') && calendar.includes("justifyContent: 'space-between'") && calendar.includes('extraMarkersByDate') && calendar.includes('blocked_periods') && calendar.includes('time_off'), 'Calendar uses separated rounded event tiles like the deployed mobile website');
 check(calendar.includes('QuickAction') && calendar.includes('ui.addSession') && calendar.includes('ui.blockTime') && calendar.includes('ui.setVacation') && calendar.includes('ui.createConsultation'), 'Calendar exposes the current web quick actions for artists');
 check(calendar.includes("router.push('/artist-dashboard/calendar')") && calendar.includes("router.push('/artist-dashboard/create-appointment')"), 'Calendar quick actions open the real artist tools');
 check(calendar.includes("pathname: '/appointment/[appointmentId]'"), 'Calendar events open the real appointment detail route');

@@ -704,6 +704,7 @@ export type Appointment = {
   consultation_already_completed: boolean;
   consultation_note: string;
   artist_note: string;
+  client_rating: number | null;
   can_edit_artist_note: boolean;
   created_at: string;
   updated_at: string;

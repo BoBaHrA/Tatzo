@@ -143,6 +143,17 @@ export function applyAppointmentAction(
   });
 }
 
+export function rateAppointment(
+  request: AuthenticatedRequest,
+  appointmentId: number,
+  rating: number,
+) {
+  return request<Appointment>(`/appointments/${appointmentId}/rating/`, {
+    method: 'PUT',
+    body: JSON.stringify({ rating }),
+  });
+}
+
 export function addAppointmentReferences(
   request: AuthenticatedRequest,
   appointmentId: number,

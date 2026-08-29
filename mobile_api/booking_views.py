@@ -170,6 +170,7 @@ def _appointment_payload(appointment, request):
         "consultation_already_completed": appointment.consultation_already_completed,
         "consultation_note": appointment.consultation_note,
         "artist_note": appointment.artist_note if role == "artist" else "",
+        "client_rating": appointment.client_rating,
         "can_edit_artist_note": role == "artist",
         "created_at": appointment.created_at,
         "updated_at": appointment.updated_at,
@@ -918,6 +919,45 @@ class AppointmentActionView(APIView):
                 auto_response = ""
 
         _send_artist_auto_response(appointment, auto_response)
+        appointment = _appointment_or_404(appointment.pk, request.user)
+        return Response(_appointment_payload(appointment, request))
+
+
+class AppointmentRatingView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def put(self, request, appointment_id):
+        try:
+            rating = int(request.data.get("rating"))
+        except (TypeError, ValueError):
+            return Response(
+                {"code": "invalid_rating", "detail": "Rating must be an integer from 1 to 5."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if rating < 1 or rating > 5:
+            return Response(
+                {"code": "invalid_rating", "detail": "Rating must be from 1 to 5."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        with transaction.atomic():
+            appointment = get_object_or_404(
+                Appointment.objects.select_for_update(),
+                pk=appointment_id,
+            )
+            if appointment.client_id != request.user.pk:
+                return Response(
+                    {"code": "not_client", "detail": "Only the client can rate this appointment."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+            if appointment.status != Appointment.STATUS_COMPLETED:
+                return Response(
+                    {"code": "not_completed", "detail": "Only completed appointments can be rated."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            appointment.client_rating = rating
+            appointment.save(update_fields=("client_rating", "updated_at"))
+
         appointment = _appointment_or_404(appointment.pk, request.user)
         return Response(_appointment_payload(appointment, request))
 
