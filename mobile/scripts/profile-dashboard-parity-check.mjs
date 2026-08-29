@@ -32,6 +32,8 @@ const profile = source('app/(tabs)/profile.tsx');
 const settings = source('app/settings.tsx');
 const profileApi = source('src/profile/profile-api.ts');
 const dashboard = source('app/artist-dashboard/index.tsx');
+const bookingPreferencesApi = source('../mobile_api/artist_booking_preferences_parity_view.py');
+const mobileUrls = source('../mobile_api/urls.py');
 
 for (const icon of ['dashboard', 'calendar', 'inbox', 'message', 'image', 'clients', 'reviews', 'statistics', 'setting', 'stat-gradient']) {
   exists(`assets/dashboard-icons/${icon}.png`);
@@ -71,13 +73,25 @@ check(dashboard.includes('StatisticsPanel') && dashboard.includes('SettingsPanel
 check(dashboard.includes('fetchAppointments(') && dashboard.includes('fetchChats(') && dashboard.includes('fetchPortfolio('), 'Dashboard panels use real native APIs instead of placeholder navigation');
 check(dashboard.includes('fetchArtistBookingPreferences(') && dashboard.includes('saveArtistBookingPreferences('), 'Dashboard Settings reads and saves the real booking preferences API');
 check(dashboard.includes("copy('Booking settings'") && dashboard.includes("copy('Booking rules'"), 'Booking settings and Booking rules live together inside the Dashboard Settings panel');
-check(dashboard.includes('booking_workflow_options') && dashboard.includes('consultation_enabled') && dashboard.includes('reference_images_required'), 'Dashboard Settings exposes the current web booking controls');
+check(dashboard.includes("copy('Accept new clients'") && dashboard.includes('bookings_enabled'), 'Booking settings expose the web new-client control');
+check(dashboard.includes("copy('Phone consultation'") && dashboard.includes('phone_consultation_enabled'), 'Booking settings expose phone consultation parity');
+check(dashboard.includes("copy('Deposit amount'") && dashboard.includes("copy('Deposit required'") && dashboard.includes('deposit_amount'), 'Booking settings expose deposit parity');
+check(dashboard.includes("copy('Min references'") && dashboard.includes("copy('Max references'") && dashboard.includes('minimum_reference_images') && dashboard.includes('maximum_reference_images'), 'Booking settings expose the web reference limits');
+check(dashboard.includes('booking_workflow_options') && dashboard.includes('consultation_enabled') && dashboard.includes('reference_images_required'), 'Dashboard Settings keeps the existing web booking controls');
 check(dashboard.includes('booking_status_options.map') && dashboard.includes('RULE_TONES'), 'Booking rules expose every server status with the web tone mapping');
+check(dashboard.includes("copy('Auto responses'") && dashboard.includes('auto_response_booking_received') && dashboard.includes('auto_response_booking_declined'), 'Dashboard Settings exposes the web auto-response messages');
+check(dashboard.includes("copy('Save all settings'"), 'Dashboard Settings uses the web save-all action');
 check(dashboard.includes('accessibilityLabel={copy(\'Back to profile\''), 'Dashboard has an explicit back control');
 check(dashboard.includes('greeting(user.username)') && dashboard.includes('todayLabel()'), 'Dashboard overview keeps the web greeting/date header');
 check(dashboard.includes("router.push('/artist-dashboard/create-appointment')"), 'Dashboard keeps the web plus action for manual booking');
-check(dashboard.includes('dashboard.stats.today_sessions') && dashboard.includes('updateArtistBookingStatus('), 'Dashboard overview remains backed by the real API');
-check(dashboard.includes('<WorkloadStrip') && dashboard.includes('<ArtistTimeline'), 'Workload and upcoming timeline remain in the overview');
+check(dashboard.includes('dashboard.stats.today_sessions') && dashboard.includes('updateArtistBookingStatus('), 'Dashboard remains backed by the real API');
+check(dashboard.includes("copy('Smart insights'") && !dashboard.includes('<WorkloadStrip') && !dashboard.includes('<ArtistTimeline'), 'Dashboard overview matches the web stat cards plus Smart insights structure');
+
+for (const field of ['bookings_enabled', 'phone_consultation_enabled', 'deposit_required', 'deposit_amount']) {
+  check(bookingPreferencesApi.includes(`\"${field}\"`), `Mobile booking preferences API persists ${field}`);
+}
+check(bookingPreferencesApi.includes('booking_preferences_parity_payload'), 'Mobile booking preferences API returns the extended web payload');
+check(mobileUrls.includes('artist_booking_preferences_parity_view import ArtistBookingPreferencesView'), 'Mobile preferences route uses the web-parity API view');
 
 console.log('\nTatzo mobile profile/dashboard parity check');
 for (const label of passed) console.log(`  ✓ ${label}`);
