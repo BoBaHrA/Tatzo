@@ -3,6 +3,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { inflateSync } from 'node:zlib';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
@@ -23,6 +24,71 @@ function exists(relativePath) {
   else failures.push(`${relativePath} exists`);
 }
 
+function crc32(buffer) {
+  let crc = 0xffffffff;
+  for (const byte of buffer) {
+    crc ^= byte;
+    for (let bit = 0; bit < 8; bit += 1) {
+      crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1));
+    }
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function validPng(relativePath) {
+  const label = `${relativePath} is a valid PNG`;
+  const absolutePath = join(projectRoot, relativePath);
+  if (!existsSync(absolutePath)) {
+    failures.push(label);
+    return;
+  }
+
+  try {
+    const data = readFileSync(absolutePath);
+    const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+    if (data.length < 20 || !data.subarray(0, 8).equals(signature)) throw new Error('invalid PNG signature');
+
+    let offset = 8;
+    let sawIhdr = false;
+    let sawIend = false;
+    const idatChunks = [];
+
+    while (offset < data.length) {
+      if (offset + 12 > data.length) throw new Error('truncated PNG chunk');
+
+      const length = data.readUInt32BE(offset);
+      const typeStart = offset + 4;
+      const dataStart = offset + 8;
+      const dataEnd = dataStart + length;
+      const chunkEnd = dataEnd + 4;
+      if (chunkEnd > data.length) throw new Error('invalid PNG chunk length');
+
+      const type = data.toString('ascii', typeStart, dataStart);
+      const expectedCrc = data.readUInt32BE(dataEnd);
+      const actualCrc = crc32(data.subarray(typeStart, dataEnd));
+      if (expectedCrc !== actualCrc) throw new Error(`bad ${type} checksum`);
+
+      if (type === 'IHDR') sawIhdr = true;
+      if (type === 'IDAT') idatChunks.push(data.subarray(dataStart, dataEnd));
+
+      offset = chunkEnd;
+      if (type === 'IEND') {
+        sawIend = true;
+        break;
+      }
+    }
+
+    if (!sawIhdr || !idatChunks.length || !sawIend || offset !== data.length) {
+      throw new Error('incomplete PNG');
+    }
+
+    inflateSync(Buffer.concat(idatChunks));
+    passed.push(label);
+  } catch {
+    failures.push(label);
+  }
+}
+
 function check(condition, label) {
   if (condition) passed.push(label);
   else failures.push(label);
@@ -33,7 +99,7 @@ const match = source('src/style-match/style-match-screen-v3.tsx');
 const result = source('src/style-match/style-match-result-v2.tsx');
 
 for (const icon of ['reject', 'save', 'like', 'favorite']) {
-  exists(`assets/style-match-icons/${icon}.png`);
+  validPng(`assets/style-match-icons/${icon}.png`);
 }
 exists('assets/tatzo7.png');
 
