@@ -85,13 +85,13 @@ const WEB_DASH_ICONS = {
 
 const STAT_GRADIENT = require('../../assets/dashboard-icons/stat-gradient.png');
 
-const RULE_TONES: Record<ArtistBookingStatus, { color: string; symbol: string }> = {
-  open: { color: '#04c5bf', symbol: '✓' },
-  paused: { color: '#38bdf8', symbol: 'Ⅱ' },
-  vacation: { color: '#ee0c6f', symbol: '⌁' },
-  fully_booked: { color: '#8b5cf6', symbol: '▤' },
-  consultation_only: { color: '#f59e0b', symbol: '◌' },
-  emergency: { color: '#ef4444', symbol: '!' },
+const RULE_TONES: Record<ArtistBookingStatus, { color: string; icon: ImageSourcePropType }> = {
+  open: { color: '#04c5bf', icon: require('../../assets/dashboard-rule-icons/check-circle.png') },
+  paused: { color: '#38bdf8', icon: require('../../assets/dashboard-rule-icons/pause-circle.png') },
+  vacation: { color: '#ee0c6f', icon: require('../../assets/dashboard-rule-icons/palmtree.png') },
+  fully_booked: { color: '#8b5cf6', icon: require('../../assets/dashboard-rule-icons/layers.png') },
+  consultation_only: { color: '#f59e0b', icon: require('../../assets/dashboard-rule-icons/message-circle.png') },
+  emergency: { color: '#ef4444', icon: require('../../assets/dashboard-rule-icons/alert-triangle.png') },
 };
 
 function copy(en: string, fr: string, ru: string) {
@@ -425,7 +425,31 @@ function ClientsPanel({ appointments }: { appointments: Appointment[] }) {
 
 function ReviewsPanel({ appointments }: { appointments: Appointment[] }) {
   const completed = appointments.filter((item) => item.role === 'artist' && item.status === 'completed').slice(0, 10);
-  return <View style={styles.surfaceCard}><Text style={styles.cardTitle}>{copy('Reviews', 'Avis', 'Отзывы')}</Text><Text style={styles.cardHint}>{copy('Completed sessions are ready for review activity.', 'Les séances terminées apparaissent ici pour les avis.', 'Здесь отображаются завершённые сеансы, связанные с отзывами.')}</Text>{completed.length ? completed.map((item) => <View key={item.id} style={styles.clientRow}><AvatarSmall uri={item.client.profile_image_url} username={item.client.username} /><View style={styles.flexOne}><Text style={styles.panelRowTitle}>{item.client.username}</Text><Text style={styles.panelRowMeta}>{dateLabel(item.date)} · {item.booking_type_label}</Text></View><Text style={styles.reviewMark}>☆</Text></View>) : <EmptyCopy text={copy('No reviews yet.', 'Aucun avis.', 'Отзывов пока нет.')} />}</View>;
+  return (
+    <View style={styles.surfaceCard}>
+      <Text style={styles.cardTitle}>{copy('Reviews', 'Avis', 'Отзывы')}</Text>
+      <Text style={styles.cardHint}>{copy('Completed sessions show the client rating as soon as it is submitted.', 'Les séances terminées affichent la note du client dès son envoi.', 'У завершённых сеансов здесь сразу показывается оценка клиента.')}</Text>
+      {completed.length ? completed.map((item) => (
+        <View key={item.id} style={styles.clientRow}>
+          <AvatarSmall uri={item.client.profile_image_url} username={item.client.username} />
+          <View style={styles.flexOne}>
+            <Text style={styles.panelRowTitle}>{item.client.username}</Text>
+            <Text style={styles.panelRowMeta}>{dateLabel(item.date)} · {item.booking_type_label}</Text>
+          </View>
+          <View style={[styles.reviewScore, !item.client_rating && styles.reviewScoreEmpty]}>
+            <Text style={[styles.reviewScoreValue, !item.client_rating && styles.reviewScoreValueEmpty]}>
+              {item.client_rating ? `${item.client_rating}/5` : '—/5'}
+            </Text>
+            <Text style={styles.reviewScoreLabel}>
+              {item.client_rating
+                ? copy('Client rating', 'Note client', 'Оценка клиента')
+                : copy('Not rated yet', 'Pas encore noté', 'Оценки пока нет')}
+            </Text>
+          </View>
+        </View>
+      )) : <EmptyCopy text={copy('No completed sessions yet.', 'Aucune séance terminée.', 'Завершённых сеансов пока нет.')} />}
+    </View>
+  );
 }
 
 function StatisticsPanel({ appointments, dashboard, threads }: { appointments: Appointment[]; dashboard: ArtistDashboard; threads: ChatThreadSummary[] }) {
@@ -513,9 +537,9 @@ function SettingsPanel({ dashboard, preferences, actionError, saving, updatingSt
                 disabled={Boolean(updatingStatus)}
                 key={option.value}
                 onPress={() => void onChangeStatus(option.value)}
-                style={({ pressed }) => [styles.ruleCard, selected && { borderColor: tone.color, backgroundColor: `${tone.color}18` }, pressed && styles.pressed]}
+                style={({ pressed }) => [styles.ruleCard, selected && styles.ruleCardActive, selected && { borderColor: tone.color, borderLeftColor: tone.color, backgroundColor: `${tone.color}14` }, pressed && styles.pressed]}
               >
-                {updatingStatus === option.value ? <ActivityIndicator color={tone.color} /> : <Text style={[styles.ruleSymbol, { color: tone.color }]}>{tone.symbol}</Text>}
+                {updatingStatus === option.value ? <ActivityIndicator color={tone.color} /> : <Image source={tone.icon} resizeMode="contain" style={[styles.ruleIcon, { tintColor: tone.color }]} />}
                 <Text style={styles.ruleLabel}>{option.label}</Text>
               </Pressable>
             );
@@ -645,7 +669,11 @@ const styles = StyleSheet.create({
   sessionCount: { alignItems: 'flex-end', gap: 1 },
   sessionCountValue: { color: colors.primary, fontSize: 18, fontWeight: '900' },
   sessionCountLabel: { color: colors.textMuted, fontSize: 9 },
-  reviewMark: { color: '#f5b301', fontSize: 25 },
+  reviewScore: { minWidth: 76, alignItems: 'flex-end', gap: 2, paddingHorizontal: 9, paddingVertical: 7, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(245,179,1,.35)', backgroundColor: 'rgba(245,179,1,.08)' },
+  reviewScoreEmpty: { borderColor: 'rgba(255,255,255,.08)', backgroundColor: 'rgba(255,255,255,.03)' },
+  reviewScoreValue: { color: '#f5b301', fontSize: 16, fontWeight: '900' },
+  reviewScoreValueEmpty: { color: colors.textMuted },
+  reviewScoreLabel: { color: colors.textMuted, fontSize: 8, fontWeight: '700' },
   portfolioGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   portfolioTile: { width: '48.5%', aspectRatio: 1, borderRadius: 14, overflow: 'hidden', backgroundColor: '#031b27', borderWidth: 1, borderColor: 'rgba(4,197,191,.08)' },
   portfolioImage: { width: '100%', height: '100%' },
@@ -683,8 +711,9 @@ const styles = StyleSheet.create({
   styleChipText: { color: colors.textMuted, fontSize: 10, fontWeight: '800' },
   styleChipTextActive: { color: '#ff69a8' },
   rulesGrid: { gap: 10 },
-  ruleCard: { minHeight: 86, justifyContent: 'center', gap: 8, padding: 14, borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,.09)', backgroundColor: 'rgba(255,255,255,.045)' },
-  ruleSymbol: { fontSize: 19, fontWeight: '900' },
+  ruleCard: { minHeight: 86, alignItems: 'flex-start', justifyContent: 'center', gap: 10, padding: 14, borderRadius: 14, borderWidth: 1, borderLeftWidth: 1, borderColor: 'rgba(255,255,255,.09)', backgroundColor: 'rgba(255,255,255,.055)' },
+  ruleCardActive: { borderLeftWidth: 3 },
+  ruleIcon: { width: 21, height: 21 },
   ruleLabel: { color: colors.text, fontSize: 12, fontWeight: '900' },
   responseSetting: { gap: 7 },
   responseInput: { minHeight: 92, color: colors.text, fontSize: 13, lineHeight: 19, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,.09)', backgroundColor: 'rgba(255,255,255,.045)' },

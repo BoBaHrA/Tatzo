@@ -17,6 +17,7 @@ from .booking_views import (
     AppointmentDetailView,
     AppointmentArtistNoteView,
     AppointmentListView,
+    AppointmentRatingView,
     AppointmentReferenceUploadView,
     AppointmentReferenceView,
     BookingArtistView,
@@ -282,6 +283,11 @@ urlpatterns = [
         "appointments/<int:appointment_id>/artist-note/",
         AppointmentArtistNoteView.as_view(),
         name="appointment_artist_note",
+    ),
+    path(
+        "appointments/<int:appointment_id>/rating/",
+        AppointmentRatingView.as_view(),
+        name="appointment_rating",
     ),
     path(
         "appointments/<int:appointment_id>/health-safety/",

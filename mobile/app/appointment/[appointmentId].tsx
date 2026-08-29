@@ -23,6 +23,7 @@ import {
   addAppointmentReferences,
   applyAppointmentAction,
   fetchAppointment,
+  rateAppointment,
   saveAppointmentArtistNote,
 } from '@/booking/booking-api';
 import { startChat } from '@/chat/chat-api';
@@ -53,6 +54,12 @@ const ACTION_LABELS: Record<AppointmentAction, TranslationKey> = {
   complete: 'completeAppointment',
   cancel: 'cancelAppointment',
 };
+
+function copy(en: string, fr: string, ru: string) {
+  if (appLanguage === 'fr') return fr;
+  if (appLanguage === 'ru') return ru;
+  return en;
+}
 
 function formatDate(appointment: Appointment) {
   return `${new Intl.DateTimeFormat(appLanguage, {
@@ -98,7 +105,7 @@ export default function AppointmentDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [action, setAction] = useState<
-    AppointmentAction | 'chat' | 'references' | null
+    AppointmentAction | 'chat' | 'references' | 'rating' | null
   >(null);
   const [actionError, setActionError] = useState('');
   const [healthAction, setHealthAction] = useState<'share' | 'revoke' | null>(null);
@@ -186,6 +193,19 @@ export default function AppointmentDetailScreen() {
       setArtistNoteSaving(false);
     }
   };
+
+  const rateSession = async (rating: number) => {
+  if (!appointment || action || appointment.role !== 'client' || appointment.status !== 'completed') return;
+  setAction('rating');
+  setActionError('');
+  try {
+    setAppointment(await rateAppointment(request, appointment.id, rating));
+  } catch (caught) {
+    setActionError(userFacingError(caught));
+  } finally {
+    setAction(null);
+  }
+};
 
   const selectAction = (nextAction: AppointmentAction) => {
     if (nextAction === 'decline' || nextAction === 'cancel' || nextAction === 'complete') {
@@ -407,6 +427,45 @@ export default function AppointmentDetailScreen() {
               <DetailRow label={t('consultationNote')} value={appointment.consultation_note} />
             </View>
           </View>
+
+
+          {appointment.status === 'completed' ? (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{copy('Client rating', 'Note client', 'Оценка')}</Text>
+              <View style={styles.ratingCard}>
+                <Text style={styles.ratingValue}>
+                  {appointment.client_rating
+                    ? `${appointment.client_rating}/5`
+                    : copy('Not rated yet', 'Pas encore noté', 'Оценка пока не оставлена')}
+                </Text>
+                {appointment.role === 'client' ? (
+                  <>
+                    <Text style={styles.ratingHint}>{copy('Tap a star to rate this completed session.', 'Touchez une étoile pour noter cette séance terminée.', 'Нажми на звезду, чтобы оценить завершённый сеанс.')}</Text>
+                    <View style={styles.ratingRow}>
+                      {[1, 2, 3, 4, 5].map((rating) => (
+                        <Pressable
+                          accessibilityLabel={`${rating}/5`}
+                          accessibilityRole="button"
+                          disabled={action === 'rating'}
+                          key={rating}
+                          onPress={() => void rateSession(rating)}
+                          style={({ pressed }) => [styles.ratingButton, pressed && styles.ratingButtonPressed]}
+                        >
+                          <Text style={[styles.ratingStar, Boolean(appointment.client_rating && rating <= appointment.client_rating) && styles.ratingStarActive]}>★</Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  </>
+                ) : (
+                  <Text style={styles.ratingHint}>
+                    {appointment.client_rating
+                      ? copy('Rating submitted by the client.', 'Note envoyée par le client.', 'Оценка, которую оставил клиент.')
+                      : copy('The client has not rated this session yet.', 'Le client n’a pas encore noté cette séance.', 'Клиент пока не оценил этот сеанс.')}
+                  </Text>
+                )}
+              </View>
+            </View>
+          ) : null}
 
           {appointment.can_edit_artist_note ? (
             <View style={styles.section}>
@@ -678,6 +737,17 @@ const styles = StyleSheet.create({
   },
   detailLabel: { color: colors.textMuted, fontSize: 11, fontWeight: '800', textTransform: 'uppercase' },
   detailValue: { color: colors.text, fontSize: 14, lineHeight: 21, fontWeight: '700' },
+  ratingCard: {
+    backgroundColor: colors.surface, borderColor: 'rgba(245,179,1,.24)', borderWidth: 1,
+    borderRadius: radius.medium, padding: spacing.md, gap: spacing.sm,
+  },
+  ratingValue: { color: '#f5b301', fontSize: 20, fontWeight: '900' },
+  ratingHint: { color: colors.textMuted, fontSize: 12, lineHeight: 18 },
+  ratingRow: { flexDirection: 'row', gap: 7 },
+  ratingButton: { width: 46, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.backgroundDeep, borderWidth: 1, borderColor: colors.border },
+  ratingButtonPressed: { transform: [{ scale: .96 }], opacity: .75 },
+  ratingStar: { color: '#53656d', fontSize: 27, lineHeight: 30 },
+  ratingStarActive: { color: '#f5b301' },
   noteCard: {
     backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1,
     borderRadius: radius.medium, padding: spacing.md, gap: spacing.sm,
