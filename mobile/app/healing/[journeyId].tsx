@@ -31,6 +31,7 @@ import { BrandHeader } from '@/components/brand-header';
 import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
 import { userFacingError } from '@/errors';
+import { HEALING_ACHIEVEMENT_ICONS } from '@/healing/achievement-icons';
 import {
   fetchHealingDetail,
   markHealingJourneyHealed,
@@ -60,11 +61,13 @@ function Metric({ label, value }: { label: string; value: number }) {
 }
 
 function Achievement({
+  achievementKey,
   label,
   unlocked,
   unlockedLabel,
   lockedLabel,
 }: {
+  achievementKey: keyof HealingAchievements;
   label: string;
   unlocked: boolean;
   unlockedLabel: string;
@@ -72,9 +75,14 @@ function Achievement({
 }) {
   return (
     <View style={[styles.achievement, unlocked && styles.achievementUnlocked]}>
-      <Text style={[styles.achievementIcon, unlocked && styles.achievementIconUnlocked]}>
-        {unlocked ? '✓' : '◇'}
-      </Text>
+      <View style={[styles.achievementIconShell, unlocked && styles.achievementIconShellUnlocked]}>
+        <Image
+          accessibilityIgnoresInvertColors
+          resizeMode="contain"
+          source={HEALING_ACHIEVEMENT_ICONS[achievementKey]}
+          style={[styles.achievementIcon, unlocked && styles.achievementIconUnlocked]}
+        />
+      </View>
       <Text style={styles.achievementTitle}>{label}</Text>
       <Text style={[styles.achievementState, unlocked && styles.achievementStateUnlocked]}>
         {unlocked ? unlockedLabel : lockedLabel}
@@ -669,6 +677,7 @@ export default function HealingDetailScreen() {
             <View style={styles.achievementsGrid}>
               {achievements.map(([key, label]) => (
                 <Achievement
+                  achievementKey={key}
                   key={key}
                   label={label}
                   lockedLabel={copy.locked}
@@ -860,13 +869,20 @@ const styles = StyleSheet.create({
   personTag: { color: colors.primary, fontWeight: '700' },
   achievementsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   achievement: {
-    width: '47%', flexGrow: 1, minHeight: 130, backgroundColor: colors.backgroundDeep,
+    width: '47%', flexGrow: 1, minHeight: 140, backgroundColor: colors.backgroundDeep,
     borderColor: colors.border, borderWidth: 1, borderRadius: radius.medium,
-    padding: spacing.md, gap: spacing.xs,
+    padding: spacing.md, gap: spacing.sm,
   },
   achievementUnlocked: { borderColor: colors.primaryMuted },
-  achievementIcon: { color: colors.textMuted, fontSize: 23 },
-  achievementIconUnlocked: { color: colors.primary },
+  achievementIconShell: {
+    width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'rgba(114,132,139,.10)', borderWidth: 1, borderColor: 'rgba(114,132,139,.20)',
+  },
+  achievementIconShellUnlocked: {
+    backgroundColor: 'rgba(4,197,191,.10)', borderColor: 'rgba(4,197,191,.28)',
+  },
+  achievementIcon: { width: 25, height: 25, tintColor: '#72848b' },
+  achievementIconUnlocked: { tintColor: colors.primary },
   achievementTitle: { color: colors.text, fontWeight: '900', lineHeight: 19 },
   achievementState: { color: colors.textMuted, fontSize: 11, marginTop: 'auto' },
   achievementStateUnlocked: { color: colors.success },
