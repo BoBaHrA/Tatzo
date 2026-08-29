@@ -451,7 +451,7 @@ export default function AppointmentDetailScreen() {
                           onPress={() => void rateSession(rating)}
                           style={({ pressed }) => [styles.ratingButton, pressed && styles.ratingButtonPressed]}
                         >
-                          <Text style={[styles.ratingStar, appointment.client_rating && rating <= appointment.client_rating && styles.ratingStarActive]}>★</Text>
+                          <Text style={[styles.ratingStar, Boolean(appointment.client_rating && rating <= appointment.client_rating) && styles.ratingStarActive]}>★</Text>
                         </Pressable>
                       ))}
                     </View>
