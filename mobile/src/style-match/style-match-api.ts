@@ -1,4 +1,5 @@
 import type {
+  StyleMatchCard,
   StyleMatchOverview,
   StyleMatchReaction,
   StyleMatchReactionResult,
@@ -12,6 +13,12 @@ export function fetchStyleMatchOverview(
   request: AuthenticatedRequest,
 ): Promise<StyleMatchOverview> {
   return request<StyleMatchOverview>('/style-match/');
+}
+
+export function fetchStyleMatchPreview(
+  request: AuthenticatedRequest,
+): Promise<{ cards: StyleMatchCard[] }> {
+  return request<{ cards: StyleMatchCard[] }>('/style-match/preview/');
 }
 
 export function startStyleMatch(
