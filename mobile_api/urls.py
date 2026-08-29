@@ -1,12 +1,12 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
+from .artist_booking_preferences_parity_view import ArtistBookingPreferencesView
 from .artist_dashboard_views import (
     ArtistAppointmentListView,
     ArtistAppointmentScheduleView,
     ArtistBlockDetailView,
     ArtistBlockListView,
-    ArtistBookingPreferencesView,
     ArtistDashboardView,
     ArtistScheduleView,
     ArtistTimeOffDetailView,

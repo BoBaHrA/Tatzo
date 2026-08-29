@@ -27,7 +27,6 @@ import {
   saveArtistBookingPreferences,
   updateArtistBookingStatus,
 } from '@/artist-dashboard/artist-dashboard-api';
-import { ArtistTimeline, WorkloadStrip } from '@/artist-dashboard/dashboard-components';
 import { useAuth } from '@/auth/auth-context';
 import { fetchAppointments } from '@/booking/booking-api';
 import { fetchChats } from '@/chat/chat-api';
@@ -55,6 +54,20 @@ type DashboardDestination = {
   key: DashboardPanelKey;
   label: string;
   icon: ImageSourcePropType;
+};
+
+type DashboardBookingPreferences = ArtistBookingPreferences & {
+  bookings_enabled: boolean;
+  phone_consultation_enabled: boolean;
+  deposit_required: boolean;
+  deposit_amount: string;
+};
+
+type DashboardBookingPreferencesUpdate = ArtistBookingPreferencesUpdate & {
+  bookings_enabled: boolean;
+  phone_consultation_enabled: boolean;
+  deposit_required: boolean;
+  deposit_amount: string;
 };
 
 const WEB_DASH_ICONS = {
@@ -144,7 +157,7 @@ function openChat(threadId: number) {
   router.push({ pathname: '/chat/[threadId]', params: { threadId: String(threadId) } });
 }
 
-function preferencePayload(value: ArtistBookingPreferences): ArtistBookingPreferencesUpdate {
+function preferencePayload(value: DashboardBookingPreferences): DashboardBookingPreferencesUpdate {
   return {
     booking_workflow: value.booking_workflow,
     minimum_notice_hours: value.minimum_notice_hours,
@@ -167,6 +180,10 @@ function preferencePayload(value: ArtistBookingPreferences): ArtistBookingPrefer
     auto_response_need_more_references: value.auto_response_need_more_references,
     auto_response_booking_approved: value.auto_response_booking_approved,
     auto_response_booking_declined: value.auto_response_booking_declined,
+    bookings_enabled: value.bookings_enabled,
+    phone_consultation_enabled: value.phone_consultation_enabled,
+    deposit_required: value.deposit_required,
+    deposit_amount: value.deposit_amount,
   };
 }
 
@@ -176,7 +193,7 @@ export default function ArtistDashboardScreen() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [threads, setThreads] = useState<ChatThreadSummary[]>([]);
   const [portfolio, setPortfolio] = useState<PortfolioWork[]>([]);
-  const [preferences, setPreferences] = useState<ArtistBookingPreferences | null>(null);
+  const [preferences, setPreferences] = useState<DashboardBookingPreferences | null>(null);
   const [activePanel, setActivePanel] = useState<DashboardPanelKey>('dashboard');
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -201,7 +218,16 @@ export default function ArtistDashboardScreen() {
       if (appointmentResult.status === 'fulfilled') setAppointments(appointmentResult.value.results);
       if (chatResult.status === 'fulfilled') setThreads(chatResult.value.results);
       if (portfolioResult.status === 'fulfilled') setPortfolio(portfolioResult.value.results);
-      if (preferencesResult.status === 'fulfilled') setPreferences(preferencesResult.value);
+      if (preferencesResult.status === 'fulfilled') {
+        const value = preferencesResult.value as DashboardBookingPreferences;
+        setPreferences({
+          ...value,
+          bookings_enabled: value.bookings_enabled ?? dashboardResult.value.settings.bookings_enabled,
+          phone_consultation_enabled: value.phone_consultation_enabled ?? false,
+          deposit_required: value.deposit_required ?? false,
+          deposit_amount: value.deposit_amount ?? '0',
+        });
+      }
     } catch {
       setLoadError(true);
     } finally {
@@ -226,6 +252,7 @@ export default function ArtistDashboardScreen() {
     try {
       const settings = await updateArtistBookingStatus(request, nextStatus);
       setDashboard((current) => current ? { ...current, settings } : current);
+      setPreferences((current) => current ? { ...current, bookings_enabled: settings.bookings_enabled } : current);
     } catch (caught) {
       setActionError(userFacingError(caught));
     } finally {
@@ -238,7 +265,8 @@ export default function ArtistDashboardScreen() {
     setSavingPreferences(true);
     setActionError('');
     try {
-      setPreferences(await saveArtistBookingPreferences(request, preferencePayload(preferences)));
+      const saved = await saveArtistBookingPreferences(request, preferencePayload(preferences));
+      setPreferences(saved as DashboardBookingPreferences);
     } catch (caught) {
       setActionError(userFacingError(caught));
     } finally {
@@ -302,7 +330,7 @@ export default function ArtistDashboardScreen() {
         </View>
       </View>
 
-      {activePanel === 'dashboard' ? <DashboardOverview dashboard={dashboard} actionError={actionError} updatingStatus={updatingStatus} onChangeStatus={changeStatus} /> : null}
+      {activePanel === 'dashboard' ? <DashboardOverview dashboard={dashboard} /> : null}
       {activePanel === 'calendar' ? <CalendarPanel dashboard={dashboard} /> : null}
       {activePanel === 'bookings' ? <BookingsPanel appointments={appointments} /> : null}
       {activePanel === 'projects' ? <ProjectsPanel appointments={appointments} /> : null}
@@ -327,12 +355,7 @@ export default function ArtistDashboardScreen() {
   );
 }
 
-function DashboardOverview({ dashboard, actionError, updatingStatus, onChangeStatus }: {
-  dashboard: ArtistDashboard;
-  actionError: string;
-  updatingStatus: ArtistBookingStatus | null;
-  onChangeStatus: (status: ArtistBookingStatus) => Promise<void>;
-}) {
+function DashboardOverview({ dashboard }: { dashboard: ArtistDashboard }) {
   const stats = [
     { value: dashboard.stats.today_sessions, label: t('artistTodaySessions'), icon: WEB_DASH_ICONS.calendar },
     { value: dashboard.stats.pending_requests, label: t('artistPendingRequests'), icon: WEB_DASH_ICONS.bookings, accent: true },
@@ -341,20 +364,6 @@ function DashboardOverview({ dashboard, actionError, updatingStatus, onChangeSta
   ];
   return (
     <>
-      <View style={styles.statusBar}>
-        <View style={styles.statusCopy}>
-          <View style={[styles.statusDot, !dashboard.settings.bookings_enabled && styles.statusDotPaused]} />
-          <View style={styles.statusTextWrap}><Text style={styles.statusTitle}>{dashboard.settings.booking_status_label}</Text><Text style={styles.statusHint}>{t('artistBookingStatusHint')}</Text></View>
-        </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statusOptions}>
-          {dashboard.settings.booking_status_options.slice(0, 3).map((option) => {
-            const selected = option.value === dashboard.settings.booking_status;
-            const updating = updatingStatus === option.value;
-            return <Pressable accessibilityRole="button" accessibilityState={{ selected }} disabled={Boolean(updatingStatus)} key={option.value} onPress={() => void onChangeStatus(option.value)} style={({ pressed }) => [styles.statusChip, selected && styles.statusChipSelected, pressed && styles.pressed]}>{updating ? <ActivityIndicator color={selected ? '#001014' : colors.primary} size="small" /> : <Text style={[styles.statusChipText, selected && styles.statusChipTextSelected]}>{option.label}</Text>}</Pressable>;
-          })}
-        </ScrollView>
-      </View>
-      {actionError ? <Text style={styles.error}>{actionError}</Text> : null}
       <View style={styles.statStack}>{stats.map((stat) => <View key={stat.label} style={styles.statCard}><Image source={stat.icon} resizeMode="contain" style={[styles.statIcon, { tintColor: stat.accent ? colors.accent : colors.primary }]} /><View style={styles.statCopy}><Text style={styles.statValue}>{stat.value}</Text><Text style={styles.statLabel}>{stat.label}</Text></View></View>)}</View>
       <Text style={styles.sectionTitle}>✦ {copy('Smart insights', 'Conseils intelligents', 'Умные подсказки')}</Text>
       <View style={styles.insightStack}>
@@ -363,8 +372,6 @@ function DashboardOverview({ dashboard, actionError, updatingStatus, onChangeSta
         <Insight accent text={copy('Pending requests should be answered quickly to improve conversion.', 'Répondez rapidement aux demandes en attente.', 'На ожидающие заявки лучше отвечать быстро — это повышает конверсию.')} />
         <Insight text={copy('Add portfolio works to make your booking page more convincing.', 'Ajoutez des œuvres au portfolio.', 'Добавляй работы в портфолио — так страница записи будет убедительнее.')} />
       </View>
-      <View style={styles.section}><View style={styles.sectionHead}><Text style={styles.sectionTitle}>{t('artistWorkload')}</Text><Pressable onPress={() => router.push('/artist-dashboard/schedule')}><Text style={styles.sectionLink}>{t('artistManageSchedule')}</Text></Pressable></View><WorkloadStrip days={dashboard.workload} /></View>
-      <View style={styles.section}><Text style={styles.sectionTitle}>{t('artistUpcoming')}</Text><ArtistTimeline items={dashboard.timeline} /></View>
     </>
   );
 }
@@ -439,20 +446,28 @@ function StatisticsPanel({ appointments, dashboard, threads }: { appointments: A
 
 function SettingsPanel({ dashboard, preferences, actionError, saving, updatingStatus, onChangePreferences, onChangeStatus, onSave }: {
   dashboard: ArtistDashboard;
-  preferences: ArtistBookingPreferences | null;
+  preferences: DashboardBookingPreferences | null;
   actionError: string;
   saving: boolean;
   updatingStatus: ArtistBookingStatus | null;
-  onChangePreferences: (patch: Partial<ArtistBookingPreferences>) => void;
+  onChangePreferences: (patch: Partial<DashboardBookingPreferences>) => void;
   onChangeStatus: (status: ArtistBookingStatus) => Promise<void>;
   onSave: () => void;
 }) {
   return (
     <View style={styles.panelStack}>
-      <View style={styles.surfaceCard}>
+      <View style={styles.settingsCard}>
         <Text style={styles.cardTitle}>{copy('Booking settings', 'Paramètres de réservation', 'Настройки записи')}</Text>
+        <Text style={styles.cardHint}>{copy('Control how clients can request and prepare a booking.', 'Contrôlez la façon dont les clients demandent et préparent une réservation.', 'Настрой, как клиенты могут отправлять и готовить заявку на запись.')}</Text>
         {preferences ? (
           <View style={styles.settingsStack}>
+            <SettingToggle label={copy('Accept new clients', 'Accepter de nouveaux clients', 'Принимать новых клиентов')} value={preferences.bookings_enabled} onChange={(value) => onChangePreferences({ bookings_enabled: value })} />
+            <SettingToggle label={copy('Reference images required', 'Références requises', 'Референсы обязательны')} value={preferences.reference_images_required} onChange={(value) => onChangePreferences({ reference_images_required: value })} />
+            <SettingToggle label={copy('Online consultation', 'Consultation en ligne', 'Онлайн-консультация')} value={preferences.online_consultation_enabled} onChange={(value) => onChangePreferences({ online_consultation_enabled: value })} />
+            <SettingToggle label={copy('Phone consultation', 'Consultation téléphonique', 'Консультация по телефону')} value={preferences.phone_consultation_enabled} onChange={(value) => onChangePreferences({ phone_consultation_enabled: value })} />
+            <DecimalSetting label={copy('Deposit amount', 'Montant de l’acompte', 'Сумма депозита')} suffix="€" value={preferences.deposit_amount} onChange={(value) => onChangePreferences({ deposit_amount: value })} />
+            <NumberSetting label={copy('Max references', 'Références max', 'Макс. референсов')} value={preferences.maximum_reference_images} onChange={(value) => onChangePreferences({ maximum_reference_images: value })} />
+            <NumberSetting label={copy('Minimum booking notice', 'Préavis minimum', 'Минимальное предупреждение')} suffix="h" value={preferences.minimum_notice_hours} onChange={(value) => onChangePreferences({ minimum_notice_hours: value })} />
             <View style={styles.settingBlock}>
               <Text style={styles.settingLabel}>{copy('Preferred booking workflow', 'Workflow préféré', 'Сценарий записи')}</Text>
               <View style={styles.inlineChoices}>
@@ -462,28 +477,29 @@ function SettingsPanel({ dashboard, preferences, actionError, saving, updatingSt
                 })}
               </View>
             </View>
+
+            <View style={styles.settingsDivider} />
+
             <SettingToggle label={copy('Consultations enabled', 'Consultations activées', 'Консультации включены')} value={preferences.consultation_enabled} onChange={(value) => onChangePreferences({ consultation_enabled: value })} />
-            <SettingToggle label={copy('Online consultation', 'Consultation en ligne', 'Онлайн-консультация')} value={preferences.online_consultation_enabled} onChange={(value) => onChangePreferences({ online_consultation_enabled: value })} />
-            <SettingToggle label={copy('Studio consultation', 'Consultation au studio', 'Консультация в студии')} value={preferences.studio_consultation_enabled} onChange={(value) => onChangePreferences({ studio_consultation_enabled: value })} />
             <SettingToggle label={copy('Consultation required', 'Consultation requise', 'Консультация обязательна')} value={preferences.consultation_required_before_booking} onChange={(value) => onChangePreferences({ consultation_required_before_booking: value })} />
-            <SettingToggle label={copy('Reference images required', 'Références requises', 'Референсы обязательны')} value={preferences.reference_images_required} onChange={(value) => onChangePreferences({ reference_images_required: value })} />
-            <View style={styles.numericGrid}>
-              <NumberSetting label={copy('Minimum booking notice', 'Préavis minimum', 'Минимальное предупреждение')} suffix="h" value={preferences.minimum_notice_hours} onChange={(value) => onChangePreferences({ minimum_notice_hours: value })} />
-              <NumberSetting label={copy('Maximum booking window', 'Fenêtre maximale', 'Окно бронирования')} suffix="d" value={preferences.maximum_booking_window_days} onChange={(value) => onChangePreferences({ maximum_booking_window_days: value })} />
-              <NumberSetting label={copy('Maximum session', 'Session maximale', 'Максимальный сеанс')} suffix="h" value={preferences.maximum_session_hours} onChange={(value) => onChangePreferences({ maximum_session_hours: value })} />
-              <NumberSetting label={copy('Max references', 'Références max', 'Макс. референсов')} value={preferences.maximum_reference_images} onChange={(value) => onChangePreferences({ maximum_reference_images: value })} />
-            </View>
+            <SettingToggle label={copy('Deposit required', 'Acompte obligatoire', 'Депозит обязателен')} value={preferences.deposit_required} onChange={(value) => onChangePreferences({ deposit_required: value })} />
+            <SettingToggle label={copy('Studio consultation', 'Consultation au studio', 'Консультация в студии')} value={preferences.studio_consultation_enabled} onChange={(value) => onChangePreferences({ studio_consultation_enabled: value })} />
+            <DecimalSetting label={copy('Consultation price', 'Prix de consultation', 'Стоимость консультации')} suffix="€" value={preferences.consultation_price} onChange={(value) => onChangePreferences({ consultation_price: value })} />
+            <NumberSetting label={copy('Min references', 'Références min', 'Мин. референсов')} value={preferences.minimum_reference_images} onChange={(value) => onChangePreferences({ minimum_reference_images: value })} />
+            <NumberSetting label={copy('Max session duration', 'Durée max de séance', 'Макс. длительность сеанса')} suffix="h" value={preferences.maximum_session_hours} onChange={(value) => onChangePreferences({ maximum_session_hours: value })} />
+            <NumberSetting label={copy('Maximum booking window', 'Fenêtre maximale', 'Максимальное окно бронирования')} suffix="d" value={preferences.maximum_booking_window_days} onChange={(value) => onChangePreferences({ maximum_booking_window_days: value })} />
+
+            <View style={styles.settingsDivider} />
             <Text style={styles.settingLabel}>{copy('Tattoo styles offered', 'Styles proposés', 'Доступные стили тату')}</Text>
             <View style={styles.styleGrid}>{preferences.style_options.map((option) => {
               const selected = preferences.active_styles.includes(option.value);
               return <Pressable key={option.value} onPress={() => onChangePreferences({ active_styles: selected ? preferences.active_styles.filter((item) => item !== option.value) : [...preferences.active_styles, option.value] })} style={[styles.styleChip, selected && styles.styleChipActive]}><Text style={[styles.styleChipText, selected && styles.styleChipTextActive]}>{option.label}</Text></Pressable>;
             })}</View>
-            <Button label={copy('Save settings', 'Enregistrer', 'Сохранить настройки')} loading={saving} onPress={onSave} />
           </View>
         ) : <Text style={styles.cardHint}>{copy('Advanced booking settings are unavailable right now.', 'Les paramètres avancés sont indisponibles.', 'Расширенные настройки записи сейчас недоступны.')}</Text>}
       </View>
 
-      <View style={styles.surfaceCard}>
+      <View style={styles.settingsCard}>
         <Text style={styles.cardTitle}>{copy('Booking rules', 'Règles de réservation', 'Правила записи')}</Text>
         <Text style={styles.cardHint}>{copy('Choose the rule clients should see in the booking flow.', 'Choisissez la règle visible aux clients.', 'Выбери правило, которое сразу увидят клиенты при записи.')}</Text>
         <View style={styles.rulesGrid}>
@@ -506,7 +522,21 @@ function SettingsPanel({ dashboard, preferences, actionError, saving, updatingSt
           })}
         </View>
       </View>
+
+      {preferences ? (
+        <View style={styles.settingsCard}>
+          <Text style={styles.cardTitle}>{copy('Auto responses', 'Réponses automatiques', 'Автоответы')}</Text>
+          <Text style={styles.cardHint}>{copy('Keep the same messages clients receive from the web booking workflow.', 'Conservez les mêmes messages que dans le parcours web.', 'Здесь те же сообщения, которые клиенты получают в веб-сценарии записи.')}</Text>
+          <ResponseSetting label={copy('Booking received', 'Réservation reçue', 'Заявка получена')} value={preferences.auto_response_booking_received} onChange={(value) => onChangePreferences({ auto_response_booking_received: value })} />
+          <ResponseSetting label={copy('Consultation required', 'Consultation requise', 'Нужна консультация')} value={preferences.auto_response_consultation_required} onChange={(value) => onChangePreferences({ auto_response_consultation_required: value })} />
+          <ResponseSetting label={copy('Need more references', 'Plus de références nécessaires', 'Нужно больше референсов')} value={preferences.auto_response_need_more_references} onChange={(value) => onChangePreferences({ auto_response_need_more_references: value })} />
+          <ResponseSetting label={copy('Booking approved', 'Réservation approuvée', 'Запись подтверждена')} value={preferences.auto_response_booking_approved} onChange={(value) => onChangePreferences({ auto_response_booking_approved: value })} />
+          <ResponseSetting label={copy('Booking declined', 'Réservation refusée', 'Запись отклонена')} value={preferences.auto_response_booking_declined} onChange={(value) => onChangePreferences({ auto_response_booking_declined: value })} />
+        </View>
+      ) : null}
+
       {actionError ? <Text style={styles.error}>{actionError}</Text> : null}
+      {preferences ? <Button label={copy('Save all settings', 'Enregistrer tous les paramètres', 'Сохранить все настройки')} loading={saving} onPress={onSave} /> : null}
     </View>
   );
 }
@@ -517,6 +547,14 @@ function SettingToggle({ label, value, onChange }: { label: string; value: boole
 
 function NumberSetting({ label, value, suffix, onChange }: { label: string; value: number; suffix?: string; onChange: (value: number) => void }) {
   return <View style={styles.numberSetting}><Text style={styles.numberLabel}>{label}</Text><View style={styles.numberInputWrap}><TextInput keyboardType="number-pad" onChangeText={(text) => onChange(Math.max(0, Number.parseInt(text || '0', 10) || 0))} style={styles.numberInput} value={String(value)} />{suffix ? <Text style={styles.numberSuffix}>{suffix}</Text> : null}</View></View>;
+}
+
+function DecimalSetting({ label, value, suffix, onChange }: { label: string; value: string; suffix?: string; onChange: (value: string) => void }) {
+  return <View style={styles.numberSetting}><Text style={styles.numberLabel}>{label}</Text><View style={styles.numberInputWrap}><TextInput keyboardType="decimal-pad" onChangeText={(text) => onChange(text.replace(',', '.').replace(/[^0-9.]/g, ''))} style={styles.numberInput} value={value} />{suffix ? <Text style={styles.numberSuffix}>{suffix}</Text> : null}</View></View>;
+}
+
+function ResponseSetting({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  return <View style={styles.responseSetting}><Text style={styles.numberLabel}>{label}</Text><TextInput maxLength={2000} multiline onChangeText={onChange} placeholder={copy('Optional message', 'Message facultatif', 'Необязательное сообщение')} placeholderTextColor={colors.textMuted} style={styles.responseInput} textAlignVertical="top" value={value} /></View>;
 }
 
 function AppointmentPanelRow({ appointment }: { appointment: Appointment }) {
@@ -566,18 +604,6 @@ const styles = StyleSheet.create({
   panelEyebrow: { color: colors.primary, fontSize: 9, fontWeight: '900', letterSpacing: 1.4 },
   heading: { color: colors.white, fontSize: 27, lineHeight: 32, fontWeight: '900', letterSpacing: -.6 },
   date: { color: colors.textMuted, fontSize: 13, textTransform: 'capitalize' },
-  statusBar: { gap: spacing.sm, borderRadius: 18, padding: spacing.md, backgroundColor: 'rgba(255,255,255,.035)', borderWidth: 1, borderColor: 'rgba(255,255,255,.075)' },
-  statusCopy: { flexDirection: 'row', alignItems: 'center', gap: 9 },
-  statusDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: colors.success },
-  statusDotPaused: { backgroundColor: colors.accent },
-  statusTextWrap: { flex: 1, minWidth: 0, gap: 2 },
-  statusTitle: { color: colors.white, fontSize: 14, fontWeight: '900' },
-  statusHint: { color: colors.textMuted, fontSize: 10, lineHeight: 14 },
-  statusOptions: { gap: 7, paddingRight: 4 },
-  statusChip: { minHeight: 34, paddingHorizontal: 12, borderRadius: 999, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,.10)', backgroundColor: 'rgba(255,255,255,.025)' },
-  statusChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
-  statusChipText: { color: colors.textMuted, fontSize: 10, fontWeight: '800' },
-  statusChipTextSelected: { color: '#001014' },
   error: { color: colors.danger, lineHeight: 20 },
   statStack: { gap: 10 },
   statCard: { minHeight: 92, flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.lg, borderRadius: 18, backgroundColor: 'rgba(255,255,255,.035)', borderWidth: 1, borderColor: 'rgba(255,255,255,.075)' },
@@ -595,6 +621,7 @@ const styles = StyleSheet.create({
   insightText: { color: 'rgba(234,255,255,.82)', fontSize: 13, lineHeight: 19, fontWeight: '700' },
   panelStack: { gap: spacing.md },
   surfaceCard: { gap: spacing.md, padding: spacing.md, borderRadius: 20, backgroundColor: 'rgba(0,19,29,.94)', borderWidth: 1, borderColor: 'rgba(4,197,191,.14)' },
+  settingsCard: { gap: spacing.md, padding: 18, borderRadius: 18, backgroundColor: 'rgba(255,255,255,.035)', borderWidth: 1, borderColor: 'rgba(255,255,255,.075)' },
   cardTitle: { color: colors.white, fontSize: 20, lineHeight: 25, fontWeight: '900' },
   cardHint: { color: colors.textMuted, fontSize: 11, lineHeight: 17 },
   flexOne: { flex: 1, minWidth: 0 },
@@ -632,6 +659,7 @@ const styles = StyleSheet.create({
   settingsStack: { gap: 14 },
   settingBlock: { gap: 8 },
   settingLabel: { color: colors.text, fontSize: 12, fontWeight: '800' },
+  settingsDivider: { height: StyleSheet.hairlineWidth, backgroundColor: 'rgba(255,255,255,.08)', marginVertical: 2 },
   inlineChoices: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
   choiceChip: { minHeight: 38, justifyContent: 'center', paddingHorizontal: 13, borderRadius: 999, borderWidth: 1, borderColor: 'rgba(255,255,255,.11)' },
   choiceChipActive: { backgroundColor: 'rgba(238,12,111,.13)', borderColor: colors.accent },
@@ -655,8 +683,10 @@ const styles = StyleSheet.create({
   styleChipText: { color: colors.textMuted, fontSize: 10, fontWeight: '800' },
   styleChipTextActive: { color: '#ff69a8' },
   rulesGrid: { gap: 10 },
-  ruleCard: { minHeight: 78, justifyContent: 'center', gap: 8, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,.09)', backgroundColor: 'rgba(255,255,255,.045)' },
+  ruleCard: { minHeight: 86, justifyContent: 'center', gap: 8, padding: 14, borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,.09)', backgroundColor: 'rgba(255,255,255,.045)' },
   ruleSymbol: { fontSize: 19, fontWeight: '900' },
   ruleLabel: { color: colors.text, fontSize: 12, fontWeight: '900' },
+  responseSetting: { gap: 7 },
+  responseInput: { minHeight: 92, color: colors.text, fontSize: 13, lineHeight: 19, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,.09)', backgroundColor: 'rgba(255,255,255,.045)' },
   pressed: { opacity: .72, transform: [{ scale: .985 }] },
 });
