@@ -1,4 +1,5 @@
 import type {
+  StyleMatchCard,
   StyleMatchOverview,
   StyleMatchReaction,
   StyleMatchReactionResult,
@@ -8,10 +9,20 @@ import type {
 import type { AuthenticatedRequest } from '@/auth/auth-context';
 
 
+type StyleMatchPreviewResponse = {
+  results: StyleMatchCard[];
+};
+
 export function fetchStyleMatchOverview(
   request: AuthenticatedRequest,
 ): Promise<StyleMatchOverview> {
   return request<StyleMatchOverview>('/style-match/');
+}
+
+export function fetchStyleMatchPreview(
+  request: AuthenticatedRequest,
+): Promise<StyleMatchPreviewResponse> {
+  return request<StyleMatchPreviewResponse>('/style-match/preview/');
 }
 
 export function startStyleMatch(
