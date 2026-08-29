@@ -19,6 +19,7 @@ export type PostDraft = {
   location: string;
   visibility: FeedPost['visibility'];
   disableComments: boolean;
+  layout: FeedPost['layout'];
   media: PendingPublishMedia[];
 };
 
@@ -52,7 +53,7 @@ export function createPost(
   body.append('location', draft.location);
   body.append('visibility', draft.visibility);
   body.append('disable_comments', String(draft.disableComments));
-  body.append('layout', draft.media.length > 1 ? 'carousel' : 'grid');
+  body.append('layout', draft.media.length > 1 ? draft.layout : 'grid');
   draft.media.forEach((item) => body.append('media', uploadBody(item)));
   return request<FeedPost>('/me/posts/', { method: 'POST', body });
 }
