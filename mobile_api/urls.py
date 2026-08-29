@@ -76,6 +76,7 @@ from .publishing_views import (
 )
 from .push_views import PushDeviceView
 from .search_views import ProfileSearchView
+from .style_match_preview_views import StyleMatchPreviewView
 from .verification_views import (
     ArtistVerificationDocumentsView,
     ArtistVerificationManualView,
@@ -392,6 +393,7 @@ urlpatterns = [
         CommentReportView.as_view(),
         name="comment_report",
     ),
+    path("style-match/preview/", StyleMatchPreviewView.as_view(), name="style_match_preview"),
     path("style-match/", StyleMatchView.as_view(), name="style_match"),
     path(
         "style-match/<uuid:session_id>/react/",

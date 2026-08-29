@@ -26,7 +26,8 @@ const home = source('app/(tabs)/home.tsx');
 const brandHeader = source('src/components/brand-header.tsx');
 const postCardExport = source('src/feed/post-card.tsx');
 const postCard = source('src/feed/web-post-card.tsx');
-const media = source('src/feed/post-media.tsx');
+const mediaExport = source('src/feed/post-media.tsx');
+const media = source('src/feed/post-media-v2.tsx');
 const composer = source('src/publishing/inline-post-composer.tsx');
 const detail = source('app/post/[postId].tsx');
 const comments = source('src/comments/comments-section-v2.tsx');
@@ -36,7 +37,7 @@ for (const icon of ['post-heart.png', 'post-comments.png', 'post-share.png', 'po
   check(existsSync(join(projectRoot, 'assets', 'web-icons', icon)), `Web post action asset ${icon} exists`);
 }
 
-check(home.includes("onDelete={removePost}"), 'Feed supports deleting owned posts from the post menu');
+check(home.includes('onDelete={removePost}'), 'Feed supports deleting owned posts from the post menu');
 check(home.includes('InlinePostComposer'), 'Post creation expands inline inside the feed');
 check(!home.includes("router.push('/create-post')"), 'Feed no longer navigates away to create a post');
 check(composer.includes('Animated.timing') && composer.includes('maxHeight: shellMaxHeight'), 'Inline composer uses explicit height animation on Android');
@@ -52,19 +53,21 @@ check(postCard.includes('LIKED_HEART') && !postCard.includes('iconLiked'), 'Like
 check(postCard.includes('BOOKMARKED') && !postCard.includes('iconBookmarked'), 'Saved state uses dedicated web artwork instead of tinting the whole icon');
 check(postCard.includes("post-heart.png") && postCard.includes("post-comments.png"), 'Like and comment actions use the exact web artwork');
 check(postCard.includes("post-share.png") && postCard.includes("post-bookmark.png"), 'Share and bookmark actions use the exact web artwork');
-check(postCard.includes("Share.share"), 'Post actions include native sharing');
+check(postCard.includes('Share.share'), 'Post actions include native sharing');
 check(postCard.includes('⋯'), 'Post menu uses the web-style ellipsis trigger');
 check(brandHeader.includes("'/search/?type=artists'"), 'Topbar star opens artist recommendations instead of Style Match');
 check(brandHeader.includes('menuOpen') && brandHeader.includes('☰'), 'Topbar exposes the web-style More menu');
+check(mediaExport.includes("from './post-media-v2'"), 'Feed uses the repaired carousel media implementation');
 check(media.includes("layout === 'carousel'"), 'Saved post layout switches between the real grid and carousel renderers');
 check(media.includes('total === 3') && media.includes('total === 5') && media.includes('total === 8') && media.includes('total === 9'), 'Grid renderer preserves the special 3/5/8/9-media web compositions');
 check(media.includes('total === 7 || total >= 10') && media.includes('stripRow'), 'Grid renderer preserves the 7 and 10+ two-up plus strip composition');
-check(media.includes('pagingEnabled') && media.includes('thumbsRow'), 'Carousel keeps swipe paging plus the web thumbnail rail');
-check(media.includes('VideoThumbnail') && media.includes('<FeedVideo controls={false} fit="cover" url={url} />'), 'Carousel video thumbnails render the actual video frame instead of an empty play tile');
-check(!media.includes('<View style={styles.videoThumb}>\n                        <Text style={styles.videoThumbText}>▶</Text>'), 'Carousel no longer falls back to a blank text-only video thumbnail');
-check(media.includes('const thumbRailHeight = largeThumbSet ? 140 : 120') && media.includes("? (active ? 140 : 82)\n                  : (active ? 120 : 90)"), 'Carousel thumbnail rail uses the current web 90/120px and 82/140px geometry');
-check(media.includes('thumbsRowCentered') && media.includes("justifyContent: 'center'"), 'Small web-style carousel thumbnail sets stay centered');
-check(media.includes('blurRadius={26}') && media.includes('contain'), 'Single and carousel media keep the web-style contained image over a blurred frame');
+check(media.includes('pagingEnabled') && media.includes('thumbsRow'), 'Carousel keeps swipe paging plus the thumbnail rail');
+check(media.includes('pointerEvents="none" style={styles.videoThumb}') && media.includes('<FeedVideo controls={false} fit="cover" url={url} />'), 'Video thumbnails cannot steal the outer Pressable tap');
+check(media.includes('Animated.spring(activation') && media.includes('CarouselThumbnail'), 'Thumbnail selection animates instead of snapping between sizes');
+check(media.includes('const transition = useRef(new Animated.Value(1))') && media.includes('duration: 230'), 'Main carousel selection gets a short animated transition');
+check(media.includes("scrollTo({ x: bounded * width, animated: true })"), 'Thumbnail selection animates the main media page');
+check(media.includes('thumbsRowCentered') && media.includes("justifyContent: 'center'"), 'Small thumbnail sets stay centered');
+check(media.includes('blurRadius={26}') && media.includes('contain'), 'Single and carousel media keep the contained image over a blurred frame');
 check(detail.includes('CommentsSectionV2'), 'Post detail uses the compact comments parity surface');
 check(comments.includes('replyList'), 'Comments preserve nested replies');
 check(comments.includes('toggleCommentLike'), 'Comments preserve comment likes');
