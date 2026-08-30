@@ -31,7 +31,7 @@ function check(condition, label) {
 const route = source('app/(tabs)/match.tsx');
 const match = source('src/style-match/style-match-screen-v3.tsx');
 const matchApi = source('src/style-match/style-match-api.ts');
-const result = source('src/style-match/style-match-result-v2.tsx');
+const result = source('src/style-match/style-match-result-v3.tsx');
 
 exists('assets/tatzo7.png');
 for (const icon of ['reject', 'save', 'like', 'favorite']) {
@@ -45,7 +45,8 @@ check(match.includes('ImageSourcePropType') && match.includes('actionIcon'), 'St
 check(match.includes('previewDeck') && match.includes('visualPill') && match.includes('previewCenter'), 'Onboarding keeps the current web preview deck');
 check(match.includes('fetchStyleMatchPreview(request)') && match.includes('setPreviewCards(preview.cards.slice(0, 3))'), 'Onboarding loads dedicated global preview cards like the website');
 check(matchApi.includes("'/style-match/preview/'") && matchApi.includes('StyleMatchCard[]'), 'Style Match preview endpoint is wired into the native API client');
-check(match.includes("setSession(null);") && match.includes("setMode('intro')"), 'Opening Style Match always shows onboarding before discovery');
+check(match.includes('overview.active_session') && match.includes("setMode('quiz')") && match.includes('overview.latest_result') && match.includes("setMode('result')"), 'Opening Style Match resumes an active session or restores the latest completed result');
+check(match.includes('useFocusEffect') && match.includes('void loadOverview()'), 'Style Match refreshes saved state when the tab regains focus');
 check(match.includes('PanResponder.create'), 'Discovery cards have a real native swipe responder');
 check(match.includes('const WEB_SWIPE_THRESHOLD = 90'), 'Swipe threshold matches the web 90px choice threshold');
 check(match.includes('const WEB_LONG_PRESS_MS = 650'), 'Hold-to-save matches the web 650ms gesture');
@@ -64,15 +65,16 @@ check(match.includes('setTimeout(() => setAnalysisPhase(1), 550)') && match.incl
 
 check(result.includes("require('../../assets/tatzo7.png')"), 'Results use the official Tatzo logo artwork');
 check(result.includes('matchLockup') && result.includes('confidence'), 'Results lead with the web match-confidence lockup');
-check(result.includes('resultAmbient') && result.includes('resultGlowTealOuter') && result.includes('resultGlowPinkOuter'), 'Results carry the same diffuse teal/pink ambient atmosphere as the website');
-check(result.includes("panelTitle: { color: colors.white, fontFamily: 'serif'") && result.includes("topStyle: { color: colors.white, fontFamily: 'serif'") && result.includes("wrappedTitle: { color: colors.white, fontFamily: 'serif'"), 'Result hierarchy uses the web serif display treatment');
-check(result.includes('personalityCard') && result.includes('personalityShade'), 'Tattoo personality keeps the web pink reveal treatment');
+check(result.includes('resultAmbient') && result.includes('ambientTealOuter') && result.includes('ambientPinkOuter'), 'Results carry the same diffuse teal/pink ambient atmosphere as the website');
+check(result.includes("panelTitle: { color: WEB.text, fontFamily: 'serif'") && result.includes("topStyle: { color: WEB.text, fontFamily: 'serif'") && result.includes("wrappedTitle: { color: WEB.text, fontFamily: 'serif'"), 'Result hierarchy uses the web serif display treatment');
+check(result.includes('personalityCard') && result.includes('personalityDeep') && result.includes('personalityGlow'), 'Tattoo personality mirrors the web pink-to-deep-magenta reveal treatment');
 check(result.includes('<SavedReferences result={result} />'), 'Saved references sit directly after the personality result');
 check(result.includes('TraitPanel') && result.includes('styleMatchDrawnTo') && result.includes('styleMatchSkip'), 'Drawn-to and skip sections use full-width result panels');
 check(result.includes('tagCloud') && result.includes('achievementGrid') && result.includes('wrappedCard'), 'Results include mood tags, unlocks and Tatzo Wrapped');
 check(result.includes("pathname: '/profile/[username]'"), 'Artist recommendations open real profiles');
 check(result.includes('saved_cards') && result.includes('savedGrid'), 'Saved references remain visible with web-like tiles');
 check(result.includes("router.replace('/(tabs)/home')"), 'Completed results keep a safe path back home');
+check(result.includes('result.styles.slice(0, 5)') && result.includes('communityHeadline'), 'Result mood tags and community copy follow the deployed web result composition');
 
 console.log('\nTatzo mobile Style Match parity check');
 for (const label of passed) console.log(`  ✓ ${label}`);
