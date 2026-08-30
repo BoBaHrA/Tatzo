@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import {
   ActivityIndicator,
   Animated,
@@ -30,7 +31,7 @@ import {
   reactToStyleMatch,
   startStyleMatch,
 } from '@/style-match/style-match-api';
-import { StyleMatchResultV2 } from '@/style-match/style-match-result-v2';
+import { StyleMatchResultV3 } from '@/style-match/style-match-result-v3';
 import { colors, spacing } from '@/theme';
 
 
@@ -184,8 +185,20 @@ export default function StyleMatchScreenV3() {
       ]);
       setLatestResult(overview.latest_result);
       setPreviewCards(preview.cards.slice(0, 3));
-      setSession(null);
-      setMode('intro');
+      setPendingResult(null);
+      if (overview.active_session) {
+        setSession(overview.active_session);
+        setResult(null);
+        setMode('quiz');
+      } else if (overview.latest_result) {
+        setSession(null);
+        setResult(overview.latest_result);
+        setMode('result');
+      } else {
+        setSession(null);
+        setResult(null);
+        setMode('intro');
+      }
     } catch {
       setError(t('styleMatchError'));
     } finally {
@@ -193,7 +206,9 @@ export default function StyleMatchScreenV3() {
     }
   }, [request, status]);
 
-  useEffect(() => { void loadOverview(); }, [loadOverview]);
+  useFocusEffect(useCallback(() => {
+    void loadOverview();
+  }, [loadOverview]));
 
   const currentCard = session?.cards[session.current_index] ?? null;
   const nextCard = session?.cards[session.current_index + 1] ?? null;
@@ -354,7 +369,7 @@ export default function StyleMatchScreenV3() {
   if (mode === 'result' && result) {
     return (
       <Screen contentStyle={styles.resultScreen}>
-        <StyleMatchResultV2 result={result} onRestart={() => setMode('intro')} restarting={starting} />
+        <StyleMatchResultV3 result={result} onRestart={() => void beginMatch()} restarting={starting} />
         {error ? <Text style={styles.error}>{error}</Text> : null}
       </Screen>
     );
