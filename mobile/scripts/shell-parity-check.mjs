@@ -69,7 +69,7 @@ check(calendar.includes('fetchArtistDashboard(request)'), 'Verified artists enri
 check(calendar.includes("type CalendarViewMode = 'month' | 'week' | 'day'"), 'Calendar keeps alternate views available in the implementation');
 check(calendar.includes('buildMonthDays') && calendar.includes('length: 42'), 'Calendar renders a complete six-week month grid');
 check(calendar.includes("['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']"), 'Calendar follows the web Monday-first week');
-check(calendar.includes("navigationControls: { display: 'none' }") && calendar.includes("viewToggle: { display: 'none' }"), 'Primary mobile Calendar hides the desktop-style control stack to match the deployed web view');
+check(calendar.includes("navigationControls: { flexDirection: 'row'") && calendar.includes("viewToggle: { minHeight: 44") && calendar.includes("monthTitle: { color: colors.text"), 'Calendar exposes compact month navigation plus Month / Week / Day controls');
 check(calendar.includes("titleBlock: { display: 'none' }") && !calendar.includes('styles.hero'), 'Calendar relies on the shared web-like header without a duplicate native title');
 check(calendar.includes('dayCellHasEvents') && calendar.includes("justifyContent: 'space-between'") && calendar.includes('extraMarkersByDate') && calendar.includes('blocked_periods') && calendar.includes('time_off'), 'Calendar uses separated rounded event tiles like the deployed mobile website');
 check(calendar.includes('calendarTouchX') && calendar.includes('goMonth(delta > 0 ? -1 : 1)') && calendar.includes('eventsY.current'), 'Month Calendar supports swipe paging and reveals the selected day details');

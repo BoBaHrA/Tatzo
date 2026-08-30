@@ -64,6 +64,8 @@ check(match.includes('setTimeout(() => setAnalysisPhase(1), 550)') && match.incl
 
 check(result.includes("require('../../assets/tatzo7.png')"), 'Results use the official Tatzo logo artwork');
 check(result.includes('matchLockup') && result.includes('confidence'), 'Results lead with the web match-confidence lockup');
+check(result.includes('resultAmbient') && result.includes('resultGlowTealOuter') && result.includes('resultGlowPinkOuter'), 'Results carry the same diffuse teal/pink ambient atmosphere as the website');
+check(result.includes("panelTitle: { color: colors.white, fontFamily: 'serif'") && result.includes("topStyle: { color: colors.white, fontFamily: 'serif'") && result.includes("wrappedTitle: { color: colors.white, fontFamily: 'serif'"), 'Result hierarchy uses the web serif display treatment');
 check(result.includes('personalityCard') && result.includes('personalityShade'), 'Tattoo personality keeps the web pink reveal treatment');
 check(result.includes('<SavedReferences result={result} />'), 'Saved references sit directly after the personality result');
 check(result.includes('TraitPanel') && result.includes('styleMatchDrawnTo') && result.includes('styleMatchSkip'), 'Drawn-to and skip sections use full-width result panels');

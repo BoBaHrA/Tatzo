@@ -22,6 +22,12 @@ function copy(en: string, fr: string, ru: string) {
 export function StyleMatchResultV2({ result, onRestart, restarting }: Props) {
   return (
     <View style={styles.wrap}>
+      <View pointerEvents="none" style={styles.resultAmbient}>
+        <View style={[styles.resultGlow, styles.resultGlowTealOuter]} />
+        <View style={[styles.resultGlow, styles.resultGlowTealCore]} />
+        <View style={[styles.resultGlow, styles.resultGlowPinkOuter]} />
+        <View style={[styles.resultGlow, styles.resultGlowPinkCore]} />
+      </View>
       <View style={styles.resultsHeader}>
         <Image
           accessibilityLabel="Tatzo"
@@ -232,21 +238,27 @@ function WrappedRow({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: 14 },
-  resultsHeader: { minHeight: 42, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
+  wrap: { position: 'relative', gap: 12, paddingBottom: 6 },
+  resultAmbient: { position: 'absolute', top: -90, left: -80, right: -80, bottom: -100, overflow: 'hidden' },
+  resultGlow: { position: 'absolute', borderRadius: 999 },
+  resultGlowTealOuter: { width: 380, height: 320, top: -160, left: -175, backgroundColor: 'rgba(9,200,194,.025)' },
+  resultGlowTealCore: { width: 240, height: 210, top: -105, left: -110, backgroundColor: 'rgba(9,200,194,.055)' },
+  resultGlowPinkOuter: { width: 410, height: 350, right: -205, bottom: -165, backgroundColor: 'rgba(237,11,112,.022)' },
+  resultGlowPinkCore: { width: 255, height: 220, right: -120, bottom: -105, backgroundColor: 'rgba(237,11,112,.052)' },
+  resultsHeader: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, paddingHorizontal: 2, zIndex: 2 },
   logo: { width: 86, height: 31 },
-  completeBadge: { borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 6, backgroundColor: 'rgba(4,197,191,.10)', borderWidth: 1, borderColor: 'rgba(4,197,191,.24)' },
-  completeText: { color: colors.primary, fontSize: 8, fontWeight: '900', textTransform: 'uppercase', letterSpacing: .7 },
-  hero: { position: 'relative', overflow: 'hidden', backgroundColor: '#082b34', borderRadius: 24, padding: 22, gap: spacing.sm },
-  heroTealGlow: { position: 'absolute', width: 220, height: 180, borderRadius: 100, right: -80, bottom: -100, backgroundColor: 'rgba(4,197,191,.18)' },
-  eyebrow: { color: colors.primary, fontSize: 9, fontWeight: '900', letterSpacing: 1.7 },
+  completeBadge: { borderRadius: radius.pill, paddingHorizontal: 11, paddingVertical: 6, backgroundColor: 'rgba(7,28,38,.78)', borderWidth: 1, borderColor: 'rgba(141,243,236,.24)' },
+  completeText: { color: '#8df3ec', fontSize: 8, fontWeight: '800', textTransform: 'uppercase', letterSpacing: .85 },
+  hero: { position: 'relative', overflow: 'hidden', backgroundColor: 'rgba(13,40,50,.96)', borderRadius: 22, borderWidth: 1, borderColor: 'rgba(150,230,232,.18)', padding: 18, gap: 9, zIndex: 1 },
+  heroTealGlow: { position: 'absolute', width: 250, height: 190, borderRadius: 125, right: -82, bottom: -105, backgroundColor: 'rgba(9,200,194,.16)' },
+  eyebrow: { color: '#8df3ec', fontSize: 9, fontWeight: '800', letterSpacing: 1.55, textTransform: 'uppercase' },
   matchLockup: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  confidence: { color: colors.primary, fontSize: 53, lineHeight: 57, fontWeight: '900', letterSpacing: -3 },
+  confidence: { color: '#09c8c2', fontFamily: 'serif', fontSize: 52, lineHeight: 55, fontWeight: '700', letterSpacing: -2.4 },
   matchCopy: { flex: 1, gap: 2 },
   confidenceLabel: { color: '#8df3ec', fontSize: 8, fontWeight: '900', textTransform: 'uppercase', letterSpacing: .8 },
-  topStyle: { color: colors.white, fontSize: 22, lineHeight: 26, fontWeight: '900' },
-  panel: { backgroundColor: 'rgba(7,28,38,.90)', borderWidth: 1, borderColor: 'rgba(150,230,232,.16)', borderRadius: 21, padding: 17, gap: 14 },
-  panelTitle: { color: colors.white, fontSize: 17, lineHeight: 22, fontWeight: '900' },
+  topStyle: { color: colors.white, fontFamily: 'serif', fontSize: 22, lineHeight: 26, fontWeight: '700', letterSpacing: -.5 },
+  panel: { backgroundColor: 'rgba(7,28,38,.86)', borderWidth: 1, borderColor: 'rgba(150,230,232,.20)', borderRadius: 20, padding: 16, gap: 13, zIndex: 1 },
+  panelTitle: { color: colors.white, fontFamily: 'serif', fontSize: 18, lineHeight: 23, fontWeight: '700', letterSpacing: -.35 },
   panelSubtitle: { color: '#8eacb3', fontSize: 12, lineHeight: 18 },
   spectrum: { gap: 12 },
   scoreRow: { gap: 6 },
@@ -256,10 +268,10 @@ const styles = StyleSheet.create({
   track: { height: 6, borderRadius: 4, overflow: 'hidden', backgroundColor: 'rgba(190,225,229,.17)' },
   fill: { height: '100%', backgroundColor: '#09c8c2', borderRadius: 4 },
   fillPink: { backgroundColor: '#ed0b70' },
-  personalityCard: { position: 'relative', overflow: 'hidden', backgroundColor: '#c90a62', borderRadius: 24, padding: 20, gap: 8 },
-  personalityShade: { position: 'absolute', width: 180, height: 180, borderRadius: 90, right: -65, bottom: -85, backgroundColor: 'rgba(94,9,48,.42)' },
+  personalityCard: { position: 'relative', overflow: 'hidden', backgroundColor: '#d10b68', borderRadius: 21, borderWidth: 1, borderColor: 'rgba(255,255,255,.08)', padding: 18, gap: 8, zIndex: 1 },
+  personalityShade: { position: 'absolute', width: 230, height: 190, borderRadius: 115, right: -88, bottom: -98, backgroundColor: 'rgba(86,4,47,.38)' },
   personalityEyebrow: { color: '#ffd8e8', fontSize: 9, fontWeight: '900', letterSpacing: 1.5 },
-  personalityTitle: { color: colors.white, fontSize: 27, fontWeight: '900', letterSpacing: -.7 },
+  personalityTitle: { color: colors.white, fontFamily: 'serif', fontSize: 25, lineHeight: 29, fontWeight: '700', letterSpacing: -.65 },
   personalityBody: { color: 'rgba(255,255,255,.90)', fontSize: 13, lineHeight: 20 },
   savedHead: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   savedHeadCopy: { flex: 1, gap: 5 },
@@ -279,7 +291,7 @@ const styles = StyleSheet.create({
   negative: { color: '#ff5e8d' },
   traitText: { flex: 1, color: '#d8e9ec', fontSize: 12, lineHeight: 17 },
   artistList: { gap: 10 },
-  artistCard: { minHeight: 68, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 9, borderRadius: 17, borderWidth: 1, borderColor: 'rgba(150,230,232,.16)' },
+  artistCard: { minHeight: 68, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 9, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(150,230,232,.18)', backgroundColor: 'rgba(255,255,255,.025)' },
   artistAvatar: { width: 46, height: 46, borderRadius: 14 },
   artistFallback: { alignItems: 'center', justifyContent: 'center', backgroundColor: '#163842' },
   artistLetter: { color: colors.primary, fontWeight: '900' },
@@ -291,21 +303,21 @@ const styles = StyleSheet.create({
   tagCloud: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
   tag: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: 999, borderWidth: 1, borderColor: 'rgba(9,200,194,.42)' },
   tagText: { color: '#dffeff', fontSize: 10, fontWeight: '800' },
-  communityCard: { position: 'relative', overflow: 'hidden', backgroundColor: '#0b2b35', borderRadius: 22, padding: 19, gap: 4 },
+  communityCard: { position: 'relative', overflow: 'hidden', backgroundColor: 'rgba(11,43,53,.94)', borderRadius: 20, borderWidth: 1, borderColor: 'rgba(150,230,232,.14)', padding: 18, gap: 5, zIndex: 1 },
   communityGlow: { position: 'absolute', width: 170, height: 130, borderRadius: 80, right: -55, bottom: -55, backgroundColor: 'rgba(64,58,139,.27)' },
-  communityNumber: { color: colors.primary, fontSize: 36, fontWeight: '900' },
+  communityNumber: { color: colors.primary, fontFamily: 'serif', fontSize: 36, lineHeight: 40, fontWeight: '700' },
   communityCopy: { color: colors.textMuted, fontSize: 12, lineHeight: 18 },
   achievementGrid: { gap: 9 },
-  achievement: { minHeight: 76, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 13, borderRadius: 16, backgroundColor: 'rgba(255,255,255,.035)', borderWidth: 1, borderColor: 'rgba(150,230,232,.12)', opacity: .55 },
+  achievement: { minHeight: 76, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 13, borderRadius: 15, backgroundColor: 'rgba(13,39,49,.82)', borderWidth: 1, borderColor: 'rgba(150,230,232,.13)', opacity: .55 },
   achievementUnlocked: { opacity: 1 },
   achievementIcon: { width: 24, color: colors.primary, fontSize: 18, textAlign: 'center' },
   achievementCopy: { flex: 1, gap: 2 },
   achievementTitle: { color: colors.white, fontSize: 12, fontWeight: '900' },
   achievementDetail: { color: colors.textMuted, fontSize: 9 },
-  wrappedCard: { position: 'relative', overflow: 'hidden', backgroundColor: '#102a39', borderRadius: 23, padding: 19, gap: 8 },
+  wrappedCard: { position: 'relative', overflow: 'hidden', backgroundColor: 'rgba(16,42,57,.96)', borderRadius: 21, borderWidth: 1, borderColor: 'rgba(150,230,232,.12)', padding: 18, gap: 8, zIndex: 1 },
   wrappedPinkGlow: { position: 'absolute', width: 190, height: 170, borderRadius: 95, right: -70, bottom: -85, backgroundColor: 'rgba(238,12,111,.16)' },
   wrappedEyebrow: { color: '#ff9bc6', fontSize: 9, fontWeight: '900', letterSpacing: 1.5 },
-  wrappedTitle: { color: colors.white, fontSize: 23, fontWeight: '900' },
+  wrappedTitle: { color: colors.white, fontFamily: 'serif', fontSize: 23, lineHeight: 27, fontWeight: '700', letterSpacing: -.45 },
   wrappedRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 14, paddingVertical: 11, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'rgba(255,255,255,.12)' },
   wrappedLabel: { color: colors.textMuted, fontSize: 11, flex: 1 },
   wrappedValue: { color: colors.white, fontSize: 11, fontWeight: '900', textAlign: 'right', flex: 1 },
