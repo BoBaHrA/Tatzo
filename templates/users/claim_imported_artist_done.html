@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Confirm your email" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/imported_artist.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="claim-page">
+  <section class="claim-card claim-done">
+    <div class="claim-done-icon">✓</div>
+    <span class="imported-eyebrow">{% trans "Almost done" %}</span>
+    <h1>{% trans "Check your email" %}</h1>
+    <p>
+      {% blocktrans with email=email %}We sent a confirmation link to {{ email }}. Open it to activate your account and take control of the prepared profile.{% endblocktrans %}
+    </p>
+    <a class="imported-btn imported-btn-secondary" href="{% url 'profile' profile_user.username %}">
+      {% trans "View profile" %}
+    </a>
+  </section>
+</main>
+{% endblock %}

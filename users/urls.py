@@ -6,10 +6,10 @@ from django.urls import reverse_lazy
 
 from users.forms_custom import CustomPasswordChangeForm, CustomSetPasswordForm
 from users import views as users_views
-
-from . import views
-from .views import create_post
 from users.security_views import TatzoLoginView, TatzoPasswordResetView
+
+from . import imported_artists, views
+from .views import create_post
 
 urlpatterns = [
     path(
@@ -19,9 +19,14 @@ urlpatterns = [
     ),
     path("signup/", views.signup, name="signup"),
     path(
-    "moderation/",
-    views.moderation_dashboard,
-    name="moderation_dashboard",
+        "claim-artist/<str:token>/",
+        imported_artists.claim_imported_artist,
+        name="claim_imported_artist",
+    ),
+    path(
+        "moderation/",
+        views.moderation_dashboard,
+        name="moderation_dashboard",
     ),
     path(
         "moderation/artist/<str:username>/approve/",
@@ -93,9 +98,9 @@ urlpatterns = [
         name="legal_notice",
     ),
     path(
-    "profile/<str:username>/follow/",
-    views.toggle_follow,
-    name="toggle_follow",
+        "profile/<str:username>/follow/",
+        views.toggle_follow,
+        name="toggle_follow",
     ),
     path(
         "profile/<str:username>/block/",
@@ -123,9 +128,9 @@ urlpatterns = [
         name="artist_portfolio_album",
     ),
     path(
-    "profile/<str:username>/portfolio/album/<int:album_id>/edit/",
-    views.edit_portfolio_album,
-    name="edit_portfolio_album",
+        "profile/<str:username>/portfolio/album/<int:album_id>/edit/",
+        views.edit_portfolio_album,
+        name="edit_portfolio_album",
     ),
     path(
         "profile/<str:username>/portfolio/album/<int:album_id>/delete/",
@@ -184,9 +189,8 @@ urlpatterns = [
     path("posts/create/", views.create_post, name="create_post"),
     path(
         "review-profile/<int:profile_id>/", views.review_profile, name="review_profile"
-    ),  # Добавлен маршрут для просмотра профиля
+    ),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
-    # Новые маршруты для подтверждения и отклонения профиля
     path(
         "approve-profile/<int:profile_id>/",
         views.approve_profile,
@@ -238,9 +242,11 @@ urlpatterns = [
         ),
         name="password_reset_complete",
     ),
-    path("profile/<str:username>/", views.profile_view, name="profile"),
-    # ... другие маршруты
-    
+    path(
+        "profile/<str:username>/",
+        imported_artists.profile_or_imported_view,
+        name="profile",
+    ),
     path("coming-soon/<str:feature>/", users_views.coming_soon, name="coming_soon"),
     path("report-problem/", views.report_problem, name="report_problem"),
 ]

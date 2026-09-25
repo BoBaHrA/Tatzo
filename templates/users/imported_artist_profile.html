@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ profile_user.first_name|default:profile_user.username }} — Tatzo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/imported_artist.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+
+<main class="imported-artist-page">
+  <section class="imported-artist-hero">
+    <div class="imported-avatar-wrap">
+      {% if profile_user.profile.profile_image %}
+        <img class="imported-avatar" src="{{ profile_user.profile.profile_image.url }}" alt="{{ profile_user.username }}">
+      {% else %}
+        <div class="imported-avatar imported-avatar-fallback">{{ profile_user.username|first|upper }}</div>
+      {% endif %}
+    </div>
+
+    <div class="imported-artist-main">
+      <div class="imported-heading-row">
+        <div>
+          {% if profile_user.first_name %}
+            <h1>{{ profile_user.first_name }}</h1>
+            <div class="imported-handle">@{{ profile_user.username }}</div>
+          {% else %}
+            <h1>@{{ profile_user.username }}</h1>
+          {% endif %}
+        </div>
+
+        <div class="imported-statuses">
+          <span class="imported-badge">{% trans "Tattoo artist" %}</span>
+          {% if is_unclaimed %}
+            <span class="imported-badge imported-badge-unclaimed">{% trans "Unclaimed profile" %}</span>
+          {% elif claim_pending %}
+            <span class="imported-badge imported-badge-pending">{% trans "Claim pending" %}</span>
+          {% elif is_claimed %}
+            <span class="imported-badge imported-badge-claimed">{% trans "Claimed" %}</span>
+          {% endif %}
+          {% if profile_user.profile.verification_status == "approved" %}
+            <span class="imported-badge imported-badge-verified">{% trans "Verified" %}</span>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if imported_location.city or imported_location.country %}
+        <div class="imported-location">
+          <span aria-hidden="true">⌖</span>
+          {% if imported_location.city %}{{ imported_location.city }}{% endif %}{% if imported_location.city and imported_location.country %}, {% endif %}{% if imported_location.country %}{{ imported_location.country }}{% endif %}
+        </div>
+      {% endif %}
+
+      {% if profile_user.profile.bio %}
+        <div class="imported-bio">{{ profile_user.profile.bio|linebreaksbr }}</div>
+      {% endif %}
+
+      <div class="imported-actions">
+        {% if imported_location.website %}
+          <a class="imported-btn imported-btn-secondary" href="{{ imported_location.website }}" target="_blank" rel="noopener noreferrer">
+            {% trans "Public portfolio" %} ↗
+          </a>
+        {% endif %}
+
+        {% if is_owner %}
+          <a class="imported-btn imported-btn-primary" href="{% url 'edit_profile' %}">{% trans "Edit profile" %}</a>
+          {% if profile_user.profile.verification_status != "approved" %}
+            <a class="imported-btn imported-btn-secondary" href="{% url 'verification_page' %}">{% trans "Complete verification" %}</a>
+          {% endif %}
+        {% elif is_claimed and profile_user.profile.verification_status == "approved" %}
+          <a class="imported-btn imported-btn-primary" href="{% url 'booking_wizard' profile_user.username %}">{% trans "Book appointment" %}</a>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  {% if is_unclaimed %}
+    <section class="imported-notice">
+      <div class="imported-notice-icon">i</div>
+      <div>
+        <strong>{% trans "This profile has not been claimed yet." %}</strong>
+        <p>{% trans "Tatzo prepared it from public artist information so the artist can review the page before taking control of the account." %}</p>
+      </div>
+    </section>
+  {% elif claim_pending %}
+    <section class="imported-notice">
+      <div class="imported-notice-icon">✉</div>
+      <div>
+        <strong>{% trans "Ownership confirmation is in progress." %}</strong>
+        <p>{% trans "The artist has started claiming this profile and is confirming their email address." %}</p>
+      </div>
+    </section>
+  {% endif %}
+
+  <section class="imported-portfolio-section">
+    <div class="imported-section-head">
+      <div>
+        <span class="imported-eyebrow">{% trans "Selected work" %}</span>
+        <h2>{% trans "Portfolio" %}</h2>
+      </div>
+      <span class="imported-work-count">{{ works_count }} {% trans "works" %}</span>
+    </div>
+
+    {% if works %}
+      <div class="imported-work-grid">
+        {% for work in works %}
+          <article class="imported-work-card">
+            <a href="{{ work.image.url }}" target="_blank" rel="noopener">
+              <img src="{{ work.image.url }}" alt="{{ work.title|default:profile_user.username }}" loading="lazy">
+            </a>
+            {% if work.title or work.style or work.body_placement %}
+              <div class="imported-work-meta">
+                {% if work.title %}<strong>{{ work.title }}</strong>{% endif %}
+                <div>
+                  {% if work.style %}<span>{{ work.style }}</span>{% endif %}
+                  {% if work.body_placement %}<span>{{ work.body_placement }}</span>{% endif %}
+                </div>
+              </div>
+            {% endif %}
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="imported-empty">
+        {% trans "Portfolio works are being prepared." %}
+      </div>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}
