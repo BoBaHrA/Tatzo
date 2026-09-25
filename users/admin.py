@@ -1,13 +1,32 @@
-from django.contrib import admin
-
-from posts.models import Post
+from django.contrib import admin, messages
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import redirect
+from django.template.response import TemplateResponse
+from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
-from django.urls import reverse
-from .models import Location, LocationClaim, LocationRequest, Profile, VerificationDocument, UserReport
+
+from posts.models import Post
+
+from .imported_artists import (
+    ImportedArtistAdminForm,
+    create_imported_artist,
+    get_imported_artist_location,
+    is_claimable_imported_artist,
+    make_imported_artist_claim_token,
+)
+from .models import (
+    Location,
+    LocationClaim,
+    LocationRequest,
+    PortfolioAlbum,
+    PortfolioWork,
+    Profile,
+    UserReport,
+    VerificationDocument,
+)
 
 
-# Действие для массового подтверждения профилей
 @admin.action(description="Approve selected profiles")
 def approve_profiles(modeladmin, request, queryset):
     queryset.update(verification_status="approved")
@@ -16,7 +35,6 @@ def approve_profiles(modeladmin, request, queryset):
         profile.save()
 
 
-# Действие для массового отклонения профилей
 @admin.action(description="Reject selected profiles")
 def reject_profiles(modeladmin, request, queryset):
     queryset.update(verification_status="rejected")
@@ -25,20 +43,149 @@ def reject_profiles(modeladmin, request, queryset):
         profile.save()
 
 
-# Регистрация модели Profile с действиями
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
+    change_list_template = "admin/users/profile/change_list.html"
     list_display = (
         "user",
         "account_type",
         "verification_status",
-    )  # Поля для отображения
-    list_filter = ("account_type", "verification_status")  # Фильтры
-    search_fields = ("user__username", "user__email")  # Поля для поиска
-    actions = [approve_profiles, reject_profiles]  # Массовые действия
+        "imported_state",
+    )
+    list_filter = ("account_type", "verification_status")
+    search_fields = ("user__username", "user__email", "user__first_name")
+    actions = [approve_profiles, reject_profiles]
+    readonly_fields = (
+        "public_profile_link",
+        "claim_link",
+        "portfolio_admin_link",
+    )
+
+    def get_urls(self):
+        custom_urls = [
+            path(
+                "imported/add/",
+                self.admin_site.admin_view(self.add_imported_artist_view),
+                name="users_profile_add_imported",
+            ),
+        ]
+        return custom_urls + super().get_urls()
+
+    def add_imported_artist_view(self, request):
+        if not self.has_add_permission(request):
+            raise PermissionDenied
+
+        if request.method == "POST":
+            form = ImportedArtistAdminForm(request.POST, request.FILES)
+            if form.is_valid():
+                try:
+                    user, _location = create_imported_artist(form)
+                except Exception as exc:
+                    form.add_error(
+                        None,
+                        _("Could not create the imported artist: %(error)s")
+                        % {"error": exc},
+                    )
+                else:
+                    claim_path = reverse(
+                        "claim_imported_artist",
+                        kwargs={"token": make_imported_artist_claim_token(user)},
+                    )
+                    profile_path = reverse("profile", kwargs={"username": user.username})
+                    self.message_user(
+                        request,
+                        _(
+                            "Imported artist created. Public profile: %(profile)s — private claim link: %(claim)s"
+                        )
+                        % {
+                            "profile": request.build_absolute_uri(profile_path),
+                            "claim": request.build_absolute_uri(claim_path),
+                        },
+                        level=messages.SUCCESS,
+                    )
+                    return redirect(
+                        reverse("admin:users_profile_change", args=[user.profile.pk])
+                    )
+        else:
+            form = ImportedArtistAdminForm()
+
+        context = {
+            **self.admin_site.each_context(request),
+            "opts": self.model._meta,
+            "title": _("Add imported tattoo artist"),
+            "form": form,
+            "media": form.media,
+        }
+        return TemplateResponse(
+            request,
+            "admin/users/profile/add_imported_artist.html",
+            context,
+        )
+
+    @admin.display(description=_("Imported profile"))
+    def imported_state(self, obj):
+        location = get_imported_artist_location(obj.user)
+        if not location:
+            return "—"
+        if is_claimable_imported_artist(obj.user):
+            return _("Unclaimed")
+        if location.status == "pending_claim":
+            return _("Claim pending")
+        if location.status == "claimed":
+            return _("Claimed")
+        return location.get_status_display()
+
+    @admin.display(description=_("Public profile"))
+    def public_profile_link(self, obj):
+        if not obj or not obj.pk:
+            return "—"
+        url = reverse("profile", kwargs={"username": obj.user.username})
+        return format_html(
+            '<a href="{}" target="_blank" rel="noopener">{}</a>',
+            url,
+            _("Open public profile"),
+        )
+
+    @admin.display(description=_("Private claim link"))
+    def claim_link(self, obj):
+        if not obj or not obj.pk:
+            return "—"
+        location = get_imported_artist_location(obj.user)
+        if not location:
+            return "—"
+        if not is_claimable_imported_artist(obj.user):
+            if location.status == "pending_claim":
+                return _("Claim submitted — waiting for email confirmation")
+            return _("Profile already claimed")
+
+        url = reverse(
+            "claim_imported_artist",
+            kwargs={"token": make_imported_artist_claim_token(obj.user)},
+        )
+        return format_html(
+            '<a href="{}" target="_blank" rel="noopener">{}</a><br><code>{}</code>',
+            url,
+            _("Open claim page"),
+            url,
+        )
+
+    @admin.display(description=_("Portfolio"))
+    def portfolio_admin_link(self, obj):
+        if not obj or not obj.pk:
+            return "—"
+        changelist = reverse("admin:users_portfoliowork_changelist")
+        add_url = reverse("admin:users_portfoliowork_add")
+        return format_html(
+            '<a href="{}?user__id__exact={}">{}</a> · <a href="{}?user={}">{}</a>',
+            changelist,
+            obj.user_id,
+            _("View works"),
+            add_url,
+            obj.user_id,
+            _("Add work"),
+        )
 
 
-# Регистрация модели VerificationDocument с действиями
 @admin.register(VerificationDocument)
 class VerificationDocumentAdmin(admin.ModelAdmin):
     list_display = (
@@ -46,30 +193,44 @@ class VerificationDocumentAdmin(admin.ModelAdmin):
         "business_document_type",
         "id_document_type",
         "is_verified",
-    )  # Обновленные поля
+    )
     list_filter = (
         "business_document_type",
         "id_document_type",
         "is_verified",
-    )  # Обновленные поля
+    )
     search_fields = ("user__username",)
 
-    # Действие для подтверждения документов
     @admin.action(description="Approve selected documents")
     def approve_documents(self, request, queryset):
         queryset.update(is_verified=True)
 
-    # Действие для отклонения документов
     @admin.action(description="Reject selected documents")
     def reject_documents(self, request, queryset):
         queryset.update(is_verified=False)
 
 
-# Регистрация модели Post
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ("user", "content", "created_at")  # Поля для отображения
-    search_fields = ("user__username", "content")  # Поля для поиска
+    list_display = ("user", "content", "created_at")
+    search_fields = ("user__username", "content")
+
+
+@admin.register(PortfolioAlbum)
+class PortfolioAlbumAdmin(admin.ModelAdmin):
+    list_display = ("title", "user", "style", "created_at")
+    search_fields = ("title", "style", "user__username")
+    list_filter = ("created_at",)
+    autocomplete_fields = ("user",)
+
+
+@admin.register(PortfolioWork)
+class PortfolioWorkAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "title", "style", "body_placement", "created_at")
+    search_fields = ("title", "style", "body_placement", "user__username")
+    list_filter = ("style", "created_at")
+    autocomplete_fields = ("user", "album")
+
 
 @admin.register(UserReport)
 class UserReportAdmin(admin.ModelAdmin):
