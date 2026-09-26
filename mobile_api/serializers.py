@@ -1,13 +1,12 @@
-import re
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from rest_framework import serializers
 
 from users.models import Profile
+from users.forms_custom import validate_registration_password
 
 User = get_user_model()
 
@@ -63,25 +62,13 @@ class RegistrationSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         password = attrs["password"]
-        password_errors = []
-
-        if not re.search(r"[A-Z]", password):
-            password_errors.append(
-                "Password must contain at least one uppercase letter."
-            )
-        if not re.search(r"\d", password):
-            password_errors.append("Password must contain at least one number.")
-
         candidate = User(username=attrs["username"], email=attrs["email"])
         try:
-            validate_password(password, candidate)
+            validate_registration_password(password, candidate)
         except DjangoValidationError as exc:
-            password_errors.extend(exc.messages)
-
-        if password_errors:
             raise serializers.ValidationError(
-                {"password": list(dict.fromkeys(password_errors))}
-            )
+                {"password": list(dict.fromkeys(exc.messages))}
+            ) from exc
 
         return attrs
 
