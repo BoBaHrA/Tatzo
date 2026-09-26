@@ -6,6 +6,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core import signing
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Q
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.http import Http404
@@ -13,7 +14,8 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_http_methods
 
-from .models import Location, PortfolioWork, Profile
+from posts.models import Post, PostBookmark, PostLike
+from .models import Location, PortfolioWork, Profile, UserBlock, UserFollow
 from .utils import send_verification_email
 
 logger = logging.getLogger(__name__)
@@ -263,7 +265,7 @@ def create_imported_artist(form):
 
 def profile_or_imported_view(request, username):
     profile_user = get_object_or_404(
-        User.objects.select_related("profile"),
+        User.objects.select_related("profile", "booking_settings"),
         username=username,
     )
     imported_location = get_imported_artist_location(profile_user)
@@ -273,11 +275,61 @@ def profile_or_imported_view(request, username):
 
         return legacy_views.profile_view(request, username)
 
-    works = (
+    if request.user.is_authenticated and request.user != profile_user:
+        if UserBlock.objects.filter(
+            Q(blocker=request.user, blocked=profile_user)
+            | Q(blocker=profile_user, blocked=request.user)
+        ).exists():
+            raise Http404
+
+    posts = (
+        Post.objects.visible_to(request.user)
+        .filter(user=profile_user)
+        .select_related("user", "user__profile")
+        .prefetch_related("medias", "likes", "comments", "bookmarks")
+        .order_by("-created_at")
+    )
+
+    can_view_liked = request.user == profile_user or profile_user.profile.show_liked_posts
+    liked_posts = Post.objects.none()
+
+    if can_view_liked:
+        liked_posts = (
+            Post.objects.visible_to(request.user)
+            .filter(likes__user=profile_user)
+            .select_related("user", "user__profile")
+            .prefetch_related("medias", "likes", "comments", "bookmarks")
+            .distinct()
+            .order_by("-created_at")
+        )
+
+    liked_post_ids = set()
+    bookmarked_post_ids = set()
+    if request.user.is_authenticated:
+        liked_post_ids = set(
+            PostLike.objects.filter(user=request.user).values_list("post_id", flat=True)
+        )
+        bookmarked_post_ids = set(
+            PostBookmark.objects.filter(user=request.user).values_list("post_id", flat=True)
+        )
+
+    followers_count = UserFollow.objects.filter(following=profile_user).count()
+    following_count = UserFollow.objects.filter(follower=profile_user).count()
+    is_following = False
+    if request.user.is_authenticated and request.user != profile_user:
+        is_following = UserFollow.objects.filter(
+            follower=request.user,
+            following=profile_user,
+        ).exists()
+
+    prepared_works = (
         PortfolioWork.objects.filter(user=profile_user)
         .select_related("album")
         .order_by("-created_at", "-id")
     )
+    portfolio_works_count = prepared_works.count()
+    posts_count = posts.count()
+    show_prepared_work_grid = posts_count == 0 and portfolio_works_count > 0
 
     is_unclaimed = is_claimable_imported_artist(profile_user)
     claim_pending = bool(
@@ -292,16 +344,26 @@ def profile_or_imported_view(request, username):
 
     return render(
         request,
-        "users/imported_artist_profile.html",
+        "users/profile.html",
         {
             "profile_user": profile_user,
+            "posts": posts,
+            "liked_posts": liked_posts,
+            "posts_count": posts_count,
+            "can_view_liked": can_view_liked,
+            "liked_post_ids": liked_post_ids,
+            "bookmarked_post_ids": bookmarked_post_ids,
+            "followers_count": followers_count,
+            "following_count": following_count,
+            "is_following": is_following,
+            "portfolio_works_count": portfolio_works_count,
+            "prepared_works": prepared_works,
+            "show_prepared_work_grid": show_prepared_work_grid,
+            "is_imported_artist": True,
             "imported_location": imported_location,
-            "works": works,
-            "works_count": works.count(),
             "is_unclaimed": is_unclaimed,
             "claim_pending": claim_pending,
             "is_claimed": is_claimed,
-            "is_owner": request.user.is_authenticated and request.user == profile_user,
         },
     )
 
