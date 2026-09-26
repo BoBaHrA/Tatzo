@@ -5,23 +5,38 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/imported_artist.css' %}">
+<link rel="stylesheet" href="{% static 'css/claim_profile.css' %}">
 {% endblock %}
 
 {% block content %}
 <main class="claim-page">
   <section class="claim-card">
+    <div class="claim-brand-row">
+      <a class="claim-brand" href="{% url 'home' %}">
+        <span class="claim-brand-mark">T</span>
+        <span class="claim-brand-copy">
+          <strong>TATZO</strong>
+          <span>{% trans "Artist profile setup" %}</span>
+        </span>
+      </a>
+
+      <span class="claim-secure-pill">✓ {% trans "Secure account setup" %}</span>
+    </div>
+
     <div class="claim-profile-preview">
       {% if profile_user.profile.profile_image %}
         <img src="{{ profile_user.profile.profile_image.url }}" alt="{{ profile_user.username }}">
       {% else %}
         <div class="claim-avatar-fallback">{{ profile_user.username|first|upper }}</div>
       {% endif %}
+
       <div>
         <span class="imported-eyebrow">{% trans "Prepared for you" %}</span>
         <h1>{% trans "Claim your Tatzo profile" %}</h1>
         <p>
-          {% if profile_user.first_name %}{{ profile_user.first_name }} · {% endif %}@{{ profile_user.username }}
+          {% if profile_user.first_name %}<strong>{{ profile_user.first_name }}</strong> · {% endif %}@{{ profile_user.username }}
           {% if imported_location.city %} · {{ imported_location.city }}{% endif %}
+          {% if imported_location.country %} · {{ imported_location.country }}{% endif %}
         </p>
       </div>
     </div>
@@ -56,9 +71,9 @@
         {{ form.accept_terms }}
         <span>
           {% trans "I accept the" %}
-          <a href="{% url 'terms' %}" target="_blank">{% trans "Terms" %}</a>
+          <a href="{% url 'terms' %}" target="_blank" rel="noopener noreferrer">{% trans "Terms" %}</a>
           {% trans "and" %}
-          <a href="{% url 'privacy' %}" target="_blank">{% trans "Privacy Policy" %}</a>.
+          <a href="{% url 'privacy' %}" target="_blank" rel="noopener noreferrer">{% trans "Privacy Policy" %}</a>.
         </span>
       </label>
       {{ form.accept_terms.errors }}
@@ -68,9 +83,11 @@
       </button>
     </form>
 
-    <a class="claim-preview-link" href="{% url 'profile' profile_user.username %}" target="_blank">
-      {% trans "Preview the prepared profile" %} ↗
-    </a>
+    <div class="claim-footer">
+      <a class="claim-preview-link" href="{% url 'profile' profile_user.username %}" target="_blank" rel="noopener noreferrer">
+        {% trans "Preview the prepared profile" %} ↗
+      </a>
+    </div>
   </section>
 </main>
 {% endblock %}

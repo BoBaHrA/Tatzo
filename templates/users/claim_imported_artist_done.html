@@ -5,17 +5,31 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/imported_artist.css' %}">
+<link rel="stylesheet" href="{% static 'css/claim_profile.css' %}">
 {% endblock %}
 
 {% block content %}
 <main class="claim-page">
   <section class="claim-card claim-done">
+    <div class="claim-brand-row">
+      <a class="claim-brand" href="{% url 'home' %}">
+        <span class="claim-brand-mark">T</span>
+        <span class="claim-brand-copy">
+          <strong>TATZO</strong>
+          <span>{% trans "Artist profile setup" %}</span>
+        </span>
+      </a>
+
+      <span class="claim-secure-pill">✓ {% trans "Email confirmation" %}</span>
+    </div>
+
     <div class="claim-done-icon">✓</div>
     <span class="imported-eyebrow">{% trans "Almost done" %}</span>
     <h1>{% trans "Check your email" %}</h1>
     <p>
       {% blocktrans with email=email %}We sent a confirmation link to {{ email }}. Open it to activate your account and take control of the prepared profile.{% endblocktrans %}
     </p>
+
     <a class="imported-btn imported-btn-secondary" href="{% url 'profile' profile_user.username %}">
       {% trans "View profile" %}
     </a>
