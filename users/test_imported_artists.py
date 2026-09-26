@@ -47,9 +47,14 @@ class ImportedArtistFlowTests(TestCase):
 
         response = self.client.get(reverse("profile", kwargs={"username": user.username}))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "users/imported_artist_profile.html")
+        self.assertTemplateUsed(response, "users/profile.html")
+        self.assertTemplateNotUsed(response, "users/imported_artist_profile.html")
         self.assertContains(response, "Unclaimed profile")
+        self.assertContains(response, "Professional portfolio")
         self.assertContains(response, "Moscow")
+        self.assertContains(response, 'class="profile-header"')
+        self.assertTrue(response.context["is_imported_artist"])
+        self.assertTrue(response.context["is_unclaimed"])
 
     def test_normal_profile_still_uses_existing_profile_view(self):
         user = User.objects.create_user(
@@ -65,6 +70,7 @@ class ImportedArtistFlowTests(TestCase):
         response = self.client.get(reverse("profile", kwargs={"username": user.username}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "users/profile.html")
+        self.assertNotContains(response, "Unclaimed profile")
 
     def test_claim_sets_credentials_and_requires_email_confirmation(self):
         user, _location = self.create_imported()
@@ -97,6 +103,11 @@ class ImportedArtistFlowTests(TestCase):
         reused = self.client.get(reverse("claim_imported_artist", kwargs={"token": token}))
         self.assertEqual(reused.status_code, 404)
 
+        preview = self.client.get(reverse("profile", kwargs={"username": user.username}))
+        self.assertEqual(preview.status_code, 200)
+        self.assertTemplateUsed(preview, "users/profile.html")
+        self.assertContains(preview, "Claim pending")
+
     def test_email_verification_finalizes_imported_claim(self):
         user, _location = self.create_imported()
         claim_token = make_imported_artist_claim_token(user)
@@ -126,6 +137,12 @@ class ImportedArtistFlowTests(TestCase):
         self.assertTrue(user.is_active)
         self.assertTrue(user.profile.is_email_verified)
         self.assertEqual(location.status, "claimed")
+
+        preview = self.client.get(reverse("profile", kwargs={"username": user.username}))
+        self.assertEqual(preview.status_code, 200)
+        self.assertTemplateUsed(preview, "users/profile.html")
+        self.assertNotContains(preview, "Unclaimed profile")
+        self.assertNotContains(preview, "Claim pending")
 
     def test_claim_rejects_duplicate_email(self):
         self.create_imported(username="linntatt")
