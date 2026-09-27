@@ -2,6 +2,7 @@
 {% load static i18n %}
 
 {% block title %}{% trans "Search" %}{% endblock %}
+{% block meta_description %}{% trans "Find tattoo artists, studios and people on Tatzo." %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
@@ -11,145 +12,461 @@
 {% block content %}
 {% include "partials/sidebar.html" %}
 
-<div class="search-page">
+<main class="search-page">
   <div class="search-shell">
-
     <header class="search-header">
-      <div>
-        <h1>{% trans "Search" %}</h1>
-        <p>{% trans "Find users and tattoo artists by username or @tag." %}</p>
-      </div>
+      <h1>{% trans "Search" %}</h1>
+      <p>{% trans "Find tattoo artists, studios and people." %}</p>
     </header>
 
-    <form method="get" action="{% url 'search_page' %}" class="search-form">
-      <div class="search-input-wrap">
-        <img src="{% static 'icons/loupe.svg' %}" alt="">
+    <form method="get" action="{% url 'search_page' %}" class="search-discovery-form" id="search-discovery-form">
+      <input type="hidden" name="type" value="{{ account_filter }}">
+      <input type="hidden" name="lat" id="search-lat" value="{{ origin_lat }}">
+      <input type="hidden" name="lng" id="search-lng" value="{{ origin_lng }}">
 
-        {% trans "Search by username or @tag..." as search_placeholder %}
-        <input
-          type="text"
-          name="q"
-          value="{{ query }}"
-          placeholder="{{ search_placeholder }}"
-          autocomplete="off"
-        >
-      </div>
-
-      <div class="search-filters">
-        <button
-          type="submit"
-          name="type"
-          value="all"
-          class="{% if account_filter == 'all' %}active{% endif %}"
-        >
-          {% trans "All" %}
-        </button>
-
-        <button
-          type="submit"
-          name="type"
-          value="artists"
-          class="{% if account_filter == 'artists' %}active{% endif %}"
-        >
-          {% trans "Tattoo artists" %}
-        </button>
-
-        <button
-          type="submit"
-          name="type"
-          value="users"
-          class="{% if account_filter == 'users' %}active{% endif %}"
-        >
-          {% trans "Users" %}
-        </button>
-      </div>
-    </form>
-
-    <section class="search-section">
-      <div class="search-section-head">
-        <h2>{% trans "Results" %}</h2>
-        <span>{{ results_count }}</span>
-      </div>
-
-      {% if query %}
-        <p class="search-query-label">
-          {% blocktrans with search_query=query %}
-            Showing results for <strong>{{ search_query }}</strong>
-          {% endblocktrans %}
-        </p>
-      {% endif %}
-
-      {% if results %}
-        <div class="search-results-grid">
-          {% for user in results %}
-            <article class="search-user-card">
-              <a href="{% url 'profile' user.username %}" class="search-user-avatar">
-                {% if user.profile.profile_image %}
-                  <img src="{{ user.profile.profile_image.url }}" alt="{{ user.username }}">
-                {% else %}
-                  <span>{{ user.username|first|upper }}</span>
-                {% endif %}
-              </a>
-
-              <div class="search-user-main">
-                <div class="search-user-top">
-                  <div>
-                    <a href="{% url 'profile' user.username %}" class="search-user-name">
-                      {{ user.username }}
-                    </a>
-
-                    {% if user.profile.tag %}
-                      <div class="search-user-tag">
-                        @{{ user.profile.tag }}
-                      </div>
-                    {% endif %}
-                  </div>
-
-                  {% if user.profile.account_type == "tattoo_artist" %}
-                    <span class="search-badge search-badge-artist">
-                      {% trans "Tattoo Artist" %}
-                    </span>
-                  {% else %}
-                    <span class="search-badge search-badge-user">
-                      {% trans "User" %}
-                    </span>
-                  {% endif %}
-                </div>
-
-                <div class="search-user-bio">
-                  {% if user.profile.bio %}
-                    {{ user.profile.bio|truncatechars:130 }}
-                  {% else %}
-                    {% trans "No bio yet." %}
-                  {% endif %}
-                </div>
-
-                <div class="search-user-actions">
-                  <a href="{% url 'profile' user.username %}" class="search-btn search-btn-primary">
-                    {% trans "View profile" %}
-                  </a>
-
-                  <a href="{% url 'start_chat' user.username %}" class="search-btn search-btn-secondary">
-                    {% trans "Message" %}
-                  </a>
-                </div>
-              </div>
-            </article>
-          {% endfor %}
-        </div>
-      {% else %}
-        <div class="search-empty">
+      <div class="search-input-row">
+        <div class="search-input-wrap">
+          <img src="{% static 'icons/loupe.svg' %}" alt="">
+          {% trans "Search by artist name, @username, studio or location" as search_placeholder %}
+          <input
+            id="search-query"
+            type="search"
+            name="q"
+            value="{{ query }}"
+            placeholder="{{ search_placeholder }}"
+            autocomplete="off"
+            aria-label="{{ search_placeholder }}"
+          >
           {% if query %}
-            <h3>{% trans "No results found" %}</h3>
-            <p>{% trans "Try another username, tag or account type." %}</p>
-          {% else %}
-            <h3>{% trans "Start searching" %}</h3>
-            <p>{% trans "Type a username or @tag to find people on Tatzo." %}</p>
+            <a class="search-clear-input" href="{{ clear_filters_url }}" aria-label="{% trans 'Clear search' %}">×</a>
           {% endif %}
         </div>
-      {% endif %}
-    </section>
+      </div>
 
+      <div class="search-quick-filters" aria-label="{% trans 'Quick filters' %}">
+        <button
+          type="button"
+          class="search-quick-chip {% if has_origin %}active{% endif %}"
+          data-search-geolocate
+          aria-pressed="{% if has_origin %}true{% else %}false{% endif %}"
+        >
+          <span class="search-quick-icon">⌖</span>
+          {% trans "Nearby" %}
+        </button>
+
+        <button
+          type="button"
+          class="search-quick-chip {% if 'Fine Line' in selected_styles %}active{% endif %}"
+          data-search-toggle="style"
+          data-search-value="Fine Line"
+          aria-pressed="{% if 'Fine Line' in selected_styles %}true{% else %}false{% endif %}"
+        >
+          {% trans "Fine Line" %}
+        </button>
+
+        <button
+          type="button"
+          class="search-quick-chip {% if verified_filter %}active{% endif %}"
+          data-search-toggle="verified"
+          data-search-value="1"
+          aria-pressed="{% if verified_filter %}true{% else %}false{% endif %}"
+        >
+          {% trans "Verified" %}
+        </button>
+
+        <button
+          type="button"
+          class="search-quick-chip {% if accepting_filter %}active{% endif %}"
+          data-search-toggle="accepting"
+          data-search-value="1"
+          aria-pressed="{% if accepting_filter %}true{% else %}false{% endif %}"
+        >
+          {% trans "Accepting bookings" %}
+        </button>
+      </div>
+
+      <nav class="search-tabs" aria-label="{% trans 'Search categories' %}">
+        <a href="{{ tab_urls.all }}" class="{% if account_filter == 'all' %}active{% endif %}">
+          {% trans "All" %}
+          <span>{{ tab_counts.all }}</span>
+        </a>
+        <a href="{{ tab_urls.artists }}" class="{% if account_filter == 'artists' %}active{% endif %}">
+          {% trans "Tattoo artists" %}
+          <span>{{ tab_counts.artists }}</span>
+        </a>
+        <a href="{{ tab_urls.studios }}" class="{% if account_filter == 'studios' %}active{% endif %}">
+          {% trans "Studios" %}
+          <span>{{ tab_counts.studios }}</span>
+        </a>
+        <a href="{{ tab_urls.users }}" class="{% if account_filter == 'users' %}active{% endif %}">
+          {% trans "Users" %}
+          <span>{{ tab_counts.users }}</span>
+        </a>
+      </nav>
+
+      <button type="button" class="search-mobile-filter-trigger" id="search-mobile-filter-trigger">
+        <span>☷</span>
+        {% trans "Filters" %}
+        {% if active_filters %}<strong>{{ active_filters|length }}</strong>{% endif %}
+      </button>
+
+      <div class="search-layout">
+        <aside class="search-filter-panel" id="search-filter-panel" aria-label="{% trans 'Search filters' %}">
+          <div class="search-filter-mobile-head">
+            <strong>{% trans "Filters" %}</strong>
+            <button type="button" id="search-filter-close" aria-label="{% trans 'Close' %}">×</button>
+          </div>
+
+          <div class="search-filter-head">
+            <strong>{% trans "Filters" %}</strong>
+            <a href="{{ clear_filters_url }}">{% trans "Clear all" %}</a>
+          </div>
+
+          <section class="search-filter-section search-filter-section-first">
+            <h2>{% trans "Location" %}</h2>
+            <label class="search-filter-label" for="search-location">{% trans "City or country" %}</label>
+            <input
+              id="search-location"
+              class="search-filter-input"
+              type="text"
+              name="location"
+              value="{{ location_filter }}"
+              placeholder="{% trans 'City or country' %}"
+            >
+
+            <div class="search-radius-grid" role="radiogroup" aria-label="{% trans 'Search radius' %}">
+              <label class="{% if radius_km == 5 %}active{% endif %}">
+                <input type="radio" name="radius" value="5" {% if radius_km == 5 %}checked{% endif %}>
+                <span>5 km</span>
+              </label>
+              <label class="{% if radius_km == 10 %}active{% endif %}">
+                <input type="radio" name="radius" value="10" {% if radius_km == 10 %}checked{% endif %}>
+                <span>10 km</span>
+              </label>
+              <label class="{% if radius_km == 25 %}active{% endif %}">
+                <input type="radio" name="radius" value="25" {% if radius_km == 25 %}checked{% endif %}>
+                <span>25 km</span>
+              </label>
+              <label class="{% if radius_km == 50 %}active{% endif %}">
+                <input type="radio" name="radius" value="50" {% if radius_km == 50 %}checked{% endif %}>
+                <span>50 km</span>
+              </label>
+              <label class="{% if radius_km == 100 %}active{% endif %}">
+                <input type="radio" name="radius" value="100" {% if radius_km == 100 %}checked{% endif %}>
+                <span>100 km</span>
+              </label>
+            </div>
+
+            <button type="button" class="search-location-action" data-search-geolocate>
+              <span>⌖</span>
+              {% if has_origin %}{% trans "Using my location" %}{% else %}{% trans "Use my location" %}{% endif %}
+            </button>
+            <p class="search-location-feedback" id="search-location-feedback" aria-live="polite"></p>
+          </section>
+
+          <section class="search-filter-section">
+            <h2>{% trans "Tattoo style" %}</h2>
+            <div class="search-style-grid">
+              {% for style in style_choices %}
+                <label class="{% if style in selected_styles %}active{% endif %}">
+                  <input
+                    type="checkbox"
+                    name="style"
+                    value="{{ style }}"
+                    {% if style in selected_styles %}checked{% endif %}
+                  >
+                  <span>{{ style }}</span>
+                </label>
+              {% endfor %}
+            </div>
+          </section>
+
+          <section class="search-filter-section">
+            <h2>{% trans "Availability" %}</h2>
+            <label class="search-checkbox-row">
+              <input type="checkbox" name="accepting" value="1" {% if accepting_filter %}checked{% endif %}>
+              <span>{% trans "Accepting bookings" %}</span>
+            </label>
+          </section>
+
+          <section class="search-filter-section">
+            <h2>{% trans "Artist status" %}</h2>
+            <label class="search-checkbox-row">
+              <input type="checkbox" name="verified" value="1" {% if verified_filter %}checked{% endif %}>
+              <span>{% trans "Verified artists" %}</span>
+            </label>
+          </section>
+
+          <button type="submit" class="search-mobile-apply">{% trans "Show results" %}</button>
+        </aside>
+
+        <section class="search-results" aria-label="{% trans 'Search results' %}">
+          <div class="search-results-toolbar">
+            <div>
+              <strong class="search-results-count">
+                {% blocktrans count counter=results_count %}
+                  {{ counter }} result
+                {% plural %}
+                  {{ counter }} results
+                {% endblocktrans %}
+              </strong>
+              {% if location_filter %}
+                <span class="search-results-context">
+                  {% blocktrans with location=location_filter %}near {{ location }}{% endblocktrans %}
+                </span>
+              {% elif has_origin %}
+                <span class="search-results-context">{% trans "near your location" %}</span>
+              {% endif %}
+            </div>
+
+            <div class="search-results-controls">
+              <div class="search-view-toggle" aria-label="{% trans 'Result view' %}">
+                <span class="active">{% trans "List" %}</span>
+                <a href="{{ maps_url }}">{% trans "Map" %}</a>
+              </div>
+
+              <label class="search-sort">
+                <span class="sr-only">{% trans "Sort results" %}</span>
+                <select name="sort" id="search-sort">
+                  <option value="relevance" {% if sort == 'relevance' %}selected{% endif %}>{% trans "Relevance" %}</option>
+                  {% if has_origin %}
+                    <option value="distance" {% if sort == 'distance' %}selected{% endif %}>{% trans "Distance" %}</option>
+                  {% endif %}
+                  <option value="newest" {% if sort == 'newest' %}selected{% endif %}>{% trans "Newest" %}</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          {% if active_filters %}
+            <div class="search-active-filters">
+              {% for filter in active_filters %}
+                <a href="{{ filter.url }}" class="search-active-chip">
+                  {{ filter.label }}
+                  <span aria-hidden="true">×</span>
+                </a>
+              {% endfor %}
+              <a href="{{ clear_filters_url }}" class="search-clear-filters">{% trans "Clear filters" %}</a>
+            </div>
+          {% endif %}
+
+          {% if results %}
+            <div class="search-result-list">
+              {% for result in results %}
+                {% if result.kind == "artist" %}
+                  <article class="search-result-card search-result-card-artist">
+                    <a href="{% url 'profile' result.user.username %}" class="search-result-avatar">
+                      {% if result.user.profile.profile_image %}
+                        <img src="{{ result.user.profile.profile_image.url }}" alt="{{ result.display_name }}">
+                      {% else %}
+                        <span>{{ result.display_name|first|upper }}</span>
+                      {% endif %}
+                      {% if result.verified %}
+                        <span class="search-verification-dot" title="{% trans 'Verified artist' %}">✓</span>
+                      {% endif %}
+                    </a>
+
+                    <div class="search-result-body">
+                      <div class="search-result-heading">
+                        <a href="{% url 'profile' result.user.username %}">{{ result.display_name }}</a>
+                        <span>@{{ result.handle }}</span>
+                        {% if result.is_imported and result.imported_state == "unclaimed" %}
+                          <span class="search-prepared-badge">{% trans "Prepared profile" %}</span>
+                        {% endif %}
+                      </div>
+
+                      {% if result.location_label %}
+                        <div class="search-result-location">
+                          <span>⌖</span>
+                          {{ result.location_label }}
+                          {% if result.distance_km is not None %} · {{ result.distance_km|floatformat:1 }} km{% endif %}
+                        </div>
+                      {% endif %}
+
+                      {% if result.styles %}
+                        <div class="search-result-tags">
+                          {% for style in result.styles|slice:":4" %}
+                            <span>{{ style }}</span>
+                          {% endfor %}
+                        </div>
+                      {% endif %}
+
+                      {% if result.bio %}
+                        <p class="search-result-bio">{{ result.bio|truncatechars:170 }}</p>
+                      {% endif %}
+
+                      <div class="search-result-meta">
+                        {% if result.portfolio_count %}
+                          <span>{% blocktrans count counter=result.portfolio_count %}{{ counter }} work{% plural %}{{ counter }} works{% endblocktrans %}</span>
+                        {% endif %}
+                        {% if result.verified %}
+                          <span class="verified">{% trans "Verified" %}</span>
+                        {% endif %}
+                        {% if result.booking_open %}
+                          <span class="open"><i></i>{% trans "Accepting bookings" %}</span>
+                        {% endif %}
+                      </div>
+
+                      {% if result.portfolio %}
+                        <div class="search-portfolio-preview">
+                          {% for work in result.portfolio %}
+                            {% if work.image %}
+                              <img src="{{ work.image.url }}" alt="{{ work.title|default:result.display_name }}">
+                            {% endif %}
+                          {% endfor %}
+                        </div>
+                      {% endif %}
+                    </div>
+
+                    <div class="search-result-actions">
+                      {% if result.consultation_price is not None %}
+                        <span class="search-result-price">
+                          {% if result.consultation_price %}
+                            {% blocktrans with price=result.consultation_price %}Consultation €{{ price }}{% endblocktrans %}
+                          {% else %}
+                            {% trans "Free consultation" %}
+                          {% endif %}
+                        </span>
+                      {% endif %}
+                      <a href="{% url 'profile' result.user.username %}" class="search-action-primary">{% trans "View profile" %}</a>
+                      {% if result.can_message %}
+                        <a href="{% url 'start_chat' result.user.username %}" class="search-action-secondary">{% trans "Message" %}</a>
+                      {% endif %}
+                    </div>
+                  </article>
+
+                {% elif result.kind == "studio" %}
+                  <article class="search-result-card search-result-card-studio">
+                    <div class="search-result-avatar search-result-avatar-studio">
+                      {% if result.linked_user and result.linked_user.profile.profile_image %}
+                        <img src="{{ result.linked_user.profile.profile_image.url }}" alt="{{ result.display_name }}">
+                      {% else %}
+                        <span>{{ result.display_name|first|upper }}</span>
+                      {% endif %}
+                      {% if result.verified %}
+                        <span class="search-verification-dot" title="{% trans 'Verified studio' %}">✓</span>
+                      {% endif %}
+                    </div>
+
+                    <div class="search-result-body">
+                      <div class="search-result-heading">
+                        <strong>{{ result.display_name }}</strong>
+                        <span class="search-result-kind">{% trans "Tattoo studio" %}</span>
+                      </div>
+
+                      {% if result.location_label %}
+                        <div class="search-result-location">
+                          <span>⌖</span>
+                          {{ result.location_label }}
+                          {% if result.distance_km is not None %} · {{ result.distance_km|floatformat:1 }} km{% endif %}
+                        </div>
+                      {% endif %}
+
+                      {% if result.styles %}
+                        <div class="search-result-tags search-result-tags-studio">
+                          {% for style in result.styles|slice:":4" %}
+                            <span>{{ style }}</span>
+                          {% endfor %}
+                        </div>
+                      {% endif %}
+
+                      <div class="search-result-meta">
+                        {% if result.verified %}
+                          <span class="verified">{% trans "Verified" %}</span>
+                        {% elif result.claimed %}
+                          <span>{% trans "Claimed profile" %}</span>
+                        {% else %}
+                          <span>{% trans "Unclaimed" %}</span>
+                        {% endif %}
+                        {% if result.booking_open %}
+                          <span class="open"><i></i>{% trans "Accepting bookings" %}</span>
+                        {% endif %}
+                      </div>
+
+                      {% if result.portfolio %}
+                        <div class="search-portfolio-preview">
+                          {% for work in result.portfolio %}
+                            {% if work.image %}
+                              <img src="{{ work.image.url }}" alt="{{ result.display_name }}">
+                            {% endif %}
+                          {% endfor %}
+                        </div>
+                      {% endif %}
+                    </div>
+
+                    <div class="search-result-actions">
+                      {% if result.linked_user %}
+                        <a href="{% url 'profile' result.linked_user.username %}" class="search-action-primary">{% trans "View studio" %}</a>
+                        {% if result.can_message %}
+                          <a href="{% url 'start_chat' result.linked_user.username %}" class="search-action-secondary">{% trans "Message" %}</a>
+                        {% endif %}
+                      {% else %}
+                        <a href="{{ maps_url }}" class="search-action-primary">{% trans "View on map" %}</a>
+                      {% endif %}
+                    </div>
+                  </article>
+
+                {% else %}
+                  <article class="search-result-card search-result-card-user">
+                    <a href="{% url 'profile' result.user.username %}" class="search-result-avatar">
+                      {% if result.user.profile.profile_image %}
+                        <img src="{{ result.user.profile.profile_image.url }}" alt="{{ result.display_name }}">
+                      {% else %}
+                        <span>{{ result.display_name|first|upper }}</span>
+                      {% endif %}
+                    </a>
+
+                    <div class="search-result-body">
+                      <div class="search-result-heading">
+                        <a href="{% url 'profile' result.user.username %}">{{ result.display_name }}</a>
+                        <span>@{{ result.handle }}</span>
+                      </div>
+                      {% if result.bio %}
+                        <p class="search-result-bio">{{ result.bio|truncatechars:170 }}</p>
+                      {% else %}
+                        <p class="search-result-bio search-result-bio-muted">{% trans "No bio yet." %}</p>
+                      {% endif %}
+                    </div>
+
+                    <div class="search-result-actions">
+                      <a href="{% url 'profile' result.user.username %}" class="search-action-primary">{% trans "View profile" %}</a>
+                      {% if result.can_message %}
+                        <a href="{% url 'start_chat' result.user.username %}" class="search-action-secondary">{% trans "Message" %}</a>
+                      {% endif %}
+                    </div>
+                  </article>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            {% if page_obj.has_other_pages %}
+              <nav class="search-pagination" aria-label="{% trans 'Search result pages' %}">
+                {% if page_obj.has_previous %}
+                  <a href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.previous_page_number }}">← {% trans "Previous" %}</a>
+                {% endif %}
+                <span>
+                  {% blocktrans with page=page_obj.number pages=page_obj.paginator.num_pages %}Page {{ page }} of {{ pages }}{% endblocktrans %}
+                </span>
+                {% if page_obj.has_next %}
+                  <a href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.next_page_number }}">{% trans "Next" %} →</a>
+                {% endif %}
+              </nav>
+            {% endif %}
+          {% else %}
+            <div class="search-empty">
+              <div class="search-empty-icon">⌕</div>
+              <h2>{% trans "No matching results" %}</h2>
+              <p>{% trans "Try another name, location or remove one of the filters." %}</p>
+              <a href="{{ clear_filters_url }}">{% trans "Clear filters" %}</a>
+            </div>
+          {% endif %}
+        </section>
+      </div>
+    </form>
   </div>
-</div>
+</main>
+
+<div class="search-filter-backdrop" id="search-filter-backdrop"></div>
+
+<script src="{% static 'js/search.js' %}" defer></script>
 {% endblock %}

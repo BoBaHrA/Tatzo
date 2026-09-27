@@ -8,7 +8,7 @@ from users.forms_custom import CustomPasswordChangeForm, CustomSetPasswordForm
 from users import views as users_views
 from users.security_views import TatzoLoginView, TatzoPasswordResetView
 
-from . import imported_artists, views
+from . import imported_artists, search_views, views
 from .views import create_post
 
 urlpatterns = [
@@ -77,7 +77,7 @@ urlpatterns = [
         views.chat_new_messages,
         name="chat_new_messages",
     ),
-    path("search/", views.search_page, name="search_page"),
+    path("search/", search_views.search_page, name="search_page"),
     path("maps/", views.maps_page, name="maps_page"),
     path("maps/location/request/", views.submit_location_request, name="submit_location_request"),
     path("maps/location/<int:location_id>/claim/", views.submit_location_claim, name="submit_location_claim"),
