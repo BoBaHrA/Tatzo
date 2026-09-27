@@ -70,6 +70,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const locationInput = document.getElementById("search-location");
   locationInput?.addEventListener("change", () => {
+    // A typed city/country replaces a previous browser-origin search. Keeping
+    // both would silently intersect two unrelated locations.
+    if (locationInput.value.trim() && latInput && lngInput) {
+      latInput.value = "";
+      lngInput.value = "";
+    }
     if (!mobileMedia.matches) submit();
   });
 
@@ -157,6 +163,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (latInput && lngInput) {
           latInput.value = position.coords.latitude.toFixed(6);
           lngInput.value = position.coords.longitude.toFixed(6);
+        }
+        if (locationInput) {
+          locationInput.value = "";
         }
         setFeedback("");
         submit();
