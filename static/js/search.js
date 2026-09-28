@@ -1,3 +1,25 @@
+(() => {
+  if (document.querySelector('link[data-search-mobile-css]')) return;
+
+  const script = document.currentScript || document.querySelector('script[src*="/js/search.js"]');
+  let href = "/static/css/search_mobile.css";
+
+  if (script?.src) {
+    try {
+      href = new URL("../css/search_mobile.css", script.src).href;
+    } catch (_) {
+      // Keep the Django default static URL fallback above.
+    }
+  }
+
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = href;
+  link.media = "(max-width: 900px)";
+  link.dataset.searchMobileCss = "1";
+  document.head.appendChild(link);
+})();
+
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("search-discovery-form");
   if (!form) return;
