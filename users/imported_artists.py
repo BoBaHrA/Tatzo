@@ -175,8 +175,9 @@ def is_imported_artist(user):
     return get_imported_artist_location(user) is not None
 
 
-def is_claimable_imported_artist(user):
-    location = get_imported_artist_location(user)
+def is_claimable_imported_artist(user, *, location=None):
+    if location is None:
+        location = get_imported_artist_location(user)
     return bool(
         location
         and location.status == "unclaimed"
@@ -385,16 +386,25 @@ def claim_imported_artist(request, token):
         if form.is_valid():
             try:
                 with transaction.atomic():
-                    # Lock the account and re-check claimability in the same
-                    # transaction so parallel submissions cannot replace one
-                    # another's credentials or issue multiple valid emails.
+                    # Lock the account and the same deterministic imported
+                    # location selected by get_imported_artist_location().
+                    # Duplicate markers are tolerated by the schema, so do
+                    # not assume this relation is unique.
                     locked_user = User.objects.select_for_update().select_related("profile").get(pk=user.pk)
-                    locked_location = Location.objects.select_for_update().get(
-                        linked_user=locked_user,
-                        source="admin",
-                        source_place_id=IMPORTED_ARTIST_SOURCE_MARKER,
+                    locked_location = (
+                        Location.objects.select_for_update()
+                        .filter(
+                            linked_user=locked_user,
+                            source="admin",
+                            source_place_id=IMPORTED_ARTIST_SOURCE_MARKER,
+                        )
+                        .order_by("id")
+                        .first()
                     )
-                    if not is_claimable_imported_artist(locked_user):
+                    if not is_claimable_imported_artist(
+                        locked_user,
+                        location=locked_location,
+                    ):
                         raise Http404
 
                     email = form.cleaned_data["email"]
