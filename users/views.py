@@ -528,6 +528,17 @@ def delete_expired_unverified_duplicate_users(username="", email=""):
             Q(profile__is_email_verified=False) |
             Q(profile__isnull=True)
         )
+        # A pending imported artist is deliberately inactive until email
+        # confirmation. A signup attempt using their public handle must not
+        # delete the prepared account and portfolio.
+        .exclude(
+            pk__in=Location.objects.filter(
+                source="admin",
+                source_place_id="tatzo:imported-artist",
+                status="pending_claim",
+                linked_user__isnull=False,
+            ).values("linked_user_id")
+        )
     )
 
     deleted_count, _ = users_to_delete.delete()

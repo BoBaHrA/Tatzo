@@ -2,7 +2,6 @@ import logging
 
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.password_validation import validate_password
 from django.core import signing
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -16,6 +15,7 @@ from django.views.decorators.http import require_http_methods
 
 from posts.models import Post, PostBookmark, PostLike
 from .models import Location, PortfolioWork, Profile, UserBlock, UserFollow
+from .forms_custom import validate_registration_password
 from .utils import send_verification_email
 
 logger = logging.getLogger(__name__)
@@ -145,7 +145,7 @@ class ImportedArtistClaimForm(forms.Form):
             return cleaned
         if password2:
             try:
-                validate_password(password2, user=self.user)
+                validate_registration_password(password2, user=self.user)
             except ValidationError as exc:
                 self.add_error("password2", exc)
         return cleaned
@@ -175,8 +175,9 @@ def is_imported_artist(user):
     return get_imported_artist_location(user) is not None
 
 
-def is_claimable_imported_artist(user):
-    location = get_imported_artist_location(user)
+def is_claimable_imported_artist(user, *, location=None):
+    if location is None:
+        location = get_imported_artist_location(user)
     return bool(
         location
         and location.status == "unclaimed"
@@ -274,6 +275,13 @@ def profile_or_imported_view(request, username):
         from . import views as legacy_views
 
         return legacy_views.profile_view(request, username)
+
+    # Prepared previews (including a pending claim) stay public. Once claimed,
+    # apply the same visibility rule as a regular profile.
+    if imported_location.status == "claimed":
+        if not profile_user.is_active or not profile_user.profile.is_email_verified:
+            if not (request.user.is_authenticated and request.user.is_staff):
+                raise Http404
 
     if request.user.is_authenticated and request.user != profile_user:
         if UserBlock.objects.filter(
@@ -378,19 +386,53 @@ def claim_imported_artist(request, token):
         if form.is_valid():
             try:
                 with transaction.atomic():
-                    user.email = form.cleaned_data["email"]
-                    user.set_password(form.cleaned_data["password1"])
-                    user.is_active = False
-                    user.save(update_fields=["email", "password", "is_active"])
+                    # Lock the account and the same deterministic imported
+                    # location selected by get_imported_artist_location().
+                    # Duplicate markers are tolerated by the schema, so do
+                    # not assume this relation is unique.
+                    locked_user = User.objects.select_for_update().select_related("profile").get(pk=user.pk)
+                    locked_location = (
+                        Location.objects.select_for_update()
+                        .filter(
+                            linked_user=locked_user,
+                            source="admin",
+                            source_place_id=IMPORTED_ARTIST_SOURCE_MARKER,
+                        )
+                        .order_by("id")
+                        .first()
+                    )
+                    if not is_claimable_imported_artist(
+                        locked_user,
+                        location=locked_location,
+                    ):
+                        raise Http404
 
-                    profile = user.profile
+                    email = form.cleaned_data["email"]
+                    if User.objects.filter(email__iexact=email).exclude(pk=locked_user.pk).exists():
+                        form.add_error("email", _("An account with this email already exists."))
+                        raise ValidationError("Claim email is no longer available.")
+
+                    locked_user.email = email
+                    locked_user.set_password(form.cleaned_data["password1"])
+                    locked_user.is_active = False
+                    locked_user.save(update_fields=["email", "password", "is_active"])
+
+                    profile = locked_user.profile
                     profile.is_email_verified = False
                     profile.save(update_fields=["is_email_verified"])
 
-                    imported_location.status = "pending_claim"
-                    imported_location.save(update_fields=["status", "updated_at"])
+                    locked_location.status = "pending_claim"
+                    locked_location.save(update_fields=["status", "updated_at"])
 
+                    user = locked_user
+                    imported_location = locked_location
                     send_verification_email(request, user)
+            except Http404:
+                raise
+            except ValidationError:
+                # The email may have been claimed by another request after
+                # form validation; keep the user's form values and errors.
+                pass
             except Exception:
                 logger.exception("Imported artist claim email failed for user=%s", user.username)
                 form.add_error(

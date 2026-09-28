@@ -1,5 +1,6 @@
 from django.contrib import admin, messages
-from django.core.exceptions import PermissionDenied
+from django import forms
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
@@ -25,6 +26,31 @@ from .models import (
     UserReport,
     VerificationDocument,
 )
+
+
+class PortfolioWorkAdminForm(forms.ModelForm):
+    class Meta:
+        model = PortfolioWork
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        user_id = self.data.get("user") if self.is_bound else self.instance.user_id
+        albums = PortfolioAlbum.objects.none()
+        if user_id:
+            try:
+                albums = PortfolioAlbum.objects.filter(user_id=int(user_id))
+            except (TypeError, ValueError):
+                pass
+        self.fields["album"].queryset = albums
+
+    def clean(self):
+        cleaned = super().clean()
+        user = cleaned.get("user")
+        album = cleaned.get("album")
+        if user and album and album.user_id != user.pk:
+            self.add_error("album", _("Choose an album owned by the selected artist."))
+        return cleaned
 
 
 @admin.action(description="Approve selected profiles")
@@ -72,7 +98,13 @@ class ProfileAdmin(admin.ModelAdmin):
         return custom_urls + super().get_urls()
 
     def add_imported_artist_view(self, request):
-        if not self.has_add_permission(request):
+        required_permissions = (
+            "users.add_profile",
+            "auth.add_user",
+            "users.add_location",
+            "users.add_portfoliowork",
+        )
+        if not all(request.user.has_perm(permission) for permission in required_permissions):
             raise PermissionDenied
 
         if request.method == "POST":
@@ -230,6 +262,12 @@ class PortfolioWorkAdmin(admin.ModelAdmin):
     search_fields = ("title", "style", "body_placement", "user__username")
     list_filter = ("style", "created_at")
     autocomplete_fields = ("user", "album")
+    form = PortfolioWorkAdminForm
+
+    def save_model(self, request, obj, form, change):
+        if obj.album_id and obj.album.user_id != obj.user_id:
+            raise ValidationError(_("A portfolio work and its album must belong to the same artist."))
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(UserReport)
