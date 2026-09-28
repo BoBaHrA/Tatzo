@@ -932,7 +932,7 @@ const styles = StyleSheet.create({
   footerSpace: { height: spacing.xl },
   pressed: { opacity: 0.74, transform: [{ scale: 0.995 }] },
   modalRoot: { flex: 1, justifyContent: 'flex-end' },
-  modalBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0, 0, 0, 0.68)' },
+  modalBackdrop: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0, 0, 0, 0.68)' },
   sheet: {
     maxHeight: '88%',
     borderTopLeftRadius: 28,
