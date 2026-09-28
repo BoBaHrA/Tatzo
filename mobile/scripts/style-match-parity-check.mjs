@@ -46,7 +46,12 @@ check(match.includes('previewDeck') && match.includes('visualPill') && match.inc
 check(match.includes('fetchStyleMatchPreview(request)') && match.includes('setPreviewCards(preview.cards.slice(0, 3))'), 'Onboarding loads dedicated global preview cards like the website');
 check(matchApi.includes("'/style-match/preview/'") && matchApi.includes('StyleMatchCard[]'), 'Style Match preview endpoint is wired into the native API client');
 check(match.includes('overview.active_session') && match.includes("setMode('quiz')") && match.includes('overview.latest_result') && match.includes("setMode('result')"), 'Opening Style Match resumes an active session or restores the latest completed result');
-check(match.includes('useFocusEffect') && match.includes('void loadOverview()'), 'Style Match refreshes saved state when the tab regains focus');
+check(match.includes('useFocusEffect') && match.includes('background: hasLoadedOverviewRef.current'), 'Style Match refreshes persisted state on focus without forcing a blocking reload after the first restore');
+check(!match.includes('const [overview, preview] = await Promise.all'), 'Persisted Style Match restoration does not depend on the optional preview request');
+check(match.includes('overviewRequestRef') && match.includes('requestId !== overviewRequestRef.current'), 'Style Match ignores stale overview responses from older focus refreshes');
+check(match.includes('return () =>') && match.includes('overviewRequestRef.current += 1'), 'Leaving the Style Match tab invalidates in-flight overview refreshes');
+check(match.includes('const blockingLoad = !background && !hasLoadedOverviewRef.current') && match.includes('if (blockingLoad) setLoading(true)'), 'Background focus refreshes preserve the visible quiz/result screen and scroll state');
+check(match.includes('if (!background) setError') && match.includes('setPreviewCards([])'), 'Optional preview failures do not replace restored Style Match state with a global error');
 check(match.includes('PanResponder.create'), 'Discovery cards have a real native swipe responder');
 check(match.includes('const WEB_SWIPE_THRESHOLD = 90'), 'Swipe threshold matches the web 90px choice threshold');
 check(match.includes('const WEB_LONG_PRESS_MS = 650'), 'Hold-to-save matches the web 650ms gesture');
