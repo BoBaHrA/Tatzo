@@ -9,6 +9,8 @@ from appointments import views as appointment_views
 
 
 SITEMAPS = {"static": StaticSitemap, "artists": ArtistSitemap}
+YANDEX_VERIFICATION_TOKEN = "16a0f5b5574ae8af"
+YANDEX_VERIFICATION_FILENAME = f"yandex_{YANDEX_VERIFICATION_TOKEN}.html"
 
 
 def healthz(request):
@@ -43,6 +45,20 @@ def indexnow_key(request):
     return response
 
 
+def yandex_verification(request):
+    html = (
+        "<html>\n"
+        "    <head>\n"
+        '        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">\n'
+        "    </head>\n"
+        f"    <body>Verification: {YANDEX_VERIFICATION_TOKEN}</body>\n"
+        "</html>\n"
+    )
+    response = HttpResponse(html, content_type="text/html; charset=utf-8")
+    response["Cache-Control"] = "public, max-age=86400"
+    return response
+
+
 def sitemap_xml(request):
     response = sitemap(request, sitemaps=SITEMAPS)
     # Django marks sitemap responses as noindex by default. Although sitemap
@@ -73,6 +89,7 @@ urlpatterns = [
     path("healthz/", healthz, name="healthz"),
     path("robots.txt", robots_txt, name="robots_txt"),
     path(f"{INDEXNOW_KEY}.txt", indexnow_key, name="indexnow_key"),
+    path(YANDEX_VERIFICATION_FILENAME, yandex_verification, name="yandex_verification"),
     path("sitemap.txt", sitemap_txt, name="sitemap_txt"),
     path(
         "sitemap.xml",

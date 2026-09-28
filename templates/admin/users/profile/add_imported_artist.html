@@ -1,0 +1,43 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% trans "Home" %}</a>
+  &rsaquo; <a href="{% url 'admin:users_profile_changelist' %}">{% trans "Profiles" %}</a>
+  &rsaquo; {% trans "Add imported artist" %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <fieldset class="module aligned">
+      <h2>{% trans "Prepared artist profile" %}</h2>
+      {% for field in form %}
+        <div class="form-row{% if field.errors %} errors{% endif %}">
+          {{ field.errors }}
+          <div>
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}
+              <div class="help">{{ field.help_text }}</div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </fieldset>
+
+    <div class="submit-row">
+      <input type="submit" value="{% trans 'Create prepared profile' %}" class="default">
+    </div>
+  </form>
+
+  <p class="help">
+    {% trans "The artist account is created without a usable password. The public profile can be reviewed immediately, while the private claim link lets the artist set their own email and password." %}
+  </p>
+</div>
+{% endblock %}

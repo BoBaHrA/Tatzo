@@ -16,6 +16,21 @@ USER_TYPE_CHOICES = [
 ]
 
 
+def validate_registration_password(password, user=None):
+    """Apply the shared password policy used by every account creation flow."""
+    errors = []
+    if len(password) < 8:
+        errors.append(_("Password must contain at least 8 characters."))
+    if not re.search(r"[A-Z]", password):
+        errors.append(_("Password must contain at least one uppercase letter."))
+    if not re.search(r"\d", password):
+        errors.append(_("Password must contain at least one number."))
+
+    if errors:
+        raise ValidationError(errors)
+    validate_password(password, user)
+
+
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     account_type = forms.ChoiceField(choices=USER_TYPE_CHOICES, required=True)
@@ -44,25 +59,12 @@ class CustomUserCreationForm(UserCreationForm):
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
 
-        errors = []
-
         if password1 and password2 and password1 != password2:
-            errors.append(_("Passwords do not match."))
+            raise ValidationError(_("Passwords do not match."))
 
         if not password1:
             return password2
-
-        if len(password1) < 8:
-            errors.append(_("Password must contain at least 8 characters."))
-        if not re.search(r"[A-Z]", password1):
-            errors.append(_("Password must contain at least one uppercase letter."))
-        if not re.search(r"\d", password1):
-            errors.append(_("Password must contain at least one number."))
-
-        if errors:
-            raise ValidationError(errors)
-
-        validate_password(password2, self.instance)
+        validate_registration_password(password2, self.instance)
 
         return password2
 
@@ -70,22 +72,9 @@ class CustomUserCreationForm(UserCreationForm):
 class CustomSetPasswordForm(SetPasswordForm):
     def clean_new_password1(self):
         password1 = self.cleaned_data.get("new_password1")
-        errors = []
-
         if not password1:
             return password1
-
-        if len(password1) < 8:
-            errors.append(_("Password must contain at least 8 characters."))
-        if not re.search(r"[A-Z]", password1):
-            errors.append(_("Password must contain at least one uppercase letter."))
-        if not re.search(r"\d", password1):
-            errors.append(_("Password must contain at least one number."))
-
-        if errors:
-            raise ValidationError(errors)
-
-        validate_password(password1, self.user)
+        validate_registration_password(password1, self.user)
 
         return password1
 
@@ -106,5 +95,5 @@ class CustomPasswordChangeForm(PasswordChangeForm):
     def clean_new_password1(self):
         password = self.cleaned_data.get("new_password1")
         if password:
-            validate_password(password, self.user)
+            validate_registration_password(password, self.user)
         return password

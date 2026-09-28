@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{{ profile_user.username }}{% endblock %}
+{% block title %}{% if is_imported_artist and profile_user.first_name %}{{ profile_user.first_name }}{% else %}{{ profile_user.username }}{% endif %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
@@ -33,7 +33,13 @@
         <div class="profile-top-row">
           <div>
             <div class="profile-name-row">
-              <h1 class="profile-username">{{ profile_user.username }}</h1>
+              <h1 class="profile-username">
+                {% if is_imported_artist and profile_user.first_name %}
+                  {{ profile_user.first_name }}
+                {% else %}
+                  {{ profile_user.username }}
+                {% endif %}
+              </h1>
 
               {% if profile_user.profile.account_type == "tattoo_artist" %}
                 <span class="profile-badge profile-badge-artist">
@@ -41,7 +47,15 @@
                 </span>
               {% endif %}
 
-              {% if profile_user.profile.verification_status == "approved" %}
+              {% if is_unclaimed %}
+                <span class="profile-badge profile-badge-verified">
+                  {% trans "Unclaimed profile" %}
+                </span>
+              {% elif claim_pending %}
+                <span class="profile-badge profile-badge-verified">
+                  {% trans "Claim pending" %}
+                </span>
+              {% elif profile_user.profile.verification_status == "approved" %}
                 <span class="profile-badge profile-badge-verified">
                   {% trans "Verified" %}
                 </span>
@@ -58,11 +72,11 @@
           </div>
 
           <div class="profile-actions">
-            {% if request.user == profile_user %}
+            {% if request.user == profile_user and not is_unclaimed and not claim_pending %}
               <a href="{% url 'edit_profile' %}" class="profile-btn profile-btn-primary">
                 {% trans "Edit profile" %}
               </a>
-            {% else %}
+            {% elif not is_unclaimed and not claim_pending %}
               <button
                 class="profile-btn profile-btn-primary profile-follow-btn {% if is_following %}is-following{% endif %}"
                 type="button"
@@ -87,8 +101,13 @@
 
         <div class="profile-stats">
           <div class="profile-stat">
-            <span class="profile-stat-value">{{ posts_count }}</span>
-            <span class="profile-stat-label">{% trans "posts" %}</span>
+            {% if show_prepared_work_grid %}
+              <span class="profile-stat-value">{{ portfolio_works_count }}</span>
+              <span class="profile-stat-label">{% trans "works" %}</span>
+            {% else %}
+              <span class="profile-stat-value">{{ posts_count }}</span>
+              <span class="profile-stat-label">{% trans "posts" %}</span>
+            {% endif %}
           </div>
 
           <div class="profile-stat">
@@ -103,10 +122,36 @@
         </div>
 
         <div class="profile-bio-card">
+          {% if is_imported_artist %}
+            {% if imported_location.city or imported_location.country %}
+              <div class="profile-muted">
+                📍 {% if imported_location.city %}{{ imported_location.city }}{% endif %}{% if imported_location.city and imported_location.country %}, {% endif %}{% if imported_location.country %}{{ imported_location.country }}{% endif %}
+              </div>
+            {% endif %}
+
+            {% if imported_location.website %}
+              <div>
+                <a href="{{ imported_location.website }}" target="_blank" rel="noopener noreferrer" class="artist-info-link">
+                  @{{ profile_user.username }}
+                </a>
+              </div>
+            {% endif %}
+          {% endif %}
+
           {% if profile_user.profile.bio %}
-            {{ profile_user.profile.bio }}
-          {% else %}
+            <div>{{ profile_user.profile.bio }}</div>
+          {% elif not is_imported_artist %}
             <span class="profile-muted">{% trans "No bio yet." %}</span>
+          {% endif %}
+
+          {% if is_unclaimed %}
+            <div class="profile-muted">
+              {% trans "This profile was prepared by Tatzo from public artist information and has not been claimed yet." %}
+            </div>
+          {% elif claim_pending %}
+            <div class="profile-muted">
+              {% trans "The artist has started claiming this profile. Email confirmation is still pending." %}
+            </div>
           {% endif %}
         </div>
 
@@ -116,7 +161,11 @@
               <div class="artist-info-title">{% trans "Verification" %}</div>
 
               <div class="artist-info-value">
-                {% if profile_user.profile.verification_status == "approved" %}
+                {% if is_unclaimed %}
+                  {% trans "Not claimed yet" %}
+                {% elif claim_pending %}
+                  {% trans "Claim pending" %}
+                {% elif profile_user.profile.verification_status == "approved" %}
                   {% trans "Verified" %}
                 {% elif profile_user.profile.verification_status == "rejected" %}
                   {% trans "Rejected" %}
@@ -131,7 +180,7 @@
                 {% endif %}
               </div>
 
-              {% if request.user == profile_user and profile_user.profile.verification_status == "not_submitted" %}
+              {% if request.user == profile_user and profile_user.profile.verification_status == "not_submitted" and not is_unclaimed and not claim_pending %}
                 <a href="{% url 'verification_page' %}" class="artist-info-link">
                   {% trans "Start verification" %}
                 </a>
@@ -142,24 +191,28 @@
               <div class="artist-info-title">{% trans "Portfolio" %}</div>
 
               <div class="artist-info-value">
-                <a
-                  href="{% url 'artist_portfolio' profile_user.username %}"
-                  class="artist-info-link"
-                >
-                  {% if request.user == profile_user %}
-                    {% if portfolio_works_count %}
-                      {% trans "Manage portfolio" %}
+                {% if show_prepared_work_grid %}
+                  {{ portfolio_works_count }} {% trans "works prepared" %}
+                {% else %}
+                  <a
+                    href="{% url 'artist_portfolio' profile_user.username %}"
+                    class="artist-info-link"
+                  >
+                    {% if request.user == profile_user %}
+                      {% if portfolio_works_count %}
+                        {% trans "Manage portfolio" %}
+                      {% else %}
+                        {% trans "Add your works" %}
+                      {% endif %}
                     {% else %}
-                      {% trans "Add your works" %}
+                      {% if portfolio_works_count %}
+                        {% trans "Take a look" %}
+                      {% else %}
+                        {% trans "No works yet" %}
+                      {% endif %}
                     {% endif %}
-                  {% else %}
-                    {% if portfolio_works_count %}
-                      {% trans "Take a look" %}
-                    {% else %}
-                      {% trans "No works yet" %}
-                    {% endif %}
-                  {% endif %}
-                </a>
+                  </a>
+                {% endif %}
               </div>
             </div>
 
@@ -167,7 +220,9 @@
               <div class="artist-info-title">{% trans "Booking" %}</div>
 
               <div class="artist-info-value">
-                {% if profile_user.profile.verification_status == "approved" %}
+                {% if is_unclaimed or claim_pending %}
+                  {% trans "Available after claim" %}
+                {% elif profile_user.profile.verification_status == "approved" %}
                   {% if request.user == profile_user %}
                     <a href="{% url 'appointments_list' %}" class="artist-info-link">
                       {% trans "Manage appointments" %}
@@ -195,7 +250,11 @@
 
     <div class="profile-tabs">
       <button class="profile-tab active" type="button" data-profile-tab="posts">
-        {% trans "Posts" %}
+        {% if show_prepared_work_grid %}
+          {% trans "Portfolio" %}
+        {% else %}
+          {% trans "Posts" %}
+        {% endif %}
       </button>
 
       <button class="profile-tab" type="button" data-profile-tab="liked">
@@ -205,38 +264,55 @@
 
     <div class="profile-tab-panel active" data-profile-panel="posts">
       <div class="profile-posts-grid">
-        {% for post in posts %}
-          <div class="profile-post-card" data-post-id="{{ post.id }}">
-            {% with first_media=post.medias.first %}
-              {% if first_media %}
-                {% if first_media.media_type == "video" %}
-                  <video class="profile-post-media" src="{{ first_media.file.url }}" muted playsinline preload="metadata"></video>
-                  <span class="profile-post-type">▶</span>
-                {% else %}
-                  <img
-                    class="profile-post-media"
-                    src="{{ first_media.file.url }}"
-                    alt="{% trans 'Post media' %}"
-                  >
-                {% endif %}
-              {% else %}
-                <div class="profile-post-empty">{% trans "No media" %}</div>
-              {% endif %}
-            {% endwith %}
-          </div>
-        {% empty %}
-          <div class="profile-empty-state">
-            <div class="profile-empty-title">{% trans "No posts yet" %}</div>
-
-            <div class="profile-empty-text">
-              {% if request.user == profile_user %}
-                {% trans "Your posts will appear here." %}
-              {% else %}
-                {% trans "This user has not published anything yet." %}
-              {% endif %}
+        {% if show_prepared_work_grid %}
+          {% for work in prepared_works %}
+            <div class="profile-post-card" title="{{ work.title|default:'Portfolio work' }}">
+              <img
+                class="profile-post-media"
+                src="{{ work.image.url }}"
+                alt="{{ work.title|default:'Portfolio work' }}"
+              >
             </div>
-          </div>
-        {% endfor %}
+          {% empty %}
+            <div class="profile-empty-state">
+              <div class="profile-empty-title">{% trans "No portfolio works yet" %}</div>
+              <div class="profile-empty-text">{% trans "Prepared works will appear here." %}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          {% for post in posts %}
+            <div class="profile-post-card" data-post-id="{{ post.id }}">
+              {% with first_media=post.medias.first %}
+                {% if first_media %}
+                  {% if first_media.media_type == "video" %}
+                    <video class="profile-post-media" src="{{ first_media.file.url }}" muted playsinline preload="metadata"></video>
+                    <span class="profile-post-type">▶</span>
+                  {% else %}
+                    <img
+                      class="profile-post-media"
+                      src="{{ first_media.file.url }}"
+                      alt="{% trans 'Post media' %}"
+                    >
+                  {% endif %}
+                {% else %}
+                  <div class="profile-post-empty">{% trans "No media" %}</div>
+                {% endif %}
+              {% endwith %}
+            </div>
+          {% empty %}
+            <div class="profile-empty-state">
+              <div class="profile-empty-title">{% trans "No posts yet" %}</div>
+
+              <div class="profile-empty-text">
+                {% if request.user == profile_user %}
+                  {% trans "Your posts will appear here." %}
+                {% else %}
+                  {% trans "This user has not published anything yet." %}
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        {% endif %}
       </div>
     </div>
 
