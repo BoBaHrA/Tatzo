@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import {
@@ -8,11 +9,11 @@ import {
   PanResponder,
   Pressable,
   StyleSheet,
-  Text,
   View,
   useWindowDimensions,
   type ImageSourcePropType,
 } from 'react-native';
+import { Text } from '@/components/text';
 
 import type {
   StyleMatchCard,
@@ -64,6 +65,7 @@ function mergeCards(current: StyleMatchCard[], added: StyleMatchCard[]) {
 }
 
 export default function StyleMatchScreenV3() {
+  useLanguage();
   const { request, status } = useAuth();
   const { width: windowWidth } = useWindowDimensions();
   const [mode, setMode] = useState<MatchMode>('intro');
@@ -502,10 +504,12 @@ export default function StyleMatchScreenV3() {
 }
 
 function Wordmark() {
+  useLanguage();
   return <Image accessibilityLabel="Tatzo" resizeMode="contain" source={require('../../assets/tatzo7.png')} style={styles.wordmark} />;
 }
 
 function Ambient() {
+  useLanguage();
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       <View style={[styles.ambientGlow, styles.ambientTealOuter]} />
@@ -519,6 +523,7 @@ function Ambient() {
 }
 
 function DeckBackCard({ card, depth }: { card: StyleMatchCard; depth: 1 | 2 }) {
+  useLanguage();
   return <View style={[styles.deckBack, depth === 1 ? styles.deckBackOne : styles.deckBackTwo]} pointerEvents="none"><Image source={{ uri: card.image_url }} resizeMode="cover" style={styles.cardImage} /><View style={styles.backTint} /></View>;
 }
 
@@ -530,6 +535,7 @@ function ActionButton({ label, icon, variant, disabled, loading, onPress }: {
   loading: boolean;
   onPress: () => void;
 }) {
+  useLanguage();
   const isLike = variant === 'like';
   const activeSave = variant === 'saveActive';
   const tintColor = isLike ? colors.white : activeSave ? colors.primary : '#d9edf0';

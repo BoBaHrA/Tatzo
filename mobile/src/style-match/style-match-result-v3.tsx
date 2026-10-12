@@ -1,5 +1,7 @@
+import { useLanguage } from '@/localization/language-context';
 import { router } from 'expo-router';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { StyleMatchResult as StyleMatchResultData } from '@/api/types';
 import { Button } from '@/components/button';
@@ -32,6 +34,7 @@ function copy(en: string, fr: string, ru: string) {
 }
 
 export function StyleMatchResultV3({ result, onRestart, restarting }: Props) {
+  useLanguage();
   const peopleCopy = result.community_count === 1
     ? copy('person shares your tattoo personality.', 'personne partage votre personnalité tattoo.', 'человек разделяет твою тату-персональность.')
     : copy('people share your tattoo personality.', 'personnes partagent votre personnalité tattoo.', 'человек разделяют твою тату-персональность.');
@@ -193,6 +196,7 @@ export function StyleMatchResultV3({ result, onRestart, restarting }: Props) {
 }
 
 function ResultAmbient() {
+  useLanguage();
   return (
     <View pointerEvents="none" style={styles.resultAmbient}>
       <View style={[styles.ambientOrb, styles.ambientTealOuter]} />
@@ -204,6 +208,7 @@ function ResultAmbient() {
 }
 
 function SavedReferences({ result }: { result: StyleMatchResultData }) {
+  useLanguage();
   return (
     <View style={styles.panel}>
       <View style={styles.savedHead}>
@@ -241,10 +246,12 @@ function SavedReferences({ result }: { result: StyleMatchResultData }) {
 }
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
+  useLanguage();
   return <View style={styles.panel}><Text style={styles.panelTitle}>{title}</Text>{children}</View>;
 }
 
 function TraitPanel({ title, values, positive = false }: { title: string; values: string[]; positive?: boolean }) {
+  useLanguage();
   return (
     <View style={styles.panel}>
       <Text style={styles.panelTitle}>{title}</Text>
@@ -261,6 +268,7 @@ function TraitPanel({ title, values, positive = false }: { title: string; values
 }
 
 function Achievement({ icon, title, unlocked = false, detail }: { icon: string; title: string; unlocked?: boolean; detail?: string }) {
+  useLanguage();
   return (
     <View style={[styles.achievement, unlocked && styles.achievementUnlocked]}>
       <Text style={styles.achievementIcon}>{icon}</Text>
@@ -273,6 +281,7 @@ function Achievement({ icon, title, unlocked = false, detail }: { icon: string; 
 }
 
 function WrappedRow({ label, value, last = false }: { label: string; value: string; last?: boolean }) {
+  useLanguage();
   return (
     <View style={[styles.wrappedRow, last && styles.wrappedRowLast]}>
       <Text style={styles.wrappedLabel}>{label}</Text>
