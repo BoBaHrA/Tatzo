@@ -22,6 +22,7 @@ import {
   toggleFeedBookmark,
   toggleFeedLike,
 } from '@/feed/feed-api';
+import { FeedMutations } from '@/feed/feed-mutations';
 import { PostCard } from '@/feed/post-card';
 import type { FeedPage } from '@/api/types';
 import { t } from '@/i18n';
@@ -38,18 +39,16 @@ export function FeedScreen({ bookmarks = false }: { bookmarks?: boolean }) {
   const publishedVersions = useRef(new Map<number, number>());
   const morePending = useRef(false);
   const pageLoaded = useRef(false);
-  const mutationVersion = useRef(0);
-  const changes = useRef(new Map<number, { version: number; patch: Partial<FeedPost> | null }>());
+  const mutations = useRef(new FeedMutations());
   const fetchPage = useCallback((cursor?: string) => bookmarks
     ? request<FeedPage>(`/me/bookmarks/${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''}`)
     : fetchFeed(request, cursor), [bookmarks, request]);
   const applyChanges = (items: FeedPost[], since: number) => items.flatMap((post) => {
-    const change = changes.current.get(post.id);
-    const updated = change && change.version > since ? (change.patch ? { ...post, ...change.patch } : null) : post;
+    const updated = mutations.current.apply(post, since);
     return updated && (!bookmarks || updated.is_bookmarked) ? [updated] : [];
   });
   const changePost = (id: number, patch: Partial<FeedPost> | null) => {
-    changes.current.set(id, { version: ++mutationVersion.current, patch });
+    mutations.current.record(id, patch);
     setPosts(current => current.flatMap(post => post.id !== id ? [post]
       : patch && (!bookmarks || patch.is_bookmarked !== false) ? [{ ...post, ...patch }] : []));
   };
@@ -64,7 +63,7 @@ export function FeedScreen({ bookmarks = false }: { bookmarks?: boolean }) {
   const loadFirstPage = useCallback(async (reset = false) => {
     const version = ++generation.current;
     firstPending.current = true;
-    const since = mutationVersion.current;
+    const since = mutations.current.version;
     const hadPage = pageLoaded.current;
     morePending.current = false;
     setLoadingMore(false);
@@ -77,19 +76,19 @@ export function FeedScreen({ bookmarks = false }: { bookmarks?: boolean }) {
         const local = current.filter(post => (publishedVersions.current.get(post.id) ?? 0) > since);
         const localIds = new Set(local.map(post => post.id));
         const fresh = [...local, ...incoming.filter(post => !localIds.has(post.id))];
-        if (reset || !hadPage) return fresh;
+        if (reset || !hadPage || bookmarks) return fresh;
         const byId = new Map(fresh.map(post => [post.id, post]));
         const known = new Set(current.map(post => post.id));
         return [...fresh.filter(post => !known.has(post.id)), ...current.map(post => byId.get(post.id) ?? post)];
       });
-      if (reset || !hadPage) setNextCursor(page.next_cursor);
+      if (reset || !hadPage || bookmarks) setNextCursor(page.next_cursor);
       pageLoaded.current = true;
     } catch {
       if (version === generation.current) setLoadError(t('feedError'));
     } finally {
       if (version === generation.current) { firstPending.current = false; setInitialLoading(false); setRefreshing(false); }
     }
-  }, [fetchPage]);
+  }, [bookmarks, fetchPage]);
 
   useFocusEffect(useCallback(() => {
     void loadFirstPage();
@@ -105,7 +104,7 @@ export function FeedScreen({ bookmarks = false }: { bookmarks?: boolean }) {
   const loadMore = async () => {
     if (!nextCursor || firstPending.current || morePending.current || initialLoading || refreshing) return;
     const version = generation.current;
-    const since = mutationVersion.current;
+    const since = mutations.current.version;
     morePending.current = true;
     setLoadingMore(true);
     try {
@@ -179,8 +178,7 @@ export function FeedScreen({ bookmarks = false }: { bookmarks?: boolean }) {
   });
 
   const published = (post: FeedPost) => {
-    changes.current.set(post.id, { version: ++mutationVersion.current, patch: post });
-    publishedVersions.current.set(post.id, mutationVersion.current);
+    publishedVersions.current.set(post.id, mutations.current.record(post.id, post));
     setPosts((current) => [post, ...current.filter((item) => item.id !== post.id)]);
   };
 

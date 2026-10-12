@@ -9,7 +9,7 @@ import {
   type PropsWithChildren,
 } from 'react';
 import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 import { useAuth } from '@/auth/auth-context';
 import {
@@ -34,16 +34,20 @@ const NotificationContext = createContext<NotificationContextValue | null>(null)
 export function NotificationProvider({ children }: PropsWithChildren) {
   const { request, status } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
+  const mounted = useRef(true);
+  const countRevision = useRef(0);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   const refreshingRef = useRef(false);
   const pendingResponseRef = useRef<Notifications.NotificationResponse | null>(null);
   const handledResponseIdsRef = useRef(new Set<string>());
 
   const refreshCount = useCallback(async () => {
-    if (status !== 'authenticated' || refreshingRef.current) return;
+    if (status !== 'authenticated' || refreshingRef.current || AppState.currentState === 'background') return;
     refreshingRef.current = true;
+    const revision = countRevision.current;
     try {
       const result = await fetchNotificationCount(request);
-      setUnreadCount(result.unread_count);
+      if (mounted.current && revision === countRevision.current) setUnreadCount(result.unread_count);
     } catch {
       // A notification badge should never block the rest of the app.
     } finally {
@@ -58,7 +62,8 @@ export function NotificationProvider({ children }: PropsWithChildren) {
     }
     void refreshCount();
     const poll = setInterval(() => void refreshCount(), 20_000);
-    return () => clearInterval(poll);
+    const subscription = AppState.addEventListener('change', next => { if (next === 'active') void refreshCount(); });
+    return () => { clearInterval(poll); subscription.remove(); };
   }, [refreshCount, status]);
 
   useEffect(() => {
@@ -73,7 +78,8 @@ export function NotificationProvider({ children }: PropsWithChildren) {
   }, [request, status]);
 
   const syncUnreadCount = useCallback((count: number) => {
-    setUnreadCount(Math.max(0, count));
+    countRevision.current++;
+    if (mounted.current) setUnreadCount(Math.max(0, count));
   }, []);
 
   const handlePushResponse = useCallback(async (
@@ -103,6 +109,7 @@ export function NotificationProvider({ children }: PropsWithChildren) {
         await refreshCount();
       }
     }
+    if (!mounted.current) return;
     navigateToNotificationTarget(target);
     await Notifications.clearLastNotificationResponseAsync();
   }, [refreshCount, request, status, syncUnreadCount]);

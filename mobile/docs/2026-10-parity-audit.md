@@ -40,6 +40,15 @@ Run the full repository suite with collected static assets, as CI does. Without
 booking tests additionally failed across the October DST transition because their
 fixtures hard-coded UTC+2; they now use the artist's actual zone.
 
+Verified results before device review:
+
+- Full backend suite: **314 tests passed**.
+- Mobile behavior tests: **10 passed** (session races and stale feed mutations).
+- TypeScript, all existing parity checks and Android/iOS/web export passed.
+- Django system check passed; no pending migrations.
+- Initial PR CI passed Full system, Platform and Payments checks. The APK job's
+  obsolete SDK `tools` dependency was corrected to `platform-tools`.
+
 Validation commands:
 
 - `python manage.py collectstatic --noinput`

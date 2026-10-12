@@ -127,16 +127,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, [request, session]);
 
   const refreshProfile = useCallback(async () => {
+    const version = operation.current;
     const profile = await request<TatzoUser>('/me/');
-    setUser(profile);
+    if (version === operation.current) setUser(profile);
   }, [request]);
 
   const updateProfile = useCallback(async (payload: ProfileUpdate) => {
+    const version = operation.current;
     const profile = await request<TatzoUser>('/me/', {
       method: 'PATCH',
       body: JSON.stringify(payload),
     });
-    setUser(profile);
+    if (version === operation.current) setUser(profile);
   }, [request]);
 
   const value = useMemo<AuthContextValue>(

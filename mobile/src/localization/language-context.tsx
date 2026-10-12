@@ -8,6 +8,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type PropsWithChildren,
 } from 'react';
@@ -25,13 +26,16 @@ type LanguageContextValue = {
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function LanguageProvider({ children }: PropsWithChildren) {
+  const revision = useRef(0);
+  const writeQueue = useRef(Promise.resolve());
   const [language, setLanguageState] = useState<AppLanguage>(appLanguage);
 
   useEffect(() => {
     let active = true;
+    const version = revision.current;
     const read = async () => Platform.OS === 'web' ? localStorage.getItem(STORAGE_KEY) : SecureStore.getItemAsync(STORAGE_KEY);
     void read().then((stored) => {
-      if (!active || !stored) return;
+      if (!active || !stored || version !== revision.current) return;
       const next = normalizeLanguage(stored);
       setRuntimeLanguage(next);
       setLanguageState(next);
@@ -42,12 +46,14 @@ export function LanguageProvider({ children }: PropsWithChildren) {
   }, []);
 
   const setLanguage = useCallback(async (next: AppLanguage) => {
+    revision.current++;
     setRuntimeLanguage(next);
     setLanguageState(next);
-    try {
+    writeQueue.current = writeQueue.current.then(async () => {
       if (Platform.OS === 'web') localStorage.setItem(STORAGE_KEY, next);
       else await SecureStore.setItemAsync(STORAGE_KEY, next);
-    } catch { /* The in-memory preference still works when persistence is unavailable. */ }
+    }).catch(() => { /* Keep the live preference if storage is unavailable. */ });
+    await writeQueue.current;
   }, []);
 
   const value = useMemo(() => ({ language, setLanguage }), [language, setLanguage]);
