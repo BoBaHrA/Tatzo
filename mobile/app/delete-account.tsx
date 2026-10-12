@@ -1,6 +1,8 @@
+import { useLanguage } from '@/localization/language-context';
 import { useState } from 'react';
 import { Redirect, router } from 'expo-router';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import { ApiError } from '@/api/client';
 import { useAuth } from '@/auth/auth-context';
@@ -13,6 +15,7 @@ import { colors, radius, spacing } from '@/theme';
 
 
 export default function DeleteAccountScreen() {
+  useLanguage();
   const { deleteAccount, status } = useAuth();
   const [password, setPassword] = useState('');
   const [deleting, setDeleting] = useState(false);

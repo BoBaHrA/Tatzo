@@ -1,12 +1,8 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Redirect, router } from 'expo-router';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { ArtistAppointmentConfig, BookingType } from '@/api/types';
 import {
@@ -36,6 +32,7 @@ function Choice({
   label: string;
   onPress: () => void;
 }) {
+  useLanguage();
   return (
     <Pressable
       accessibilityRole="radio"
@@ -55,6 +52,7 @@ function Choice({
 }
 
 export default function CreateArtistAppointmentScreen() {
+  useLanguage();
   const { request, status, user } = useAuth();
   const [config, setConfig] = useState<ArtistAppointmentConfig | null>(null);
   const [loading, setLoading] = useState(true);

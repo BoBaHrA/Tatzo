@@ -1,12 +1,8 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { Appointment, ArtistAppointmentConfig } from '@/api/types';
 import {
@@ -50,6 +46,7 @@ function TimeChoice({
   value: string;
   onPress: () => void;
 }) {
+  useLanguage();
   return (
     <Pressable
       accessibilityRole="radio"
@@ -69,6 +66,7 @@ function TimeChoice({
 }
 
 export default function RescheduleAppointmentScreen() {
+  useLanguage();
   const params = useLocalSearchParams<{ appointmentId?: string | string[] }>();
   const rawId = Array.isArray(params.appointmentId)
     ? params.appointmentId[0]

@@ -1,15 +1,18 @@
-import { useState } from 'react';
+import { useLanguage } from '@/localization/language-context';
+import { useRef, useState } from 'react';
 import { router } from 'expo-router';
 import {
   ActivityIndicator,
   Alert,
   Image,
+  Modal,
+  ScrollView,
   Pressable,
   Share,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { FeedPost, ReportReason } from '@/api/types';
 import { t } from '@/i18n';
@@ -70,6 +73,9 @@ export function WebPostCard({
   onDelete,
   onComments,
 }: WebPostCardProps) {
+  useLanguage();
+  const busy = useRef({ like: false, bookmark: false, report: false });
+  const [reportOpen, setReportOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [liking, setLiking] = useState(false);
   const [bookmarking, setBookmarking] = useState(false);
@@ -94,19 +100,29 @@ export function WebPostCard({
   };
 
   const like = async () => {
+    if (busy.current.like) return;
+    busy.current.like = true;
     setLiking(true);
     try {
       await onLike(post);
+    } catch {
+      Alert.alert(t('genericError'));
     } finally {
+      busy.current.like = false;
       setLiking(false);
     }
   };
 
   const bookmark = async () => {
+    if (busy.current.bookmark) return;
+    busy.current.bookmark = true;
     setBookmarking(true);
     try {
       await onBookmark(post);
+    } catch {
+      Alert.alert(t('genericError'));
     } finally {
+      busy.current.bookmark = false;
       setBookmarking(false);
     }
   };
@@ -123,35 +139,40 @@ export function WebPostCard({
   };
 
   const report = async (reason: ReportReason) => {
+    if (busy.current.report) return;
+    busy.current.report = true;
     setReporting(true);
     try {
       await onReport(post, reason);
+    } catch {
+      Alert.alert(t('genericError'));
     } finally {
+      busy.current.report = false;
       setReporting(false);
     }
   };
 
   const openMenu = () => {
-    if (owned && onDelete) {
-      Alert.alert(t('deletePost'), t('deletePostConfirm'), [
-        { text: t('cancel'), style: 'cancel' },
-        { text: t('delete'), style: 'destructive', onPress: () => void onDelete(post) },
-      ]);
-      return;
-    }
-
-    const reasons: ReportReason[] = ['spam', 'harassment', 'hate_or_violence', 'sexual_content', 'other'];
-    Alert.alert(t('reportPost'), t('reportPrompt'), [
-      ...reasons.map((reason) => ({
-        text: reportReasonLabel(reason),
-        onPress: () => void report(reason),
-      })),
-      { text: t('cancel'), style: 'cancel' as const },
-    ]);
+    if (owned && onDelete) { void onDelete(post); return; }
+    if (!post.is_reported) setReportOpen(true);
   };
 
   return (
     <View style={styles.post}>
+      <Modal transparent animationType="fade" visible={reportOpen} onRequestClose={() => setReportOpen(false)}>
+        <Pressable style={styles.reportBackdrop} onPress={() => setReportOpen(false)}>
+          <Pressable style={styles.reportSheet} onPress={event => event.stopPropagation()}>
+            <Text style={styles.reportTitle}>{t('reportPost')}</Text>
+            <Text style={styles.reportHint}>{t('reportPrompt')}</Text>
+            <ScrollView>{(['spam', 'harassment', 'hate_or_violence', 'sexual_content', 'other'] as ReportReason[]).map(reason => (
+              <Pressable accessibilityRole="button" key={reason} style={styles.reportOption} onPress={() => { setReportOpen(false); void report(reason); }}>
+                <Text style={styles.reportLabel}>{reportReasonLabel(reason)}</Text>
+              </Pressable>
+            ))}</ScrollView>
+            <Pressable accessibilityRole="button" style={styles.reportOption} onPress={() => setReportOpen(false)}><Text style={styles.reportTitle}>{t('cancel')}</Text></Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
       <View style={[styles.messageRow, owned && styles.messageRowOwned]}>
         <Pressable
           accessibilityLabel={`${t('openProfile')} ${post.author.username}`}
@@ -282,6 +303,12 @@ export function WebPostCard({
 
 const styles = StyleSheet.create({
   post: { width: '100%' },
+  reportBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,.65)', justifyContent: 'center', padding: 24 },
+  reportSheet: { maxHeight: '85%', borderRadius: 24, backgroundColor: colors.backgroundDeep, padding: 20, borderWidth: 1, borderColor: colors.primary },
+  reportTitle: { color: colors.accent, fontWeight: '800', fontSize: 18 },
+  reportHint: { color: colors.textMuted, marginVertical: 12 },
+  reportOption: { minHeight: 52, justifyContent: 'center', borderTopWidth: 1, borderTopColor: colors.border },
+  reportLabel: { color: colors.text, fontSize: 15 },
   messageRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
   messageRowOwned: { flexDirection: 'row-reverse' },
   avatarButton: { width: 36, height: 36, borderRadius: 18, marginTop: 14 },

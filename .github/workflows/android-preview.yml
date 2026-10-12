@@ -1,0 +1,58 @@
+name: Android preview APK
+
+on:
+  pull_request:
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/android-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      CI: '1'
+      TATZO_APK_PREVIEW: '1'
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install and check
+        run: |
+          npm ci --ignore-scripts
+          npm run typecheck
+          npm test
+      - name: Generate Android project
+        run: npx expo prebuild --platform android --no-install
+      - name: Build installable preview
+        working-directory: mobile/android
+        # Expo's generated release build uses the development signing key.
+        # This separate application ID is for review only, never store submission.
+        run: ./gradlew :app:assembleRelease -PreactNativeArchitectures=arm64-v8a,x86_64 --no-daemon --max-workers=2
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: tatzo-preview-${{ github.sha }}
+          path: mobile/android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 14

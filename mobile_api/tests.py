@@ -1,4 +1,5 @@
 from datetime import datetime, time, timedelta
+from zoneinfo import ZoneInfo
 from io import BytesIO
 import shutil
 import tempfile
@@ -871,6 +872,24 @@ class MobileChatTests(APITestCase):
         )
         self.assertEqual(receipt.data["last_read_message_id"], sent.data["id"])
 
+    def test_poll_syncs_edits_and_deletions_without_leaking_another_thread(self):
+        thread_id = self.start_chat().data["id"]
+        first = self.send_message(thread_id, "Before edit").data["id"]
+        second = self.send_message(thread_id, "Will delete").data["id"]
+        foreign = ChatThread.get_or_create_for_users(self.target, self.stranger)
+        secret = ChatMessage.objects.create(thread=foreign, sender=self.stranger, content="Private")
+        self.client.patch(reverse("mobile_api:chat_message", args=[first]), {"content": "Edited"}, format="json")
+        self.client.delete(reverse("mobile_api:chat_message", args=[second]))
+        self.client.force_authenticate(self.target)
+        response = self.client.get(reverse("mobile_api:chat_thread", args=[thread_id]),
+                                   {"after": second, "known": f"{first},{second},{secret.pk}"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["messages"], [])
+        self.assertEqual([message["content"] for message in response.data["updated_messages"]], ["Edited"])
+        self.assertIn(second, response.data["deleted_message_ids"])
+        invalid = self.client.get(reverse("mobile_api:chat_thread", args=[thread_id]), {"known": ",".join([str(first)] * 101)})
+        self.assertEqual(invalid.status_code, 400)
+
     def test_thread_poll_returns_only_messages_after_cursor(self):
         thread_id = self.start_chat().data["id"]
         first = self.send_message(thread_id, "First").data
@@ -1071,7 +1090,7 @@ class MobileBookingTests(APITestCase):
         return SimpleUploadedFile(name, output.getvalue(), content_type="image/png")
 
     def make_calendar_block(self, start_hour=15, end_hour=16):
-        artist_timezone = timezone.get_fixed_timezone(120)
+        artist_timezone = ZoneInfo(self.artist.profile.timezone)
         return CalendarEvent.objects.create(
             artist=self.artist,
             event_type=CalendarEvent.TYPE_BLOCKED,
@@ -1197,7 +1216,7 @@ class MobileBookingTests(APITestCase):
         self.assertEqual(vacation.data["code"], "date_blocked")
 
     def test_calendar_reminders_do_not_consume_booking_time(self):
-        artist_timezone = timezone.get_fixed_timezone(120)
+        artist_timezone = ZoneInfo(self.artist.profile.timezone)
         CalendarEvent.objects.create(
             artist=self.artist,
             event_type=CalendarEvent.TYPE_SKETCH_DEADLINE,

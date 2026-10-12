@@ -13,13 +13,13 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import { Text } from '@/components/text';
 import { useVideoPlayer, VideoView } from 'expo-video';
 
 import type { FeedMedia, FeedPost } from '@/api/types';

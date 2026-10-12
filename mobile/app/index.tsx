@@ -1,5 +1,7 @@
+import { useLanguage } from '@/localization/language-context';
 import { Redirect } from 'expo-router';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import { useAuth } from '@/auth/auth-context';
 import { t } from '@/i18n';
@@ -7,6 +9,7 @@ import { colors, spacing } from '@/theme';
 
 
 export default function Index() {
+  useLanguage();
   const { status } = useAuth();
   if (status === 'loading') {
     return (

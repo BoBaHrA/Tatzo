@@ -1,12 +1,7 @@
+import { useLanguage } from '@/localization/language-context';
 import { router } from 'expo-router';
-import {
-  Image,
-  Linking,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Image, Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { MapLocationMarker } from '@/api/types';
 import { Button } from '@/components/button';
@@ -21,6 +16,7 @@ type MapLocationCardProps = {
 };
 
 export function MapLocationCard({ marker, onClose, onSelect }: MapLocationCardProps) {
+  useLanguage();
   const claimPending = marker.claim_status === 'submitted'
     || marker.claim_status === 'under_review';
   const verified = marker.kind === 'artist';

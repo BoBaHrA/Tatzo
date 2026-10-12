@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -6,10 +7,10 @@ import {
   Image,
   Pressable,
   StyleSheet,
-  Text,
   View,
   type ImageSourcePropType,
 } from 'react-native';
+import { Text } from '@/components/text';
 
 import type {
   StyleMatchCard,
@@ -49,6 +50,7 @@ function copy(en: string, fr: string, ru: string) {
 }
 
 export default function StyleMatchScreenV2() {
+  useLanguage();
   const { request, status } = useAuth();
   const [mode, setMode] = useState<MatchMode>('intro');
   const [session, setSession] = useState<StyleMatchSession | null>(null);
@@ -410,10 +412,12 @@ export default function StyleMatchScreenV2() {
 }
 
 function Wordmark() {
+  useLanguage();
   return <Image accessibilityLabel="Tatzo" resizeMode="contain" source={require('../../assets/tatzo7.png')} style={styles.wordmark} />;
 }
 
 function Ambient() {
+  useLanguage();
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       <View style={styles.ambientTeal} />
@@ -437,6 +441,7 @@ function ActionButton({
   loading: boolean;
   onPress: () => void;
 }) {
+  useLanguage();
   const iconColor = variant === 'saveActive' ? colors.primary : colors.white;
   return (
     <Pressable

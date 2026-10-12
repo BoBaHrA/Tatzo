@@ -3,19 +3,22 @@ import 'react-native-gesture-handler';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
-import { AuthProvider } from '@/auth/auth-context';
+import { AuthProvider, useAuth } from '@/auth/auth-context';
+import { SessionBoundary } from '@/auth/session-boundary';
 import { ChatProvider } from '@/chat/chat-context';
 import { LanguageProvider } from '@/localization/language-context';
 import { NotificationProvider } from '@/notifications/notification-context';
+import { FontProvider } from '@/components/text';
 import { colors } from '@/theme';
 
 
 export default function RootLayout() {
   return (
+    <FontProvider>
     <LanguageProvider>
       <AuthProvider>
-        <NotificationProvider>
-          <ChatProvider>
+        <SessionBoundary>
+        <AccountProviders>
             <StatusBar style="light" />
             <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
               <Stack.Screen name="index" />
@@ -43,9 +46,15 @@ export default function RootLayout() {
               <Stack.Screen name="map/add-location" options={{ presentation: 'modal' }} />
               <Stack.Screen name="map/claim/[locationId]" options={{ presentation: 'modal' }} />
             </Stack>
-          </ChatProvider>
-        </NotificationProvider>
+        </AccountProviders>
+        </SessionBoundary>
       </AuthProvider>
     </LanguageProvider>
+    </FontProvider>
   );
+}
+
+function AccountProviders({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  return <NotificationProvider key={user?.id ?? 'guest'}><ChatProvider>{children}</ChatProvider></NotificationProvider>;
 }

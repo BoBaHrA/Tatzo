@@ -62,6 +62,9 @@ jobs:
       - name: Type-check mobile client
         run: npm run typecheck --prefix mobile
 
+      - name: Test mobile session behavior
+        run: npm test --prefix mobile
+
       - name: Check mobile release configuration
         run: npm run release:check --prefix mobile
 

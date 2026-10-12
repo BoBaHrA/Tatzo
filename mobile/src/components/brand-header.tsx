@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import { useState } from 'react';
 import { router } from 'expo-router';
 import {
@@ -8,10 +9,10 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
   type ImageSourcePropType,
 } from 'react-native';
+import { Text } from '@/components/text';
 
 import { useAuth } from '@/auth/auth-context';
 import { Avatar } from '@/components/avatar';
@@ -22,6 +23,7 @@ import { colors, layout, spacing, typography } from '@/theme';
 
 type BrandHeaderProps = {
   showNotifications?: boolean;
+  back?: boolean;
   title?: string;
   showQuickMatch?: boolean;
 };
@@ -63,7 +65,8 @@ const COPY = {
 
 function copy() { return COPY[appLanguage as keyof typeof COPY] ?? COPY.en; }
 
-export function BrandHeader({ showNotifications = true, title, showQuickMatch = false }: BrandHeaderProps) {
+export function BrandHeader({ back = false, showNotifications = true, title, showQuickMatch = false }: BrandHeaderProps) {
+  useLanguage();
   const { request, signOut, status, user } = useAuth();
   const { unreadCount } = useNotifications();
   const ui = copy();
@@ -82,12 +85,12 @@ export function BrandHeader({ showNotifications = true, title, showQuickMatch = 
     finally { setRecommendationsLoading(false); }
   };
   const openProfile = (username: string) => { setRecommendationsOpen(false); router.push({ pathname: '/profile/[username]', params: { username } }); };
-  const closeMenuAndGo = (path: '/healing' | '/health-safety' | '/settings' | '/(tabs)/match') => { setMenuOpen(false); router.push(path); };
+  const closeMenuAndGo = (path: '/healing' | '/health-safety' | '/settings' | '/(tabs)/match' | '/bookmarks' | '/report-problem' | '/artist-dashboard' | '/admin') => { setMenuOpen(false); router.push(path); };
   const comingSoon = (label: string) => Alert.alert(ui.comingSoon, label);
 
   return <>
     <View style={[styles.container, isSectionHeader && styles.sectionContainer]}>
-      {isSectionHeader ? <><Pressable accessibilityLabel={t('profile')} accessibilityRole="button" onPress={() => router.push('/(tabs)/profile')} style={({ pressed }) => [styles.profileButton, pressed && styles.pressed]}><Avatar uri={user?.profile_image_url} label={user?.username} size={42} ring /></Pressable><Text numberOfLines={1} style={styles.sectionTitle}>{title}</Text></> : <Image source={require('../../assets/tatzo7.png')} resizeMode="contain" style={styles.logo} accessibilityLabel="Tatzo" />}
+      {isSectionHeader ? <><Pressable accessibilityLabel={back ? t('back') : t('profile')} accessibilityRole="button" onPress={() => back ? (router.canGoBack() ? router.back() : router.replace('/(tabs)/home')) : router.push('/(tabs)/profile')} style={({ pressed }) => [styles.profileButton, pressed && styles.pressed]}><>{back ? <Text style={styles.menuSymbol}>‹</Text> : <Avatar uri={user?.profile_image_url} label={user?.username} size={42} ring />}</></Pressable><Text numberOfLines={1} style={styles.sectionTitle}>{title}</Text></> : <Image source={require('../../assets/tatzo7.png')} resizeMode="contain" style={styles.logo} accessibilityLabel="Tatzo" />}
       <View style={styles.actions}>
         {showQuickMatch && status === 'authenticated' ? <Pressable accessibilityLabel={ui.recommendations} accessibilityRole="button" onPress={() => void openRecommendations()} style={({ pressed }) => [styles.topbarButton, pressed && styles.pressed]}><Text style={styles.recommendationsSymbol}>✦</Text></Pressable> : null}
         {showNotifications && status === 'authenticated' ? <Pressable accessibilityLabel={t('notifications')} accessibilityRole="button" onPress={() => router.push('/notifications')} style={({ pressed }) => [styles.notificationButton, pressed && styles.pressed]}><Image source={require('../../assets/web-icons/notifications.png')} resizeMode="contain" style={styles.notificationIcon} />{unreadCount ? <View style={styles.badge}><Text style={styles.badgeText}>{badge}</Text></View> : null}</Pressable> : null}
@@ -106,19 +109,23 @@ export function BrandHeader({ showNotifications = true, title, showQuickMatch = 
     <Modal animationType="fade" onRequestClose={() => setMenuOpen(false)} transparent visible={menuOpen}>
       <Pressable style={styles.backdrop} onPress={() => setMenuOpen(false)}><Pressable onPress={(event) => event.stopPropagation()} style={[styles.panel, styles.menuPanel]}>
         <View style={styles.menuHead}><Text style={styles.panelTitle}>{ui.menu}</Text><Pressable accessibilityLabel={t('close')} accessibilityRole="button" onPress={() => setMenuOpen(false)} style={styles.closeButtonInline}><Text style={styles.closeText}>×</Text></Pressable></View>
+        <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View style={styles.menuGrid}>
           <MenuTile icon={MENU_ICONS.healing} label={ui.healing} onPress={() => closeMenuAndGo('/healing')} />
           <MenuTile icon={MENU_ICONS.styleMatch} label={ui.styleMatch} onPress={() => closeMenuAndGo('/(tabs)/match')} />
-          <MenuTile icon={MENU_ICONS.bookmarks} label={ui.bookmarks} onPress={() => comingSoon(ui.bookmarks)} />
+          <MenuTile icon={MENU_ICONS.bookmarks} label={ui.bookmarks} onPress={() => closeMenuAndGo('/bookmarks')} />
           <MenuTile icon={MENU_ICONS.contests} label={ui.contests} onPress={() => comingSoon(ui.contests)} />
           <MenuTile icon={MENU_ICONS.cleanSlate} label={ui.cleanSlate} onPress={() => comingSoon(ui.cleanSlate)} />
-          <MenuTile accent label={ui.reportProblem} symbol="⚠" onPress={() => comingSoon(ui.reportProblem)} />
+          <MenuTile accent label={ui.reportProblem} symbol="⚠" onPress={() => closeMenuAndGo('/report-problem')} />
           <MenuTile icon={MENU_ICONS.healthSafety} label={ui.healthSafety} onPress={() => closeMenuAndGo('/health-safety')} />
+          {user?.is_verified_artist ? <MenuTile label={t('dashboard')} symbol="▦" onPress={() => closeMenuAndGo('/artist-dashboard')} /> : null}
+          {user?.is_staff ? <MenuTile label={t('adminPanel')} symbol="⚙" onPress={() => closeMenuAndGo('/admin')} /> : null}
         </View>
         <View style={styles.divider} /><Text style={styles.legalLabel}>{ui.legal.toUpperCase()}</Text>
         <Pressable accessibilityRole="button" onPress={() => closeMenuAndGo('/settings')} style={({ pressed }) => [styles.wideMenuItem, pressed && styles.pressed]}><Text style={styles.wideSymbol}>⚖</Text><Text style={styles.wideMenuText}>{ui.legalCenter}</Text></Pressable>
         <Pressable accessibilityRole="button" onPress={() => closeMenuAndGo('/settings')} style={({ pressed }) => [styles.languageRow, pressed && styles.pressed]}><View><Text style={styles.languageLabel}>{ui.language}</Text><Text style={styles.languageValue}>{appLanguage.toUpperCase()}</Text></View><Text style={styles.chevron}>›</Text></Pressable>
         <Pressable accessibilityRole="button" onPress={() => { setMenuOpen(false); void signOut(); }} style={({ pressed }) => [styles.logoutButton, pressed && styles.pressed]}><Text style={styles.logoutText}>{ui.logout}</Text></Pressable>
+        </ScrollView>
       </Pressable></Pressable>
     </Modal>
   </>;
@@ -126,6 +133,7 @@ export function BrandHeader({ showNotifications = true, title, showQuickMatch = 
 
 type MenuTileProps = { label: string; onPress: () => void; icon?: ImageSourcePropType; symbol?: string; accent?: boolean };
 function MenuTile({ label, onPress, icon, symbol, accent = false }: MenuTileProps) {
+  useLanguage();
   return <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.menuTile, pressed && styles.pressed]}>{icon ? <Image accessibilityIgnoresInvertColors resizeMode="contain" source={icon} style={styles.menuTileIcon} /> : <Text style={[styles.menuTileSymbol, accent && styles.menuTileSymbolAccent]}>{symbol}</Text>}<Text numberOfLines={2} style={styles.menuTileText}>{label}</Text></Pressable>;
 }
 

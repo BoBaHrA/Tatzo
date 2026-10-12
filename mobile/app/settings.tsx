@@ -1,6 +1,9 @@
-import { router } from 'expo-router';
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useLanguage } from '@/localization/language-context';
+import { Redirect, router } from 'expo-router';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
+import { AuthLanguageSwitcher } from '@/auth/auth-language-switcher';
 import { useAuth } from '@/auth/auth-context';
 import { BrandHeader } from '@/components/brand-header';
 import { Screen } from '@/components/screen';
@@ -10,8 +13,9 @@ import { colors, radius, spacing, typography } from '@/theme';
 
 
 export default function SettingsScreen() {
+  useLanguage();
   const { user, signOut } = useAuth();
-  if (!user) return null;
+  if (!user) return <Redirect href="/(auth)/login" />;
 
   return (
     <Screen contentStyle={styles.screen}>
@@ -28,17 +32,21 @@ export default function SettingsScreen() {
 
       <View style={styles.intro}>
         <Text style={styles.eyebrow}>{t('account')}</Text>
-        <Text style={styles.title}>{t('profile')}</Text>
+        <Text style={styles.title}>{t('settings')}</Text>
         <Text style={styles.subtitle}>{user.email}</Text>
       </View>
+
+      <SettingsGroup title={t('language')}><AuthLanguageSwitcher /></SettingsGroup>
 
       <SettingsGroup title={t('account')}>
         <ActionRow label={t('editProfile')} onPress={() => router.push('/edit-profile')} symbol="✎" />
         {user.is_verified_artist ? (
           <ActionRow label={t('managePortfolio')} onPress={() => router.push('/manage-portfolio')} symbol="▦" last />
-        ) : (
+        ) : user.account_type === 'tattoo_artist' ? (
           <ActionRow label={t('verificationOpen')} onPress={() => router.push('/artist-verification')} symbol="✓" last={user.account_type === 'tattoo_artist'} />
-        )}
+        ) : null}
+        <ActionRow label={t('bookmarks')} onPress={() => router.push('/bookmarks')} symbol="▱" />
+        {user.is_staff ? <ActionRow label={t('adminPanel')} onPress={() => router.push('/admin')} symbol="⚙" /> : null}
       </SettingsGroup>
 
       <SettingsGroup title={t('healing')}>
@@ -53,6 +61,7 @@ export default function SettingsScreen() {
       </SettingsGroup>
 
       <SettingsGroup title={t('safety')}>
+        <ActionRow label={t('reportProblem')} onPress={() => router.push('/report-problem')} symbol="?" />
         <ActionRow label={t('blockedUsers')} onPress={() => router.push('/blocked-users')} symbol="⊘" />
         <ActionRow label={t('contactSafetySupport')} onPress={() => void Linking.openURL(PUBLIC_LINKS.safetySupport)} symbol="?" />
         <ActionRow label={t('deleteAccount')} onPress={() => router.push('/delete-account')} symbol="×" danger last />
@@ -70,6 +79,7 @@ export default function SettingsScreen() {
 }
 
 function SettingsGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  useLanguage();
   return (
     <View style={styles.group}>
       <Text style={styles.groupTitle}>{title}</Text>
@@ -91,6 +101,7 @@ function ActionRow({
   danger?: boolean;
   last?: boolean;
 }) {
+  useLanguage();
   return (
     <Pressable
       accessibilityRole="button"

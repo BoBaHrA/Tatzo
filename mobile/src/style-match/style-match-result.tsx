@@ -1,12 +1,7 @@
+import { useLanguage } from '@/localization/language-context';
 import { router } from 'expo-router';
-import {
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { StyleMatchResult as StyleMatchResultData } from '@/api/types';
 import { Button } from '@/components/button';
@@ -25,6 +20,7 @@ export function StyleMatchResult({
   onRestart,
   restarting,
 }: StyleMatchResultProps) {
+  useLanguage();
   return (
     <View style={styles.container}>
       <View style={styles.hero}>
@@ -159,6 +155,7 @@ function ScoreBar({
   accent?: boolean;
   pink?: boolean;
 }) {
+  useLanguage();
   return (
     <View style={styles.scoreTrack}>
       <View
@@ -182,6 +179,7 @@ function TraitSection({
   values: string[];
   positive?: boolean;
 }) {
+  useLanguage();
   return (
     <View style={styles.traitSection}>
       <Text style={styles.sectionTitle}>{title}</Text>

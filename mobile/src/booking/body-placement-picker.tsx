@@ -1,4 +1,6 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useLanguage } from '@/localization/language-context';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import { t } from '@/i18n';
 import { colors, radius, spacing } from '@/theme';
@@ -12,6 +14,7 @@ type BodyPlacementPickerProps = {
 };
 
 function Figure({ back = false }: { back?: boolean }) {
+  useLanguage();
   return (
     <View style={styles.figureWrap}>
       <Text style={styles.figureLabel}>{t(back ? 'bodyBack' : 'bodyFront')}</Text>
@@ -36,6 +39,7 @@ export function BodyPlacementPicker({
   options,
   selected,
 }: BodyPlacementPickerProps) {
+  useLanguage();
   const toggle = (value: string) => {
     onChange(
       selected.includes(value)

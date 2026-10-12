@@ -50,7 +50,7 @@ check(tabs.includes('name="calendar"') && tabs.includes('WEB_ICONS.calendar'), '
 check(tabs.includes('name="match" options={{ href: null }}'), 'Style Match is removed from primary bottom navigation');
 check(tabs.includes('name="bookings" options={{ href: null }}'), 'Bookings is removed from primary bottom navigation');
 check(tabs.includes('name="profile" options={{ href: null }}'), 'Profile is removed from primary bottom navigation');
-check(tabs.includes('height: 76') && tabs.includes("borderTopColor: 'rgba(4, 197, 191, 0.18)'"), 'Bottom navigation keeps the web mobile shell dimensions');
+check(tabs.includes('height: 69 + Math.max(insets.bottom, 7)') && tabs.includes("borderTopColor: 'rgba(4, 197, 191, 0.18)'"), 'Bottom navigation keeps the web mobile shell dimensions');
 check(tabs.includes("tabBarActiveBackgroundColor: 'rgba(238, 12, 111, 0.07)'"), 'Active tab keeps the web pink treatment');
 check(header.includes("web-icons/notifications.png"), 'Top bar uses the exact web notification asset');
 check(header.includes("router.push('/(tabs)/profile')"), 'Top bar avatar keeps profile access');

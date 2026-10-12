@@ -1,11 +1,12 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
+const auditPreview = process.env.TATZO_APK_PREVIEW === '1';
 const expoOwner = 'tatzo-team';
 const easProjectId = '38bcf2cb-ad7b-49bf-a0f4-3855e371caa2';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: 'Tatzo',
+  name: auditPreview ? 'Tatzo Preview' : 'Tatzo',
   slug: 'tatzo',
   owner: expoOwner,
   version: '0.1.0',
@@ -22,7 +23,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
   },
   android: {
-    package: 'eu.tatzo.app',
+    package: auditPreview ? 'eu.tatzo.app.preview' : 'eu.tatzo.app',
     icon: './assets/tatzo-app-icon.png',
     adaptiveIcon: {
       foregroundImage: './assets/tatzo-adaptive-icon.png',
@@ -35,6 +36,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     'expo-router',
+    'expo-font',
     'expo-localization',
     'expo-notifications',
     [

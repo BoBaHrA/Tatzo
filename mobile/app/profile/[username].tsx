@@ -1,14 +1,8 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useEffect, useState } from 'react';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import { ApiError } from '@/api/client';
 import type { FeedPost, PublicProfile, ReportReason } from '@/api/types';
@@ -30,6 +24,7 @@ import { colors, radius, spacing } from '@/theme';
 
 
 export default function PublicProfileScreen() {
+  useLanguage();
   const params = useLocalSearchParams<{ username?: string | string[] }>();
   const username = Array.isArray(params.username) ? params.username[0] : params.username;
   const { request, status } = useAuth();
@@ -363,6 +358,7 @@ export default function PublicProfileScreen() {
 }
 
 function Stat({ label, value }: { label: string; value: number }) {
+  useLanguage();
   return (
     <View style={styles.stat}>
       <Text style={styles.statValue}>{value}</Text>

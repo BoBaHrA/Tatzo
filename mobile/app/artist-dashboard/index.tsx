@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useMemo, useState } from 'react';
 import { Redirect, router, useFocusEffect } from 'expo-router';
 import {
@@ -6,11 +7,11 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   View,
   type ImageSourcePropType,
 } from 'react-native';
+import { Text } from '@/components/text';
 
 import type {
   Appointment,
@@ -188,6 +189,7 @@ function preferencePayload(value: DashboardBookingPreferences): DashboardBooking
 }
 
 export default function ArtistDashboardScreen() {
+  useLanguage();
   const { request, status, user } = useAuth();
   const [dashboard, setDashboard] = useState<ArtistDashboard | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -356,6 +358,7 @@ export default function ArtistDashboardScreen() {
 }
 
 function DashboardOverview({ dashboard }: { dashboard: ArtistDashboard }) {
+  useLanguage();
   const stats = [
     { value: dashboard.stats.today_sessions, label: t('artistTodaySessions'), icon: WEB_DASH_ICONS.calendar },
     { value: dashboard.stats.pending_requests, label: t('artistPendingRequests'), icon: WEB_DASH_ICONS.bookings, accent: true },
@@ -377,6 +380,7 @@ function DashboardOverview({ dashboard }: { dashboard: ArtistDashboard }) {
 }
 
 function CalendarPanel({ dashboard }: { dashboard: ArtistDashboard }) {
+  useLanguage();
   return (
     <View style={styles.panelStack}>
       <View style={styles.surfaceCard}>
@@ -392,26 +396,31 @@ function CalendarPanel({ dashboard }: { dashboard: ArtistDashboard }) {
 }
 
 function BookingsPanel({ appointments }: { appointments: Appointment[] }) {
+  useLanguage();
   const rows = appointments.filter((item) => item.role === 'artist').slice(0, 12);
   return <View style={styles.surfaceCard}><Text style={styles.cardTitle}>{copy('Booking requests', 'Demandes de réservation', 'Заявки на запись')}</Text>{rows.length ? rows.map((item) => <AppointmentPanelRow appointment={item} key={item.id} />) : <EmptyCopy text={copy('No booking requests yet.', 'Aucune demande pour le moment.', 'Заявок на запись пока нет.')} />}</View>;
 }
 
 function ProjectsPanel({ appointments }: { appointments: Appointment[] }) {
+  useLanguage();
   const rows = appointments.filter((item) => item.role === 'artist' && item.status !== 'declined' && item.status !== 'cancelled').slice(0, 12);
   return <View style={styles.surfaceCard}><Text style={styles.cardTitle}>{copy('Tattoo projects', 'Projets tattoo', 'Тату-проекты')}</Text>{rows.length ? rows.map((item) => <Pressable key={item.id} onPress={() => openAppointment(item.id)} style={({ pressed }) => [styles.panelRow, pressed && styles.rowPressed]}><View style={styles.flexOne}><Text style={styles.panelRowTitle}>{item.client.username}{item.placement_label ? ` — ${item.placement_label}` : ''}</Text><Text numberOfLines={2} style={styles.panelRowMeta}>{item.styles_label || item.booking_type_label}</Text></View><StatusPill text={item.status_label} /></Pressable>) : <EmptyCopy text={copy('No active tattoo projects yet.', 'Aucun projet actif.', 'Активных тату-проектов пока нет.')} />}</View>;
 }
 
 function MessagesPanel({ threads }: { threads: ChatThreadSummary[] }) {
+  useLanguage();
   const rows = threads.filter((item) => item.unread_count > 0);
   const visible = (rows.length ? rows : threads).slice(0, 10);
   return <View style={styles.surfaceCard}><Text style={styles.cardTitle}>{copy('Messages', 'Messages', 'Сообщения')}</Text>{visible.length ? visible.map((thread) => <Pressable key={thread.id} onPress={() => openChat(thread.id)} style={({ pressed }) => [styles.panelRow, pressed && styles.rowPressed]}><AvatarSmall uri={thread.other_user.profile_image_url} username={thread.other_user.username} /><View style={styles.flexOne}><Text style={styles.panelRowTitle}>{thread.other_user.username}</Text><Text numberOfLines={1} style={styles.panelRowMeta}>{thread.last_message?.content || copy('Attachment', 'Pièce jointe', 'Вложение')}</Text></View>{thread.unread_count ? <View style={styles.countBadge}><Text style={styles.countBadgeText}>{thread.unread_count}</Text></View> : null}</Pressable>) : <EmptyCopy text={copy('No messages yet.', 'Aucun message.', 'Сообщений пока нет.')} />}</View>;
 }
 
 function PortfolioPanel({ works }: { works: PortfolioWork[] }) {
+  useLanguage();
   return <View style={styles.surfaceCard}><View style={styles.sectionHead}><Text style={styles.cardTitle}>{copy('Portfolio', 'Portfolio', 'Портфолио')}</Text><Pressable onPress={() => router.push('/manage-portfolio')}><Text style={styles.sectionLink}>{copy('Manage', 'Gérer', 'Управлять')}</Text></Pressable></View>{works.length ? <View style={styles.portfolioGrid}>{works.slice(0, 8).map((work) => <View key={work.id} style={styles.portfolioTile}>{work.image_url ? <Image source={{ uri: work.image_url }} style={styles.portfolioImage} /> : <View style={styles.portfolioFallback}><Text style={styles.panelRowMeta}>{work.title || 'Tatzo'}</Text></View>}</View>)}</View> : <EmptyCopy text={copy('No portfolio works yet.', 'Aucune œuvre.', 'Работ в портфолио пока нет.')} />}</View>;
 }
 
 function ClientsPanel({ appointments }: { appointments: Appointment[] }) {
+  useLanguage();
   const clients = useMemo(() => {
     const byId = new Map<number, { user: Appointment['client']; count: number }>();
     appointments.filter((item) => item.role === 'artist').forEach((item) => {
@@ -424,6 +433,7 @@ function ClientsPanel({ appointments }: { appointments: Appointment[] }) {
 }
 
 function ReviewsPanel({ appointments }: { appointments: Appointment[] }) {
+  useLanguage();
   const completed = appointments.filter((item) => item.role === 'artist' && item.status === 'completed').slice(0, 10);
   return (
     <View style={styles.surfaceCard}>
@@ -453,6 +463,7 @@ function ReviewsPanel({ appointments }: { appointments: Appointment[] }) {
 }
 
 function StatisticsPanel({ appointments, dashboard, threads }: { appointments: Appointment[]; dashboard: ArtistDashboard; threads: ChatThreadSummary[] }) {
+  useLanguage();
   const now = new Date();
   const monthly = appointments.filter((item) => {
     if (item.role !== 'artist' || item.status !== 'accepted') return false;
@@ -478,6 +489,7 @@ function SettingsPanel({ dashboard, preferences, actionError, saving, updatingSt
   onChangeStatus: (status: ArtistBookingStatus) => Promise<void>;
   onSave: () => void;
 }) {
+  useLanguage();
   return (
     <View style={styles.panelStack}>
       <View style={styles.settingsCard}>
@@ -566,42 +578,52 @@ function SettingsPanel({ dashboard, preferences, actionError, saving, updatingSt
 }
 
 function SettingToggle({ label, value, onChange }: { label: string; value: boolean; onChange: (value: boolean) => void }) {
+  useLanguage();
   return <View style={styles.settingToggleRow}><Text style={styles.settingToggleLabel}>{label}</Text><Pressable accessibilityRole="switch" accessibilityState={{ checked: value }} onPress={() => onChange(!value)} style={[styles.switchTrack, value && styles.switchTrackOn]}><View style={[styles.switchKnob, value && styles.switchKnobOn]} /></Pressable></View>;
 }
 
 function NumberSetting({ label, value, suffix, onChange }: { label: string; value: number; suffix?: string; onChange: (value: number) => void }) {
+  useLanguage();
   return <View style={styles.numberSetting}><Text style={styles.numberLabel}>{label}</Text><View style={styles.numberInputWrap}><TextInput keyboardType="number-pad" onChangeText={(text) => onChange(Math.max(0, Number.parseInt(text || '0', 10) || 0))} style={styles.numberInput} value={String(value)} />{suffix ? <Text style={styles.numberSuffix}>{suffix}</Text> : null}</View></View>;
 }
 
 function DecimalSetting({ label, value, suffix, onChange }: { label: string; value: string; suffix?: string; onChange: (value: string) => void }) {
+  useLanguage();
   return <View style={styles.numberSetting}><Text style={styles.numberLabel}>{label}</Text><View style={styles.numberInputWrap}><TextInput keyboardType="decimal-pad" onChangeText={(text) => onChange(text.replace(',', '.').replace(/[^0-9.]/g, ''))} style={styles.numberInput} value={value} />{suffix ? <Text style={styles.numberSuffix}>{suffix}</Text> : null}</View></View>;
 }
 
 function ResponseSetting({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  useLanguage();
   return <View style={styles.responseSetting}><Text style={styles.numberLabel}>{label}</Text><TextInput maxLength={2000} multiline onChangeText={onChange} placeholder={copy('Optional message', 'Message facultatif', 'Необязательное сообщение')} placeholderTextColor={colors.textMuted} style={styles.responseInput} textAlignVertical="top" value={value} /></View>;
 }
 
 function AppointmentPanelRow({ appointment }: { appointment: Appointment }) {
+  useLanguage();
   return <Pressable onPress={() => openAppointment(appointment.id)} style={({ pressed }) => [styles.panelRow, pressed && styles.rowPressed]}><View style={styles.flexOne}><Text style={styles.panelRowTitle}>{appointment.client.username}</Text><Text style={styles.panelRowMeta}>{appointment.booking_type_label} · {dateLabel(appointment.date)} {appointment.start_time}</Text></View><StatusPill text={appointment.status_label} /></Pressable>;
 }
 
 function AvatarSmall({ uri, username }: { uri: string | null; username: string }) {
+  useLanguage();
   return <View style={styles.avatarSmallWrap}>{uri ? <Image source={{ uri }} style={styles.avatarSmall} /> : <Text style={styles.avatarSmallLetter}>{username[0]?.toUpperCase()}</Text>}</View>;
 }
 
 function StatusPill({ text }: { text: string }) {
+  useLanguage();
   return <View style={styles.statusPill}><Text numberOfLines={1} style={styles.statusPillText}>{text}</Text></View>;
 }
 
 function EmptyCopy({ text }: { text: string }) {
+  useLanguage();
   return <Text style={styles.emptyCopy}>{text}</Text>;
 }
 
 function StatBar({ label, value, percent }: { label: string; value: number; percent: number }) {
+  useLanguage();
   return <View style={styles.statBarRow}><View style={styles.sectionHead}><Text style={styles.panelRowTitle}>{label}</Text><Text style={styles.statBarValue}>{value}</Text></View><View style={styles.statBarTrack}><Image source={STAT_GRADIENT} resizeMode="stretch" style={[styles.statGradient, { width: `${Math.max(2, percent)}%` }]} /></View></View>;
 }
 
 function Insight({ text, accent = false }: { text: string; accent?: boolean }) {
+  useLanguage();
   return <View style={[styles.insight, accent && styles.insightAccent]}><Text style={styles.insightText}>{text}</Text></View>;
 }
 
