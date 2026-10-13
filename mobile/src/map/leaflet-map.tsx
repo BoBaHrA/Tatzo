@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import type { MapLocationMarker } from '@/api/types';
 import type { MapRegion } from '@/map/map-api';
+import { cartoTileUrl } from '@/map/carto-basemap';
 
 
 type LeafletGlobal = any;
@@ -38,7 +39,6 @@ const CLUSTER_JS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/d
 const CLUSTER_CSS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/dist/MarkerCluster.css`;
 const CLUSTER_DEFAULT_CSS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/dist/MarkerCluster.Default.css`;
 const CARTO_BASEMAP_API_KEY = (process.env.EXPO_PUBLIC_CARTO_BASEMAP_API_KEY ?? '').trim();
-const CARTO_TILES = `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png${CARTO_BASEMAP_API_KEY ? `?key=${encodeURIComponent(CARTO_BASEMAP_API_KEY)}` : ''}`;
 
 function ensureStylesheet(href: string) {
   if (document.querySelector(`link[href="${href}"]`)) return;
@@ -165,7 +165,7 @@ export default function LeafletMap({
         worldCopyJump: false,
       });
 
-      L.tileLayer(CARTO_TILES, {
+      L.tileLayer(cartoTileUrl(CARTO_BASEMAP_API_KEY), {
         minZoom: 2,
         maxZoom: 19,
         noWrap: true,

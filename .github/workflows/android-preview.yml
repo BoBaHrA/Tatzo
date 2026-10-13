@@ -45,6 +45,10 @@ jobs:
           npm ci --ignore-scripts
           npm run typecheck
           npm test
+      - name: Configure CARTO basemap
+        env:
+          EXPO_PUBLIC_CARTO_BASEMAP_API_KEY: ${{ secrets.EXPO_PUBLIC_CARTO_BASEMAP_API_KEY || vars.EXPO_PUBLIC_CARTO_BASEMAP_API_KEY }}
+        run: node scripts/prepare-preview-basemap.mjs
       - name: Generate Android project
         run: npx expo prebuild --platform android --no-install
       - name: Build installable preview

@@ -6,6 +6,7 @@ import type { MapLocationMarker } from '@/api/types';
 import LeafletMap from '@/map/leaflet-map-stable';
 import type { MapRegion } from '@/map/map-api';
 
+const CARTO_BASEMAP_API_KEY = (process.env.EXPO_PUBLIC_CARTO_BASEMAP_API_KEY ?? '').trim();
 
 type UserLocation = {
   latitude: number;
@@ -33,6 +34,7 @@ export function MapCanvas({
   return (
     <View style={styles.map}>
       <LeafletMap
+        basemapApiKey={CARTO_BASEMAP_API_KEY}
         unavailableLabel={t('mapLoadError')}
         retryLabel={t('retry')}
         dom={{

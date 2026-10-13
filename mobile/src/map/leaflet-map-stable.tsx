@@ -4,11 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 
 import type { MapLocationMarker } from '@/api/types';
 import type { MapRegion } from '@/map/map-api';
+import { cartoTileUrl } from '@/map/carto-basemap';
 
 
 type LeafletGlobal = any;
 type UserLocation = { latitude: number; longitude: number };
 type LeafletMapProps = {
+  basemapApiKey: string;
   markers: MapLocationMarker[];
   region: MapRegion;
   selectedMarkerId: string | null;
@@ -39,7 +41,6 @@ const LEAFLET_CSS = `https://unpkg.com/leaflet@${LEAFLET_VERSION}/dist/leaflet.c
 const CLUSTER_JS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/dist/leaflet.markercluster.js`;
 const CLUSTER_CSS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/dist/MarkerCluster.css`;
 const CLUSTER_DEFAULT_CSS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/dist/MarkerCluster.Default.css`;
-const CARTO_TILES = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
 
 function ensureStylesheet(href: string) {
   if (document.querySelector(`link[href="${href}"]`)) return;
@@ -131,6 +132,7 @@ function markerSignature(marker: MapLocationMarker, selected: boolean) {
 }
 
 export default function LeafletMapStable({
+  basemapApiKey,
   markers,
   region,
   selectedMarkerId,
@@ -162,6 +164,7 @@ export default function LeafletMapStable({
 
     void loadLeafletStack().then((L) => {
       if (disposed || !containerRef.current || mapRef.current) return;
+      const tileUrl = cartoTileUrl(basemapApiKey);
       leafletRef.current = L;
       const isAndroid = /Android/i.test(navigator.userAgent || '');
       const reduceMotion = Boolean(
@@ -182,7 +185,7 @@ export default function LeafletMapStable({
         markerZoomAnimation: !isAndroid && clusterMotionEnabled,
       });
 
-      L.tileLayer(CARTO_TILES, {
+      L.tileLayer(tileUrl, {
         minZoom: 2,
         maxZoom: 19,
         noWrap: true,
@@ -254,7 +257,7 @@ export default function LeafletMapStable({
       userLayerRef.current = null;
       leafletRef.current = null;
     };
-  }, [attempt]);
+  }, [attempt, basemapApiKey]);
 
   useEffect(() => {
     const L = leafletRef.current;

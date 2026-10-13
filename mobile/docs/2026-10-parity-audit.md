@@ -65,3 +65,28 @@ The cloud browser cannot access the local preview (`ERR_BLOCKED_BY_CLIENT`). The
 Expo account build list requires sign-in. No Android device/emulator is available
 in this workspace. Therefore successful checks, bundle export and APK compilation
 must not be described as a completed visual/device acceptance test.
+
+## Device feedback — 13 October: CARTO key watermark
+
+The user's first APK showed CARTO's "API KEY REQUIRED" tile. The active stabilized
+Leaflet component never received the configured key; the old, unused component
+was the only one reading it, and the release guard was inspecting that old file.
+The GitHub preview build also did not load EAS environment variables.
+
+The native bridge now passes `EXPO_PUBLIC_CARTO_BASEMAP_API_KEY` explicitly to
+the active DOM map, which appends CARTO's documented `key` query parameter.
+Release guards inspect that actual path. Missing keys cannot silently produce
+anonymous tile requests. EAS continues to use its configured environment.
+
+GitHub previews first use an explicit Actions secret/variable of the same name;
+otherwise they read the already-public client key from Tatzo's web map settings.
+The value is masked in CI and never committed. Missing or malformed settings
+stop the preview build. This map fix does not need a new backend endpoint.
+
+A live tile request with the website's configured key returned the expected
+Dark Matter map; the same request without the key returned the watermark with
+HTTP 200. Therefore HTTP status alone is not evidence that the map is working.
+Added behavior tests cover authenticated URLs, encoding, empty keys, configuration
+precedence, HTML decoding, failed fetches and environment-line injection.
+Post-fix local validation: **18 mobile tests passed**, TypeScript and all release
+guards passed, and Android export contains the configured key in the native bundle.
