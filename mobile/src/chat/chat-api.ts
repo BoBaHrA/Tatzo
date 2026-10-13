@@ -40,11 +40,12 @@ export function startChat(
 export function fetchChatThread(
   request: AuthenticatedRequest,
   threadId: number,
-  cursor?: { after?: number; before?: number },
+  cursor?: { after?: number; before?: number; known?: number[] },
 ) {
   const search = new URLSearchParams();
   if (cursor?.after) search.set('after', String(cursor.after));
   if (cursor?.before) search.set('before', String(cursor.before));
+  if (cursor?.known?.length) search.set('known', cursor.known.slice(-100).join(','));
   const query = search.toString();
   return request<ChatThreadDetail>(
     `/chat/${threadId}/${query ? `?${query}` : ''}`,

@@ -346,6 +346,8 @@ export type ChatListResponse = {
 };
 
 export type ChatThreadDetail = ChatThreadSummary & {
+  updated_messages?: ChatMessage[];
+  deleted_message_ids?: number[];
   messages: ChatMessage[];
   has_more: boolean;
 };

@@ -15,13 +15,14 @@ export function AuthShell({ children, centered = false }: AuthShellProps) {
     <Screen contentStyle={centered ? styles.centeredScreen : styles.screen}>
       <View style={styles.frame}>
         <AuthLanguageSwitcher />
+        <View style={styles.card}>
         <Image
           accessibilityLabel="Tatzo"
           source={require('../../assets/tatzo7.png')}
           resizeMode="contain"
           style={styles.logo}
         />
-        <View style={styles.card}>{children}</View>
+        {children}</View>
       </View>
     </Screen>
   );

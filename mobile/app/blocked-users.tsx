@@ -1,14 +1,8 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useEffect, useState } from 'react';
 import { Redirect, router } from 'expo-router';
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { BlockedUser } from '@/api/types';
 import { useAuth } from '@/auth/auth-context';
@@ -21,6 +15,7 @@ import { colors, radius, spacing } from '@/theme';
 
 
 export default function BlockedUsersScreen() {
+  useLanguage();
   const { request, status } = useAuth();
   const [users, setUsers] = useState<BlockedUser[]>([]);
   const [loading, setLoading] = useState(true);

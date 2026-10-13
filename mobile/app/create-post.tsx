@@ -1,15 +1,9 @@
+import { useLanguage } from '@/localization/language-context';
 import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { Redirect, router } from 'expo-router';
-import {
-  Alert,
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { FeedPost } from '@/api/types';
 import { useAuth } from '@/auth/auth-context';
@@ -41,6 +35,7 @@ function visibilityLabel(value: FeedPost['visibility']) {
 }
 
 export default function CreatePostScreen() {
+  useLanguage();
   const { request, status } = useAuth();
   const [content, setContent] = useState('');
   const [location, setLocation] = useState('');

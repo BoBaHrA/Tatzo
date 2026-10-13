@@ -10,13 +10,16 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "release:check": "node ./scripts/release-check.mjs && node ./scripts/design-system-check.mjs && node ./scripts/shell-parity-check.mjs && node ./scripts/auth-parity-check.mjs && node ./scripts/feed-parity-check.mjs && node ./scripts/map-parity-check.mjs && node ./scripts/chat-parity-check.mjs && node ./scripts/style-match-parity-check.mjs && node ./scripts/profile-dashboard-parity-check.mjs && node ./scripts/healing-parity-check.mjs && node ./scripts/search-parity-check.mjs",
-    "release:check:production": "node ./scripts/release-check.mjs --production && node ./scripts/design-system-check.mjs && node ./scripts/shell-parity-check.mjs && node ./scripts/auth-parity-check.mjs && node ./scripts/feed-parity-check.mjs && node ./scripts/map-parity-check.mjs && node ./scripts/chat-parity-check.mjs && node ./scripts/style-match-parity-check.mjs && node ./scripts/profile-dashboard-parity-check.mjs && node ./scripts/healing-parity-check.mjs && node ./scripts/search-parity-check.mjs"
+    "release:check:production": "node ./scripts/release-check.mjs --production && node ./scripts/design-system-check.mjs && node ./scripts/shell-parity-check.mjs && node ./scripts/auth-parity-check.mjs && node ./scripts/feed-parity-check.mjs && node ./scripts/map-parity-check.mjs && node ./scripts/chat-parity-check.mjs && node ./scripts/style-match-parity-check.mjs && node ./scripts/profile-dashboard-parity-check.mjs && node ./scripts/healing-parity-check.mjs && node ./scripts/search-parity-check.mjs",
+    "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {
+    "@expo-google-fonts/poppins": "^0.4.1",
     "@expo/metro-runtime": "~57.0.12",
     "expo": "~57.0.12",
     "expo-constants": "~57.0.10",
     "expo-document-picker": "~57.0.1",
+    "expo-font": "~57.0.4",
     "expo-image-picker": "~57.0.9",
     "expo-linking": "~57.0.5",
     "expo-localization": "~57.0.1",
@@ -26,6 +29,7 @@
     "expo-secure-store": "~57.0.1",
     "expo-splash-screen": "~57.0.6",
     "expo-status-bar": "~57.0.1",
+    "expo-system-ui": "~57.0.4",
     "expo-video": "~57.0.2",
     "react": "19.2.3",
     "react-dom": "19.2.3",

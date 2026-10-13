@@ -1,13 +1,8 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useState } from 'react';
 import { Redirect, router, useFocusEffect } from 'expo-router';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Switch,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Switch, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { ArtistScheduleDay } from '@/api/types';
 import {
@@ -34,6 +29,7 @@ function weekdayLabel(weekday: number) {
 }
 
 export default function ArtistScheduleScreen() {
+  useLanguage();
   const { request, status, user } = useAuth();
   const [days, setDays] = useState<ArtistScheduleDay[]>([]);
   const [loading, setLoading] = useState(true);

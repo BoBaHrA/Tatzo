@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useMemo, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import {
@@ -13,10 +14,10 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from 'react-native';
+import { Text } from '@/components/text';
 
 import type {
   HealingAchievements,
@@ -52,6 +53,7 @@ function formatDate(value: string) {
 }
 
 function Metric({ label, value }: { label: string; value: number }) {
+  useLanguage();
   return (
     <View style={styles.metric}>
       <Text style={styles.metricValue}>{value}</Text>
@@ -73,6 +75,7 @@ function Achievement({
   unlockedLabel: string;
   lockedLabel: string;
 }) {
+  useLanguage();
   return (
     <View style={[styles.achievement, unlocked && styles.achievementUnlocked]}>
       <View style={[styles.achievementIconShell, unlocked && styles.achievementIconShellUnlocked]}>
@@ -106,6 +109,7 @@ function CheckInGallery({
   copy: Record<string, string>;
   symptomLabels: Map<string, string>;
 }) {
+  useLanguage();
   if (!checkins.length || !selected) {
     return (
       <View style={styles.photoEmpty}>
@@ -160,6 +164,7 @@ function CheckInGallery({
 }
 
 export default function HealingDetailScreen() {
+  useLanguage();
   const params = useLocalSearchParams<{ journeyId?: string | string[] }>();
   const rawJourneyId = Array.isArray(params.journeyId)
     ? params.journeyId[0]

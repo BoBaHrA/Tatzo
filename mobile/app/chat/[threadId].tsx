@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import {
   useCallback,
   useEffect,
@@ -7,10 +8,11 @@ import {
 } from 'react';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { Redirect, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import {
   ActivityIndicator,
+  AppState,
   FlatList,
   Image,
   KeyboardAvoidingView,
@@ -19,10 +21,10 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from 'react-native';
+import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ApiError } from '@/api/client';
@@ -68,6 +70,7 @@ function Sheet({
   title,
   visible,
 }: PropsWithChildren<{ visible: boolean; onClose: () => void; title: string }>) {
+  useLanguage();
   return (
     <Modal
       animationType="fade"
@@ -88,6 +91,7 @@ function Sheet({
 }
 
 function FullVideo({ attachment }: { attachment: ChatAttachment }) {
+  useLanguage();
   const player = useVideoPlayer({ uri: attachment.url, useCaching: true });
   return (
     <VideoView
@@ -107,6 +111,7 @@ function MessageAttachment({
   attachment: ChatAttachment;
   onPreview: (attachment: ChatAttachment) => void;
 }) {
+  useLanguage();
   if (attachment.type === 'image') {
     return (
       <Pressable onPress={() => onPreview(attachment)} style={styles.imageAttachmentButton}>
@@ -142,6 +147,7 @@ function PendingAttachmentChip({
   attachment: PendingChatAttachment;
   onRemove: () => void;
 }) {
+  useLanguage();
   return (
     <View style={styles.pendingChip}>
       {attachment.type === 'image' ? (
@@ -163,7 +169,13 @@ function PendingAttachmentChip({
   );
 }
 
-export default function ChatThreadScreen() {
+export default function ChatThreadRoute() {
+  const { threadId } = useLocalSearchParams();
+  return <ChatThreadScreen key={String(threadId)} />;
+}
+
+function ChatThreadScreen() {
+  useLanguage();
   const params = useLocalSearchParams<{
     threadId?: string | string[];
     healingJourneyId?: string | string[];
@@ -204,6 +216,10 @@ export default function ChatThreadScreen() {
   const [blocking, setBlocking] = useState(false);
   const [mediaPreview, setMediaPreview] = useState<ChatAttachment | null>(null);
   const listRef = useRef<FlatList<ChatMessage>>(null);
+  const active = useRef(false);
+  const version = useRef(0);
+  const knownMessages = useRef<number[]>([]);
+  const nearBottom = useRef(true);
   const pollInFlight = useRef(false);
   const lastMessageId = useRef<number | null>(null);
   const shouldScrollToEnd = useRef(true);
@@ -211,6 +227,7 @@ export default function ChatThreadScreen() {
 
   useEffect(() => {
     lastMessageId.current = messages.at(-1)?.id ?? null;
+    knownMessages.current = messages.slice(-100).map(message => message.id);
   }, [messages]);
 
   const loadThread = useCallback(async () => {
@@ -219,10 +236,12 @@ export default function ChatThreadScreen() {
       if (!validThreadId) setLoadError(t('chatError'));
       return;
     }
+    const loadVersion = ++version.current;
     setLoading(true);
     setLoadError('');
     try {
       const response = await fetchChatThread(request, threadId);
+      if (loadVersion !== version.current) return;
       setThread(response);
       setMessages(response.messages);
       setHasMore(response.has_more);
@@ -230,6 +249,7 @@ export default function ChatThreadScreen() {
       shouldScrollToEnd.current = true;
       void refreshChats();
     } catch (error) {
+      if (loadVersion !== version.current) return;
       setThread(null);
       setLoadError(
         error instanceof ApiError && error.status === 404
@@ -237,13 +257,19 @@ export default function ChatThreadScreen() {
           : t('chatError'),
       );
     } finally {
-      setLoading(false);
+      if (loadVersion === version.current) setLoading(false);
     }
   }, [clearUnread, refreshChats, request, status, threadId, validThreadId]);
 
   useEffect(() => {
+    setMessages([]); setThread(null); lastMessageId.current = null; knownMessages.current = [];
     void loadThread();
+    return () => { version.current++; };
   }, [loadThread]);
+  useFocusEffect(useCallback(() => {
+    active.current = true;
+    return () => { active.current = false; };
+  }, []));
 
   useEffect(() => {
     const journeyId = String(rawHealingJourneyId ?? '');
@@ -278,17 +304,22 @@ export default function ChatThreadScreen() {
   }, [healingDraft, thread]);
 
   useEffect(() => {
-    if (status !== 'authenticated' || !thread || !validThreadId) return undefined;
+    if (status !== 'authenticated' || loading || !validThreadId) return undefined;
     const poll = setInterval(async () => {
-      if (pollInFlight.current) return;
+      if (pollInFlight.current || !active.current || AppState.currentState === 'background') return;
+      const pollVersion = version.current;
       pollInFlight.current = true;
       try {
         const response = await fetchChatThread(
           request,
           threadId,
-          lastMessageId.current ? { after: lastMessageId.current } : undefined,
+           { after: lastMessageId.current ?? undefined, known: knownMessages.current },
         );
+        if (pollVersion !== version.current || !active.current) return;
         setThread(response);
+        const updated = new Map(response.updated_messages?.map(message => [message.id, message]) ?? []);
+        const deleted = new Set(response.deleted_message_ids ?? []);
+        setMessages(current => current.filter(message => !deleted.has(message.id)).map(message => updated.get(message.id) ?? message));
         if (response.last_read_message_id) {
           setMessages((current) => current.map((message) => (
             message.is_mine && message.id <= response.last_read_message_id!
@@ -297,7 +328,7 @@ export default function ChatThreadScreen() {
           )));
         }
         if (response.messages.length) {
-          shouldScrollToEnd.current = true;
+          shouldScrollToEnd.current = nearBottom.current;
           setMessages((current) => {
             const known = new Set(current.map((message) => message.id));
             return [
@@ -315,7 +346,7 @@ export default function ChatThreadScreen() {
       }
     }, 2_500);
     return () => clearInterval(poll);
-  }, [clearUnread, refreshChats, request, status, thread, threadId, validThreadId]);
+  }, [clearUnread, refreshChats, request, status, loading, threadId, validThreadId]);
 
   if (status === 'anonymous') {
     return <Redirect href="/(auth)/login" />;
@@ -492,6 +523,7 @@ export default function ChatThreadScreen() {
     }
     setSavingEdit(true);
     try {
+      version.current++;
       const updated = await editChatMessage(
         request,
         editingMessage.id,
@@ -499,6 +531,7 @@ export default function ChatThreadScreen() {
         [...removedAttachmentIds],
         editAttachments,
       );
+      version.current++;
       setMessages((current) => current.map((message) => (
         message.id === updated.id ? updated : message
       )));
@@ -523,7 +556,9 @@ export default function ChatThreadScreen() {
     if (!deleteTarget || deleting) return;
     setDeleting(true);
     try {
+      version.current++;
       await deleteChatMessage(request, deleteTarget.id);
+      version.current++;
       setMessages((current) => current.filter((message) => message.id !== deleteTarget.id));
       setDeleteTarget(null);
       void refreshChats();
@@ -700,6 +735,11 @@ export default function ChatThreadScreen() {
                   )}
                 </Pressable>
               ) : null}
+              onScroll={({ nativeEvent }) => {
+                nearBottom.current = nativeEvent.contentSize.height - nativeEvent.contentOffset.y - nativeEvent.layoutMeasurement.height < 100;
+              }}
+              scrollEventThrottle={100}
+              maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
               onContentSizeChange={() => {
                 if (shouldScrollToEnd.current) {
                   listRef.current?.scrollToEnd({ animated: messages.length > 1 });

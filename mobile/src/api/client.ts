@@ -36,19 +36,22 @@ export async function apiRequest<T>(
   headers.set('Accept', 'application/json');
   headers.set('Accept-Language', getPreferredLanguage());
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers,
-  });
-
-  const contentType = response.headers.get('content-type') ?? '';
-  const body = contentType.includes('application/json')
-    ? ((await response.json()) as ErrorBody)
-    : {};
-
-  if (!response.ok) {
-    throw new ApiError(response.status, body);
+  const controller = new AbortController();
+  const abort = () => controller.abort();
+  if (init.signal?.aborted) abort();
+  else init.signal?.addEventListener('abort', abort, { once: true });
+  const timeout = setTimeout(abort, isFormData ? 60_000 : 20_000);
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      ...init, headers, signal: controller.signal,
+    });
+    const contentType = response.headers.get('content-type') ?? '';
+    const body = contentType.includes('application/json') && response.status !== 204
+      ? ((await response.json()) as ErrorBody) : {};
+    if (!response.ok) throw new ApiError(response.status, body);
+    return body as T;
+  } finally {
+    clearTimeout(timeout);
+    init.signal?.removeEventListener('abort', abort);
   }
-
-  return body as T;
 }

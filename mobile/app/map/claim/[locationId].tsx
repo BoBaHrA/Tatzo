@@ -1,13 +1,9 @@
+import { useLanguage } from '@/localization/language-context';
 import { useState } from 'react';
 import * as DocumentPicker from 'expo-document-picker';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import {
-  Alert,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import { useAuth } from '@/auth/auth-context';
 import { Button } from '@/components/button';
@@ -27,6 +23,7 @@ function firstParam(value: string | string[] | undefined) {
 }
 
 export default function ClaimMapLocationScreen() {
+  useLanguage();
   const params = useLocalSearchParams<{ locationId?: string; name?: string }>();
   const { request, status, user } = useAuth();
   const locationId = Number(firstParam(params.locationId));
