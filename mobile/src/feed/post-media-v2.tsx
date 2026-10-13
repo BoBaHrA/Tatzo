@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -35,6 +36,8 @@ type PostMediaLayoutProviderProps = {
 
 const PostMediaLayoutContext = createContext<FeedLayout>('grid');
 const GAP = 8;
+const THUMB_GAP = 16;
+const THUMB_PADDING = 16;
 
 export function PostMediaLayoutProvider({
   children,
@@ -70,6 +73,7 @@ function FeedVideo({
       nativeControls={controls}
       player={player}
       style={StyleSheet.absoluteFill}
+      surfaceType={controls ? 'surfaceView' : 'textureView'}
     />
   );
 }
@@ -273,13 +277,15 @@ function CarouselThumbnail({
   active,
   item,
   index,
-  largeThumbSet,
+  baseSize,
+  activeScale,
   onPress,
 }: {
   active: boolean;
   item: FeedMedia;
   index: number;
-  largeThumbSet: boolean;
+  baseSize: number;
+  activeScale: number;
   onPress: () => void;
 }) {
   const activation = useRef(new Animated.Value(active ? 1 : 0)).current;
@@ -293,9 +299,8 @@ function CarouselThumbnail({
     }).start();
   }, [activation, active]);
 
-  const baseSize = largeThumbSet ? 82 : 90;
-  const activeScale = largeThumbSet ? 1.28 : 1.22;
-  const scale = activation.interpolate({ inputRange: [0, 1], outputRange: [1, activeScale] });
+  // Keep the spring inside the space reserved for the enlarged thumbnail.
+  const scale = activation.interpolate({ inputRange: [0, 1], outputRange: [1, activeScale], extrapolate: 'clamp' });
   const opacity = activation.interpolate({ inputRange: [0, 1], outputRange: [0.72, 1] });
 
   return (
@@ -303,6 +308,7 @@ function CarouselThumbnail({
       <Pressable
         accessibilityLabel={`Media ${index + 1}`}
         accessibilityRole="button"
+        accessibilityState={{ selected: active }}
         onPress={onPress}
         style={({ pressed }) => [
           styles.thumb,
@@ -322,12 +328,35 @@ function CarouselThumbnail({
 
 function CarouselMedia({ items }: { items: FeedMedia[] }) {
   const scrollRef = useRef<ScrollView>(null);
+  const thumbsRef = useRef<ScrollView>(null);
+  const activeIndexRef = useRef(0);
   const [width, setWidth] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
   const transition = useRef(new Animated.Value(1)).current;
   const height = clamp(width * 0.76, 230, 335);
   const largeThumbSet = items.length >= 6;
+  const baseSize = largeThumbSet ? 82 : 90;
+  const activeScale = largeThumbSet ? 1.28 : 1.22;
   const thumbRailHeight = largeThumbSet ? 130 : 122;
+  const thumbsContentWidth = THUMB_PADDING * 2 + items.length * baseSize + (items.length - 1) * THUMB_GAP;
+
+  const scrollToActiveThumbnail = useCallback(() => {
+    if (!width) return;
+    const center = THUMB_PADDING + activeIndex * (baseSize + THUMB_GAP) + baseSize / 2;
+    const x = clamp(center - width / 2, 0, Math.max(0, thumbsContentWidth - width));
+    thumbsRef.current?.scrollTo({ x, animated: true });
+  }, [activeIndex, baseSize, thumbsContentWidth, width]);
+
+  useEffect(scrollToActiveThumbnail, [scrollToActiveThumbnail]);
+
+  // Preserve the selected page when the post resizes or its media count changes.
+  useEffect(() => {
+    if (!width) return;
+    const bounded = clamp(activeIndexRef.current, 0, items.length - 1);
+    activeIndexRef.current = bounded;
+    setActiveIndex(bounded);
+    scrollRef.current?.scrollTo({ x: bounded * width, animated: false });
+  }, [items.length, width]);
 
   const setMeasuredWidth = (next: number) => {
     if (Math.abs(next - width) > 1) setWidth(next);
@@ -346,7 +375,8 @@ function CarouselMedia({ items }: { items: FeedMedia[] }) {
 
   const select = (index: number) => {
     const bounded = Math.max(0, Math.min(index, items.length - 1));
-    if (bounded === activeIndex) return;
+    if (bounded === activeIndexRef.current) return;
+    activeIndexRef.current = bounded;
     setActiveIndex(bounded);
     animateSelection();
     if (width) scrollRef.current?.scrollTo({ x: bounded * width, animated: true });
@@ -358,7 +388,8 @@ function CarouselMedia({ items }: { items: FeedMedia[] }) {
       0,
       Math.min(Math.round(event.nativeEvent.contentOffset.x / width), items.length - 1),
     );
-    if (nextIndex !== activeIndex) {
+    if (nextIndex !== activeIndexRef.current) {
+      activeIndexRef.current = nextIndex;
       setActiveIndex(nextIndex);
       animateSelection();
     }
@@ -384,6 +415,7 @@ function CarouselMedia({ items }: { items: FeedMedia[] }) {
               ref={scrollRef}
               scrollEnabled={items.length > 1}
               showsHorizontalScrollIndicator={false}
+              style={{ width, height }}
             >
               {items.map((item) => (
                 <MediaCell
@@ -403,27 +435,38 @@ function CarouselMedia({ items }: { items: FeedMedia[] }) {
           </Animated.View>
 
           {items.length > 1 ? (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
+            <View
+              collapsable={false}
               style={[styles.thumbsViewport, { height: thumbRailHeight }]}
-              contentContainerStyle={[
-                styles.thumbsRow,
-                !largeThumbSet && styles.thumbsRowCentered,
-                { minHeight: thumbRailHeight },
-              ]}
             >
-              {items.map((item, index) => (
-                <CarouselThumbnail
-                  active={index === activeIndex}
-                  index={index}
-                  item={item}
-                  key={item.id}
-                  largeThumbSet={largeThumbSet}
-                  onPress={() => select(index)}
-                />
-              ))}
-            </ScrollView>
+              <ScrollView
+                bounces={false}
+                horizontal
+                nestedScrollEnabled
+                onContentSizeChange={scrollToActiveThumbnail}
+                overScrollMode="never"
+                ref={thumbsRef}
+                showsHorizontalScrollIndicator={false}
+                style={{ width, height: thumbRailHeight }}
+                contentContainerStyle={[
+                  styles.thumbsRow,
+                  thumbsContentWidth <= width && styles.thumbsRowCentered,
+                  { minHeight: thumbRailHeight },
+                ]}
+              >
+                {items.map((item, index) => (
+                  <CarouselThumbnail
+                    active={index === activeIndex}
+                    activeScale={activeScale}
+                    baseSize={baseSize}
+                    index={index}
+                    item={item}
+                    key={item.id}
+                    onPress={() => select(index)}
+                  />
+                ))}
+              </ScrollView>
+            </View>
           ) : null}
         </>
       ) : (
@@ -493,7 +536,9 @@ const styles = StyleSheet.create({
   },
   carousel: {
     width: '100%',
+    minWidth: 0,
     gap: 10,
+    overflow: 'hidden',
   },
   carouselMain: {
     width: '100%',
@@ -518,14 +563,14 @@ const styles = StyleSheet.create({
   },
   thumbsViewport: {
     width: '100%',
-    overflow: 'visible',
+    overflow: 'hidden',
+    borderRadius: 14,
   },
   thumbsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    paddingHorizontal: 12,
-    overflow: 'visible',
+    gap: THUMB_GAP,
+    paddingHorizontal: THUMB_PADDING,
   },
   thumbsRowCentered: {
     flexGrow: 1,
