@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Manage studio" %} | Tatzo{% endblock %}
+{% block content %}
+<main style="max-width:640px;margin:5rem auto;padding:2rem">
+  <h1>{% trans "Manage studio" %}: {{ studio.name }}</h1>
+  <p>{% trans "You can update studio contact details. To change its address, use the location correction review process." %}</p>
+  <form method="post">
+    {% csrf_token %}
+    <p><label for="phone">{% trans "Phone" %}</label>
+      <input type="tel" id="phone" name="phone" maxlength="60" value="{{ studio.phone }}"></p>
+    <p><label for="website">{% trans "Website" %}</label>
+      <input type="url" id="website" name="website" maxlength="500" value="{{ studio.website }}"></p>
+    <button type="submit">{% trans "Save contact details" %}</button>
+  </form>
+  <p><a href="{% url 'maps_page' %}">{% trans "Back to map" %}</a></p>
+</main>
+{% endblock %}
