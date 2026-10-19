@@ -211,4 +211,4 @@ class StudioClaimSecurityTests(TestCase):
         self.assertEqual(home.status_code, 200)
         self.assertEqual(search.status_code, 200)
         self.assertNotContains(home, "12 Ink Lane")
-        self.assertNotContains(search, "12 Ink Lane")
+        self.assertNotContains(search, "Unicorn Tattoo Art Collective")
