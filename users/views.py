@@ -24,6 +24,7 @@ from django.utils.translation import gettext as _, ngettext
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.http import require_http_methods, require_POST
 from .security import check_rate_limit, is_new_account, rate_limited_json
+from .location_review import approve_location_request, approve_location_claim, reject_location_submission
 from .models import (
     Profile,
     VerificationDocument,
@@ -1400,7 +1401,14 @@ def moderation_dashboard(request):
         .order_by("-created_at")
     )
 
+    pending_location_requests = LocationRequest.objects.filter(status__in=["submitted", "under_review"]).select_related("requested_by").order_by("-created_at")
+    pending_location_claims = LocationClaim.objects.filter(status__in=["submitted", "under_review"]).select_related("claimant_user", "location").order_by("-created_at")
+
     context = {
+        "pending_location_requests": pending_location_requests,
+        "pending_location_claims": pending_location_claims,
+        "location_request_count": pending_location_requests.count(),
+        "location_claim_count": pending_location_claims.count(),
         "pending_document_requests": pending_document_requests,
         "pending_manual_requests": pending_manual_requests,
         "post_reports": post_reports,
@@ -1412,6 +1420,34 @@ def moderation_dashboard(request):
     }
 
     return render(request, "users/moderation_dashboard.html", context)
+
+
+@user_passes_test(is_admin)
+@require_POST
+def moderation_review_location(request, kind, item_id):
+    """One staff-only POST endpoint for transactional approval/rejection."""
+    if kind not in ("claim", "request"):
+        raise Http404
+    action = request.POST.get("decision")
+    if action not in ("approve", "reject"):
+        messages.error(request, _("Choose a valid moderation action."))
+        return redirect("moderation_dashboard")
+    if action == "approve" and request.POST.get("confirm_evidence") != "1":
+        messages.error(request, _("Confirm that you independently reviewed the business evidence."))
+        return redirect("moderation_dashboard")
+
+    try:
+        if action == "reject":
+            reject_location_submission(kind, item_id, request.user)
+        elif kind == "request":
+            approve_location_request(item_id, request.user)
+        else:
+            approve_location_claim(item_id, request.user)
+    except (ValidationError, LocationRequest.DoesNotExist, LocationClaim.DoesNotExist, Location.DoesNotExist) as error:
+        messages.error(request, "; ".join(error.messages) if isinstance(error, ValidationError) else str(error))
+        return redirect("moderation_dashboard")
+    messages.success(request, _("Location submission reviewed successfully."))
+    return redirect("moderation_dashboard")
 
 
 @user_passes_test(is_admin)
@@ -2116,7 +2152,7 @@ def submit_location_claim(request, location_id):
 
     LocationClaim.objects.create(
         location=location,
-        claimant_user=request.user if request.user.is_authenticated else None,
+        claimant_user=(request.user if request.user.is_authenticated and request.user.is_active and request.user.email.strip().casefold() == contact_email.casefold() and getattr(getattr(request.user, "profile", None), "is_email_verified", False) else None),
         claimant_name=claimant_name,
         contact_email=contact_email,
         relation_to_location=relation,
@@ -2225,6 +2261,20 @@ def submit_location_request(request):
             messages.error(request, _("Latitude or longitude is outside the valid range."))
             return redirect("maps_page")
 
+    wants_ownership = request.POST.get("claim_for_my_account") == "1"
+    if wants_ownership:
+        if (
+            not request.user.is_authenticated
+            or not request.user.is_active
+            or request.user.email.strip().casefold() != contact_email.casefold()
+            or not getattr(getattr(request.user, "profile", None), "is_email_verified", False)
+        ):
+            messages.error(
+                request,
+                _("To claim this address, sign in with a verified account and use that account's email."),
+            )
+            return redirect("maps_page")
+
     active_statuses = ["submitted", "under_review"]
     duplicate_request = LocationRequest.objects.filter(
         name__iexact=name,
@@ -2242,6 +2292,8 @@ def submit_location_request(request):
         return redirect("maps_page")
 
     LocationRequest.objects.create(
+        requested_by=request.user if request.user.is_authenticated else None,
+        wants_ownership=wants_ownership,
         name=name,
         city=city,
         country=country,
