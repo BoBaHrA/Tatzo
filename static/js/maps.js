@@ -280,7 +280,7 @@
       let actionButton = "";
       if (isVerified && card.dataset.canBook === "true") {
         actionButton = `<a class="tatzo-map-popup-action tatzo-map-popup-book" href="${escapeHtml(card.dataset.bookUrl)}">${escapeHtml(t("book", "Book"))}</a>`;
-      } else if (!isVerified) {
+      } else if (card.dataset.claimable === "true") {
         actionButton = `<button class="tatzo-map-popup-action tatzo-map-popup-claim" type="button" data-open-claim data-claim-url="/maps/location/${card.dataset.locationId}/claim/" data-claim-location="${escapeHtml(card.dataset.location)}" data-claim-artist="${escapeHtml(card.dataset.artist)}" data-claim-kind="${source}">${escapeHtml(card.dataset.actionLabel || t("claim_location", "Claim this location"))}</button>`;
       }
 
