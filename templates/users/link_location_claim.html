@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Link studio claim" %} | Tatzo{% endblock %}
+{% block content %}
+<main style="max-width:640px;margin:5rem auto;padding:2rem">
+  <h1>{% trans "Connect your studio claim" %}</h1>
+  <p>{% trans "Your contact email was confirmed. To request management access, verify the email of your Tatzo account and link this request. Tatzo will independently review business ownership before approving access." %}</p>
+  <p><strong>{{ claim.location.name }}</strong></p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">{% trans "Connect this Tatzo account" %}</button>
+  </form>
+  <p><a href="{% url 'maps_page' %}">{% trans "Back to the map" %}</a></p>
+</main>
+{% endblock %}
