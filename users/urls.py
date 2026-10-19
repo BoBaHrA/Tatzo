@@ -28,6 +28,7 @@ urlpatterns = [
         views.moderation_dashboard,
         name="moderation_dashboard",
     ),
+    path("moderation/locations/<str:kind>/<int:item_id>/review/", views.moderation_review_location, name="moderation_review_location"),
     path(
         "moderation/artist/<str:username>/approve/",
         views.moderation_approve_artist,
