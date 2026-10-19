@@ -12,7 +12,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
+from django.core.validators import validate_email, URLValidator
 from django.db import transaction
 from django.db.models import Case, Count, Exists, IntegerField, OuterRef, Q, Value, When
 from django.http import FileResponse, Http404, JsonResponse
@@ -2236,6 +2236,13 @@ def submit_location_request(request):
     except ValidationError:
         messages.error(request, _("Please enter a valid contact email."))
         return redirect("maps_page")
+
+    if website_or_map_link:
+        try:
+            URLValidator(schemes=("https", "http"))(website_or_map_link)
+        except ValidationError:
+            messages.error(request, _("Enter a valid http or https website URL."))
+            return redirect("maps_page")
 
     if supporting_file and not _validate_location_upload(supporting_file):
         messages.error(request, _("Upload a PDF, JPG, PNG or WEBP file up to 10 MB."))
