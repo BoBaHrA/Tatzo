@@ -212,3 +212,20 @@ class StudioClaimSecurityTests(TestCase):
         self.assertEqual(search.status_code, 200)
         self.assertNotContains(home, "12 Ink Lane")
         self.assertNotContains(search, "Unicorn Tattoo Art Collective")
+
+    def test_moderator_dashboard_lists_ownership_and_correction_queues(self):
+        claim = self.create_claim()
+        correction = LocationCorrectionRequest.objects.create(
+            location=self.location,
+            reporter_name="Terry Brown",
+            contact_email="talesofink@outlook.com",
+            reason="closed",
+        )
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse("moderation_dashboard"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Unicorn Tattoo Art Collective")
+        self.assertContains(response, "info@utac.cc")
+        self.assertContains(response, "talesofink@outlook.com")
+        self.assertEqual(response.context["location_claims_count"], 1)
+        self.assertEqual(response.context["location_corrections_count"], 1)
