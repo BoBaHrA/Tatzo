@@ -361,7 +361,7 @@ class LocationAdmin(admin.ModelAdmin):
         "linked_user__username",
         "linked_user__email",
     )
-    readonly_fields = ("created_at", "updated_at")
+    readonly_fields = ("created_at", "updated_at", "status", "studio_owner")
     autocomplete_fields = ("linked_user",)
     ordering = ("name",)
 
@@ -393,7 +393,7 @@ class LocationClaimAdmin(admin.ModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         # Ownership state may only be changed by an audited approval service.
         # Prevent a model-admin save from marking an unlinked claim approved.
-        return (*super().get_readonly_fields(request, obj), "status", "claimant_user")
+        return (*super().get_readonly_fields(request, obj), "status", "claimant_user", "reviewed_by", "reviewed_at")
 
     @admin.display(boolean=True, description="Proof document")
     def has_proof_document(self, obj):
@@ -423,8 +423,10 @@ class LocationRequestAdmin(admin.ModelAdmin):
     list_filter = ("status", "city", "country", "created_at")
     search_fields = ("name", "city", "country", "full_address", "website_or_map_link", "contact_email")
     readonly_fields = ("supporting_file_link", "created_at", "updated_at")
-    list_editable = ("status",)
     ordering = ("-created_at",)
+
+    def get_readonly_fields(self, request, obj=None):
+        return (*super().get_readonly_fields(request, obj), "status", "requested_by", "wants_ownership", "approved_location", "reviewed_by", "reviewed_at")
 
     @admin.display(boolean=True, description="Supporting file")
     def has_supporting_file(self, obj):
