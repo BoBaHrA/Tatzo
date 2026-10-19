@@ -2152,7 +2152,7 @@ def submit_location_claim(request, location_id):
 
     LocationClaim.objects.create(
         location=location,
-        claimant_user=(request.user if request.user.is_authenticated and request.user.is_active and request.user.email.strip().casefold() == contact_email.casefold() and getattr(getattr(request.user, "profile", None), "is_email_verified", False) else None),
+        claimant_user=request.user if request.user.is_authenticated else None,
         claimant_name=claimant_name,
         contact_email=contact_email,
         relation_to_location=relation,
