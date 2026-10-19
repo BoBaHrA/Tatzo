@@ -2647,6 +2647,7 @@ def maps_page(request):
         "book": _("Book"),
         "claim_location": _("Claim this location"),
         "report_issue": _("Report an issue with this studio"),
+        "manage_studio": _("Manage studio"),
         "website": _("Website"),
         "data": _("Data"),
         "address_pending": _("Address pending"),
