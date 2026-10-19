@@ -267,11 +267,11 @@ class MobileMapTests(APITestCase):
 
         self.assertEqual(created.status_code, status.HTTP_201_CREATED)
         claim = LocationClaim.objects.get()
-        self.assertEqual(claim.claimant_user, self.viewer)
-        self.assertEqual(claim.status, "submitted")
+        self.assertIsNone(claim.claimant_user)
+        self.assertEqual(claim.status, "awaiting_email")
         self.assertEqual(duplicate.status_code, status.HTTP_409_CONFLICT)
         self.assertEqual(duplicate.data["code"], "claim_exists")
-        self.assertEqual(map_response.data["results"][0]["claim_status"], "submitted")
+        self.assertIsNone(map_response.data["results"][0]["claim_status"])
 
     def test_claim_rejects_linked_location(self):
         response = self.client.post(
