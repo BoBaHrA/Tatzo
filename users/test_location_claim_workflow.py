@@ -177,3 +177,38 @@ class StudioClaimSecurityTests(TestCase):
         suppress_location(self.location.pk, self.staff, "Closed")
         self.assertEqual(self.client.post(reverse("submit_location_claim", args=[self.location.pk])).status_code, 404)
         self.assertEqual(self.client.post(reverse("report_location_correction", args=[self.location.pk])).status_code, 404)
+
+    def test_owned_studio_contact_management_requires_approved_owner(self):
+        edit_url = reverse("manage_owned_studio", args=[self.location.pk])
+        self.client.force_login(self.owner)
+        self.assertEqual(self.client.get(edit_url).status_code, 404)
+        claim = self.create_claim()
+        confirm_claim_email(self.email_token())
+        connect_claim_account(claim.pk, self.owner)
+        verify_claim_evidence(claim.pk, self.staff)
+        approve_studio_claim(claim.pk, self.staff)
+        self.client.force_login(self.owner)
+        response = self.client.post(edit_url, {
+            "phone": "+33 123456789", "website": "https://utac.cc",
+            "address": "ATTACKER ADDRESS", "latitude": "0",
+        })
+        self.assertEqual(response.status_code, 302)
+        self.location.refresh_from_db()
+        self.assertEqual(self.location.phone, "+33 123456789")
+        self.assertEqual(self.location.website, "https://utac.cc")
+        self.assertEqual(self.location.address, "12 Ink Lane")
+        self.assertEqual(str(self.location.latitude), "55.865000")
+        attacker = User.objects.create_user("attacker2", "else@example.com", "StrongPass!123")
+        attacker.profile.is_email_verified = True
+        attacker.profile.save(update_fields=["is_email_verified"])
+        self.client.force_login(attacker)
+        self.assertEqual(self.client.get(edit_url).status_code, 404)
+
+    def test_public_web_search_and_map_do_not_leak_suppressed_address(self):
+        suppress_location(self.location.pk, self.staff, "Permanently closed")
+        home = self.client.get(reverse("maps_page"))
+        search = self.client.get(reverse("search_page"), {"q": "12 Ink Lane"})
+        self.assertEqual(home.status_code, 200)
+        self.assertEqual(search.status_code, 200)
+        self.assertNotContains(home, "12 Ink Lane")
+        self.assertNotContains(search, "12 Ink Lane")
