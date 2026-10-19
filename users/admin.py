@@ -363,7 +363,6 @@ class LocationAdmin(admin.ModelAdmin):
     )
     readonly_fields = ("created_at", "updated_at")
     autocomplete_fields = ("linked_user",)
-    list_editable = ("status",)
     ordering = ("name",)
 
 
@@ -389,8 +388,12 @@ class LocationClaimAdmin(admin.ModelAdmin):
     )
     readonly_fields = ("proof_document_link", "created_at", "updated_at")
     autocomplete_fields = ("location", "claimant_user")
-    list_editable = ("status",)
     ordering = ("-created_at",)
+
+    def get_readonly_fields(self, request, obj=None):
+        # Ownership state may only be changed by an audited approval service.
+        # Prevent a model-admin save from marking an unlinked claim approved.
+        return (*super().get_readonly_fields(request, obj), "status", "claimant_user")
 
     @admin.display(boolean=True, description="Proof document")
     def has_proof_document(self, obj):
