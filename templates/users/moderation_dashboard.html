@@ -45,6 +45,10 @@
         <span>{% trans "Comment reports" %}</span>
         <strong>{{ comment_reports_count }}</strong>
       </div>
+      <div class="moderation-stat-card">
+        <span>{% trans "Location reviews" %}</span>
+        <strong>{{ location_claims_count|add:location_requests_count|add:location_corrections_count }}</strong>
+      </div>
     </section>
 
     <div class="moderation-toolbar">
@@ -54,6 +58,10 @@
           <span>{{ document_count|add:manual_count }}</span>
         </button>
 
+        <button type="button" class="moderation-folder-tab" data-folder-tab="locations">
+          {% trans "Locations" %}
+          <span>{{ location_claims_count|add:location_requests_count|add:location_corrections_count }}</span>
+        </button>
         <button type="button" class="moderation-folder-tab" data-folder-tab="posts">
           {% trans "Post reports" %}
           <span>{{ post_reports_count }}</span>
@@ -269,6 +277,53 @@
             {% trans "No pending manual reviews." %}
           </div>
         {% endif %}
+      </section>
+    </div>
+
+    <div class="moderation-folder-panel" data-folder-panel="locations" hidden>
+      <section class="moderation-section">
+        <div class="moderation-section-head"><h2>{% trans "Studio ownership claims" %}</h2><span>{{ location_claims_count }}</span></div>
+        <div class="moderation-list">
+          {% for claim in pending_location_claims %}
+            <article class="moderation-card" data-moderation-card data-date="{{ claim.created_at|date:'U' }}" data-reason="with-reason" data-search="{{ claim.location.name }} {{ claim.claimant_name }} {{ claim.contact_email }}">
+              <div class="moderation-card-main">
+                <div><h3>{{ claim.location.name }}</h3>
+                  <p>{{ claim.claimant_name }} · {{ claim.contact_email }}</p>
+                  <p>{% trans "Status" %}: {{ claim.get_status_display }}</p>
+                  <p>{% trans "Email confirmed" %}: {% if claim.email_verified_at %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</p>
+                </div>
+              </div>
+              <div class="moderation-actions"><a class="moderation-btn moderation-btn-neutral" href="{% url 'admin:users_locationclaim_change' claim.pk %}">{% trans "Review in Django Admin" %}</a></div>
+            </article>
+          {% empty %}<div class="moderation-empty">{% trans "No pending ownership claims." %}</div>{% endfor %}
+        </div>
+      </section>
+      <section class="moderation-section">
+        <div class="moderation-section-head"><h2>{% trans "New location requests" %}</h2><span>{{ location_requests_count }}</span></div>
+        <div class="moderation-list">
+          {% for item in pending_location_requests %}
+            <article class="moderation-card" data-moderation-card data-date="{{ item.created_at|date:'U' }}" data-reason="with-reason" data-search="{{ item.name }} {{ item.city }} {{ item.contact_email }}">
+              <div class="moderation-card-main"><div><h3>{{ item.name }}</h3>
+                <p>{{ item.city }}, {{ item.country }} · {{ item.contact_email }}</p>
+                <p>{{ item.full_address|truncatechars:160 }}</p>
+                <p>{{ item.get_status_display }}</p></div></div>
+              <div class="moderation-actions"><a class="moderation-btn moderation-btn-neutral" href="{% url 'admin:users_locationrequest_change' item.pk %}">{% trans "Review in Django Admin" %}</a></div>
+            </article>
+          {% empty %}<div class="moderation-empty">{% trans "No pending location requests." %}</div>{% endfor %}
+        </div>
+      </section>
+      <section class="moderation-section">
+        <div class="moderation-section-head"><h2>{% trans "Location correction and removal reports" %}</h2><span>{{ location_corrections_count }}</span></div>
+        <div class="moderation-list">
+          {% for item in pending_location_corrections %}
+            <article class="moderation-card" data-moderation-card data-date="{{ item.created_at|date:'U' }}" data-reason="with-reason" data-search="{{ item.location.name }} {{ item.reason }} {{ item.contact_email }}">
+              <div class="moderation-card-main"><div><h3>{{ item.location.name }}</h3>
+                <p>{{ item.get_reason_display }} · {{ item.contact_email }}</p>
+                <p>{{ item.explanation|truncatechars:160 }}</p></div></div>
+              <div class="moderation-actions"><a class="moderation-btn moderation-btn-neutral" href="{% url 'admin:users_locationcorrectionrequest_change' item.pk %}">{% trans "Review in Django Admin" %}</a></div>
+            </article>
+          {% empty %}<div class="moderation-empty">{% trans "No pending correction reports." %}</div>{% endfor %}
+        </div>
       </section>
     </div>
 
