@@ -26,7 +26,10 @@ def normalize(value):
 def location_fingerprint(name, city, address, country=""):
     """Conservative match: require a real address to avoid false suppressions."""
     a, n = normalize(address), normalize(name)
-    if not n or not a:
+    # A city/country-only entry is not a safe identity for an OSM tombstone.
+    address_parts = [normalize(part) for part in a.split(",") if normalize(part)]
+    known_geography = {normalize(city), normalize(country)}
+    if not n or not a or not any(part not in known_geography for part in address_parts):
         return ""
     return hashlib.sha256(f"{n}|{normalize(city)}|{normalize(country)}|{a}".encode("utf-8")).hexdigest()
 
@@ -180,7 +183,7 @@ def suppress_location(location_id, reviewer, reason, correction=None):
     location.suppressed_by = reviewer
     location.suppression_reason = str(reason)[:300]
     location.save(update_fields=["is_suppressed", "suppressed_at", "suppressed_by", "suppression_reason", "updated_at"])
-    fingerprint = location_fingerprint(location.name, location.city, location.display_address, location.country)
+    fingerprint = location_fingerprint(location.name, location.city, location.formatted_address or location.address, location.country)
     if location.source_place_id or fingerprint:
         LocationSuppression.objects.get_or_create(
             location=location, source=location.source, source_place_id=location.source_place_id,
