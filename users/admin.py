@@ -18,7 +18,7 @@ from .imported_artists import (
 )
 from .location_services import (
     approve_studio_claim, set_claim_review_state, suppress_location,
-    restore_location, verify_claim_evidence,
+    restore_location, verify_claim_evidence, send_claim_confirmation,
 )
 from django.core.mail import send_mail
 from django.conf import settings
@@ -411,7 +411,24 @@ class LocationClaimAdmin(admin.ModelAdmin):
     )
     autocomplete_fields = ("location",)
     ordering = ("-created_at",)
-    actions = ("verify_evidence", "approve_and_link", "reject_claims", "request_more_information")
+    actions = ("send_email_confirmation", "verify_evidence", "approve_and_link",
+               "reject_claims", "request_more_information")
+
+    @admin.action(description=_("Send or resend contact email confirmation"))
+    def send_email_confirmation(self, request, queryset):
+        count = 0
+        for claim in queryset:
+            if claim.email_verified_at or claim.status in {"rejected", "approved"}:
+                continue
+            try:
+                send_claim_confirmation(claim, request)
+                count += 1
+                self.log_change(request, claim, "Contact email confirmation resent")
+            except Exception as exc:
+                self.message_user(request, _("Email sending failed: %(error)s") % {"error": str(exc)},
+                                  level=messages.ERROR)
+        self.message_user(request, _("%(count)s verification emails sent") % {"count": count})
+
 
     def has_add_permission(self, request):
         return False
