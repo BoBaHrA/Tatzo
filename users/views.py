@@ -12,7 +12,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.core.validators import validate_email
+from django.core.validators import validate_email, URLValidator
 from django.db import transaction
 from django.db.models import Case, Count, Exists, IntegerField, OuterRef, Q, Value, When
 from django.http import FileResponse, Http404, JsonResponse
@@ -2362,6 +2362,37 @@ def report_location_correction(request, location_id):
     messages.success(request, _("Thank you. Tatzo will review this issue before changing the listing."))
     return redirect("maps_page")
 
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def manage_owned_studio(request, location_id):
+    """Owner-only contact details. Address changes always require staff review."""
+    location = get_object_or_404(
+        Location, pk=location_id, studio_owner=request.user,
+        is_suppressed=False, linked_user__isnull=True,
+    )
+    if not request.user.is_active or not request.user.profile.is_email_verified:
+        raise Http404
+    if request.method == "POST":
+        phone = (request.POST.get("phone") or "").strip()
+        website = (request.POST.get("website") or "").strip()
+        if len(phone) > 60 or len(website) > 500:
+            messages.error(request, _("The contact details are too long."))
+        else:
+            try:
+                if website:
+                    URLValidator(schemes=["http", "https"])(website)
+            except ValidationError:
+                messages.error(request, _("Enter a valid HTTP or HTTPS website URL."))
+            else:
+                location.phone = phone
+                location.website = website
+                location.save(update_fields=["phone", "website", "updated_at"])
+                messages.success(request, _("Studio contact details updated. Address changes require Tatzo review."))
+                return redirect("maps_page")
+    return render(request, "users/manage_owned_studio.html", {"studio": location})
+
+
 def _map_location_parts(location):
     parts = [part.strip() for part in (location or "").split(",") if part.strip()]
     return {
@@ -2567,6 +2598,9 @@ def maps_page(request):
             "book_url": "",
             "location_id": location_obj.id,
             "can_claim": not location_obj.studio_owner_id,
+            "can_manage": bool(
+                request.user.is_authenticated and location_obj.studio_owner_id == request.user.pk
+            ),
             "location": location,
             "location_city": location_parts["city"],
             "location_country": location_parts["country"],
