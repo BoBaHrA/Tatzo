@@ -613,7 +613,7 @@ class MapLocationClaimView(APIView):
         with transaction.atomic():
             claim = serializer.save(
                 location=location,
-                claimant_user=(request.user if request.user.email.strip().casefold() == validated["contact_email"].strip().casefold() and getattr(getattr(request.user, "profile", None), "is_email_verified", False) else None),
+                claimant_user=request.user,
                 status="submitted",
             )
         return Response(
