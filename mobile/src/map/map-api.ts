@@ -44,6 +44,15 @@ export type MapLocationRequestDraft = {
   supportingFile?: PendingMapDocument | null;
 };
 
+export type MapLocationCorrectionDraft = {
+  reporterName: string;
+  contactEmail: string;
+  reason: 'closed' | 'moved' | 'address' | 'duplicate' | 'nonexistent' | 'other';
+  explanation: string;
+  newAddress: string;
+  supportingFile?: PendingMapDocument | null;
+};
+
 export type MapLocationClaimDraft = {
   claimantName: string;
   contactEmail: string;
@@ -135,6 +144,27 @@ export function submitMapLocationClaim(
   }
   return request<MapSubmissionResponse>(
     `/map/locations/${locationId}/claim/`,
+    { method: 'POST', body },
+  );
+}
+
+
+export function submitMapLocationCorrection(
+  request: AuthenticatedRequest,
+  locationId: number,
+  draft: MapLocationCorrectionDraft,
+) {
+  const body = new FormData();
+  body.append('reporter_name', draft.reporterName);
+  body.append('contact_email', draft.contactEmail);
+  body.append('reason', draft.reason);
+  body.append('explanation', draft.explanation);
+  body.append('new_address', draft.newAddress);
+  if (draft.supportingFile) {
+    body.append('supporting_file', documentBody(draft.supportingFile));
+  }
+  return request<MapSubmissionResponse>(
+    `/map/locations/${locationId}/report/`,
     { method: 'POST', body },
   );
 }
