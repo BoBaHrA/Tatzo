@@ -20,7 +20,7 @@ CLAIM_EMAIL_MAX_AGE = 48 * 60 * 60
 
 
 def normalize(value):
-    return re.sub(r"\\s+", " ", str(value or "").casefold().strip())
+    return re.sub(r"\s+", " ", str(value or "").casefold().strip())
 
 
 def location_fingerprint(name, city, address, country=""):
@@ -43,7 +43,7 @@ def send_claim_confirmation(claim, request):
     url = request.build_absolute_uri(reverse("verify_location_claim_email", args=[token]))
     send_mail(
         "Confirm your Tatzo studio claim email",
-        f"Confirm your contact email for {claim.location.name} within 48 hours:\\n{url}\\n\\n"
+        f"Confirm your contact email for {claim.location.name} within 48 hours:\n{url}\n\n"
         "Confirming your email does not grant ownership. Tatzo will review proof of your "
         "authority and require a verified Tatzo account.",
         settings.DEFAULT_FROM_EMAIL,
