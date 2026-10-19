@@ -2496,7 +2496,7 @@ def maps_page(request):
         Location.objects
         .filter(
             linked_user__isnull=True,
-            status__in=["imported", "unclaimed", "pending_claim"],
+            status__in=["imported", "unclaimed", "pending_claim", "claimed"],
             latitude__isnull=False,
             longitude__isnull=False,
         )
@@ -2504,6 +2504,8 @@ def maps_page(request):
     )
 
     for location_obj in external_locations:
+        owner = location_obj.studio_owner if location_obj.status == "claimed" else None
+        claimable = not bool(owner) and location_obj.status in ("imported", "unclaimed", "pending_claim")
         location = location_obj.display_address or _("Location pending")
         location_parts = {
             "city": location_obj.city,
@@ -2513,23 +2515,24 @@ def maps_page(request):
             "user": None,
             "is_registered": False,
             "display_name": location_obj.name,
-            "tag": _("Imported location"),
+            "tag": _("Managed studio") if owner else _("Imported location"),
             "profile_image": None,
-            "profile_url": "",
+            "profile_url": f"/profile/{owner.username}/" if owner else "",
             "book_url": "",
             "location_id": location_obj.id,
             "location": location,
             "location_city": location_parts["city"],
             "location_country": location_parts["country"],
-            "location_kind": _("Not yet on Tatzo / Unclaimed"),
-            "location_kind_code": "imported",
+            "location_kind": _("Managed Tatzo studio") if owner else _("Not yet on Tatzo / Unclaimed"),
+            "location_kind_code": "registered_studio" if owner else "imported",
             "location_status": location_obj.status,
             "phone": location_obj.phone,
             "website": location_obj.website,
             "has_map_pin": True,
             "latitude": location_obj.latitude,
             "longitude": location_obj.longitude,
-            "source": "unclaimed",
+            "source": "verified" if owner else "unclaimed",
+            "claimable": claimable,
             "confidence_score": 80,
             "portfolio_count": 0,
             "post_count": 0,
@@ -2541,11 +2544,11 @@ def maps_page(request):
 
     verified_location_count = sum(
         1 for artist in artist_cards
-        if artist["is_registered"] and artist["has_map_pin"]
+        if (artist["is_registered"] or artist["source"] == "verified") and artist["has_map_pin"]
     )
     imported_location_count = sum(
         1 for artist in artist_cards
-        if not artist["is_registered"] and artist["has_map_pin"]
+        if not artist["is_registered"] and artist["source"] != "verified" and artist["has_map_pin"]
     )
     pending_location_count = sum(
         1 for artist in artist_cards
