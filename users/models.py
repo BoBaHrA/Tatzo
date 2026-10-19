@@ -997,7 +997,7 @@ class LocationCorrectionRequest(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
-        indexes = [models.Index(fields=["status", "created_at"])]
+        indexes = [models.Index(fields=["status", "created_at"], name="users_loccor_status_idx")]
 
     def __str__(self):
         return f"{self.location.name}: {self.get_reason_display()}"
