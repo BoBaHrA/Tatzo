@@ -284,6 +284,9 @@
         actionButton = `<button class="tatzo-map-popup-action tatzo-map-popup-claim" type="button" data-open-claim data-claim-url="/maps/location/${card.dataset.locationId}/claim/" data-claim-location="${escapeHtml(card.dataset.location)}" data-claim-artist="${escapeHtml(card.dataset.artist)}" data-claim-kind="${source}">${escapeHtml(card.dataset.actionLabel || t("claim_location", "Claim this location"))}</button>`;
       }
 
+      const manageButton = card.dataset.canManage === "true"
+        ? `<a class="tatzo-map-popup-action" href="/maps/studios/${escapeHtml(card.dataset.locationId)}/manage/">${escapeHtml(t("manage_studio", "Manage studio"))}</a>`
+        : "";
       const reportButton = card.dataset.locationId
         ? `<button class="tatzo-map-popup-action" type="button" data-open-report data-location-id="${escapeHtml(card.dataset.locationId)}" data-location-name="${escapeHtml(card.dataset.artist)}">${escapeHtml(t("report_issue", "Report an issue with this studio"))}</button>`
         : "";
@@ -316,6 +319,7 @@
             ${profileButton}
             ${actionButton}
             ${reportButton}
+            ${manageButton}
           </div>
         </div>
       `);
