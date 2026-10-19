@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "My studios" %} | Tatzo{% endblock %}
+{% block content %}
+{% include "partials/sidebar.html" %}
+<main style="max-width:860px;margin:2rem auto;padding:1.25rem">
+  <h1>{% trans "My studios and addresses" %}</h1>
+  <p>{% trans "Only studios approved by a moderator are linked to your Tatzo account. A pending request is not a published studio." %}</p>
+  <p><a href="{% url 'maps_page' %}">{% trans "Back to map / Add another location" %}</a></p>
+  <h2>{% trans "Approved addresses I manage" %}</h2>
+  {% for location in owned_locations %}
+    <article style="padding:1rem;margin:.75rem 0;border:1px solid #39505c;border-radius:12px">
+      <h3>{{ location.name }}</h3>
+      <p>{{ location.display_address }}</p>
+      <p>{% trans "Approved and linked to your account" %}</p>
+      {% if location.latitude == None or location.longitude == None %}
+        <p>{% trans "Map pin is missing; ask Tatzo support to confirm the coordinates." %}</p>
+      {% endif %}
+    </article>
+  {% empty %}
+    <p>{% trans "No approved studio addresses linked yet." %}</p>
+  {% endfor %}
+  <h2>{% trans "My submitted addresses" %}</h2>
+  {% for item in requested_locations %}
+    <article style="padding:1rem;margin:.75rem 0;border:1px solid #39505c;border-radius:12px">
+      <h3>{{ item.name }}</h3>
+      <p>{{ item.full_address }}</p>
+      <p>{% trans "Review status" %}: {{ item.get_status_display }}</p>
+      <p>{% trans "Requested ownership" %}: {{ item.wants_ownership|yesno:"Yes,No" }}</p>
+    </article>
+  {% empty %}
+    <p>{% trans "You have not submitted a new address." %}</p>
+  {% endfor %}
+  <h2>{% trans "Claims for existing studios" %}</h2>
+  {% for item in submitted_claims %}
+    <article style="padding:1rem;margin:.75rem 0;border:1px solid #39505c;border-radius:12px">
+      <h3>{{ item.location.name }}</h3>
+      <p>{% trans "Review status" %}: {{ item.get_status_display }}</p>
+    </article>
+  {% empty %}
+    <p>{% trans "No linked studio claims." %}</p>
+  {% endfor %}
+</main>
+{% endblock %}
