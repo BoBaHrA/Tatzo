@@ -22,7 +22,10 @@ type MapLocationCardProps = {
 
 export function MapLocationCard({ marker, onClose, onSelect }: MapLocationCardProps) {
   const claimPending = marker.claim_status === 'submitted'
-    || marker.claim_status === 'under_review';
+    || marker.claim_status === 'under_review'
+    || marker.claim_status === 'awaiting_email'
+    || marker.claim_status === 'awaiting_account'
+    || marker.claim_status === 'needs_information';
   const verified = marker.kind === 'artist';
 
   const openProfile = () => {
@@ -38,6 +41,13 @@ export function MapLocationCard({ marker, onClose, onSelect }: MapLocationCardPr
     router.push({
       pathname: '/booking/[username]',
       params: { username: marker.username },
+    });
+  };
+
+  const openReport = () => {
+    router.push({
+      pathname: '/map/report/[locationId]',
+      params: { locationId: String(marker.location_id), name: marker.name },
     });
   };
 
@@ -142,14 +152,22 @@ export function MapLocationCard({ marker, onClose, onSelect }: MapLocationCardPr
                 variant="secondary"
               />
             ) : null}
-            <Button
-              disabled={claimPending || !marker.claimable}
-              label={claimPending ? t('mapClaimPending') : t('mapClaim')}
-              onPress={openClaim}
-              style={styles.action}
-            />
+            {marker.claimable ? (
+              <Button
+                disabled={claimPending}
+                label={claimPending ? t('mapClaimPending') : t('mapClaim')}
+                onPress={openClaim}
+                style={styles.action}
+              />
+            ) : null}
           </>
         )}
+        <Button
+          label={t('mapReportIssue')}
+          onPress={openReport}
+          style={styles.action}
+          variant="secondary"
+        />
       </View>
     </Pressable>
   );
