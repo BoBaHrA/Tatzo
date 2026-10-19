@@ -49,7 +49,7 @@ class StudioClaimSecurityTests(TestCase):
 
     def email_token(self):
         self.assertEqual(len(mail.outbox), 1)
-        return re.search(r"/maps/claim/verify/([^/\\s]+)/", mail.outbox[0].body).group(1)
+        return re.search(r"/maps/claim/verify/([^/\s]+)/", mail.outbox[0].body).group(1)
 
     def test_anonymous_claim_sends_confirmation_not_ownership(self):
         claim = self.create_claim()
