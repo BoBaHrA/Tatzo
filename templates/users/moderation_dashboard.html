@@ -66,7 +66,7 @@
               </p>
               <p>{% trans "Requests management access" %}: {{ item.wants_ownership|yesno:"Yes,No" }}</p>
               <p>{% trans "Map pin" %}: {% if item.latitude != None and item.longitude != None %}{{ item.latitude }}, {{ item.longitude }}{% else %}{% trans "Not provided — location will not display as a pin" %}{% endif %}</p>
-              {% if item.website_or_map_link %}<p><a href="{{ item.website_or_map_link }}" target="_blank" rel="noopener noreferrer">{% trans "Website / evidence" %}</a></p>{% endif %}
+              {% if item.website_or_map_link %}<p>{% trans "Website / evidence" %}: {{ item.website_or_map_link }}</p>{% endif %}
               {% if item.supporting_file %}<p><a href="{% url 'protected_media' 'location-request' item.id 'file' %}">{% trans "Private supporting document" %}</a></p>{% endif %}
               {% if item.message %}<p>{{ item.message }}</p>{% endif %}
               <p>{% trans "Status" %}: {{ item.get_status_display }}</p>
