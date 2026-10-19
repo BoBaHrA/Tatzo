@@ -38,6 +38,7 @@ export type MapLocationRequestDraft = {
   websiteOrMapLink: string;
   phone: string;
   contactEmail: string;
+  wantsOwnership: boolean;
   latitude: number | null;
   longitude: number | null;
   message: string;
@@ -105,6 +106,7 @@ export function submitMapLocation(
   body.append('website_or_map_link', draft.websiteOrMapLink);
   body.append('phone', draft.phone);
   body.append('contact_email', draft.contactEmail);
+  body.append('wants_ownership', draft.wantsOwnership ? 'true' : 'false');
   body.append('message', draft.message);
   if (draft.latitude !== null && draft.longitude !== null) {
     body.append('latitude', draft.latitude.toFixed(6));
