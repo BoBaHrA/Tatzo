@@ -83,6 +83,7 @@ urlpatterns = [
     path("maps/location/<int:location_id>/claim/", views.submit_location_claim, name="submit_location_claim"),
     path("maps/claim/verify/<str:token>/", views.verify_location_claim_email, name="verify_location_claim_email"),
     path("maps/claim/<int:claim_id>/link/", views.link_location_claim, name="link_location_claim"),
+    path("maps/studios/<int:location_id>/manage/", views.manage_owned_studio, name="manage_owned_studio"),
     path("maps/location/<int:location_id>/report/", views.report_location_correction, name="report_location_correction"),
     path("legal/", views.legal_index, name="legal_index"),
     path("terms/", views.legal_page, {"page": "terms"}, name="terms"),
