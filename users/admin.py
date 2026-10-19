@@ -355,7 +355,7 @@ class LocationAdmin(admin.ModelAdmin):
     search_fields = ("name", "address", "formatted_address", "city",
                      "country", "source_place_id", "studio_owner__email")
     readonly_fields = (
-        "created_at", "updated_at", "studio_owner", "is_suppressed",
+        "created_at", "updated_at", "studio_owner", "status", "is_suppressed",
         "suppressed_at", "suppression_reason", "suppressed_by",
     )
     autocomplete_fields = ("linked_user",)
@@ -403,13 +403,18 @@ class LocationClaimAdmin(admin.ModelAdmin):
     search_fields = ("location__name", "claimant_name", "contact_email",
                      "claimant_user__username", "relation_to_location")
     readonly_fields = (
-        "proof_document_link", "status", "claimant_user",
+        "proof_document_link", "status", "location", "claimant_name",
+        "contact_email", "relation_to_location", "proof", "proof_document",
+        "message", "claimant_user",
         "email_verified_at", "evidence_verified_at", "reviewed_by",
         "reviewed_at", "decision", "created_at", "updated_at",
     )
     autocomplete_fields = ("location",)
     ordering = ("-created_at",)
     actions = ("verify_evidence", "approve_and_link", "reject_claims", "request_more_information")
+
+    def has_add_permission(self, request):
+        return False
 
     @admin.display(boolean=True, description=_("Proof document"))
     def has_proof_document(self, obj):
@@ -466,9 +471,14 @@ class LocationCorrectionRequestAdmin(admin.ModelAdmin):
                     "status", "reviewed_by", "created_at")
     list_filter = ("status", "reason", "created_at")
     search_fields = ("location__name", "reporter_name", "contact_email", "explanation")
-    readonly_fields = ("status", "reviewed_by", "reviewed_at", "created_at", "supporting_file_link")
+    readonly_fields = ("location", "reporter_name", "contact_email", "reason",
+                       "explanation", "new_address", "supporting_file",
+                       "status", "reviewed_by", "reviewed_at", "created_at", "supporting_file_link")
     autocomplete_fields = ("location",)
     actions = ("approve_and_hide", "reject_reports", "request_more_information")
+
+    def has_add_permission(self, request):
+        return False
 
     @admin.display(description=_("Evidence file"))
     def supporting_file_link(self, obj):
