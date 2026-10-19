@@ -64,7 +64,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="LocationOwnershipAudit",
             fields=[
-                ("id", models.AutoField(primary_key=True, serialize=False, auto_created=True)),
+                ("id", models.BigAutoField(primary_key=True, serialize=False, auto_created=True, verbose_name="ID")),
                 ("decision", models.CharField(max_length=40)),
                 ("source", models.CharField(max_length=40)),
                 ("source_id", models.PositiveIntegerField()),
