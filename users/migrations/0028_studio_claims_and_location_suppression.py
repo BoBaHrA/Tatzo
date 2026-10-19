@@ -79,7 +79,7 @@ class Migration(migrations.Migration):
                 ("new_address", models.CharField(max_length=255, blank=True)),
                 ("supporting_file", models.FileField(
                     upload_to="location_correction_proofs/",
-                    storage=mytattooapp.storage_backends.private_media_storage,
+                    storage=mytattooapp.storage_backends.PrivateMediaStorage(),
                     blank=True, validators=[
                         django.core.validators.FileExtensionValidator(allowed_extensions=["pdf","jpg","jpeg","png","webp"]),
                         users.models.validate_location_upload_size,
