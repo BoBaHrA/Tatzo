@@ -1407,7 +1407,36 @@ def moderation_dashboard(request):
         .order_by("-created_at")
     )
 
+    pending_location_claims = (
+        LocationClaim.objects.filter(status__in=[
+            "submitted", "under_review", "awaiting_email",
+            "awaiting_account", "needs_information",
+        ])
+        .select_related("location")
+        .order_by("-created_at")[:100]
+    )
+    pending_location_requests = LocationRequest.objects.filter(
+        status__in=["submitted", "under_review"]
+    ).order_by("-created_at")[:100]
+    pending_location_corrections = (
+        LocationCorrectionRequest.objects.filter(
+            status__in=["submitted", "under_review", "needs_information"]
+        ).select_related("location").order_by("-created_at")[:100]
+    )
     context = {
+        "pending_location_claims": pending_location_claims,
+        "pending_location_requests": pending_location_requests,
+        "pending_location_corrections": pending_location_corrections,
+        "location_claims_count": LocationClaim.objects.filter(status__in=[
+            "submitted", "under_review", "awaiting_email",
+            "awaiting_account", "needs_information",
+        ]).count(),
+        "location_requests_count": LocationRequest.objects.filter(status__in=[
+            "submitted", "under_review",
+        ]).count(),
+        "location_corrections_count": LocationCorrectionRequest.objects.filter(
+            status__in=["submitted", "under_review", "needs_information"],
+        ).count(),
         "pending_document_requests": pending_document_requests,
         "pending_manual_requests": pending_manual_requests,
         "post_reports": post_reports,
