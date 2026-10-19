@@ -1,0 +1,16 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block content %}
+<h1>{{ title }}</h1>
+<p>{% trans "The selected public listings will become invisible in maps, search and APIs. Artist profiles and bookings will be retained. This operation is audited and can be reversed by an authorized administrator." %}</p>
+<ul>{% for location in locations %}<li>{{ location }}</li>{% endfor %}</ul>
+<form method="post">
+  {% csrf_token %}
+  {% for pk in selected_ids %}<input type="hidden" name="_selected_action" value="{{ pk }}">{% endfor %}
+  <input type="hidden" name="action" value="{{ action_name }}">
+  <input type="hidden" name="confirm_hide" value="yes">
+  <input type="hidden" name="index" value="0">
+  <button type="submit" class="default">{% trans "Confirm hiding listings" %}</button>
+  <a href="../">{% trans "Cancel" %}</a>
+</form>
+{% endblock %}
