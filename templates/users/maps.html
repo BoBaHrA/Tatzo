@@ -152,7 +152,15 @@
           <input type="file" name="supporting_file" accept=".pdf,.jpg,.jpeg,.png,.webp">
           <small>{% trans "Optional. Helps Tatzo verify the location faster." %}</small>
         </label>
-        <input type="email" name="contact_email" placeholder="{% trans 'Contact email' %}" required>
+        <input type="email" name="contact_email" placeholder="{% trans 'Contact email' %}" value="{% if user.is_authenticated %}{{ user.email }}{% endif %}" required>
+        {% if user.is_authenticated %}
+          <label class="maps-file-upload">
+            <span><input type="checkbox" name="claim_for_my_account" value="1"> {% trans "This is my studio / professional address — request management access for my Tatzo account" %}</span>
+            <small>{% trans "Your Tatzo email must be verified. A moderator must approve ownership before the location becomes managed by you." %}</small>
+          </label>
+        {% else %}
+          <p class="maps-dialog-help">{% trans "To manage your new address after review, sign in with an email-verified Tatzo account first." %}</p>
+        {% endif %}
         <input type="hidden" name="latitude" data-location-latitude>
         <input type="hidden" name="longitude" data-location-longitude>
         <button type="button" class="maps-pin-picker-button" data-pick-location-pin>{% trans "Use map pin" %}</button>
