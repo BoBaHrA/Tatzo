@@ -2353,6 +2353,25 @@ def _optional_location_coordinate(*objects, field_name):
     return None
 
 
+@login_required
+def my_studios(request):
+    """Private overview of locations this account manages and requested."""
+    return render(
+        request, "users/my_studios.html",
+        {
+            "owned_locations": Location.objects.filter(
+                studio_owner=request.user, status__in=["claimed", "verified"],
+            ).order_by("name"),
+            "requested_locations": LocationRequest.objects.filter(
+                requested_by=request.user,
+            ).order_by("-created_at")[:30],
+            "submitted_claims": LocationClaim.objects.filter(
+                claimant_user=request.user,
+            ).select_related("location").order_by("-created_at")[:30],
+        },
+    )
+
+
 def maps_page(request):
     """Interactive public map built from verified artist profiles."""
     verified_artists = (
