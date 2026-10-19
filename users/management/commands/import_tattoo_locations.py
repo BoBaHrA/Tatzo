@@ -5,6 +5,9 @@ from urllib.request import Request, urlopen
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.db.models import Q
+from users.location_services import location_fingerprint
+from users.models import LocationSuppression
 
 from users.models import Location
 
@@ -57,6 +60,9 @@ class Command(BaseCommand):
                 continue
 
             obj, was_created = self.save_location(parsed)
+            if obj is None:
+                skipped += 1
+                continue
             if was_created:
                 created += 1
             else:
@@ -166,30 +172,55 @@ out center tags;
 
     @transaction.atomic
     def save_location(self, data):
-        source_place_id = data.get("source_place_id")
+        """Never resurrect suppressed places or overwrite a manually reviewed POI."""
+        source_place_id = data.get("source_place_id", "")
+        fingerprint = location_fingerprint(
+            data["name"], data.get("city", ""),
+            data.get("formatted_address") or data.get("address", ""),
+            data.get("country", ""),
+        )
+        tombstones = LocationSuppression.objects.filter(source="osm")
+        conditions = Q()
         if source_place_id:
-            return Location.objects.update_or_create(
-                source="osm",
-                source_place_id=source_place_id,
-                defaults=data,
-            )
+            conditions |= Q(source_place_id=source_place_id)
+        if fingerprint:
+            conditions |= Q(fingerprint=fingerprint)
+        if conditions and tombstones.filter(conditions).exists():
+            return None, False
 
-        normalized_name = normalize_text(data["name"])
-        normalized_city = normalize_text(data.get("city"))
-        normalized_address = normalize_text(data.get("formatted_address") or data.get("address"))
         existing = None
-        for candidate in Location.objects.filter(source="osm", city__iexact=data.get("city", ""))[:200]:
-            if (
-                normalize_text(candidate.name) == normalized_name
-                and normalize_text(candidate.display_address) == normalized_address
-                and normalize_text(candidate.city) == normalized_city
-            ):
-                existing = candidate
-                break
+        if source_place_id:
+            existing = (Location.objects.select_for_update()
+                        .filter(source="osm", source_place_id=source_place_id)
+                        .order_by("pk").first())
+
+        # Overpass occasionally changes node/way IDs. Match only exact known
+        # names + addresses + city + country; do not merge vague geographic pins.
+        if existing is None and fingerprint:
+            for candidate in Location.objects.select_for_update().filter(
+                source="osm", name__iexact=data["name"],
+                city__iexact=data.get("city", ""),
+                country__iexact=data.get("country", ""),
+            )[:200]:
+                if location_fingerprint(
+                    candidate.name, candidate.city, candidate.display_address,
+                    candidate.country,
+                ) == fingerprint:
+                    existing = candidate
+                    break
 
         if existing:
-            for field, value in data.items():
-                setattr(existing, field, value)
+            if (existing.is_suppressed or existing.studio_owner_id
+                    or existing.linked_user_id
+                    or existing.status not in {"imported", "unclaimed"}):
+                return existing, False
+            for field in ("name", "address", "formatted_address", "city",
+                          "country", "latitude", "longitude", "phone", "website"):
+                setattr(existing, field, data[field])
+            # Keep a stable source ID; a stale old ID must never be re-imported
+            # as a second active listing after a reviewed correction.
+            if not existing.source_place_id:
+                existing.source_place_id = source_place_id
             existing.save()
             return existing, False
 

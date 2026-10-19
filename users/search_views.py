@@ -383,7 +383,7 @@ def search_page(request):
     )
     location_prefetch = Prefetch(
         "map_locations",
-        queryset=Location.objects.exclude(status="rejected").order_by("name"),
+        queryset=Location.objects.filter(is_suppressed=False).exclude(status="rejected").order_by("name"),
         to_attr="search_locations",
     )
 
@@ -396,6 +396,7 @@ def search_page(request):
             Q(profile__is_email_verified=True)
             | Q(
                 profile__account_type="tattoo_artist",
+                map_locations__is_suppressed=False,
                 map_locations__source="admin",
                 map_locations__source_place_id=IMPORTED_ARTIST_SOURCE_MARKER,
                 map_locations__status__in=["unclaimed", "pending_claim"],
@@ -425,18 +426,18 @@ def search_page(request):
             | Q(last_name__icontains=clean_query)
             | Q(profile__tag__icontains=clean_query)
             | Q(profile__bio__icontains=clean_query)
-            | Q(map_locations__name__icontains=clean_query)
-            | Q(map_locations__city__icontains=clean_query)
-            | Q(map_locations__country__icontains=clean_query)
+            | Q(map_locations__is_suppressed=False, map_locations__name__icontains=clean_query)
+            | Q(map_locations__is_suppressed=False, map_locations__city__icontains=clean_query)
+            | Q(map_locations__is_suppressed=False, map_locations__country__icontains=clean_query)
         )
 
     if location_filter:
         users = users.filter(
-            Q(map_locations__name__icontains=location_filter)
-            | Q(map_locations__city__icontains=location_filter)
-            | Q(map_locations__country__icontains=location_filter)
-            | Q(map_locations__address__icontains=location_filter)
-            | Q(map_locations__formatted_address__icontains=location_filter)
+            Q(map_locations__is_suppressed=False, map_locations__name__icontains=location_filter)
+            | Q(map_locations__is_suppressed=False, map_locations__city__icontains=location_filter)
+            | Q(map_locations__is_suppressed=False, map_locations__country__icontains=location_filter)
+            | Q(map_locations__is_suppressed=False, map_locations__address__icontains=location_filter)
+            | Q(map_locations__is_suppressed=False, map_locations__formatted_address__icontains=location_filter)
         )
 
     users = users.distinct().order_by(
@@ -465,7 +466,7 @@ def search_page(request):
     studio_statuses = ["imported", "unclaimed", "pending_claim", "claimed", "verified"]
     studios = (
         Location.objects
-        .filter(status__in=studio_statuses)
+        .filter(status__in=studio_statuses, is_suppressed=False)
         .select_related("linked_user", "linked_user__profile", "linked_user__booking_settings")
         .prefetch_related(
             Prefetch(

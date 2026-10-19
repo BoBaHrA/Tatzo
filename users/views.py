@@ -11,8 +11,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import redirect_to_login
-from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.validators import validate_email, URLValidator
 from django.db import transaction
 from django.db.models import Case, Count, Exists, IntegerField, OuterRef, Q, Value, When
 from django.http import FileResponse, Http404, JsonResponse
@@ -24,6 +24,7 @@ from django.utils.translation import gettext as _, ngettext
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.http import require_http_methods, require_POST
 from .security import check_rate_limit, is_new_account, rate_limited_json
+from .location_services import send_claim_confirmation, confirm_claim_email, connect_claim_account, normalize
 from .models import (
     Profile,
     VerificationDocument,
@@ -31,6 +32,7 @@ from .models import (
     Location,
     LocationClaim,
     LocationRequest,
+    LocationCorrectionRequest,
     LOCATION_UPLOAD_EXTENSIONS,
     MAX_LOCATION_UPLOAD_SIZE,
     UserFollow,
@@ -101,6 +103,11 @@ def protected_media(request, media_type, object_id, field):
         if request.user != item.claimant_user and not request.user.is_staff:
             raise Http404
         file_field = item.proof_document if field == "file" else None
+    elif media_type == "location-correction":
+        item = get_object_or_404(LocationCorrectionRequest, pk=object_id)
+        if not request.user.is_staff:
+            raise Http404
+        file_field = item.supporting_file if field == "file" else None
     elif media_type == "location-request":
         item = get_object_or_404(LocationRequest, pk=object_id)
         if not request.user.is_staff:
@@ -1400,7 +1407,36 @@ def moderation_dashboard(request):
         .order_by("-created_at")
     )
 
+    pending_location_claims = (
+        LocationClaim.objects.filter(status__in=[
+            "submitted", "under_review", "awaiting_email",
+            "awaiting_account", "needs_information",
+        ])
+        .select_related("location")
+        .order_by("-created_at")[:100]
+    )
+    pending_location_requests = LocationRequest.objects.filter(
+        status__in=["submitted", "under_review"]
+    ).order_by("-created_at")[:100]
+    pending_location_corrections = (
+        LocationCorrectionRequest.objects.filter(
+            status__in=["submitted", "under_review", "needs_information"]
+        ).select_related("location").order_by("-created_at")[:100]
+    )
     context = {
+        "pending_location_claims": pending_location_claims,
+        "pending_location_requests": pending_location_requests,
+        "pending_location_corrections": pending_location_corrections,
+        "location_claims_count": LocationClaim.objects.filter(status__in=[
+            "submitted", "under_review", "awaiting_email",
+            "awaiting_account", "needs_information",
+        ]).count(),
+        "location_requests_count": LocationRequest.objects.filter(status__in=[
+            "submitted", "under_review",
+        ]).count(),
+        "location_corrections_count": LocationCorrectionRequest.objects.filter(
+            status__in=["submitted", "under_review", "needs_information"],
+        ).count(),
         "pending_document_requests": pending_document_requests,
         "pending_manual_requests": pending_manual_requests,
         "post_reports": post_reports,
@@ -2031,6 +2067,8 @@ def submit_location_claim(request, location_id):
         Location,
         id=location_id,
         linked_user__isnull=True,
+        studio_owner__isnull=True,
+        is_suppressed=False,
         status__in=["imported", "unclaimed", "pending_claim"],
     )
 
@@ -2094,7 +2132,7 @@ def submit_location_claim(request, location_id):
         messages.error(request, _("Upload a PDF, JPG, PNG or WEBP file up to 10 MB."))
         return redirect("maps_page")
 
-    active_statuses = ["submitted", "under_review"]
+    active_statuses = ["submitted", "under_review", "awaiting_email", "awaiting_account", "needs_information"]
     duplicate_claims = LocationClaim.objects.filter(
         location=location,
         status__in=active_statuses,
@@ -2114,17 +2152,28 @@ def submit_location_claim(request, location_id):
         )
         return redirect("maps_page")
 
-    LocationClaim.objects.create(
+    verified_account = (
+        request.user.is_authenticated
+        and getattr(request.user.profile, "is_email_verified", False)
+        and normalize(request.user.email) == normalize(contact_email)
+    )
+    claim = LocationClaim.objects.create(
         location=location,
-        claimant_user=request.user if request.user.is_authenticated else None,
+        claimant_user=request.user if verified_account else None,
         claimant_name=claimant_name,
         contact_email=contact_email,
         relation_to_location=relation,
         proof=proof,
         proof_document=proof_document,
         message=message,
-        status="submitted",
+        status="awaiting_email",
     )
+    try:
+        send_claim_confirmation(claim, request)
+    except Exception:
+        logger.exception("Unable to send claim confirmation for claim_id=%s", claim.pk)
+        messages.error(request, _("Your request was saved, but email confirmation could not be sent. Contact support."))
+        return redirect("maps_page")
 
     messages.success(
         request,
@@ -2263,6 +2312,116 @@ def submit_location_request(request):
     return redirect("maps_page")
 
 
+
+
+def verify_location_claim_email(request, token):
+    if request.method != "GET":
+        raise Http404
+    try:
+        claim = confirm_claim_email(token)
+    except (ValidationError, LocationClaim.DoesNotExist, KeyError, ValueError):
+        messages.error(request, _("The claim verification link is invalid, expired, or already used."))
+        return redirect("maps_page")
+    messages.success(request, _("Your contact email is confirmed. Connect a verified Tatzo account to continue."))
+    return redirect("link_location_claim", claim_id=claim.pk)
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def link_location_claim(request, claim_id):
+    # Do not disclose claim content to users who don't control the verified email.
+    claim = get_object_or_404(
+        LocationClaim, pk=claim_id, contact_email__iexact=request.user.email
+    )
+    if not claim.email_verified_at or claim.status == "rejected":
+        raise Http404
+    if request.method == "POST":
+        try:
+            connect_claim_account(claim.pk, request.user)
+        except (ValidationError, PermissionDenied):
+            messages.error(request, _("Verify your Tatzo account email before linking this claim."))
+        else:
+            messages.success(request, _("Your account is connected. Business ownership still requires Tatzo approval."))
+            return redirect("maps_page")
+    return render(request, "users/link_location_claim.html", {"claim": claim})
+
+
+@require_POST
+def report_location_correction(request, location_id):
+    location = get_object_or_404(Location, pk=location_id, is_suppressed=False)
+    reporter_name = (request.POST.get("reporter_name") or "").strip()
+    email = (request.POST.get("contact_email") or "").strip()
+    reason = (request.POST.get("reason") or "").strip()
+    explanation = (request.POST.get("explanation") or "").strip()
+    new_address = (request.POST.get("new_address") or "").strip()
+    evidence = request.FILES.get("supporting_file")
+    checks = (
+        check_rate_limit(request, scope="maps:correction:ip", limit=8,
+                         window_seconds=3600, identity="ip"),
+        check_rate_limit(request, scope="maps:correction:email", limit=4,
+                         window_seconds=86400, value=email),
+    )
+    if not all(allowed for allowed, _ in checks):
+        messages.error(request, _("Too many reports. Please try later."))
+        return redirect("maps_page")
+    if (
+        not reporter_name or not email
+        or reason not in dict(LocationCorrectionRequest.REASONS)
+        or len(reporter_name) > 160 or len(explanation) > 3000
+        or len(new_address) > 255 or (evidence and not _validate_location_upload(evidence))
+    ):
+        messages.error(request, _("Please check the report details and attachment."))
+        return redirect("maps_page")
+    try:
+        validate_email(email)
+    except ValidationError:
+        messages.error(request, _("Please enter a valid contact email."))
+        return redirect("maps_page")
+    if LocationCorrectionRequest.objects.filter(
+        location=location, contact_email__iexact=email,
+        reason=reason, status__in=["submitted", "under_review", "needs_information"]
+    ).exists():
+        messages.info(request, _("This report is already awaiting review."))
+        return redirect("maps_page")
+    LocationCorrectionRequest.objects.create(
+        location=location, reporter_name=reporter_name, contact_email=email,
+        reason=reason, explanation=explanation, new_address=new_address,
+        supporting_file=evidence, status="submitted",
+    )
+    messages.success(request, _("Thank you. Tatzo will review this issue before changing the listing."))
+    return redirect("maps_page")
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def manage_owned_studio(request, location_id):
+    """Owner-only contact details. Address changes always require staff review."""
+    location = get_object_or_404(
+        Location, pk=location_id, studio_owner=request.user,
+        is_suppressed=False, linked_user__isnull=True,
+    )
+    if not request.user.is_active or not request.user.profile.is_email_verified:
+        raise Http404
+    if request.method == "POST":
+        phone = (request.POST.get("phone") or "").strip()
+        website = (request.POST.get("website") or "").strip()
+        if len(phone) > 60 or len(website) > 500:
+            messages.error(request, _("The contact details are too long."))
+        else:
+            try:
+                if website:
+                    URLValidator(schemes=["http", "https"])(website)
+            except ValidationError:
+                messages.error(request, _("Enter a valid HTTP or HTTPS website URL."))
+            else:
+                location.phone = phone
+                location.website = website
+                location.save(update_fields=["phone", "website", "updated_at"])
+                messages.success(request, _("Studio contact details updated. Address changes require Tatzo review."))
+                return redirect("maps_page")
+    return render(request, "users/manage_owned_studio.html", {"studio": location})
+
+
 def _map_location_parts(location):
     parts = [part.strip() for part in (location or "").split(",") if part.strip()]
     return {
@@ -2329,7 +2488,7 @@ def maps_page(request):
         manual_request = getattr(artist, "manualverificationrequest", None)
         location_obj = (
             Location.objects
-            .filter(linked_user=artist, status__in=["verified", "claimed"])
+            .filter(linked_user=artist, is_suppressed=False, status__in=["verified", "claimed"])
             .exclude(latitude__isnull=True)
             .exclude(longitude__isnull=True)
             .order_by("-verified_at", "-updated_at")
@@ -2444,7 +2603,8 @@ def maps_page(request):
         Location.objects
         .filter(
             linked_user__isnull=True,
-            status__in=["imported", "unclaimed", "pending_claim"],
+            is_suppressed=False,
+            status__in=["imported", "unclaimed", "pending_claim", "claimed"],
             latitude__isnull=False,
             longitude__isnull=False,
         )
@@ -2466,6 +2626,10 @@ def maps_page(request):
             "profile_url": "",
             "book_url": "",
             "location_id": location_obj.id,
+            "can_claim": not location_obj.studio_owner_id,
+            "can_manage": bool(
+                request.user.is_authenticated and location_obj.studio_owner_id == request.user.pk
+            ),
             "location": location,
             "location_city": location_parts["city"],
             "location_country": location_parts["country"],
@@ -2511,6 +2675,8 @@ def maps_page(request):
         "profile": _("Profile"),
         "book": _("Book"),
         "claim_location": _("Claim this location"),
+        "report_issue": _("Report an issue with this studio"),
+        "manage_studio": _("Manage studio"),
         "website": _("Website"),
         "data": _("Data"),
         "address_pending": _("Address pending"),

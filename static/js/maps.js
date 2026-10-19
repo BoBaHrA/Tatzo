@@ -280,9 +280,16 @@
       let actionButton = "";
       if (isVerified && card.dataset.canBook === "true") {
         actionButton = `<a class="tatzo-map-popup-action tatzo-map-popup-book" href="${escapeHtml(card.dataset.bookUrl)}">${escapeHtml(t("book", "Book"))}</a>`;
-      } else if (!isVerified) {
+      } else if (!isVerified && card.dataset.canClaim === "true") {
         actionButton = `<button class="tatzo-map-popup-action tatzo-map-popup-claim" type="button" data-open-claim data-claim-url="/maps/location/${card.dataset.locationId}/claim/" data-claim-location="${escapeHtml(card.dataset.location)}" data-claim-artist="${escapeHtml(card.dataset.artist)}" data-claim-kind="${source}">${escapeHtml(card.dataset.actionLabel || t("claim_location", "Claim this location"))}</button>`;
       }
+
+      const manageButton = card.dataset.canManage === "true"
+        ? `<a class="tatzo-map-popup-action" href="/maps/studios/${escapeHtml(card.dataset.locationId)}/manage/">${escapeHtml(t("manage_studio", "Manage studio"))}</a>`
+        : "";
+      const reportButton = card.dataset.locationId
+        ? `<button class="tatzo-map-popup-action" type="button" data-open-report data-location-id="${escapeHtml(card.dataset.locationId)}" data-location-name="${escapeHtml(card.dataset.artist)}">${escapeHtml(t("report_issue", "Report an issue with this studio"))}</button>`
+        : "";
 
       const contactDetails = [
         card.dataset.phone
@@ -311,6 +318,8 @@
           <div class="tatzo-map-popup-actions">
             ${profileButton}
             ${actionButton}
+            ${reportButton}
+            ${manageButton}
           </div>
         </div>
       `);
@@ -426,6 +435,25 @@
   });
   addLocationDialog?.addEventListener("close", refreshMapSize);
 
+
+  const reportDialog = document.querySelector("[data-report-dialog]");
+  const reportForm = document.querySelector("[data-report-form]");
+  document.querySelector("[data-close-report]")?.addEventListener("click", () => {
+    reportDialog?.close();
+    refreshMapSize();
+  });
+  reportDialog?.addEventListener("close", refreshMapSize);
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-open-report]");
+    if (!button || !reportForm) return;
+    const locationId = button.dataset.locationId;
+    if (!/^[0-9]+$/.test(locationId || "")) return;
+    reportForm.reset();
+    reportForm.action = `/maps/location/${locationId}/report/`;
+    closeMobileSheet();
+    reportDialog?.showModal();
+    refreshMapSize();
+  });
 
   const claimDialog = document.querySelector("[data-claim-dialog]");
   const claimForm = document.querySelector("[data-claim-form]");

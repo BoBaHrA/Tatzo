@@ -801,6 +801,18 @@ class Location(models.Model):
     source = models.CharField(max_length=30, choices=SOURCE_CHOICES, default="unknown")
     source_place_id = models.CharField(max_length=255, blank=True)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="imported")
+    is_suppressed = models.BooleanField(default=False, db_index=True)
+    suppressed_at = models.DateTimeField(null=True, blank=True)
+    suppression_reason = models.CharField(max_length=300, blank=True)
+    suppressed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="suppressed_locations",
+    )
+    # Separate from linked_user: that field belongs to tattoo artist profiles.
+    studio_owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="owned_studios",
+    )
     linked_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -842,6 +854,9 @@ class LocationClaim(models.Model):
         ("draft", _("Draft")),
         ("submitted", _("Submitted")),
         ("under_review", _("Under review")),
+        ("awaiting_email", _("Awaiting email confirmation")),
+        ("awaiting_account", _("Verified, awaiting account connection")),
+        ("needs_information", _("Needs additional information")),
         ("approved", _("Approved")),
         ("rejected", _("Rejected")),
     ]
@@ -876,6 +891,14 @@ class LocationClaim(models.Model):
     message = models.TextField(blank=True)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="draft")
     admin_notes = models.TextField(blank=True)
+    email_verified_at = models.DateTimeField(null=True, blank=True)
+    evidence_verified_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="reviewed_studio_claims",
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    decision = models.CharField(max_length=300, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -932,3 +955,68 @@ class LocationRequest(models.Model):
 
     def __str__(self):
         return f"{self.name} — {self.city}"
+
+
+class LocationCorrectionRequest(models.Model):
+    REASONS = [
+        ("closed", _("Business permanently closed")),
+        ("moved", _("Business moved")),
+        ("address", _("Incorrect address")),
+        ("duplicate", _("Duplicate listing")),
+        ("nonexistent", _("Business does not exist")),
+        ("other", _("Other")),
+    ]
+    STATUSES = [
+        ("submitted", _("Submitted")),
+        ("under_review", _("Under review")),
+        ("needs_information", _("Needs information")),
+        ("approved", _("Approved")),
+        ("rejected", _("Rejected")),
+    ]
+    location = models.ForeignKey(Location, on_delete=models.PROTECT, related_name="correction_requests")
+    reporter_name = models.CharField(max_length=160)
+    contact_email = models.EmailField()
+    reason = models.CharField(max_length=20, choices=REASONS)
+    explanation = models.TextField(blank=True)
+    new_address = models.CharField(max_length=255, blank=True)
+    supporting_file = models.FileField(
+        upload_to="location_correction_proofs/", storage=private_media_storage,
+        blank=True, validators=[
+            FileExtensionValidator(allowed_extensions=LOCATION_UPLOAD_EXTENSIONS),
+            validate_location_upload_size,
+        ],
+    )
+    status = models.CharField(max_length=30, choices=STATUSES, default="submitted")
+    admin_notes = models.TextField(blank=True)
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="reviewed_location_corrections",
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["status", "created_at"], name="users_loccor_status_idx")]
+
+    def __str__(self):
+        return f"{self.location.name}: {self.get_reason_display()}"
+
+
+class LocationSuppression(models.Model):
+    """Import tombstone; never expose through public APIs."""
+    location = models.ForeignKey(
+        Location, on_delete=models.CASCADE, related_name="import_suppressions"
+    )
+    source = models.CharField(max_length=30)
+    source_place_id = models.CharField(max_length=255, blank=True)
+    fingerprint = models.CharField(max_length=64, blank=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["location", "source", "source_place_id"],
+                name="unique_location_import_tombstone",
+            )
+        ]

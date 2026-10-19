@@ -52,6 +52,7 @@ from .health_safety_views import (
 )
 from .map_views import (
     MapLocationClaimView,
+    MapLocationCorrectionView,
     MapLocationListView,
     MapLocationRequestView,
 )
@@ -218,6 +219,8 @@ urlpatterns = [
         MapLocationClaimView.as_view(),
         name="map_location_claim",
     ),
+    path("map/locations/<int:location_id>/report/",
+         MapLocationCorrectionView.as_view(), name="map_location_correction"),
     path("appointments/", AppointmentListView.as_view(), name="appointment_list"),
     path(
         "artist/dashboard/",

@@ -11,12 +11,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from users.models import Location, LocationClaim, LocationRequest, UserBlock
+from users.models import Location, LocationClaim, LocationRequest, LocationCorrectionRequest, UserBlock
+from users.location_services import send_claim_confirmation, normalize
 from users.security import check_rate_limit
 
 VISIBLE_ARTIST_LOCATION_STATUSES = ("verified", "claimed")
-VISIBLE_STUDIO_LOCATION_STATUSES = ("imported", "unclaimed", "pending_claim")
-ACTIVE_SUBMISSION_STATUSES = ("submitted", "under_review")
+VISIBLE_STUDIO_LOCATION_STATUSES = ("imported", "unclaimed", "pending_claim", "claimed")
+ACTIVE_SUBMISSION_STATUSES = ("submitted", "under_review", "awaiting_email", "awaiting_account", "needs_information")
 MAP_TYPES = {"artist", "studio"}
 BOOKING_FILTERS = {"accepting", "online", "in_person"}
 
@@ -144,6 +145,18 @@ class LocationRequestSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class LocationCorrectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LocationCorrectionRequest
+        fields = ("reporter_name", "contact_email", "reason", "explanation",
+                  "new_address", "supporting_file")
+        extra_kwargs = {
+            "explanation": {"required": False, "allow_blank": True, "max_length": 3000},
+            "new_address": {"required": False, "allow_blank": True},
+            "supporting_file": {"required": False},
+        }
+
+
 class LocationClaimSerializer(serializers.ModelSerializer):
     proof = serializers.CharField(required=False, allow_blank=True, max_length=3000)
     message = serializers.CharField(required=False, allow_blank=True, max_length=3000)
@@ -251,6 +264,7 @@ def _location_queryset(viewer, query):
             ),
             latitude__isnull=False,
             longitude__isnull=False,
+            is_suppressed=False,
         )
         .exclude(linked_user_id__in=_blocked_user_ids(viewer))
         .select_related(
@@ -319,7 +333,7 @@ def _location_payload(request, location):
             "portfolio_count": 0,
             "website": _safe_public_url(location.website),
             "phone": location.phone or None,
-            "claimable": True,
+            "claimable": location.studio_owner_id is None,
             "claim_status": active_claim.status if active_claim else None,
         }
 
@@ -530,6 +544,8 @@ class MapLocationClaimView(APIView):
             Location,
             pk=location_id,
             linked_user__isnull=True,
+            studio_owner__isnull=True,
+            is_suppressed=False,
             status__in=VISIBLE_STUDIO_LOCATION_STATUSES,
         )
         contact_email = str(
@@ -590,17 +606,67 @@ class MapLocationClaimView(APIView):
                 status=status.HTTP_409_CONFLICT,
             )
 
+        eligible_account = (
+            request.user.is_active
+            and getattr(request.user.profile, "is_email_verified", False)
+            and normalize(request.user.email) == normalize(validated["contact_email"])
+        )
         with transaction.atomic():
             claim = serializer.save(
                 location=location,
-                claimant_user=request.user,
-                status="submitted",
+                claimant_user=request.user if eligible_account else None,
+                status="awaiting_email",
             )
+        try:
+            send_claim_confirmation(claim, request)
+        except Exception:
+            import logging
+            logging.getLogger(__name__).exception("Failed to email claim confirmation id=%s", claim.pk)
+            return Response({"code": "email_failed", "detail": "Claim saved, but confirmation email could not be delivered. Contact support."},
+                            status=status.HTTP_503_SERVICE_UNAVAILABLE)
         return Response(
             {
                 "id": claim.pk,
                 "status": claim.status,
-                "detail": "Your claim was submitted for review.",
+                "detail": "Check your email to confirm your claim. Ownership still requires Tatzo review.",
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+class MapLocationCorrectionView(APIView):
+    # Mobile map keeps its existing authenticated API policy.
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, location_id):
+        location = get_object_or_404(Location, pk=location_id, is_suppressed=False)
+        contact_email = str(request.data.get("contact_email") or request.user.email).strip()
+        checks = (
+            check_rate_limit(request, scope="mobile:map:correction:user", limit=4,
+                             window_seconds=86400, identity="user"),
+            check_rate_limit(request, scope="mobile:map:correction:ip", limit=8,
+                             window_seconds=3600, identity="ip"),
+        )
+        limited = _rate_limit_response(checks)
+        if limited:
+            return limited
+        data = request.data.copy()
+        if not data.get("contact_email"):
+            data["contact_email"] = request.user.email
+        if not data.get("reporter_name"):
+            data["reporter_name"] = request.user.username
+        serializer = LocationCorrectionSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        validated = serializer.validated_data
+        if LocationCorrectionRequest.objects.filter(
+            location=location, contact_email__iexact=validated["contact_email"],
+            reason=validated["reason"], status__in=["submitted", "under_review", "needs_information"]
+        ).exists():
+            return Response({"code": "report_exists", "detail": "This report is already awaiting review."},
+                            status=status.HTTP_409_CONFLICT)
+        with transaction.atomic():
+            report = serializer.save(location=location, status="submitted")
+        return Response({
+            "id": report.pk, "status": report.status,
+            "detail": "Your report is awaiting manual review; the listing remains visible until confirmed.",
+        }, status=status.HTTP_201_CREATED)
