@@ -50,10 +50,10 @@
     <section class="moderation-section" id="location-moderation">
       <div class="moderation-section-head">
         <h2>{% trans "Studio ownership and map requests" %}</h2>
-        <span>{{ location_request_count|add:location_claim_count }}</span>
+        <span>{{ location_request_count|add:location_claim_count|add:location_removal_count }}</span>
       </div>
       <p>{% trans "Confirm the studio's identity and the applicant's legal right to manage it. Approval links eligible verified accounts and publishes reviewed locations." %}</p>
-      {% if pending_location_requests or pending_location_claims %}
+      {% if pending_location_requests or pending_location_claims or pending_location_removals %}
       <div class="moderation-list">
         {% for item in pending_location_requests %}
         <article class="moderation-card">
@@ -105,6 +105,33 @@
           <form method="post" action="{% url 'moderation_review_location' 'claim' item.id %}">
             {% csrf_token %}
             <button type="submit" name="decision" value="reject">{% trans "Reject" %}</button>
+          </form>
+        </article>
+        {% endfor %}
+        {% for item in pending_location_removals %}
+        <article class="moderation-card">
+          <div class="moderation-card-main">
+            <div>
+              <h3>{% trans "Report closed or outdated studio" %}: {{ item.location.name }}</h3>
+              <p>{{ item.location.display_address }}</p>
+              <p>{{ item.reporter_name }} — {{ item.contact_email }}</p>
+              <p>{% trans "Reason" %}: {{ item.reason }}</p>
+              {% if item.evidence_url %}<p><a href="{{ item.evidence_url }}" rel="noopener noreferrer" target="_blank">{% trans "Supporting URL (unverified)" %}</a></p>{% endif %}
+              <p>{% trans "Current status" %}: {{ item.location.get_status_display }}</p>
+              {% if item.location.studio_owner %}<p>{% trans "Managed by" %}: @{{ item.location.studio_owner.username }}</p>{% endif %}
+            </div>
+          </div>
+          <form method="post" action="{% url 'moderation_review_location_removal' item.pk %}">
+            {% csrf_token %}
+            <label><input type="checkbox" name="confirm_evidence" value="1" required> {% trans "I independently verified that this listing is obsolete." %}</label>
+            {% if item.location.studio_owner %}
+              <label><input type="checkbox" name="confirm_managed" value="1" required> {% trans "I confirmed that removal affects a managed studio." %}</label>
+            {% endif %}
+            <button type="submit" name="decision" value="approve">{% trans "Remove from public maps" %}</button>
+          </form>
+          <form method="post" action="{% url 'moderation_review_location_removal' item.pk %}">
+            {% csrf_token %}
+            <button type="submit" name="decision" value="reject">{% trans "Reject report" %}</button>
           </form>
         </article>
         {% endfor %}
