@@ -1444,7 +1444,16 @@ def moderation_review_location(request, kind, item_id):
         if action == "reject":
             reject_location_submission(kind, item_id, request.user)
         elif kind == "request":
-            approve_location_request(item_id, request.user)
+            lat = request.POST.get("latitude")
+            lon = request.POST.get("longitude")
+            if lat is None and lon is None:
+                # Existing clients may submit requests whose stored pin has
+                # already been verified; service still enforces both values.
+                approve_location_request(item_id, request.user)
+            elif not lat or not lon:
+                raise ValidationError("Enter valid latitude and longitude before approval.")
+            else:
+                approve_location_request(item_id, request.user, latitude=lat, longitude=lon)
         else:
             approve_location_claim(item_id, request.user)
     except (ValidationError, LocationRequest.DoesNotExist, LocationClaim.DoesNotExist, Location.DoesNotExist) as error:
