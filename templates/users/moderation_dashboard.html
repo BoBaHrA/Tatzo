@@ -35,6 +35,10 @@
         <span>{% trans "Manual reviews" %}</span>
         <strong>{{ manual_count }}</strong>
       </div>
+      <div class="moderation-stat-card">
+        <span>{% trans "Map requests" %}</span>
+        <strong>{{ location_request_count|add:location_claim_count|add:location_removal_count }}</strong>
+      </div>
 
       <div class="moderation-stat-card">
         <span>{% trans "Post reports" %}</span>
@@ -47,111 +51,16 @@
       </div>
     </section>
 
-    <section class="moderation-section" id="location-moderation">
-      <div class="moderation-section-head">
-        <h2>{% trans "Studio ownership and map requests" %}</h2>
-        <span>{{ location_request_count|add:location_claim_count|add:location_removal_count }}</span>
-      </div>
-      <p>{% trans "Confirm the studio's identity and the applicant's legal right to manage it. Approval links eligible verified accounts and publishes reviewed locations." %}</p>
-      {% if pending_location_requests or pending_location_claims or pending_location_removals %}
-      <div class="moderation-list">
-        {% for item in pending_location_requests %}
-        <article class="moderation-card">
-          <div class="moderation-card-main">
-            <div>
-              <h3>{% trans "New address" %}: {{ item.name }}</h3>
-              <p>{{ item.full_address }}, {{ item.city }}, {{ item.country }}</p>
-              <p>{% trans "Contact" %}: {{ item.contact_email }}</p>
-              <p>
-                <strong>{% trans "Profile" %} Tatzo:</strong>
-                {% if item.requested_by %}
-                  <a href="{% url 'profile' item.requested_by.username %}">@{{ item.requested_by.username }}</a>
-                {% else %}
-                  <span class="moderation-muted">{% trans "Unknown" %}</span>
-                {% endif %}
-              </p>
-              <p>{% trans "Requests management access" %}: {{ item.wants_ownership|yesno:"Yes,No" }}</p>
-              <p>{% trans "Map pin" %}: {% if item.latitude != None and item.longitude != None %}{{ item.latitude }}, {{ item.longitude }}{% else %}{% trans "Not provided — location will not display as a pin" %}{% endif %}</p>
-              {% if item.website_or_map_link %}<p>{% trans "Website / evidence" %}: {{ item.website_or_map_link }}</p>{% endif %}
-              {% if item.supporting_file %}<p><a href="{% url 'protected_media' 'location-request' item.id 'file' %}">{% trans "Private supporting document" %}</a></p>{% endif %}
-              {% if item.message %}<p>{{ item.message }}</p>{% endif %}
-              <p>{% trans "Status" %}: {{ item.get_status_display }}</p>
-            </div>
-          </div>
-          <form method="post" action="{% url 'moderation_review_location' 'request' item.id %}">
-            {% csrf_token %}
-            <label><input type="checkbox" name="confirm_evidence" value="1" required> {% trans "I independently verified this address and the right to manage it." %}</label>
-            <button type="submit" name="decision" value="approve">{% trans "Approve and publish" %}</button>
-          </form>
-          <form method="post" action="{% url 'moderation_review_location' 'request' item.id %}">
-            {% csrf_token %}
-            <button type="submit" name="decision" value="reject">{% trans "Reject" %}</button>
-          </form>
-        </article>
-        {% endfor %}
-        {% for item in pending_location_claims %}
-        <article class="moderation-card">
-          <div class="moderation-card-main">
-            <div>
-              <h3>{% trans "Claim existing studio" %}: {{ item.location.name }}</h3>
-              <p>{{ item.location.display_address }}</p>
-              <p>{{ item.claimant_name }} — {{ item.contact_email }}</p>
-              <p>{% trans "Linked account" %}: {% if item.claimant_user %}@{{ item.claimant_user.username }}{% else %}{% trans "Not linked — cannot approve yet" %}{% endif %}</p>
-              <p>{% trans "Relationship" %}: {{ item.relation_to_location }}</p>
-              {% if item.proof %}<p>{{ item.proof }}</p>{% endif %}
-              {% if item.proof_document %}<p><a href="{% url 'protected_media' 'location-claim' item.id 'file' %}">{% trans "Private ownership evidence" %}</a></p>{% endif %}
-              {% if item.message %}<p>{{ item.message }}</p>{% endif %}
-            </div>
-          </div>
-          <form method="post" action="{% url 'moderation_review_location' 'claim' item.id %}">
-            {% csrf_token %}
-            <label><input type="checkbox" name="confirm_evidence" value="1" required> {% trans "I independently verified the business relationship and applicant's right to manage it." %}</label>
-            <button type="submit" name="decision" value="approve" {% if not item.claimant_user %}disabled{% endif %}>{% trans "Approve and link account" %}</button>
-          </form>
-          <form method="post" action="{% url 'moderation_review_location' 'claim' item.id %}">
-            {% csrf_token %}
-            <button type="submit" name="decision" value="reject">{% trans "Reject" %}</button>
-          </form>
-        </article>
-        {% endfor %}
-        {% for item in pending_location_removals %}
-        <article class="moderation-card">
-          <div class="moderation-card-main">
-            <div>
-              <h3>{% trans "Report closed or outdated studio" %}: {{ item.location.name }}</h3>
-              <p>{{ item.location.display_address }}</p>
-              <p>{{ item.reporter_name }} — {{ item.contact_email }}</p>
-              <p>{% trans "Reason" %}: {{ item.reason }}</p>
-              {% if item.evidence_url %}<p><a href="{{ item.evidence_url }}" rel="noopener noreferrer" target="_blank">{% trans "Supporting URL (unverified)" %}</a></p>{% endif %}
-              <p>{% trans "Current status" %}: {{ item.location.get_status_display }}</p>
-              {% if item.location.studio_owner %}<p>{% trans "Managed by" %}: @{{ item.location.studio_owner.username }}</p>{% endif %}
-            </div>
-          </div>
-          <form method="post" action="{% url 'moderation_review_location_removal' item.pk %}">
-            {% csrf_token %}
-            <label><input type="checkbox" name="confirm_evidence" value="1" required> {% trans "I independently verified that this listing is obsolete." %}</label>
-            {% if item.location.studio_owner %}
-              <label><input type="checkbox" name="confirm_managed" value="1" required> {% trans "I confirmed that removal affects a managed studio." %}</label>
-            {% endif %}
-            <button type="submit" name="decision" value="approve">{% trans "Remove from public maps" %}</button>
-          </form>
-          <form method="post" action="{% url 'moderation_review_location_removal' item.pk %}">
-            {% csrf_token %}
-            <button type="submit" name="decision" value="reject">{% trans "Reject report" %}</button>
-          </form>
-        </article>
-        {% endfor %}
-      </div>
-      {% else %}
-        <p>{% trans "No pending map requests." %}</p>
-      {% endif %}
-    </section>
-
     <div class="moderation-toolbar">
       <div class="moderation-folder-tabs">
         <button type="button" class="moderation-folder-tab active" data-folder-tab="verification">
           {% trans "Verification" %}
           <span>{{ document_count|add:manual_count }}</span>
+        </button>
+
+        <button type="button" class="moderation-folder-tab" data-folder-tab="maps">
+          {% trans "Map requests" %}
+          <span>{{ location_request_count|add:location_claim_count|add:location_removal_count }}</span>
         </button>
 
         <button type="button" class="moderation-folder-tab" data-folder-tab="posts">
@@ -370,6 +279,117 @@
           </div>
         {% endif %}
       </section>
+    </div>
+
+    <div class="moderation-folder-panel" data-folder-panel="maps" hidden>
+    <section class="moderation-section" id="location-moderation">
+      <div class="moderation-section-head">
+        <h2>{% trans "Studio ownership and map requests" %}</h2>
+        <span>{{ location_request_count|add:location_claim_count|add:location_removal_count }}</span>
+      </div>
+      <p>{% trans "Confirm the studio's identity and the applicant's legal right to manage it. Approval links eligible verified accounts and publishes reviewed locations." %}</p>
+      {% if pending_location_requests or pending_location_claims or pending_location_removals %}
+      <div class="moderation-list">
+        {% for item in pending_location_requests %}
+        <article class="moderation-card moderation-location-card" data-moderation-card
+          data-date="{{ item.created_at|date:'U' }}"
+          data-reason="{% if item.message %}with-reason{% else %}no-reason{% endif %}"
+          data-search="{{ item.name }} {{ item.full_address }} {{ item.city }} {{ item.country }} {{ item.contact_email }} {% if item.requested_by %}{{ item.requested_by.username }}{% endif %} {{ item.message }}">
+          <div class="moderation-card-main">
+            <div>
+              <h3>{% trans "New address" %}: {{ item.name }}</h3>
+              <p>{{ item.full_address }}, {{ item.city }}, {{ item.country }}</p>
+              <p>{% trans "Contact" %}: {{ item.contact_email }}</p>
+              <p>
+                <strong>{% trans "Profile" %} Tatzo:</strong>
+                {% if item.requested_by %}
+                  <a href="{% url 'profile' item.requested_by.username %}">@{{ item.requested_by.username }}</a>
+                {% else %}
+                  <span class="moderation-muted">{% trans "Unknown" %}</span>
+                {% endif %}
+              </p>
+              <p>{% trans "Requests management access" %}: {{ item.wants_ownership|yesno:"Yes,No" }}</p>
+              <p>{% trans "Map pin" %}: {% if item.latitude != None and item.longitude != None %}{{ item.latitude }}, {{ item.longitude }}{% else %}{% trans "Not provided — location will not display as a pin" %}{% endif %}</p>
+              {% if item.website_or_map_link %}<p>{% trans "Website / evidence" %}: {{ item.website_or_map_link }}</p>{% endif %}
+              {% if item.supporting_file %}<p><a href="{% url 'protected_media' 'location-request' item.id 'file' %}">{% trans "Private supporting document" %}</a></p>{% endif %}
+              {% if item.message %}<p>{{ item.message }}</p>{% endif %}
+              <p>{% trans "Status" %}: {{ item.get_status_display }}</p>
+            </div>
+          </div>
+          <form method="post" action="{% url 'moderation_review_location' 'request' item.id %}">
+            {% csrf_token %}
+            <label><input type="checkbox" name="confirm_evidence" value="1" required> {% trans "I independently verified this address and the right to manage it." %}</label>
+            <button type="submit" name="decision" value="approve">{% trans "Approve and publish" %}</button>
+          </form>
+          <form method="post" action="{% url 'moderation_review_location' 'request' item.id %}">
+            {% csrf_token %}
+            <button type="submit" name="decision" value="reject">{% trans "Reject" %}</button>
+          </form>
+        </article>
+        {% endfor %}
+        {% for item in pending_location_claims %}
+        <article class="moderation-card moderation-location-card" data-moderation-card
+          data-date="{{ item.created_at|date:'U' }}"
+          data-reason="{% if item.message or item.proof %}with-reason{% else %}no-reason{% endif %}"
+          data-search="{{ item.location.name }} {{ item.location.display_address }} {{ item.claimant_name }} {{ item.contact_email }} {% if item.claimant_user %}{{ item.claimant_user.username }}{% endif %} {{ item.relation_to_location }} {{ item.proof }} {{ item.message }}">
+          <div class="moderation-card-main">
+            <div>
+              <h3>{% trans "Claim existing studio" %}: {{ item.location.name }}</h3>
+              <p>{{ item.location.display_address }}</p>
+              <p>{{ item.claimant_name }} — {{ item.contact_email }}</p>
+              <p>{% trans "Linked account" %}: {% if item.claimant_user %}@{{ item.claimant_user.username }}{% else %}{% trans "Not linked — cannot approve yet" %}{% endif %}</p>
+              <p>{% trans "Relationship" %}: {{ item.relation_to_location }}</p>
+              {% if item.proof %}<p>{{ item.proof }}</p>{% endif %}
+              {% if item.proof_document %}<p><a href="{% url 'protected_media' 'location-claim' item.id 'file' %}">{% trans "Private ownership evidence" %}</a></p>{% endif %}
+              {% if item.message %}<p>{{ item.message }}</p>{% endif %}
+            </div>
+          </div>
+          <form method="post" action="{% url 'moderation_review_location' 'claim' item.id %}">
+            {% csrf_token %}
+            <label><input type="checkbox" name="confirm_evidence" value="1" required> {% trans "I independently verified the business relationship and applicant's right to manage it." %}</label>
+            <button type="submit" name="decision" value="approve" {% if not item.claimant_user %}disabled{% endif %}>{% trans "Approve and link account" %}</button>
+          </form>
+          <form method="post" action="{% url 'moderation_review_location' 'claim' item.id %}">
+            {% csrf_token %}
+            <button type="submit" name="decision" value="reject">{% trans "Reject" %}</button>
+          </form>
+        </article>
+        {% endfor %}
+        {% for item in pending_location_removals %}
+        <article class="moderation-card moderation-location-card" data-moderation-card
+          data-date="{{ item.created_at|date:'U' }}"
+          data-reason="with-reason"
+          data-search="{{ item.location.name }} {{ item.location.display_address }} {{ item.reporter_name }} {{ item.contact_email }} {{ item.reason }}">
+          <div class="moderation-card-main">
+            <div>
+              <h3>{% trans "Report closed or outdated studio" %}: {{ item.location.name }}</h3>
+              <p>{{ item.location.display_address }}</p>
+              <p>{{ item.reporter_name }} — {{ item.contact_email }}</p>
+              <p>{% trans "Reason" %}: {{ item.reason }}</p>
+              {% if item.evidence_url %}<p><a href="{{ item.evidence_url }}" rel="noopener noreferrer" target="_blank">{% trans "Supporting URL (unverified)" %}</a></p>{% endif %}
+              <p>{% trans "Current status" %}: {{ item.location.get_status_display }}</p>
+              {% if item.location.studio_owner %}<p>{% trans "Managed by" %}: @{{ item.location.studio_owner.username }}</p>{% endif %}
+            </div>
+          </div>
+          <form method="post" action="{% url 'moderation_review_location_removal' item.pk %}">
+            {% csrf_token %}
+            <label><input type="checkbox" name="confirm_evidence" value="1" required> {% trans "I independently verified that this listing is obsolete." %}</label>
+            {% if item.location.studio_owner %}
+              <label><input type="checkbox" name="confirm_managed" value="1" required> {% trans "I confirmed that removal affects a managed studio." %}</label>
+            {% endif %}
+            <button type="submit" name="decision" value="approve">{% trans "Remove from public maps" %}</button>
+          </form>
+          <form method="post" action="{% url 'moderation_review_location_removal' item.pk %}">
+            {% csrf_token %}
+            <button type="submit" name="decision" value="reject">{% trans "Reject report" %}</button>
+          </form>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+        <p>{% trans "No pending map requests." %}</p>
+      {% endif %}
+    </section>
     </div>
 
     <div class="moderation-folder-panel" data-folder-panel="posts" hidden>
