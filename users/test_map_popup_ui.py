@@ -8,14 +8,14 @@ import shutil
 import subprocess
 
 from django.conf import settings
-from django.test import SimpleTestCase
+from django.test import TestCase
 from django.urls import reverse
 
 
 ASSET_ROOT = Path(settings.BASE_DIR) / "static"
 
 
-class MapPopupUiTests(SimpleTestCase):
+class MapPopupUiTests(TestCase):
     def setUp(self):
         self.script_file = ASSET_ROOT / "js" / "maps.js"
         self.css_file = ASSET_ROOT / "css" / "maps.css"
@@ -28,7 +28,8 @@ class MapPopupUiTests(SimpleTestCase):
         self.assertIn('tatzo-map-popup-badge-data', self.script)
         self.assertIn('tatzo-map-popup-contact', self.script)
         self.assertIn('className: "tatzo-leaflet-popup"', self.script)
-        self.assertIn(".tatzo-map-popup-verified", self.css) if ".tatzo-map-popup-verified" in self.css else self.assertIn(".tatzo-map-popup-unclaimed", self.css)
+        self.assertIn(".tatzo-map-popup-icon", self.css)
+        self.assertIn(".tatzo-map-popup-badge", self.css)
         self.assertIn(".tatzo-map-popup-unclaimed", self.css)
         self.assertIn(".tatzo-map-popup-claim", self.css)
         self.assertIn(".tatzo-map-popup-profile", self.css)
