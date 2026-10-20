@@ -214,4 +214,29 @@ out center tags;
             existing.save()
             return existing, False
 
+        # External OSM IDs can change when an element is recreated or
+        # converted from a node to a way. A prior human removal decision must
+        # also survive that change for an otherwise identical address.
+        if not existing:
+            incoming_name = normalize_text(data.get("name"))
+            incoming_city = normalize_text(data.get("city"))
+            incoming_country = normalize_text(data.get("country"))
+            incoming_address = normalize_text(
+                data.get("formatted_address") or data.get("address")
+            )
+            if all((incoming_name, incoming_city, incoming_country, incoming_address)):
+                suppressed = Location.objects.select_for_update().filter(
+                    status="removed",
+                    city__iexact=data.get("city", ""),
+                    country__iexact=data.get("country", ""),
+                )
+                for candidate in suppressed.iterator():
+                    if (
+                        normalize_text(candidate.name) == incoming_name
+                        and normalize_text(candidate.city) == incoming_city
+                        and normalize_text(candidate.country) == incoming_country
+                        and normalize_text(candidate.display_address) == incoming_address
+                    ):
+                        return candidate, False
+
         return Location.objects.create(**data), True
