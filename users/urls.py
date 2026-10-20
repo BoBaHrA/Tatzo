@@ -82,6 +82,7 @@ urlpatterns = [
     path("search/", search_views.search_page, name="search_page"),
     path("maps/", views.maps_page, name="maps_page"),
     path("maps/my-studios/", views.my_studios, name="my_studios"),
+    path("maps/my-studios/<int:location_id>/edit/", views.edit_owned_studio, name="edit_owned_studio"),
     path("maps/location/<int:location_id>/report-outdated/", views.report_outdated_location, name="report_outdated_location"),
     path("maps/my-studios/link-claim/<int:claim_id>/", views.link_my_studio_claim, name="link_my_studio_claim"),
     path("maps/my-studios/claim/<int:claim_id>/verified-email/", views.set_my_studio_claim_account_email, name="set_my_studio_claim_account_email"),
