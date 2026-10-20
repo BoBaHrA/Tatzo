@@ -41,6 +41,16 @@ jobs:
         with:
           packages: platform-tools
           log-accepted-android-sdk-licenses: false
+      - name: Check previous preview signature
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail --silent --show-error --location \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            --header "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/11801874411/zip" \
+            --output "${RUNNER_TEMP}/tatzo-previous.zip"
+          python3 scripts/verify-preview-apk.py --baseline "${RUNNER_TEMP}/tatzo-previous.zip"
       - uses: gradle/actions/setup-gradle@v4
       - name: Install and check
         run: |
@@ -54,20 +64,13 @@ jobs:
       - name: Generate Android project
         run: npx expo prebuild --platform android --no-install
       - name: Build installable preview
+        id: android-build
         working-directory: mobile/android
         # Expo's generated release build uses the development signing key.
         # This separate application ID is for review only, never store submission.
         run: ./gradlew :app:assembleRelease -PreactNativeArchitectures=arm64-v8a,x86_64 --no-daemon --max-workers=2
       - name: Verify update compatibility and package APK
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          curl --fail --silent --show-error --location \
-            --header "Authorization: Bearer ${GH_TOKEN}" \
-            --header "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/11801874411/zip" \
-            --output "${RUNNER_TEMP}/tatzo-previous.zip"
-          python3 scripts/verify-preview-apk.py android/app/build/outputs/apk/release/app-release.apk "${RUNNER_TEMP}/tatzo-previous.zip"
+        run: python3 scripts/verify-preview-apk.py android/app/build/outputs/apk/release/app-release.apk "${RUNNER_TEMP}/tatzo-previous.zip"
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
@@ -75,3 +78,11 @@ jobs:
           path: mobile/dist/apk/
           if-no-files-found: error
           retention-days: 14
+      - name: Preserve APK for verification diagnostics
+        if: failure() && steps.android-build.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tatzo-unverified-preview-${{ github.sha }}
+          path: mobile/android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 3

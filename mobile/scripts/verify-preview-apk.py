@@ -13,8 +13,6 @@ from zipfile import ZipFile
 PREVIOUS_SHA256 = "d9a39f2693e8710253097da946467ea11b2274f62c57ac7647a15515d3660d55"
 PACKAGE = "eu.tatzo.app.preview"
 
-apk = Path(sys.argv[1])
-previous_zip = Path(sys.argv[2])
 sdk = Path(os.environ.get("ANDROID_HOME") or os.environ["ANDROID_SDK_ROOT"])
 build_tools = sorted(
     sdk.glob("build-tools/*"),
@@ -23,34 +21,69 @@ build_tools = sorted(
 )
 tool_dir = next(path for path in build_tools if (path / "apksigner").is_file() and (path / "aapt").is_file())
 
+
 def inspect(path):
-    signed = subprocess.run(
-        [str(tool_dir / "apksigner"), "verify", "--print-certs", str(path)],
-        check=True, capture_output=True, text=True,
-    ).stdout
-    digest = re.search(r"Signer #1 certificate SHA-256 digest: (\w+)", signed)
-    assert digest, "No verified signing certificate"
+    result = subprocess.run(
+        [str(tool_dir / "apksigner"), "verify", "--verbose", "--print-certs", str(path)],
+        capture_output=True, text=True,
+    )
+    # Certificate details are public. Keep the verifier output visible for diagnostics.
+    print(f"Signature verification with {tool_dir.name}: {path.name}", flush=True)
+    print(result.stdout, flush=True)
+    if result.stderr:
+        print(result.stderr, file=sys.stderr, flush=True)
+    result.check_returncode()
+    assert re.search(r"^Verifies\s*$", result.stdout, re.MULTILINE), "APK signature was not verified"
+    # apksigner labels v3.1 certificates by SDK range instead of signer number.
+    digests = {
+        value.lower()
+        for value in re.findall(
+            r"^Signer(?: #[0-9]+| \([^\r\n]+\)) certificate SHA-256 digest:\s*([0-9a-fA-F]{64})\s*$",
+            result.stdout, re.MULTILINE,
+        )
+    }
+    assert len(digests) == 1, "Expected one verified signing identity"
     badging = subprocess.run(
         [str(tool_dir / "aapt"), "dump", "badging", str(path)],
         check=True, capture_output=True, text=True,
     ).stdout
     manifest = re.search(r"package: name='([^']+)' versionCode='([^']+)' versionName='([^']+)'", badging)
     assert manifest, "Missing Android package metadata"
-    return manifest.group(1), int(manifest.group(2)), manifest.group(3), digest.group(1), badging
+    return manifest.group(1), int(manifest.group(2)), manifest.group(3), next(iter(digests)), badging
 
+
+def inspect_previous(previous_zip):
+    with tempfile.TemporaryDirectory() as folder:
+        old = Path(folder) / "previous.apk"
+        with ZipFile(previous_zip) as archive:
+            names = [name for name in archive.namelist() if name.endswith(".apk")]
+            assert len(names) == 1, "Ambiguous previous APK artifact"
+            old.write_bytes(archive.read(names[0]))
+        assert hashlib.sha256(old.read_bytes()).hexdigest() == PREVIOUS_SHA256, "Previous APK checksum mismatch"
+        result = inspect(old)
+        assert result[0] == PACKAGE, "Unexpected previous application ID"
+        return result
+
+
+if sys.argv[1] == "--baseline":
+    old_package, old_code, old_name, old_certificate, _ = inspect_previous(Path(sys.argv[2]))
+    print(json.dumps({
+        "baseline_package": old_package,
+        "baseline_version_code": old_code,
+        "baseline_version_name": old_name,
+        "baseline_certificate_sha256": old_certificate,
+        "baseline_sha256": PREVIOUS_SHA256,
+    }, indent=2))
+    sys.exit(0)
+
+apk = Path(sys.argv[1])
+previous_zip = Path(sys.argv[2])
 package, version_code, version_name, certificate, badging = inspect(apk)
 assert package == PACKAGE, "Preview application ID changed"
 assert "application-debuggable" not in badging, "Expected a standalone release build"
-with tempfile.TemporaryDirectory() as folder:
-    old = Path(folder) / "previous.apk"
-    with ZipFile(previous_zip) as archive:
-        names = [name for name in archive.namelist() if name.endswith(".apk")]
-        assert len(names) == 1, "Ambiguous previous APK artifact"
-        old.write_bytes(archive.read(names[0]))
-    assert hashlib.sha256(old.read_bytes()).hexdigest() == PREVIOUS_SHA256, "Previous APK checksum mismatch"
-    old_package, old_code, _, old_certificate, _ = inspect(old)
-    assert package == old_package and certificate == old_certificate, "APK cannot update the previous preview"
-    assert version_code > old_code, "Android versionCode was not incremented"
+old_package, old_code, _, old_certificate, _ = inspect_previous(previous_zip)
+assert package == old_package and certificate == old_certificate, "APK cannot update the previous preview"
+assert version_code > old_code, "Android versionCode was not incremented"
 
 with ZipFile(apk) as archive:
     assert archive.testzip() is None, "APK ZIP integrity failure"
