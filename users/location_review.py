@@ -112,6 +112,34 @@ def approve_location_request(request_id, reviewer):
 
 
 @transaction.atomic
+def link_pending_claim_to_account(claim_id, user):
+    """Attach a prior anonymous claim to its contact email's verified account.
+
+    This does NOT grant studio ownership: a moderator must still review the
+    evidence and approve the claim separately.
+    """
+    if not getattr(user, "is_authenticated", False):
+        raise ValidationError("Sign in before linking a studio claim.")
+
+    claim = LocationClaim.objects.select_for_update().get(pk=claim_id)
+    if claim.status not in ACTIVE_STATES:
+        raise ValidationError("Only pending studio claims can be linked.")
+    _verified_applicant(user, claim.contact_email)
+
+    if claim.claimant_user_id and claim.claimant_user_id != user.pk:
+        raise ValidationError("This studio claim is already linked to a different account.")
+    if claim.location.status in {"removed", "rejected"}:
+        raise ValidationError("This location is no longer eligible for a claim.")
+    if claim.location.studio_owner_id and claim.location.studio_owner_id != user.pk:
+        raise ValidationError("This studio already has a different owner.")
+
+    if claim.claimant_user_id is None:
+        claim.claimant_user = user
+        claim.save(update_fields=["claimant_user", "updated_at"])
+    return claim
+
+
+@transaction.atomic
 def approve_location_claim(claim_id, reviewer):
     """Grant management of an existing studio after independent evidence review."""
     _require_moderator(reviewer)
