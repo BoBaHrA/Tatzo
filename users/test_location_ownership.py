@@ -155,6 +155,42 @@ class StudioOwnershipTests(TestCase):
             approve_location_request(self.request.pk, self.moderator)
         self.assertFalse(Location.objects.filter(name=self.request.name).exists())
 
+    def test_staff_can_correct_coordinates_before_publishing_studio(self):
+        self.client.force_login(self.moderator)
+        response = self.client.post(
+            reverse("moderation_review_location", args=("request", self.request.pk)),
+            {
+                "decision": "approve",
+                "confirm_evidence": "1",
+                "latitude": "45.765000",
+                "longitude": "4.836000",
+            },
+        )
+        self.assertRedirects(response, reverse("moderation_dashboard"))
+        self.request.refresh_from_db()
+        self.assertEqual(str(self.request.latitude), "45.765000")
+        self.assertEqual(str(self.request.longitude), "4.836000")
+        location = self.request.approved_location
+        self.assertEqual(location.latitude, self.request.latitude)
+        self.assertEqual(location.longitude, self.request.longitude)
+
+    def test_staff_cannot_publish_new_address_without_valid_coordinates(self):
+        self.request.latitude = None
+        self.request.longitude = None
+        self.request.save(update_fields=["latitude", "longitude"])
+        self.client.force_login(self.moderator)
+        route = reverse("moderation_review_location", args=("request", self.request.pk))
+        for latitude, longitude in (("", ""), ("91", "0"), ("nan", "2")):
+            self.client.post(route, {
+                "decision": "approve",
+                "confirm_evidence": "1",
+                "latitude": latitude,
+                "longitude": longitude,
+            })
+            self.request.refresh_from_db()
+            self.assertEqual(self.request.status, "submitted")
+        self.assertFalse(Location.objects.filter(name=self.request.name).exists())
+
     def test_public_add_location_form_records_ownership_intent(self):
         self.client.force_login(self.owner)
         response = self.client.post(reverse("submit_location_request"), {
