@@ -3812,3 +3812,43 @@ msgstr "Использовать подтверждённый email Tatzo для
 #: templates/users/my_studios.html
 msgid "No linked studio claims."
 msgstr "Пока нет заявок на студии, привязанных к аккаунту."
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Edit studio details"
+msgstr "Редактировать студию"
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Enter a studio name."
+msgstr "Укажите название студии."
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Use a valid HTTP or HTTPS website URL."
+msgstr "Укажите корректный адрес сайта с HTTP или HTTPS."
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Studio details saved successfully."
+msgstr "Данные студии успешно сохранены."
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Back to My Studios"
+msgstr "Вернуться к моим студиям"
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Update your studio name and contact information. Changes appear on the Tatzo map."
+msgstr "Измените название студии и контактные данные. Изменения появятся на карте Tatzo."
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Approved studio"
+msgstr "Подтверждённая студия"
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Verified studio address"
+msgstr "Проверенный адрес студии"
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "To change the address or map pin, contact Tatzo support for review."
+msgstr "Чтобы изменить адрес или отметку на карте, обратитесь в поддержку Tatzo для проверки."
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Save studio details"
+msgstr "Сохранить данные студии"

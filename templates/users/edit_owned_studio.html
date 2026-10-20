@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% block title %}{% trans "Edit studio details" %} | Tatzo{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/my_studios.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+<main class="my-studios-page" id="main-content">
+  <div class="my-studios-shell my-studios-edit-shell">
+    <nav class="my-studios-edit-nav" aria-label="{% trans 'Studio navigation' %}">
+      <a href="{% url 'my_studios' %}">← {% trans "Back to My Studios" %}</a>
+    </nav>
+    <header class="my-studios-hero">
+      <div class="my-studios-hero-copy">
+        <p class="my-studios-kicker">{% trans "Studio management" %}</p>
+        <h1>{% trans "Edit studio details" %}</h1>
+        <p class="my-studios-description">{% trans "Update your studio name and contact information. Changes appear on the Tatzo map." %}</p>
+      </div>
+    </header>
+    <section class="my-studios-panel my-studios-edit-panel" aria-labelledby="studio-edit-heading">
+      <div class="my-studios-panel-heading">
+        <div>
+          <p class="my-studios-section-kicker">{% trans "Approved studio" %}</p>
+          <h2 id="studio-edit-heading">{{ studio.name }}</h2>
+        </div>
+      </div>
+      <form method="post" action="{% url 'edit_owned_studio' studio.pk %}" class="my-studios-edit-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="my-studios-edit-errors" role="alert">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <div class="my-studios-edit-field">
+          <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+          {{ form.name }}
+          {% for error in form.name.errors %}<p class="my-studios-edit-error" role="alert">{{ error }}</p>{% endfor %}
+        </div>
+        <div class="my-studios-edit-field">
+          <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+          {{ form.phone }}
+          {% for error in form.phone.errors %}<p class="my-studios-edit-error" role="alert">{{ error }}</p>{% endfor %}
+        </div>
+        <div class="my-studios-edit-field">
+          <label for="{{ form.website.id_for_label }}">{{ form.website.label }}</label>
+          {{ form.website }}
+          {% for error in form.website.errors %}<p class="my-studios-edit-error" role="alert">{{ error }}</p>{% endfor %}
+        </div>
+        <div class="my-studios-edit-readonly">
+          <strong>{% trans "Verified studio address" %}</strong>
+          <p>{{ studio.display_address }}</p>
+          <span>{% trans "To change the address or map pin, contact Tatzo support for review." %}</span>
+        </div>
+        <div class="my-studios-edit-actions">
+          <button class="my-studios-button my-studios-button-primary" type="submit">{% trans "Save studio details" %}</button>
+          <a class="my-studios-button my-studios-button-outline" href="{% url 'my_studios' %}">{% trans "Cancel" %}</a>
+        </div>
+      </form>
+    </section>
+  </div>
+</main>
+{% endblock %}

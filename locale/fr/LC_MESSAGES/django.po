@@ -3875,3 +3875,43 @@ msgstr "Utiliser mon e-mail Tatzo vérifié pour cette demande"
 #: templates/users/my_studios.html
 msgid "No linked studio claims."
 msgstr "Aucune demande de studio liée à votre compte pour le moment."
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Edit studio details"
+msgstr "Modifier les informations du studio"
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Enter a studio name."
+msgstr "Indiquez le nom du studio."
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Use a valid HTTP or HTTPS website URL."
+msgstr "Saisissez une adresse de site valide en HTTP ou HTTPS."
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Studio details saved successfully."
+msgstr "Les informations du studio ont été enregistrées."
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Back to My Studios"
+msgstr "Retour à mes studios"
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Update your studio name and contact information. Changes appear on the Tatzo map."
+msgstr "Modifiez le nom et les coordonnées de votre studio. Les changements apparaîtront sur la carte Tatzo."
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Approved studio"
+msgstr "Studio approuvé"
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Verified studio address"
+msgstr "Adresse vérifiée du studio"
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "To change the address or map pin, contact Tatzo support for review."
+msgstr "Pour modifier l’adresse ou le repère sur la carte, contactez l’assistance Tatzo afin de faire vérifier le changement."
+
+#: templates/users/edit_owned_studio.html users/location_forms.py
+msgid "Save studio details"
+msgstr "Enregistrer les informations du studio"

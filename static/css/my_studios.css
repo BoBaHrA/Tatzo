@@ -285,3 +285,67 @@ body {
   .my-studios-overview { grid-template-columns: 1fr; }
   .my-studios-summary { flex-direction: row; align-items: center; justify-content: space-between; }
 }
+
+
+/* Edit owned studio: reuse the private Tatzo map-dashboard visual language. */
+.my-studios-edit-shell { max-width: 860px; }
+.my-studios-edit-nav { margin-bottom: 18px; }
+.my-studios-edit-nav a {
+  color: #79dcd8;
+  font-size: 13px;
+  font-weight: 750;
+  text-decoration: none;
+}
+.my-studios-edit-nav a:hover { color: #fff; text-decoration: underline; }
+.my-studios-edit-panel { margin-top: 20px; }
+.my-studios-edit-form { display: grid; gap: 18px; max-width: 650px; }
+.my-studios-edit-field { display: flex; flex-direction: column; gap: 7px; }
+.my-studios-edit-field label {
+  color: #a4c5d2;
+  font-size: 12px;
+  font-weight: 800;
+}
+.my-studios-edit-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 14px;
+  border: 1px solid rgba(4, 197, 191, .23);
+  border-radius: 12px;
+  background: #061e2a;
+  color: #f6ffff;
+  font: 500 13px/1.5 "Poppins", Arial, sans-serif;
+  outline: none;
+}
+.my-studios-edit-input:focus {
+  border-color: #04c5bf;
+  box-shadow: 0 0 0 3px rgba(4, 197, 191, .13);
+}
+.my-studios-edit-error,
+.my-studios-edit-errors {
+  margin: 0;
+  color: #ffc2d8;
+  font-size: 12px;
+  line-height: 1.55;
+}
+.my-studios-edit-errors,
+.my-studios-edit-readonly {
+  padding: 14px 16px;
+  border: 1px solid rgba(238, 12, 111, .23);
+  border-radius: 12px;
+  background: rgba(238, 12, 111, .055);
+}
+.my-studios-edit-readonly {
+  border-color: rgba(4,197,191,.16);
+  background: rgba(4,197,191,.045);
+  color: #a8c9d5;
+}
+.my-studios-edit-readonly strong { display: block; color: #e9fcff; font-size: 13px; }
+.my-studios-edit-readonly p { margin: 6px 0; color: #e3f4f7; font-size: 13px; }
+.my-studios-edit-readonly span { display: block; font-size: 12px; line-height: 1.5; }
+.my-studios-card-actions { display: flex; flex-wrap: wrap; margin-top: 18px; gap: 10px; }
+.my-studios-edit-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 680px) {
+  .my-studios-edit-actions .my-studios-button { flex: 1 1 140px; }
+  .my-studios-card-actions .my-studios-button { width: 100%; }
+}
