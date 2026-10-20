@@ -981,7 +981,7 @@ class LocationRemovalRequest(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
-        indexes = [models.Index(fields=["status", "created_at"])]
+        indexes = [models.Index(fields=["status", "created_at"], name="users_locrem_status_3ab49_idx")]
 
     def __str__(self):
         return f"Removal report: {self.location.name} ({self.status})"
