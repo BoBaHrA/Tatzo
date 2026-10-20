@@ -8,7 +8,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 
-from .models import Location, LocationClaim, LocationRequest, LocationOwnershipAudit
+from .models import Location, LocationClaim, LocationRequest, LocationRemovalRequest, LocationOwnershipAudit
 
 
 ACTIVE_STATES = ("submitted", "under_review")
@@ -166,6 +166,40 @@ def approve_location_claim(claim_id, reviewer):
     claim.save(update_fields=["status", "reviewed_by", "reviewed_at", "updated_at"])
     _audit(location, reviewer, previous_owner, owner, "approve", "location_claim", claim.pk)
     return location
+
+
+@transaction.atomic
+def review_location_removal(report_id, reviewer, decision, *, confirm_managed=False):
+    """Approve or reject a public closure report; never hard-delete a studio."""
+    _require_moderator(reviewer)
+    if decision not in {"approve", "reject"}:
+        raise ValidationError("Choose a valid removal decision.")
+
+    report = LocationRemovalRequest.objects.select_for_update().get(pk=report_id)
+    location = Location.objects.select_for_update().get(pk=report.location_id)
+
+    if report.status != "submitted":
+        if report.status == ("approved" if decision == "approve" else "rejected"):
+            return report
+        raise ValidationError("This report was already reviewed.")
+
+    if decision == "approve":
+        if location.linked_user_id:
+            raise ValidationError(
+                "Linked artist locations require separate artist-address review."
+            )
+        if location.studio_owner_id and not confirm_managed:
+            raise ValidationError(
+                "A managed studio requires explicit additional staff confirmation."
+            )
+        location.status = "removed"
+        location.save(update_fields=["status", "updated_at"])
+
+    report.status = "approved" if decision == "approve" else "rejected"
+    report.reviewed_by = reviewer
+    report.reviewed_at = timezone.now()
+    report.save(update_fields=["status", "reviewed_by", "reviewed_at", "updated_at"])
+    return report
 
 
 @transaction.atomic
