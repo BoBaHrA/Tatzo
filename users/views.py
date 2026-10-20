@@ -1459,6 +1459,18 @@ def moderation_review_location(request, kind, item_id):
     except (ValidationError, LocationRequest.DoesNotExist, LocationClaim.DoesNotExist, Location.DoesNotExist) as error:
         messages.error(request, "; ".join(error.messages) if isinstance(error, ValidationError) else str(error))
         return redirect("moderation_dashboard")
+    except Exception:
+        # Atomic review services roll back on failure. The moderator should
+        # receive a safe message while the full traceback stays in server logs.
+        logger.exception(
+            "Unexpected map moderation error: kind=%s item_id=%s decision=%s moderator_id=%s",
+            kind, item_id, action, request.user.pk,
+        )
+        messages.error(
+            request,
+            _("An unexpected error occurred while reviewing this location. No approval was confirmed. Please retry or contact Tatzo support."),
+        )
+        return redirect("moderation_dashboard")
     messages.success(request, _("Location submission reviewed successfully."))
     return redirect("moderation_dashboard")
 
