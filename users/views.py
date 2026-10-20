@@ -2627,6 +2627,16 @@ def maps_page(request):
         })
 
 
+    # Pending claims are private to the submitting account. Display their
+    # status on the map so the same user does not submit twice.
+    my_pending_claim_ids = (
+        set(LocationClaim.objects.filter(
+            claimant_user=request.user,
+            status__in=["submitted", "under_review"],
+        ).values_list("location_id", flat=True))
+        if request.user.is_authenticated else set()
+    )
+
     external_locations = (
         Location.objects
         .filter(
@@ -2640,7 +2650,12 @@ def maps_page(request):
 
     for location_obj in external_locations:
         owner = location_obj.studio_owner if location_obj.status == "claimed" else None
-        claimable = not bool(owner) and location_obj.status in ("imported", "unclaimed", "pending_claim")
+        has_my_pending_claim = location_obj.pk in my_pending_claim_ids
+        claimable = (
+            not bool(owner)
+            and not has_my_pending_claim
+            and location_obj.status in ("imported", "unclaimed", "pending_claim")
+        )
         location = location_obj.display_address or _("Location pending")
         location_parts = {
             "city": location_obj.city,
@@ -2668,6 +2683,7 @@ def maps_page(request):
             "longitude": location_obj.longitude,
             "source": "verified" if owner else "unclaimed",
             "claimable": claimable,
+            "pending_own_claim": has_my_pending_claim,
             "confidence_score": 80,
             "portfolio_count": 0,
             "post_count": 0,
@@ -2701,6 +2717,7 @@ def maps_page(request):
         "profile": _("Profile"),
         "book": _("Book"),
         "claim_location": _("Claim this location"),
+        "my_claim_pending": _("Your claim is under review"),
         "website": _("Website"),
         "data": _("Data"),
         "address_pending": _("Address pending"),
