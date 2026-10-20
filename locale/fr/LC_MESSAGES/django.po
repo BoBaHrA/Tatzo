@@ -3716,3 +3716,42 @@ msgstr "Saisissez votre mot de passe pour supprimer le compte."
 
 msgid "If you cannot access your account, contact"
 msgstr "Si vous ne pouvez pas accéder à votre compte, contactez"
+
+msgid "Review artist verification requests, map submissions, reports and platform safety issues."
+msgstr "Examinez les demandes de vérification des artistes, les propositions cartographiques, les signalements et les questions de sécurité de la plateforme."
+
+msgid "Map requests"
+msgstr "Demandes pour la carte"
+
+msgid "Search by username, email, location, reason..."
+msgstr "Rechercher par nom d’utilisateur, e-mail, lieu, motif…"
+
+msgid "Pending map requests"
+msgstr "Demandes cartographiques en attente"
+
+msgid "Open address in Google Maps"
+msgstr "Ouvrir l’adresse dans Google Maps"
+
+msgid "Open supporting file"
+msgstr "Ouvrir le justificatif"
+
+msgid "Latitude"
+msgstr "Latitude"
+
+msgid "Longitude"
+msgstr "Longitude"
+
+msgid "Coordinates are required before approval."
+msgstr "Les coordonnées sont requises avant l’approbation."
+
+msgid "No pending location requests."
+msgstr "Aucune demande de localisation en attente."
+
+msgid "Enter valid latitude and longitude before approving the request."
+msgstr "Saisissez une latitude et une longitude valides avant d’approuver la demande."
+
+msgid "Location request approved and published on the map."
+msgstr "La demande de localisation a été approuvée et publiée sur la carte."
+
+msgid "Location request rejected."
+msgstr "La demande de localisation a été rejetée."
