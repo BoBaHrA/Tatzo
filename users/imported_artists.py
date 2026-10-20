@@ -16,6 +16,7 @@ from django.views.decorators.http import require_http_methods
 from posts.models import Post, PostBookmark, PostLike
 from .models import Location, PortfolioWork, Profile, UserBlock, UserFollow
 from .forms_custom import validate_registration_password
+from .profile_styles import public_artist_styles
 from .utils import send_verification_email
 
 logger = logging.getLogger(__name__)
@@ -355,6 +356,7 @@ def profile_or_imported_view(request, username):
         "users/profile.html",
         {
             "profile_user": profile_user,
+            "public_tattoo_styles": public_artist_styles(profile_user),
             "posts": posts,
             "liked_posts": liked_posts,
             "posts_count": posts_count,

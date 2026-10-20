@@ -3915,3 +3915,19 @@ msgstr "Pour modifier l’adresse ou le repère sur la carte, contactez l’assi
 #: templates/users/edit_owned_studio.html users/location_forms.py
 msgid "Save studio details"
 msgstr "Enregistrer les informations du studio"
+
+#: templates/users/profile.html
+msgid "Specialties"
+msgstr "SPÉCIALITÉS"
+
+#: templates/users/profile.html
+msgid "Tattoo styles"
+msgstr "Styles de tatouage"
+
+#: templates/users/profile.html
+msgid "Manage styles"
+msgstr "Gérer les styles"
+
+#: templates/users/profile.html
+msgid "Choose your tattoo styles in your booking dashboard to show them on your public profile."
+msgstr "Sélectionnez vos styles de tatouage dans les paramètres de réservation pour les afficher sur votre profil public."
