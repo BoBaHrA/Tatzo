@@ -387,6 +387,68 @@ class StudioOwnershipTests(TestCase):
             relation_to_location="Manager", status="submitted",
         )
 
+    def test_claimant_can_replace_mismatched_contact_with_verified_email(self):
+        studio = self._existing_studio()
+        claim = LocationClaim.objects.create(
+            location=studio, claimant_user=self.owner,
+            claimant_name="Studio manager", contact_email="business@example.org",
+            relation_to_location="Manager", status="submitted",
+        )
+        self.client.force_login(self.owner)
+        page = self.client.get(reverse("my_studios"))
+        link = reverse("set_my_studio_claim_account_email", args=[claim.pk])
+        self.assertContains(page, link)
+        response = self.client.post(link)
+        self.assertRedirects(response, reverse("my_studios"))
+        claim.refresh_from_db()
+        self.assertEqual(claim.contact_email, self.owner.email)
+        self.assertEqual(claim.status, "submitted")
+        studio.refresh_from_db()
+        self.assertIsNone(studio.studio_owner_id)
+        self.assertFalse(LocationOwnershipAudit.objects.exists())
+
+        self.client.force_login(self.moderator)
+        approved = self.client.post(
+            reverse("moderation_review_location", args=["claim", claim.pk]),
+            {"decision": "approve", "confirm_evidence": "1"},
+        )
+        self.assertRedirects(approved, reverse("moderation_dashboard"))
+        studio.refresh_from_db()
+        self.assertEqual(studio.studio_owner_id, self.owner.pk)
+
+    def test_other_user_cannot_change_claim_contact_email(self):
+        studio = self._existing_studio()
+        claim = LocationClaim.objects.create(
+            location=studio, claimant_user=self.owner,
+            claimant_name="Studio manager", contact_email="business@example.org",
+            relation_to_location="Manager", status="submitted",
+        )
+        another = User.objects.create_user("outsiderclaim", "outsider@example.org", "pw")
+        another.profile.is_email_verified = True
+        another.profile.save(update_fields=["is_email_verified"])
+        url = reverse("set_my_studio_claim_account_email", args=[claim.pk])
+        self.client.force_login(another)
+        self.assertEqual(self.client.post(url).status_code, 404)
+        claim.refresh_from_db()
+        self.assertEqual(claim.contact_email, "business@example.org")
+
+    def test_unverified_claimant_cannot_update_contact_email(self):
+        studio = self._existing_studio()
+        claim = LocationClaim.objects.create(
+            location=studio, claimant_user=self.owner,
+            claimant_name="Studio manager", contact_email="business@example.org",
+            relation_to_location="Manager", status="submitted",
+        )
+        self.owner.profile.is_email_verified = False
+        self.owner.profile.save(update_fields=["is_email_verified"])
+        self.client.force_login(self.owner)
+        response = self.client.post(
+            reverse("set_my_studio_claim_account_email", args=[claim.pk])
+        )
+        self.assertRedirects(response, reverse("my_studios"))
+        claim.refresh_from_db()
+        self.assertEqual(claim.contact_email, "business@example.org")
+
     def test_anonymous_claim_can_be_linked_then_staff_approved(self):
         claim = self._make_anonymous_claim()
         with self.assertRaises(ValidationError):
