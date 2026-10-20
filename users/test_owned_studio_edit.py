@@ -1,6 +1,7 @@
 """Owner-only editing of public studio details without changing map/ownership data."""
 from decimal import Decimal
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
@@ -169,6 +170,15 @@ class OwnedStudioEditTests(TestCase):
                 self.assertEqual(result.status_code, 200)
                 self.studio.refresh_from_db()
                 self.assertEqual(self.studio.name, "Old studio name")
+
+    def test_edit_page_and_action_are_translated(self):
+        for language, heading in [("ru", "Редактировать студию"), ("fr", "Modifier les informations du studio")]:
+            with self.subTest(language=language):
+                self.client.cookies[settings.LANGUAGE_COOKIE_NAME] = language
+                page = self.client.get(self.url, HTTP_ACCEPT_LANGUAGE=language)
+                self.assertContains(page, heading)
+                dashboard = self.client.get(reverse("my_studios"), HTTP_ACCEPT_LANGUAGE=language)
+                self.assertContains(dashboard, heading)
 
     def test_csrf_protection(self):
         client = Client(enforce_csrf_checks=True)
