@@ -192,6 +192,7 @@ class StudioOwnershipTests(TestCase):
         })
         self.assertRedirects(submitted, reverse("maps_page"))
         claim = LocationClaim.objects.get(location=studio)
+        self.assertContains(self.client.get(reverse("maps_page")), "Your claim is under review")
         self.assertEqual(claim.status, "submitted")
         self.assertEqual(claim.claimant_user_id, self.owner.pk)
 
