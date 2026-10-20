@@ -3692,3 +3692,123 @@ msgstr "Заявка на локацию одобрена, точка опубл
 
 msgid "Location request rejected."
 msgstr "Заявка на локацию отклонена."
+
+#: templates/users/my_studios.html
+msgid "My studios"
+msgstr "Мои студии"
+
+#: templates/users/my_studios.html
+msgid "Studio management"
+msgstr "Управление студиями"
+
+#: templates/users/my_studios.html
+msgid "Manage your studio addresses and follow your map requests. Only approved locations appear as studios you manage."
+msgstr "Управляйте адресами своих студий и следите за заявками на карте. В управляемых студиях отображаются только одобренные точки."
+
+#: templates/users/my_studios.html
+msgid "Studio navigation"
+msgstr "Навигация по студиям"
+
+#: templates/users/my_studios.html
+msgid "Back to map"
+msgstr "Вернуться к карте"
+
+#: templates/users/my_studios.html
+msgid "Add a location on the map"
+msgstr "Добавить точку на карту"
+
+#: templates/users/my_studios.html
+msgid "Studio overview"
+msgstr "Обзор студий"
+
+#: templates/users/my_studios.html
+msgid "Studios managed"
+msgstr "Студии в управлении"
+
+#: templates/users/my_studios.html
+msgid "Addresses submitted"
+msgstr "Отправленные адреса"
+
+#: templates/users/my_studios.html
+msgid "Studio claims"
+msgstr "Заявки на студии"
+
+#: templates/users/my_studios.html
+msgid "Your places"
+msgstr "Ваши места"
+
+#: templates/users/my_studios.html
+msgid "Approved studios I manage"
+msgstr "Подтверждённые студии под моим управлением"
+
+#: templates/users/my_studios.html
+msgid "Map pin is missing; ask Tatzo support to confirm the coordinates."
+msgstr "На карте нет отметки. Обратитесь в поддержку Tatzo для проверки координат."
+
+#: templates/users/my_studios.html
+msgid "No approved studio addresses linked yet."
+msgstr "Пока нет подтверждённых студий, привязанных к аккаунту."
+
+#: templates/users/my_studios.html
+msgid "My submitted addresses"
+msgstr "Мои отправленные адреса"
+
+#: templates/users/my_studios.html
+msgid "Requested ownership"
+msgstr "Запрошено управление"
+
+#: templates/users/my_studios.html
+msgid "Yes"
+msgstr "Да"
+
+#: templates/users/my_studios.html
+msgid "No"
+msgstr "Нет"
+
+#: templates/users/my_studios.html
+msgid "You have not submitted a new address."
+msgstr "Вы ещё не отправляли адреса на карту."
+
+#: templates/users/my_studios.html
+msgid "Account linking"
+msgstr "Привязка аккаунта"
+
+#: templates/users/my_studios.html
+msgid "Claims submitted before I created my account"
+msgstr "Заявки, отправленные до регистрации"
+
+#: templates/users/my_studios.html
+msgid "These pending claims used your verified email address. Link only claims you personally submitted. Linking does not approve ownership; Tatzo still reviews the evidence."
+msgstr "Эти заявки были отправлены с вашим подтверждённым email. Привязывайте только свои заявки. Привязка не подтверждает право владения — Tatzo ещё проверит доказательства."
+
+#: templates/users/my_studios.html
+msgid "Link this claim to my account"
+msgstr "Привязать заявку к моему аккаунту"
+
+#: templates/users/my_studios.html
+msgid "Ownership requests"
+msgstr "Запросы на владение"
+
+#: templates/users/my_studios.html
+msgid "Claims for existing studios"
+msgstr "Заявки на существующие студии"
+
+#: templates/users/my_studios.html
+msgid "Relationship"
+msgstr "Связь со студией"
+
+#: templates/users/my_studios.html
+msgid "Action required"
+msgstr "Требуется действие"
+
+#: templates/users/my_studios.html
+msgid "This claim's contact email differs from your verified Tatzo email. Moderation cannot approve ownership until these match."
+msgstr "Контактный email заявки отличается от подтверждённого email Tatzo. Пока адреса не совпадут, модератор не сможет подтвердить владение."
+
+#: templates/users/my_studios.html
+msgid "Use my verified Tatzo email for this claim"
+msgstr "Использовать подтверждённый email Tatzo для этой заявки"
+
+#: templates/users/my_studios.html
+msgid "No linked studio claims."
+msgstr "Пока нет заявок на студии, привязанных к аккаунту."

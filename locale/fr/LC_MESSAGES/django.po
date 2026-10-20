@@ -3755,3 +3755,123 @@ msgstr "La demande de localisation a été approuvée et publiée sur la carte."
 
 msgid "Location request rejected."
 msgstr "La demande de localisation a été rejetée."
+
+#: templates/users/my_studios.html
+msgid "My studios"
+msgstr "Mes studios"
+
+#: templates/users/my_studios.html
+msgid "Studio management"
+msgstr "Gestion des studios"
+
+#: templates/users/my_studios.html
+msgid "Manage your studio addresses and follow your map requests. Only approved locations appear as studios you manage."
+msgstr "Gérez les adresses de vos studios et suivez vos demandes sur la carte. Seuls les établissements approuvés apparaissent parmi les studios que vous gérez."
+
+#: templates/users/my_studios.html
+msgid "Studio navigation"
+msgstr "Navigation des studios"
+
+#: templates/users/my_studios.html
+msgid "Back to map"
+msgstr "Retour à la carte"
+
+#: templates/users/my_studios.html
+msgid "Add a location on the map"
+msgstr "Ajouter un établissement sur la carte"
+
+#: templates/users/my_studios.html
+msgid "Studio overview"
+msgstr "Vue d’ensemble des studios"
+
+#: templates/users/my_studios.html
+msgid "Studios managed"
+msgstr "Studios gérés"
+
+#: templates/users/my_studios.html
+msgid "Addresses submitted"
+msgstr "Adresses proposées"
+
+#: templates/users/my_studios.html
+msgid "Studio claims"
+msgstr "Demandes de propriété"
+
+#: templates/users/my_studios.html
+msgid "Your places"
+msgstr "Vos établissements"
+
+#: templates/users/my_studios.html
+msgid "Approved studios I manage"
+msgstr "Studios approuvés que je gère"
+
+#: templates/users/my_studios.html
+msgid "Map pin is missing; ask Tatzo support to confirm the coordinates."
+msgstr "Le repère sur la carte est manquant. Contactez l’assistance Tatzo pour vérifier les coordonnées."
+
+#: templates/users/my_studios.html
+msgid "No approved studio addresses linked yet."
+msgstr "Aucune adresse de studio approuvée n’est encore liée à votre compte."
+
+#: templates/users/my_studios.html
+msgid "My submitted addresses"
+msgstr "Mes adresses proposées"
+
+#: templates/users/my_studios.html
+msgid "Requested ownership"
+msgstr "Gestion demandée"
+
+#: templates/users/my_studios.html
+msgid "Yes"
+msgstr "Oui"
+
+#: templates/users/my_studios.html
+msgid "No"
+msgstr "Non"
+
+#: templates/users/my_studios.html
+msgid "You have not submitted a new address."
+msgstr "Vous n’avez pas encore proposé de nouvelle adresse."
+
+#: templates/users/my_studios.html
+msgid "Account linking"
+msgstr "Liaison de compte"
+
+#: templates/users/my_studios.html
+msgid "Claims submitted before I created my account"
+msgstr "Demandes envoyées avant la création de mon compte"
+
+#: templates/users/my_studios.html
+msgid "These pending claims used your verified email address. Link only claims you personally submitted. Linking does not approve ownership; Tatzo still reviews the evidence."
+msgstr "Ces demandes ont été envoyées avec votre adresse e-mail vérifiée. Ne liez que vos propres demandes. Cette liaison n’accorde pas la propriété : Tatzo doit encore vérifier les justificatifs."
+
+#: templates/users/my_studios.html
+msgid "Link this claim to my account"
+msgstr "Lier cette demande à mon compte"
+
+#: templates/users/my_studios.html
+msgid "Ownership requests"
+msgstr "Demandes de propriété"
+
+#: templates/users/my_studios.html
+msgid "Claims for existing studios"
+msgstr "Demandes pour des studios existants"
+
+#: templates/users/my_studios.html
+msgid "Relationship"
+msgstr "Lien avec le studio"
+
+#: templates/users/my_studios.html
+msgid "Action required"
+msgstr "Action requise"
+
+#: templates/users/my_studios.html
+msgid "This claim's contact email differs from your verified Tatzo email. Moderation cannot approve ownership until these match."
+msgstr "L’adresse e-mail de contact de cette demande diffère de votre e-mail Tatzo vérifié. La modération ne pourra pas approuver la propriété tant que ces adresses ne correspondent pas."
+
+#: templates/users/my_studios.html
+msgid "Use my verified Tatzo email for this claim"
+msgstr "Utiliser mon e-mail Tatzo vérifié pour cette demande"
+
+#: templates/users/my_studios.html
+msgid "No linked studio claims."
+msgstr "Aucune demande de studio liée à votre compte pour le moment."
