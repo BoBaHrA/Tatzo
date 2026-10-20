@@ -53,6 +53,7 @@ from .forms import ProfileForm, VerificationForm, UserEditForm, ManualVerificati
 
 from .forms_custom import CustomUserCreationForm
 from .location_forms import OwnedStudioDetailsForm
+from .profile_styles import public_artist_styles
 from posts.models import Post, PostMedia,  PostLike, PostBookmark, PostReport, PostComment, CommentReport
 from .utils import send_verification_email
 
@@ -936,6 +937,7 @@ def profile_view(request, username):
 
     context = {
         "profile_user": user_obj,
+        "public_tattoo_styles": public_artist_styles(user_obj),
         "posts": posts,
         "liked_posts": liked_posts,
         "posts_count": posts.count(),
