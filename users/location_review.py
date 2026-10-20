@@ -47,9 +47,9 @@ def approve_location_request(request_id, reviewer, *, latitude=None, longitude=N
     Must only be invoked after staff have inspected submitted evidence.
     """
     _require_moderator(reviewer)
-    submission = LocationRequest.objects.select_for_update().select_related(
-        "requested_by", "approved_location"
-    ).get(pk=request_id)
+    # Lock only the request: optional owner/approved_location relations must not
+    # be LEFT JOINed into SELECT FOR UPDATE (PostgreSQL forbids that).
+    submission = LocationRequest.objects.select_for_update().get(pk=request_id)
 
     if submission.status == "approved" and submission.approved_location_id:
         return submission.approved_location
@@ -170,7 +170,9 @@ def link_pending_claim_to_account(claim_id, user):
 def approve_location_claim(claim_id, reviewer):
     """Grant management of an existing studio after independent evidence review."""
     _require_moderator(reviewer)
-    claim = LocationClaim.objects.select_for_update().select_related("claimant_user").get(pk=claim_id)
+    # Lock the claim and studio independently. A nullable claimant_user join
+    # would produce PostgreSQL NotSupportedError with SELECT FOR UPDATE.
+    claim = LocationClaim.objects.select_for_update().get(pk=claim_id)
     location = Location.objects.select_for_update().get(pk=claim.location_id)
     if claim.status == "approved":
         if claim.claimant_user_id and location.studio_owner_id == claim.claimant_user_id:
