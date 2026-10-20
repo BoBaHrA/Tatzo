@@ -110,6 +110,9 @@
               {% elif not artist.has_map_pin %}
                 <button type="button" data-open-claim data-claim-location="{{ artist.location }}" data-claim-artist="{{ artist.display_name }}" data-location-id="{{ artist.location_id }}" data-claim-kind="{{ artist.source }}">{% trans "Add location request" %}</button>
               {% endif %}
+              {% if artist.location_id %}
+                <a href="{% url 'report_outdated_location' artist.location_id %}">{% trans "Report closed or outdated location" %}</a>
+              {% endif %}
             </div>
           </article>
         {% empty %}
