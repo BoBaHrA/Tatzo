@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import TestCase, override_settings
@@ -72,7 +74,7 @@ class StudioOwnershipTests(TestCase):
             f'<a href="{reverse("profile", kwargs={"username": self.owner.username})}">@{self.owner.username}</a>',
             html=True,
         )
-        self.assertContains(response, "Tatzo:")
+        self.assertContains(response, "Tatzo account")
 
     def test_moderation_does_not_guess_account_for_legacy_request(self):
         self.request.requested_by = None
@@ -83,7 +85,7 @@ class StudioOwnershipTests(TestCase):
         response = self.client.get(reverse("moderation_dashboard"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Unknown")
+        self.assertContains(response, "Not linked")
         self.assertNotContains(response, f"@{self.owner.username}")
 
     def test_approval_requires_explicit_moderator_confirmation(self):
@@ -174,6 +176,71 @@ class StudioOwnershipTests(TestCase):
         self.assertEqual(request.status, "approved")
         self.assertIsNotNone(request.approved_location_id)
         self.assertIsNone(request.approved_location.studio_owner_id)
+
+    def test_unexpected_moderation_exception_redirects_without_exposing_details(self):
+        """An unforeseen failure is logged; it never becomes a raw 500 page."""
+        location = self._existing_studio()
+        claim = LocationClaim.objects.create(
+            location=location, claimant_user=self.owner,
+            claimant_name="Owner", contact_email=self.owner.email,
+            relation_to_location="Owner", status="submitted",
+        )
+        self.client.force_login(self.moderator)
+        with patch("users.views.approve_location_claim", side_effect=RuntimeError("private infrastructure error")):
+            with self.assertLogs("users.views", level="ERROR") as logs:
+                response = self.client.post(
+                    reverse("moderation_review_location", args=["claim", claim.pk]),
+                    {"decision": "approve", "confirm_evidence": "1"},
+                    follow=True,
+                )
+        self.assertRedirects(response, reverse("moderation_dashboard"))
+        self.assertContains(response, "An unexpected error occurred")
+        self.assertNotContains(response, "private infrastructure error")
+        self.assertTrue(any("kind=claim item_id=" in record for record in logs.output))
+        claim.refresh_from_db()
+        location.refresh_from_db()
+        self.assertEqual(claim.status, "submitted")
+        self.assertIsNone(location.studio_owner_id)
+
+    def test_map_moderation_cards_use_consistent_styled_actions(self):
+        location = self._existing_studio()
+        claim = LocationClaim.objects.create(
+            location=location, claimant_user=self.owner,
+            claimant_name="Studio owner", contact_email=self.owner.email,
+            relation_to_location="Owner", status="submitted",
+            message="Evidence provided",
+        )
+        self.client.force_login(self.moderator)
+        response = self.client.get(reverse("moderation_dashboard"))
+        self.assertContains(response, 'data-folder-panel="maps"')
+        self.assertContains(response, "moderation-location-body")
+        self.assertContains(response, "moderation-location-actions")
+        self.assertContains(response, "moderation-location-details")
+        self.assertContains(response, "moderation-location-note")
+        self.assertContains(response, 'class="moderation-btn moderation-btn-danger"')
+        self.assertContains(response, 'class="moderation-btn moderation-btn-approve"')
+        self.assertContains(response, reverse("moderation_review_location", args=["claim", claim.pk]))
+
+    def test_moderation_shows_mismatched_claim_email_without_granting_ownership(self):
+        location = self._existing_studio()
+        claim = LocationClaim.objects.create(
+            location=location, claimant_user=self.owner,
+            claimant_name="Studio owner", contact_email="other@example.org",
+            relation_to_location="Owner", status="submitted",
+        )
+        self.client.force_login(self.moderator)
+        dashboard = self.client.get(reverse("moderation_dashboard"))
+        self.assertContains(dashboard, "applicant must update it from My Studios")
+        self.assertContains(dashboard, "disabled")
+        response = self.client.post(
+            reverse("moderation_review_location", args=["claim", claim.pk]),
+            {"decision": "approve", "confirm_evidence": "1"},
+        )
+        self.assertRedirects(response, reverse("moderation_dashboard"))
+        claim.refresh_from_db()
+        location.refresh_from_db()
+        self.assertEqual(claim.status, "submitted")
+        self.assertIsNone(location.studio_owner_id)
 
     def test_existing_claim_requires_verified_linked_account(self):
         location = Location.objects.create(

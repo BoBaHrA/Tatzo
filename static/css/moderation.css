@@ -1014,3 +1014,244 @@ body {
 .moderation-custom-select.open .moderation-custom-select-arrow::before {
   border-color: #ffffff;
 }
+
+
+/* =========================
+   TATZO LOCATION REVIEW CARD REFINEMENT
+   Covers new addresses, ownership claims and outdated-location reports.
+========================= */
+.moderation-page .moderation-card.moderation-location-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 24px;
+  align-items: stretch;
+  padding: 24px;
+  overflow: hidden;
+}
+
+.moderation-page .moderation-location-card[hidden] {
+  display: none !important;
+}
+
+.moderation-location-card .moderation-card-main.moderation-location-body {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.moderation-location-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.moderation-location-kind,
+.moderation-location-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(4, 197, 191, 0.22);
+  background: rgba(4, 197, 191, 0.1);
+  color: #76eee8;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.moderation-location-status {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.045);
+  color: #b7d1dc;
+}
+
+.moderation-location-kind-pink {
+  border-color: rgba(238, 12, 111, 0.25);
+  background: rgba(238, 12, 111, 0.1);
+  color: #ff7eaf;
+}
+
+.moderation-location-card h3 {
+  font-size: clamp(17px, 1.7vw, 21px);
+  line-height: 1.35;
+  margin: 0 0 16px;
+}
+
+.moderation-location-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 20px;
+  margin: 0;
+}
+
+.moderation-location-detail { min-width: 0; }
+.moderation-location-detail-wide { grid-column: 1 / -1; }
+
+.moderation-location-detail dt,
+.moderation-location-note strong {
+  display: block;
+  margin: 0 0 4px;
+  color: #85a3af;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.moderation-location-detail dd {
+  margin: 0;
+  color: #e9f8fc;
+  font-size: 13px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.moderation-location-detail a,
+.moderation-location-links a {
+  color: #46ded6;
+  text-decoration: none;
+}
+
+.moderation-location-detail a:hover,
+.moderation-location-links a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.moderation-location-note {
+  margin-top: 15px;
+  padding: 11px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.moderation-location-note span {
+  display: block;
+  color: #d6e7ec;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.moderation-location-links {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.moderation-location-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 13px;
+  border: 1px solid rgba(4, 197, 191, 0.25);
+  border-radius: 11px;
+  background: rgba(4, 197, 191, 0.08);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.moderation-location-warning {
+  margin: 12px 0 0 !important;
+  padding: 10px 12px;
+  border: 1px solid rgba(238, 12, 111, 0.28);
+  border-radius: 11px;
+  background: rgba(238, 12, 111, 0.08);
+  color: #ffc6da !important;
+  font-size: 12px !important;
+  line-height: 1.55;
+}
+
+.moderation-page .moderation-location-card .moderation-location-actions {
+  width: auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: flex-end;
+  align-self: stretch;
+  border-left: 1px solid rgba(4, 197, 191, 0.13);
+  padding-left: 22px;
+}
+
+.moderation-page .moderation-location-card .moderation-location-actions form {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  flex: none;
+  margin: 0;
+}
+
+.moderation-location-check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: #d5eaf1;
+  font-size: 12px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.moderation-location-check input {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  accent-color: #04c5bf;
+  cursor: pointer;
+}
+
+.moderation-location-card .moderation-btn {
+  width: 100%;
+  min-height: 42px;
+  white-space: normal;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.moderation-location-card .moderation-btn:disabled {
+  background: #203440;
+  color: #829ba6;
+  box-shadow: none;
+  opacity: 0.72;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.moderation-location-card .moderation-btn:focus-visible,
+.moderation-location-card a:focus-visible,
+.moderation-location-card input:focus-visible {
+  outline: 2px solid #04c5bf;
+  outline-offset: 3px;
+}
+
+@media (max-width: 920px) {
+  .moderation-page .moderation-card.moderation-location-card {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .moderation-page .moderation-location-card .moderation-location-actions {
+    border-left: 0;
+    border-top: 1px solid rgba(4, 197, 191, 0.13);
+    padding-left: 0;
+    padding-top: 16px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .moderation-page .moderation-card.moderation-location-card {
+    padding: 18px 15px;
+  }
+
+  .moderation-location-details {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+}
