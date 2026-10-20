@@ -81,6 +81,7 @@ urlpatterns = [
     path("search/", search_views.search_page, name="search_page"),
     path("maps/", views.maps_page, name="maps_page"),
     path("maps/my-studios/", views.my_studios, name="my_studios"),
+    path("maps/my-studios/link-claim/<int:claim_id>/", views.link_my_studio_claim, name="link_my_studio_claim"),
     path("maps/location/request/", views.submit_location_request, name="submit_location_request"),
     path("maps/location/<int:location_id>/claim/", views.submit_location_claim, name="submit_location_claim"),
     path("legal/", views.legal_index, name="legal_index"),
