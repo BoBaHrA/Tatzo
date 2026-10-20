@@ -34,11 +34,11 @@ def inspect(path):
         print(result.stderr, file=sys.stderr, flush=True)
     result.check_returncode()
     assert re.search(r"^Verifies\s*$", result.stdout, re.MULTILINE), "APK signature was not verified"
-    # apksigner labels v3.1 certificates by SDK range instead of signer number.
+    # Support numbered/SDK-range labels and Build Tools 37's scheme-specific labels.
     digests = {
         value.lower()
         for value in re.findall(
-            r"^Signer(?: #[0-9]+| \([^\r\n]+\)) certificate SHA-256 digest:\s*([0-9a-fA-F]{64})\s*$",
+            r"^(?:Signer(?: #[0-9]+| \([^\r\n]+\))|V[1-4](?:\.[0-9]+)? Signer:) certificate SHA-256 digest:\s*([0-9a-fA-F]{64})\s*$",
             result.stdout, re.MULTILINE,
         )
     }
