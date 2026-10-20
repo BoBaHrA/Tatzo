@@ -131,6 +131,50 @@ class StudioOwnershipTests(TestCase):
         self.request.refresh_from_db()
         self.assertEqual(self.request.status, "submitted")
 
+    def test_anonymous_claim_review_is_safe_with_null_account(self):
+        """PostgreSQL must not lock the nullable user side of an outer join."""
+        location = Location.objects.create(
+            name="Anonymous studio", city="Lyon", status="unclaimed"
+        )
+        claim = LocationClaim.objects.create(
+            location=location,
+            claimant_name="Unregistered manager",
+            contact_email="notregistered@example.org",
+            relation_to_location="Manager",
+            status="submitted",
+        )
+        self.client.force_login(self.moderator)
+        response = self.client.post(
+            reverse("moderation_review_location", args=("claim", claim.pk)),
+            {"decision": "approve", "confirm_evidence": "1"},
+        )
+        self.assertRedirects(response, reverse("moderation_dashboard"))
+        claim.refresh_from_db()
+        location.refresh_from_db()
+        self.assertEqual(claim.status, "submitted")
+        self.assertIsNone(location.studio_owner_id)
+
+    def test_staff_can_publish_unlinked_address_without_nullable_lock_join(self):
+        """Existing anonymous location requests have neither linked owner nor approved location."""
+        request = LocationRequest.objects.create(
+            name="Anonymous new address",
+            city="Lyon", country="France",
+            full_address="17 rue des Arts", contact_email="guest@example.org",
+            latitude="45.750000", longitude="4.850000",
+            status="submitted",
+        )
+        self.client.force_login(self.moderator)
+        response = self.client.post(
+            reverse("moderation_review_location", args=("request", request.pk)),
+            {"decision": "approve", "confirm_evidence": "1",
+             "latitude": "45.750000", "longitude": "4.850000"},
+        )
+        self.assertRedirects(response, reverse("moderation_dashboard"))
+        request.refresh_from_db()
+        self.assertEqual(request.status, "approved")
+        self.assertIsNotNone(request.approved_location_id)
+        self.assertIsNone(request.approved_location.studio_owner_id)
+
     def test_existing_claim_requires_verified_linked_account(self):
         location = Location.objects.create(
             name="Claim target", city="Lyon", status="unclaimed",
