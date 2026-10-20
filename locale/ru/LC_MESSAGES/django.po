@@ -3852,3 +3852,19 @@ msgstr "Чтобы изменить адрес или отметку на кар
 #: templates/users/edit_owned_studio.html users/location_forms.py
 msgid "Save studio details"
 msgstr "Сохранить данные студии"
+
+#: templates/users/profile.html
+msgid "Specialties"
+msgstr "СПЕЦИАЛИЗАЦИЯ"
+
+#: templates/users/profile.html
+msgid "Tattoo styles"
+msgstr "Стили татуировки"
+
+#: templates/users/profile.html
+msgid "Manage styles"
+msgstr "Управлять стилями"
+
+#: templates/users/profile.html
+msgid "Choose your tattoo styles in your booking dashboard to show them on your public profile."
+msgstr "Выберите стили татуировок в настройках записи, чтобы показывать их в своём профиле."
