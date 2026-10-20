@@ -168,6 +168,134 @@ class StudioOwnershipTests(TestCase):
         self.assertTrue(item.wants_ownership)
         self.assertEqual(item.requested_by_id, self.owner.pk)
 
+    def _existing_studio(self):
+        return Location.objects.create(
+            name="Old Ink Atelier", address="18 Rue de Paris",
+            city="Lyon", country="France", status="unclaimed",
+            source="osm", source_place_id="node/claim-148",
+            latitude="45.760", longitude="4.830",
+        )
+
+    def test_existing_studio_web_claim_reaches_map_tab_and_approval(self):
+        studio = self._existing_studio()
+        claim_url = reverse("submit_location_claim", args=[studio.pk])
+        self.client.force_login(self.owner)
+        map_response = self.client.get(reverse("maps_page"))
+        self.assertContains(map_response, claim_url)
+
+        submitted = self.client.post(claim_url, {
+            "claimant_name": "Studio owner",
+            "contact_email": self.owner.email,
+            "relation_to_location": "Owner",
+            "proof": "https://example.com/business",
+            "message": "I operate this studio.",
+        })
+        self.assertRedirects(submitted, reverse("maps_page"))
+        claim = LocationClaim.objects.get(location=studio)
+        self.assertEqual(claim.status, "submitted")
+        self.assertEqual(claim.claimant_user_id, self.owner.pk)
+
+        self.client.force_login(self.moderator)
+        dashboard = self.client.get(reverse("moderation_dashboard"))
+        self.assertEqual(dashboard.context["location_claim_count"], 1)
+        self.assertContains(dashboard, 'data-folder-tab="maps"')
+        self.assertContains(dashboard, 'data-folder-panel="maps"')
+        self.assertContains(dashboard, "Old Ink Atelier")
+        self.assertContains(dashboard, self.owner.email)
+        self.assertContains(dashboard, f"@{self.owner.username}")
+        action_url = reverse("moderation_review_location", args=["claim", claim.pk])
+        self.assertContains(dashboard, action_url)
+
+        # An approval without explicit staff evidence review must not change ownership.
+        self.client.post(action_url, {"decision": "approve"})
+        claim.refresh_from_db()
+        studio.refresh_from_db()
+        self.assertEqual(claim.status, "submitted")
+        self.assertIsNone(studio.studio_owner_id)
+
+        approved = self.client.post(
+            action_url, {"decision": "approve", "confirm_evidence": "1"},
+        )
+        self.assertRedirects(approved, reverse("moderation_dashboard"))
+        claim.refresh_from_db()
+        studio.refresh_from_db()
+        self.assertEqual(claim.status, "approved")
+        self.assertEqual(studio.studio_owner_id, self.owner.pk)
+        self.assertEqual(studio.status, "claimed")
+        self.assertEqual(LocationOwnershipAudit.objects.filter(
+            source="location_claim", source_id=claim.pk,
+        ).count(), 1)
+        self.assertEqual(
+            self.client.get(reverse("moderation_dashboard")).context["location_claim_count"],
+            0,
+        )
+
+    def test_legacy_anonymous_claim_appears_without_linked_account(self):
+        studio = self._existing_studio()
+        claim = LocationClaim.objects.create(
+            location=studio,
+            claimant_name="Old claimant",
+            contact_email="old@example.com",
+            relation_to_location="Owner",
+            status="under_review",
+            claimant_user=None,
+        )
+        self.client.force_login(self.moderator)
+        dashboard = self.client.get(reverse("moderation_dashboard"))
+        self.assertEqual(dashboard.context["location_claim_count"], 1)
+        self.assertContains(dashboard, "Old Ink Atelier")
+        self.assertContains(dashboard, "Not linked")
+        self.assertContains(
+            dashboard,
+            reverse("moderation_review_location", args=["claim", claim.pk]),
+        )
+        self.client.post(
+            reverse("moderation_review_location", args=["claim", claim.pk]),
+            {"decision": "reject"},
+        )
+        claim.refresh_from_db()
+        self.assertEqual(claim.status, "rejected")
+        studio.refresh_from_db()
+        self.assertEqual(studio.status, "unclaimed")
+
+    def test_mobile_existing_studio_claim_reaches_same_moderation_tab(self):
+        studio = self._existing_studio()
+        api = APIClient()
+        api.force_authenticate(self.owner)
+        submitted = api.post(
+            reverse("mobile_api:map_location_claim", args=[studio.pk]),
+            {
+                "claimant_name": "Mobile owner",
+                "contact_email": self.owner.email,
+                "relation_to_location": "Manager",
+            },
+        )
+        self.assertEqual(submitted.status_code, 201)
+        claim = LocationClaim.objects.get(pk=submitted.data["id"])
+        self.assertEqual(claim.claimant_user_id, self.owner.pk)
+        self.client.force_login(self.moderator)
+        dashboard = self.client.get(reverse("moderation_dashboard"))
+        self.assertEqual(dashboard.context["location_claim_count"], 1)
+        self.assertContains(dashboard, "Old Ink Atelier")
+        self.assertContains(dashboard, "Mobile owner")
+
+    def test_duplicate_web_claim_not_recreated_and_still_visible_in_queue(self):
+        studio = self._existing_studio()
+        self.client.force_login(self.owner)
+        url = reverse("submit_location_claim", args=[studio.pk])
+        body = {
+            "claimant_name": "Studio owner",
+            "contact_email": self.owner.email,
+            "relation_to_location": "Owner",
+        }
+        self.client.post(url, body)
+        self.client.post(url, body)
+        self.assertEqual(LocationClaim.objects.filter(location=studio).count(), 1)
+        self.client.force_login(self.moderator)
+        response = self.client.get(reverse("moderation_dashboard"))
+        self.assertEqual(response.context["location_claim_count"], 1)
+        self.assertContains(response, "Old Ink Atelier")
+
     def _make_anonymous_claim(self, email=None):
         location = Location.objects.create(
             name="Anonymous claim studio", city="Lyon", status="unclaimed",
