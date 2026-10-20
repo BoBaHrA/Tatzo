@@ -1,0 +1,77 @@
+name: Android preview APK
+
+on:
+  pull_request:
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/android-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: android-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      CI: '1'
+      TATZO_APK_PREVIEW: '1'
+      TATZO_SOURCE_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install and check
+        run: |
+          npm ci --ignore-scripts
+          npm run typecheck
+          npm test
+      - name: Configure CARTO basemap
+        env:
+          EXPO_PUBLIC_CARTO_BASEMAP_API_KEY: ${{ secrets.EXPO_PUBLIC_CARTO_BASEMAP_API_KEY || vars.EXPO_PUBLIC_CARTO_BASEMAP_API_KEY }}
+        run: node scripts/prepare-preview-basemap.mjs
+      - name: Generate Android project
+        run: npx expo prebuild --platform android --no-install
+      - name: Build installable preview
+        working-directory: mobile/android
+        # Expo's generated release build uses the development signing key.
+        # This separate application ID is for review only, never store submission.
+        run: ./gradlew :app:assembleRelease -PreactNativeArchitectures=arm64-v8a,x86_64 --no-daemon --max-workers=2
+      - name: Verify update compatibility and package APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail --silent --show-error --location \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            --header "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/11801874411/zip" \
+            --output "${RUNNER_TEMP}/tatzo-previous.zip"
+          python3 scripts/verify-preview-apk.py android/app/build/outputs/apk/release/app-release.apk "${RUNNER_TEMP}/tatzo-previous.zip"
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: tatzo-preview-${{ github.sha }}
+          path: mobile/dist/apk/
+          if-no-files-found: error
+          retention-days: 14

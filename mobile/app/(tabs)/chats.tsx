@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import { useState } from 'react';
 import { router } from 'expo-router';
 import {
@@ -7,9 +8,9 @@ import {
   Pressable,
   RefreshControl,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
+import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { ChatThreadSummary } from '@/api/types';
@@ -42,6 +43,7 @@ function lastMessagePreview(thread: ChatThreadSummary) {
 }
 
 function ChatRow({ thread }: { thread: ChatThreadSummary }) {
+  useLanguage();
   const user = thread.other_user;
   return (
     <Pressable
@@ -88,6 +90,7 @@ function ChatRow({ thread }: { thread: ChatThreadSummary }) {
 }
 
 export default function ChatsScreen() {
+  useLanguage();
   const { threads, loading, error, refresh } = useChat();
   const [refreshing, setRefreshing] = useState(false);
 

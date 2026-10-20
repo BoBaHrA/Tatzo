@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Location from 'expo-location';
 import { Redirect, router, useFocusEffect } from 'expo-router';
@@ -7,13 +8,14 @@ import {
   Modal,
   Pressable,
   RefreshControl,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from 'react-native';
+import { Text } from '@/components/text';
+
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type {
   MapBookingMode,
@@ -47,6 +49,7 @@ type ChipProps = {
 };
 
 function Chip({ label, active = false, disabled = false, onPress }: ChipProps) {
+  useLanguage();
   return (
     <Pressable
       accessibilityRole="button"
@@ -77,6 +80,7 @@ function SheetTab({
   onPress: () => void;
   badge?: number;
 }) {
+  useLanguage();
   return (
     <Pressable
       accessibilityLabel={accessibilityLabel}
@@ -99,6 +103,7 @@ function SheetTab({
 }
 
 export default function MapScreen() {
+  useLanguage();
   const { request, status } = useAuth();
   const [region, setRegion] = useState<MapRegion>(DEFAULT_REGION);
   const [markers, setMarkers] = useState<MapLocationMarker[]>([]);
@@ -185,7 +190,7 @@ export default function MapScreen() {
 
   useEffect(() => {
     const timeout = setTimeout(() => void loadMap(), 260);
-    return () => clearTimeout(timeout);
+    return () => { clearTimeout(timeout); loadSequence.current++; };
   }, [focusRefresh, loadMap]);
 
   if (status === 'anonymous') return <Redirect href="/(auth)/login" />;
@@ -409,7 +414,7 @@ export default function MapScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={styles.safe}>
       <View style={styles.header}>
         <BrandHeader title={t('mapTitle')} />
       </View>

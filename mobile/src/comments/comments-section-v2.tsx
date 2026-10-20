@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { router } from 'expo-router';
 import {
@@ -7,10 +8,10 @@ import {
   Modal,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { CommentItem, FeedPost, ReportReason } from '@/api/types';
 import { useAuth } from '@/auth/auth-context';
@@ -100,6 +101,7 @@ function CommentRow({
   onReply,
   onReport,
 }: CommentRowProps) {
+  useLanguage();
   const openProfile = () => router.push({
     pathname: '/profile/[username]',
     params: { username: comment.author.username },
@@ -211,6 +213,7 @@ export function CommentsSectionV2({
   focusRequest = 0,
   onCountChange,
 }: CommentsSectionProps) {
+  useLanguage();
   const { request } = useAuth();
   const inputRef = useRef<TextInput>(null);
   const [comments, setComments] = useState<CommentItem[]>([]);

@@ -285,6 +285,11 @@ class ChatThreadView(APIView):
 
     def get(self, request, thread_id):
         thread = _thread_or_404(thread_id, request.user)
+        known_raw = str(request.query_params.get("known", ""))
+        known_parts = known_raw.split(",") if known_raw else []
+        if len(known_parts) > 100 or any(_parse_positive_int(value) is None for value in known_parts):
+            return Response({"code": "invalid_cursor"}, status=status.HTTP_400_BAD_REQUEST)
+        known_ids = {_parse_positive_int(value) for value in known_parts}
         after = _parse_positive_int(request.query_params.get("after"))
         before = _parse_positive_int(request.query_params.get("before"))
         if request.query_params.get("after") and after is None:
@@ -343,6 +348,11 @@ class ChatThreadView(APIView):
                 "has_more": has_more,
             }
         )
+        if known_ids:
+            known_messages = list(thread.messages.filter(pk__in=known_ids, is_deleted=False)
+                                  .select_related("sender", "sender__profile").prefetch_related("attachments"))
+            summary["updated_messages"] = [_message_payload(message, request) for message in known_messages]
+            summary["deleted_message_ids"] = sorted(known_ids - {message.pk for message in known_messages})
         return Response(summary)
 
 

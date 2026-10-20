@@ -1,13 +1,8 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
-import {
-  ActivityIndicator,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { FeedPost, PublicProfile } from '@/api/types';
 import { useAuth } from '@/auth/auth-context';
@@ -33,6 +28,7 @@ function verificationLabel(status: string) {
 }
 
 export default function ProfileScreen() {
+  useLanguage();
   const { request, user } = useAuth();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [tab, setTab] = useState<ProfileContentTab>('posts');
@@ -250,6 +246,7 @@ export default function ProfileScreen() {
 }
 
 function Stat({ value, label }: { value: number; label: string }) {
+  useLanguage();
   return (
     <View style={styles.stat}>
       <Text style={styles.statValue}>{value}</Text>
@@ -267,6 +264,7 @@ function ArtistInfoCard({
   value: string;
   onPress?: () => void;
 }) {
+  useLanguage();
   const content = (
     <>
       <Text style={styles.artistInfoTitle}>{title}</Text>
@@ -285,6 +283,7 @@ function ArtistInfoCard({
 }
 
 function ProfileTab({ active, label, onPress }: { active: boolean; label: string; onPress: () => void }) {
+  useLanguage();
   return (
     <Pressable
       accessibilityRole="tab"
@@ -298,6 +297,7 @@ function ProfileTab({ active, label, onPress }: { active: boolean; label: string
 }
 
 function PostTile({ post }: { post: FeedPost }) {
+  useLanguage();
   const media = post.media[0];
   return (
     <Pressable

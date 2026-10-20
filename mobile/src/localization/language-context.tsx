@@ -1,11 +1,14 @@
 import * as SecureStore from 'expo-secure-store';
-import { getLocales } from 'expo-localization';
+import { Platform } from 'react-native';
+import { appLanguage, normalizeLanguage, setRuntimeLanguage } from './language-runtime';
+export { getPreferredLanguage } from './language-runtime';
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type PropsWithChildren,
 } from 'react';
@@ -15,17 +18,6 @@ export type AppLanguage = 'en' | 'fr' | 'ru';
 
 const STORAGE_KEY = 'tatzo-language';
 
-function normalizeLanguage(value?: string | null): AppLanguage {
-  if (value === 'fr' || value === 'ru') return value;
-  return 'en';
-}
-
-let runtimeLanguage: AppLanguage = normalizeLanguage(getLocales()[0]?.languageCode);
-
-export function getPreferredLanguage(): AppLanguage {
-  return runtimeLanguage;
-}
-
 type LanguageContextValue = {
   language: AppLanguage;
   setLanguage: (language: AppLanguage) => Promise<void>;
@@ -34,25 +26,34 @@ type LanguageContextValue = {
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function LanguageProvider({ children }: PropsWithChildren) {
-  const [language, setLanguageState] = useState<AppLanguage>(runtimeLanguage);
+  const revision = useRef(0);
+  const writeQueue = useRef(Promise.resolve());
+  const [language, setLanguageState] = useState<AppLanguage>(appLanguage);
 
   useEffect(() => {
     let active = true;
-    void SecureStore.getItemAsync(STORAGE_KEY).then((stored) => {
-      if (!active || !stored) return;
+    const version = revision.current;
+    const read = async () => Platform.OS === 'web' ? localStorage.getItem(STORAGE_KEY) : SecureStore.getItemAsync(STORAGE_KEY);
+    void read().then((stored) => {
+      if (!active || !stored || version !== revision.current) return;
       const next = normalizeLanguage(stored);
-      runtimeLanguage = next;
+      setRuntimeLanguage(next);
       setLanguageState(next);
-    });
+    }).catch(() => { /* Keep the device language when storage is unavailable. */ });
     return () => {
       active = false;
     };
   }, []);
 
   const setLanguage = useCallback(async (next: AppLanguage) => {
-    runtimeLanguage = next;
+    revision.current++;
+    setRuntimeLanguage(next);
     setLanguageState(next);
-    await SecureStore.setItemAsync(STORAGE_KEY, next);
+    writeQueue.current = writeQueue.current.then(async () => {
+      if (Platform.OS === 'web') localStorage.setItem(STORAGE_KEY, next);
+      else await SecureStore.setItemAsync(STORAGE_KEY, next);
+    }).catch(() => { /* Keep the live preference if storage is unavailable. */ });
+    await writeQueue.current;
   }, []);
 
   const value = useMemo(() => ({ language, setLanguage }), [language, setLanguage]);

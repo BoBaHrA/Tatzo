@@ -1,5 +1,7 @@
+import { useLanguage } from '@/localization/language-context';
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import type {
   BookingOccupiedSlot,
@@ -143,6 +145,7 @@ export function BookingCalendar({
   selectedDate,
   onSelect,
 }: BookingCalendarProps) {
+  useLanguage();
   const [visibleMonth, setVisibleMonth] = useState(monthKey(selectedDate || config.today));
   useEffect(() => {
     if (selectedDate) setVisibleMonth(monthKey(selectedDate));
