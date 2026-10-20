@@ -62,6 +62,11 @@
             {% if location.latitude == None or location.longitude == None %}
             <p class="my-studios-notice my-studios-notice-warning">{% trans "Map pin is missing; ask Tatzo support to confirm the coordinates." %}</p>
             {% endif %}
+            {% if not location.linked_user_id or location.linked_user_id == request.user.pk %}
+            <div class="my-studios-card-actions">
+              <a class="my-studios-button my-studios-button-outline" href="{% url 'edit_owned_studio' location.pk %}">{% trans "Edit studio details" %}</a>
+            </div>
+            {% endif %}
           </article>
           {% empty %}
           <div class="my-studios-empty">
