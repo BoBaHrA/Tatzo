@@ -52,6 +52,7 @@ from appointments.models import APPOINTMENT_VALUE_LABELS
 from .forms import ProfileForm, VerificationForm, UserEditForm, ManualVerificationForm, PortfolioWorkForm, PortfolioAlbumForm, UserReportForm
 
 from .forms_custom import CustomUserCreationForm
+from .location_forms import OwnedStudioDetailsForm
 from posts.models import Post, PostMedia,  PostLike, PostBookmark, PostReport, PostComment, CommentReport
 from .utils import send_verification_email
 
@@ -2462,6 +2463,45 @@ def _optional_location_coordinate(*objects, field_name):
         if value not in (None, ""):
             return value
     return None
+
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def edit_owned_studio(request, location_id):
+    """Edit public details only on a reviewed studio belonging to this account.
+
+    The location address, coordinates, ownership, and approval status remain
+    immutable through this endpoint. Access is checked again on every POST.
+    """
+    allowed = Location.objects.filter(
+        pk=location_id,
+        studio_owner=request.user,
+        status__in=("claimed", "verified"),
+    ).filter(Q(linked_user__isnull=True) | Q(linked_user=request.user))
+    if request.method == "POST":
+        with transaction.atomic():
+            location = get_object_or_404(allowed.select_for_update())
+            form = OwnedStudioDetailsForm(request.POST, instance=location)
+            if form.is_valid():
+                changed = form.changed_data
+                location = form.save(commit=False)
+                if changed:
+                    location.save(update_fields=["name", "phone", "website", "updated_at"])
+                    logger.info(
+                        "Reviewed studio details updated studio_id=%s owner_id=%s fields=%s",
+                        location.pk, request.user.pk, ",".join(sorted(changed)),
+                    )
+                messages.success(request, _("Studio details saved successfully."))
+                return redirect("my_studios")
+    else:
+        location = get_object_or_404(allowed)
+        form = OwnedStudioDetailsForm(instance=location)
+
+    return render(request, "users/edit_owned_studio.html", {
+        "studio": location,
+        "form": form,
+    })
 
 
 @login_required
