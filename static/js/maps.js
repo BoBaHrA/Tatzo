@@ -269,21 +269,22 @@
         : t("imported_location", "Imported location");
       const confidence = card.dataset.confidence
         ? `${escapeHtml(card.dataset.confidence)}%`
-        : t("pending", "Pending");
+        : escapeHtml(t("pending", "Pending"));
       const website = safeExternalUrl(card.dataset.website || "");
       const websiteLabel = website.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
+      // Preserve the existing links and claim handler; no change to ownership.
       const profileButton = isVerified && card.dataset.profileUrl
         ? `<a class="tatzo-map-popup-action tatzo-map-popup-profile" href="${escapeHtml(card.dataset.profileUrl)}">${escapeHtml(t("profile", "Profile"))}</a>`
         : "";
 
       let actionButton = "";
-      if (isVerified && card.dataset.canBook === "true") {
+      if (isVerified && card.dataset.canBook === "true" && card.dataset.bookUrl) {
         actionButton = `<a class="tatzo-map-popup-action tatzo-map-popup-book" href="${escapeHtml(card.dataset.bookUrl)}">${escapeHtml(t("book", "Book"))}</a>`;
       } else if (card.dataset.claimPending === "true") {
-        actionButton = `<span class="tatzo-map-popup-status">${escapeHtml(t("my_claim_pending", "Your claim is under review"))}</span>`;
-      } else if (card.dataset.claimable === "true") {
-        actionButton = `<button class="tatzo-map-popup-action tatzo-map-popup-claim" type="button" data-open-claim data-claim-url="/maps/location/${card.dataset.locationId}/claim/" data-claim-location="${escapeHtml(card.dataset.location)}" data-claim-artist="${escapeHtml(card.dataset.artist)}" data-claim-kind="${source}">${escapeHtml(card.dataset.actionLabel || t("claim_location", "Claim this location"))}</button>`;
+        actionButton = `<span class="tatzo-map-popup-pending">${escapeHtml(t("my_claim_pending", "Your claim is under review"))}</span>`;
+      } else if (card.dataset.claimable === "true" && /^\d+$/.test(card.dataset.locationId || "")) {
+        actionButton = `<button class="tatzo-map-popup-action tatzo-map-popup-claim" type="button" data-open-claim data-claim-url="/maps/location/${card.dataset.locationId}/claim/" data-claim-location="${escapeHtml(card.dataset.location)}" data-claim-artist="${escapeHtml(card.dataset.artist)}" data-claim-kind="${escapeHtml(source)}">${escapeHtml(card.dataset.actionLabel || t("claim_location", "Claim this location"))}</button>`;
       }
 
       const contactDetails = [
@@ -291,31 +292,38 @@
           ? `<span class="tatzo-map-popup-pill">${escapeHtml(card.dataset.phone)}</span>`
           : "",
         website
-          ? `<a class="tatzo-map-popup-pill" href="${escapeHtml(website)}" target="_blank" rel="noopener noreferrer">${escapeHtml(websiteLabel || t("website", "Website"))}</a>`
+          ? `<a class="tatzo-map-popup-pill tatzo-map-popup-website" href="${escapeHtml(website)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(websiteLabel)}">${escapeHtml(websiteLabel || t("website", "Website"))}</a>`
           : "",
       ].filter(Boolean).join("");
 
       marker.bindPopup(`
-        <div class="tatzo-map-popup tatzo-map-popup-${popupType}">
+        <section class="tatzo-map-popup tatzo-map-popup-${popupType}">
           <div class="tatzo-map-popup-head">
-            <span class="tatzo-map-popup-icon">${isVerified ? "✓" : "⌖"}</span>
-            <div>
-              <strong>${escapeHtml(card.dataset.artist)}</strong>
-              <span class="tatzo-map-popup-status">${popupStatus}</span>
+            <span class="tatzo-map-popup-icon" aria-hidden="true">${isVerified ? "✓" : "⌖"}</span>
+            <div class="tatzo-map-popup-heading">
+              <h3 class="tatzo-map-popup-title">${escapeHtml(card.dataset.artist || card.dataset.name || "")}</h3>
+              <p class="tatzo-map-popup-status">${escapeHtml(popupStatus)}</p>
             </div>
           </div>
           <div class="tatzo-map-popup-meta">
-            <span>${popupBadge}</span>
-            <span>${escapeHtml(t("data", "Data"))} ${confidence}</span>
+            <span class="tatzo-map-popup-badge">${escapeHtml(popupBadge)}</span>
+            <span class="tatzo-map-popup-badge tatzo-map-popup-badge-data">${escapeHtml(t("data", "Data"))} ${confidence}</span>
           </div>
-          <p class="tatzo-map-popup-address">${escapeHtml(card.dataset.location || card.dataset.city || t("address_pending", "Address pending"))}</p>
-          ${contactDetails ? `<div class="tatzo-map-popup-contact">${contactDetails}</div>` : ""}
-          <div class="tatzo-map-popup-actions">
+          <div class="tatzo-map-popup-details">
+            <p class="tatzo-map-popup-address">${escapeHtml(card.dataset.location || card.dataset.city || t("address_pending", "Address pending"))}</p>
+            ${contactDetails ? `<div class="tatzo-map-popup-contact">${contactDetails}</div>` : ""}
+          </div>
+          ${profileButton || actionButton ? `<div class="tatzo-map-popup-actions">
             ${profileButton}
             ${actionButton}
-          </div>
-        </div>
-      `);
+          </div>` : ""}
+        </section>
+      `, {
+        className: "tatzo-leaflet-popup",
+        maxWidth: 350,
+        minWidth: 278,
+        autoPanPadding: [24, 24],
+      });
 
       addMarkerToLayer(marker);
       leafletMarkersByKey.set(card.dataset.mapKey, marker);
