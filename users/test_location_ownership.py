@@ -58,6 +58,34 @@ class StudioOwnershipTests(TestCase):
         self.assertFalse(studio["claimable"])
         self.assertEqual(studio["username"], self.owner.username)
 
+    def test_moderation_shows_actual_tatzo_account_separately_from_contact_email(self):
+        self.request.contact_email = "other-contact@example.com"
+        self.request.save(update_fields=["contact_email"])
+        self.client.force_login(self.moderator)
+
+        response = self.client.get(reverse("moderation_dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "other-contact@example.com")
+        self.assertContains(
+            response,
+            f'<a href="{reverse("profile", kwargs={"username": self.owner.username})}">@{self.owner.username}</a>',
+            html=True,
+        )
+        self.assertContains(response, "Tatzo:")
+
+    def test_moderation_does_not_guess_account_for_legacy_request(self):
+        self.request.requested_by = None
+        self.request.contact_email = self.owner.email
+        self.request.save(update_fields=["requested_by", "contact_email"])
+        self.client.force_login(self.moderator)
+
+        response = self.client.get(reverse("moderation_dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Unknown")
+        self.assertNotContains(response, f"@{self.owner.username}")
+
     def test_approval_requires_explicit_moderator_confirmation(self):
         self.client.force_login(self.moderator)
         self.client.post(
