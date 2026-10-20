@@ -342,6 +342,9 @@
               <p>{{ item.location.display_address }}</p>
               <p>{{ item.claimant_name }} — {{ item.contact_email }}</p>
               <p>{% trans "Linked account" %}: {% if item.claimant_user %}@{{ item.claimant_user.username }}{% else %}{% trans "Not linked — cannot approve yet" %}{% endif %}</p>
+              {% if item.claimant_user and item.contact_email|lower != item.claimant_user.email|lower %}
+                <p class="moderation-coordinate-help">{% trans "Claim email differs from the verified account email. Ask the claimant to update it from My Studios." %}</p>
+              {% endif %}
               <p>{% trans "Relationship" %}: {{ item.relation_to_location }}</p>
               {% if item.proof %}<p>{{ item.proof }}</p>{% endif %}
               {% if item.proof_document %}<p><a href="{% url 'protected_media' 'location-claim' item.id 'file' %}">{% trans "Private ownership evidence" %}</a></p>{% endif %}
@@ -351,7 +354,7 @@
           <form method="post" action="{% url 'moderation_review_location' 'claim' item.id %}">
             {% csrf_token %}
             <label><input type="checkbox" name="confirm_evidence" value="1" required> {% trans "I independently verified the business relationship and applicant's right to manage it." %}</label>
-            <button type="submit" name="decision" value="approve" {% if not item.claimant_user %}disabled{% endif %}>{% trans "Approve and link account" %}</button>
+            <button type="submit" name="decision" value="approve" {% if not item.claimant_user or item.contact_email|lower != item.claimant_user.email|lower %}disabled{% endif %}>{% trans "Approve and link account" %}</button>
           </form>
           <form method="post" action="{% url 'moderation_review_location' 'claim' item.id %}">
             {% csrf_token %}

@@ -51,6 +51,15 @@
     <article style="padding:1rem;margin:.75rem 0;border:1px solid #39505c;border-radius:12px">
       <h3>{{ item.location.name }}</h3>
       <p>{% trans "Review status" %}: {{ item.get_status_display }}</p>
+      {% if item.status == "submitted" or item.status == "under_review" %}
+        {% if item.contact_email|lower != request.user.email|lower %}
+          <p>{% trans "This claim's contact email differs from your verified Tatzo email. Moderation cannot approve ownership until these match." %}</p>
+          <form method="post" action="{% url 'set_my_studio_claim_account_email' item.pk %}">
+            {% csrf_token %}
+            <button type="submit">{% trans "Use my verified Tatzo email for this claim" %}</button>
+          </form>
+        {% endif %}
+      {% endif %}
     </article>
   {% empty %}
     <p>{% trans "No linked studio claims." %}</p>

@@ -84,6 +84,7 @@ urlpatterns = [
     path("maps/my-studios/", views.my_studios, name="my_studios"),
     path("maps/location/<int:location_id>/report-outdated/", views.report_outdated_location, name="report_outdated_location"),
     path("maps/my-studios/link-claim/<int:claim_id>/", views.link_my_studio_claim, name="link_my_studio_claim"),
+    path("maps/my-studios/claim/<int:claim_id>/verified-email/", views.set_my_studio_claim_account_email, name="set_my_studio_claim_account_email"),
     path("maps/location/request/", views.submit_location_request, name="submit_location_request"),
     path("maps/location/<int:location_id>/claim/", views.submit_location_claim, name="submit_location_claim"),
     path("legal/", views.legal_index, name="legal_index"),

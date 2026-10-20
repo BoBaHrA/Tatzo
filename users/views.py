@@ -24,7 +24,7 @@ from django.utils.translation import gettext as _, ngettext
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.http import require_http_methods, require_POST
 from .security import check_rate_limit, is_new_account, rate_limited_json
-from .location_review import approve_location_request, approve_location_claim, reject_location_submission, link_pending_claim_to_account, review_location_removal
+from .location_review import approve_location_request, approve_location_claim, reject_location_submission, link_pending_claim_to_account, review_location_removal, use_verified_email_for_pending_claim
 from .models import (
     Profile,
     VerificationDocument,
@@ -2494,6 +2494,21 @@ def link_my_studio_claim(request, claim_id):
         messages.error(request, "; ".join(error.messages))
     else:
         messages.success(request, _("Claim linked to your account. Tatzo must still review your proof before ownership can be granted."))
+    return redirect("my_studios")
+
+
+@login_required
+@require_POST
+def set_my_studio_claim_account_email(request, claim_id):
+    """Change a pending claim to the claimant's already verified Tatzo email."""
+    try:
+        use_verified_email_for_pending_claim(claim_id, request.user)
+    except LocationClaim.DoesNotExist:
+        raise Http404
+    except ValidationError as exc:
+        messages.error(request, "; ".join(exc.messages))
+    else:
+        messages.success(request, _("Your claim now uses your verified Tatzo account email. Moderation approval is still required."))
     return redirect("my_studios")
 
 

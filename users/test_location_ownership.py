@@ -131,6 +131,50 @@ class StudioOwnershipTests(TestCase):
         self.request.refresh_from_db()
         self.assertEqual(self.request.status, "submitted")
 
+    def test_anonymous_claim_review_is_safe_with_null_account(self):
+        """PostgreSQL must not lock the nullable user side of an outer join."""
+        location = Location.objects.create(
+            name="Anonymous studio", city="Lyon", status="unclaimed"
+        )
+        claim = LocationClaim.objects.create(
+            location=location,
+            claimant_name="Unregistered manager",
+            contact_email="notregistered@example.org",
+            relation_to_location="Manager",
+            status="submitted",
+        )
+        self.client.force_login(self.moderator)
+        response = self.client.post(
+            reverse("moderation_review_location", args=("claim", claim.pk)),
+            {"decision": "approve", "confirm_evidence": "1"},
+        )
+        self.assertRedirects(response, reverse("moderation_dashboard"))
+        claim.refresh_from_db()
+        location.refresh_from_db()
+        self.assertEqual(claim.status, "submitted")
+        self.assertIsNone(location.studio_owner_id)
+
+    def test_staff_can_publish_unlinked_address_without_nullable_lock_join(self):
+        """Existing anonymous location requests have neither linked owner nor approved location."""
+        request = LocationRequest.objects.create(
+            name="Anonymous new address",
+            city="Lyon", country="France",
+            full_address="17 rue des Arts", contact_email="guest@example.org",
+            latitude="45.750000", longitude="4.850000",
+            status="submitted",
+        )
+        self.client.force_login(self.moderator)
+        response = self.client.post(
+            reverse("moderation_review_location", args=("request", request.pk)),
+            {"decision": "approve", "confirm_evidence": "1",
+             "latitude": "45.750000", "longitude": "4.850000"},
+        )
+        self.assertRedirects(response, reverse("moderation_dashboard"))
+        request.refresh_from_db()
+        self.assertEqual(request.status, "approved")
+        self.assertIsNotNone(request.approved_location_id)
+        self.assertIsNone(request.approved_location.studio_owner_id)
+
     def test_existing_claim_requires_verified_linked_account(self):
         location = Location.objects.create(
             name="Claim target", city="Lyon", status="unclaimed",
@@ -342,6 +386,68 @@ class StudioOwnershipTests(TestCase):
             contact_email=email or self.owner.email,
             relation_to_location="Manager", status="submitted",
         )
+
+    def test_claimant_can_replace_mismatched_contact_with_verified_email(self):
+        studio = self._existing_studio()
+        claim = LocationClaim.objects.create(
+            location=studio, claimant_user=self.owner,
+            claimant_name="Studio manager", contact_email="business@example.org",
+            relation_to_location="Manager", status="submitted",
+        )
+        self.client.force_login(self.owner)
+        page = self.client.get(reverse("my_studios"))
+        link = reverse("set_my_studio_claim_account_email", args=[claim.pk])
+        self.assertContains(page, link)
+        response = self.client.post(link)
+        self.assertRedirects(response, reverse("my_studios"))
+        claim.refresh_from_db()
+        self.assertEqual(claim.contact_email, self.owner.email)
+        self.assertEqual(claim.status, "submitted")
+        studio.refresh_from_db()
+        self.assertIsNone(studio.studio_owner_id)
+        self.assertFalse(LocationOwnershipAudit.objects.exists())
+
+        self.client.force_login(self.moderator)
+        approved = self.client.post(
+            reverse("moderation_review_location", args=["claim", claim.pk]),
+            {"decision": "approve", "confirm_evidence": "1"},
+        )
+        self.assertRedirects(approved, reverse("moderation_dashboard"))
+        studio.refresh_from_db()
+        self.assertEqual(studio.studio_owner_id, self.owner.pk)
+
+    def test_other_user_cannot_change_claim_contact_email(self):
+        studio = self._existing_studio()
+        claim = LocationClaim.objects.create(
+            location=studio, claimant_user=self.owner,
+            claimant_name="Studio manager", contact_email="business@example.org",
+            relation_to_location="Manager", status="submitted",
+        )
+        another = User.objects.create_user("outsiderclaim", "outsider@example.org", "pw")
+        another.profile.is_email_verified = True
+        another.profile.save(update_fields=["is_email_verified"])
+        url = reverse("set_my_studio_claim_account_email", args=[claim.pk])
+        self.client.force_login(another)
+        self.assertEqual(self.client.post(url).status_code, 404)
+        claim.refresh_from_db()
+        self.assertEqual(claim.contact_email, "business@example.org")
+
+    def test_unverified_claimant_cannot_update_contact_email(self):
+        studio = self._existing_studio()
+        claim = LocationClaim.objects.create(
+            location=studio, claimant_user=self.owner,
+            claimant_name="Studio manager", contact_email="business@example.org",
+            relation_to_location="Manager", status="submitted",
+        )
+        self.owner.profile.is_email_verified = False
+        self.owner.profile.save(update_fields=["is_email_verified"])
+        self.client.force_login(self.owner)
+        response = self.client.post(
+            reverse("set_my_studio_claim_account_email", args=[claim.pk])
+        )
+        self.assertRedirects(response, reverse("my_studios"))
+        claim.refresh_from_db()
+        self.assertEqual(claim.contact_email, "business@example.org")
 
     def test_anonymous_claim_can_be_linked_then_staff_approved(self):
         claim = self._make_anonymous_claim()
