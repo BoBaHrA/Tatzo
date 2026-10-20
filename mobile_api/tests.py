@@ -1199,7 +1199,7 @@ class MobileBookingTests(APITestCase):
         self.assertEqual(vacation.data["code"], "date_blocked")
 
     def test_calendar_reminders_do_not_consume_booking_time(self):
-        artist_timezone = timezone.get_fixed_timezone(120)
+        artist_timezone = ZoneInfo(self.artist.profile.timezone)
         CalendarEvent.objects.create(
             artist=self.artist,
             event_type=CalendarEvent.TYPE_SKETCH_DEADLINE,
