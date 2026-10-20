@@ -167,6 +167,26 @@ def link_pending_claim_to_account(claim_id, user):
 
 
 @transaction.atomic
+def use_verified_email_for_pending_claim(claim_id, user):
+    """Allow the original claimant to use their verified Tatzo email.
+
+    This only updates claim contact details and never grants studio ownership.
+    """
+    if not getattr(user, "is_authenticated", False):
+        raise ValidationError("Sign in to update your claim's contact email.")
+    verified_user = _verified_applicant(user, user.email)
+    claim = LocationClaim.objects.select_for_update().get(
+        pk=claim_id, claimant_user=verified_user
+    )
+    if claim.status not in ACTIVE_STATES:
+        raise ValidationError("Only pending studio claims can be updated.")
+    if claim.contact_email.strip().casefold() != user.email.strip().casefold():
+        claim.contact_email = user.email.strip()
+        claim.save(update_fields=["contact_email", "updated_at"])
+    return claim
+
+
+@transaction.atomic
 def approve_location_claim(claim_id, reviewer):
     """Grant management of an existing studio after independent evidence review."""
     _require_moderator(reviewer)
