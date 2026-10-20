@@ -156,6 +156,30 @@
         </div>
 
         {% if profile_user.profile.account_type == "tattoo_artist" %}
+          {% if public_tattoo_styles or request.user == profile_user and not is_unclaimed and not claim_pending %}
+            <section class="profile-styles-card" aria-labelledby="profile-styles-heading">
+              <div class="profile-styles-header">
+                <div class="profile-styles-header-copy">
+                  <span class="profile-styles-eyebrow">{% trans "Specialties" %}</span>
+                  <h2 id="profile-styles-heading">{% trans "Tattoo styles" %}</h2>
+                </div>
+                {% if request.user == profile_user and not is_unclaimed and not claim_pending and profile_user.profile.verification_status == "approved" %}
+                  <a href="{% url 'artist_booking_settings' %}" class="profile-styles-edit">
+                    {% trans "Manage styles" %} <span aria-hidden="true">↗</span>
+                  </a>
+                {% endif %}
+              </div>
+              {% if public_tattoo_styles %}
+                <div class="profile-styles-list" aria-label="{% trans 'Tattoo styles' %}">
+                  {% for style in public_tattoo_styles %}
+                    <span class="profile-style-chip">{{ style }}</span>
+                  {% endfor %}
+                </div>
+              {% elif request.user == profile_user %}
+                <p class="profile-styles-empty">{% trans "Choose your tattoo styles in your booking dashboard to show them on your public profile." %}</p>
+              {% endif %}
+            </section>
+          {% endif %}
           <div class="artist-info-grid">
             <div class="artist-info-card">
               <div class="artist-info-title">{% trans "Verification" %}</div>
