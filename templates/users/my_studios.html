@@ -32,6 +32,20 @@
   {% empty %}
     <p>{% trans "You have not submitted a new address." %}</p>
   {% endfor %}
+  {% if unlinked_claims %}
+    <h2>{% trans "Claims submitted before I created my account" %}</h2>
+    <p>{% trans "These pending claims used your verified email address. Link only claims you personally submitted. Linking does not approve ownership; Tatzo still reviews the evidence." %}</p>
+    {% for claim in unlinked_claims %}
+      <article style="padding:1rem;margin:.75rem 0;border:1px solid #39505c;border-radius:12px">
+        <h3>{{ claim.location.name }}</h3>
+        <p>{% trans "Review status" %}: {{ claim.get_status_display }}</p>
+        <form method="post" action="{% url 'link_my_studio_claim' claim.pk %}">
+          {% csrf_token %}
+          <button type="submit">{% trans "Link this claim to my account" %}</button>
+        </form>
+      </article>
+    {% endfor %}
+  {% endif %}
   <h2>{% trans "Claims for existing studios" %}</h2>
   {% for item in submitted_claims %}
     <article style="padding:1rem;margin:.75rem 0;border:1px solid #39505c;border-radius:12px">
