@@ -1,4 +1,5 @@
 """My Studios page styling, translations and claim controls."""
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -43,11 +44,18 @@ class MyStudiosUiTests(TestCase):
     def test_page_and_maps_button_are_translated_to_russian_and_french(self):
         for language, heading in [("ru", "Мои студии"), ("fr", "Mes studios")]:
             with self.subTest(language=language):
+                self.client.cookies[settings.LANGUAGE_COOKIE_NAME] = language
                 with translation.override(language):
-                    page = self.client.get(reverse("my_studios"))
+                    page = self.client.get(
+                        reverse("my_studios"),
+                        HTTP_ACCEPT_LANGUAGE=language,
+                    )
                     self.assertContains(page, heading)
                     self.assertNotContains(page, "My studios and addresses")
-                    map_page = self.client.get(reverse("maps_page"))
+                    map_page = self.client.get(
+                        reverse("maps_page"),
+                        HTTP_ACCEPT_LANGUAGE=language,
+                    )
                     self.assertContains(map_page, heading)
 
     def test_anonymous_cannot_see_private_studio_dashboard(self):
