@@ -1,68 +1,176 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "My studios" %} | Tatzo{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/my_studios.css' %}">
+{% endblock %}
+
 {% block content %}
 {% include "partials/sidebar.html" %}
-<main style="max-width:860px;margin:2rem auto;padding:1.25rem">
-  <h1>{% trans "My studios and addresses" %}</h1>
-  <p>{% trans "Only studios approved by a moderator are linked to your Tatzo account. A pending request is not a published studio." %}</p>
-  <p><a href="{% url 'maps_page' %}">{% trans "Back to map / Add another location" %}</a></p>
-  <h2>{% trans "Approved addresses I manage" %}</h2>
-  {% for location in owned_locations %}
-    <article style="padding:1rem;margin:.75rem 0;border:1px solid #39505c;border-radius:12px">
-      <h3>{{ location.name }}</h3>
-      <p>{{ location.display_address }}</p>
-      <p>{% trans "Approved and linked to your account" %}</p>
-      {% if location.latitude == None or location.longitude == None %}
-        <p>{% trans "Map pin is missing; ask Tatzo support to confirm the coordinates." %}</p>
+<main class="my-studios-page" id="main-content">
+  <div class="my-studios-shell">
+    <header class="my-studios-hero">
+      <div class="my-studios-hero-copy">
+        <p class="my-studios-kicker">{% trans "Studio management" %}</p>
+        <h1>{% trans "My studios" %}</h1>
+        <p class="my-studios-description">{% trans "Manage your studio addresses and follow your map requests. Only approved locations appear as studios you manage." %}</p>
+      </div>
+      <nav class="my-studios-hero-actions" aria-label="{% trans 'Studio navigation' %}">
+        <a class="my-studios-button my-studios-button-outline" href="{% url 'maps_page' %}">← {% trans "Back to map" %}</a>
+        <a class="my-studios-button my-studios-button-primary" href="{% url 'maps_page' %}">{% trans "Add a location on the map" %} <span aria-hidden="true">↗</span></a>
+      </nav>
+    </header>
+
+    <div class="my-studios-overview" aria-label="{% trans 'Studio overview' %}">
+      <div class="my-studios-summary">
+        <span>{% trans "Studios managed" %}</span>
+        <strong>{{ owned_locations|length }}</strong>
+      </div>
+      <div class="my-studios-summary">
+        <span>{% trans "Addresses submitted" %}</span>
+        <strong>{{ requested_locations|length }}</strong>
+      </div>
+      <div class="my-studios-summary">
+        <span>{% trans "Studio claims" %}</span>
+        <strong>{{ submitted_claims|length }}</strong>
+      </div>
+    </div>
+
+    <div class="my-studios-sections">
+      <section class="my-studios-panel" aria-labelledby="managed-studios-heading">
+        <div class="my-studios-panel-heading">
+          <div>
+            <p class="my-studios-section-kicker">{% trans "Your places" %}</p>
+            <h2 id="managed-studios-heading">{% trans "Approved studios I manage" %}</h2>
+          </div>
+          <span class="my-studios-panel-count">{{ owned_locations|length }}</span>
+        </div>
+        <div class="my-studios-card-grid">
+          {% for location in owned_locations %}
+          <article class="my-studios-card">
+            <div class="my-studios-card-top">
+              <span class="my-studios-badge my-studios-badge-approved">{% trans "Approved" %}</span>
+            </div>
+            <h3>{{ location.name }}</h3>
+            <dl class="my-studios-details">
+              <div><dt>{% trans "Address" %}</dt><dd>{{ location.display_address }}</dd></div>
+              {% if location.phone %}<div><dt>{% trans "Phone" %}</dt><dd>{{ location.phone }}</dd></div>{% endif %}
+              {% if location.website %}<div><dt>{% trans "Website" %}</dt><dd>{{ location.website }}</dd></div>{% endif %}
+            </dl>
+            {% if location.latitude == None or location.longitude == None %}
+            <p class="my-studios-notice my-studios-notice-warning">{% trans "Map pin is missing; ask Tatzo support to confirm the coordinates." %}</p>
+            {% endif %}
+          </article>
+          {% empty %}
+          <div class="my-studios-empty">
+            <span class="my-studios-empty-icon" aria-hidden="true">⌖</span>
+            <p>{% trans "No approved studio addresses linked yet." %}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="my-studios-panel" aria-labelledby="submitted-addresses-heading">
+        <div class="my-studios-panel-heading">
+          <div>
+            <p class="my-studios-section-kicker">{% trans "Map requests" %}</p>
+            <h2 id="submitted-addresses-heading">{% trans "My submitted addresses" %}</h2>
+          </div>
+          <span class="my-studios-panel-count">{{ requested_locations|length }}</span>
+        </div>
+        <div class="my-studios-card-grid">
+          {% for item in requested_locations %}
+          <article class="my-studios-card">
+            <div class="my-studios-card-top">
+              <span class="my-studios-badge {% if item.status == 'approved' %}my-studios-badge-approved{% elif item.status == 'rejected' %}my-studios-badge-rejected{% endif %}">{{ item.get_status_display }}</span>
+            </div>
+            <h3>{{ item.name }}</h3>
+            <dl class="my-studios-details">
+              <div><dt>{% trans "Address" %}</dt><dd>{{ item.full_address }}</dd></div>
+              <div><dt>{% trans "Requested ownership" %}</dt><dd>{% if item.wants_ownership %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</dd></div>
+            </dl>
+          </article>
+          {% empty %}
+          <div class="my-studios-empty">
+            <span class="my-studios-empty-icon" aria-hidden="true">＋</span>
+            <p>{% trans "You have not submitted a new address." %}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      {% if unlinked_claims %}
+      <section class="my-studios-panel" aria-labelledby="unlinked-claims-heading">
+        <div class="my-studios-panel-heading">
+          <div>
+            <p class="my-studios-section-kicker">{% trans "Account linking" %}</p>
+            <h2 id="unlinked-claims-heading">{% trans "Claims submitted before I created my account" %}</h2>
+          </div>
+          <span class="my-studios-panel-count">{{ unlinked_claims|length }}</span>
+        </div>
+        <p class="my-studios-panel-intro">{% trans "These pending claims used your verified email address. Link only claims you personally submitted. Linking does not approve ownership; Tatzo still reviews the evidence." %}</p>
+        <div class="my-studios-card-grid">
+          {% for claim in unlinked_claims %}
+          <article class="my-studios-card">
+            <div class="my-studios-card-top">
+              <span class="my-studios-badge">{{ claim.get_status_display }}</span>
+            </div>
+            <h3>{{ claim.location.name }}</h3>
+            <p class="my-studios-card-secondary">{{ claim.location.display_address }}</p>
+            <form method="post" action="{% url 'link_my_studio_claim' claim.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="my-studios-button my-studios-button-primary">{% trans "Link this claim to my account" %}</button>
+            </form>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
       {% endif %}
-    </article>
-  {% empty %}
-    <p>{% trans "No approved studio addresses linked yet." %}</p>
-  {% endfor %}
-  <h2>{% trans "My submitted addresses" %}</h2>
-  {% for item in requested_locations %}
-    <article style="padding:1rem;margin:.75rem 0;border:1px solid #39505c;border-radius:12px">
-      <h3>{{ item.name }}</h3>
-      <p>{{ item.full_address }}</p>
-      <p>{% trans "Review status" %}: {{ item.get_status_display }}</p>
-      <p>{% trans "Requested ownership" %}: {{ item.wants_ownership|yesno:"Yes,No" }}</p>
-    </article>
-  {% empty %}
-    <p>{% trans "You have not submitted a new address." %}</p>
-  {% endfor %}
-  {% if unlinked_claims %}
-    <h2>{% trans "Claims submitted before I created my account" %}</h2>
-    <p>{% trans "These pending claims used your verified email address. Link only claims you personally submitted. Linking does not approve ownership; Tatzo still reviews the evidence." %}</p>
-    {% for claim in unlinked_claims %}
-      <article style="padding:1rem;margin:.75rem 0;border:1px solid #39505c;border-radius:12px">
-        <h3>{{ claim.location.name }}</h3>
-        <p>{% trans "Review status" %}: {{ claim.get_status_display }}</p>
-        <form method="post" action="{% url 'link_my_studio_claim' claim.pk %}">
-          {% csrf_token %}
-          <button type="submit">{% trans "Link this claim to my account" %}</button>
-        </form>
-      </article>
-    {% endfor %}
-  {% endif %}
-  <h2>{% trans "Claims for existing studios" %}</h2>
-  {% for item in submitted_claims %}
-    <article style="padding:1rem;margin:.75rem 0;border:1px solid #39505c;border-radius:12px">
-      <h3>{{ item.location.name }}</h3>
-      <p>{% trans "Review status" %}: {{ item.get_status_display }}</p>
-      {% if item.status == "submitted" or item.status == "under_review" %}
-        {% if item.contact_email|lower != request.user.email|lower %}
-          <p>{% trans "This claim's contact email differs from your verified Tatzo email. Moderation cannot approve ownership until these match." %}</p>
-          <form method="post" action="{% url 'set_my_studio_claim_account_email' item.pk %}">
-            {% csrf_token %}
-            <button type="submit">{% trans "Use my verified Tatzo email for this claim" %}</button>
-          </form>
-        {% endif %}
-      {% endif %}
-    </article>
-  {% empty %}
-    <p>{% trans "No linked studio claims." %}</p>
-  {% endfor %}
+
+      <section class="my-studios-panel" aria-labelledby="existing-claims-heading">
+        <div class="my-studios-panel-heading">
+          <div>
+            <p class="my-studios-section-kicker">{% trans "Ownership requests" %}</p>
+            <h2 id="existing-claims-heading">{% trans "Claims for existing studios" %}</h2>
+          </div>
+          <span class="my-studios-panel-count">{{ submitted_claims|length }}</span>
+        </div>
+        <div class="my-studios-card-grid">
+          {% for item in submitted_claims %}
+          <article class="my-studios-card">
+            <div class="my-studios-card-top">
+              <span class="my-studios-badge {% if item.status == 'approved' %}my-studios-badge-approved{% elif item.status == 'rejected' %}my-studios-badge-rejected{% endif %}">{{ item.get_status_display }}</span>
+            </div>
+            <h3>{{ item.location.name }}</h3>
+            <dl class="my-studios-details">
+              <div><dt>{% trans "Address" %}</dt><dd>{{ item.location.display_address }}</dd></div>
+              <div><dt>{% trans "Relationship" %}</dt><dd>{{ item.relation_to_location }}</dd></div>
+              <div><dt>{% trans "Contact email" %}</dt><dd>{{ item.contact_email }}</dd></div>
+            </dl>
+            {% if item.status == "submitted" or item.status == "under_review" %}
+              {% if item.contact_email|lower != request.user.email|lower %}
+              <div class="my-studios-notice my-studios-notice-warning" role="status">
+                <strong>{% trans "Action required" %}</strong>
+                <p>{% trans "This claim's contact email differs from your verified Tatzo email. Moderation cannot approve ownership until these match." %}</p>
+                <form method="post" action="{% url 'set_my_studio_claim_account_email' item.pk %}">
+                  {% csrf_token %}
+                  <button type="submit" class="my-studios-button my-studios-button-primary">{% trans "Use my verified Tatzo email for this claim" %}</button>
+                </form>
+              </div>
+              {% endif %}
+            {% endif %}
+          </article>
+          {% empty %}
+          <div class="my-studios-empty">
+            <span class="my-studios-empty-icon" aria-hidden="true">◎</span>
+            <p>{% trans "No linked studio claims." %}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </div>
 </main>
 {% endblock %}
