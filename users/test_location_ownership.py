@@ -140,6 +140,80 @@ class StudioOwnershipTests(TestCase):
         self.assertTrue(item.wants_ownership)
         self.assertEqual(item.requested_by_id, self.owner.pk)
 
+    def _make_anonymous_claim(self, email=None):
+        location = Location.objects.create(
+            name="Anonymous claim studio", city="Lyon", status="unclaimed",
+        )
+        return LocationClaim.objects.create(
+            location=location, claimant_name="Manager",
+            contact_email=email or self.owner.email,
+            relation_to_location="Manager", status="submitted",
+        )
+
+    def test_anonymous_claim_can_be_linked_then_staff_approved(self):
+        claim = self._make_anonymous_claim()
+        with self.assertRaises(ValidationError):
+            approve_location_claim(claim.pk, self.moderator)
+        self.client.force_login(self.owner)
+        dashboard = self.client.get(reverse("my_studios"))
+        self.assertContains(dashboard, "Anonymous claim studio")
+        self.assertContains(dashboard, reverse("link_my_studio_claim", args=[claim.pk]))
+        response = self.client.post(reverse("link_my_studio_claim", args=[claim.pk]))
+        self.assertRedirects(response, reverse("my_studios"))
+        claim.refresh_from_db()
+        self.assertEqual(claim.claimant_user, self.owner)
+        self.assertEqual(claim.status, "submitted")
+        self.assertIsNone(claim.location.studio_owner)
+        self.assertEqual(LocationOwnershipAudit.objects.count(), 0)
+        self.assertEqual(
+            approve_location_claim(claim.pk, self.moderator).studio_owner, self.owner
+        )
+        self.assertEqual(LocationOwnershipAudit.objects.count(), 1)
+
+    def test_link_requires_post_and_login(self):
+        claim = self._make_anonymous_claim()
+        url = reverse("link_my_studio_claim", args=[claim.pk])
+        self.assertEqual(self.client.post(url).status_code, 302)
+        self.client.force_login(self.owner)
+        self.assertEqual(self.client.get(url).status_code, 405)
+        claim.refresh_from_db()
+        self.assertIsNone(claim.claimant_user)
+
+    def test_unverified_or_mismatched_email_cannot_link(self):
+        claim = self._make_anonymous_claim()
+        self.client.force_login(self.owner)
+        self.owner.profile.is_email_verified = False
+        self.owner.profile.save(update_fields=["is_email_verified"])
+        self.client.post(reverse("link_my_studio_claim", args=[claim.pk]))
+        claim.refresh_from_db()
+        self.assertIsNone(claim.claimant_user)
+        self.assertNotContains(self.client.get(reverse("my_studios")), "Anonymous claim studio")
+        self.owner.profile.is_email_verified = True
+        self.owner.profile.save(update_fields=["is_email_verified"])
+        claim.contact_email = "other@example.com"
+        claim.save(update_fields=["contact_email"])
+        self.client.post(reverse("link_my_studio_claim", args=[claim.pk]))
+        claim.refresh_from_db()
+        self.assertIsNone(claim.claimant_user)
+
+    def test_link_never_reassigns_claim_or_approved_ownership(self):
+        claim = self._make_anonymous_claim()
+        second = User.objects.create_user("secondowner", "second@example.com", "pw")
+        second.profile.is_email_verified = True
+        second.profile.save(update_fields=["is_email_verified"])
+        claim.claimant_user = second
+        claim.save(update_fields=["claimant_user"])
+        self.client.force_login(self.owner)
+        self.client.post(reverse("link_my_studio_claim", args=[claim.pk]))
+        claim.refresh_from_db()
+        self.assertEqual(claim.claimant_user, second)
+        claim.claimant_user = None
+        claim.status = "rejected"
+        claim.save(update_fields=["claimant_user", "status"])
+        self.client.post(reverse("link_my_studio_claim", args=[claim.pk]))
+        claim.refresh_from_db()
+        self.assertIsNone(claim.claimant_user)
+
     def test_anonymous_can_suggest_but_not_claim_new_address(self):
         self.client.logout()
         self.client.post(reverse("submit_location_request"), {
