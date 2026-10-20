@@ -702,6 +702,11 @@
         panel.classList.toggle("active", isActive);
       });
 
+      try {
+        window.sessionStorage.setItem("tatzo-moderation-folder", folder);
+      } catch (_) {
+        // Browsers blocking session storage still support tab navigation.
+      }
       applyFilters();
     }
 
@@ -807,8 +812,15 @@
     });
 
     const requestedFolder = new URLSearchParams(window.location.search).get("folder");
-    if (requestedFolder && Array.from(tabs).some(tab => tab.dataset.folderTab === requestedFolder)) {
-      activateFolder(requestedFolder);
+    let previousFolder = null;
+    try {
+      previousFolder = window.sessionStorage.getItem("tatzo-moderation-folder");
+    } catch (_) {
+      // Optional convenience; no persistence required.
+    }
+    const initialFolder = requestedFolder || previousFolder;
+    if (initialFolder && Array.from(tabs).some(tab => tab.dataset.folderTab === initialFolder)) {
+      activateFolder(initialFolder);
     } else {
       applyFilters();
     }
