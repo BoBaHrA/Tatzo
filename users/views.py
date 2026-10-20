@@ -12,19 +12,19 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
+from django.core.validators import validate_email, URLValidator
 from django.db import transaction
 from django.db.models import Case, Count, Exists, IntegerField, OuterRef, Q, Value, When
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import force_str
 from django.utils.translation import gettext as _, ngettext
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.http import require_http_methods, require_POST
 from .security import check_rate_limit, is_new_account, rate_limited_json
+from .location_review import approve_location_request, approve_location_claim, reject_location_submission, link_pending_claim_to_account, review_location_removal
 from .models import (
     Profile,
     VerificationDocument,
@@ -32,6 +32,7 @@ from .models import (
     Location,
     LocationClaim,
     LocationRequest,
+    LocationRemovalRequest,
     LOCATION_UPLOAD_EXTENSIONS,
     MAX_LOCATION_UPLOAD_SIZE,
     UserFollow,
@@ -1386,10 +1387,6 @@ def moderation_dashboard(request):
         user__profile__verification_status="pending_manual_review",
     ).select_related("user", "user__profile")
 
-    pending_location_requests = LocationRequest.objects.filter(
-        status__in=["submitted", "under_review"]
-    ).order_by("-created_at")
-
     post_reports = (
         PostReport.objects
         .filter(is_resolved=False)
@@ -1405,20 +1402,87 @@ def moderation_dashboard(request):
         .order_by("-created_at")
     )
 
+    pending_location_requests = LocationRequest.objects.filter(status__in=["submitted", "under_review"]).select_related("requested_by").order_by("-created_at")
+    pending_location_claims = LocationClaim.objects.filter(status__in=["submitted", "under_review"]).select_related("claimant_user", "location").order_by("-created_at")
+    pending_location_removals = LocationRemovalRequest.objects.filter(status="submitted").select_related("location", "reporter_user").order_by("-created_at")
+
     context = {
+        "pending_location_requests": pending_location_requests,
+        "pending_location_claims": pending_location_claims,
+        "pending_location_removals": pending_location_removals,
+        "location_removal_count": pending_location_removals.count(),
+        "location_request_count": pending_location_requests.count(),
+        "location_claim_count": pending_location_claims.count(),
         "pending_document_requests": pending_document_requests,
         "pending_manual_requests": pending_manual_requests,
-        "pending_location_requests": pending_location_requests,
         "post_reports": post_reports,
         "comment_reports": comment_reports,
         "document_count": pending_document_requests.count(),
         "manual_count": pending_manual_requests.count(),
-        "location_requests_count": pending_location_requests.count(),
         "post_reports_count": post_reports.count(),
         "comment_reports_count": comment_reports.count(),
     }
 
     return render(request, "users/moderation_dashboard.html", context)
+
+
+@user_passes_test(is_admin)
+@require_POST
+def moderation_review_location(request, kind, item_id):
+    """One staff-only POST endpoint for transactional approval/rejection."""
+    if kind not in ("claim", "request"):
+        raise Http404
+    action = request.POST.get("decision")
+    if action not in ("approve", "reject"):
+        messages.error(request, _("Choose a valid moderation action."))
+        return redirect("moderation_dashboard")
+    if action == "approve" and request.POST.get("confirm_evidence") != "1":
+        messages.error(request, _("Confirm that you independently reviewed the business evidence."))
+        return redirect("moderation_dashboard")
+
+    try:
+        if action == "reject":
+            reject_location_submission(kind, item_id, request.user)
+        elif kind == "request":
+            lat = request.POST.get("latitude")
+            lon = request.POST.get("longitude")
+            if lat is None and lon is None:
+                # Existing clients may submit requests whose stored pin has
+                # already been verified; service still enforces both values.
+                approve_location_request(item_id, request.user)
+            elif not lat or not lon:
+                raise ValidationError("Enter valid latitude and longitude before approval.")
+            else:
+                approve_location_request(item_id, request.user, latitude=lat, longitude=lon)
+        else:
+            approve_location_claim(item_id, request.user)
+    except (ValidationError, LocationRequest.DoesNotExist, LocationClaim.DoesNotExist, Location.DoesNotExist) as error:
+        messages.error(request, "; ".join(error.messages) if isinstance(error, ValidationError) else str(error))
+        return redirect("moderation_dashboard")
+    messages.success(request, _("Location submission reviewed successfully."))
+    return redirect("moderation_dashboard")
+
+
+@user_passes_test(is_admin)
+@require_POST
+def moderation_review_location_removal(request, item_id):
+    decision = request.POST.get("decision")
+    if decision not in ("approve", "reject"):
+        messages.error(request, _("Choose a valid moderation action."))
+        return redirect("moderation_dashboard")
+    if decision == "approve" and request.POST.get("confirm_evidence") != "1":
+        messages.error(request, _("Confirm you checked the location closure evidence."))
+        return redirect("moderation_dashboard")
+    try:
+        review_location_removal(
+            item_id, request.user, decision,
+            confirm_managed=request.POST.get("confirm_managed") == "1",
+        )
+    except (ValidationError, LocationRemovalRequest.DoesNotExist, Location.DoesNotExist) as error:
+        messages.error(request, "; ".join(error.messages) if isinstance(error, ValidationError) else str(error))
+    else:
+        messages.success(request, _("Location closure report reviewed."))
+    return redirect("moderation_dashboard")
 
 
 @user_passes_test(is_admin)
@@ -1475,124 +1539,6 @@ def moderation_reject_artist(request, username):
         % {"username": user_obj.username},
     )
     return redirect("moderation_dashboard")
-
-
-def _map_moderation_redirect():
-    return redirect(f"{reverse('moderation_dashboard')}?folder=maps")
-
-
-def _moderated_coordinate(raw_value, minimum, maximum):
-    try:
-        coordinate = Decimal(str(raw_value or "").strip())
-        if not coordinate.is_finite() or not minimum <= coordinate <= maximum:
-            return None
-        return coordinate.quantize(Decimal("0.000001"))
-    except (InvalidOperation, TypeError, ValueError):
-        return None
-
-
-def _matching_public_location(location_request):
-    return (
-        Location.objects.select_for_update()
-        .filter(
-            linked_user__isnull=True,
-            name__iexact=location_request.name,
-            city__iexact=location_request.city,
-            country__iexact=location_request.country,
-            status__in=["imported", "unclaimed", "pending_claim"],
-        )
-        .filter(
-            Q(address__iexact=location_request.full_address)
-            | Q(formatted_address__iexact=location_request.full_address)
-        )
-        .order_by("pk")
-        .first()
-    )
-
-
-@user_passes_test(is_admin)
-@require_POST
-def moderation_approve_location_request(request, request_id):
-    latitude = _moderated_coordinate(
-        request.POST.get("latitude"), Decimal("-90"), Decimal("90")
-    )
-    longitude = _moderated_coordinate(
-        request.POST.get("longitude"), Decimal("-180"), Decimal("180")
-    )
-    if latitude is None or longitude is None:
-        messages.error(
-            request,
-            _("Enter valid latitude and longitude before approving the request."),
-        )
-        return _map_moderation_redirect()
-
-    with transaction.atomic():
-        location_request = get_object_or_404(
-            LocationRequest.objects.select_for_update(),
-            pk=request_id,
-            status__in=["submitted", "under_review"],
-        )
-        location = _matching_public_location(location_request)
-        location_values = {
-            "name": location_request.name,
-            "address": location_request.full_address,
-            "formatted_address": location_request.full_address,
-            "city": location_request.city,
-            "country": location_request.country,
-            "latitude": latitude,
-            "longitude": longitude,
-            "phone": location_request.phone,
-            "website": location_request.website_or_map_link,
-            "verified_at": timezone.now(),
-        }
-
-        if location is None:
-            Location.objects.create(
-                **location_values,
-                source="manual",
-                status="unclaimed",
-            )
-        else:
-            if not location_request.phone:
-                location_values.pop("phone")
-            if not location_request.website_or_map_link:
-                location_values.pop("website")
-            changed_fields = []
-            for field_name, value in location_values.items():
-                if getattr(location, field_name) != value:
-                    setattr(location, field_name, value)
-                    changed_fields.append(field_name)
-            if changed_fields:
-                location.save(update_fields=[*changed_fields, "updated_at"])
-
-        location_request.latitude = latitude
-        location_request.longitude = longitude
-        location_request.status = "approved"
-        location_request.save(
-            update_fields=["latitude", "longitude", "status", "updated_at"]
-        )
-
-    messages.success(
-        request,
-        _("Location request approved and published on the map."),
-    )
-    return _map_moderation_redirect()
-
-
-@user_passes_test(is_admin)
-@require_POST
-def moderation_reject_location_request(request, request_id):
-    with transaction.atomic():
-        location_request = get_object_or_404(
-            LocationRequest.objects.select_for_update(),
-            pk=request_id,
-            status__in=["submitted", "under_review"],
-        )
-        location_request.status = "rejected"
-        location_request.save(update_fields=["status", "updated_at"])
-
-    messages.success(request, _("Location request rejected."))
-    return _map_moderation_redirect()
 
 
 @user_passes_test(is_admin)
@@ -2150,6 +2096,63 @@ def _validate_location_upload(uploaded_file):
     return uploaded_file.size <= MAX_LOCATION_UPLOAD_SIZE
 
 
+@require_http_methods(["GET", "POST"])
+def report_outdated_location(request, location_id):
+    """Accept a closure report without giving the submitter moderation powers."""
+    location = get_object_or_404(
+        Location, pk=location_id,
+        status__in=["imported", "unclaimed", "pending_claim", "claimed", "verified"],
+    )
+    if request.method == "GET":
+        return render(request, "users/report_outdated_location.html", {
+            "location": location,
+            "default_email": request.user.email if request.user.is_authenticated else "",
+        })
+
+    reporter_name = (request.POST.get("reporter_name") or "").strip()
+    contact_email = (request.POST.get("contact_email") or "").strip()
+    reason = (request.POST.get("reason") or "").strip()
+    evidence_url = (request.POST.get("evidence_url") or "").strip()
+
+    allowed, _retry_after = check_rate_limit(
+        request, scope="maps:obsolete-location", limit=5,
+        window_seconds=24 * 60 * 60, identity="user_or_ip",
+    )
+    if not allowed:
+        messages.error(request, _("Too many location reports. Please try again later."))
+    elif not reporter_name or not contact_email or not reason:
+        messages.error(request, _("Provide your name, email and why this listing should be removed."))
+    elif len(reporter_name) > 160 or len(reason) > 3000 or len(evidence_url) > 500:
+        messages.error(request, _("One or more report fields are too long."))
+    else:
+        try:
+            validate_email(contact_email)
+            if evidence_url:
+                URLValidator(schemes=("https", "http"))(evidence_url)
+        except ValidationError:
+            messages.error(request, _("Provide a valid email and an optional http(s) evidence URL."))
+        else:
+            if LocationRemovalRequest.objects.filter(
+                location=location, contact_email__iexact=contact_email, status="submitted",
+            ).exists():
+                messages.warning(request, _("A removal report for this location is already pending."))
+            else:
+                LocationRemovalRequest.objects.create(
+                    location=location,
+                    reporter_user=request.user if request.user.is_authenticated else None,
+                    reporter_name=reporter_name,
+                    contact_email=contact_email,
+                    reason=reason,
+                    evidence_url=evidence_url,
+                )
+                messages.success(request, _("Report submitted. The location stays visible until a moderator verifies and approves removal."))
+                return redirect("maps_page")
+
+    return render(request, "users/report_outdated_location.html", {
+        "location": location, "default_email": contact_email,
+    }, status=400)
+
+
 @require_POST
 def submit_location_claim(request, location_id):
     location = get_object_or_404(
@@ -2326,6 +2329,13 @@ def submit_location_request(request):
         messages.error(request, _("Please enter a valid contact email."))
         return redirect("maps_page")
 
+    if website_or_map_link:
+        try:
+            URLValidator(schemes=("https", "http"))(website_or_map_link)
+        except ValidationError:
+            messages.error(request, _("Enter a valid http or https website URL."))
+            return redirect("maps_page")
+
     if supporting_file and not _validate_location_upload(supporting_file):
         messages.error(request, _("Upload a PDF, JPG, PNG or WEBP file up to 10 MB."))
         return redirect("maps_page")
@@ -2350,6 +2360,20 @@ def submit_location_request(request):
             messages.error(request, _("Latitude or longitude is outside the valid range."))
             return redirect("maps_page")
 
+    wants_ownership = request.POST.get("claim_for_my_account") == "1"
+    if wants_ownership:
+        if (
+            not request.user.is_authenticated
+            or not request.user.is_active
+            or request.user.email.strip().casefold() != contact_email.casefold()
+            or not getattr(getattr(request.user, "profile", None), "is_email_verified", False)
+        ):
+            messages.error(
+                request,
+                _("To claim this address, sign in with a verified account and use that account's email."),
+            )
+            return redirect("maps_page")
+
     active_statuses = ["submitted", "under_review"]
     duplicate_request = LocationRequest.objects.filter(
         name__iexact=name,
@@ -2367,6 +2391,8 @@ def submit_location_request(request):
         return redirect("maps_page")
 
     LocationRequest.objects.create(
+        requested_by=request.user if request.user.is_authenticated else None,
+        wants_ownership=wants_ownership,
         name=name,
         city=city,
         country=country,
@@ -2424,6 +2450,51 @@ def _optional_location_coordinate(*objects, field_name):
         if value not in (None, ""):
             return value
     return None
+
+
+@login_required
+def my_studios(request):
+    """Private overview of locations this account manages and requested."""
+    return render(
+        request, "users/my_studios.html",
+        {
+            "owned_locations": Location.objects.filter(
+                studio_owner=request.user, status__in=["claimed", "verified"],
+            ).order_by("name"),
+            "requested_locations": LocationRequest.objects.filter(
+                requested_by=request.user,
+            ).order_by("-created_at")[:30],
+            "submitted_claims": LocationClaim.objects.filter(
+                claimant_user=request.user,
+            ).select_related("location").order_by("-created_at")[:30],
+            "unlinked_claims": (
+                LocationClaim.objects.filter(
+                    claimant_user__isnull=True,
+                    contact_email__iexact=request.user.email,
+                    status__in=["submitted", "under_review"],
+                ).select_related("location").order_by("-created_at")[:30]
+                if request.user.is_active
+                and request.user.email
+                and getattr(getattr(request.user, "profile", None), "is_email_verified", False)
+                else LocationClaim.objects.none()
+            ),
+        },
+    )
+
+
+@login_required
+@require_POST
+def link_my_studio_claim(request, claim_id):
+    """Link an anonymous claim to an email-verified user, without approving it."""
+    try:
+        link_pending_claim_to_account(claim_id, request.user)
+    except LocationClaim.DoesNotExist:
+        raise Http404
+    except ValidationError as error:
+        messages.error(request, "; ".join(error.messages))
+    else:
+        messages.success(request, _("Claim linked to your account. Tatzo must still review your proof before ownership can be granted."))
+    return redirect("my_studios")
 
 
 def maps_page(request):
@@ -2565,11 +2636,21 @@ def maps_page(request):
         })
 
 
+    # Pending claims are private to the submitting account. Display their
+    # status on the map so the same user does not submit twice.
+    my_pending_claim_ids = (
+        set(LocationClaim.objects.filter(
+            claimant_user=request.user,
+            status__in=["submitted", "under_review"],
+        ).values_list("location_id", flat=True))
+        if request.user.is_authenticated else set()
+    )
+
     external_locations = (
         Location.objects
         .filter(
             linked_user__isnull=True,
-            status__in=["imported", "unclaimed", "pending_claim"],
+            status__in=["imported", "unclaimed", "pending_claim", "claimed"],
             latitude__isnull=False,
             longitude__isnull=False,
         )
@@ -2577,6 +2658,13 @@ def maps_page(request):
     )
 
     for location_obj in external_locations:
+        owner = location_obj.studio_owner if location_obj.status == "claimed" else None
+        has_my_pending_claim = location_obj.pk in my_pending_claim_ids
+        claimable = (
+            not bool(owner)
+            and not has_my_pending_claim
+            and location_obj.status in ("imported", "unclaimed", "pending_claim")
+        )
         location = location_obj.display_address or _("Location pending")
         location_parts = {
             "city": location_obj.city,
@@ -2586,23 +2674,25 @@ def maps_page(request):
             "user": None,
             "is_registered": False,
             "display_name": location_obj.name,
-            "tag": _("Imported location"),
+            "tag": _("Managed studio") if owner else _("Imported location"),
             "profile_image": None,
-            "profile_url": "",
+            "profile_url": f"/profile/{owner.username}/" if owner else "",
             "book_url": "",
             "location_id": location_obj.id,
             "location": location,
             "location_city": location_parts["city"],
             "location_country": location_parts["country"],
-            "location_kind": _("Not yet on Tatzo / Unclaimed"),
-            "location_kind_code": "imported",
+            "location_kind": _("Managed Tatzo studio") if owner else _("Not yet on Tatzo / Unclaimed"),
+            "location_kind_code": "registered_studio" if owner else "imported",
             "location_status": location_obj.status,
             "phone": location_obj.phone,
             "website": location_obj.website,
             "has_map_pin": True,
             "latitude": location_obj.latitude,
             "longitude": location_obj.longitude,
-            "source": "unclaimed",
+            "source": "verified" if owner else "unclaimed",
+            "claimable": claimable,
+            "pending_own_claim": has_my_pending_claim,
             "confidence_score": 80,
             "portfolio_count": 0,
             "post_count": 0,
@@ -2614,11 +2704,11 @@ def maps_page(request):
 
     verified_location_count = sum(
         1 for artist in artist_cards
-        if artist["is_registered"] and artist["has_map_pin"]
+        if (artist["is_registered"] or artist["source"] == "verified") and artist["has_map_pin"]
     )
     imported_location_count = sum(
         1 for artist in artist_cards
-        if not artist["is_registered"] and artist["has_map_pin"]
+        if not artist["is_registered"] and artist["source"] != "verified" and artist["has_map_pin"]
     )
     pending_location_count = sum(
         1 for artist in artist_cards
@@ -2636,6 +2726,7 @@ def maps_page(request):
         "profile": _("Profile"),
         "book": _("Book"),
         "claim_location": _("Claim this location"),
+        "my_claim_pending": _("Your claim is under review"),
         "website": _("Website"),
         "data": _("Data"),
         "address_pending": _("Address pending"),

@@ -21,7 +21,10 @@
       <h1>{% trans "Find verified tattoo artists and studios" %}</h1>
       <p>{% trans "Preview map for verified Tatzo artists and locations awaiting confirmation." %}</p>
     </div>
-    <button class="maps-add-location" type="button" data-open-add-location>{% trans "Add new location" %}</button>
+    <div>
+      {% if user.is_authenticated %}<a href="{% url 'my_studios' %}" class="maps-add-location" style="display:inline-block;margin-right:1rem">{% trans "My studios" %}</a>{% endif %}
+      <button class="maps-add-location" type="button" data-open-add-location>{% trans "Add new location" %}</button>
+    </div>
   </section>
 
   <section class="maps-layout">
@@ -68,7 +71,7 @@
 
       <div class="maps-results" data-map-results>
         {% for artist in artist_cards %}
-          <article class="maps-artist-card {% if not artist.is_registered %}maps-artist-card-imported{% elif artist.source == 'verified' %}maps-artist-card-verified{% endif %}" data-location-card data-map-key="{% if artist.location_id %}location:{{ artist.location_id }}{% elif artist.user %}user:{{ artist.user.id }}{% else %}card:{{ forloop.counter0 }}{% endif %}" data-location-id="{{ artist.location_id }}" data-name="{{ artist.display_name }}" data-source="{{ artist.source }}" data-location="{{ artist.location }}" data-location-status="{{ artist.location_status }}" data-location-kind="{{ artist.location_kind_code }}" data-location-label="{{ artist.location_kind }}" data-phone="{{ artist.phone }}" data-website="{{ artist.website }}" data-lat="{{ artist.latitude|default:''|unlocalize }}" data-lng="{{ artist.longitude|default:''|unlocalize }}" data-city="{{ artist.location_city }}" data-country="{{ artist.location_country }}" data-artist="{{ artist.display_name }}" data-tag="{{ artist.tag }}" data-styles="{{ artist.style_tags|join:' ' }}" data-booking="{{ artist.booking_modes|join:' ' }}" data-profile-url="{{ artist.profile_url }}" data-book-url="{{ artist.book_url }}" data-can-book="{% if artist.is_registered and artist.source == 'verified' and artist.can_book %}true{% else %}false{% endif %}" data-confidence="{{ artist.confidence_score }}" data-action-label="{% if not artist.is_registered %}{% trans 'Claim this location' %}{% elif not artist.has_map_pin %}{% trans 'Add location request' %}{% endif %}" data-search="{{ artist.display_name }} {{ artist.location }} {{ artist.tag }} {{ artist.style_tags|join:' ' }} {{ artist.booking_modes|join:' ' }}">
+          <article class="maps-artist-card {% if not artist.is_registered %}maps-artist-card-imported{% elif artist.source == 'verified' %}maps-artist-card-verified{% endif %}" data-location-card data-map-key="{% if artist.location_id %}location:{{ artist.location_id }}{% elif artist.user %}user:{{ artist.user.id }}{% else %}card:{{ forloop.counter0 }}{% endif %}" data-location-id="{{ artist.location_id }}" data-name="{{ artist.display_name }}" data-source="{{ artist.source }}" data-claimable="{% if artist.claimable %}true{% else %}false{% endif %}" data-claim-pending="{% if artist.pending_own_claim %}true{% else %}false{% endif %}" data-location="{{ artist.location }}" data-location-status="{{ artist.location_status }}" data-location-kind="{{ artist.location_kind_code }}" data-location-label="{{ artist.location_kind }}" data-phone="{{ artist.phone }}" data-website="{{ artist.website }}" data-lat="{{ artist.latitude|default:''|unlocalize }}" data-lng="{{ artist.longitude|default:''|unlocalize }}" data-city="{{ artist.location_city }}" data-country="{{ artist.location_country }}" data-artist="{{ artist.display_name }}" data-tag="{{ artist.tag }}" data-styles="{{ artist.style_tags|join:' ' }}" data-booking="{{ artist.booking_modes|join:' ' }}" data-profile-url="{{ artist.profile_url }}" data-book-url="{{ artist.book_url }}" data-can-book="{% if artist.is_registered and artist.source == 'verified' and artist.can_book %}true{% else %}false{% endif %}" data-confidence="{{ artist.confidence_score }}" data-action-label="{% if artist.claimable %}{% trans 'Claim this location' %}{% elif not artist.has_map_pin %}{% trans 'Add location request' %}{% endif %}" data-search="{{ artist.display_name }} {{ artist.location }} {{ artist.tag }} {{ artist.style_tags|join:' ' }} {{ artist.booking_modes|join:' ' }}">
             <div class="maps-card-top">
               <div class="maps-avatar">
                 {% if artist.profile_image %}
@@ -102,10 +105,15 @@
               {% if artist.is_registered %}<a href="{{ artist.profile_url }}">{% trans "Profile" %}</a>{% endif %}
               {% if artist.is_registered and artist.source == "verified" and artist.can_book %}
                 <a href="{{ artist.book_url }}">{% trans "Book" %}</a>
-              {% elif not artist.is_registered %}
+              {% elif artist.pending_own_claim %}
+                <span class="maps-claim-pending">{% trans "Your claim is under review" %}</span>
+              {% elif artist.claimable %}
                 <button type="button" data-open-claim data-claim-url="{% url 'submit_location_claim' artist.location_id %}" data-claim-location="{{ artist.location }}" data-claim-artist="{{ artist.display_name }}" data-location-id="{{ artist.location_id }}" data-claim-kind="{{ artist.source }}">{% trans "Claim this location" %}</button>
               {% elif not artist.has_map_pin %}
                 <button type="button" data-open-claim data-claim-location="{{ artist.location }}" data-claim-artist="{{ artist.display_name }}" data-location-id="{{ artist.location_id }}" data-claim-kind="{{ artist.source }}">{% trans "Add location request" %}</button>
+              {% endif %}
+              {% if artist.location_id %}
+                <a href="{% url 'report_outdated_location' artist.location_id %}">{% trans "Report closed or outdated location" %}</a>
               {% endif %}
             </div>
           </article>
@@ -152,7 +160,15 @@
           <input type="file" name="supporting_file" accept=".pdf,.jpg,.jpeg,.png,.webp">
           <small>{% trans "Optional. Helps Tatzo verify the location faster." %}</small>
         </label>
-        <input type="email" name="contact_email" placeholder="{% trans 'Contact email' %}" required>
+        <input type="email" name="contact_email" placeholder="{% trans 'Contact email' %}" value="{% if user.is_authenticated %}{{ user.email }}{% endif %}" required>
+        {% if user.is_authenticated %}
+          <label class="maps-file-upload">
+            <span><input type="checkbox" name="claim_for_my_account" value="1"> {% trans "This is my studio / professional address — request management access for my Tatzo account" %}</span>
+            <small>{% trans "Your Tatzo email must be verified. A moderator must approve ownership before the location becomes managed by you." %}</small>
+          </label>
+        {% else %}
+          <p class="maps-dialog-help">{% trans "To manage your new address after review, sign in with an email-verified Tatzo account first." %}</p>
+        {% endif %}
         <input type="hidden" name="latitude" data-location-latitude>
         <input type="hidden" name="longitude" data-location-longitude>
         <button type="button" class="maps-pin-picker-button" data-pick-location-pin>{% trans "Use map pin" %}</button>

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Report an outdated studio" %} | Tatzo{% endblock %}
+
+{% block content %}
+{% include "partials/sidebar.html" %}
+<main style="max-width:680px;margin:2rem auto;padding:1.25rem">
+  <a href="{% url 'maps_page' %}">← {% trans "Back to the map" %}</a>
+  <h1>{% trans "Report a closed or outdated studio" %}</h1>
+  <h2>{{ location.name }}</h2>
+  <p>{{ location.display_address }}</p>
+  <p>{% trans "Reports are checked by the Tatzo moderation team. A submission does not automatically hide or delete a studio." %}</p>
+  <form method="post" style="display:grid;gap:1rem">
+    {% csrf_token %}
+    <label>{% trans "Your name" %}<br>
+      <input type="text" name="reporter_name" maxlength="160" required value="{{ request.POST.reporter_name|default:'' }}" style="width:100%">
+    </label>
+    <label>{% trans "Contact email" %}<br>
+      <input type="email" name="contact_email" required value="{{ default_email }}" style="width:100%">
+    </label>
+    <label>{% trans "Why is this location closed or inaccurate?" %}<br>
+      <textarea name="reason" maxlength="3000" required rows="5" style="width:100%">{{ request.POST.reason|default:'' }}</textarea>
+    </label>
+    <label>{% trans "Evidence URL (optional)" %}<br>
+      <input type="url" name="evidence_url" maxlength="500" value="{{ request.POST.evidence_url|default:'' }}" style="width:100%">
+    </label>
+    <button type="submit">{% trans "Send for review" %}</button>
+  </form>
+</main>
+{% endblock %}

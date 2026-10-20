@@ -787,6 +787,7 @@ class Location(models.Model):
         ("claimed", _("Claimed")),
         ("verified", _("Verified")),
         ("rejected", _("Rejected")),
+        ("removed", _("Removed from public maps")),
     ]
 
     name = models.CharField(max_length=160)
@@ -807,6 +808,14 @@ class Location(models.Model):
         blank=True,
         null=True,
         related_name="map_locations",
+    )
+    studio_owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="owned_studios",
+        help_text=_("Reviewed owner of this studio; independent from linked tattoo artists."),
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -876,6 +885,8 @@ class LocationClaim(models.Model):
     message = models.TextField(blank=True)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="draft")
     admin_notes = models.TextField(blank=True)
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="reviewed_location_claims")
+    reviewed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -918,6 +929,11 @@ class LocationRequest(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     message = models.TextField(blank=True)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="submitted")
+    requested_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="submitted_location_requests")
+    wants_ownership = models.BooleanField(default=False, help_text=_("Applicant asks to manage this new location after staff review."))
+    approved_location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True, related_name="approved_from_requests")
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="reviewed_location_requests")
+    reviewed_at = models.DateTimeField(null=True, blank=True)
     admin_notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -932,3 +948,55 @@ class LocationRequest(models.Model):
 
     def __str__(self):
         return f"{self.name} — {self.city}"
+
+
+class LocationRemovalRequest(models.Model):
+    """Public report that a mapped location is closed, obsolete, or incorrect."""
+
+    STATUS_CHOICES = [
+        ("submitted", _("Submitted")),
+        ("approved", _("Approved")),
+        ("rejected", _("Rejected")),
+    ]
+    location = models.ForeignKey(
+        Location, on_delete=models.PROTECT, related_name="removal_requests",
+    )
+    reporter_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True,
+        related_name="submitted_location_removal_requests",
+    )
+    reporter_name = models.CharField(max_length=160)
+    contact_email = models.EmailField()
+    reason = models.TextField()
+    evidence_url = models.URLField(max_length=500, blank=True)
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="submitted")
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True,
+        related_name="reviewed_location_removal_requests",
+    )
+    reviewed_at = models.DateTimeField(blank=True, null=True)
+    admin_notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["status", "created_at"], name="users_locrem_status_3ab49_idx")]
+
+    def __str__(self):
+        return f"Removal report: {self.location.name} ({self.status})"
+
+
+class LocationOwnershipAudit(models.Model):
+    """Immutable moderation log for location ownership decisions."""
+    location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name="ownership_audit")
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    previous_owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    new_owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    decision = models.CharField(max_length=40)
+    source = models.CharField(max_length=40)
+    source_id = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]

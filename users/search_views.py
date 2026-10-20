@@ -243,6 +243,7 @@ def _studio_result(location, origin_lat=None, origin_lng=None):
         )
 
     linked_user = location.linked_user
+    studio_owner = location.studio_owner
     settings = _booking_settings_for(linked_user) if linked_user else None
     booking_open = bool(
         linked_user
@@ -251,7 +252,7 @@ def _studio_result(location, origin_lat=None, origin_lng=None):
         and settings.booking_status in BOOKING_OPEN_STATUSES
     )
     verified = location.status == "verified"
-    claimed = bool(location.linked_user_id or location.status in {"claimed", "verified"})
+    claimed = bool(location.linked_user_id or location.studio_owner_id or location.status in {"claimed", "verified"})
     styles = _studio_styles(location)
     portfolio = []
     if linked_user:
@@ -276,6 +277,7 @@ def _studio_result(location, origin_lat=None, origin_lng=None):
         "styles": styles,
         "portfolio": portfolio,
         "linked_user": linked_user,
+        "studio_owner": studio_owner,
         "can_message": bool(
             linked_user
             and linked_user.profile.is_email_verified
@@ -383,7 +385,7 @@ def search_page(request):
     )
     location_prefetch = Prefetch(
         "map_locations",
-        queryset=Location.objects.exclude(status="rejected").order_by("name"),
+        queryset=Location.objects.exclude(status__in=("rejected", "removed")).order_by("name"),
         to_attr="search_locations",
     )
 
@@ -466,7 +468,7 @@ def search_page(request):
     studios = (
         Location.objects
         .filter(status__in=studio_statuses)
-        .select_related("linked_user", "linked_user__profile", "linked_user__booking_settings")
+        .select_related("linked_user", "linked_user__profile", "linked_user__booking_settings", "studio_owner")
         .prefetch_related(
             Prefetch(
                 "linked_user__portfolio_works",

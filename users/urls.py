@@ -28,6 +28,8 @@ urlpatterns = [
         views.moderation_dashboard,
         name="moderation_dashboard",
     ),
+    path("moderation/locations/removal/<int:item_id>/review/", views.moderation_review_location_removal, name="moderation_review_location_removal"),
+    path("moderation/locations/<str:kind>/<int:item_id>/review/", views.moderation_review_location, name="moderation_review_location"),
     path(
         "moderation/artist/<str:username>/approve/",
         views.moderation_approve_artist,
@@ -37,16 +39,6 @@ urlpatterns = [
         "moderation/artist/<str:username>/reject/",
         views.moderation_reject_artist,
         name="moderation_reject_artist",
-    ),
-    path(
-        "moderation/map-requests/<int:request_id>/approve/",
-        views.moderation_approve_location_request,
-        name="moderation_approve_location_request",
-    ),
-    path(
-        "moderation/map-requests/<int:request_id>/reject/",
-        views.moderation_reject_location_request,
-        name="moderation_reject_location_request",
     ),
     path(
         "moderation/reports/posts/<int:report_id>/resolve/",
@@ -89,6 +81,9 @@ urlpatterns = [
     ),
     path("search/", search_views.search_page, name="search_page"),
     path("maps/", views.maps_page, name="maps_page"),
+    path("maps/my-studios/", views.my_studios, name="my_studios"),
+    path("maps/location/<int:location_id>/report-outdated/", views.report_outdated_location, name="report_outdated_location"),
+    path("maps/my-studios/link-claim/<int:claim_id>/", views.link_my_studio_claim, name="link_my_studio_claim"),
     path("maps/location/request/", views.submit_location_request, name="submit_location_request"),
     path("maps/location/<int:location_id>/claim/", views.submit_location_claim, name="submit_location_claim"),
     path("legal/", views.legal_index, name="legal_index"),

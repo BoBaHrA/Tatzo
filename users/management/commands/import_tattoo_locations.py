@@ -166,31 +166,77 @@ out center tags;
 
     @transaction.atomic
     def save_location(self, data):
-        source_place_id = data.get("source_place_id")
-        if source_place_id:
-            return Location.objects.update_or_create(
-                source="osm",
-                source_place_id=source_place_id,
-                defaults=data,
-            )
+        """Do not let an external import overwrite editorial or ownership decisions.
 
-        normalized_name = normalize_text(data["name"])
-        normalized_city = normalize_text(data.get("city"))
-        normalized_address = normalize_text(data.get("formatted_address") or data.get("address"))
+        Only refresh previously imported, unclaimed OSM records. In particular,
+        pending claims, claimed/verified artists and suppressed listings must
+        keep their manually reviewed metadata and status.
+        """
+        source_place_id = data.get("source_place_id")
         existing = None
-        for candidate in Location.objects.filter(source="osm", city__iexact=data.get("city", ""))[:200]:
-            if (
-                normalize_text(candidate.name) == normalized_name
-                and normalize_text(candidate.display_address) == normalized_address
-                and normalize_text(candidate.city) == normalized_city
+        if source_place_id:
+            existing = (
+                Location.objects.select_for_update()
+                .filter(source="osm", source_place_id=source_place_id)
+                .first()
+            )
+        else:
+            normalized_name = normalize_text(data["name"])
+            normalized_city = normalize_text(data.get("city"))
+            normalized_address = normalize_text(
+                data.get("formatted_address") or data.get("address")
+            )
+            for candidate in (
+                Location.objects.select_for_update()
+                .filter(source="osm", city__iexact=data.get("city", ""))
+                .order_by("pk")[:200]
             ):
-                existing = candidate
-                break
+                if (
+                    normalize_text(candidate.name) == normalized_name
+                    and normalize_text(candidate.display_address) == normalized_address
+                    and normalize_text(candidate.city) == normalized_city
+                ):
+                    existing = candidate
+                    break
 
         if existing:
+            # The importer's external metadata is not authoritative over a
+            # manually reviewed listing, even if OSM still lists the place.
+            if (
+                existing.status not in {"imported", "unclaimed"}
+                or existing.linked_user_id is not None
+            ):
+                return existing, False
+            # Never reset the existing workflow status to "imported".
             for field, value in data.items():
-                setattr(existing, field, value)
+                if field not in {"status", "source", "source_place_id"}:
+                    setattr(existing, field, value)
             existing.save()
             return existing, False
+
+        # External OSM IDs can change when an element is recreated or
+        # converted from a node to a way. A prior human removal decision must
+        # also survive that change for an otherwise identical address.
+        if not existing:
+            incoming_name = normalize_text(data.get("name"))
+            incoming_city = normalize_text(data.get("city"))
+            incoming_country = normalize_text(data.get("country"))
+            incoming_address = normalize_text(
+                data.get("formatted_address") or data.get("address")
+            )
+            if all((incoming_name, incoming_city, incoming_country, incoming_address)):
+                suppressed = Location.objects.select_for_update().filter(
+                    status="removed",
+                    city__iexact=data.get("city", ""),
+                    country__iexact=data.get("country", ""),
+                )
+                for candidate in suppressed.iterator():
+                    if (
+                        normalize_text(candidate.name) == incoming_name
+                        and normalize_text(candidate.city) == incoming_city
+                        and normalize_text(candidate.country) == incoming_country
+                        and normalize_text(candidate.display_address) == incoming_address
+                    ):
+                        return candidate, False
 
         return Location.objects.create(**data), True

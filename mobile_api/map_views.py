@@ -15,7 +15,7 @@ from users.models import Location, LocationClaim, LocationRequest, UserBlock
 from users.security import check_rate_limit
 
 VISIBLE_ARTIST_LOCATION_STATUSES = ("verified", "claimed")
-VISIBLE_STUDIO_LOCATION_STATUSES = ("imported", "unclaimed", "pending_claim")
+VISIBLE_STUDIO_LOCATION_STATUSES = ("imported", "unclaimed", "pending_claim", "claimed")
 ACTIVE_SUBMISSION_STATUSES = ("submitted", "under_review")
 MAP_TYPES = {"artist", "studio"}
 BOOKING_FILTERS = {"accepting", "online", "in_person"}
@@ -108,8 +108,10 @@ class LocationRequestSerializer(serializers.ModelSerializer):
             "latitude",
             "longitude",
             "message",
+            "wants_ownership",
         )
         extra_kwargs = {
+            "wants_ownership": {"required": False, "default": False},
             "supporting_file": {"required": False, "allow_null": True},
             "website_or_map_link": {"required": False, "allow_blank": True},
             "phone": {"required": False, "allow_blank": True},
@@ -257,6 +259,8 @@ def _location_queryset(viewer, query):
             "linked_user",
             "linked_user__profile",
             "linked_user__booking_settings",
+            "studio_owner",
+            "studio_owner__profile",
         )
         .prefetch_related(
             "linked_user__portfolio_works",
@@ -297,6 +301,7 @@ def _location_payload(request, location):
 
     artist = location.linked_user
     if artist is None:
+        owner = location.studio_owner
         active_claims = getattr(location, "viewer_active_claims", [])
         active_claim = active_claims[0] if active_claims else None
         return {
@@ -304,8 +309,8 @@ def _location_payload(request, location):
             "location_id": location.pk,
             "kind": "studio",
             "name": location.name,
-            "tag": None,
-            "username": None,
+            "tag": (owner.profile.tag or owner.username) if owner and hasattr(owner, "profile") else None,
+            "username": owner.username if owner else None,
             "avatar_url": None,
             "address": location.display_address,
             "city": location.city,
@@ -319,7 +324,7 @@ def _location_payload(request, location):
             "portfolio_count": 0,
             "website": _safe_public_url(location.website),
             "phone": location.phone or None,
-            "claimable": True,
+            "claimable": location.status in ("imported", "unclaimed", "pending_claim") and owner is None,
             "claim_status": active_claim.status if active_claim else None,
         }
 
@@ -510,8 +515,22 @@ class MapLocationRequestView(APIView):
                 status=status.HTTP_409_CONFLICT,
             )
 
+        if validated.get("wants_ownership"):
+            if (
+                not request.user.is_active
+                or request.user.email.strip().casefold() != validated["contact_email"].strip().casefold()
+                or not getattr(getattr(request.user, "profile", None), "is_email_verified", False)
+            ):
+                return Response(
+                    {"code": "account_verification_required", "detail": "Use your verified Tatzo account email to request studio ownership."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         with transaction.atomic():
-            location_request = serializer.save(status="submitted")
+            location_request = serializer.save(
+                status="submitted",
+                requested_by=request.user,
+            )
         return Response(
             {
                 "id": location_request.pk,
@@ -530,7 +549,8 @@ class MapLocationClaimView(APIView):
             Location,
             pk=location_id,
             linked_user__isnull=True,
-            status__in=VISIBLE_STUDIO_LOCATION_STATUSES,
+            status__in=("imported", "unclaimed", "pending_claim"),
+            studio_owner__isnull=True,
         )
         contact_email = str(
             request.data.get("contact_email") or request.user.email

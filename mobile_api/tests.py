@@ -1072,6 +1072,7 @@ class MobileBookingTests(APITestCase):
         return SimpleUploadedFile(name, output.getvalue(), content_type="image/png")
 
     def make_calendar_block(self, start_hour=15, end_hour=16):
+        # Respect DST on the booking date; Europe/Paris is UTC+1 in winter.
         artist_timezone = ZoneInfo(self.artist.profile.timezone)
         return CalendarEvent.objects.create(
             artist=self.artist,

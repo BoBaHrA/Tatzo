@@ -20,7 +20,7 @@
         <h1>{% trans "Moderation dashboard" %}</h1>
 
         <p>
-          {% trans "Review artist verification requests, map submissions, reports and platform safety issues." %}
+          {% trans "Review artist verification requests, reports and platform safety issues." %}
         </p>
       </div>
     </header>
@@ -35,10 +35,9 @@
         <span>{% trans "Manual reviews" %}</span>
         <strong>{{ manual_count }}</strong>
       </div>
-
       <div class="moderation-stat-card">
         <span>{% trans "Map requests" %}</span>
-        <strong>{{ location_requests_count }}</strong>
+        <strong>{{ location_request_count|add:location_claim_count|add:location_removal_count }}</strong>
       </div>
 
       <div class="moderation-stat-card">
@@ -61,7 +60,7 @@
 
         <button type="button" class="moderation-folder-tab" data-folder-tab="maps">
           {% trans "Map requests" %}
-          <span>{{ location_requests_count }}</span>
+          <span>{{ location_request_count|add:location_claim_count|add:location_removal_count }}</span>
         </button>
 
         <button type="button" class="moderation-folder-tab" data-folder-tab="posts">
@@ -79,7 +78,7 @@
         <input
           type="text"
           id="moderationSearch"
-          placeholder="{% trans 'Search by username, email, location, reason...' %}"
+          placeholder="{% trans 'Search by username, email, reason...' %}"
           autocomplete="off"
         >
 
@@ -283,136 +282,118 @@
     </div>
 
     <div class="moderation-folder-panel" data-folder-panel="maps" hidden>
-      <section class="moderation-section">
-        <div class="moderation-section-head">
-          <h2>{% trans "Pending map requests" %}</h2>
-          <span>{{ location_requests_count }}</span>
-        </div>
-
-        {% if pending_location_requests %}
-          <div class="moderation-list">
-            {% for location_request in pending_location_requests %}
-              <article
-                class="moderation-card moderation-location-card"
-                data-moderation-card
-                data-date="{{ location_request.created_at|date:'U' }}"
-                data-reason="{% if location_request.message %}with-reason{% else %}no-reason{% endif %}"
-                data-search="{{ location_request.name }} {{ location_request.contact_email }} {{ location_request.city }} {{ location_request.country }} {{ location_request.full_address }} {{ location_request.phone }} {{ location_request.website_or_map_link }} {{ location_request.message }}"
-              >
-                <div class="moderation-card-main">
-                  <div class="moderation-avatar moderation-location-icon" aria-hidden="true">⌖</div>
-
-                  <div class="moderation-location-content">
-                    <h3>{{ location_request.name }}</h3>
-                    <p>{{ location_request.full_address }}</p>
-
-                    <div class="moderation-meta">
-                      <span>{{ location_request.city }}, {{ location_request.country }}</span>
-                      <span>{{ location_request.contact_email }}</span>
-                      <span>{{ location_request.created_at|date:"d M Y H:i" }}</span>
-                      {% if location_request.phone %}
-                        <span>{{ location_request.phone }}</span>
-                      {% endif %}
-                    </div>
-
-                    <div class="moderation-file-links">
-                      <a
-                        href="https://www.google.com/maps/search/?api=1&amp;query={{ location_request.full_address|urlencode }}%20{{ location_request.city|urlencode }}%20{{ location_request.country|urlencode }}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {% trans "Open address in Google Maps" %}
-                      </a>
-
-                      {% if location_request.supporting_file %}
-                        <a
-                          href="{% url 'protected_media' 'location-request' location_request.pk 'file' %}"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {% trans "Open supporting file" %}
-                        </a>
-                      {% endif %}
-                    </div>
-
-                    {% if location_request.website_or_map_link %}
-                      <div class="moderation-submitted-link">
-                        <strong>{% trans "Website or Google/Apple Maps link" %}</strong>
-                        <span>{{ location_request.website_or_map_link }}</span>
-                      </div>
-                    {% endif %}
-
-                    {% if location_request.message %}
-                      <div class="moderation-explanation">
-                        {{ location_request.message }}
-                      </div>
-                    {% endif %}
-                  </div>
-                </div>
-
-                <div class="moderation-actions moderation-location-actions">
-                  <form
-                    method="post"
-                    action="{% url 'moderation_approve_location_request' location_request.pk %}"
-                    class="moderation-location-approval"
-                  >
-                    {% csrf_token %}
-
-                    <div class="moderation-coordinate-fields">
-                      <label>
-                        <span>{% trans "Latitude" %}</span>
-                        <input
-                          type="number"
-                          name="latitude"
-                          min="-90"
-                          max="90"
-                          step="0.000001"
-                          value="{% if location_request.latitude != None %}{{ location_request.latitude|unlocalize }}{% endif %}"
-                          required
-                        >
-                      </label>
-
-                      <label>
-                        <span>{% trans "Longitude" %}</span>
-                        <input
-                          type="number"
-                          name="longitude"
-                          min="-180"
-                          max="180"
-                          step="0.000001"
-                          value="{% if location_request.longitude != None %}{{ location_request.longitude|unlocalize }}{% endif %}"
-                          required
-                        >
-                      </label>
-                    </div>
-
-                    {% if location_request.latitude == None or location_request.longitude == None %}
-                      <small class="moderation-coordinate-help">
-                        {% trans "Coordinates are required before approval." %}
-                      </small>
-                    {% endif %}
-
-                    <button type="submit" class="moderation-btn moderation-btn-approve">
-                      {% trans "Approve" %}
-                    </button>
-                  </form>
-
-                  <form method="post" action="{% url 'moderation_reject_location_request' location_request.pk %}">
-                    {% csrf_token %}
-                    <button type="submit" class="moderation-btn moderation-btn-danger">
-                      {% trans "Reject" %}
-                    </button>
-                  </form>
-                </div>
-              </article>
-            {% endfor %}
+    <section class="moderation-section" id="location-moderation">
+      <div class="moderation-section-head">
+        <h2>{% trans "Studio ownership and map requests" %}</h2>
+        <span>{{ location_request_count|add:location_claim_count|add:location_removal_count }}</span>
+      </div>
+      <p>{% trans "Confirm the studio's identity and the applicant's legal right to manage it. Approval links eligible verified accounts and publishes reviewed locations." %}</p>
+      {% if pending_location_requests or pending_location_claims or pending_location_removals %}
+      <div class="moderation-list">
+        {% for item in pending_location_requests %}
+        <article class="moderation-card moderation-location-card" data-moderation-card
+          data-date="{{ item.created_at|date:'U' }}"
+          data-reason="{% if item.message %}with-reason{% else %}no-reason{% endif %}"
+          data-search="{{ item.name }} {{ item.full_address }} {{ item.city }} {{ item.country }} {{ item.contact_email }} {% if item.requested_by %}{{ item.requested_by.username }}{% endif %} {{ item.message }}">
+          <div class="moderation-card-main">
+            <div>
+              <h3>{% trans "New address" %}: {{ item.name }}</h3>
+              <p>{{ item.full_address }}, {{ item.city }}, {{ item.country }}</p>
+              <p>{% trans "Contact" %}: {{ item.contact_email }}</p>
+              <p>
+                <strong>{% trans "Profile" %} Tatzo:</strong>
+                {% if item.requested_by %}
+                  <a href="{% url 'profile' item.requested_by.username %}">@{{ item.requested_by.username }}</a>
+                {% else %}
+                  <span class="moderation-muted">{% trans "Unknown" %}</span>
+                {% endif %}
+              </p>
+              <p>{% trans "Requests management access" %}: {{ item.wants_ownership|yesno:"Yes,No" }}</p>
+              <p>{% trans "Map pin" %}: {% if item.latitude != None and item.longitude != None %}{{ item.latitude }}, {{ item.longitude }}{% else %}{% trans "Not provided — location will not display as a pin" %}{% endif %}</p>
+              {% if item.website_or_map_link %}<p>{% trans "Website / evidence" %}: {{ item.website_or_map_link }}</p>{% endif %}
+              {% if item.supporting_file %}<p><a href="{% url 'protected_media' 'location-request' item.id 'file' %}">{% trans "Private supporting document" %}</a></p>{% endif %}
+              {% if item.message %}<p>{{ item.message }}</p>{% endif %}
+              <p>{% trans "Status" %}: {{ item.get_status_display }}</p>
+            </div>
           </div>
-        {% else %}
-          <div class="moderation-empty">
-            {% trans "No pending location requests." %}
+          <form method="post" action="{% url 'moderation_review_location' 'request' item.id %}">
+            {% csrf_token %}
+            <label><input type="checkbox" name="confirm_evidence" value="1" required> {% trans "I independently verified this address and the right to manage it." %}</label>
+            <div class="moderation-coordinate-fields">
+              <label>{% trans "Latitude" %}<input type="text" name="latitude" value="{{ item.latitude|default_if_none:''|unlocalize }}" required></label>
+              <label>{% trans "Longitude" %}<input type="text" name="longitude" value="{{ item.longitude|default_if_none:''|unlocalize }}" required></label>
+            </div>
+            <button type="submit" name="decision" value="approve" class="moderation-btn moderation-btn-approve">{% trans "Approve and publish" %}</button>
+          </form>
+          <form method="post" action="{% url 'moderation_review_location' 'request' item.id %}">
+            {% csrf_token %}
+            <button type="submit" name="decision" value="reject">{% trans "Reject" %}</button>
+          </form>
+        </article>
+        {% endfor %}
+        {% for item in pending_location_claims %}
+        <article class="moderation-card moderation-location-card" data-moderation-card
+          data-date="{{ item.created_at|date:'U' }}"
+          data-reason="{% if item.message or item.proof %}with-reason{% else %}no-reason{% endif %}"
+          data-search="{{ item.location.name }} {{ item.location.display_address }} {{ item.claimant_name }} {{ item.contact_email }} {% if item.claimant_user %}{{ item.claimant_user.username }}{% endif %} {{ item.relation_to_location }} {{ item.proof }} {{ item.message }}">
+          <div class="moderation-card-main">
+            <div>
+              <h3>{% trans "Claim existing studio" %}: {{ item.location.name }}</h3>
+              <p>{{ item.location.display_address }}</p>
+              <p>{{ item.claimant_name }} — {{ item.contact_email }}</p>
+              <p>{% trans "Linked account" %}: {% if item.claimant_user %}@{{ item.claimant_user.username }}{% else %}{% trans "Not linked — cannot approve yet" %}{% endif %}</p>
+              <p>{% trans "Relationship" %}: {{ item.relation_to_location }}</p>
+              {% if item.proof %}<p>{{ item.proof }}</p>{% endif %}
+              {% if item.proof_document %}<p><a href="{% url 'protected_media' 'location-claim' item.id 'file' %}">{% trans "Private ownership evidence" %}</a></p>{% endif %}
+              {% if item.message %}<p>{{ item.message }}</p>{% endif %}
+            </div>
           </div>
-        {% endif %}
-      </section>
+          <form method="post" action="{% url 'moderation_review_location' 'claim' item.id %}">
+            {% csrf_token %}
+            <label><input type="checkbox" name="confirm_evidence" value="1" required> {% trans "I independently verified the business relationship and applicant's right to manage it." %}</label>
+            <button type="submit" name="decision" value="approve" {% if not item.claimant_user %}disabled{% endif %}>{% trans "Approve and link account" %}</button>
+          </form>
+          <form method="post" action="{% url 'moderation_review_location' 'claim' item.id %}">
+            {% csrf_token %}
+            <button type="submit" name="decision" value="reject">{% trans "Reject" %}</button>
+          </form>
+        </article>
+        {% endfor %}
+        {% for item in pending_location_removals %}
+        <article class="moderation-card moderation-location-card" data-moderation-card
+          data-date="{{ item.created_at|date:'U' }}"
+          data-reason="with-reason"
+          data-search="{{ item.location.name }} {{ item.location.display_address }} {{ item.reporter_name }} {{ item.contact_email }} {{ item.reason }}">
+          <div class="moderation-card-main">
+            <div>
+              <h3>{% trans "Report closed or outdated studio" %}: {{ item.location.name }}</h3>
+              <p>{{ item.location.display_address }}</p>
+              <p>{{ item.reporter_name }} — {{ item.contact_email }}</p>
+              <p>{% trans "Reason" %}: {{ item.reason }}</p>
+              {% if item.evidence_url %}<p><a href="{{ item.evidence_url }}" rel="noopener noreferrer" target="_blank">{% trans "Supporting URL (unverified)" %}</a></p>{% endif %}
+              <p>{% trans "Current status" %}: {{ item.location.get_status_display }}</p>
+              {% if item.location.studio_owner %}<p>{% trans "Managed by" %}: @{{ item.location.studio_owner.username }}</p>{% endif %}
+            </div>
+          </div>
+          <form method="post" action="{% url 'moderation_review_location_removal' item.pk %}">
+            {% csrf_token %}
+            <label><input type="checkbox" name="confirm_evidence" value="1" required> {% trans "I independently verified that this listing is obsolete." %}</label>
+            {% if item.location.studio_owner %}
+              <label><input type="checkbox" name="confirm_managed" value="1" required> {% trans "I confirmed that removal affects a managed studio." %}</label>
+            {% endif %}
+            <button type="submit" name="decision" value="approve">{% trans "Remove from public maps" %}</button>
+          </form>
+          <form method="post" action="{% url 'moderation_review_location_removal' item.pk %}">
+            {% csrf_token %}
+            <button type="submit" name="decision" value="reject">{% trans "Reject report" %}</button>
+          </form>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+        <p>{% trans "No pending map requests." %}</p>
+      {% endif %}
+    </section>
     </div>
 
     <div class="moderation-folder-panel" data-folder-panel="posts" hidden>
@@ -739,16 +720,7 @@
       });
     });
 
-    const requestedFolder = new URLSearchParams(window.location.search).get("folder");
-    const hasRequestedFolder = Array.from(tabs).some(
-      (tab) => tab.dataset.folderTab === requestedFolder
-    );
-
-    if (hasRequestedFolder) {
-      activateFolder(requestedFolder);
-    } else {
-      applyFilters();
-    }
+    applyFilters();
   });
 </script>
 {% endblock %}

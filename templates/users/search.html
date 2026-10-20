@@ -400,6 +400,8 @@
                         {% if result.can_message %}
                           <a href="{% url 'start_chat' result.linked_user.username %}" class="search-action-secondary">{% trans "Message" %}</a>
                         {% endif %}
+                      {% elif result.studio_owner %}
+                        <a href="{% url 'profile' result.studio_owner.username %}" class="search-action-primary">{% trans "View studio owner" %}</a>
                       {% else %}
                         <a href="{{ maps_url }}" class="search-action-primary">{% trans "View on map" %}</a>
                       {% endif %}

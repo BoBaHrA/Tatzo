@@ -46,6 +46,7 @@ export default function AddMapLocationScreen() {
   const [phone, setPhone] = useState('');
   const [contactEmail, setContactEmail] = useState(user?.email ?? '');
   const [message, setMessage] = useState('');
+  const [wantsOwnership, setWantsOwnership] = useState(false);
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [supportingFile, setSupportingFile] = useState<PendingMapDocument | null>(null);
@@ -120,6 +121,7 @@ export default function AddMapLocationScreen() {
         websiteOrMapLink: website.trim(),
         phone: phone.trim(),
         contactEmail: contactEmail.trim(),
+        wantsOwnership,
         latitude,
         longitude,
         message: message.trim(),
@@ -169,6 +171,18 @@ export default function AddMapLocationScreen() {
           onChangeText={setContactEmail}
           value={contactEmail}
         />
+        <Pressable
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: wantsOwnership }}
+          onPress={() => setWantsOwnership((value) => !value)}
+          style={styles.ownershipRow}
+        >
+          <Text style={styles.ownershipBox}>{wantsOwnership ? '☑' : '☐'}</Text>
+          <View style={styles.heading}>
+            <Text style={styles.ownershipLabel}>{t('mapClaimMyNewAddress')}</Text>
+            <Text style={styles.sectionHint}>{t('mapClaimMyNewAddressHint')}</Text>
+          </View>
+        </Pressable>
       </View>
 
       <View style={styles.card}>
@@ -259,6 +273,9 @@ const styles = StyleSheet.create({
   },
   coordinateText: { color: colors.primary, fontWeight: '800', fontVariant: ['tabular-nums'] },
   removeText: { color: colors.accent, fontSize: 12, fontWeight: '800' },
+  ownershipRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
+  ownershipBox: { color: colors.primary, fontSize: 25 },
+  ownershipLabel: { color: colors.text, fontSize: 14, fontWeight: '700' },
   buttonRow: { flexDirection: 'row', gap: spacing.sm },
   flexButton: { flex: 1, paddingHorizontal: spacing.sm },
   fileRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
