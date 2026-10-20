@@ -47,7 +47,7 @@ body {
 
 .moderation-stats {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 28px;
 }
@@ -803,6 +803,118 @@ body {
 .moderation-custom-select-btn:hover .moderation-custom-select-arrow::before,
 .moderation-custom-select.open .moderation-custom-select-arrow::before {
   border-color: #ffffff;
+}
+
+/* =========================
+   MAP REQUEST MODERATION
+========================= */
+
+.moderation-card.moderation-location-card {
+  grid-template-columns: minmax(0, 1fr) 250px;
+  align-items: stretch;
+}
+
+.moderation-location-icon {
+  color: #8afff8;
+  font-size: 28px;
+}
+
+.moderation-location-content {
+  min-width: 0;
+}
+
+.moderation-submitted-link {
+  display: grid;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 11px 13px;
+  overflow-wrap: anywhere;
+  border: 1px solid rgba(4, 197, 191, 0.12);
+  border-radius: 13px;
+  background: rgba(4, 197, 191, 0.045);
+  color: rgba(223, 252, 255, 0.66);
+  font-size: 12px;
+}
+
+.moderation-submitted-link strong {
+  color: #75f8ef;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.moderation-location-card .moderation-location-actions {
+  width: 250px;
+  justify-content: center;
+}
+
+.moderation-location-approval {
+  display: grid;
+  gap: 10px;
+}
+
+.moderation-coordinate-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.moderation-coordinate-fields label {
+  display: grid;
+  gap: 5px;
+  color: rgba(223, 252, 255, 0.58);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.moderation-coordinate-fields input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 38px;
+  padding: 0 9px;
+  border: 1px solid rgba(4, 197, 191, 0.2);
+  border-radius: 11px;
+  outline: none;
+  background: rgba(0, 9, 15, 0.68);
+  color: #eaffff;
+  font: inherit;
+  font-size: 12px;
+  text-transform: none;
+}
+
+.moderation-coordinate-fields input:focus {
+  border-color: #04c5bf;
+  box-shadow: 0 0 0 3px rgba(4, 197, 191, 0.1);
+}
+
+.moderation-coordinate-help {
+  display: block;
+  color: #ffb4d0;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+@media (max-width: 860px) {
+  .moderation-card.moderation-location-card {
+    grid-template-columns: 1fr;
+  }
+
+  .moderation-location-card .moderation-location-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .moderation-location-actions form {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .moderation-coordinate-fields {
+    grid-template-columns: 1fr;
+  }
 }
 
 .moderation-card {

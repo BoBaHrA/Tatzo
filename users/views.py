@@ -18,6 +18,7 @@ from django.db.models import Case, Count, Exists, IntegerField, OuterRef, Q, Val
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import force_str
 from django.utils.translation import gettext as _, ngettext
@@ -1385,6 +1386,10 @@ def moderation_dashboard(request):
         user__profile__verification_status="pending_manual_review",
     ).select_related("user", "user__profile")
 
+    pending_location_requests = LocationRequest.objects.filter(
+        status__in=["submitted", "under_review"]
+    ).order_by("-created_at")
+
     post_reports = (
         PostReport.objects
         .filter(is_resolved=False)
@@ -1403,10 +1408,12 @@ def moderation_dashboard(request):
     context = {
         "pending_document_requests": pending_document_requests,
         "pending_manual_requests": pending_manual_requests,
+        "pending_location_requests": pending_location_requests,
         "post_reports": post_reports,
         "comment_reports": comment_reports,
         "document_count": pending_document_requests.count(),
         "manual_count": pending_manual_requests.count(),
+        "location_requests_count": pending_location_requests.count(),
         "post_reports_count": post_reports.count(),
         "comment_reports_count": comment_reports.count(),
     }
@@ -1468,6 +1475,124 @@ def moderation_reject_artist(request, username):
         % {"username": user_obj.username},
     )
     return redirect("moderation_dashboard")
+
+
+def _map_moderation_redirect():
+    return redirect(f"{reverse('moderation_dashboard')}?folder=maps")
+
+
+def _moderated_coordinate(raw_value, minimum, maximum):
+    try:
+        coordinate = Decimal(str(raw_value or "").strip())
+        if not coordinate.is_finite() or not minimum <= coordinate <= maximum:
+            return None
+        return coordinate.quantize(Decimal("0.000001"))
+    except (InvalidOperation, TypeError, ValueError):
+        return None
+
+
+def _matching_public_location(location_request):
+    return (
+        Location.objects.select_for_update()
+        .filter(
+            linked_user__isnull=True,
+            name__iexact=location_request.name,
+            city__iexact=location_request.city,
+            country__iexact=location_request.country,
+            status__in=["imported", "unclaimed", "pending_claim"],
+        )
+        .filter(
+            Q(address__iexact=location_request.full_address)
+            | Q(formatted_address__iexact=location_request.full_address)
+        )
+        .order_by("pk")
+        .first()
+    )
+
+
+@user_passes_test(is_admin)
+@require_POST
+def moderation_approve_location_request(request, request_id):
+    latitude = _moderated_coordinate(
+        request.POST.get("latitude"), Decimal("-90"), Decimal("90")
+    )
+    longitude = _moderated_coordinate(
+        request.POST.get("longitude"), Decimal("-180"), Decimal("180")
+    )
+    if latitude is None or longitude is None:
+        messages.error(
+            request,
+            _("Enter valid latitude and longitude before approving the request."),
+        )
+        return _map_moderation_redirect()
+
+    with transaction.atomic():
+        location_request = get_object_or_404(
+            LocationRequest.objects.select_for_update(),
+            pk=request_id,
+            status__in=["submitted", "under_review"],
+        )
+        location = _matching_public_location(location_request)
+        location_values = {
+            "name": location_request.name,
+            "address": location_request.full_address,
+            "formatted_address": location_request.full_address,
+            "city": location_request.city,
+            "country": location_request.country,
+            "latitude": latitude,
+            "longitude": longitude,
+            "phone": location_request.phone,
+            "website": location_request.website_or_map_link,
+            "verified_at": timezone.now(),
+        }
+
+        if location is None:
+            Location.objects.create(
+                **location_values,
+                source="manual",
+                status="unclaimed",
+            )
+        else:
+            if not location_request.phone:
+                location_values.pop("phone")
+            if not location_request.website_or_map_link:
+                location_values.pop("website")
+            changed_fields = []
+            for field_name, value in location_values.items():
+                if getattr(location, field_name) != value:
+                    setattr(location, field_name, value)
+                    changed_fields.append(field_name)
+            if changed_fields:
+                location.save(update_fields=[*changed_fields, "updated_at"])
+
+        location_request.latitude = latitude
+        location_request.longitude = longitude
+        location_request.status = "approved"
+        location_request.save(
+            update_fields=["latitude", "longitude", "status", "updated_at"]
+        )
+
+    messages.success(
+        request,
+        _("Location request approved and published on the map."),
+    )
+    return _map_moderation_redirect()
+
+
+@user_passes_test(is_admin)
+@require_POST
+def moderation_reject_location_request(request, request_id):
+    with transaction.atomic():
+        location_request = get_object_or_404(
+            LocationRequest.objects.select_for_update(),
+            pk=request_id,
+            status__in=["submitted", "under_review"],
+        )
+        location_request.status = "rejected"
+        location_request.save(update_fields=["status", "updated_at"])
+
+    messages.success(request, _("Location request rejected."))
+    return _map_moderation_redirect()
 
 
 @user_passes_test(is_admin)

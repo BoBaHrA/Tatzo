@@ -39,6 +39,16 @@ urlpatterns = [
         name="moderation_reject_artist",
     ),
     path(
+        "moderation/map-requests/<int:request_id>/approve/",
+        views.moderation_approve_location_request,
+        name="moderation_approve_location_request",
+    ),
+    path(
+        "moderation/map-requests/<int:request_id>/reject/",
+        views.moderation_reject_location_request,
+        name="moderation_reject_location_request",
+    ),
+    path(
         "moderation/reports/posts/<int:report_id>/resolve/",
         views.moderation_resolve_post_report,
         name="moderation_resolve_post_report",

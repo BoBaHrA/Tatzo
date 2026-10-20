@@ -790,8 +790,8 @@ class Location(models.Model):
     ]
 
     name = models.CharField(max_length=160)
-    address = models.CharField(max_length=255, blank=True)
-    formatted_address = models.CharField(max_length=255, blank=True)
+    address = models.CharField(max_length=1000, blank=True)
+    formatted_address = models.CharField(max_length=1000, blank=True)
     city = models.CharField(max_length=120, blank=True)
     country = models.CharField(max_length=120, blank=True)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)

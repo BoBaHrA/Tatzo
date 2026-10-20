@@ -3,6 +3,7 @@ from io import BytesIO
 import shutil
 import tempfile
 from urllib.parse import urlparse
+from zoneinfo import ZoneInfo
 
 from PIL import Image
 from django.contrib.auth import get_user_model
@@ -1071,7 +1072,7 @@ class MobileBookingTests(APITestCase):
         return SimpleUploadedFile(name, output.getvalue(), content_type="image/png")
 
     def make_calendar_block(self, start_hour=15, end_hour=16):
-        artist_timezone = timezone.get_fixed_timezone(120)
+        artist_timezone = ZoneInfo(self.artist.profile.timezone)
         return CalendarEvent.objects.create(
             artist=self.artist,
             event_type=CalendarEvent.TYPE_BLOCKED,
@@ -1197,7 +1198,7 @@ class MobileBookingTests(APITestCase):
         self.assertEqual(vacation.data["code"], "date_blocked")
 
     def test_calendar_reminders_do_not_consume_booking_time(self):
-        artist_timezone = timezone.get_fixed_timezone(120)
+        artist_timezone = ZoneInfo(self.artist.profile.timezone)
         CalendarEvent.objects.create(
             artist=self.artist,
             event_type=CalendarEvent.TYPE_SKETCH_DEADLINE,

@@ -3653,3 +3653,42 @@ msgstr "Введите пароль, чтобы удалить аккаунт."
 
 msgid "If you cannot access your account, contact"
 msgstr "Если вы не можете войти в аккаунт, напишите на"
+
+msgid "Review artist verification requests, map submissions, reports and platform safety issues."
+msgstr "Проверяйте заявки на верификацию мастеров и добавление на карту, жалобы и вопросы безопасности платформы."
+
+msgid "Map requests"
+msgstr "Заявки на карту"
+
+msgid "Search by username, email, location, reason..."
+msgstr "Поиск по имени, эл. почте, месту, причине…"
+
+msgid "Pending map requests"
+msgstr "Ожидающие заявки на карту"
+
+msgid "Open address in Google Maps"
+msgstr "Открыть адрес в Google Maps"
+
+msgid "Open supporting file"
+msgstr "Открыть подтверждающий файл"
+
+msgid "Latitude"
+msgstr "Широта"
+
+msgid "Longitude"
+msgstr "Долгота"
+
+msgid "Coordinates are required before approval."
+msgstr "Для одобрения необходимы координаты."
+
+msgid "No pending location requests."
+msgstr "Нет ожидающих заявок на добавление локации."
+
+msgid "Enter valid latitude and longitude before approving the request."
+msgstr "Введите корректные широту и долготу перед одобрением заявки."
+
+msgid "Location request approved and published on the map."
+msgstr "Заявка на локацию одобрена, точка опубликована на карте."
+
+msgid "Location request rejected."
+msgstr "Заявка на локацию отклонена."

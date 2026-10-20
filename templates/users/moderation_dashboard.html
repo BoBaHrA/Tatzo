@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n l10n %}
 
 {% block title %}{% trans "Moderation dashboard" %}{% endblock %}
 
@@ -20,7 +20,7 @@
         <h1>{% trans "Moderation dashboard" %}</h1>
 
         <p>
-          {% trans "Review artist verification requests, reports and platform safety issues." %}
+          {% trans "Review artist verification requests, map submissions, reports and platform safety issues." %}
         </p>
       </div>
     </header>
@@ -34,6 +34,11 @@
       <div class="moderation-stat-card">
         <span>{% trans "Manual reviews" %}</span>
         <strong>{{ manual_count }}</strong>
+      </div>
+
+      <div class="moderation-stat-card">
+        <span>{% trans "Map requests" %}</span>
+        <strong>{{ location_requests_count }}</strong>
       </div>
 
       <div class="moderation-stat-card">
@@ -54,6 +59,11 @@
           <span>{{ document_count|add:manual_count }}</span>
         </button>
 
+        <button type="button" class="moderation-folder-tab" data-folder-tab="maps">
+          {% trans "Map requests" %}
+          <span>{{ location_requests_count }}</span>
+        </button>
+
         <button type="button" class="moderation-folder-tab" data-folder-tab="posts">
           {% trans "Post reports" %}
           <span>{{ post_reports_count }}</span>
@@ -69,7 +79,7 @@
         <input
           type="text"
           id="moderationSearch"
-          placeholder="{% trans 'Search by username, email, reason...' %}"
+          placeholder="{% trans 'Search by username, email, location, reason...' %}"
           autocomplete="off"
         >
 
@@ -267,6 +277,139 @@
         {% else %}
           <div class="moderation-empty">
             {% trans "No pending manual reviews." %}
+          </div>
+        {% endif %}
+      </section>
+    </div>
+
+    <div class="moderation-folder-panel" data-folder-panel="maps" hidden>
+      <section class="moderation-section">
+        <div class="moderation-section-head">
+          <h2>{% trans "Pending map requests" %}</h2>
+          <span>{{ location_requests_count }}</span>
+        </div>
+
+        {% if pending_location_requests %}
+          <div class="moderation-list">
+            {% for location_request in pending_location_requests %}
+              <article
+                class="moderation-card moderation-location-card"
+                data-moderation-card
+                data-date="{{ location_request.created_at|date:'U' }}"
+                data-reason="{% if location_request.message %}with-reason{% else %}no-reason{% endif %}"
+                data-search="{{ location_request.name }} {{ location_request.contact_email }} {{ location_request.city }} {{ location_request.country }} {{ location_request.full_address }} {{ location_request.phone }} {{ location_request.website_or_map_link }} {{ location_request.message }}"
+              >
+                <div class="moderation-card-main">
+                  <div class="moderation-avatar moderation-location-icon" aria-hidden="true">⌖</div>
+
+                  <div class="moderation-location-content">
+                    <h3>{{ location_request.name }}</h3>
+                    <p>{{ location_request.full_address }}</p>
+
+                    <div class="moderation-meta">
+                      <span>{{ location_request.city }}, {{ location_request.country }}</span>
+                      <span>{{ location_request.contact_email }}</span>
+                      <span>{{ location_request.created_at|date:"d M Y H:i" }}</span>
+                      {% if location_request.phone %}
+                        <span>{{ location_request.phone }}</span>
+                      {% endif %}
+                    </div>
+
+                    <div class="moderation-file-links">
+                      <a
+                        href="https://www.google.com/maps/search/?api=1&amp;query={{ location_request.full_address|urlencode }}%20{{ location_request.city|urlencode }}%20{{ location_request.country|urlencode }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {% trans "Open address in Google Maps" %}
+                      </a>
+
+                      {% if location_request.supporting_file %}
+                        <a
+                          href="{% url 'protected_media' 'location-request' location_request.pk 'file' %}"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {% trans "Open supporting file" %}
+                        </a>
+                      {% endif %}
+                    </div>
+
+                    {% if location_request.website_or_map_link %}
+                      <div class="moderation-submitted-link">
+                        <strong>{% trans "Website or Google/Apple Maps link" %}</strong>
+                        <span>{{ location_request.website_or_map_link }}</span>
+                      </div>
+                    {% endif %}
+
+                    {% if location_request.message %}
+                      <div class="moderation-explanation">
+                        {{ location_request.message }}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="moderation-actions moderation-location-actions">
+                  <form
+                    method="post"
+                    action="{% url 'moderation_approve_location_request' location_request.pk %}"
+                    class="moderation-location-approval"
+                  >
+                    {% csrf_token %}
+
+                    <div class="moderation-coordinate-fields">
+                      <label>
+                        <span>{% trans "Latitude" %}</span>
+                        <input
+                          type="number"
+                          name="latitude"
+                          min="-90"
+                          max="90"
+                          step="0.000001"
+                          value="{% if location_request.latitude != None %}{{ location_request.latitude|unlocalize }}{% endif %}"
+                          required
+                        >
+                      </label>
+
+                      <label>
+                        <span>{% trans "Longitude" %}</span>
+                        <input
+                          type="number"
+                          name="longitude"
+                          min="-180"
+                          max="180"
+                          step="0.000001"
+                          value="{% if location_request.longitude != None %}{{ location_request.longitude|unlocalize }}{% endif %}"
+                          required
+                        >
+                      </label>
+                    </div>
+
+                    {% if location_request.latitude == None or location_request.longitude == None %}
+                      <small class="moderation-coordinate-help">
+                        {% trans "Coordinates are required before approval." %}
+                      </small>
+                    {% endif %}
+
+                    <button type="submit" class="moderation-btn moderation-btn-approve">
+                      {% trans "Approve" %}
+                    </button>
+                  </form>
+
+                  <form method="post" action="{% url 'moderation_reject_location_request' location_request.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="moderation-btn moderation-btn-danger">
+                      {% trans "Reject" %}
+                    </button>
+                  </form>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="moderation-empty">
+            {% trans "No pending location requests." %}
           </div>
         {% endif %}
       </section>
@@ -596,7 +739,16 @@
       });
     });
 
-    applyFilters();
+    const requestedFolder = new URLSearchParams(window.location.search).get("folder");
+    const hasRequestedFolder = Array.from(tabs).some(
+      (tab) => tab.dataset.folderTab === requestedFolder
+    );
+
+    if (hasRequestedFolder) {
+      activateFolder(requestedFolder);
+    } else {
+      applyFilters();
+    }
   });
 </script>
 {% endblock %}
