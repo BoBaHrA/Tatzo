@@ -24,7 +24,7 @@ from django.utils.translation import gettext as _, ngettext
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.http import require_http_methods, require_POST
 from .security import check_rate_limit, is_new_account, rate_limited_json
-from .location_review import approve_location_request, approve_location_claim, reject_location_submission
+from .location_review import approve_location_request, approve_location_claim, reject_location_submission, link_pending_claim_to_account
 from .models import (
     Profile,
     VerificationDocument,
@@ -2375,8 +2375,34 @@ def my_studios(request):
             "submitted_claims": LocationClaim.objects.filter(
                 claimant_user=request.user,
             ).select_related("location").order_by("-created_at")[:30],
+            "unlinked_claims": (
+                LocationClaim.objects.filter(
+                    claimant_user__isnull=True,
+                    contact_email__iexact=request.user.email,
+                    status__in=["submitted", "under_review"],
+                ).select_related("location").order_by("-created_at")[:30]
+                if request.user.is_active
+                and request.user.email
+                and getattr(getattr(request.user, "profile", None), "is_email_verified", False)
+                else LocationClaim.objects.none()
+            ),
         },
     )
+
+
+@login_required
+@require_POST
+def link_my_studio_claim(request, claim_id):
+    """Link an anonymous claim to an email-verified user, without approving it."""
+    try:
+        link_pending_claim_to_account(claim_id, request.user)
+    except LocationClaim.DoesNotExist:
+        raise Http404
+    except ValidationError as error:
+        messages.error(request, "; ".join(error.messages))
+    else:
+        messages.success(request, _("Claim linked to your account. Tatzo must still review your proof before ownership can be granted."))
+    return redirect("my_studios")
 
 
 def maps_page(request):
