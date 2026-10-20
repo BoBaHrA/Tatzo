@@ -54,3 +54,27 @@ class OSMImportSafetyTests(TestCase):
         self.assertEqual(location.name, "Original studio")
         self.assertEqual(location.status, "removed")
         self.assertEqual(Location.objects.filter(source_place_id="node/123456").count(), 1)
+
+    def test_suppressed_location_survives_external_id_change(self):
+        location = Location.objects.create(**{**self.payload, "status": "removed"})
+        result, created = self.command.save_location({
+            **self.payload, "source_place_id": "way/998877",
+        })
+        self.assertFalse(created)
+        self.assertEqual(result.pk, location.pk)
+        self.assertEqual(Location.objects.count(), 1)
+        location.refresh_from_db()
+        self.assertEqual(location.status, "removed")
+        self.assertEqual(location.source_place_id, "node/123456")
+
+    def test_different_address_is_not_suppressed_when_external_id_changes(self):
+        Location.objects.create(**{**self.payload, "status": "removed"})
+        result, created = self.command.save_location({
+            **self.payload,
+            "source_place_id": "node/654321",
+            "address": "58 Shirley Road",
+            "formatted_address": "58 Shirley Road, Croydon",
+        })
+        self.assertTrue(created)
+        self.assertEqual(result.status, "imported")
+        self.assertEqual(Location.objects.count(), 2)
