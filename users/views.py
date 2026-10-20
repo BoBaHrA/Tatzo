@@ -24,7 +24,7 @@ from django.utils.translation import gettext as _, ngettext
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.http import require_http_methods, require_POST
 from .security import check_rate_limit, is_new_account, rate_limited_json
-from .location_review import approve_location_request, approve_location_claim, reject_location_submission, link_pending_claim_to_account
+from .location_review import approve_location_request, approve_location_claim, reject_location_submission, link_pending_claim_to_account, review_location_removal
 from .models import (
     Profile,
     VerificationDocument,
@@ -32,6 +32,7 @@ from .models import (
     Location,
     LocationClaim,
     LocationRequest,
+    LocationRemovalRequest,
     LOCATION_UPLOAD_EXTENSIONS,
     MAX_LOCATION_UPLOAD_SIZE,
     UserFollow,
@@ -1403,10 +1404,13 @@ def moderation_dashboard(request):
 
     pending_location_requests = LocationRequest.objects.filter(status__in=["submitted", "under_review"]).select_related("requested_by").order_by("-created_at")
     pending_location_claims = LocationClaim.objects.filter(status__in=["submitted", "under_review"]).select_related("claimant_user", "location").order_by("-created_at")
+    pending_location_removals = LocationRemovalRequest.objects.filter(status="submitted").select_related("location", "reporter_user").order_by("-created_at")
 
     context = {
         "pending_location_requests": pending_location_requests,
         "pending_location_claims": pending_location_claims,
+        "pending_location_removals": pending_location_removals,
+        "location_removal_count": pending_location_removals.count(),
         "location_request_count": pending_location_requests.count(),
         "location_claim_count": pending_location_claims.count(),
         "pending_document_requests": pending_document_requests,
@@ -1447,6 +1451,28 @@ def moderation_review_location(request, kind, item_id):
         messages.error(request, "; ".join(error.messages) if isinstance(error, ValidationError) else str(error))
         return redirect("moderation_dashboard")
     messages.success(request, _("Location submission reviewed successfully."))
+    return redirect("moderation_dashboard")
+
+
+@user_passes_test(is_admin)
+@require_POST
+def moderation_review_location_removal(request, item_id):
+    decision = request.POST.get("decision")
+    if decision not in ("approve", "reject"):
+        messages.error(request, _("Choose a valid moderation action."))
+        return redirect("moderation_dashboard")
+    if decision == "approve" and request.POST.get("confirm_evidence") != "1":
+        messages.error(request, _("Confirm you checked the location closure evidence."))
+        return redirect("moderation_dashboard")
+    try:
+        review_location_removal(
+            item_id, request.user, decision,
+            confirm_managed=request.POST.get("confirm_managed") == "1",
+        )
+    except (ValidationError, LocationRemovalRequest.DoesNotExist, Location.DoesNotExist) as error:
+        messages.error(request, "; ".join(error.messages) if isinstance(error, ValidationError) else str(error))
+    else:
+        messages.success(request, _("Location closure report reviewed."))
     return redirect("moderation_dashboard")
 
 
@@ -2059,6 +2085,63 @@ def _validate_location_upload(uploaded_file):
         return False
 
     return uploaded_file.size <= MAX_LOCATION_UPLOAD_SIZE
+
+
+@require_http_methods(["GET", "POST"])
+def report_outdated_location(request, location_id):
+    """Accept a closure report without giving the submitter moderation powers."""
+    location = get_object_or_404(
+        Location, pk=location_id,
+        status__in=["imported", "unclaimed", "pending_claim", "claimed", "verified"],
+    )
+    if request.method == "GET":
+        return render(request, "users/report_outdated_location.html", {
+            "location": location,
+            "default_email": request.user.email if request.user.is_authenticated else "",
+        })
+
+    reporter_name = (request.POST.get("reporter_name") or "").strip()
+    contact_email = (request.POST.get("contact_email") or "").strip()
+    reason = (request.POST.get("reason") or "").strip()
+    evidence_url = (request.POST.get("evidence_url") or "").strip()
+
+    allowed, _retry_after = check_rate_limit(
+        request, scope="maps:obsolete-location", limit=5,
+        window_seconds=24 * 60 * 60, identity="user_or_ip",
+    )
+    if not allowed:
+        messages.error(request, _("Too many location reports. Please try again later."))
+    elif not reporter_name or not contact_email or not reason:
+        messages.error(request, _("Provide your name, email and why this listing should be removed."))
+    elif len(reporter_name) > 160 or len(reason) > 3000 or len(evidence_url) > 500:
+        messages.error(request, _("One or more report fields are too long."))
+    else:
+        try:
+            validate_email(contact_email)
+            if evidence_url:
+                URLValidator(schemes=("https", "http"))(evidence_url)
+        except ValidationError:
+            messages.error(request, _("Provide a valid email and an optional http(s) evidence URL."))
+        else:
+            if LocationRemovalRequest.objects.filter(
+                location=location, contact_email__iexact=contact_email, status="submitted",
+            ).exists():
+                messages.warning(request, _("A removal report for this location is already pending."))
+            else:
+                LocationRemovalRequest.objects.create(
+                    location=location,
+                    reporter_user=request.user if request.user.is_authenticated else None,
+                    reporter_name=reporter_name,
+                    contact_email=contact_email,
+                    reason=reason,
+                    evidence_url=evidence_url,
+                )
+                messages.success(request, _("Report submitted. The location stays visible until a moderator verifies and approves removal."))
+                return redirect("maps_page")
+
+    return render(request, "users/report_outdated_location.html", {
+        "location": location, "default_email": contact_email,
+    }, status=400)
 
 
 @require_POST
