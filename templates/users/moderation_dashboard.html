@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n l10n %}
 
 {% block title %}{% trans "Moderation dashboard" %}{% endblock %}
 
@@ -319,7 +319,11 @@
           <form method="post" action="{% url 'moderation_review_location' 'request' item.id %}">
             {% csrf_token %}
             <label><input type="checkbox" name="confirm_evidence" value="1" required> {% trans "I independently verified this address and the right to manage it." %}</label>
-            <button type="submit" name="decision" value="approve">{% trans "Approve and publish" %}</button>
+            <div class="moderation-coordinate-fields">
+              <label>{% trans "Latitude" %}<input type="text" name="latitude" value="{{ item.latitude|default_if_none:''|unlocalize }}" required></label>
+              <label>{% trans "Longitude" %}<input type="text" name="longitude" value="{{ item.longitude|default_if_none:''|unlocalize }}" required></label>
+            </div>
+            <button type="submit" name="decision" value="approve" class="moderation-btn moderation-btn-approve">{% trans "Approve and publish" %}</button>
           </form>
           <form method="post" action="{% url 'moderation_review_location' 'request' item.id %}">
             {% csrf_token %}
