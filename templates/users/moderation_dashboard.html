@@ -61,8 +61,14 @@
             <div>
               <h3>{% trans "New address" %}: {{ item.name }}</h3>
               <p>{{ item.full_address }}, {{ item.city }}, {{ item.country }}</p>
-              <p>{% trans "Contact" %}: {{ item.contact_email }}
-                {% if item.requested_by %} — @{{ item.requested_by.username }}{% endif %}
+              <p>{% trans "Contact" %}: {{ item.contact_email }}</p>
+              <p>
+                <strong>{% trans "Profile" %} Tatzo:</strong>
+                {% if item.requested_by %}
+                  <a href="{% url 'profile' item.requested_by.username %}">@{{ item.requested_by.username }}</a>
+                {% else %}
+                  <span class="moderation-muted">{% trans "Unknown" %}</span>
+                {% endif %}
               </p>
               <p>{% trans "Requests management access" %}: {{ item.wants_ownership|yesno:"Yes,No" }}</p>
               <p>{% trans "Map pin" %}: {% if item.latitude != None and item.longitude != None %}{{ item.latitude }}, {{ item.longitude }}{% else %}{% trans "Not provided — location will not display as a pin" %}{% endif %}</p>
