@@ -3,6 +3,8 @@
 Only an authenticated, email-verified account can become a studio owner.
 Admin review verifies the real-world relationship separately from email control.
 """
+from decimal import Decimal, InvalidOperation
+
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
@@ -39,7 +41,7 @@ def _audit(location, reviewer, before, after, action, origin, origin_id):
 
 
 @transaction.atomic
-def approve_location_request(request_id, reviewer):
+def approve_location_request(request_id, reviewer, *, latitude=None, longitude=None):
     """Review a user-created address, publish it, and optionally bind its owner.
 
     Must only be invoked after staff have inspected submitted evidence.
@@ -53,6 +55,26 @@ def approve_location_request(request_id, reviewer):
         return submission.approved_location
     if submission.status not in ACTIVE_STATES:
         raise ValidationError("This location request cannot be approved in its current state.")
+
+    # The moderator may correct a pin before approval. No unpinned location
+    # is silently published, and invalid coordinates cannot mutate the request.
+    if latitude is not None or longitude is not None:
+        if latitude is None or longitude is None:
+            raise ValidationError("Both reviewed coordinates are required.")
+        try:
+            latitude, longitude = Decimal(str(latitude)), Decimal(str(longitude))
+        except (InvalidOperation, ValueError, TypeError):
+            raise ValidationError("Enter valid latitude and longitude.") from None
+        if (
+            not latitude.is_finite() or not longitude.is_finite()
+            or not Decimal("-90") <= latitude <= Decimal("90")
+            or not Decimal("-180") <= longitude <= Decimal("180")
+        ):
+            raise ValidationError("Enter coordinates within valid ranges.")
+        submission.latitude = latitude
+        submission.longitude = longitude
+    if submission.latitude is None or submission.longitude is None:
+        raise ValidationError("Confirm coordinates before approving a new address.")
 
     owner = None
     if submission.wants_ownership:
@@ -80,7 +102,11 @@ def approve_location_request(request_id, reviewer):
         ):
             raise ValidationError("The matching location is already managed or suppressed.")
         previous_owner = location.studio_owner
-        location.status = "claimed" if owner else "unclaimed"
+        location.status = "claimed" if owner else ("unclaimed" if location.status == "pending_claim" else location.status)
+        location.name = submission.name.strip()
+        location.address = submission.full_address.strip()[:1000]
+        location.formatted_address = submission.full_address.strip()[:1000]
+        location.country = submission.country.strip()
         location.studio_owner = owner
         # Keep correct existing coordinates, but allow a reviewed replacement.
         if submission.latitude is not None and submission.longitude is not None:
@@ -88,17 +114,18 @@ def approve_location_request(request_id, reviewer):
             location.longitude = submission.longitude
         location.website = submission.website_or_map_link or location.website
         location.phone = submission.phone or location.phone
+        location.verified_at = timezone.now()
         location.save()
     else:
         location = Location.objects.create(
             name=submission.name.strip(), city=submission.city.strip(),
             country=submission.country.strip(),
-            address=submission.full_address.strip()[:255],
-            formatted_address=submission.full_address.strip()[:255],
+            address=submission.full_address.strip()[:1000],
+            formatted_address=submission.full_address.strip()[:1000],
             latitude=submission.latitude, longitude=submission.longitude,
             website=submission.website_or_map_link, phone=submission.phone,
             source="manual", status="claimed" if owner else "unclaimed",
-            studio_owner=owner,
+            studio_owner=owner, verified_at=timezone.now(),
         )
         previous_owner = None
 
@@ -106,7 +133,7 @@ def approve_location_request(request_id, reviewer):
     submission.status = "approved"
     submission.reviewed_by = reviewer
     submission.reviewed_at = timezone.now()
-    submission.save(update_fields=["approved_location", "status", "reviewed_by", "reviewed_at", "updated_at"])
+    submission.save(update_fields=["latitude", "longitude", "approved_location", "status", "reviewed_by", "reviewed_at", "updated_at"])
     _audit(location, reviewer, previous_owner, owner, "approve", "location_request", submission.pk)
     return location
 
