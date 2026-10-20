@@ -74,7 +74,7 @@ class StudioOwnershipTests(TestCase):
             f'<a href="{reverse("profile", kwargs={"username": self.owner.username})}">@{self.owner.username}</a>',
             html=True,
         )
-        self.assertContains(response, "Tatzo:")
+        self.assertContains(response, "Tatzo account")
 
     def test_moderation_does_not_guess_account_for_legacy_request(self):
         self.request.requested_by = None
@@ -85,7 +85,7 @@ class StudioOwnershipTests(TestCase):
         response = self.client.get(reverse("moderation_dashboard"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Unknown")
+        self.assertContains(response, "Not linked")
         self.assertNotContains(response, f"@{self.owner.username}")
 
     def test_approval_requires_explicit_moderator_confirmation(self):
