@@ -16,6 +16,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  profile-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - name: Export actual profile and map components for visual review
+        run: |
+          npm ci --ignore-scripts
+          node scripts/prepare-profile-review.mjs
+          npx expo export --platform web --output-dir dist/profile-review
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tatzo-profile-review-${{ github.sha }}
+          path: mobile/dist/profile-review/
+          if-no-files-found: error
+          retention-days: 3
   apk:
     runs-on: ubuntu-latest
     timeout-minutes: 40

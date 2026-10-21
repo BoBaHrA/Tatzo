@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { knownPublicPostCount, withOwnerDetails } from '../src/map/owner-details.ts';
+import { knownPublicPostCount, matchesMapStyle, withOwnerDetails } from '../src/map/owner-details.ts';
 
 const marker = { kind: 'studio', name: 'MedusaTattoo', username: 'MedusaTattoo', status: 'claimed', claimable: false, can_book: false, portfolio_count: 0, styles: [], avatar_url: null, tag: null };
 const profile = { username: 'MedusaTattoo', is_verified_artist: true, profile_image_url: 'https://example.test/avatar.png', portfolio_works_count: 4, tag: 'medusatattoo', posts_count: 3, recent_posts: [{ visibility: 'public' }, { visibility: 'followers' }, { visibility: 'private' }] };
@@ -38,4 +38,17 @@ test('owner verification and studio ownership are independent', () => {
   assert.equal(card.portfolio_count, 0);
   assert.deepEqual(card.styles, []);
   assert.equal(card.public_post_count, undefined);
+});
+
+test('localized style labels retain stable filter values from the API', () => {
+  const card = withOwnerDetails(marker, profile, ['Ligne fine', 'Lettrage'], ['fine_line', 'lettering']);
+  assert.equal(matchesMapStyle(card, 'fine_line'), true);
+  assert.equal(matchesMapStyle(card, 'Fine line'), true);
+  assert.equal(matchesMapStyle(card, 'Ligne fine'), true);
+  assert.equal(matchesMapStyle(card, 'realism'), false);
+});
+
+test('an optional style lookup failure preserves styles already returned by the map API', () => {
+  const card = withOwnerDetails({ ...marker, styles: ['Blackwork'] }, profile, []);
+  assert.deepEqual(card.styles, ['Blackwork']);
 });

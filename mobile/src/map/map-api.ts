@@ -6,7 +6,7 @@ import type {
   MapSubmissionResponse,
 } from '@/api/types';
 import type { AuthenticatedRequest } from '@/auth/auth-context';
-import { fetchPublicProfile, fetchProfileStyles } from '@/profile/profile-api';
+import { fetchPublicProfile, fetchProfileStyleOptions } from '@/profile/profile-api';
 import { withOwnerDetails } from './owner-details';
 
 
@@ -99,8 +99,8 @@ export function fetchMapLocations(
 
 /** Reuse deployed profile APIs until map responses include owner presentation data. */
 export async function enrichMapOwners(request: AuthenticatedRequest, markers: MapLocationMarker[], isCurrent: () => boolean) {
-  const owners = [...new Set(markers.map(marker => marker.username).filter((name): name is string => Boolean(name)))];
-  const details = new Map<string, { profile: Awaited<ReturnType<typeof fetchPublicProfile>>; styles: string[] }>();
+  const owners = [...new Set(markers.filter(marker => marker.kind === 'studio').map(marker => marker.username).filter((name): name is string => Boolean(name)))];
+  const details = new Map<string, { profile: Awaited<ReturnType<typeof fetchPublicProfile>>; options: { value: string; label: string }[] }>();
   let cursor = 0;
   await Promise.all(Array.from({ length: Math.min(4, owners.length) }, async () => {
     while (cursor < owners.length && isCurrent()) {
@@ -108,14 +108,14 @@ export async function enrichMapOwners(request: AuthenticatedRequest, markers: Ma
       try {
         const profile = await fetchPublicProfile(request, username);
         if (!isCurrent()) return;
-        const styles = await fetchProfileStyles(request, profile);
-        if (isCurrent()) details.set(username.toLowerCase(), { profile, styles });
+        const options = await fetchProfileStyleOptions(request, profile);
+        if (isCurrent()) details.set(username.toLowerCase(), { profile, options });
       } catch { /* Keep the map response when optional owner details are unavailable. */ }
     }
   }));
   return markers.map(marker => {
     const owner = marker.username ? details.get(marker.username.toLowerCase()) : undefined;
-    return owner ? withOwnerDetails(marker, owner.profile, owner.styles) : marker;
+    return owner ? withOwnerDetails(marker, owner.profile, owner.options.map(option => option.label), owner.options.map(option => option.value)) : marker;
   });
 }
 

@@ -271,6 +271,7 @@ export type MapLocationMarker = {
   claimable: boolean;
   claim_status: string | null;
   public_post_count?: number;
+  style_keys?: string[];
 };
 
 export type MapLocationsResponse = {

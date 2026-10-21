@@ -26,6 +26,7 @@ import { BrandHeader } from '@/components/brand-header';
 import { t } from '@/i18n';
 import { profileCopy as copy } from '@/profile/profile-copy';
 import { mapLocationPresentation } from '@/map/location-presentation';
+import { matchesMapStyle } from '@/map/owner-details';
 import { MapLocationCard } from '@/map/location-card';
 import { enrichMapOwners, fetchMapLocations, type MapRegion } from '@/map/map-api';
 import { MapCanvas } from '@/map/map-canvas';
@@ -171,11 +172,13 @@ export default function MapScreen() {
 
       // Show pins immediately; owner cards refresh without blocking the basemap.
       setMarkers(loaded);
+      setViewportCounts(latestViewport);
+      setStylesAvailable(latestStyles);
       const enriched = await enrichMapOwners(request, loaded, () => sequence === loadSequence.current);
       if (sequence !== loadSequence.current) return;
       setMarkers(enriched);
       setViewportCounts(latestViewport);
-      setStylesAvailable([...new Set([...latestStyles, ...enriched.flatMap(marker => marker.styles)])]);
+      setStylesAvailable([...new Set([...latestStyles, ...enriched.flatMap(marker => marker.style_keys ?? marker.styles)])]);
       setSelectedMarkerId((current) => (
         current && loaded.some((marker) => marker.marker_id === current)
           ? current
@@ -201,10 +204,18 @@ export default function MapScreen() {
   const visibleMarkers = markers.filter(marker => {
     const connected = mapLocationPresentation(marker).connected;
     return (!kind || (kind === 'verified' ? connected : !connected))
-      && (!activeStyles.length || activeStyles.some(style => marker.styles.some(value => value.toLowerCase() === style.toLowerCase())));
+      && (!activeStyles.length || activeStyles.some(style => matchesMapStyle(marker, style)));
   });
   const selected = visibleMarkers.find((marker) => marker.marker_id === selectedMarkerId) ?? null;
   const activeFilterCount = activeStyles.length + activeBooking.length + (kind ? 1 : 0);
+
+  const mapStyleLabel = (value: string) => {
+    for (const marker of markers) {
+      const index = marker.style_keys?.indexOf(value) ?? -1;
+      if (index >= 0) return marker.styles[index] ?? value.replace(/_/g, ' ');
+    }
+    return value.replace(/_/g, ' ');
+  };
 
   const toggleStyle = (style: string) => {
     setActiveStyles((current) => current.includes(style)
@@ -350,7 +361,7 @@ export default function MapScreen() {
                   <Chip
                     active={activeStyles.includes(style)}
                     key={style}
-                    label={style}
+                    label={mapStyleLabel(style)}
                     onPress={() => toggleStyle(style)}
                   />
                 ))}
