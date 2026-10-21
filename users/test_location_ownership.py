@@ -88,6 +88,62 @@ class StudioOwnershipTests(TestCase):
         self.assertContains(response, "Not linked")
         self.assertNotContains(response, f"@{self.owner.username}")
 
+    def test_managed_map_card_shows_owner_avatar_and_profile_link(self):
+        """A managed studio is linked to its real owner's profile in the web map."""
+        self.owner.profile.profile_image.name = "profile_images/medusa-avatar.jpg"
+        self.owner.profile.save(update_fields=["profile_image"])
+        location = Location.objects.create(
+            name="MedusaTattoo", city="Clermont-Ferrand",
+            address="5 rue Victor Duruy", country="France",
+            latitude="45.7847", longitude="3.075381",
+            status="claimed", studio_owner=self.owner, source="manual",
+        )
+
+        response = self.client.get(reverse("maps_page"))
+        self.assertEqual(response.status_code, 200)
+        card = next(
+            card for card in response.context["artist_cards"]
+            if card.get("location_id") == location.pk
+        )
+        self.assertTrue(card["is_managed_studio"])
+        self.assertEqual(card["profile_image"].name, "profile_images/medusa-avatar.jpg")
+        self.assertEqual(
+            card["profile_url"],
+            reverse("profile", kwargs={"username": self.owner.username}),
+        )
+        self.assertEqual(card["source"], "verified")
+        self.assertContains(response, "maps-artist-card-managed")
+        self.assertContains(response, "profile_images/medusa-avatar.jpg")
+        self.assertContains(
+            response, f'data-profile-url="{card["profile_url"]}"'
+        )
+        self.assertContains(response, 'class="maps-profile-link"')
+        self.assertContains(response, 'class="maps-card-more"')
+        self.assertContains(
+            response, reverse("report_outdated_location", args=[location.pk])
+        )
+        self.assertNotContains(response, 'maps-artist-card-imported" data-location-card data-map-key="location:%s"' % location.pk)
+
+    def test_unclaimed_imported_map_card_does_not_invent_owner_profile(self):
+        location = Location.objects.create(
+            name="Unclaimed Studio", city="Clermont-Ferrand",
+            address="12 rue des Arts", country="France",
+            latitude="45.7847", longitude="3.075381",
+            status="unclaimed", source="osm",
+        )
+        response = self.client.get(reverse("maps_page"))
+        card = next(
+            card for card in response.context["artist_cards"]
+            if card.get("location_id") == location.pk
+        )
+        self.assertFalse(card["is_managed_studio"])
+        self.assertFalse(card["profile_url"])
+        self.assertFalse(card["profile_image"])
+        self.assertContains(response, "maps-artist-card-imported")
+        self.assertContains(
+            response, reverse("report_outdated_location", args=[location.pk])
+        )
+
     def test_approval_requires_explicit_moderator_confirmation(self):
         self.client.force_login(self.moderator)
         self.client.post(
