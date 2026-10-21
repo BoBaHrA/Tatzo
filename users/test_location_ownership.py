@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework.test import APIClient
+from posts.models import Post
 
 from users.location_review import (
     approve_location_claim,
@@ -123,6 +124,29 @@ class StudioOwnershipTests(TestCase):
             response, reverse("report_outdated_location", args=[location.pk])
         )
         self.assertNotContains(response, 'maps-artist-card-imported" data-location-card data-map-key="location:%s"' % location.pk)
+
+    def test_managed_studio_reuses_public_artist_styles_and_post_counts(self):
+        self.owner.profile.account_type = "tattoo_artist"
+        self.owner.profile.verification_status = "approved"
+        self.owner.profile.save(update_fields=["account_type", "verification_status"])
+        Post.objects.create(user=self.owner, content="Public tattoo", visibility="public")
+        Post.objects.create(user=self.owner, content="Private draft", visibility="private")
+        location = Location.objects.create(
+            name="My Tattoo Studio", city="Lyon", country="France",
+            status="claimed", source="manual", studio_owner=self.owner,
+            latitude="45.764", longitude="4.835",
+        )
+
+        response = self.client.get(reverse("maps_page"))
+        managed_card = next(
+            card for card in response.context["artist_cards"]
+            if card.get("location_id") == location.pk
+        )
+        self.assertEqual(managed_card["post_count"], 1)
+        self.assertEqual(managed_card["profile_url"], reverse(
+            "profile", kwargs={"username": self.owner.username},
+        ))
+        self.assertEqual(managed_card["source"], "verified")
 
     def test_unclaimed_imported_map_card_does_not_invent_owner_profile(self):
         location = Location.objects.create(
