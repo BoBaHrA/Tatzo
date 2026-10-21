@@ -17,6 +17,7 @@ from django.db import transaction
 from django.db.models import Case, Count, Exists, IntegerField, OuterRef, Q, Value, When
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.encoding import force_str
@@ -2715,6 +2716,14 @@ def maps_page(request):
         if request.user.is_authenticated else set()
     )
 
+    # Reuse already gathered public stats/styles for owners who are also
+    # verified tattoo artists; do not render zeroes for their managed studios.
+    verified_artist_cards_by_user_id = {
+        card["user"].pk: card
+        for card in artist_cards
+        if card.get("user") is not None
+    }
+
     external_locations = (
         Location.objects
         .filter(
@@ -2723,11 +2732,15 @@ def maps_page(request):
             latitude__isnull=False,
             longitude__isnull=False,
         )
+        .select_related("studio_owner", "studio_owner__profile")
         .order_by("name")
     )
 
     for location_obj in external_locations:
         owner = location_obj.studio_owner if location_obj.status == "claimed" else None
+        owner_artist_card = (
+            verified_artist_cards_by_user_id.get(owner.pk) if owner else None
+        )
         has_my_pending_claim = location_obj.pk in my_pending_claim_ids
         claimable = (
             not bool(owner)
@@ -2742,10 +2755,11 @@ def maps_page(request):
         artist_cards.append({
             "user": None,
             "is_registered": False,
+            "is_managed_studio": bool(owner),
             "display_name": location_obj.name,
             "tag": _("Managed studio") if owner else _("Imported location"),
-            "profile_image": None,
-            "profile_url": f"/profile/{owner.username}/" if owner else "",
+            "profile_image": owner.profile.profile_image if owner and hasattr(owner, "profile") else None,
+            "profile_url": reverse("profile", kwargs={"username": owner.username}) if owner else "",
             "book_url": "",
             "location_id": location_obj.id,
             "location": location,
@@ -2763,10 +2777,10 @@ def maps_page(request):
             "claimable": claimable,
             "pending_own_claim": has_my_pending_claim,
             "confidence_score": 80,
-            "portfolio_count": 0,
-            "post_count": 0,
-            "style_tags": [],
-            "style_labels": [],
+            "portfolio_count": owner_artist_card["portfolio_count"] if owner_artist_card else 0,
+            "post_count": owner_artist_card["post_count"] if owner_artist_card else 0,
+            "style_tags": owner_artist_card["style_tags"] if owner_artist_card else [],
+            "style_labels": owner_artist_card["style_labels"] if owner_artist_card else [],
             "booking_modes": [],
             "can_book": False,
         })
