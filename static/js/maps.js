@@ -273,8 +273,9 @@
       const website = safeExternalUrl(card.dataset.website || "");
       const websiteLabel = website.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
-      // Preserve the existing links and claim handler; no change to ownership.
-      const profileButton = isVerified && card.dataset.profileUrl
+      // Verified artist and owner-managed studio cards can both link to a
+      // real Tatzo profile. Imported/unclaimed listings have no profile URL.
+      const profileButton = card.dataset.profileUrl?.startsWith("/profile/")
         ? `<a class="tatzo-map-popup-action tatzo-map-popup-profile" href="${escapeHtml(card.dataset.profileUrl)}">${escapeHtml(t("profile", "Profile"))}</a>`
         : "";
 
