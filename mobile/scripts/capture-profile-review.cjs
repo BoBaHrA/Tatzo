@@ -20,6 +20,7 @@ const server = http.createServer(async (req, res) => {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const browser = await chromium.launch({ headless: true });
   const results = [];
+  const failures = [];
   try {
     for (const scenario of [
       { name: 'public-profile-393', width: 393, query: '' },
@@ -34,24 +35,81 @@ const server = http.createServer(async (req, res) => {
       await page.goto('http://127.0.0.1:' + server.address().port + '/' + scenario.query, { waitUntil: 'networkidle' });
       await page.getByText(scenario.query.includes('long') ? 'MedusaTattooClermontFerrandStudio' : 'MedusaTattoo', { exact: true }).waitFor();
       await page.evaluate(() => document.fonts.ready);
-      const overflow = await page.evaluate(() => [...document.querySelectorAll('body *')].filter(element => {
-        const box = element.getBoundingClientRect();
-        return box.width > 0 && box.height > 0 && (box.left < -1 || box.right > window.innerWidth + 1);
-      }).map(element => ({ tag: element.tagName, text: element.textContent?.slice(0, 70) })));
-      assert.deepEqual(errors, [], scenario.name + ' runtime errors');
-      assert.deepEqual(overflow, [], scenario.name + ' horizontal overflow');
-      if (!scenario.query.includes('map')) {
-        const tops = await Promise.all(['Tattoo', 'Portfolio', 'Blackwork'].map(label => page.getByRole('button', { name: label, exact: true }).boundingBox().then(box => box.y)));
-        assert.ok(Math.max(...tops) - Math.min(...tops) < 1, scenario.name + ' keeps all three post columns');
-      } else {
-        const button = page.getByRole('button', { name: scenario.query.includes('lang=ru') ? 'Другие действия' : 'Plus d’options', exact: true });
-        await button.click();
-        await page.getByText(scenario.query.includes('lang=ru') ? 'Сообщить о закрытом или устаревшем адресе' : 'Signaler un lieu fermé ou obsolète', { exact: true }).waitFor();
-      }
+      const layout = await page.evaluate(() => {
+        const outside = box => box.left < -1 || box.right > window.innerWidth + 1;
+        const positive = box => box.right > box.left && box.bottom > box.top;
+        const describe = (element, box) => ({
+          tag: element.tagName, text: element.textContent?.slice(0, 70),
+          box: { left: box.left, right: box.right, top: box.top, bottom: box.bottom },
+        });
+        const rawOverflow = [];
+        const visibleOverflow = [];
+        const buttonOverflow = [];
+        for (const element of document.querySelectorAll('body *')) {
+          const box = element.getBoundingClientRect();
+          if (!positive(box)) continue;
+          if (outside(box)) rawOverflow.push(describe(element, box));
+          const visible = { left: box.left, right: box.right, top: box.top, bottom: box.bottom };
+          let hidden = false;
+          for (let ancestor = element; ancestor; ancestor = ancestor.parentElement) {
+            const style = getComputedStyle(ancestor);
+            if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) {
+              hidden = true;
+              break;
+            }
+            if (ancestor === element) continue;
+            const clip = ancestor.getBoundingClientRect();
+            // ImageBackground uses an oversized, clipped background plus an
+            // invisible intrinsic-size image. Only painted overflow is a defect.
+            if (/^(hidden|clip|auto|scroll)$/.test(style.overflowX)) {
+              visible.left = Math.max(visible.left, clip.left);
+              visible.right = Math.min(visible.right, clip.right);
+            }
+            if (/^(hidden|clip|auto|scroll)$/.test(style.overflowY)) {
+              visible.top = Math.max(visible.top, clip.top);
+              visible.bottom = Math.min(visible.bottom, clip.bottom);
+            }
+          }
+          if (hidden || !positive(visible)) continue;
+          if (outside(visible)) visibleOverflow.push(describe(element, visible));
+          // A clipped control still needs to fit: do not hide a genuine layout
+          // regression simply because a ScrollView masks part of the button.
+          if (element.matches('button, [role="button"]') && outside(box)) buttonOverflow.push(describe(element, box));
+        }
+        return {
+          viewportWidth: window.innerWidth,
+          documentWidth: document.documentElement.scrollWidth,
+          rawOverflow, visibleOverflow, buttonOverflow,
+        };
+      });
+      const result = { ...scenario, runtimeErrors: errors, layout };
+      results.push(result);
+      // Always preserve the rendered evidence before any assertion can fail.
       await page.screenshot({ path: path.join(output, scenario.name + '.png'), fullPage: true });
-      results.push({ ...scenario, runtimeErrors: errors, horizontalOverflow: overflow });
+      try {
+        assert.deepEqual(errors, [], scenario.name + ' runtime errors');
+        assert.deepEqual(layout.visibleOverflow, [], scenario.name + ' visible horizontal overflow');
+        assert.deepEqual(layout.buttonOverflow, [], scenario.name + ' clipped buttons');
+        assert.ok(layout.documentWidth <= scenario.width + 1, scenario.name + ' document horizontal overflow');
+        if (!scenario.query.includes('map')) {
+          const boxes = await Promise.all(['Tattoo', 'Portfolio', 'Blackwork'].map(label => page.getByRole('button', { name: label, exact: true }).boundingBox()));
+          assert.ok(boxes.every(Boolean), scenario.name + ' displays all three posts');
+          const tops = boxes.map(box => box.y);
+          assert.ok(Math.max(...tops) - Math.min(...tops) < 1, scenario.name + ' keeps all three post columns');
+        } else {
+          const button = page.getByRole('button', { name: scenario.query.includes('lang=ru') ? 'Другие действия' : 'Plus d’options', exact: true });
+          await button.click();
+          await page.getByText(scenario.query.includes('lang=ru') ? 'Сообщить о закрытом или устаревшем адресе' : 'Signaler un lieu fermé ou obsolète', { exact: true }).waitFor();
+          await page.screenshot({ path: path.join(output, scenario.name + '-menu.png'), fullPage: true });
+        }
+      } catch (error) {
+        result.failure = error.message;
+        failures.push(scenario.name + ': ' + error.message);
+      }
+      await fs.writeFile(path.join(output, 'checks.json'), JSON.stringify(results, null, 2));
       await page.close();
     }
     await fs.writeFile(path.join(output, 'checks.json'), JSON.stringify(results, null, 2));
+    assert.deepEqual(failures, [], 'Native component visual review');
   } finally { await browser.close(); server.close(); }
 })().catch(error => { console.error(error); server.close(); process.exitCode = 1; });
