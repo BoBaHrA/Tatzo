@@ -26,6 +26,8 @@ const server = http.createServer(async (req, res) => {
       { name: 'public-profile-393', width: 393, query: '' },
       { name: 'own-profile-393', width: 393, query: '?own=1' },
       { name: 'long-name-320', width: 320, query: '?long=1' },
+      { name: 'own-profile-320', width: 320, query: '?own=1' },
+      { name: 'own-profile-ru-320', width: 320, query: '?own=1&lang=ru' },
       { name: 'map-card-320', width: 320, query: '?map=1' },
       { name: 'map-card-ru-393', width: 393, query: '?map=1&lang=ru' },
     ]) {
@@ -92,6 +94,18 @@ const server = http.createServer(async (req, res) => {
         assert.deepEqual(layout.buttonOverflow, [], scenario.name + ' clipped buttons');
         assert.ok(layout.documentWidth <= scenario.width + 1, scenario.name + ' document horizontal overflow');
         if (!scenario.query.includes('map')) {
+          for (const [containerId, childId] of [
+            ['profile-identity', 'profile-verified-mark'],
+            ['profile-portfolio-card', 'profile-portfolio-icon'],
+            ['profile-booking-card', 'profile-booking-icon'],
+          ]) {
+            const parent = await page.getByTestId(containerId).boundingBox();
+            const child = await page.getByTestId(childId).boundingBox();
+            assert.ok(parent && child && child.width >= 18 && child.height >= 18, scenario.name + ' displays ' + childId);
+            assert.ok(child.x >= parent.x - 1 && child.x + child.width <= parent.x + parent.width + 1
+              && child.y >= parent.y - 1 && child.y + child.height <= parent.y + parent.height + 1,
+            scenario.name + ' contains ' + childId + ' inside ' + containerId);
+          }
           const boxes = await Promise.all(['Tattoo', 'Portfolio', 'Blackwork'].map(label => page.getByRole('button', { name: label, exact: true }).boundingBox()));
           assert.ok(boxes.every(Boolean), scenario.name + ' displays all three posts');
           const tops = boxes.map(box => box.y);

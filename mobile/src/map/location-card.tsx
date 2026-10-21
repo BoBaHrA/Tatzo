@@ -79,7 +79,7 @@ export function MapLocationCard({ marker, onClose, onSelect }: MapLocationCardPr
             <Image source={{ uri: marker.avatar_url }} style={styles.avatar} />
           </View>
         ) : (
-          <View style={[styles.avatarFallback, !connected && styles.studioAvatar]}>
+          <View style={[styles.avatarFallback, connected ? styles.managedAvatar : styles.studioAvatar]}>
             <Text style={styles.avatarText}>
               {artist ? marker.name[0]?.toUpperCase() : '⌖'}
             </Text>
@@ -106,7 +106,7 @@ export function MapLocationCard({ marker, onClose, onSelect }: MapLocationCardPr
       {menuOpen ? <Pressable accessibilityRole="button" onPress={(event) => { event.stopPropagation(); reportOutdated(); }} style={styles.reportMenu}><Text style={styles.reportText}>{copy('Report closed or outdated location', 'Signaler un lieu fermé ou obsolète', 'Сообщить о закрытом или устаревшем адресе')}</Text></Pressable> : null}
       <View style={styles.kindRow}>
         <Text style={styles.kind}>{artist ? copy('Registered Tatzo artist', 'Artiste inscrit sur Tatzo', 'Мастер Tatzo') : connected ? copy('Managed Tatzo studio', 'Studio Tatzo géré', 'Управляемая студия Tatzo') : copy('Not yet on Tatzo / Unclaimed', 'Pas encore sur Tatzo / Non revendiqué', 'Ещё не на Tatzo / Не присвоено')}</Text>
-        <View style={[styles.status, connected ? styles.statusVerified : styles.statusUnclaimed]}><Text style={[styles.statusText, connected ? styles.statusTextVerified : styles.statusTextUnclaimed]}>{connected ? t('verified') : copy('Needs claim', 'À revendiquer', 'Не присвоено')}</Text></View>
+        <View style={[styles.status, connected ? styles.statusVerified : styles.statusUnclaimed]}><Text style={[styles.statusText, connected ? styles.statusTextVerified : styles.statusTextUnclaimed]}>{connected ? copy('Verified', 'Vérifié', 'Подтверждено') : copy('Needs claim', 'À revendiquer', 'Не присвоено')}</Text></View>
       </View>
       <Text numberOfLines={2} style={styles.address}>
         📍 {marker.address || [marker.city, marker.country].filter(Boolean).join(', ')}
