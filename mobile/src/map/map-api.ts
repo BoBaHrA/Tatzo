@@ -1,10 +1,13 @@
 import type {
   MapBookingMode,
   MapLocationsResponse,
+  MapLocationMarker,
   MapMarkerKind,
   MapSubmissionResponse,
 } from '@/api/types';
 import type { AuthenticatedRequest } from '@/auth/auth-context';
+import { fetchPublicProfile, fetchProfileStyles } from '@/profile/profile-api';
+import { withOwnerDetails } from './owner-details';
 
 
 export type MapRegion = {
@@ -92,6 +95,28 @@ export function fetchMapLocations(
   if (query.booking?.length) search.set('booking', query.booking.join(','));
   if (query.search?.trim()) search.set('q', query.search.trim());
   return request<MapLocationsResponse>(`/map/locations/?${search.toString()}`);
+}
+
+/** Reuse deployed profile APIs until map responses include owner presentation data. */
+export async function enrichMapOwners(request: AuthenticatedRequest, markers: MapLocationMarker[], isCurrent: () => boolean) {
+  const owners = [...new Set(markers.map(marker => marker.username).filter((name): name is string => Boolean(name)))];
+  const details = new Map<string, { profile: Awaited<ReturnType<typeof fetchPublicProfile>>; styles: string[] }>();
+  let cursor = 0;
+  await Promise.all(Array.from({ length: Math.min(4, owners.length) }, async () => {
+    while (cursor < owners.length && isCurrent()) {
+      const username = owners[cursor++];
+      try {
+        const profile = await fetchPublicProfile(request, username);
+        if (!isCurrent()) return;
+        const styles = await fetchProfileStyles(request, profile);
+        if (isCurrent()) details.set(username.toLowerCase(), { profile, styles });
+      } catch { /* Keep the map response when optional owner details are unavailable. */ }
+    }
+  }));
+  return markers.map(marker => {
+    const owner = marker.username ? details.get(marker.username.toLowerCase()) : undefined;
+    return owner ? withOwnerDetails(marker, owner.profile, owner.styles) : marker;
+  });
 }
 
 export function submitMapLocation(

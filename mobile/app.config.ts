@@ -9,7 +9,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: auditPreview ? 'Tatzo Preview' : 'Tatzo',
   slug: 'tatzo',
   owner: expoOwner,
-  version: auditPreview ? '0.1.2' : '0.1.0',
+  version: auditPreview ? '0.1.3' : '0.1.0',
   orientation: 'portrait',
   icon: './assets/tatzo-app-icon.png',
   scheme: 'tatzo',
@@ -23,7 +23,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
   },
   android: {
-    ...(auditPreview ? { versionCode: 3 } : {}),
+    ...(auditPreview ? { versionCode: 4 } : {}),
     package: auditPreview ? 'eu.tatzo.app.preview' : 'eu.tatzo.app',
     icon: './assets/tatzo-app-icon.png',
     adaptiveIcon: {

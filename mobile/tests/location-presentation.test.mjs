@@ -76,6 +76,20 @@ test('verified artist profile and permitted booking remain available', () => {
   assert.equal(mapLocationPresentation({ ...studio, can_book: true }).canBook, false);
 });
 
+test('verified studios without an owner payload are still connected and cannot be claimed again', () => {
+  const result = mapLocationPresentation({ ...unclaimed, status: 'verified' });
+  assert.equal(result.connected, true);
+  assert.equal(result.glyph, '✓');
+  assert.equal(result.canOpenProfile, false);
+  assert.equal(result.showClaim, false);
+  assert.equal(result.canBook, false);
+});
+
+test('the managed-studio pin matches the verified web-map pin', () => {
+  assert.equal(mapLocationPresentation(studio).glyph, '✓');
+  assert.equal(mapLocationPresentation(unclaimed).glyph, '•');
+});
+
 test('cluster colors reflect ownership while studio entity types stay intact', () => {
   assert.equal(mapClusterTone([studio]), 'connected');
   assert.equal(mapClusterTone([studio, artist]), 'connected');

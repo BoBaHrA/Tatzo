@@ -33,13 +33,22 @@
         <div class="profile-top-row">
           <div>
             <div class="profile-name-row">
-              <h1 class="profile-username">
-                {% if is_imported_artist and profile_user.first_name %}
-                  {{ profile_user.first_name }}
-                {% else %}
-                  {{ profile_user.username }}
+              <div class="profile-identity">
+                <h1 class="profile-username">
+                  {% if is_imported_artist and profile_user.first_name %}
+                    {{ profile_user.first_name }}
+                  {% else %}
+                    {{ profile_user.username }}
+                  {% endif %}
+                </h1>
+                {% if profile_user.profile.account_type == "tattoo_artist" and profile_user.profile.verification_status == "approved" and not is_unclaimed and not claim_pending %}
+                  <span class="profile-verified-mark" role="img" aria-label="{% trans 'Verified' %}" title="{% trans 'Verified' %}">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                      <path d="M7 12.3 10.2 15.5 17.2 8.5" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
                 {% endif %}
-              </h1>
+              </div>
 
               {% if profile_user.profile.account_type == "tattoo_artist" %}
                 <span class="profile-badge profile-badge-artist">
@@ -55,10 +64,6 @@
                 <span class="profile-badge profile-badge-verified">
                   {% trans "Claim pending" %}
                 </span>
-              {% elif profile_user.profile.verification_status == "approved" %}
-                <span class="profile-badge profile-badge-verified">
-                  {% trans "Verified" %}
-                </span>
               {% endif %}
             </div>
 
@@ -69,6 +74,9 @@
                 {% trans "Community profile" %}
               {% endif %}
             </div>
+            {% if request.user == profile_user and profile_user.profile.account_type == "tattoo_artist" and profile_user.profile.verification_status == "not_submitted" and not is_unclaimed and not claim_pending %}
+              <a class="profile-start-verification" href="{% url 'verification_page' %}">{% trans "Start verification" %} <span aria-hidden="true">↗</span></a>
+            {% endif %}
           </div>
 
           <div class="profile-actions">
@@ -180,92 +188,81 @@
               {% endif %}
             </section>
           {% endif %}
-          <div class="artist-info-grid">
-            <div class="artist-info-card">
-              <div class="artist-info-title">{% trans "Verification" %}</div>
-
-              <div class="artist-info-value">
-                {% if is_unclaimed %}
-                  {% trans "Not claimed yet" %}
-                {% elif claim_pending %}
-                  {% trans "Claim pending" %}
-                {% elif profile_user.profile.verification_status == "approved" %}
-                  {% trans "Verified" %}
-                {% elif profile_user.profile.verification_status == "rejected" %}
-                  {% trans "Rejected" %}
-                {% elif profile_user.profile.verification_status == "pending" %}
-                  {% trans "Pending" %}
-                {% elif profile_user.profile.verification_status == "pending_manual_review" %}
-                  {% trans "Pending" %}
-                {% elif profile_user.profile.verification_status == "not_submitted" %}
-                  {% trans "Not submitted" %}
-                {% else %}
-                  {{ profile_user.profile.public_verification_status }}
-                {% endif %}
-              </div>
-
-              {% if request.user == profile_user and profile_user.profile.verification_status == "not_submitted" and not is_unclaimed and not claim_pending %}
-                <a href="{% url 'verification_page' %}" class="artist-info-link">
-                  {% trans "Start verification" %}
-                </a>
+          <div class="artist-cta-grid" aria-label="{% trans 'Portfolio' %} &amp; {% trans 'Booking' %}">
+            <div class="artist-cta-card artist-cta--portfolio">
+              {% if show_prepared_work_grid %}
+                <a class="artist-cta-main" href="#profile-posts">
+              {% else %}
+                <a class="artist-cta-main" href="{% url 'artist_portfolio' profile_user.username %}">
               {% endif %}
-            </div>
-
-            <div class="artist-info-card">
-              <div class="artist-info-title">{% trans "Portfolio" %}</div>
-
-              <div class="artist-info-value">
-                {% if show_prepared_work_grid %}
-                  {{ portfolio_works_count }} {% trans "works prepared" %}
-                {% else %}
-                  <a
-                    href="{% url 'artist_portfolio' profile_user.username %}"
-                    class="artist-info-link"
-                  >
-                    {% if request.user == profile_user %}
-                      {% if portfolio_works_count %}
-                        {% trans "Manage portfolio" %}
-                      {% else %}
-                        {% trans "Add your works" %}
-                      {% endif %}
-                    {% else %}
-                      {% if portfolio_works_count %}
-                        {% trans "Take a look" %}
+                  <span class="artist-cta-top">
+                    <span class="artist-cta-title">{% trans "Portfolio" %}</span>
+                    <svg class="artist-cta-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                      <rect x="3" y="3.5" width="18" height="17" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                      <circle cx="8.5" cy="9" r="1.6" fill="currentColor"/>
+                      <path d="m5 17 4.1-4.1 3.1 2.7 3.8-4.2 3 3.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                  <span class="artist-cta-bottom">
+                    <span class="artist-cta-subtitle">
+                      {% if show_prepared_work_grid %}
+                        {{ portfolio_works_count }} {% trans "works" %}
+                      {% elif request.user == profile_user %}
+                        {% if portfolio_works_count %}{% trans "Manage portfolio" %}{% else %}{% trans "Add your works" %}{% endif %}
+                      {% elif portfolio_works_count %}
+                        {{ portfolio_works_count }} {% trans "works" %}
                       {% else %}
                         {% trans "No works yet" %}
                       {% endif %}
-                    {% endif %}
-                  </a>
-                {% endif %}
-              </div>
+                    </span>
+                    <span class="artist-cta-arrow" aria-hidden="true">↗</span>
+                  </span>
+                </a>
             </div>
 
-            <div class="artist-info-card">
-              <div class="artist-info-title">{% trans "Booking" %}</div>
-
-              <div class="artist-info-value">
-                {% if is_unclaimed or claim_pending %}
-                  {% trans "Available after claim" %}
-                {% elif profile_user.profile.verification_status == "approved" %}
-                  {% if request.user == profile_user %}
-                    <a href="{% url 'appointments_list' %}" class="artist-info-link">
-                      {% trans "Manage appointments" %}
-                    </a>
-
-                    <br>
-
-                    <a href="{% url 'artist_booking_settings' %}" class="artist-info-link">
-                      {% trans "Booking settings" %}
-                    </a>
-                  {% else %}
-                    <a href="{% url 'booking_wizard' profile_user.username %}" class="artist-info-link">
-                      {% trans "Book appointment" %}
-                    </a>
-                  {% endif %}
-                {% else %}
-                  {% trans "Available after verification" %}
-                {% endif %}
-              </div>
+            <div class="artist-cta-card artist-cta--booking{% if is_unclaimed or claim_pending or profile_user.profile.verification_status != 'approved' %} artist-cta--unavailable{% endif %}">
+              {% if is_unclaimed or claim_pending %}
+                <div class="artist-cta-main artist-cta-main--disabled">
+              {% elif profile_user.profile.verification_status != "approved" %}
+                <div class="artist-cta-main artist-cta-main--disabled">
+              {% elif request.user == profile_user %}
+                <a class="artist-cta-main" href="{% url 'appointments_list' %}">
+              {% else %}
+                <a class="artist-cta-main" href="{% url 'booking_wizard' profile_user.username %}">
+              {% endif %}
+                  <span class="artist-cta-top">
+                    <span class="artist-cta-title">{% trans "Booking" %}</span>
+                    <svg class="artist-cta-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                      <rect x="3.5" y="5.5" width="17" height="15" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                      <path d="M7.5 3.5v4m9-4v4M3.5 10.5h17m-12 5 2.2 2.2 4.8-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                  <span class="artist-cta-bottom">
+                    <span class="artist-cta-subtitle">
+                      {% if is_unclaimed or claim_pending %}
+                        {% trans "Available after claim" %}
+                      {% elif profile_user.profile.verification_status != "approved" %}
+                        {% trans "Available after verification" %}
+                      {% elif request.user == profile_user %}
+                        {% trans "Manage appointments" %}
+                      {% else %}
+                        {% trans "Book appointment" %}
+                      {% endif %}
+                    </span>
+                    {% if not is_unclaimed and not claim_pending and profile_user.profile.verification_status == "approved" %}
+                      <span class="artist-cta-arrow" aria-hidden="true">↗</span>
+                    {% endif %}
+                  </span>
+              {% if is_unclaimed or claim_pending or profile_user.profile.verification_status != "approved" %}
+                </div>
+              {% else %}
+                </a>
+              {% endif %}
+              {% if request.user == profile_user and profile_user.profile.verification_status == "approved" and not is_unclaimed and not claim_pending %}
+                <a href="{% url 'artist_booking_settings' %}" class="artist-cta-settings">
+                  {% trans "Booking settings" %} <span aria-hidden="true">→</span>
+                </a>
+              {% endif %}
             </div>
           </div>
         {% endif %}
@@ -286,7 +283,7 @@
       </button>
     </div>
 
-    <div class="profile-tab-panel active" data-profile-panel="posts">
+    <div class="profile-tab-panel active" id="profile-posts" data-profile-panel="posts">
       <div class="profile-posts-grid">
         {% if show_prepared_work_grid %}
           {% for work in prepared_works %}

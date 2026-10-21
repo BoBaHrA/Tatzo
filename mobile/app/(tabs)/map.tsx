@@ -20,13 +20,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type {
   MapBookingMode,
   MapLocationMarker,
-  MapMarkerKind,
 } from '@/api/types';
 import { useAuth } from '@/auth/auth-context';
 import { BrandHeader } from '@/components/brand-header';
 import { t } from '@/i18n';
+import { profileCopy as copy } from '@/profile/profile-copy';
+import { mapLocationPresentation } from '@/map/location-presentation';
 import { MapLocationCard } from '@/map/location-card';
-import { fetchMapLocations, type MapRegion } from '@/map/map-api';
+import { enrichMapOwners, fetchMapLocations, type MapRegion } from '@/map/map-api';
 import { MapCanvas } from '@/map/map-canvas';
 import { colors, radius, spacing } from '@/theme';
 
@@ -108,7 +109,7 @@ export default function MapScreen() {
   const [region, setRegion] = useState<MapRegion>(DEFAULT_REGION);
   const [markers, setMarkers] = useState<MapLocationMarker[]>([]);
   const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
-  const [kind, setKind] = useState<MapMarkerKind | undefined>();
+  const [kind, setKind] = useState<'verified' | 'unclaimed' | undefined>();
   const [stylesAvailable, setStylesAvailable] = useState<string[]>([]);
   const [activeStyles, setActiveStyles] = useState<string[]>([]);
   const [activeBooking, setActiveBooking] = useState<MapBookingMode[]>([]);
@@ -150,8 +151,6 @@ export default function MapScreen() {
       while (hasMore) {
         const response = await fetchMapLocations(request, {
           region,
-          kind,
-          styles: activeStyles,
           booking: activeBooking,
           search,
           offset,
@@ -170,9 +169,13 @@ export default function MapScreen() {
         }
       }
 
+      // Show pins immediately; owner cards refresh without blocking the basemap.
       setMarkers(loaded);
+      const enriched = await enrichMapOwners(request, loaded, () => sequence === loadSequence.current);
+      if (sequence !== loadSequence.current) return;
+      setMarkers(enriched);
       setViewportCounts(latestViewport);
-      setStylesAvailable(latestStyles);
+      setStylesAvailable([...new Set([...latestStyles, ...enriched.flatMap(marker => marker.styles)])]);
       setSelectedMarkerId((current) => (
         current && loaded.some((marker) => marker.marker_id === current)
           ? current
@@ -186,7 +189,7 @@ export default function MapScreen() {
         setRefreshing(false);
       }
     }
-  }, [activeBooking, activeStyles, kind, region, request, search, status]);
+  }, [activeBooking, region, request, search, status]);
 
   useEffect(() => {
     const timeout = setTimeout(() => void loadMap(), 260);
@@ -195,7 +198,12 @@ export default function MapScreen() {
 
   if (status === 'anonymous') return <Redirect href="/(auth)/login" />;
 
-  const selected = markers.find((marker) => marker.marker_id === selectedMarkerId) ?? null;
+  const visibleMarkers = markers.filter(marker => {
+    const connected = mapLocationPresentation(marker).connected;
+    return (!kind || (kind === 'verified' ? connected : !connected))
+      && (!activeStyles.length || activeStyles.some(style => marker.styles.some(value => value.toLowerCase() === style.toLowerCase())));
+  });
+  const selected = visibleMarkers.find((marker) => marker.marker_id === selectedMarkerId) ?? null;
   const activeFilterCount = activeStyles.length + activeBooking.length + (kind ? 1 : 0);
 
   const toggleStyle = (style: string) => {
@@ -294,8 +302,8 @@ export default function MapScreen() {
 
           <View style={styles.kindRow}>
             <Chip label={t('mapAll')} active={!kind} onPress={() => setKind(undefined)} />
-            <Chip label={t('mapArtists')} active={kind === 'artist'} onPress={() => setKind('artist')} />
-            <Chip label={t('mapStudios')} active={kind === 'studio'} onPress={() => setKind('studio')} />
+            <Chip label={t('verified')} active={kind === 'verified'} onPress={() => setKind('verified')} />
+            <Chip label={copy('Needs claim', 'À revendiquer', 'Не присвоено')} active={kind === 'unclaimed'} onPress={() => setKind('unclaimed')} />
           </View>
 
           <View style={styles.statGrid}>
@@ -326,11 +334,11 @@ export default function MapScreen() {
       return (
         <ScrollView contentContainerStyle={styles.sheetScrollContent}>
           <View style={styles.filterSection}>
-            <Text style={styles.sectionTitle}>{t('mapArtists')} · {t('mapStudios')}</Text>
+            <Text style={styles.sectionTitle}>{copy('Location status', 'Statut du lieu', 'Статус адреса')}</Text>
             <View style={styles.kindRow}>
               <Chip label={t('mapAll')} active={!kind} onPress={() => setKind(undefined)} />
-              <Chip label={t('mapArtists')} active={kind === 'artist'} onPress={() => setKind('artist')} />
-              <Chip label={t('mapStudios')} active={kind === 'studio'} onPress={() => setKind('studio')} />
+              <Chip label={t('verified')} active={kind === 'verified'} onPress={() => setKind('verified')} />
+              <Chip label={copy('Needs claim', 'À revendiquer', 'Не присвоено')} active={kind === 'unclaimed'} onPress={() => setKind('unclaimed')} />
             </View>
           </View>
 
@@ -385,7 +393,7 @@ export default function MapScreen() {
     return (
       <FlatList
         contentContainerStyle={styles.listContent}
-        data={markers}
+        data={visibleMarkers}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         keyExtractor={(marker) => marker.marker_id}
         ListEmptyComponent={loading ? (
@@ -421,7 +429,7 @@ export default function MapScreen() {
 
       <View style={styles.mapShell}>
         <MapCanvas
-          markers={markers}
+          markers={visibleMarkers}
           onRegionChange={updateRegion}
           onSelectMarker={(marker) => setSelectedMarkerId(marker.marker_id)}
           region={region}
@@ -609,3 +617,4 @@ const styles = StyleSheet.create({
   emptyTitle: { color: colors.text, fontSize: 20, fontWeight: '900' },
   pressed: { opacity: 0.72 },
 });
+

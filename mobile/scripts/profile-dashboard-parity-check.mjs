@@ -28,7 +28,11 @@ function check(condition, label) {
   else failures.push(label);
 }
 
-const profile = source('app/(tabs)/profile.tsx');
+const ownProfile = source('app/(tabs)/profile.tsx');
+const publicProfile = source('app/profile/[username].tsx');
+const profile = source('src/profile/profile-screen.tsx');
+const header = source('src/profile/profile-header.tsx');
+const content = source('src/profile/profile-content.tsx');
 const settings = source('app/settings.tsx');
 const profileApi = source('src/profile/profile-api.ts');
 const dashboard = source('app/artist-dashboard/index.tsx');
@@ -45,14 +49,16 @@ for (const icon of ['check-circle', 'pause-circle', 'palmtree', 'layers', 'messa
   exists(`assets/dashboard-rule-icons/${icon}.png`);
 }
 
-check(profile.includes('profileHeader') && profile.includes('avatarWrap') && profile.includes('nameRow'), 'Profile follows the web identity header hierarchy');
-check(profile.includes('styles.stats') && profile.includes('styles.bioCard'), 'Profile keeps web stats and bio surfaces');
-check(profile.includes('artistInfoGrid') && profile.includes('ArtistInfoCard'), 'Artist profile exposes verification, portfolio and booking cards');
-check(profile.includes('ProfileTab') && profile.includes("selectTab('liked')"), 'Profile has Posts and Liked tabs');
-check(profile.includes('postsGrid') && profile.includes('PostTile'), 'Profile renders the three-column post grid');
+check(header.includes('profileHeader') && header.includes('avatarWrap') && header.includes('nameRow'), 'Profile follows the web identity header hierarchy');
+check(header.includes('styles.stats') && header.includes('styles.bioCard'), 'Profile keeps web stats and bio surfaces');
+check(header.includes('primaryActions') && header.includes('portfolio-gradient.png') && header.includes('booking-gradient.png') && !header.includes('ArtistInfoCard'), 'Artist profile has the web Portfolio and Booking primary actions');
+check(header.includes('styles.verified') && header.includes('nameAndCheck'), 'Verification is beside the name instead of a third action card');
+check(ownProfile.includes('ProfileScreen') && publicProfile.includes('ProfileScreen'), 'Own and public profiles share the compact web layout');
+check(profile.includes('ProfileTabs') && content.includes('canViewLiked') && content.includes("['liked']"), 'Profile has Posts and Liked tabs');
+check(content.includes('postsGrid') && content.includes('PostTile'), 'Profile renders the three-column post grid');
 check(profile.includes("router.push('/settings')"), 'Account settings are separated from the public-facing profile');
 check(profile.includes("router.push('/edit-profile')"), 'Edit profile remains available from the profile header');
-check(profile.includes('dashboardEntry') && profile.includes("router.push('/artist-dashboard')"), 'Verified artists get a direct Dashboard entry from their profile');
+check(profile.includes('dashboardIcon') && profile.includes("router.push('/artist-dashboard')"), 'Verified artists get a direct Dashboard entry from their profile');
 check(profileApi.includes('fetchProfileContent') && profileApi.includes('/content/?tab='), 'Profile tabs are backed by the real content API');
 
 check(!settings.includes("router.push('/artist-dashboard')"), 'Dashboard is not hidden inside account Settings');

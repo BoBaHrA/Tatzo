@@ -2028,3 +2028,82 @@
     min-height: 48px !important;
   }
 }
+
+
+/* Managed studios belong to real Tatzo accounts, not the imported-placeholder state. */
+.maps-artist-card-managed {
+  border-color: rgba(4, 197, 191, 0.3);
+  background: linear-gradient(145deg, rgba(4, 197, 191, 0.07), rgba(255, 255, 255, 0.045));
+}
+.maps-artist-card-managed .maps-avatar {
+  border-color: rgba(4, 197, 191, 0.85);
+  background: #071e26;
+  box-shadow: 0 0 0 4px rgba(4, 197, 191, 0.14);
+}
+.maps-artist-card {
+  position: relative;
+}
+.maps-artist-card .maps-card-top {
+  padding-right: 40px;
+}
+.maps-card-more {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 12;
+}
+.maps-card-more > summary {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(4, 197, 191, 0.2);
+  border-radius: 12px;
+  color: #c9f8f8;
+  background: rgba(6, 26, 37, 0.97);
+  list-style: none;
+  font-size: 23px;
+  line-height: 1;
+  cursor: pointer;
+}
+.maps-card-more > summary::-webkit-details-marker { display: none; }
+.maps-card-more > summary::marker { content: ""; }
+.maps-card-more > summary:hover,
+.maps-card-more[open] > summary {
+  background: #09313b;
+  border-color: rgba(4, 197, 191, 0.65);
+}
+.maps-card-more > summary:focus-visible {
+  outline: 2px solid #04c5bf;
+  outline-offset: 2px;
+}
+.maps-card-more-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 7px);
+  width: min(280px, calc(100vw - 48px));
+  padding: 6px;
+  border: 1px solid rgba(4, 197, 191, 0.22);
+  border-radius: 14px;
+  background: #061b26;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.4);
+}
+.maps-card-more-menu a {
+  display: block;
+  padding: 11px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-decoration: none;
+  color: #e8f8fa;
+}
+.maps-card-more-menu a:hover,
+.maps-card-more-menu a:focus-visible {
+  background: rgba(238, 12, 111, 0.16);
+  color: #fff;
+}
+.maps-artist-card-managed .maps-actions .maps-profile-link {
+  background: rgba(4, 197, 191, 0.14);
+  color: #a8fffa;
+}

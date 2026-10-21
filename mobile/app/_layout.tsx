@@ -32,6 +32,7 @@ export default function RootLayout() {
               <Stack.Screen name="delete-account" options={{ presentation: 'modal' }} />
               <Stack.Screen name="notifications" />
               <Stack.Screen name="profile/[username]" />
+              <Stack.Screen name="profile/[username]/portfolio" />
               <Stack.Screen name="post/[postId]" />
               <Stack.Screen name="chat/[threadId]" />
               <Stack.Screen name="booking/[username]" />

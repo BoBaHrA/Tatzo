@@ -10,7 +10,7 @@ import sys
 import tempfile
 from zipfile import ZipFile
 
-PREVIOUS_SHA256 = "12081805282223072070f1a6fd5f943944596184ec06ddefc9110d4b820b366d"
+PREVIOUS_SHA256 = "1f49ca5472b3d8050340fd5695e68e737a77251fdb74c811af5b50899be7c800"
 PACKAGE = "eu.tatzo.app.preview"
 
 sdk = Path(os.environ.get("ANDROID_HOME") or os.environ["ANDROID_SDK_ROOT"])
@@ -99,7 +99,7 @@ with ZipFile(apk) as archive:
 
 destination = Path("dist/apk")
 destination.mkdir(parents=True, exist_ok=True)
-output = destination / "Tatzo-Preview-0.1.2.apk"
+output = destination / "Tatzo-Preview-0.1.3.apk"
 shutil.copyfile(apk, output)
 sha256 = hashlib.sha256(output.read_bytes()).hexdigest()
 metadata = {
