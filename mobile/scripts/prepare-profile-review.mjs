@@ -32,7 +32,7 @@ function Preview() {
         {!own ? <Pressable style={[profileActionStyles.button, profileActionStyles.secondary]}><Text style={[profileActionStyles.text, profileActionStyles.secondaryText]}>Message</Text></Pressable> : null}
       </>} />
       <ProfileTabs tab="posts" canViewLiked onChange={() => {}} />
-      <ProfilePostGrid posts={[{ id: 1, content: 'Tattoo', media: [] }, { id: 2, content: 'Portfolio', media: [] }]} />
+      <ProfilePostGrid posts={[{ id: 1, content: 'Tattoo', media: [] }, { id: 2, content: 'Portfolio', media: [] }, { id: 3, content: 'Blackwork', media: [] }]} />
     </>}
   </ScrollView>;
 }

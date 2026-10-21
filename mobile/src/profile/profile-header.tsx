@@ -22,7 +22,7 @@ export function ProfileHeader({ profile, tattooStyles, verificationStatus, actio
   const own = profile.is_self;
   return <View style={styles.profileHeader}>
     <View style={styles.identityRow}>
-      <View style={styles.avatarWrap}><Avatar uri={profile.profile_image_url} label={profile.username} size={70} ring /></View>
+      <View style={styles.avatarWrap}><Avatar uri={profile.profile_image_url} label={profile.username} size={70} ring style={{ borderWidth: 2 }} /></View>
       <View style={styles.identity}>
         <View style={styles.nameRow}>
           <View style={styles.nameAndCheck}>
