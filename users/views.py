@@ -2723,6 +2723,7 @@ def maps_page(request):
             latitude__isnull=False,
             longitude__isnull=False,
         )
+        .select_related("studio_owner", "studio_owner__profile")
         .order_by("name")
     )
 
@@ -2742,10 +2743,11 @@ def maps_page(request):
         artist_cards.append({
             "user": None,
             "is_registered": False,
+            "is_managed_studio": bool(owner),
             "display_name": location_obj.name,
             "tag": _("Managed studio") if owner else _("Imported location"),
-            "profile_image": None,
-            "profile_url": f"/profile/{owner.username}/" if owner else "",
+            "profile_image": owner.profile.profile_image if owner and hasattr(owner, "profile") else None,
+            "profile_url": reverse("profile", kwargs={"username": owner.username}) if owner else "",
             "book_url": "",
             "location_id": location_obj.id,
             "location": location,
