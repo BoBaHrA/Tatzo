@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 
 import type { MapLocationMarker } from '@/api/types';
+import { mapClusterTone, mapLocationPresentation } from '@/map/location-presentation';
 import type { MapRegion } from '@/map/map-api';
+import { cartoTileUrl } from '@/map/carto-basemap';
 
 
 type LeafletGlobal = any;
@@ -38,7 +40,6 @@ const CLUSTER_JS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/d
 const CLUSTER_CSS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/dist/MarkerCluster.css`;
 const CLUSTER_DEFAULT_CSS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/dist/MarkerCluster.Default.css`;
 const CARTO_BASEMAP_API_KEY = (process.env.EXPO_PUBLIC_CARTO_BASEMAP_API_KEY ?? '').trim();
-const CARTO_TILES = `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png${CARTO_BASEMAP_API_KEY ? `?key=${encodeURIComponent(CARTO_BASEMAP_API_KEY)}` : ''}`;
 
 function ensureStylesheet(href: string) {
   if (document.querySelector(`link[href="${href}"]`)) return;
@@ -113,17 +114,12 @@ function regionKey(region: MapRegion) {
 }
 
 function pointMarkerHtml(marker: MapLocationMarker, selected: boolean) {
-  const sourceClass = marker.kind === 'artist' ? 'verified' : 'unclaimed';
-  const glyph = marker.kind === 'artist' ? '✓' : '•';
+  const { markerKind: sourceClass, glyph } = mapLocationPresentation(marker);
   return `<span class="tatzo-map-marker tatzo-map-marker-${sourceClass}${selected ? ' is-selected' : ''}"><span>${glyph}</span></span>`;
 }
 
 function clusterKind(cluster: any) {
-  const markers = cluster.getAllChildMarkers();
-  const hasArtist = markers.some((marker: any) => marker.options.tatzoKind === 'artist');
-  const hasStudio = markers.some((marker: any) => marker.options.tatzoKind === 'studio');
-  if (hasArtist && hasStudio) return 'mixed';
-  return hasArtist ? 'verified' : 'unclaimed';
+  return mapClusterTone(cluster.getAllChildMarkers().map((marker: any) => marker.options.tatzoData));
 }
 
 export default function LeafletMap({
@@ -165,7 +161,7 @@ export default function LeafletMap({
         worldCopyJump: false,
       });
 
-      L.tileLayer(CARTO_TILES, {
+      L.tileLayer(cartoTileUrl(CARTO_BASEMAP_API_KEY), {
         minZoom: 2,
         maxZoom: 19,
         noWrap: true,
@@ -245,6 +241,7 @@ export default function LeafletMap({
         keyboard: true,
         title: marker.name,
         tatzoKind: marker.kind,
+        tatzoData: marker,
       });
       leafletMarker.on('click', () => {
         void propsRef.current.onSelectMarker(marker);
@@ -306,13 +303,13 @@ export default function LeafletMap({
         .tatzo-map-marker-shell { background: transparent !important; border: 0 !important; }
         .tatzo-map-marker { width: 34px; height: 34px; border: 3px solid rgba(255,255,255,.86); border-radius: 50%; box-shadow: 0 10px 26px rgba(0,0,0,.36), 0 0 0 6px rgba(4,197,191,.12); display: grid; place-items: center; transform-origin: center; transition: transform .18s ease, box-shadow .18s ease; }
         .tatzo-map-marker span { color: #001316; font-size: 13px; font-weight: 900; line-height: 1; }
-        .tatzo-map-marker-verified { background: #04c5bf; }
+        .tatzo-map-marker-verified, .tatzo-map-marker-claimed { background: #04c5bf; }
         .tatzo-map-marker-unclaimed { background: #ee0c6f; box-shadow: 0 10px 26px rgba(0,0,0,.36), 0 0 0 6px rgba(238,12,111,.16); }
         .tatzo-map-marker-unclaimed span { color: #fff; font-size: 20px; line-height: .8; }
         .tatzo-map-marker.is-selected { transform: scale(1.18); box-shadow: 0 10px 30px rgba(0,0,0,.42), 0 0 0 7px rgba(255,255,255,.18); }
         .tatzo-cluster { border: 3px solid rgba(255,255,255,.82) !important; border-radius: 50%; box-shadow: 0 12px 30px rgba(0,0,0,.38), 0 0 0 7px rgba(255,255,255,.05); display: grid !important; place-items: center; color: #fff; transition: transform .2s ease; }
         .tatzo-cluster span { color: #fff; font-size: 13px; font-weight: 900; line-height: 1; }
-        .tatzo-cluster-verified { background: radial-gradient(circle at 35% 28%, #8ffefa, #04c5bf) !important; }
+        .tatzo-cluster-connected { background: radial-gradient(circle at 35% 28%, #8ffefa, #04c5bf) !important; }
         .tatzo-cluster-unclaimed { background: radial-gradient(circle at 35% 28%, #ff9bc5, #ee0c6f) !important; }
         .tatzo-cluster-mixed { background: linear-gradient(135deg, #04c5bf, #ee0c6f) !important; }
         .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background: transparent !important; }
@@ -326,3 +323,4 @@ export default function LeafletMap({
     </div>
   );
 }
+

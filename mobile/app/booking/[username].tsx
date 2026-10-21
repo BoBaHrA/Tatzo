@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
@@ -6,10 +7,10 @@ import {
   Image,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from 'react-native';
+import { Text } from '@/components/text';
 
 import { ApiError } from '@/api/client';
 import type {
@@ -77,6 +78,7 @@ type ChoiceProps = {
 };
 
 function Choice({ active, label, onPress }: ChoiceProps) {
+  useLanguage();
   return (
     <Pressable
       accessibilityRole="checkbox"
@@ -94,6 +96,7 @@ function Choice({ active, label, onPress }: ChoiceProps) {
 }
 
 function FieldLabel({ children }: { children: string }) {
+  useLanguage();
   return <Text style={styles.fieldLabel}>{children}</Text>;
 }
 
@@ -108,6 +111,7 @@ function CheckRow({
   onPress: () => void;
   hint?: string;
 }) {
+  useLanguage();
   return (
     <Pressable
       accessibilityRole="checkbox"
@@ -127,6 +131,7 @@ function CheckRow({
 }
 
 function ReviewRow({ label, value }: { label: string; value: string }) {
+  useLanguage();
   return (
     <View style={styles.reviewRow}>
       <Text style={styles.reviewLabel}>{label}</Text>
@@ -136,6 +141,7 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
 }
 
 export default function BookingScreen() {
+  useLanguage();
   const params = useLocalSearchParams<{ username?: string | string[] }>();
   const username = Array.isArray(params.username) ? params.username[0] : params.username;
   const { request, status } = useAuth();

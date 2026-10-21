@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type PropsWithChildren,
 } from 'react';
@@ -14,13 +15,13 @@ import type {
   ProfileUpdate,
   RegistrationPayload,
   TatzoUser,
-  TokenPair,
 } from '@/api/types';
 import { clearTokens, readTokens, writeTokens } from '@/auth/token-store';
+import { createSessionClient, SessionChangedError, SessionExpiredError } from '@/auth/session-client';
 import { unregisterPushDevice } from '@/notifications/push-notifications';
 
 
-type AuthStatus = 'loading' | 'anonymous' | 'authenticated';
+type AuthStatus = 'loading' | 'unavailable' | 'anonymous' | 'authenticated';
 
 export type AuthenticatedRequest = <T>(
   path: string,
@@ -30,6 +31,7 @@ export type AuthenticatedRequest = <T>(
 type AuthContextValue = {
   status: AuthStatus;
   user: TatzoUser | null;
+  retrySession: () => Promise<void>;
   request: AuthenticatedRequest;
   signIn: (identifier: string, password: string) => Promise<void>;
   register: (payload: RegistrationPayload) => Promise<string>;
@@ -41,96 +43,48 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-async function refreshTokenPair(tokens: TokenPair): Promise<TokenPair> {
-  const rotated = await apiRequest<{ access: string; refresh?: string }>(
-    '/auth/token/refresh/',
-    {
-      method: 'POST',
-      body: JSON.stringify({ refresh: tokens.refresh }),
-    },
-  );
-  const next = {
-    access: rotated.access,
-    refresh: rotated.refresh ?? tokens.refresh,
-  };
-  await writeTokens(next);
-  return next;
-}
-
-async function authenticatedRequest<T>(
-  path: string,
-  init: RequestInit = {},
-): Promise<T> {
-  let tokens = await readTokens();
-  if (!tokens) {
-    throw new ApiError(401, { code: 'not_authenticated' });
-  }
-
-  const perform = (access: string) =>
-    apiRequest<T>(path, {
-      ...init,
-      headers: {
-        ...Object.fromEntries(new Headers(init.headers).entries()),
-        Authorization: `Bearer ${access}`,
-      },
-    });
-
-  try {
-    return await perform(tokens.access);
-  } catch (error) {
-    if (!(error instanceof ApiError) || error.status !== 401) {
-      throw error;
-    }
-    tokens = await refreshTokenPair(tokens);
-    return perform(tokens.access);
-  }
-}
-
 export function AuthProvider({ children }: PropsWithChildren) {
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [user, setUser] = useState<TatzoUser | null>(null);
-
-  const request = useCallback(
-    async <T,>(path: string, init: RequestInit = {}): Promise<T> => {
-      try {
-        return await authenticatedRequest<T>(path, init);
-      } catch (error) {
-        if (error instanceof ApiError && error.status === 401) {
-          await clearTokens();
-          setUser(null);
-          setStatus('anonymous');
-        }
-        throw error;
-      }
-    },
-    [],
-  );
+  const operation = useRef(0);
+  const [session] = useState(() => createSessionClient(
+    apiRequest,
+    { read: readTokens, write: writeTokens, clear: clearTokens },
+    (error) => error instanceof ApiError && error.status === 401,
+    () => { setUser(null); setStatus('anonymous'); },
+  ));
+  const request = session.request;
 
   const bootstrap = useCallback(async () => {
+    const version = ++operation.current;
+    setStatus('loading');
     try {
       const profile = await request<TatzoUser>('/me/');
+      if (version !== operation.current) return;
       setUser(profile);
       setStatus('authenticated');
-    } catch {
-      await clearTokens();
+    } catch (error) {
+      if (version !== operation.current || error instanceof SessionChangedError) return;
       setUser(null);
-      setStatus('anonymous');
+      // Network/server errors must not destroy a valid refresh token.
+      setStatus(error instanceof SessionExpiredError || (error instanceof ApiError && error.status === 401)
+        ? 'anonymous' : 'unavailable');
     }
   }, [request]);
 
-  useEffect(() => {
-    void bootstrap();
-  }, [bootstrap]);
+  useEffect(() => { void bootstrap(); }, [bootstrap]);
 
   const signIn = useCallback(async (identifier: string, password: string) => {
+    const version = ++operation.current;
     const response = await apiRequest<LoginResponse>('/auth/token/', {
-      method: 'POST',
-      body: JSON.stringify({ identifier, password }),
+      method: 'POST', body: JSON.stringify({ identifier, password }),
     });
-    await writeTokens({ access: response.access, refresh: response.refresh });
+    if (version !== operation.current) throw new SessionChangedError();
+    await session.setTokens({ access: response.access, refresh: response.refresh });
+    if (version !== operation.current) throw new SessionChangedError();
     setUser(response.user);
     setStatus('authenticated');
-  }, []);
+  }, [session]);
 
   const register = useCallback(async (payload: RegistrationPayload) => {
     const response = await apiRequest<{ email: string }>('/auth/register/', {
@@ -141,54 +95,57 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, []);
 
   const signOut = useCallback(async () => {
-    const tokens = await readTokens();
-    if (tokens) {
-      try {
-        await unregisterPushDevice(authenticatedRequest);
-      } catch {
-        // A stale device registration must not prevent local sign out.
-      }
-      try {
-        await authenticatedRequest<void>('/auth/logout/', {
-          method: 'POST',
-          body: JSON.stringify({ refresh: tokens.refresh }),
-        });
-      } catch {
-        // Local credentials must still be removed if the network is unavailable.
-      }
-    }
-    await clearTokens();
+    ++operation.current;
+    const stored = session.read();
+    const cleared = session.clear();
     setUser(null);
     setStatus('anonymous');
-  }, []);
+    const tokens = await stored;
+    await cleared;
+    if (!tokens) return;
+    // Cleanup uses the old access token directly and cannot refresh/resurrect it.
+    const oldRequest: AuthenticatedRequest = (path, init = {}) => {
+      const headers = new Headers(init.headers);
+      headers.set('Authorization', `Bearer ${tokens.access}`);
+      return apiRequest(path, { ...init, headers });
+    };
+    await Promise.allSettled([
+      unregisterPushDevice(oldRequest),
+      oldRequest('/auth/logout/', { method: 'POST', body: JSON.stringify({ refresh: tokens.refresh }) }),
+    ]);
+  }, [session]);
 
   const deleteAccount = useCallback(async (password: string) => {
     await request<void>('/me/', {
       method: 'DELETE',
       body: JSON.stringify({ password }),
     });
-    await clearTokens();
+    ++operation.current;
+    await session.clear();
     setUser(null);
     setStatus('anonymous');
-  }, [request]);
+  }, [request, session]);
 
   const refreshProfile = useCallback(async () => {
+    const version = operation.current;
     const profile = await request<TatzoUser>('/me/');
-    setUser(profile);
+    if (version === operation.current) setUser(profile);
   }, [request]);
 
   const updateProfile = useCallback(async (payload: ProfileUpdate) => {
+    const version = operation.current;
     const profile = await request<TatzoUser>('/me/', {
       method: 'PATCH',
       body: JSON.stringify(payload),
     });
-    setUser(profile);
+    if (version === operation.current) setUser(profile);
   }, [request]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       status,
       user,
+      retrySession: bootstrap,
       request,
       signIn,
       register,
@@ -198,6 +155,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       updateProfile,
     }),
     [
+      bootstrap,
       status,
       user,
       request,

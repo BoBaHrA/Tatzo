@@ -23,6 +23,7 @@ function check(condition, label) {
 }
 
 const leaflet = source('src/map/leaflet-map-stable.tsx');
+const basemap = source('src/map/carto-basemap.ts');
 const nativeCanvas = source('src/map/map-canvas-impl.native.tsx');
 const screen = source('app/(tabs)/map.tsx');
 const card = source('src/map/location-card.tsx');
@@ -30,7 +31,9 @@ const card = source('src/map/location-card.tsx');
 check(nativeCanvas.includes("@/map/leaflet-map-stable"), 'Native map uses the stabilized Leaflet bridge');
 check(leaflet.includes("const LEAFLET_VERSION = '1.9.4'"), 'Map keeps the web Leaflet version');
 check(leaflet.includes("const CLUSTER_VERSION = '1.5.3'"), 'Map loads the web marker-cluster version');
-check(leaflet.includes('basemaps.cartocdn.com/dark_all'), 'Map uses the same CARTO dark tiles as web');
+check(basemap.includes('basemaps.cartocdn.com/dark_all'), 'Map uses the same CARTO dark tiles as web');
+check(nativeCanvas.includes('process.env.EXPO_PUBLIC_CARTO_BASEMAP_API_KEY') && nativeCanvas.includes('basemapApiKey={CARTO_BASEMAP_API_KEY}'), 'Native bridge passes the configured CARTO key into the active DOM map');
+check(leaflet.includes('cartoTileUrl(basemapApiKey)'), 'Active Leaflet map authenticates its tile requests');
 check(leaflet.includes('L.markerClusterGroup'), 'Map uses Leaflet MarkerCluster');
 check(leaflet.includes('animateAddingMarkers: false'), 'Cluster additions avoid the Android double-animation path');
 check(leaflet.includes('markerEntriesRef') && !leaflet.includes('cluster.clearLayers()'), 'Marker updates are diffed instead of clearing the whole cluster layer');

@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
 import {
@@ -7,9 +8,9 @@ import {
   Pressable,
   RefreshControl,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
+import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Appointment } from '@/api/types';
@@ -39,6 +40,7 @@ function statusColor(status: Appointment['status']) {
 }
 
 function AppointmentRow({ appointment }: { appointment: Appointment }) {
+  useLanguage();
   const user = appointment.other_user;
   const color = statusColor(appointment.status);
   return (
@@ -78,6 +80,7 @@ function AppointmentRow({ appointment }: { appointment: Appointment }) {
 }
 
 export default function BookingsScreen() {
+  useLanguage();
   const { request, status, user } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [attentionCount, setAttentionCount] = useState(0);

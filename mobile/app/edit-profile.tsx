@@ -1,6 +1,8 @@
+import { useLanguage } from '@/localization/language-context';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import { useAuth } from '@/auth/auth-context';
 import { Button } from '@/components/button';
@@ -12,6 +14,7 @@ import { colors, radius, spacing } from '@/theme';
 
 
 export default function EditProfileScreen() {
+  useLanguage();
   const { user, updateProfile } = useAuth();
   const [username, setUsername] = useState(user?.username ?? '');
   const [tag, setTag] = useState(user?.tag ?? '');

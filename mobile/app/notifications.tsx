@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useState } from 'react';
 import { Redirect, router, useFocusEffect } from 'expo-router';
 import {
@@ -7,9 +8,9 @@ import {
   Pressable,
   RefreshControl,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
+import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type {
@@ -92,6 +93,7 @@ function NotificationRow({
   notification: NotificationItem;
   onPress: (notification: NotificationItem) => void;
 }) {
+  useLanguage();
   const actor = notification.actor;
   const preview = notificationPreview(notification);
   return (
@@ -127,6 +129,7 @@ function NotificationRow({
 }
 
 export default function NotificationsScreen() {
+  useLanguage();
   const { request, status } = useAuth();
   const { unreadCount, syncUnreadCount } = useNotifications();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);

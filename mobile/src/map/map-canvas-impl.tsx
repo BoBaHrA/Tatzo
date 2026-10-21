@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { MapLocationMarker } from '@/api/types';
 import type { MapRegion } from '@/map/map-api';
 import { clusterMapMarkers, regionAroundCluster } from '@/map/map-clusters';
+import { mapClusterTone } from '@/map/location-presentation';
 import { colors, radius, spacing } from '@/theme';
 
 
@@ -88,7 +90,7 @@ export function MapCanvas({
             }}
             style={[
               styles.marker,
-              styles[cluster.kind],
+              styles[mapClusterTone(cluster.markers)],
               selected && styles.selected,
               { left: `${left}%`, top: `${top}%` },
             ]}
@@ -151,8 +153,8 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: colors.backgroundDeep,
   },
-  artist: { backgroundColor: colors.primary },
-  studio: { backgroundColor: colors.accent },
+  connected: { backgroundColor: colors.primary },
+  unclaimed: { backgroundColor: colors.accent },
   mixed: { backgroundColor: colors.heading },
   selected: { borderColor: colors.white, transform: [{ scale: 1.14 }] },
   markerText: { color: colors.backgroundDeep, fontWeight: '900', fontSize: 13 },
@@ -183,3 +185,4 @@ const styles = StyleSheet.create({
   },
   webHintText: { color: colors.textMuted, fontSize: 11, fontWeight: '700' },
 });
+

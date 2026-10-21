@@ -1,5 +1,6 @@
 import { Link, useLocalSearchParams } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import { authCopy } from '@/auth/auth-copy';
 import { AuthShell } from '@/auth/auth-shell';
