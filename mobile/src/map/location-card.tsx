@@ -6,6 +6,7 @@ import { Text } from '@/components/text';
 import type { MapLocationMarker } from '@/api/types';
 import { Button } from '@/components/button';
 import { t } from '@/i18n';
+import { mapLocationPresentation } from '@/map/location-presentation';
 import { colors, radius, spacing } from '@/theme';
 
 
@@ -17,9 +18,8 @@ type MapLocationCardProps = {
 
 export function MapLocationCard({ marker, onClose, onSelect }: MapLocationCardProps) {
   useLanguage();
-  const claimPending = marker.claim_status === 'submitted'
-    || marker.claim_status === 'under_review';
-  const verified = marker.kind === 'artist';
+  const presentation = mapLocationPresentation(marker);
+  const { artist, connected, claimPending } = presentation;
 
   const openProfile = () => {
     if (!marker.username) return;
@@ -38,6 +38,7 @@ export function MapLocationCard({ marker, onClose, onSelect }: MapLocationCardPr
   };
 
   const openClaim = () => {
+    if (!presentation.canClaim) return;
     router.push({
       pathname: '/map/claim/[locationId]',
       params: {
@@ -53,7 +54,7 @@ export function MapLocationCard({ marker, onClose, onSelect }: MapLocationCardPr
       onPress={onSelect}
       style={({ pressed }) => [
         styles.card,
-        verified ? styles.cardVerified : styles.cardUnclaimed,
+        connected ? styles.cardVerified : styles.cardUnclaimed,
         pressed && onSelect && styles.pressed,
       ]}
     >
@@ -63,9 +64,9 @@ export function MapLocationCard({ marker, onClose, onSelect }: MapLocationCardPr
             <Image source={{ uri: marker.avatar_url }} style={styles.avatar} />
           </View>
         ) : (
-          <View style={[styles.avatarFallback, !verified && styles.studioAvatar]}>
+          <View style={[styles.avatarFallback, !connected && styles.studioAvatar]}>
             <Text style={styles.avatarText}>
-              {verified ? marker.name[0]?.toUpperCase() : '⌖'}
+              {artist ? marker.name[0]?.toUpperCase() : '⌖'}
             </Text>
           </View>
         )}
@@ -75,9 +76,9 @@ export function MapLocationCard({ marker, onClose, onSelect }: MapLocationCardPr
           {marker.tag ? <Text numberOfLines={1} style={styles.tag}>@{marker.tag}</Text> : null}
         </View>
 
-        <View style={[styles.status, verified ? styles.statusVerified : styles.statusUnclaimed]}>
-          <Text style={[styles.statusText, verified ? styles.statusTextVerified : styles.statusTextUnclaimed]}>
-            {verified ? t('mapVerifiedArtist') : t('mapUnclaimedStudio')}
+        <View style={[styles.status, connected ? styles.statusVerified : styles.statusUnclaimed]}>
+          <Text style={[styles.statusText, connected ? styles.statusTextVerified : styles.statusTextUnclaimed]}>
+            {t(presentation.statusKey)}
           </Text>
         </View>
 
@@ -93,7 +94,7 @@ export function MapLocationCard({ marker, onClose, onSelect }: MapLocationCardPr
         ) : null}
       </View>
 
-      <Text style={styles.kind}>{verified ? '✓ Tatzo' : '⌖ Tatzo Maps'}</Text>
+      <Text style={styles.kind}>{artist ? '✓ Tatzo' : '⌖ Tatzo Maps'}</Text>
       <Text numberOfLines={2} style={styles.address}>
         📍 {marker.address || [marker.city, marker.country].filter(Boolean).join(', ')}
       </Text>
@@ -112,40 +113,33 @@ export function MapLocationCard({ marker, onClose, onSelect }: MapLocationCardPr
       </View>
 
       <View style={styles.actions}>
-        {verified ? (
-          <>
-            <Button
-              label={t('openProfile')}
-              onPress={openProfile}
-              style={styles.action}
-              variant="secondary"
-            />
-            {marker.can_book ? (
-              <Button
-                label={t('bookNow')}
-                onPress={openBooking}
-                style={styles.action}
-              />
-            ) : null}
-          </>
-        ) : (
-          <>
-            {marker.website ? (
-              <Button
-                label={t('mapWebsite')}
-                onPress={() => void Linking.openURL(marker.website!)}
-                style={styles.action}
-                variant="secondary"
-              />
-            ) : null}
-            <Button
-              disabled={claimPending || !marker.claimable}
-              label={claimPending ? t('mapClaimPending') : t('mapClaim')}
-              onPress={openClaim}
-              style={styles.action}
-            />
-          </>
-        )}
+        {presentation.canOpenProfile ? (
+          <Button
+            label={t('openProfile')}
+            onPress={openProfile}
+            style={styles.action}
+            variant="secondary"
+          />
+        ) : null}
+        {presentation.canBook ? (
+          <Button label={t('bookNow')} onPress={openBooking} style={styles.action} />
+        ) : null}
+        {!artist && marker.website ? (
+          <Button
+            label={t('mapWebsite')}
+            onPress={() => void Linking.openURL(marker.website!)}
+            style={styles.action}
+            variant="secondary"
+          />
+        ) : null}
+        {presentation.showClaim ? (
+          <Button
+            disabled={!presentation.canClaim}
+            label={claimPending ? t('mapClaimPending') : t('mapClaim')}
+            onPress={openClaim}
+            style={styles.action}
+          />
+        ) : null}
       </View>
     </Pressable>
   );
@@ -230,3 +224,4 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', gap: 7, marginTop: 2 },
   action: { flex: 1, minHeight: 38, paddingHorizontal: spacing.sm, borderRadius: 13 },
 });
+
