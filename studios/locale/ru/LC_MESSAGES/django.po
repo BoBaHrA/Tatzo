@@ -1,0 +1,602 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-26 14:04+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Time zone"
+msgstr "Часовой пояс"
+
+msgid "Choose an image smaller than 5 MB."
+msgstr "Выберите изображение размером до 5 МБ."
+
+msgid "Tatzo username"
+msgstr "Имя пользователя Tatzo"
+
+msgid "Role"
+msgstr "Роль"
+
+msgid "From"
+msgstr "С"
+
+msgid "Until"
+msgstr "До"
+
+msgid "End date must be after start date."
+msgstr "Дата окончания должна быть позже даты начала."
+
+msgid "Choose the last day of the guest spot."
+msgstr "Укажите последний день гостевого визита."
+
+msgid "Choose a future date."
+msgstr "Выберите будущую дату."
+
+msgid "Assigned artist"
+msgstr "Назначенный мастер"
+
+msgid "Project stage"
+msgstr "Этап проекта"
+
+msgid "Artist"
+msgstr "Мастер"
+
+msgid "Client name"
+msgstr "Имя клиента"
+
+msgid "Session title"
+msgstr "Название сеанса"
+
+msgid "Date"
+msgstr "Дата"
+
+msgid "Start"
+msgstr "Начало"
+
+msgid "End"
+msgstr "Окончание"
+
+msgid "Type"
+msgstr "Тип"
+
+msgid "Tattoo session"
+msgstr "Сеанс татуировки"
+
+msgid "Consultation"
+msgstr "Консультация"
+
+msgid "Blocked time"
+msgstr "Заблокированное время"
+
+msgid "Related studio enquiry"
+msgstr "Связанная заявка студии"
+
+msgid "Choose a time outside the daylight-saving transition."
+msgstr "Выберите время вне перехода на летнее или зимнее время."
+
+msgid "End time must be after start time."
+msgstr "Время окончания должно быть позже начала."
+
+msgid "The artist is not available as a studio member on that date."
+msgstr "Мастер не состоит в команде студии на эту дату."
+
+msgid "Assign the enquiry to this artist first."
+msgstr "Сначала назначьте заявку этому мастеру."
+
+msgid "About the studio"
+msgstr "О студии"
+
+msgid "Studio logo"
+msgstr "Логотип студии"
+
+msgid "Cover image"
+msgstr "Обложка"
+
+msgid "Accept studio enquiries"
+msgstr "Принимать заявки в студию"
+
+msgid "Manager"
+msgstr "Управляющий"
+
+msgid "Resident artist"
+msgstr "Постоянный мастер"
+
+msgid "Guest artist"
+msgstr "Приглашённый мастер"
+
+msgid "Invited"
+msgstr "Приглашён"
+
+msgid "Active"
+msgstr "Активен"
+
+msgid "Declined"
+msgstr "Отклонено"
+
+msgid "Removed"
+msgstr "Удалён"
+
+msgid "New enquiry"
+msgstr "Новая заявка"
+
+msgid "In discussion"
+msgstr "Обсуждение"
+
+msgid "Sketching"
+msgstr "Подготовка эскиза"
+
+msgid "Ready for session"
+msgstr "Готово к сеансу"
+
+msgid "Healing"
+msgstr "Заживление"
+
+msgid "Touch-up"
+msgstr "Коррекция"
+
+msgid "Closed"
+msgstr "Закрыто"
+
+msgid "Project title"
+msgstr "Название проекта"
+
+msgid "Tell us about your tattoo"
+msgstr "Расскажите о своей татуировке"
+
+msgid "Placement"
+msgstr "Расположение"
+
+msgid "Studio note"
+msgstr "Заметка студии"
+
+msgid "This time overlaps another event."
+msgstr "Это время пересекается с другой записью."
+
+msgid "Studio workspace"
+msgstr "Кабинет студии"
+
+msgid "Your studios"
+msgstr "Ваши студии"
+
+msgid "Studio navigation"
+msgstr "Навигация студии"
+
+msgid "Overview"
+msgstr "Обзор"
+
+msgid "Studio enquiries"
+msgstr "Заявки студии"
+
+msgid "Team calendar"
+msgstr "Календарь команды"
+
+msgid "Team"
+msgstr "Команда"
+
+msgid "Studio settings"
+msgstr "Настройки студии"
+
+msgid "Public studio page"
+msgstr "Публичная страница студии"
+
+msgid "My artist workspace"
+msgstr "Мой кабинет мастера"
+
+msgid "Addresses & claims"
+msgstr "Адреса и подтверждение владения"
+
+msgid "Studio enquiry"
+msgstr "Заявка в студию"
+
+msgid "All enquiries"
+msgstr "Все заявки"
+
+msgid "The idea"
+msgstr "Идея"
+
+msgid "Discuss with client"
+msgstr "Обсудить с клиентом"
+
+msgid "Messages stay in your personal conversation with the client."
+msgstr "Сообщения остаются в вашей личной переписке с клиентом."
+
+msgid "Plan a session"
+msgstr "Запланировать сеанс"
+
+msgid "Move the project forward"
+msgstr "Следующий шаг проекта"
+
+msgid "Update project"
+msgstr "Обновить проект"
+
+msgid ""
+"Studio notes are visible to managers and the assigned artist. Keep medical "
+"information in Health & Safety."
+msgstr ""
+"Заметки видят управляющие и назначенный мастер. Медицинские данные храните в"
+" разделе здоровья и безопасности."
+
+msgid "Together, in your own style"
+msgstr "Вместе, каждый в своём стиле"
+
+msgid "A shared place for your team, projects and sessions."
+msgstr "Общее пространство для команды, проектов и сеансов."
+
+msgid "Your invitations"
+msgstr "Ваши приглашения"
+
+msgid ""
+"Joining shares only studio work. Your personal clients and portfolio stay "
+"yours."
+msgstr ""
+"В команде доступна работа студии. Ваши личные клиенты и портфолио остаются "
+"вашими."
+
+msgid "Accept invitation"
+msgstr "Принять приглашение"
+
+msgid "Decline"
+msgstr "Отклонить"
+
+msgid "Owner"
+msgstr "Владелец"
+
+msgid "Open studio"
+msgstr "Открыть студию"
+
+msgid ""
+"Your address is approved. Set up the team workspace when you are ready."
+msgstr "Ваш адрес подтверждён. Создайте кабинет команды, когда будете готовы."
+
+msgid "Set up studio"
+msgstr "Создать кабинет студии"
+
+msgid "Built around your way of working"
+msgstr "Под ваш ритм работы"
+
+msgid "One studio. Individual artists. Shared rhythm."
+msgstr "Одна студия. Самостоятельные мастера. Общий ритм."
+
+msgid ""
+"Connect your approved studio address, invite your team and organise work "
+"together. You can also join a studio through an invitation."
+msgstr ""
+"Подключите подтверждённый адрес студии, пригласите команду и организуйте "
+"работу вместе. В другую студию можно вступить по приглашению."
+
+msgid "Connect a studio address"
+msgstr "Подключить адрес студии"
+
+msgid "Your identity stays yours"
+msgstr "Вы сохраняете свою индивидуальность"
+
+msgid "Keep your own profile, portfolio and personal clients."
+msgstr "Сохраняйте личный профиль, портфолио и своих клиентов."
+
+msgid "A team by agreement"
+msgstr "Команда по согласию"
+
+msgid ""
+"Invite residents, managers and guest artists. Each person chooses to join."
+msgstr ""
+"Приглашайте постоянных мастеров, управляющих и гостей. Каждый сам принимает "
+"приглашение."
+
+msgid "Conversation first"
+msgstr "Сначала общение"
+
+msgid "Discuss the tattoo, then plan a session. Walk-ins fit here too."
+msgstr ""
+"Обсудите татуировку, затем назначьте сеанс. Клиентов без записи тоже можно "
+"принять."
+
+msgid "Map"
+msgstr "Карта"
+
+msgid "Open workspace"
+msgstr "Открыть кабинет"
+
+msgid "Tattoo studio"
+msgstr "Тату-студия"
+
+msgid "Discuss your tattoo"
+msgstr "Обсудить татуировку"
+
+msgid "Explore the work"
+msgstr "Смотреть работы"
+
+msgid "A place for your next tattoo"
+msgstr "Место для вашей следующей татуировки"
+
+msgid "Studio website"
+msgstr "Сайт студии"
+
+msgid "Meet the artists"
+msgstr "Познакомьтесь с мастерами"
+
+msgid "Verified artist"
+msgstr "Подтверждённый мастер"
+
+msgid "Portfolio"
+msgstr "Портфолио"
+
+msgid "Book"
+msgstr "Записаться"
+
+msgid ""
+"The studio is preparing its team page. You can contact the studio below."
+msgstr "Студия готовит страницу команды. Вы можете связаться с ней ниже."
+
+msgid "Different hands. Shared space."
+msgstr "Разные мастера. Общее пространство."
+
+msgid "Artist work will appear here as the team builds its portfolios."
+msgstr "Работы появятся здесь по мере пополнения портфолио мастеров."
+
+msgid "It starts with a conversation"
+msgstr "Всё начинается с общения"
+
+msgid "Tell us your idea"
+msgstr "Расскажите свою идею"
+
+msgid ""
+"Share the tattoo you have in mind. The studio will discuss the project and "
+"find the right artist with you. This is an enquiry, not a confirmed booking."
+msgstr ""
+"Расскажите, какую татуировку вы задумали. Студия обсудит проект и поможет "
+"выбрать мастера. Заявка ещё не означает подтверждённую запись."
+
+msgid "Send studio enquiry"
+msgstr "Отправить заявку в студию"
+
+msgid "Sign in to discuss your tattoo"
+msgstr "Войдите, чтобы обсудить татуировку"
+
+msgid "The studio has paused new enquiries."
+msgstr "Студия приостановила приём новых заявок."
+
+msgid "Your enquiries with this studio"
+msgstr "Ваши заявки в эту студию"
+
+msgid "Discuss with artist"
+msgstr "Обсудить с мастером"
+
+msgid "People make the studio"
+msgstr "Студию создают люди"
+
+msgid "A shared rhythm"
+msgstr "Общий ритм"
+
+msgid "From idea to tattoo"
+msgstr "От идеи до татуировки"
+
+msgid "Make it your studio"
+msgstr "Студия в вашем стиле"
+
+msgid "View studio page"
+msgstr "Открыть страницу студии"
+
+msgid "Open studio projects"
+msgstr "Открытые проекты студии"
+
+msgid "Upcoming sessions"
+msgstr "Предстоящие сеансы"
+
+msgid "Team members"
+msgstr "Участники команды"
+
+msgid "Next in the studio"
+msgstr "Ближайшее в студии"
+
+msgid "Room for the next project"
+msgstr "Место для следующего проекта"
+
+msgid ""
+"Add a session after a conversation or a walk-in. It also appears in the "
+"artist calendar."
+msgstr ""
+"Добавьте сеанс после общения или визита без записи. Он появится и в "
+"календаре мастера."
+
+msgid "View all"
+msgstr "Смотреть все"
+
+msgid "Start with an idea"
+msgstr "Начните с идеи"
+
+msgid ""
+"Share your studio page so clients can tell the team about their project."
+msgstr ""
+"Поделитесь страницей студии, чтобы клиенты могли рассказать команде о своём "
+"проекте."
+
+msgid "Open public page"
+msgstr "Открыть публичную страницу"
+
+msgid "Shared studio. Personal craft."
+msgstr "Общая студия. Личное мастерство."
+
+msgid ""
+"Only studio enquiries and sessions are shared here. Personal bookings, "
+"health information and private conversations stay in their existing spaces."
+msgstr ""
+"Здесь доступны заявки и сеансы студии. Личные записи, медицинские данные и "
+"приватная переписка остаются в своих разделах."
+
+msgid "Your team"
+msgstr "Ваша команда"
+
+msgid "Member actions"
+msgstr "Действия с участником"
+
+msgid "Leave studio"
+msgstr "Покинуть студию"
+
+msgid "End membership"
+msgstr "Завершить участие"
+
+msgid "Invite the people you work with. They join only after accepting."
+msgstr "Пригласите коллег. Они вступят в команду после принятия приглашения."
+
+msgid "Invite a teammate"
+msgstr "Пригласить участника"
+
+msgid ""
+"Use their Tatzo username. The invitation appears in their Studio workspace."
+msgstr ""
+"Укажите имя пользователя Tatzo. Приглашение появится в его кабинете студии."
+
+msgid "Create invitation"
+msgstr "Создать приглашение"
+
+msgid "Clear roles, clear boundaries"
+msgstr "Понятные роли и границы"
+
+msgid ""
+"Owners control membership and ownership. Managers organise studio enquiries "
+"and sessions. Resident and guest artists work on their assigned projects. "
+"Guest access ends on the agreed date."
+msgstr ""
+"Владелец управляет составом команды и владением. Управляющие организуют "
+"заявки и сеансы студии. Мастера работают с назначенными им проектами. "
+"Гостевой доступ заканчивается в оговорённую дату."
+
+msgid "Invitations do not transfer studio ownership."
+msgstr "Приглашение не передаёт владение студией."
+
+msgid "open"
+msgstr "открыто"
+
+msgid "Unassigned"
+msgstr "Не назначено"
+
+msgid "Every tattoo starts with a conversation"
+msgstr "Каждая татуировка начинается с общения"
+
+msgid ""
+"Clients can send an enquiry from your public studio page. Assigned projects "
+"appear here for each artist."
+msgstr ""
+"Клиенты отправляют заявки с публичной страницы студии. Каждый мастер видит "
+"здесь свои назначенные проекты."
+
+msgid "Previous week"
+msgstr "Предыдущая неделя"
+
+msgid "Today"
+msgstr "Сегодня"
+
+msgid "Next week"
+msgstr "Следующая неделя"
+
+msgid "Session"
+msgstr "Сеанс"
+
+msgid "All artists"
+msgstr "Все мастера"
+
+msgid "Apply"
+msgstr "Применить"
+
+msgid "Busy"
+msgstr "Занято"
+
+msgid "Actions"
+msgstr "Действия"
+
+msgid "Complete"
+msgstr "Завершить"
+
+msgid "Cancel session"
+msgstr "Отменить сеанс"
+
+msgid "Plan a studio session"
+msgstr "Запланировать сеанс в студии"
+
+msgid ""
+"For a project discussed on Tatzo, in person or as a walk-in. Times use the "
+"studio time zone. Existing artist bookings and blocked time are checked."
+msgstr ""
+"Для проекта, обсуждённого в Tatzo, лично или при визите без записи. Время "
+"указано в часовом поясе студии. Учитываются существующие записи и "
+"заблокированное время мастера."
+
+msgid "Add to calendars"
+msgstr "Добавить в календари"
+
+msgid "Studio identity"
+msgstr "Облик студии"
+
+msgid "Introduce the space where your team creates. Images up to 5 MB."
+msgstr ""
+"Расскажите о пространстве, где творит ваша команда. Изображения до 5 МБ."
+
+msgid "Save studio"
+msgstr "Сохранить студию"
+
+msgid "Your verified address"
+msgstr "Ваш подтверждённый адрес"
+
+msgid "Address and ownership remain connected to the reviewed map location."
+msgstr "Адрес и владение связаны с подтверждённой точкой на карте."
+
+msgid "Edit studio details"
+msgstr "Изменить данные студии"
+
+msgid "Artist verification is required to join the studio team."
+msgstr "Для вступления в команду нужна верификация мастера."
+
+msgid "Choose another active Tatzo account."
+msgstr "Выберите другой активный аккаунт Tatzo."
+
+msgid "Choose a verified tattoo artist."
+msgstr "Выберите подтверждённого тату-мастера."
+
+msgid "This account is already a member or has an invitation."
+msgstr "Этот аккаунт уже в команде или приглашён."
+
+msgid ""
+"Invitation ready in their Studio workspace. They must accept before joining."
+msgstr ""
+"Приглашение готово в кабинете студии пользователя. Для вступления его нужно "
+"принять."
+
+msgid ""
+"Membership ended. Existing sessions stay in the calendar; review future "
+"sessions."
+msgstr ""
+"Участие завершено. Существующие сеансы остались в календаре; проверьте "
+"предстоящие записи."
+
+msgid "Studio settings saved."
+msgstr "Настройки студии сохранены."
+
+msgid "Session added to the studio and artist calendars."
+msgstr "Сеанс добавлен в календари студии и мастера."
+
+msgid "This account cannot be assigned to this client."
+msgstr "Этого мастера нельзя назначить данному клиенту."
+
+msgid "Project updated."
+msgstr "Проект обновлён."
+
+msgid "You have already contacted this studio today. Please wait for a reply."
+msgstr "Вы уже связались со студией сегодня. Дождитесь ответа."
+
+msgid ""
+"Your enquiry was sent. The studio can discuss your project with you on "
+"Tatzo."
+msgstr "Заявка отправлена. Студия сможет обсудить с вами проект в Tatzo."

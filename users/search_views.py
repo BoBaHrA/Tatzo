@@ -278,6 +278,7 @@ def _studio_result(location, origin_lat=None, origin_lng=None):
         "portfolio": portfolio,
         "linked_user": linked_user,
         "studio_owner": studio_owner,
+        "studio_workspace": getattr(location, "workspace", None) if studio_owner and location.status in ("claimed", "verified") else None,
         "can_message": bool(
             linked_user
             and linked_user.profile.is_email_verified
@@ -468,7 +469,7 @@ def search_page(request):
     studios = (
         Location.objects
         .filter(status__in=studio_statuses)
-        .select_related("linked_user", "linked_user__profile", "linked_user__booking_settings", "studio_owner")
+        .select_related("linked_user", "linked_user__profile", "linked_user__booking_settings", "studio_owner", "workspace")
         .prefetch_related(
             Prefetch(
                 "linked_user__portfolio_works",

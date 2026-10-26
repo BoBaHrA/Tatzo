@@ -395,7 +395,9 @@
                     </div>
 
                     <div class="search-result-actions">
-                      {% if result.linked_user %}
+                      {% if result.studio_workspace %}
+                        <a href="{% url 'studio_public' result.location.pk %}" class="search-action-primary">{% trans "View studio" %}</a>
+                      {% elif result.linked_user %}
                         <a href="{% url 'profile' result.linked_user.username %}" class="search-action-primary">{% trans "View studio" %}</a>
                         {% if result.can_message %}
                           <a href="{% url 'start_chat' result.linked_user.username %}" class="search-action-secondary">{% trans "Message" %}</a>

@@ -1275,7 +1275,7 @@ def calendar_events(request):
                 "duration_minutes": duration_minutes,
                 "duration_hours": duration_hours,
                 "artist_name": event.artist.username,
-                "client_name": event.client.username if event.client_id else "",
+                "client_name": event.client.username if event.client_id else event.external_client_name,
                 "project_title": event.title,
                 "title": event.title,
                 "placement": event.placement,

@@ -3,6 +3,7 @@
 {% if not mobile_only %}
 <div class="sidebar">
   <ul class="sidebar-main-menu">
+    {% if request.user.is_authenticated %}<li><a href="{% url 'studio_hub' %}"><img src="{% static 'icons/clients.svg' %}" alt=""><span>{% trans "Studio" %}</span></a></li>{% endif %}
     <li>
       {% if request.user.is_authenticated %}
         <a href="{% url 'profile' request.user.username %}"
@@ -325,6 +326,7 @@
 </nav>
 
 <div class="mobile-menu-panel" id="mobile-menu-panel" aria-hidden="true">
+  {% if request.user.is_authenticated %}<a class="mobile-menu-link" href="{% url 'studio_hub' %}">{% trans "Studio workspace" %} ↗</a>{% endif %}
   <div class="mobile-menu-panel-head">
     <strong>{% trans "Menu" %}</strong>
     <button type="button" id="mobile-menu-close" aria-label="{% trans 'Close' %}">×</button>

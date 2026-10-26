@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "mobile_api.apps.MobileApiConfig",
     "health_safety.apps.HealthSafetyConfig",
     "payments.apps.PaymentsConfig",
+    "studios.apps.StudiosConfig",
 ]
 
 # Настройки middleware

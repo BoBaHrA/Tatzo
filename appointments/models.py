@@ -403,6 +403,9 @@ class CalendarEvent(models.Model):
         null=True,
         verbose_name=_("Client"),
     )
+    studio = models.ForeignKey("studios.Studio", on_delete=models.SET_NULL, null=True, blank=True, related_name="sessions")
+    studio_enquiry = models.ForeignKey("studios.Enquiry", on_delete=models.SET_NULL, null=True, blank=True, related_name="sessions")
+    external_client_name = models.CharField(max_length=120, blank=True)
     # TODO: Link to TattooProject when the project domain model is added.
     project = models.ForeignKey(
         Appointment,
@@ -440,7 +443,7 @@ class CalendarEvent(models.Model):
         super().clean()
         if self.ends_at and self.starts_at and self.ends_at <= self.starts_at:
             raise ValidationError({"ends_at": _("End time must be after start time.")})
-        if self.event_type in [self.TYPE_TATTOO_SESSION, self.TYPE_CONSULTATION] and not self.client_id:
+        if self.event_type in [self.TYPE_TATTOO_SESSION, self.TYPE_CONSULTATION] and not self.client_id and not (self.studio_id and self.external_client_name):
             raise ValidationError({"client": _("Client is required for sessions and consultations.")})
 
     @property

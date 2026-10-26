@@ -86,6 +86,7 @@ def sitemap_txt(request):
 
 
 urlpatterns = [
+    path("", include("studios.urls")),
     path("healthz/", healthz, name="healthz"),
     path("robots.txt", robots_txt, name="robots_txt"),
     path(f"{INDEXNOW_KEY}.txt", indexnow_key, name="indexnow_key"),

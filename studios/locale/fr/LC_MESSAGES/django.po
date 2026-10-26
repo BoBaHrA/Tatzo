@@ -1,0 +1,609 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-26 14:04+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Time zone"
+msgstr "Fuseau horaire"
+
+msgid "Choose an image smaller than 5 MB."
+msgstr "Choisissez une image de moins de 5 Mo."
+
+msgid "Tatzo username"
+msgstr "Nom d’utilisateur Tatzo"
+
+msgid "Role"
+msgstr "Rôle"
+
+msgid "From"
+msgstr "Du"
+
+msgid "Until"
+msgstr "Au"
+
+msgid "End date must be after start date."
+msgstr "La date de fin doit suivre la date de début."
+
+msgid "Choose the last day of the guest spot."
+msgstr "Choisissez le dernier jour du guest spot."
+
+msgid "Choose a future date."
+msgstr "Choisissez une date à venir."
+
+msgid "Assigned artist"
+msgstr "Artiste attribué"
+
+msgid "Project stage"
+msgstr "Étape du projet"
+
+msgid "Artist"
+msgstr "Artiste"
+
+msgid "Client name"
+msgstr "Nom du client"
+
+msgid "Session title"
+msgstr "Titre de la séance"
+
+msgid "Date"
+msgstr "Date"
+
+msgid "Start"
+msgstr "Début"
+
+msgid "End"
+msgstr "Fin"
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Tattoo session"
+msgstr "Séance de tatouage"
+
+msgid "Consultation"
+msgstr "Consultation"
+
+msgid "Blocked time"
+msgstr "Créneau bloqué"
+
+msgid "Related studio enquiry"
+msgstr "Demande du studio associée"
+
+msgid "Choose a time outside the daylight-saving transition."
+msgstr "Choisissez une heure en dehors du changement d’heure."
+
+msgid "End time must be after start time."
+msgstr "La fin doit être après le début."
+
+msgid "The artist is not available as a studio member on that date."
+msgstr "L’artiste ne fait pas partie de l’équipe à cette date."
+
+msgid "Assign the enquiry to this artist first."
+msgstr "Attribuez d’abord la demande à cet artiste."
+
+msgid "About the studio"
+msgstr "À propos du studio"
+
+msgid "Studio logo"
+msgstr "Logo du studio"
+
+msgid "Cover image"
+msgstr "Image de couverture"
+
+msgid "Accept studio enquiries"
+msgstr "Accepter les demandes au studio"
+
+msgid "Manager"
+msgstr "Responsable"
+
+msgid "Resident artist"
+msgstr "Artiste résident"
+
+msgid "Guest artist"
+msgstr "Artiste invité"
+
+msgid "Invited"
+msgstr "Invité"
+
+msgid "Active"
+msgstr "Actif"
+
+msgid "Declined"
+msgstr "Refusé"
+
+msgid "Removed"
+msgstr "Retiré"
+
+msgid "New enquiry"
+msgstr "Nouvelle demande"
+
+msgid "In discussion"
+msgstr "En discussion"
+
+msgid "Sketching"
+msgstr "Création du dessin"
+
+msgid "Ready for session"
+msgstr "Prêt pour la séance"
+
+msgid "Healing"
+msgstr "Cicatrisation"
+
+msgid "Touch-up"
+msgstr "Retouche"
+
+msgid "Closed"
+msgstr "Clôturé"
+
+msgid "Project title"
+msgstr "Titre du projet"
+
+msgid "Tell us about your tattoo"
+msgstr "Parlez-nous de votre tatouage"
+
+msgid "Placement"
+msgstr "Emplacement"
+
+msgid "Studio note"
+msgstr "Note du studio"
+
+msgid "This time overlaps another event."
+msgstr "Ce créneau chevauche un autre événement."
+
+msgid "Studio workspace"
+msgstr "Espace studio"
+
+msgid "Your studios"
+msgstr "Vos studios"
+
+msgid "Studio navigation"
+msgstr "Navigation du studio"
+
+msgid "Overview"
+msgstr "Vue d’ensemble"
+
+msgid "Studio enquiries"
+msgstr "Demandes au studio"
+
+msgid "Team calendar"
+msgstr "Agenda de l’équipe"
+
+msgid "Team"
+msgstr "Équipe"
+
+msgid "Studio settings"
+msgstr "Paramètres du studio"
+
+msgid "Public studio page"
+msgstr "Page publique du studio"
+
+msgid "My artist workspace"
+msgstr "Mon espace artiste"
+
+msgid "Addresses & claims"
+msgstr "Adresses et revendications"
+
+msgid "Studio enquiry"
+msgstr "Demande au studio"
+
+msgid "All enquiries"
+msgstr "Toutes les demandes"
+
+msgid "The idea"
+msgstr "L’idée"
+
+msgid "Discuss with client"
+msgstr "Échanger avec le client"
+
+msgid "Messages stay in your personal conversation with the client."
+msgstr ""
+"Les messages restent dans votre conversation personnelle avec le client."
+
+msgid "Plan a session"
+msgstr "Planifier une séance"
+
+msgid "Move the project forward"
+msgstr "Faire avancer le projet"
+
+msgid "Update project"
+msgstr "Mettre à jour le projet"
+
+msgid ""
+"Studio notes are visible to managers and the assigned artist. Keep medical "
+"information in Health & Safety."
+msgstr ""
+"Les notes sont visibles aux responsables et à l’artiste attribué. Gardez les"
+" données médicales dans Santé et sécurité."
+
+msgid "Together, in your own style"
+msgstr "Ensemble, chacun son style"
+
+msgid "A shared place for your team, projects and sessions."
+msgstr "Un espace commun pour votre équipe, vos projets et vos séances."
+
+msgid "Your invitations"
+msgstr "Vos invitations"
+
+msgid ""
+"Joining shares only studio work. Your personal clients and portfolio stay "
+"yours."
+msgstr ""
+"Seul le travail du studio est partagé. Vos clients personnels et votre "
+"portfolio restent les vôtres."
+
+msgid "Accept invitation"
+msgstr "Accepter l’invitation"
+
+msgid "Decline"
+msgstr "Refuser"
+
+msgid "Owner"
+msgstr "Propriétaire"
+
+msgid "Open studio"
+msgstr "Ouvrir le studio"
+
+msgid ""
+"Your address is approved. Set up the team workspace when you are ready."
+msgstr ""
+"Votre adresse est approuvée. Configurez l’espace d’équipe quand vous le "
+"souhaitez."
+
+msgid "Set up studio"
+msgstr "Configurer le studio"
+
+msgid "Built around your way of working"
+msgstr "Pensé pour votre façon de travailler"
+
+msgid "One studio. Individual artists. Shared rhythm."
+msgstr "Un studio. Des artistes singuliers. Un rythme partagé."
+
+msgid ""
+"Connect your approved studio address, invite your team and organise work "
+"together. You can also join a studio through an invitation."
+msgstr ""
+"Reliez votre adresse approuvée, invitez votre équipe et organisez le travail"
+" ensemble. Vous pouvez aussi rejoindre un studio sur invitation."
+
+msgid "Connect a studio address"
+msgstr "Associer une adresse de studio"
+
+msgid "Your identity stays yours"
+msgstr "Votre identité reste la vôtre"
+
+msgid "Keep your own profile, portfolio and personal clients."
+msgstr "Conservez votre profil, votre portfolio et vos clients personnels."
+
+msgid "A team by agreement"
+msgstr "Une équipe par choix"
+
+msgid ""
+"Invite residents, managers and guest artists. Each person chooses to join."
+msgstr ""
+"Invitez résidents, responsables et artistes invités. Chacun choisit de "
+"rejoindre l’équipe."
+
+msgid "Conversation first"
+msgstr "L’échange avant tout"
+
+msgid "Discuss the tattoo, then plan a session. Walk-ins fit here too."
+msgstr ""
+"Échangez sur le tatouage, puis planifiez la séance. Les visites spontanées "
+"ont aussi leur place."
+
+msgid "Map"
+msgstr "Carte"
+
+msgid "Open workspace"
+msgstr "Ouvrir l’espace studio"
+
+msgid "Tattoo studio"
+msgstr "Studio de tatouage"
+
+msgid "Discuss your tattoo"
+msgstr "Parler de votre tatouage"
+
+msgid "Explore the work"
+msgstr "Découvrir les réalisations"
+
+msgid "A place for your next tattoo"
+msgstr "Un lieu pour votre prochain tatouage"
+
+msgid "Studio website"
+msgstr "Site du studio"
+
+msgid "Meet the artists"
+msgstr "Rencontrez les artistes"
+
+msgid "Verified artist"
+msgstr "Artiste vérifié"
+
+msgid "Portfolio"
+msgstr "Portfolio"
+
+msgid "Book"
+msgstr "Réserver"
+
+msgid ""
+"The studio is preparing its team page. You can contact the studio below."
+msgstr ""
+"Le studio prépare sa page d’équipe. Vous pouvez le contacter ci-dessous."
+
+msgid "Different hands. Shared space."
+msgstr "Des mains différentes. Un espace partagé."
+
+msgid "Artist work will appear here as the team builds its portfolios."
+msgstr "Les réalisations apparaîtront ici au fil des portfolios de l’équipe."
+
+msgid "It starts with a conversation"
+msgstr "Tout commence par un échange"
+
+msgid "Tell us your idea"
+msgstr "Racontez votre idée"
+
+msgid ""
+"Share the tattoo you have in mind. The studio will discuss the project and "
+"find the right artist with you. This is an enquiry, not a confirmed booking."
+msgstr ""
+"Décrivez le tatouage que vous imaginez. Le studio échangera avec vous pour "
+"trouver l’artiste qui vous correspond. Cette demande ne confirme pas de "
+"rendez-vous."
+
+msgid "Send studio enquiry"
+msgstr "Envoyer au studio"
+
+msgid "Sign in to discuss your tattoo"
+msgstr "Connectez-vous pour parler de votre tatouage"
+
+msgid "The studio has paused new enquiries."
+msgstr "Le studio a suspendu les nouvelles demandes."
+
+msgid "Your enquiries with this studio"
+msgstr "Vos demandes auprès de ce studio"
+
+msgid "Discuss with artist"
+msgstr "Échanger avec l’artiste"
+
+msgid "People make the studio"
+msgstr "L’équipe fait le studio"
+
+msgid "A shared rhythm"
+msgstr "Un rythme partagé"
+
+msgid "From idea to tattoo"
+msgstr "De l’idée au tatouage"
+
+msgid "Make it your studio"
+msgstr "Un studio à votre image"
+
+msgid "View studio page"
+msgstr "Voir la page du studio"
+
+msgid "Open studio projects"
+msgstr "Projets en cours"
+
+msgid "Upcoming sessions"
+msgstr "Séances à venir"
+
+msgid "Team members"
+msgstr "Membres de l’équipe"
+
+msgid "Next in the studio"
+msgstr "À venir au studio"
+
+msgid "Room for the next project"
+msgstr "Place au prochain projet"
+
+msgid ""
+"Add a session after a conversation or a walk-in. It also appears in the "
+"artist calendar."
+msgstr ""
+"Ajoutez une séance après un échange ou une visite spontanée. Elle apparaît "
+"aussi dans l’agenda de l’artiste."
+
+msgid "View all"
+msgstr "Tout voir"
+
+msgid "Start with an idea"
+msgstr "Commencez par une idée"
+
+msgid ""
+"Share your studio page so clients can tell the team about their project."
+msgstr ""
+"Partagez votre page pour que les clients présentent leur projet à l’équipe."
+
+msgid "Open public page"
+msgstr "Ouvrir la page publique"
+
+msgid "Shared studio. Personal craft."
+msgstr "Studio partagé. Savoir-faire personnel."
+
+msgid ""
+"Only studio enquiries and sessions are shared here. Personal bookings, "
+"health information and private conversations stay in their existing spaces."
+msgstr ""
+"Seules les demandes et séances du studio sont partagées ici. Les rendez-vous"
+" personnels, données de santé et conversations privées restent dans leurs "
+"espaces habituels."
+
+msgid "Your team"
+msgstr "Votre équipe"
+
+msgid "Member actions"
+msgstr "Actions du membre"
+
+msgid "Leave studio"
+msgstr "Quitter le studio"
+
+msgid "End membership"
+msgstr "Mettre fin à l’adhésion"
+
+msgid "Invite the people you work with. They join only after accepting."
+msgstr ""
+"Invitez vos collaborateurs. Ils rejoignent l’équipe après acceptation."
+
+msgid "Invite a teammate"
+msgstr "Inviter un membre"
+
+msgid ""
+"Use their Tatzo username. The invitation appears in their Studio workspace."
+msgstr ""
+"Utilisez son nom d’utilisateur Tatzo. L’invitation apparaît dans son espace "
+"studio."
+
+msgid "Create invitation"
+msgstr "Créer l’invitation"
+
+msgid "Clear roles, clear boundaries"
+msgstr "Des rôles clairs, des limites claires"
+
+msgid ""
+"Owners control membership and ownership. Managers organise studio enquiries "
+"and sessions. Resident and guest artists work on their assigned projects. "
+"Guest access ends on the agreed date."
+msgstr ""
+"Le propriétaire contrôle l’équipe et la propriété. Les responsables "
+"organisent les demandes et séances. Les artistes travaillent sur leurs "
+"projets attribués. L’accès invité prend fin à la date convenue."
+
+msgid "Invitations do not transfer studio ownership."
+msgstr "Les invitations ne transfèrent pas la propriété du studio."
+
+msgid "open"
+msgstr "en cours"
+
+msgid "Unassigned"
+msgstr "Non attribué"
+
+msgid "Every tattoo starts with a conversation"
+msgstr "Chaque tatouage commence par un échange"
+
+msgid ""
+"Clients can send an enquiry from your public studio page. Assigned projects "
+"appear here for each artist."
+msgstr ""
+"Les clients envoient leur demande depuis la page publique. Chaque artiste "
+"retrouve ici ses projets attribués."
+
+msgid "Previous week"
+msgstr "Semaine précédente"
+
+msgid "Today"
+msgstr "Aujourd’hui"
+
+msgid "Next week"
+msgstr "Semaine suivante"
+
+msgid "Session"
+msgstr "Séance"
+
+msgid "All artists"
+msgstr "Tous les artistes"
+
+msgid "Apply"
+msgstr "Appliquer"
+
+msgid "Busy"
+msgstr "Occupé"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "Complete"
+msgstr "Terminer"
+
+msgid "Cancel session"
+msgstr "Annuler la séance"
+
+msgid "Plan a studio session"
+msgstr "Planifier une séance au studio"
+
+msgid ""
+"For a project discussed on Tatzo, in person or as a walk-in. Times use the "
+"studio time zone. Existing artist bookings and blocked time are checked."
+msgstr ""
+"Pour un projet discuté sur Tatzo, en personne ou sans rendez-vous. Les "
+"horaires suivent le fuseau du studio. Les rendez-vous et indisponibilités de"
+" l’artiste sont vérifiés."
+
+msgid "Add to calendars"
+msgstr "Ajouter aux agendas"
+
+msgid "Studio identity"
+msgstr "Identité du studio"
+
+msgid "Introduce the space where your team creates. Images up to 5 MB."
+msgstr "Présentez l’espace où votre équipe crée. Images de 5 Mo maximum."
+
+msgid "Save studio"
+msgstr "Enregistrer le studio"
+
+msgid "Your verified address"
+msgstr "Votre adresse vérifiée"
+
+msgid "Address and ownership remain connected to the reviewed map location."
+msgstr "L’adresse et la propriété restent liées au lieu validé sur la carte."
+
+msgid "Edit studio details"
+msgstr "Modifier les informations du studio"
+
+msgid "Artist verification is required to join the studio team."
+msgstr "La vérification artiste est nécessaire pour rejoindre l’équipe."
+
+msgid "Choose another active Tatzo account."
+msgstr "Choisissez un autre compte Tatzo actif."
+
+msgid "Choose a verified tattoo artist."
+msgstr "Choisissez un artiste tatoueur vérifié."
+
+msgid "This account is already a member or has an invitation."
+msgstr "Ce compte est déjà membre ou a une invitation."
+
+msgid ""
+"Invitation ready in their Studio workspace. They must accept before joining."
+msgstr ""
+"L’invitation est disponible dans son espace studio. Elle doit être acceptée "
+"pour rejoindre l’équipe."
+
+msgid ""
+"Membership ended. Existing sessions stay in the calendar; review future "
+"sessions."
+msgstr ""
+"L’adhésion est terminée. Les séances restent dans l’agenda ; vérifiez celles"
+" à venir."
+
+msgid "Studio settings saved."
+msgstr "Paramètres du studio enregistrés."
+
+msgid "Session added to the studio and artist calendars."
+msgstr "Séance ajoutée aux agendas du studio et de l’artiste."
+
+msgid "This account cannot be assigned to this client."
+msgstr "Ce compte ne peut pas être attribué à ce client."
+
+msgid "Project updated."
+msgstr "Projet mis à jour."
+
+msgid "You have already contacted this studio today. Please wait for a reply."
+msgstr "Vous avez déjà contacté ce studio aujourd’hui. Attendez sa réponse."
+
+msgid ""
+"Your enquiry was sent. The studio can discuss your project with you on "
+"Tatzo."
+msgstr ""
+"Votre demande a été envoyée. Le studio peut échanger avec vous sur Tatzo."

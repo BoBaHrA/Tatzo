@@ -67,6 +67,7 @@
               {% endif %}
             </div>
 
+            {% if studio_memberships %}<div class="profile-subline">{% for membership in studio_memberships %}<a href="{% url 'studio_public' membership.studio.location_id %}">⌂ {{ membership.studio.location.name }}</a>{% if not forloop.last %} · {% endif %}{% endfor %}</div>{% endif %}
             <div class="profile-subline">
               {% if profile_user.profile.account_type == "tattoo_artist" %}
                 {% trans "Professional portfolio" %}
