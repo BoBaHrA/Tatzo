@@ -936,7 +936,10 @@ def profile_view(request, username):
     if user_obj.profile.account_type == "tattoo_artist":
         portfolio_works_count = PortfolioWork.objects.filter(user=user_obj).count()
 
+    from studios.models import Membership
+    studio_memberships = Membership.current().filter(user=user_obj, studio__location__status__in=["claimed", "verified"], studio__location__studio_owner__isnull=False).select_related("studio__location")
     context = {
+        "studio_memberships": studio_memberships,
         "profile_user": user_obj,
         "public_tattoo_styles": public_artist_styles(user_obj),
         "posts": posts,
@@ -2732,7 +2735,7 @@ def maps_page(request):
             latitude__isnull=False,
             longitude__isnull=False,
         )
-        .select_related("studio_owner", "studio_owner__profile")
+        .select_related("studio_owner", "studio_owner__profile", "workspace")
         .order_by("name")
     )
 
@@ -2759,7 +2762,7 @@ def maps_page(request):
             "display_name": location_obj.name,
             "tag": _("Managed studio") if owner else _("Imported location"),
             "profile_image": owner.profile.profile_image if owner and hasattr(owner, "profile") else None,
-            "profile_url": reverse("profile", kwargs={"username": owner.username}) if owner else "",
+            "profile_url": (reverse("studio_public", args=[location_obj.pk]) if getattr(location_obj, "workspace", None) else reverse("profile", kwargs={"username": owner.username})) if owner else "",
             "book_url": "",
             "location_id": location_obj.id,
             "location": location,

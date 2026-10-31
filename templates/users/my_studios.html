@@ -17,6 +17,7 @@
         <h1>{% trans "My studios" %}</h1>
         <p class="my-studios-description">{% trans "Manage your studio addresses and follow your map requests. Only approved locations appear as studios you manage." %}</p>
       </div>
+      <a class="my-studios-button my-studios-button-primary" href="{% url 'studio_hub' %}">{% trans "Studio workspace" %} ↗</a>
       <nav class="my-studios-hero-actions" aria-label="{% trans 'Studio navigation' %}">
         <a class="my-studios-button my-studios-button-outline" href="{% url 'maps_page' %}">← {% trans "Back to map" %}</a>
         <a class="my-studios-button my-studios-button-primary" href="{% url 'maps_page' %}">{% trans "Add a location on the map" %} <span aria-hidden="true">↗</span></a>

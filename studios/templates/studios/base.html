@@ -1,0 +1,23 @@
+{% extends 'base.html' %}{% load static i18n %}
+{% block title %}{% if studio %}{{ studio.location.name }} · {% endif %}{% trans 'Studio workspace' %} | Tatzo{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'studios/studios.css' %}">{% endblock %}
+{% block content %}
+<div class="studio-app">
+  <aside class="studio-sidebar">
+    <a class="studio-brand" href="{% url 'home' %}" aria-label="Tatzo"><img src="{% static 'images/tatzo7.png' %}" alt="Tatzo"></a>
+    <a class="studio-switch" href="{% url 'studio_hub' %}"><span class="studio-mark">{% if studio.logo %}<img src="{{ studio.logo.url }}" alt="">{% else %}⌂{% endif %}</span><span><strong>{% if studio %}{{ studio.location.name }}{% else %}{% trans 'Your studios' %}{% endif %}</strong><small>{% trans 'Studio workspace' %}</small></span><span aria-hidden="true">⌄</span></a>
+    <nav aria-label="{% trans 'Studio navigation' %}">
+    {% if studio %}
+      <a href="{% url 'studio_workspace' studio.location_id %}" {% if tab == 'overview' %}aria-current="page"{% endif %}><span aria-hidden="true">◫</span>{% trans 'Overview' %}</a>
+      <a href="{% url 'studio_workspace' studio.location_id %}?tab=enquiries" {% if tab == 'enquiries' %}aria-current="page"{% endif %}><span aria-hidden="true">▤</span>{% trans 'Studio enquiries' %}</a>
+      <a href="{% url 'studio_workspace' studio.location_id %}?tab=calendar" {% if tab == 'calendar' %}aria-current="page"{% endif %}><span aria-hidden="true">▦</span>{% trans 'Team calendar' %}</a>
+      <a href="{% url 'studio_workspace' studio.location_id %}?tab=team" {% if tab == 'team' %}aria-current="page"{% endif %}><span aria-hidden="true">♧</span>{% trans 'Team' %}</a>
+      {% if manager %}<a href="{% url 'studio_workspace' studio.location_id %}?tab=settings" {% if tab == 'settings' %}aria-current="page"{% endif %}><span aria-hidden="true">⚙</span>{% trans 'Studio settings' %}</a>{% endif %}
+      <a href="{% url 'studio_public' studio.location_id %}"><span aria-hidden="true">↗</span>{% trans 'Public studio page' %}</a>
+    {% endif %}
+    </nav>
+    <div class="studio-sidebar-bottom"><a href="{% url 'artist_booking_settings' %}">← {% trans 'My artist workspace' %}</a><a href="{% url 'my_studios' %}">⌖ {% trans 'Addresses & claims' %}</a><a href="{% url 'profile' request.user.username %}">@{{ request.user.username }}</a></div>
+  </aside>
+  <main class="studio-main" id="main-content">{% block studio_content %}{% endblock %}</main>
+</div>
+{% endblock %}
