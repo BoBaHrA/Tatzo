@@ -1,13 +1,8 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useState, type ReactNode } from 'react';
 import { Redirect, router, useFocusEffect } from 'expo-router';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Switch,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Switch, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import type {
   ArtistBookingPreferences,
@@ -108,6 +103,7 @@ function SectionCard({
   hint: string;
   children: ReactNode;
 }) {
+  useLanguage();
   return (
     <View style={styles.card}>
       <View style={styles.sectionHeading}>
@@ -128,6 +124,7 @@ function ChoiceChip({
   selected: boolean;
   onPress: () => void;
 }) {
+  useLanguage();
   return (
     <Pressable
       accessibilityRole="button"
@@ -157,6 +154,7 @@ function ToggleRow({
   value: boolean;
   onValueChange: (value: boolean) => void;
 }) {
+  useLanguage();
   return (
     <View style={styles.toggleRow}>
       <View style={styles.toggleCopy}>
@@ -175,6 +173,7 @@ function ToggleRow({
 }
 
 export default function ArtistBookingPreferencesScreen() {
+  useLanguage();
   const { request, status, user } = useAuth();
   const [settings, setSettings] = useState<ArtistBookingPreferences | null>(null);
   const [form, setForm] = useState<PreferencesForm | null>(null);

@@ -1,13 +1,8 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useState } from 'react';
 import { Redirect, router, useFocusEffect } from 'expo-router';
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { ArtistDashboard } from '@/api/types';
 import {
@@ -47,6 +42,7 @@ function formatDate(value: string) {
 }
 
 export default function ArtistCalendarControlsScreen() {
+  useLanguage();
   const { request, status, user } = useAuth();
   const [dashboard, setDashboard] = useState<ArtistDashboard | null>(null);
   const [timeOffDate, setTimeOffDate] = useState(tomorrowValue);

@@ -116,6 +116,22 @@ class MobileMapTests(APITestCase):
         self.assertEqual(response.data["viewport"], {"artists": 1, "studios": 2})
         self.assertFalse(response.data["capabilities"]["distance"])
 
+    def test_claimed_studio_exposes_owner_without_becoming_an_artist(self):
+        self.studio.studio_owner = self.viewer
+        self.studio.status = "claimed"
+        self.studio.save(update_fields=("studio_owner", "status"))
+
+        response = self.get_map()
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        studio = next(item for item in response.data["results"] if item["location_id"] == self.studio.pk)
+        self.assertEqual(studio["kind"], "studio")
+        self.assertEqual(studio["status"], "claimed")
+        self.assertEqual(studio["username"], self.viewer.username)
+        self.assertFalse(studio["claimable"])
+        self.assertFalse(studio["can_book"])
+        self.assertEqual(response.data["viewport"], {"artists": 1, "studios": 1})
+
     def test_map_does_not_silently_cap_results_at_thirty_six(self):
         Location.objects.bulk_create(
             [
@@ -327,3 +343,4 @@ class MobileMapRateLimitTests(APITestCase):
         self.assertEqual(limited.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
         self.assertEqual(limited.data["code"], "rate_limited")
         self.assertEqual(LocationRequest.objects.count(), 3)
+

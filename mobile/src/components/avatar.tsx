@@ -1,4 +1,5 @@
-import { Image, StyleSheet, Text, View, type ImageStyle, type ViewStyle } from 'react-native';
+import { Image, StyleSheet, View, type ImageStyle, type ViewStyle } from 'react-native';
+import { Text } from '@/components/text';
 
 import { colors } from '@/theme';
 

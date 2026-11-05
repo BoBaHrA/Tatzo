@@ -22,7 +22,7 @@ function check(condition, label) {
   else failures.push(label);
 }
 
-const home = source('app/(tabs)/home.tsx');
+const home = source('src/feed/feed-screen.tsx');
 const brandHeader = source('src/components/brand-header.tsx');
 const postCardExport = source('src/feed/post-card.tsx');
 const postCard = source('src/feed/web-post-card.tsx');

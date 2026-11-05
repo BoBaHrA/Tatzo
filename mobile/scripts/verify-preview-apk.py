@@ -1,0 +1,123 @@
+"""Verify that the self-contained preview APK can update the last delivered build."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from zipfile import ZipFile
+
+PREVIOUS_SHA256 = "1f49ca5472b3d8050340fd5695e68e737a77251fdb74c811af5b50899be7c800"
+PACKAGE = "eu.tatzo.app.preview"
+
+sdk = Path(os.environ.get("ANDROID_HOME") or os.environ["ANDROID_SDK_ROOT"])
+build_tools = sorted(
+    sdk.glob("build-tools/*"),
+    key=lambda path: tuple(int(n) for n in re.findall(r"\d+", path.name)),
+    reverse=True,
+)
+tool_dir = next(path for path in build_tools if (path / "apksigner").is_file() and (path / "aapt").is_file())
+
+
+def inspect(path):
+    result = subprocess.run(
+        [str(tool_dir / "apksigner"), "verify", "--verbose", "--print-certs", str(path)],
+        capture_output=True, text=True,
+    )
+    # Certificate details are public. Keep the verifier output visible for diagnostics.
+    print(f"Signature verification with {tool_dir.name}: {path.name}", flush=True)
+    print(result.stdout, flush=True)
+    if result.stderr:
+        print(result.stderr, file=sys.stderr, flush=True)
+    result.check_returncode()
+    assert re.search(r"^Verifies\s*$", result.stdout, re.MULTILINE), "APK signature was not verified"
+    # Support numbered/SDK-range labels and Build Tools 37's scheme-specific labels.
+    digests = {
+        value.lower()
+        for value in re.findall(
+            r"^(?:Signer(?: #[0-9]+| \([^\r\n]+\))|V[1-4](?:\.[0-9]+)? Signer:) certificate SHA-256 digest:\s*([0-9a-fA-F]{64})\s*$",
+            result.stdout, re.MULTILINE,
+        )
+    }
+    assert len(digests) == 1, "Expected one verified signing identity"
+    badging = subprocess.run(
+        [str(tool_dir / "aapt"), "dump", "badging", str(path)],
+        check=True, capture_output=True, text=True,
+    ).stdout
+    manifest = re.search(r"package: name='([^']+)' versionCode='([^']+)' versionName='([^']+)'", badging)
+    assert manifest, "Missing Android package metadata"
+    return manifest.group(1), int(manifest.group(2)), manifest.group(3), next(iter(digests)), badging
+
+
+def inspect_previous(previous_zip):
+    with tempfile.TemporaryDirectory() as folder:
+        old = Path(folder) / "previous.apk"
+        with ZipFile(previous_zip) as archive:
+            names = [name for name in archive.namelist() if name.endswith(".apk")]
+            assert len(names) == 1, "Ambiguous previous APK artifact"
+            old.write_bytes(archive.read(names[0]))
+        assert hashlib.sha256(old.read_bytes()).hexdigest() == PREVIOUS_SHA256, "Previous APK checksum mismatch"
+        result = inspect(old)
+        assert result[0] == PACKAGE, "Unexpected previous application ID"
+        return result
+
+
+if sys.argv[1] == "--baseline":
+    old_package, old_code, old_name, old_certificate, _ = inspect_previous(Path(sys.argv[2]))
+    print(json.dumps({
+        "baseline_package": old_package,
+        "baseline_version_code": old_code,
+        "baseline_version_name": old_name,
+        "baseline_certificate_sha256": old_certificate,
+        "baseline_sha256": PREVIOUS_SHA256,
+    }, indent=2))
+    sys.exit(0)
+
+apk = Path(sys.argv[1])
+previous_zip = Path(sys.argv[2])
+package, version_code, version_name, certificate, badging = inspect(apk)
+assert package == PACKAGE, "Preview application ID changed"
+assert "application-debuggable" not in badging, "Expected a standalone release build"
+old_package, old_code, _, old_certificate, _ = inspect_previous(previous_zip)
+assert package == old_package and certificate == old_certificate, "APK cannot update the previous preview"
+assert version_code > old_code, "Android versionCode was not incremented"
+
+with ZipFile(apk) as archive:
+    assert archive.testzip() is None, "APK ZIP integrity failure"
+    native = archive.read("assets/index.android.bundle")
+    assert len(native) > 1000000, "Missing embedded application bundle"
+    key = os.environ["EXPO_PUBLIC_CARTO_BASEMAP_API_KEY"].strip().encode()
+    assert key and key in native, "CARTO key was not included"
+    assert b"basemapApiKey" in native, "Missing native map key bridge"
+    dom_files = [name for name in archive.namelist() if name.endswith(".js") and "www.bundle" in name]
+    assert any(b"basemaps.cartocdn.com/dark_all" in (data := archive.read(name)) and b"?key=" in data for name in dom_files), "Missing authenticated map tile URL"
+    architectures = sorted({name.split("/")[1] for name in archive.namelist() if name.startswith("lib/")})
+    assert "arm64-v8a" in architectures and "x86_64" in architectures, "Missing native architecture"
+
+destination = Path("dist/apk")
+destination.mkdir(parents=True, exist_ok=True)
+output = destination / "Tatzo-Preview-0.1.3.apk"
+shutil.copyfile(apk, output)
+sha256 = hashlib.sha256(output.read_bytes()).hexdigest()
+metadata = {
+    "file": output.name,
+    "bytes": output.stat().st_size,
+    "sha256": sha256,
+    "package": package,
+    "version_name": version_name,
+    "version_code": version_code,
+    "signer_certificate_sha256": certificate,
+    "same_signer_as_previous_preview": True,
+    "standalone_bundle": True,
+    "carto_key_included": True,
+    "architectures": architectures,
+    "source_head": os.environ.get("TATZO_SOURCE_HEAD"),
+    "build_commit": os.environ.get("GITHUB_SHA"),
+}
+(destination / "build-info.json").write_text(json.dumps(metadata, indent=2) + "\n")
+(destination / "SHA256SUMS.txt").write_text(sha256 + "  " + output.name + "\n")
+print(json.dumps(metadata, indent=2))
+

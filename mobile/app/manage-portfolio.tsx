@@ -1,15 +1,9 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { Redirect, router, useFocusEffect } from 'expo-router';
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { PortfolioWork } from '@/api/types';
 import { useAuth } from '@/auth/auth-context';
@@ -43,6 +37,7 @@ function formatDate(value: string) {
 }
 
 export default function ManagePortfolioScreen() {
+  useLanguage();
   const { request, status, user } = useAuth();
   const [works, setWorks] = useState<PortfolioWork[]>([]);
   const [loading, setLoading] = useState(true);

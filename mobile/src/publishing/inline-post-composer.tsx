@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import { useRef, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import {
@@ -8,10 +9,10 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { FeedPost } from '@/api/types';
 import type { AuthenticatedRequest } from '@/auth/auth-context';
@@ -93,6 +94,7 @@ type InlinePostComposerProps = {
 };
 
 export function InlinePostComposer({ request, onPublished }: InlinePostComposerProps) {
+  useLanguage();
   const ui = copy();
   const progress = useRef(new Animated.Value(0)).current;
   const [expanded, setExpanded] = useState(false);
@@ -439,6 +441,7 @@ type OptionRowProps = {
 };
 
 function OptionRow({ label, detail, onPress, disabled = false }: OptionRowProps) {
+  useLanguage();
   return (
     <Pressable
       accessibilityRole="button"

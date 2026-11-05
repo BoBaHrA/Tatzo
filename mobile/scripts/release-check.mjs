@@ -128,16 +128,18 @@ check(isHttpsUrl(expo.extra?.apiBaseUrl), 'Release API URL uses HTTPS');
 
 const appConfigSource = readFileSync(join(projectRoot, 'app.config.ts'), 'utf8');
 const nativeMapSource = readFileSync(join(projectRoot, 'src', 'map', 'map-canvas-impl.native.tsx'), 'utf8');
-const leafletMapSource = readFileSync(join(projectRoot, 'src', 'map', 'leaflet-map.tsx'), 'utf8');
+const leafletMapSource = readFileSync(join(projectRoot, 'src', 'map', 'leaflet-map-stable.tsx'), 'utf8');
+const basemapSource = readFileSync(join(projectRoot, 'src', 'map', 'carto-basemap.ts'), 'utf8');
 check(
   !appConfigSource.includes('EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY') &&
     !appConfigSource.includes("'react-native-maps'"),
   'Native app configuration has no Google Maps API-key requirement',
 );
-check(nativeMapSource.includes("@/map/leaflet-map"), 'Native map renders the shared Leaflet bridge');
+check(nativeMapSource.includes("@/map/leaflet-map-stable"), 'Native map renders the active Leaflet bridge');
 check(leafletMapSource.includes("'use dom'"), 'Leaflet map runs in the Expo DOM bridge');
 check(leafletMapSource.includes("const LEAFLET_VERSION = '1.9.4'"), 'Mobile map pins Leaflet 1.9.4');
-check(leafletMapSource.includes('basemaps.cartocdn.com/dark_all'), 'Mobile map uses the Tatzo web CARTO dark tiles');
+check(basemapSource.includes('basemaps.cartocdn.com/dark_all'), 'Mobile map uses the Tatzo web CARTO dark tiles');
+check(nativeMapSource.includes('basemapApiKey={CARTO_BASEMAP_API_KEY}') && leafletMapSource.includes('cartoTileUrl(basemapApiKey)'), 'Configured CARTO key reaches native tile requests');
 check(leafletMapSource.includes('OpenStreetMap</a> contributors'), 'OpenStreetMap attribution is present');
 
 for (const [path, expectsAlpha] of [

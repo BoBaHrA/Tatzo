@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
 import {
@@ -6,9 +7,9 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
+import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Appointment, ArtistDashboard } from '@/api/types';
@@ -233,6 +234,7 @@ function datesBetween(start: string, end: string) {
 }
 
 export default function CalendarScreen() {
+  useLanguage();
   const ui = copy();
   const { request, status, user } = useAuth();
   const today = localTodayIso();
@@ -516,6 +518,7 @@ function CalendarDayCell({
   mode: CalendarViewMode;
   onPress: () => void;
 }) {
+  useLanguage();
   const markers = [
     ...appointments.map((appointment) => ({ key: `appointment-${appointment.id}`, color: appointmentColor(appointment) })),
     ...extraMarkers,
@@ -555,6 +558,7 @@ function CalendarDayCell({
 }
 
 function AppointmentRow({ appointment }: { appointment: Appointment }) {
+  useLanguage();
   const color = appointmentColor(appointment);
   return (
     <Pressable
@@ -572,6 +576,7 @@ function AppointmentRow({ appointment }: { appointment: Appointment }) {
 }
 
 function QuickAction({ label, onPress }: { label: string; onPress: () => void }) {
+  useLanguage();
   return (
     <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.quickAction, pressed && styles.pressed]}>
       <Text style={styles.quickActionText}>{label}</Text>
@@ -580,6 +585,7 @@ function QuickAction({ label, onPress }: { label: string; onPress: () => void })
 }
 
 function LegendRow({ color, label }: { color: string; label: string }) {
+  useLanguage();
   return (
     <View style={styles.legendRow}>
       <View style={[styles.legendDot, { backgroundColor: color }]} />

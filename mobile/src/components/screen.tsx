@@ -7,7 +7,7 @@ import {
   View,
   type ViewStyle,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, layout, spacing } from '@/theme';
 
@@ -19,7 +19,8 @@ type ScreenProps = PropsWithChildren<{
 }>;
 
 export function Screen({ children, scroll = true, contentStyle, bottomInset = true }: ScreenProps) {
-  const content = <View style={[styles.content, !bottomInset && styles.noBottomInset, contentStyle]}>{children}</View>;
+  const insets = useSafeAreaInsets();
+  const content = <View style={[styles.content, !bottomInset && styles.noBottomInset, contentStyle, bottomInset && { paddingBottom: Math.max(contentStyle?.paddingBottom as number || spacing.xxl, insets.bottom + spacing.md) }]}>{children}</View>;
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
       <KeyboardAvoidingView

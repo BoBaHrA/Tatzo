@@ -1,15 +1,10 @@
+import { useLanguage } from '@/localization/language-context';
 import { useState } from 'react';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Location from 'expo-location';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import { useAuth } from '@/auth/auth-context';
 import { Button } from '@/components/button';
@@ -34,6 +29,7 @@ function finiteParam(value: string | string[] | undefined) {
 }
 
 export default function AddMapLocationScreen() {
+  useLanguage();
   const params = useLocalSearchParams<{ latitude?: string; longitude?: string }>();
   const { request, status, user } = useAuth();
   const suggestedLatitude = finiteParam(params.latitude);

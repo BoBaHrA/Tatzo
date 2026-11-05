@@ -102,9 +102,19 @@ from .views import (
     StyleMatchView,
 )
 
+from .account_tools_views import (
+    BookmarksView, SupportReportView, ModerationOverviewView,
+    ModerationQueueView, ModerationActionView,
+)
+
 app_name = "mobile_api"
 
 urlpatterns = [
+    path("me/bookmarks/", BookmarksView.as_view(), name="bookmarks"),
+    path("support/reports/", SupportReportView.as_view(), name="support_report"),
+    path("moderation/", ModerationOverviewView.as_view(), name="moderation_overview"),
+    path("moderation/<str:kind>/", ModerationQueueView.as_view(), name="moderation_queue"),
+    path("moderation/<str:kind>/<int:report_id>/", ModerationActionView.as_view(), name="moderation_action"),
     path("auth/register/", RegisterView.as_view(), name="register"),
     path("auth/token/", LoginView.as_view(), name="token"),
     path("auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),

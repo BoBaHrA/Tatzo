@@ -1,5 +1,8 @@
+import { useLanguage } from '@/localization/language-context';
 import { Redirect, Tabs } from 'expo-router';
 import { Image, type ColorValue, type ImageSourcePropType } from 'react-native';
+
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/auth/auth-context';
 import { useChat } from '@/chat/chat-context';
@@ -32,6 +35,7 @@ function WebTabIcon({
   source: ImageSourcePropType;
   color: ColorValue;
 }) {
+  useLanguage();
   return (
     <Image
       resizeMode="contain"
@@ -42,6 +46,8 @@ function WebTabIcon({
 }
 
 export default function TabsLayout() {
+  useLanguage();
+  const insets = useSafeAreaInsets();
   const { status } = useAuth();
   const { unreadCount } = useChat();
   const copy = shellCopy();
@@ -65,10 +71,10 @@ export default function TabsLayout() {
           backgroundColor: 'rgba(0, 9, 17, 0.98)',
           borderTopColor: 'rgba(4, 197, 191, 0.18)',
           borderTopWidth: 1,
-          height: 76,
+          height: 69 + Math.max(insets.bottom, 7),
           paddingTop: 7,
           paddingHorizontal: 10,
-          paddingBottom: 7,
+          paddingBottom: Math.max(insets.bottom, 7),
         },
         tabBarLabelStyle: {
           fontSize: 10,

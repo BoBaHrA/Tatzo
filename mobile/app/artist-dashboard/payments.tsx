@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useState } from 'react';
 import { Redirect, router, useFocusEffect } from 'expo-router';
 import {
@@ -5,10 +6,10 @@ import {
   Linking,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { ArtistPaymentSettings } from '@/api/types';
 import { useAuth } from '@/auth/auth-context';
@@ -26,6 +27,7 @@ import { colors, radius, spacing } from '@/theme';
 
 
 export default function ArtistPaymentsScreen() {
+  useLanguage();
   const { request, status, user } = useAuth();
   const [settings, setSettings] = useState<ArtistPaymentSettings | null>(null);
   const [depositRequired, setDepositRequired] = useState(false);

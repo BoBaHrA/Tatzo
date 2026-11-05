@@ -9,6 +9,8 @@ import {
   type PropsWithChildren,
 } from 'react';
 
+import { AppState } from 'react-native';
+
 import type { ChatThreadSummary } from '@/api/types';
 import { useAuth } from '@/auth/auth-context';
 import { fetchChats } from '@/chat/chat-api';
@@ -28,32 +30,38 @@ const ChatContext = createContext<ChatContextValue | null>(null);
 export function ChatProvider({ children }: PropsWithChildren) {
   const { request, status } = useAuth();
   const [threads, setThreads] = useState<ChatThreadSummary[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const unreadCount = threads.reduce((total, thread) => total + thread.unread_count, 0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const refreshingRef = useRef(false);
+  const hasLoaded = useRef(false);
+  const mounted = useRef(true);
+  const clearedThreads = useRef(new Set<number>());
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
 
   const refresh = useCallback(async () => {
-    if (status !== 'authenticated' || refreshingRef.current) return;
+    if (status !== 'authenticated' || refreshingRef.current || AppState.currentState === 'background') return;
     refreshingRef.current = true;
-    setLoading((current) => current || threads.length === 0);
+    setLoading(!hasLoaded.current);
+    clearedThreads.current.clear();
     try {
       const response = await fetchChats(request);
-      setThreads(response.results);
-      setUnreadCount(response.unread_count);
+      if (!mounted.current) return;
+      hasLoaded.current = true;
+      const next = response.results.map(thread => clearedThreads.current.has(thread.id) ? { ...thread, unread_count: 0 } : thread);
+      setThreads(next);
       setError(false);
     } catch {
-      setError(true);
+      if (mounted.current) setError(true);
     } finally {
       refreshingRef.current = false;
-      setLoading(false);
+      if (mounted.current) setLoading(false);
     }
-  }, [request, status, threads.length]);
+  }, [request, status]);
 
   useEffect(() => {
     if (status !== 'authenticated') {
       setThreads([]);
-      setUnreadCount(0);
       setLoading(false);
       setError(false);
       return undefined;
@@ -61,15 +69,13 @@ export function ChatProvider({ children }: PropsWithChildren) {
 
     void refresh();
     const poll = setInterval(() => void refresh(), 8_000);
-    return () => clearInterval(poll);
+    const subscription = AppState.addEventListener('change', next => { if (next === 'active') void refresh(); });
+    return () => { clearInterval(poll); subscription.remove(); };
   }, [refresh, status]);
 
   const clearUnread = useCallback((threadId: number) => {
+    clearedThreads.current.add(threadId);
     setThreads((current) => {
-      const cleared = current.find((thread) => thread.id === threadId)?.unread_count ?? 0;
-      if (cleared) {
-        setUnreadCount((total) => Math.max(0, total - cleared));
-      }
       return current.map((thread) => (
         thread.id === threadId ? { ...thread, unread_count: 0 } : thread
       ));

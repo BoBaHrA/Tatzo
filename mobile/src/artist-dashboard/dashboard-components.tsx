@@ -1,13 +1,14 @@
+import { useLanguage } from '@/localization/language-context';
 import { router } from 'expo-router';
 import {
   Image,
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
   type DimensionValue,
 } from 'react-native';
+import { Text } from '@/components/text';
 
 import type {
   ArtistDashboard,
@@ -46,6 +47,7 @@ function workloadColor(day: ArtistWorkloadDay) {
 }
 
 export function ArtistStats({ stats }: { stats: ArtistDashboard['stats'] }) {
+  useLanguage();
   const items = [
     { value: stats.today_sessions, label: t('artistTodaySessions') },
     { value: stats.pending_requests, label: t('artistPendingRequests'), accent: true },
@@ -65,6 +67,7 @@ export function ArtistStats({ stats }: { stats: ArtistDashboard['stats'] }) {
 }
 
 export function WorkloadStrip({ days }: { days: ArtistWorkloadDay[] }) {
+  useLanguage();
   return (
     <ScrollView
       contentContainerStyle={styles.workloadContent}
@@ -100,6 +103,7 @@ export function WorkloadStrip({ days }: { days: ArtistWorkloadDay[] }) {
 }
 
 function TimelineRow({ item }: { item: ArtistTimelineItem }) {
+  useLanguage();
   const canOpen = item.appointment_id !== null;
   const open = () => {
     if (!item.appointment_id) return;
@@ -148,6 +152,7 @@ function TimelineRow({ item }: { item: ArtistTimelineItem }) {
 }
 
 export function ArtistTimeline({ items }: { items: ArtistTimelineItem[] }) {
+  useLanguage();
   if (!items.length) {
     return <Text style={styles.emptyText}>{t('artistUpcomingEmpty')}</Text>;
   }

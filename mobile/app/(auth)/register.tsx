@@ -1,6 +1,7 @@
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { AccountType } from '@/api/types';
 import { useAuth } from '@/auth/auth-context';

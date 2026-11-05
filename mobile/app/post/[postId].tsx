@@ -1,6 +1,8 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useEffect, useState } from 'react';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import { ApiError } from '@/api/client';
 import type { FeedPost, ReportReason } from '@/api/types';
@@ -22,6 +24,7 @@ import { colors, radius, spacing } from '@/theme';
 
 
 export default function PostDetailScreen() {
+  useLanguage();
   const params = useLocalSearchParams<{ postId?: string | string[] }>();
   const rawId = Array.isArray(params.postId) ? params.postId[0] : params.postId;
   const postId = Number(rawId);

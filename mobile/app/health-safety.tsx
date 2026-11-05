@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useState } from 'react';
 import { Redirect, router, useFocusEffect } from 'expo-router';
 import {
@@ -5,10 +6,10 @@ import {
   Alert,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from 'react-native';
+import { Text } from '@/components/text';
 
 import type {
   HealthSafetyCard,
@@ -41,6 +42,7 @@ function CheckRow({
   onPress: () => void;
   hint?: string;
 }) {
+  useLanguage();
   return (
     <Pressable
       accessibilityRole="checkbox"
@@ -60,6 +62,7 @@ function CheckRow({
 }
 
 export default function HealthSafetyScreen() {
+  useLanguage();
   const { request, status } = useAuth();
   const [card, setCard] = useState<HealthSafetyCard | null>(null);
   const [values, setValues] = useState<HealthSafetyValues>({ ...EMPTY_HEALTH_VALUES });

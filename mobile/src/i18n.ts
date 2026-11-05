@@ -1,7 +1,15 @@
-import { getLocales } from 'expo-localization';
+import { appLanguage } from '@/localization/language-runtime';
+export { appLanguage } from '@/localization/language-runtime';
 
 const translations = {
   en: {
+    bookmarks: "Bookmarks",
+    bookmarksEmptyHint: "Save posts with the bookmark button to find them here.",
+    reportProblem: "Report a problem",
+    dashboard: "Dashboard",
+    adminPanel: "Administration",
+    language: "Language",
+    settings: "Settings",
     signIn: 'Sign in',
     signUp: 'Create account',
     identifier: 'Username or email',
@@ -49,6 +57,7 @@ const translations = {
     mapEmptyHint: 'Move the map, clear a filter, or add a studio for review.',
     mapVerifiedArtist: 'VERIFIED ARTIST',
     mapUnclaimedStudio: 'UNCLAIMED STUDIO',
+    mapClaimedStudio: 'CLAIMED STUDIO',
     mapWebsite: 'Website',
     mapClaimPending: 'Claim pending',
     mapClaim: 'Claim studio',
@@ -713,6 +722,13 @@ const translations = {
     loading: 'Loading Tatzo…',
   },
   fr: {
+    bookmarks: "Enregistrements",
+    bookmarksEmptyHint: "Enregistrez des publications pour les retrouver ici.",
+    reportProblem: "Signaler un problème",
+    dashboard: "Tableau de bord",
+    adminPanel: "Administration",
+    language: "Langue",
+    settings: "Paramètres",
     signIn: 'Se connecter',
     signUp: 'Créer un compte',
     identifier: "Nom d'utilisateur ou e-mail",
@@ -760,6 +776,7 @@ const translations = {
     mapEmptyHint: 'Déplacez la carte, retirez un filtre ou proposez un studio.',
     mapVerifiedArtist: 'ARTISTE VÉRIFIÉ',
     mapUnclaimedStudio: 'STUDIO NON REVENDIQUÉ',
+    mapClaimedStudio: 'STUDIO REVENDIQUÉ',
     mapWebsite: 'Site web',
     mapClaimPending: 'Demande en cours',
     mapClaim: 'Revendiquer',
@@ -1424,6 +1441,13 @@ const translations = {
     loading: 'Chargement de Tatzo…',
   },
   ru: {
+    bookmarks: "Закладки",
+    bookmarksEmptyHint: "Сохраняй публикации кнопкой закладки — они появятся здесь.",
+    reportProblem: "Сообщить о проблеме",
+    dashboard: "Панель мастера",
+    adminPanel: "Администрирование",
+    language: "Язык",
+    settings: "Настройки",
     signIn: 'Войти',
     signUp: 'Создать аккаунт',
     identifier: 'Имя пользователя или email',
@@ -1471,6 +1495,7 @@ const translations = {
     mapEmptyHint: 'Передвинь карту, отключи фильтр или отправь студию на проверку.',
     mapVerifiedArtist: 'ПРОВЕРЕННЫЙ МАСТЕР',
     mapUnclaimedStudio: 'СТУДИЯ БЕЗ ВЛАДЕЛЬЦА',
+    mapClaimedStudio: 'СТУДИЯ С ВЛАДЕЛЬЦЕМ',
     mapWebsite: 'Сайт',
     mapClaimPending: 'Заявка проверяется',
     mapClaim: 'Забрать студию',
@@ -2136,12 +2161,7 @@ const translations = {
   },
 } as const;
 
-type Language = keyof typeof translations;
 export type TranslationKey = keyof (typeof translations)['en'];
-
-const deviceLanguage = getLocales()[0]?.languageCode;
-export const appLanguage: Language =
-  deviceLanguage === 'fr' || deviceLanguage === 'ru' ? deviceLanguage : 'en';
 
 export function t(key: TranslationKey): string {
   return translations[appLanguage][key];

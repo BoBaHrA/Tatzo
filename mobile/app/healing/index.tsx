@@ -1,13 +1,8 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useState } from 'react';
 import { Redirect, router, useFocusEffect } from 'expo-router';
-import {
-  ActivityIndicator,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import type {
   HealingEligibleAppointment,
@@ -38,6 +33,7 @@ function formatDate(value: string) {
 }
 
 function HealingMark({ size = 48 }: { size?: number }) {
+  useLanguage();
   return (
     <Image
       accessibilityIgnoresInvertColors
@@ -55,6 +51,7 @@ function JourneyCard({
   copy: Record<string, string>;
   journey: HealingJourneySummary;
 }) {
+  useLanguage();
   return (
     <Pressable
       accessibilityRole="button"
@@ -111,6 +108,7 @@ function EligibleCard({
   loading: boolean;
   onStart: () => void;
 }) {
+  useLanguage();
   return (
     <View style={styles.eligibleCard}>
       <View style={styles.eligibleIdentity}>
@@ -136,6 +134,7 @@ function EligibleCard({
 }
 
 export default function HealingIndexScreen() {
+  useLanguage();
   const { request, status } = useAuth();
   const [data, setData] = useState<HealingListResponse | null>(null);
   const [loading, setLoading] = useState(true);

@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { Redirect, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -8,9 +9,9 @@ import {
   Linking,
   Pressable,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
+import { Text } from '@/components/text';
 
 import type {
   Appointment,
@@ -74,6 +75,7 @@ function formatDate(appointment: Appointment) {
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {
+  useLanguage();
   if (!value) return null;
   return (
     <View style={styles.detailRow}>
@@ -84,6 +86,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 }
 
 export default function AppointmentDetailScreen() {
+  useLanguage();
   const params = useLocalSearchParams<{
     appointmentId?: string | string[];
     created?: string | string[];

@@ -270,6 +270,8 @@ export type MapLocationMarker = {
   phone: string | null;
   claimable: boolean;
   claim_status: string | null;
+  public_post_count?: number;
+  style_keys?: string[];
 };
 
 export type MapLocationsResponse = {
@@ -346,6 +348,8 @@ export type ChatListResponse = {
 };
 
 export type ChatThreadDetail = ChatThreadSummary & {
+  updated_messages?: ChatMessage[];
+  deleted_message_ids?: number[];
   messages: ChatMessage[];
   has_more: boolean;
 };

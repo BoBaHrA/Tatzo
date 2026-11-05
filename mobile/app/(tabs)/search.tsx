@@ -1,3 +1,4 @@
+import { useLanguage } from '@/localization/language-context';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { router } from 'expo-router';
 import * as ExpoLocation from 'expo-location';
@@ -11,10 +12,10 @@ import {
   ScrollView,
   StyleSheet,
   Switch,
-  Text,
   TextInput,
   View,
 } from 'react-native';
+import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/auth/auth-context';
@@ -257,6 +258,7 @@ function kindLabel(kind: SearchKind, ui: ReturnType<typeof copy>) {
 }
 
 export default function SearchScreen() {
+  useLanguage();
   const { request } = useAuth();
   const ui = copy();
   const [query, setQuery] = useState('');
@@ -710,6 +712,7 @@ export default function SearchScreen() {
 }
 
 function ActiveChip({ label, onPress }: { label: string; onPress: () => void }) {
+  useLanguage();
   return (
     <Pressable accessibilityRole="button" onPress={onPress} style={styles.activeChip}>
       <Text numberOfLines={1} style={styles.activeChipText}>{label}</Text>
@@ -727,6 +730,7 @@ function ResultCard({
   onPress: () => void;
   ui: ReturnType<typeof copy>;
 }) {
+  useLanguage();
   const prepared = item.is_imported && !item.native_profile_available;
   return (
     <Pressable

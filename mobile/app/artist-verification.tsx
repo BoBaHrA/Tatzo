@@ -1,14 +1,9 @@
+import { useLanguage } from '@/localization/language-context';
 import * as DocumentPicker from 'expo-document-picker';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import type { ArtistVerification, VerificationStatus } from '@/api/types';
 import { useAuth } from '@/auth/auth-context';
@@ -95,6 +90,7 @@ async function pickDocument(): Promise<PendingVerificationDocument | null> {
 }
 
 export default function ArtistVerificationScreen() {
+  useLanguage();
   const { refreshProfile, request, status, user } = useAuth();
   const [verification, setVerification] = useState<ArtistVerification | null>(null);
   const [loading, setLoading] = useState(true);
@@ -426,6 +422,7 @@ function MethodCard({
   onPress: () => void;
   title: string;
 }) {
+  useLanguage();
   return (
     <Pressable
       accessibilityRole="radio"
@@ -453,6 +450,7 @@ function ChoiceGroup({
   options: { value: string; label: string }[];
   value: string;
 }) {
+  useLanguage();
   return (
     <View style={styles.fieldGroup}>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -493,6 +491,7 @@ function FileField({
   onClear: () => void;
   onPick: () => void;
 }) {
+  useLanguage();
   return (
     <View style={styles.fileCard}>
       <Text style={styles.fieldLabel}>{label}</Text>

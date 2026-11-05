@@ -4,17 +4,22 @@ import { useEffect, useRef, useState } from 'react';
 
 import type { MapLocationMarker } from '@/api/types';
 import type { MapRegion } from '@/map/map-api';
+import { cartoTileUrl } from '@/map/carto-basemap';
+import { mapClusterTone, mapLocationPresentation, mapMarkerSignature } from '@/map/location-presentation';
 
 
 type LeafletGlobal = any;
 type UserLocation = { latitude: number; longitude: number };
 type LeafletMapProps = {
+  basemapApiKey: string;
   markers: MapLocationMarker[];
   region: MapRegion;
   selectedMarkerId: string | null;
   userLocation?: UserLocation | null;
   onRegionChange: (region: MapRegion) => Promise<void>;
   onSelectMarker: (marker: MapLocationMarker) => Promise<void>;
+  unavailableLabel?: string;
+  retryLabel?: string;
   dom?: import('expo/dom').DOMProps;
 };
 
@@ -37,7 +42,6 @@ const LEAFLET_CSS = `https://unpkg.com/leaflet@${LEAFLET_VERSION}/dist/leaflet.c
 const CLUSTER_JS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/dist/leaflet.markercluster.js`;
 const CLUSTER_CSS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/dist/MarkerCluster.css`;
 const CLUSTER_DEFAULT_CSS = `https://unpkg.com/leaflet.markercluster@${CLUSTER_VERSION}/dist/MarkerCluster.Default.css`;
-const CARTO_TILES = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
 
 function ensureStylesheet(href: string) {
   if (document.querySelector(`link[href="${href}"]`)) return;
@@ -52,17 +56,19 @@ function loadScript(src: string, ready: () => boolean) {
   if (ready()) return Promise.resolve();
   return new Promise<void>((resolve, reject) => {
     const existing = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`);
-    if (existing) {
-      existing.addEventListener('load', () => ready() ? resolve() : reject(new Error(`${src} did not initialize.`)), { once: true });
-      existing.addEventListener('error', () => reject(new Error(`${src} failed to load.`)), { once: true });
-      return;
-    }
-    const node = document.createElement('script');
-    node.src = src;
-    node.crossOrigin = '';
-    node.onload = () => ready() ? resolve() : reject(new Error(`${src} did not initialize.`));
-    node.onerror = () => reject(new Error(`${src} failed to load.`));
-    document.head.appendChild(node);
+    const node = existing ?? document.createElement('script');
+    const finish = (error?: Error) => {
+      window.clearTimeout(timeout);
+      node.removeEventListener('load', loaded);
+      node.removeEventListener('error', failed);
+      if (error) { node.remove(); reject(error); } else resolve();
+    };
+    const loaded = () => finish(ready() ? undefined : new Error(`${src} did not initialize.`));
+    const failed = () => finish(new Error(`${src} failed to load.`));
+    const timeout = window.setTimeout(failed, 15_000);
+    node.addEventListener('load', loaded, { once: true });
+    node.addEventListener('error', failed, { once: true });
+    if (!existing) { node.src = src; node.crossOrigin = ''; document.head.appendChild(node); }
   });
 }
 
@@ -77,7 +83,7 @@ function loadLeafletStack() {
     await loadScript(CLUSTER_JS, () => Boolean(window.L?.markerClusterGroup));
     if (!window.L?.markerClusterGroup) throw new Error('Leaflet MarkerCluster did not initialize.');
     return window.L;
-  })();
+  })().catch(error => { window.__tatzoLeafletStablePromise = undefined; throw error; });
   return window.__tatzoLeafletStablePromise;
 }
 
@@ -109,30 +115,24 @@ function closeEnough(a: MapRegion, b: MapRegion) {
 }
 
 function markerHtml(marker: MapLocationMarker, selected: boolean) {
-  const kind = marker.kind === 'artist' ? 'verified' : 'unclaimed';
-  const glyph = marker.kind === 'artist' ? '✓' : '•';
+  const { markerKind: kind, glyph } = mapLocationPresentation(marker);
   return `<span class="tatzo-map-marker tatzo-map-marker-${kind}${selected ? ' is-selected' : ''}"><span>${glyph}</span></span>`;
 }
 
 function clusterKind(cluster: any) {
-  const children = cluster.getAllChildMarkers();
-  const artist = children.some((item: any) => item.options.tatzoKind === 'artist');
-  const studio = children.some((item: any) => item.options.tatzoKind === 'studio');
-  if (artist && studio) return 'mixed';
-  return artist ? 'verified' : 'unclaimed';
-}
-
-function markerSignature(marker: MapLocationMarker, selected: boolean) {
-  return [marker.latitude, marker.longitude, marker.kind, marker.name, selected ? 1 : 0].join('|');
+  return mapClusterTone(cluster.getAllChildMarkers().map((item: any) => item.options.tatzoData));
 }
 
 export default function LeafletMapStable({
+  basemapApiKey,
   markers,
   region,
   selectedMarkerId,
   userLocation = null,
   onRegionChange,
   onSelectMarker,
+  unavailableLabel = 'Map unavailable',
+  retryLabel = 'Try again',
 }: LeafletMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
@@ -142,16 +142,21 @@ export default function LeafletMapStable({
   const leafletRef = useRef<LeafletGlobal | null>(null);
   const propsRef = useRef({ markers, region, selectedMarkerId, userLocation, onRegionChange, onSelectMarker });
   const suppressMoveRef = useRef(false);
+  const [attempt, setAttempt] = useState(0);
+  const [unavailable, setUnavailable] = useState(false);
   const [ready, setReady] = useState(false);
 
   propsRef.current = { markers, region, selectedMarkerId, userLocation, onRegionChange, onSelectMarker };
 
   useEffect(() => {
     let disposed = false;
+    setReady(false);
+    setUnavailable(false);
     let releaseTimer: number | undefined;
 
     void loadLeafletStack().then((L) => {
       if (disposed || !containerRef.current || mapRef.current) return;
+      const tileUrl = cartoTileUrl(basemapApiKey);
       leafletRef.current = L;
       const isAndroid = /Android/i.test(navigator.userAgent || '');
       const reduceMotion = Boolean(
@@ -172,7 +177,7 @@ export default function LeafletMapStable({
         markerZoomAnimation: !isAndroid && clusterMotionEnabled,
       });
 
-      L.tileLayer(CARTO_TILES, {
+      L.tileLayer(tileUrl, {
         minZoom: 2,
         maxZoom: 19,
         noWrap: true,
@@ -232,7 +237,7 @@ export default function LeafletMapStable({
       map.once('moveend', () => { suppressMoveRef.current = false; });
       releaseTimer = window.setTimeout(() => { suppressMoveRef.current = false; }, 240);
       setReady(true);
-    }).catch(() => containerRef.current?.classList.add('is-unavailable'));
+    }).catch(() => { if (!disposed) setUnavailable(true); });
 
     return () => {
       disposed = true;
@@ -244,7 +249,7 @@ export default function LeafletMapStable({
       userLayerRef.current = null;
       leafletRef.current = null;
     };
-  }, []);
+  }, [attempt, basemapApiKey]);
 
   useEffect(() => {
     const L = leafletRef.current;
@@ -260,7 +265,7 @@ export default function LeafletMapStable({
 
     for (const marker of markers) {
       const selected = marker.marker_id === selectedMarkerId;
-      const signature = markerSignature(marker, selected);
+      const signature = mapMarkerSignature(marker, selected);
       const icon = () => L.divIcon({
         className: 'tatzo-map-marker-shell',
         html: markerHtml(marker, selected),
@@ -339,13 +344,13 @@ export default function LeafletMapStable({
         .tatzo-map-marker-shell, .tatzo-user-location-shell { background:transparent!important; border:0!important; }
         .tatzo-map-marker { width:34px; height:34px; border:3px solid rgba(255,255,255,.86); border-radius:50%; box-shadow:0 10px 26px rgba(0,0,0,.36),0 0 0 6px rgba(4,197,191,.12); display:grid; place-items:center; transform-origin:center; transition:transform .14s ease,box-shadow .14s ease; }
         .tatzo-map-marker span { color:#001316; font-size:13px; font-weight:900; line-height:1; }
-        .tatzo-map-marker-verified { background:#04c5bf; }
+        .tatzo-map-marker-verified, .tatzo-map-marker-claimed { background:#04c5bf; }
         .tatzo-map-marker-unclaimed { background:#ee0c6f; box-shadow:0 10px 26px rgba(0,0,0,.36),0 0 0 6px rgba(238,12,111,.16); }
         .tatzo-map-marker-unclaimed span { color:#fff; font-size:20px; line-height:.8; }
         .tatzo-map-marker.is-selected { transform:scale(1.15); box-shadow:0 10px 30px rgba(0,0,0,.42),0 0 0 7px rgba(255,255,255,.18); }
         .tatzo-cluster { border:3px solid rgba(255,255,255,.82)!important; border-radius:50%; box-shadow:0 12px 30px rgba(0,0,0,.38),0 0 0 7px rgba(255,255,255,.05); display:grid!important; place-items:center; color:#fff; }
         .tatzo-cluster span { color:#fff; font-size:13px; font-weight:900; line-height:1; }
-        .tatzo-cluster-verified { background:radial-gradient(circle at 35% 28%,#8ffefa,#04c5bf)!important; }
+        .tatzo-cluster-connected { background:radial-gradient(circle at 35% 28%,#8ffefa,#04c5bf)!important; }
         .tatzo-cluster-unclaimed { background:radial-gradient(circle at 35% 28%,#ff9bc5,#ee0c6f)!important; }
         .tatzo-cluster-mixed { background:linear-gradient(135deg,#04c5bf,#ee0c6f)!important; }
         .marker-cluster-small,.marker-cluster-medium,.marker-cluster-large { background:transparent!important; }
@@ -355,6 +360,10 @@ export default function LeafletMapStable({
         @keyframes tatzo-pulse { 0%{transform:scale(.55);opacity:.9} 100%{transform:scale(1.55);opacity:0} }
       `}</style>
       <div className="tatzo-leaflet-map" ref={containerRef} />
+      {unavailable ? <div role="alert" style={{ position: 'absolute', inset: 0, display: 'grid', placeContent: 'center', gap: 16, padding: 24, textAlign: 'center', color: '#e2ffff', background: '#000d18' }}>
+        <p>{unavailableLabel}</p><button onClick={() => setAttempt(value => value + 1)} style={{ background: '#04c5bf', color: '#000d18', border: 0, borderRadius: 14, minHeight: 48, padding: 14, fontWeight: 700 }}>{retryLabel}</button>
+      </div> : null}
     </div>
   );
 }
+
