@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import {
   ActivityIndicator,
   Animated,
@@ -30,7 +31,7 @@ import {
   reactToStyleMatch,
   startStyleMatch,
 } from '@/style-match/style-match-api';
-import { StyleMatchResultV2 } from '@/style-match/style-match-result-v2';
+import { StyleMatchResultV3 } from '@/style-match/style-match-result-v3';
 import { colors, spacing } from '@/theme';
 
 
@@ -89,6 +90,8 @@ export default function StyleMatchScreenV3() {
   const busyRef = useRef(false);
   const reactRef = useRef<(reaction: StyleMatchReaction, direction: SwipeDirection) => void>(() => undefined);
   const saveRef = useRef<() => void>(() => undefined);
+  const overviewRequestRef = useRef(0);
+  const hasLoadedOverviewRef = useRef(false);
 
   busyRef.current = Boolean(busyAction);
 
@@ -173,27 +176,72 @@ export default function StyleMatchScreenV3() {
     },
   })).current;
 
-  const loadOverview = useCallback(async () => {
+  const loadOverview = useCallback(async (options?: { background?: boolean }) => {
     if (status !== 'authenticated') return;
-    setLoading(true);
-    setError('');
+
+    const requestId = ++overviewRequestRef.current;
+    const background = Boolean(options?.background);
+    const blockingLoad = !background && !hasLoadedOverviewRef.current;
+
+    if (blockingLoad) setLoading(true);
+    if (!background) setError('');
+
     try {
-      const [overview, preview] = await Promise.all([
-        fetchStyleMatchOverview(request),
-        fetchStyleMatchPreview(request),
-      ]);
+      const overview = await fetchStyleMatchOverview(request);
+      if (requestId !== overviewRequestRef.current) return;
+
+      hasLoadedOverviewRef.current = true;
       setLatestResult(overview.latest_result);
-      setPreviewCards(preview.cards.slice(0, 3));
-      setSession(null);
-      setMode('intro');
+      setPendingResult(null);
+
+      const needsPreview = !overview.active_session && !overview.latest_result;
+      if (overview.active_session) {
+        setSession(overview.active_session);
+        setResult(null);
+        setMode('quiz');
+      } else if (overview.latest_result) {
+        setSession(null);
+        setResult(overview.latest_result);
+        setMode('result');
+      } else {
+        setSession(null);
+        setResult(null);
+        setMode('intro');
+      }
+
+      // Restoring a persisted session/result must never depend on the optional
+      // onboarding preview endpoint. Once the overview is applied, unblock the
+      // screen immediately and only fetch preview cards when intro needs them.
+      if (blockingLoad) setLoading(false);
+
+      if (needsPreview) {
+        try {
+          const preview = await fetchStyleMatchPreview(request);
+          if (requestId !== overviewRequestRef.current) return;
+          setPreviewCards(preview.cards.slice(0, 3));
+        } catch {
+          if (requestId !== overviewRequestRef.current) return;
+          setPreviewCards([]);
+        }
+      }
     } catch {
-      setError(t('styleMatchError'));
+      if (requestId !== overviewRequestRef.current) return;
+      if (!background) setError(t('styleMatchError'));
     } finally {
-      setLoading(false);
+      if (requestId === overviewRequestRef.current && blockingLoad) {
+        setLoading(false);
+      }
     }
   }, [request, status]);
 
-  useEffect(() => { void loadOverview(); }, [loadOverview]);
+  useFocusEffect(useCallback(() => {
+    void loadOverview({ background: hasLoadedOverviewRef.current });
+    return () => {
+      // Invalidate any response started for the focus that just ended. A newer
+      // focus refresh then owns the right to update the restored state.
+      overviewRequestRef.current += 1;
+    };
+  }, [loadOverview]));
 
   const currentCard = session?.cards[session.current_index] ?? null;
   const nextCard = session?.cards[session.current_index + 1] ?? null;
@@ -354,7 +402,7 @@ export default function StyleMatchScreenV3() {
   if (mode === 'result' && result) {
     return (
       <Screen contentStyle={styles.resultScreen}>
-        <StyleMatchResultV2 result={result} onRestart={() => setMode('intro')} restarting={starting} />
+        <StyleMatchResultV3 result={result} onRestart={() => void beginMatch()} restarting={starting} />
         {error ? <Text style={styles.error}>{error}</Text> : null}
       </Screen>
     );
