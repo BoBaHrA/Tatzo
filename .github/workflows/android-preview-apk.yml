@@ -1,0 +1,118 @@
+name: Android Preview APK
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/android-preview-apk.yml"
+      - "mobile/eas.json"
+
+permissions:
+  contents: read
+
+jobs:
+  android-preview:
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'build/android-preview-apk-20261020'
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    env:
+      CI: "1"
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EXPO_PUBLIC_API_BASE_URL: "https://tatzo.eu/api/v1"
+
+    steps:
+      - name: Checkout mobile source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --prefix mobile
+
+      - name: Check types and mobile release configuration
+        run: |
+          npm run typecheck --prefix mobile
+          npm run release:check --prefix mobile
+
+      - name: Require EAS build credentials
+        shell: bash
+        run: |
+          if [[ -z "$EXPO_TOKEN" ]]; then
+            echo "::error title=Expo token missing::Add EXPO_TOKEN as a GitHub Actions repository secret; use a token authorized for tatzo-team/tatzo."
+            exit 1
+          fi
+
+      - name: Build EAS-signed Android APK
+        working-directory: mobile
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes eas-cli@latest build \
+            --platform android \
+            --profile preview \
+            --non-interactive \
+            --wait \
+            --json > "$RUNNER_TEMP/tatzo-eas-build.json"
+
+      - name: Download completed APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require("node:fs");
+          const file = process.env.RUNNER_TEMP + "/tatzo-eas-build.json";
+          let result;
+          try {
+            result = JSON.parse(fs.readFileSync(file, "utf8"));
+          } catch (error) {
+            console.error("EAS did not return valid build JSON:", error.message);
+            process.exit(1);
+          }
+          const build = Array.isArray(result) ? result[0] : result;
+          if (build.status !== "FINISHED") {
+            console.error("EAS build is not finished:", build.status);
+            process.exit(1);
+          }
+          const url = build.artifacts?.buildUrl || build.artifacts?.applicationArchiveUrl;
+          if (!url || new URL(url).protocol !== "https:") {
+            console.error("Finished EAS build did not return an HTTPS APK artifact URL.");
+            process.exit(1);
+          }
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, "artifact_url=" + url + "\n");
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+            "Android EAS preview APK built successfully.\n\n" +
+            "Build ID: `" + (build.id || "unknown") + "`\n\n");
+          NODE
+        id: eas-result
+
+      - name: Save installable APK
+        shell: bash
+        env:
+          BUILD_URL: ${{ steps.eas-result.outputs.artifact_url }}
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          curl --fail --location --retry 3 --connect-timeout 20 --max-time 300 \
+            "$BUILD_URL" --output out/tatzo-preview.apk
+          test "$(wc -c < out/tatzo-preview.apk)" -gt 1000000
+          unzip -tq out/tatzo-preview.apk >/dev/null
+          unzip -Z1 out/tatzo-preview.apk | grep -q '^AndroidManifest.xml$'
+          sha256sum out/tatzo-preview.apk | tee out/SHA256SUMS.txt
+          echo "APK validated: archive is readable and includes AndroidManifest.xml." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish signed APK as GitHub Actions artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tatzo-preview-apk
+          path: out/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
