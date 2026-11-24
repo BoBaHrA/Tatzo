@@ -54,8 +54,8 @@ function makeStyle(base, theme, tilted = false){
       if(tag === "link") { el.rel = "stylesheet"; el.href = url; }
       else { el.src = url; el.async = true; }
       el.onload = () => finish();
-      el.onerror = () => finish(new Error("Map dependency unavailable"));
-      timer = setTimeout(() => finish(new Error("Map dependency timeout")), 10000);
+      el.onerror = () => finish(new Error("Dependency unavailable: " + url.split("/").pop()));
+      timer = setTimeout(() => finish(new Error("Dependency timeout: " + url.split("/").pop())), 10000);
       document.head.appendChild(el);
     });
   }
@@ -76,17 +76,8 @@ function makeStyle(base, theme, tilted = false){
     let vector, gl, deadline, observer, control, credited = false, stopped = false, ready = false;
     const container = map.getContainer();
     container.dataset.tatzoBasemap = "loading";
-    let statusNode;
-    const StatusControl = L.Control.extend({
-      onAdd() {
-        statusNode = L.DomUtil.create("div", "leaflet-bar tatzo-vector-status");
-        statusNode.setAttribute("role", "status");
-        statusNode.style.cssText = "max-width:210px;padding:6px 9px;background:#071317;color:#efffff;font:12px/1.4 system-ui;border-radius:6px";
-        statusNode.textContent = "Tatzo Vector · loading";
-        return statusNode;
-      }
-    });
-    new StatusControl({position:"topright"}).addTo(map);
+    const statusNode = document.querySelector("[data-basemap-status]") || document.createElement("div");
+    statusNode.textContent = "Tatzo Vector · loading";
     function fallback(reason) {
       if (stopped) return;
       stopped = true;
@@ -100,7 +91,7 @@ function makeStyle(base, theme, tilted = false){
       if (credited) map.attributionControl?.removeAttribution(CREDIT);
       if (control) map.removeControl(control);
       container.dataset.tatzoBasemap = "raster-fallback";
-      if(statusNode) {statusNode.textContent = reason === "Classic map selected" ? "Tatzo Classic" : "Tatzo Vector unavailable · Classic"; statusNode.title = String(reason); }
+      if(statusNode) {statusNode.textContent = reason === "Classic map selected" ? "Tatzo Classic" : "Tatzo Vector → Classic: " + String(reason).slice(0,160); statusNode.title = String(reason); }
       console.warn("Tatzo vector basemap fallback:", reason);
     }
     try {
@@ -131,55 +122,6 @@ function makeStyle(base, theme, tilted = false){
         map.removeLayer(raster);
         container.dataset.tatzoBasemap = requested;
         statusNode.textContent = "Tatzo Vector · "+requested;
-        const ThemeControl = L.Control.extend({
-          onAdd() {
-            const box = L.DomUtil.create("div","leaflet-bar tatzo-basemap-control");
-            const select = document.createElement("select");
-            select.setAttribute("aria-label","Tatzo map theme");
-            for (const name of [...allowed,"raster"]) {
-              const option = document.createElement("option");
-              option.value = name;
-              option.textContent = name === "raster" ? "Classic map" : "Tatzo "+name[0].toUpperCase()+name.slice(1);
-              select.appendChild(option);
-            }
-            select.value = requested;
-            select.style.cssText = "max-width:150px;padding:6px;background:#071317;color:#efffff;border:0;font:inherit";
-            L.DomEvent.disableClickPropagation(box);
-            L.DomEvent.disableScrollPropagation(box);
-            select.addEventListener("change", () => {
-              const url = new URL(location.href);
-              if (select.value === "raster") url.searchParams.delete("basemap");
-              else url.searchParams.set("basemap",select.value);
-              // Keep Leaflet camera and filters intact when changing vector styles.
-              if (select.value === "raster") { history.replaceState(history.state,"",url); fallback("Classic map selected"); return; }
-              try {
-                if (!ready || stopped) return;
-                const next = select.value;
-                ready = false;
-                if (!map.hasLayer(raster)) raster.addTo(map);
-                container.dataset.tatzoBasemap = "loading";
-                statusNode.textContent = "Tatzo Vector · loading";
-                clearTimeout(deadline);
-                deadline = setTimeout(() => fallback("Theme load timeout"),16000);
-                gl.once("idle", () => {
-                  if(stopped) return;
-                  clearTimeout(deadline);
-                  ready = true;
-                  map.removeLayer(raster);
-                  container.dataset.tatzoBasemap = next;
-                  statusNode.textContent = "Tatzo Vector · "+next;
-                  history.replaceState(history.state,"",url);
-                  select.disabled = false;
-                });
-                select.disabled = true;
-                gl.setStyle(makeStyle(base,next),{diff:false});
-              } catch (err) {fallback(err.message);}
-            });
-            box.appendChild(select);
-            return box;
-          }
-        });
-        control = new ThemeControl({position:"topright"}).addTo(map);
       });
       if (window.ResizeObserver) {
         observer = new ResizeObserver(() => { if (!stopped && container.clientWidth && container.clientHeight) map.invalidateSize({pan:false}); });
