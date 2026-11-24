@@ -80,7 +80,7 @@
     <link rel="apple-touch-icon" href="{% static 'images/tatzo-icon.png' %}">
 </head>
 
-<body>
+<body{% if request.resolver_match.url_name == 'home' %} class="tatzo-home"{% endif %}>
 
     {% if messages %}
     <div class="flash-stack">
@@ -93,20 +93,6 @@
     </div>
     {% endif %}
 
-    {% if request.resolver_match.url_name == 'home' and not user.is_authenticated %}
-    <section class="seo-brand-hero" aria-labelledby="tatzo-home-heading">
-        <div class="seo-brand-hero__inner">
-            <span class="seo-brand-hero__eyebrow">TATZO</span>
-            <h1 id="tatzo-home-heading">{% trans "Find the right tattoo artist for your next tattoo." %}</h1>
-            <p>{% trans "Discover tattoo artists and studios, explore portfolios, compare styles and start your booking journey with Tatzo." %}</p>
-            <nav class="seo-brand-hero__links" aria-label="{% trans 'Explore Tatzo' %}">
-                <a href="{% url 'search_page' %}">{% trans "Find tattoo artists" %}</a>
-                <a href="{% url 'maps_page' %}">{% trans "Explore tattoo map" %}</a>
-                <a href="{% url 'style_match:index' %}">{% trans "Try Style Match" %}</a>
-            </nav>
-        </div>
-    </section>
-    {% endif %}
 
     <div class="content">
         {% block content %}
