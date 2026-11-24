@@ -95,7 +95,7 @@
       </a>
     </li>
 
-    <li>
+    <li class="sidebar-secondary-item">
       <a
         href="{% url 'coming_soon' 'contests' %}"
         class="{% if request.resolver_match.url_name == 'coming_soon' and request.resolver_match.kwargs.feature == 'contests' %}active{% endif %}"
@@ -105,7 +105,7 @@
       </a>
     </li>
 
-    <li>
+    <li class="sidebar-secondary-item">
       <a
         href="{% url 'coming_soon' 'clean-slate' %}"
         class="{% if request.resolver_match.url_name == 'coming_soon' and request.resolver_match.kwargs.feature == 'clean-slate' %}active{% endif %}"
@@ -115,7 +115,7 @@
       </a>
     </li>
 
-    <li>
+    <li class="sidebar-secondary-item">
       <a
         href="{% url 'coming_soon' 'notifications' %}"
         class="{% if request.resolver_match.url_name == 'coming_soon' and request.resolver_match.kwargs.feature == 'notifications' %}active{% endif %}"
@@ -134,6 +134,11 @@
       </button>
 
       <div class="sidebar-more-menu" id="sidebar-more-menu">
+        <div class="sidebar-shortcuts-compact">
+          <a href="{% url 'coming_soon' 'contests' %}" class="sidebar-more-link">{% trans "Contests" %}</a>
+          <a href="{% url 'coming_soon' 'clean-slate' %}" class="sidebar-more-link">{% trans "Clean slate" %}</a>
+          <a href="{% url 'coming_soon' 'notifications' %}" class="sidebar-more-link">{% trans "Notifications" %}</a>
+        </div>
         <div class="sidebar-more-title">
           {% trans "Settings" %}
         </div>
