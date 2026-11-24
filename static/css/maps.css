@@ -148,23 +148,45 @@
 
 .maps-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
   margin: 12px 0;
 }
 
-.maps-stats article {
-  border-radius: 16px;
+.maps-stats > article {
+  display: grid;
+  grid-template-columns: minmax(3ch, max-content) minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  box-sizing: border-box;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.06);
-  padding: 10px;
+  padding: 9px 12px;
 }
 
-.maps-stats strong {
+.maps-stats > article > strong {
   display: block;
-  font-size: 21px;
+  margin: 0;
+  min-width: 0;
+  font-size: 20px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
-.maps-stats span,
+.maps-stats > article > span {
+  display: block;
+  min-width: 0;
+  color: var(--map-muted);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
+}
+
 .maps-chip-group p {
   color: var(--map-muted);
   font-size: 11px;
@@ -464,7 +486,6 @@
 }
 
 @media (max-width: 560px) {
-  .maps-stats { grid-template-columns: 1fr; }
   .maps-hero h1 { font-size: 32px; }
   .maps-panel, .maps-canvas { border-radius: 22px; }
 }
@@ -1275,17 +1296,6 @@
     opacity: 0.72;
   }
 
-  .maps-stats {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .maps-stats article {
-    padding: 9px;
-  }
-
-  .maps-stats strong {
-    font-size: 18px;
-  }
 
   .maps-results {
     padding-bottom: 8px;
@@ -1353,9 +1363,6 @@
     bottom: calc(120px + env(safe-area-inset-bottom));
   }
 
-  .maps-stats {
-    grid-template-columns: 1fr;
-  }
 }
 
 .maps-mobile-explore,
@@ -2114,7 +2121,6 @@
 .tatzo-map-preview-toolbar a{display:block;padding:5px 8px;color:#efffff;border-radius:6px;text-decoration:none;background:#20343b}
 .tatzo-map-preview-toolbar a[aria-current=true]{background:#04c5bf;color:#071317;font-weight:700}
 .tatzo-map-preview-toolbar [data-basemap-status]{padding:4px 2px 0;overflow-wrap:anywhere;max-width:300px}
-@media(min-width:761px){body>.content>.maps-shell .maps-stats{grid-template-columns:1fr;gap:5px}body>.content>.maps-shell .maps-stats article{display:flex;align-items:center;gap:10px;min-height:0;padding:8px 10px;overflow-wrap:normal}body>.content>.maps-shell .maps-stats article strong{flex:0 0 42px;margin:0;font-size:20px}body>.content>.maps-shell .maps-stats article span{min-width:0;font-size:12px;line-height:1.3;overflow-wrap:normal;word-break:normal}}
 
 /* Project Atlas opt-in native map, above classic only after successful load. */
 .maps-canvas .atlas-native-map{position:absolute;inset:0;z-index:5;visibility:hidden;pointer-events:none;background:#12242b}
