@@ -5,9 +5,9 @@ const rootURL="https://unpkg.com/maplibre-gl@5.6.1/dist/";
 const sourceURL="https://tiles.openfreemap.org/styles/liberty";
 const themes=["midnight","porcelain","ink"];
 const palettes={
- midnight:{bg:"#12242b",land:"#1b3036",park:"#21473e",forest:"#285a49",water:"#174352",shore:"#36717c",building:"#435d65",outline:"#263c44",road:"#91a9a9",local:"#55727a",main:"#b7c7c3",edge:"#273c44",text:"#e1edeb"},
- porcelain:{bg:"#e9e6dd",land:"#dedbd0",park:"#b7d4b7",forest:"#9bc39d",water:"#a5cfdd",shore:"#80b3c8",building:"#e9ded1",outline:"#c4b5a7",road:"#fffaf0",local:"#f9f5ed",main:"#fffdf7",edge:"#c5bdb0",text:"#31434a"},
- ink:{bg:"#211d29",land:"#2e2938",park:"#344a43",forest:"#426258",water:"#303f60",shore:"#576a88",building:"#615269",outline:"#3e3549",road:"#a99bad",local:"#776a82",main:"#d0b6cb",edge:"#44384d",text:"#f3e5f3"}
+ midnight:{bg:"#101e25",land:"#23343b",park:"#25483f",forest:"#2e5949",water:"#163b50",shore:"#285c70",building:"#50666c",outline:"#2d4149",road:"#708e94",local:"#405b64",main:"#a6b7b2",edge:"#182b34",text:"#e1edeb"},
+ porcelain:{bg:"#eeeae1",land:"#e5e0d6",park:"#c3d9b9",forest:"#a8c9a1",water:"#a6d1df",shore:"#83b5c9",building:"#e4d6c6",outline:"#c9bbaa",road:"#fffaf0",local:"#f6f1e8",main:"#fffdf7",edge:"#c8bfb1",text:"#31434a"},
+ ink:{bg:"#211e29",land:"#302c39",park:"#374f46",forest:"#45685b",water:"#303e5b",shore:"#506587",building:"#675c70",outline:"#40394b",road:"#93869e",local:"#5d536a",main:"#c2a9bf",edge:"#302838",text:"#f3e5f3"}
 };
 const z=(...stops)=>["interpolate",["linear"],["zoom"],...stops];
 const cls=(...values)=>["in",["get","class"],["literal",values]];
@@ -16,22 +16,27 @@ function style(base,theme,quality){
  const s=window.TatzoVectorBasemap.makeStyle(base,theme,false);
  s.name="Tatzo Atlas "+theme;
  const source=Object.keys(s.sources)[0];
+ s.sources[source]={...s.sources[source],attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · <a href="https://openmaptiles.org/">OpenMapTiles</a> · <a href="https://openfreemap.org/">OpenFreeMap</a>'};
  const extra=(id,type,sourceLayer,paint,options={})=>({id,type,source,"source-layer":sourceLayer,paint,...options});
  const by=id=>s.layers.find(l=>l.id===id);
  const before=(id,layer)=>s.layers.splice(s.layers.findIndex(l=>l.id===id),0,layer);
  const paint=(id,changes)=>Object.assign(by(id).paint,changes);
  paint("tatzo-background",{"background-color":p.bg});
- paint("tatzo-nature",{"fill-color":p.forest,"fill-opacity":.55});
+ paint("tatzo-nature",{"fill-color":["match",["get","class"],"wood",p.forest,"grass",p.park,"farmland",p.land,p.park],"fill-opacity":.48});
  paint("tatzo-parks",{"fill-color":p.park,"fill-outline-color":p.forest});
  before("tatzo-nature",extra("atlas-neighbourhoods","fill","landuse",{"fill-color":p.land,"fill-opacity":.65},{minzoom:9,filter:cls("residential","commercial","industrial","retail","cemetery")}));
  paint("tatzo-water",{"fill-color":p.water});
  before("tatzo-buildings",extra("atlas-shoreline","line","water",{"line-color":p.shore,"line-width":z(9,.25,15,.9,18,1.5),"line-opacity":.65},{minzoom:9}));
  paint("tatzo-buildings",{"fill-color":p.building,"fill-outline-color":p.outline});
- by("tatzo-buildings").minzoom=13;
- paint("tatzo-road-casing",{"line-color":p.edge,"line-width":z(5,.7,10,2,14,5,18,17)});
- paint("tatzo-roads",{"line-color":p.local,"line-width":z(5,.4,10,1.1,14,3.4,18,12)});
- paint("tatzo-main-casing",{"line-color":p.edge,"line-width":z(5,1.2,10,3.5,14,9,18,25)});
- paint("tatzo-main-roads",{"line-color":p.main,"line-width":z(5,.7,10,2.2,14,6,18,19)});
+ by("tatzo-buildings").minzoom=13.5;
+ paint("tatzo-buildings",{"fill-opacity":z(13.5,.1,15,.85,17,1)});
+ by("tatzo-road-casing").filter=cls("tertiary","minor","service");by("tatzo-roads").filter=cls("tertiary","minor","service");
+ by("tatzo-road-casing").minzoom=10;by("tatzo-roads").minzoom=10;
+ paint("tatzo-road-casing",{"line-color":p.edge,"line-width":z(10,.8,14,3.6,18,13)});
+ paint("tatzo-roads",{"line-color":p.local,"line-width":z(10,.35,14,2.5,18,10)});
+ before("tatzo-road-casing",extra("atlas-walkways","line","transportation",{"line-color":p.road,"line-width":z(14,.4,18,1.8),"line-opacity":.45,"line-dasharray":[2,2]},{minzoom:14,filter:cls("path","track")}));
+ paint("tatzo-main-casing",{"line-color":p.edge,"line-width":z(5,.8,10,2.7,14,6.5,18,21)});
+ paint("tatzo-main-roads",{"line-color":["match",["get","class"],["motorway","trunk"],p.main,p.road],"line-width":z(5,.4,10,1.6,14,4.5,18,15)});
  before("tatzo-city-labels",extra("atlas-avenues","line","transportation",{"line-color":p.road,"line-width":z(11,.6,15,2.8,18,8)},{minzoom:11,filter:cls("tertiary"),layout:{"line-cap":"round","line-join":"round"}}));
  const extrusion=by("tatzo-building-3d");
  s.layers=s.layers.filter(l=>l!==extrusion);
@@ -41,7 +46,7 @@ function style(base,theme,quality){
  const height=["max",3,["to-number",["get","render_height"],["get","height"],6]];
  extrusion.paint={"fill-extrusion-color":["interpolate",["linear"],height,3,p.building,45,p.building,120,p.road],"fill-extrusion-height":height,"fill-extrusion-base":["min",height,["max",0,["to-number",["get","render_min_height"],0]]],"fill-extrusion-opacity":1,"fill-extrusion-vertical-gradient":true};
  before("tatzo-city-labels",extrusion);
- s.light={anchor:"map",color:"#fff5e8",intensity:.42,position:[1.5,210,42]};
+ s.light={anchor:"map",color:"#fff5e8",intensity:.38,position:[1.5,225,38]};
  for(const id of ["tatzo-city-labels","tatzo-street-labels"]){paint(id,{"text-color":p.text,"text-halo-color":p.bg,"text-halo-width":1.4});}
  const regularFont=base.layers.map(l=>l.layout?.["text-font"]).find(f=>Array.isArray(f)&&f.length&&f.every(n=>typeof n==="string"&&!/italic|oblique/i.test(n))&&f.some(n=>/regular|medium/i.test(n)));
  if(regularFont)for(const id of ["tatzo-city-labels","tatzo-street-labels"])by(id).layout["text-font"]=regularFont;
@@ -52,7 +57,9 @@ function style(base,theme,quality){
  places.layout["text-padding"]=5;
  by("tatzo-borders").filter=["<=",["to-number",["get","admin_level"],2],2];
  before("tatzo-road-casing",extra("atlas-regional-borders","line","boundary",{"line-color":p.outline,"line-width":.65,"line-opacity":.6},{minzoom:6,maxzoom:11,filter:[">",["to-number",["get","admin_level"],2],2]}));
- by("tatzo-street-labels").layout["symbol-spacing"]=320;
+ const streets=by("tatzo-street-labels");streets.minzoom=13;streets.filter=cls("motorway","trunk","primary","secondary","tertiary","minor");streets.layout["symbol-spacing"]=380;streets.layout["text-size"]=z(13,10,17,12);streets.layout["text-padding"]=5;
+ const language=(document.documentElement.lang||"en").split("-")[0];
+ if(["en","fr","ru","ro"].includes(language))for(const id of ["atlas-country-labels","tatzo-city-labels"]){by(id).layout["text-field"]=["coalesce",["get","name:"+language],["get","name_"+language],["get","name"],["get","name:en"],""];}
  return s;
 }
 function load(tag,url){
@@ -83,6 +90,7 @@ function addLocations(map,cards){
 async function activate({leafletMap,cards,markers,onPick}){
  const params=new URLSearchParams(location.search);if(params.get("basemap")!=="atlas")return;
  const status=document.querySelector("[data-basemap-status]");
+ const settings=document.querySelector("[data-map-settings]"),nativeControls=document.querySelector("[data-atlas-native-controls]"),settingsTitle=document.querySelector("[data-map-settings-title]"),settingsCurrent=document.querySelector("[data-map-settings-current]");
  const classic=leafletMap.getContainer(),frame=classic.parentElement;
  let map,host,controls,observer,resizeObserver,popup,pick,deadline,stopped=false,avatars=new Map(),raf=0,filterFrame=0,base;
  const bubbles=new Map();let bubbleFrame=0,previousZoom=null,animateFrom=null,splitOrigins=[],splitUntil=0,brand;
@@ -94,7 +102,7 @@ async function activate({leafletMap,cards,markers,onPick}){
  function clearAvatars(){for(const m of avatars.values())m.remove();avatars.clear()}
  function fallback(reason){
   if(stopped)return;stopped=true;clearTimeout(deadline);cancelAnimationFrame(raf);cancelAnimationFrame(filterFrame);observer?.disconnect();resizeObserver?.disconnect();clearAvatars();clearBubbles();cancelAnimationFrame(bubbleFrame);try{map?.remove()}catch(_){}
-  host?.remove();controls?.remove();brand?.remove();classic.style.visibility="";leafletMap.invalidateSize({pan:false});say("Atlas → Classic: "+String(reason).slice(0,130));
+  host?.remove();controls?.remove();brand?.remove();if(nativeControls)nativeControls.hidden=true;if(settingsTitle)settingsTitle.textContent="Classic";if(settingsCurrent)settingsCurrent.textContent="Fallback";if(settings)settings.open=true;classic.style.visibility="";leafletMap.invalidateSize({pan:false});say("Atlas → Classic: "+String(reason).slice(0,130));
  }
  function openCard(idx,coord){
   const card=cards[idx];if(!card)return;
@@ -186,8 +194,10 @@ async function activate({leafletMap,cards,markers,onPick}){
   if(!window.maplibregl?.Map)throw Error("MapLibre unavailable");
   host=document.createElement("div");host.className="atlas-native-map";frame.append(host);
   const c=leafletMap.getCenter();
-  map=new maplibregl.Map({container:host,style:style(base,theme,quality),center:[c.lng,c.lat],zoom:Math.max(2,leafletMap.getZoom()-1),pitch:0,maxPitch:65,maxZoom:19,minZoom:2,renderWorldCopies:false,attributionControl:false,canvasContextAttributes:{antialias:quality==="high"}});
-  map.addControl(new maplibregl.AttributionControl({compact:false,customAttribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · <a href="https://openmaptiles.org/">OpenMapTiles</a> · <a href="https://openfreemap.org/">OpenFreeMap</a>'}),"bottom-right");
+  const read=(key,lo,hi,fallback)=>{const raw=params.get(key),n=Number(raw);return raw!==null&&raw.trim()&&Number.isFinite(n)&&n>=lo&&n<=hi?n:fallback};
+  const camera={center:[read("lng",-180,180,c.lng),read("lat",-85,85,c.lat)],zoom:read("z",2,19,Math.max(2,leafletMap.getZoom()-1)),pitch:quality==="low"?0:read("pitch",0,65,0),bearing:read("bearing",-180,180,0)};
+  map=new maplibregl.Map({container:host,style:style(base,theme,quality),...camera,maxPitch:quality==="low"?0:65,maxZoom:19,minZoom:2,renderWorldCopies:false,attributionControl:false,canvasContextAttributes:{antialias:quality==="high"}});
+  map.addControl(new maplibregl.AttributionControl({compact:false}),"bottom-right");
   map.addControl(new maplibregl.NavigationControl({visualizePitch:true}),"top-left");
   deadline=setTimeout(()=>fallback("Native map startup timeout"),22000);
   map.on("error",e=>{if(status&& !stopped)status.title=e.error?.message||"Map resource error"});
@@ -198,16 +208,25 @@ async function activate({leafletMap,cards,markers,onPick}){
    map.once("idle",()=>{
     if(stopped)return;clearTimeout(deadline);classic.style.visibility="hidden";host.classList.add("atlas-ready");say("Tatzo Atlas · "+theme+" / "+quality);
     controls=document.createElement("div");controls.className="atlas-controls";
-    const button=(label,fn)=>{const b=document.createElement("button");b.type="button";b.textContent=label;b.addEventListener("click",fn);controls.append(b)};
-    button("2D",()=>map.easeTo({pitch:0,bearing:0}));
-    button("3D",()=>{if(quality==="low"){say("Atlas · choose Medium or High for 3D");return}map.easeTo({pitch:55,bearing:-22,zoom:Math.max(15,map.getZoom())})});
-    button("Clermont-Ferrand",()=>map.flyTo({center:[3.087,45.777],zoom:15.5,pitch:quality==="low"?0:55,bearing:quality==="low"?0:-22}));
+    if(settingsTitle)settingsTitle.textContent="Atlas";if(settingsCurrent)settingsCurrent.textContent=theme[0].toUpperCase()+theme.slice(1);
+    const section=(label)=>{const row=document.createElement("div");row.className="atlas-settings-section";const caption=document.createElement("span");caption.className="atlas-settings-label";caption.textContent=label;row.append(caption);controls.append(row);return row};
+    const cameraRow=section("View");const views=document.createElement("div");views.className="atlas-view-buttons";cameraRow.append(views);
+    const button=(label,fn,container)=>{const b=document.createElement("button");b.type="button";b.textContent=label;b.addEventListener("click",fn);container.append(b);return b};
+    const two=button("2D",()=>{map.easeTo({pitch:0,bearing:0});if(settings)settings.open=false},views);
+    const three=button("3D",()=>{map.easeTo({pitch:55,bearing:-22,zoom:Math.max(15,map.getZoom())});if(settings)settings.open=false},views);
+    three.disabled=quality==="low";three.title=quality==="low"?"Choose Medium or High for 3D":"";
+    const syncView=()=>{const is3d=map.getPitch()>5;two.setAttribute("aria-pressed",String(!is3d));three.setAttribute("aria-pressed",String(is3d));if(settingsTitle)settingsTitle.textContent=is3d?"Atlas 3D":"Atlas 2D"};
+    map.on("pitchend",syncView);syncView();
     for(const [key,values,current] of [["theme",themes,theme],["quality",["low","medium","high"],quality]]){
+     const row=section(key==="theme"?"Theme":"Graphics");
      const select=document.createElement("select");select.setAttribute("aria-label","Atlas "+key);
-     for(const value of values){const o=document.createElement("option");o.value=value;o.textContent=value;o.selected=value===current;select.append(o)}
-     select.addEventListener("change",()=>{const url=new URL(location.href);url.searchParams.set(key,select.value);location.assign(url)});controls.append(select);
+     for(const value of values){const o=document.createElement("option");o.value=value;o.textContent=value[0].toUpperCase()+value.slice(1);o.selected=value===current;select.append(o)}
+     select.addEventListener("change",()=>{const url=new URL(location.href),center=map.getCenter();url.searchParams.set(key,select.value);
+      for(const [k,v] of [["lng",center.lng],["lat",center.lat],["z",map.getZoom()],["pitch",map.getPitch()],["bearing",map.getBearing()]])url.searchParams.set(k,String(Number(v.toFixed(4))));
+      location.assign(url)});row.append(select);
     }
-    frame.append(controls);
+    const demo=section("Explore");button("Clermont-Ferrand",()=>{map.flyTo({center:[3.087,45.777],zoom:15.5,pitch:quality==="low"?0:55,bearing:quality==="low"?0:-22});if(settings)settings.open=false},demo);
+    if(nativeControls){nativeControls.append(controls);nativeControls.hidden=false}else frame.append(controls);
     brand=document.createElement("div");brand.className="atlas-brand";brand.setAttribute("aria-label","Tatzo Atlas");
     const word=document.createElement("strong");word.textContent="Tatzo";const dot=document.createElement("span");dot.textContent=".";word.append(dot);const sub=document.createElement("small");sub.textContent="ATLAS";brand.append(word,sub);frame.append(brand);
     refreshBubbles();refreshAvatars();
