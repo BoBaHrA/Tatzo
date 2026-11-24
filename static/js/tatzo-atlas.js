@@ -75,13 +75,14 @@ async function activate({leafletMap,cards,markers,onPick}){
  const params=new URLSearchParams(location.search);if(params.get("basemap")!=="atlas")return;
  const status=document.querySelector("[data-basemap-status]");
  const classic=leafletMap.getContainer(),frame=classic.parentElement;
- let map,host,controls,observer,resizeObserver,popup,pick,deadline,stopped=false,avatars=new Map(),raf=0,base;
+ let map,host,controls,observer,resizeObserver,popup,pick,deadline,stopped=false,avatars=new Map(),raf=0,filterFrame=0,base;
+ let lastData="";
  let theme=themes.includes(params.get("theme"))?params.get("theme"):"midnight";
  let quality=["low","medium","high"].includes(params.get("quality"))?params.get("quality"):"medium";
  const say=t=>{if(status)status.textContent=t};
  function clearAvatars(){for(const m of avatars.values())m.remove();avatars.clear()}
  function fallback(reason){
-  if(stopped)return;stopped=true;clearTimeout(deadline);cancelAnimationFrame(raf);observer?.disconnect();resizeObserver?.disconnect();clearAvatars();try{map?.remove()}catch(_){}
+  if(stopped)return;stopped=true;clearTimeout(deadline);cancelAnimationFrame(raf);cancelAnimationFrame(filterFrame);observer?.disconnect();resizeObserver?.disconnect();clearAvatars();try{map?.remove()}catch(_){}
   host?.remove();controls?.remove();classic.style.visibility="";leafletMap.invalidateSize({pan:false});say("Atlas → Classic: "+String(reason).slice(0,130));
  }
  function openCard(idx,coord){
@@ -106,12 +107,12 @@ async function activate({leafletMap,cards,markers,onPick}){
    const el=document.createElement("button");el.type="button";el.className="atlas-avatar "+(card.dataset.source==="verified"?"verified":"unclaimed");
    el.setAttribute("aria-label",card.dataset.name||"Tatzo location");
    const img=card.querySelector(".maps-avatar img");
-   if(img){const clone=document.createElement("img");clone.src=img.src;clone.alt="";el.append(clone)}else{el.textContent=card.dataset.source==="verified"?(card.dataset.name||"T").slice(0,1).toUpperCase():"⌖"}
-   el.addEventListener("click",e=>{e.stopPropagation();openCard(idx,coord)});
+   if(img){const clone=document.createElement("img");clone.src=img.src;clone.alt="";clone.addEventListener("error",()=>{clone.remove();el.textContent=(card.dataset.name||"T").slice(0,1).toUpperCase()},{once:true});el.append(clone)}else{el.textContent=card.dataset.source==="verified"?(card.dataset.name||"T").slice(0,1).toUpperCase():"⌖"}
+   el.addEventListener("click",e=>{e.stopPropagation();if(onPick(coord[1],coord[0])){popup?.remove();if(pick)pick.setLngLat(coord);else pick=new maplibregl.Marker({color:"#ee0c6f"}).setLngLat(coord).addTo(map);return}openCard(idx,coord)});
    avatars.set(idx,new maplibregl.Marker({element:el,anchor:"bottom"}).setLngLat(coord).addTo(map));
   }
  }
- function update(){if(stopped||!map?.getSource("atlas-artists"))return;map.getSource("atlas-artists").setData(features(cards));popup?.remove();clearAvatars()}
+ function update(){if(stopped||!map?.getSource("atlas-artists"))return;const data=features(cards),signature=JSON.stringify(data);if(signature===lastData)return;lastData=signature;map.getSource("atlas-artists").setData(data);popup?.remove();clearAvatars()}
  try{
   say("Atlas · loading native 3D");
   const abort=new AbortController();const timeout=setTimeout(()=>abort.abort(),12000);
@@ -128,7 +129,7 @@ async function activate({leafletMap,cards,markers,onPick}){
   map.getCanvas().addEventListener("webglcontextlost",()=>fallback("WebGL context lost"),{once:true});
   map.once("load",()=>{
    if(stopped)return;
-   try{addLocations(map,cards)}catch(e){fallback(e.message);return}
+   try{addLocations(map,cards);lastData=JSON.stringify(features(cards))}catch(e){fallback(e.message);return}
    map.once("idle",()=>{
     if(stopped)return;clearTimeout(deadline);classic.style.visibility="hidden";host.classList.add("atlas-ready");say("Tatzo Atlas · "+theme+" / "+quality);
     controls=document.createElement("div");controls.className="atlas-controls";
@@ -153,7 +154,7 @@ async function activate({leafletMap,cards,markers,onPick}){
    if(f.layer.id==="atlas-clusters"){try{const zoom=await map.getSource("atlas-artists").getClusterExpansionZoom(f.properties.cluster_id);if(!stopped)map.easeTo({center:f.geometry.coordinates,zoom})}catch(_){}}else openCard(Number(f.properties.idx),f.geometry.coordinates);
   });
   map.on("moveend",refreshAvatars);map.on("sourcedata",e=>{if(e.sourceId==="atlas-artists"&&e.isSourceLoaded){cancelAnimationFrame(raf);raf=requestAnimationFrame(refreshAvatars)}});
-  observer=new MutationObserver(()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(update)});
+  observer=new MutationObserver(()=>{cancelAnimationFrame(filterFrame);filterFrame=requestAnimationFrame(update)});
   cards.forEach(card=>observer.observe(card,{attributes:true,attributeFilter:["class"]}));
   if(window.ResizeObserver){resizeObserver=new ResizeObserver(()=>{if(!stopped)map.resize()});resizeObserver.observe(host)}
  }catch(e){fallback(e.message)}
