@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tatzo Maps — Vector Lab</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#071317;color:#efffff;font:14px system-ui,sans-serif}button{font:inherit;cursor:pointer}button:focus-visible{outline:2px solid #04c5bf;outline-offset:3px}header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 24px;border-bottom:1px solid #244044}header strong{font-size:23px;letter-spacing:-1px}header strong span{color:#04c5bf}small,.muted{color:#9bc0c4}.shell{display:grid;grid-template-columns:minmax(240px,300px) minmax(0,1fr);gap:16px;padding:16px;height:calc(100dvh - 66px);min-height:480px}aside{min-width:0;overflow:auto;padding:12px}h1{font-size:25px;line-height:1.1;margin:12px 0}p{line-height:1.5}.themes{display:grid;gap:8px;margin:16px 0}.theme{display:flex;text-align:left;align-items:center;gap:12px;background:#112429;color:inherit;border:1px solid #29464a;border-radius:12px;padding:12px}.theme[aria-pressed=true]{border-color:#04c5bf;background:#103333}.theme b{display:block}.theme small{display:block}.swatch{width:36px;height:36px;border-radius:10px;flex-shrink:0;border:1px solid #71878a}.action{background:#112429;border:1px solid #34565a;color:#efffff;border-radius:9px;padding:9px 12px}.actions{display:flex;flex-wrap:wrap;gap:8px}.map-frame{position:relative;min-width:0;min-height:0;border:1px solid #244044;border-radius:18px;overflow:hidden;background:#101c22}#map{position:absolute;inset:0}.map-title{position:absolute;top:12px;left:12px;background:#071317eb;border:1px solid #34565a;border-radius:12px;padding:9px 13px;pointer-events:none;max-width:65%}.map-title strong{display:block}.legend{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}.pin{width:34px;height:34px;border-radius:50%;border:2px solid white;background:#04c5bf;color:#071317;font-weight:900;box-shadow:0 3px 12px #0007;display:grid;place-items:center}.pin.claim{background:#ee0c6f;color:white}.maplibregl-popup-content{color:#071317;border-radius:12px;padding:14px}.maplibregl-popup-content p{margin:4px 0}.maplibregl-ctrl-attrib{font-size:11px}#status{min-height:36px;overflow-wrap:anywhere}.error{color:#ff9bbf}@media(max-width:760px){header{padding:12px 14px}.shell{height:auto;min-height:0;grid-template-columns:1fr;gap:8px;padding:10px}aside{overflow:visible;padding:4px}.themes{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.theme{padding:8px;flex-direction:column;align-items:flex-start;gap:5px}.theme small{display:none}.swatch{width:26px;height:26px}.map-frame{height:60dvh;min-height:320px}h1{font-size:21px;margin:4px 0}}
+</style></head><body><header><strong>tatzo<span>.</span> maps</strong><small>VECTOR LAB / 01</small></header>
+<main class="shell"><aside><small>EXPERIMENTAL • NOT LIVE</small><h1>A map with its own identity.</h1><p class="muted">Real geography, custom cartography. Choose a visual direction for Tatzo.</p>
+<div class="themes" role="group" aria-label="Map style">
+<button class="theme" data-theme="midnight" aria-pressed="true"><span class="swatch" style="background:linear-gradient(135deg,#071317 48%,#285052 49%,#285052 57%,#101f25 58%)"></span><span><b>Midnight</b><small>Signature teal & graphite</small></span></button>
+<button class="theme" data-theme="porcelain" aria-pressed="false"><span class="swatch" style="background:linear-gradient(135deg,#f3f1eb 48%,#fff 49%,#fff 57%,#dedbd2 58%)"></span><span><b>Porcelain</b><small>Warm editorial minimalism</small></span></button>
+<button class="theme" data-theme="ink" aria-pressed="false"><span class="swatch" style="background:linear-gradient(135deg,#18171c 48%,#55424f 49%,#55424f 57%,#27222c 58%)"></span><span><b>Ink</b><small>Blackwork & muted plum</small></span></button></div>
+<div class="actions"><button class="action" id="reset">Recenter</button><button class="action" id="tilt" aria-pressed="false">3D view</button><button class="action" id="export" disabled>Export style JSON</button></div>
+<div class="legend"><span><i class="dot" style="background:#04c5bf"></i>Verified demo</span><span><i class="dot" style="background:#ee0c6f"></i>Claimable demo</span></div>
+<p class="muted">Pins are fictional samples, not real businesses. No Tatzo account or API is connected.</p><p id="status" role="status" class="muted">Loading vector geography…</p></aside>
+<section class="map-frame" aria-label="Interactive map"><div id="map"></div><div class="map-title"><strong>Clermont-Ferrand</strong><small>France · real vector geography</small></div></section></main>
+<script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script><script>
+'use strict';
+const palettes={
+ midnight:{bg:'#0b191e',green:'#15332f',water:'#153c49',building:'#20343b',outline:'#2a4148',road:'#34545b',major:'#4a7478',edge:'#14272e',text:'#b7d1d2',halo:'#0b191e',boundary:'#607879'},
+ porcelain:{bg:'#f3f1eb',green:'#dce8d9',water:'#c5dfe5',building:'#dfdbd2',outline:'#cfcac0',road:'#ffffff',major:'#fffdf7',edge:'#d5d1c7',text:'#425359',halo:'#f3f1eb',boundary:'#a1a8a2'},
+ ink:{bg:'#19171e',green:'#282e2c',water:'#283647',building:'#322c37',outline:'#443947',road:'#514653',major:'#786174',edge:'#26212b',text:'#e2cedb',halo:'#19171e',boundary:'#7a6477'}
+};
+const center=[3.0870,45.7772],status=document.getElementById('status'),buttons=[...document.querySelectorAll('[data-theme]')];
+let base,map,current='midnight',tilted=false,markers=[];
+const zoom=(...stops)=>['interpolate',['linear'],['zoom'],...stops];
+const cls=(...values)=>['in',['get','class'],['literal',values]];
+function makeStyle(theme){
+ const p=palettes[theme];
+ const source=Object.keys(base.sources).find(k=>base.sources[k].type==='vector');
+ if(!source||!base.glyphs)throw new Error('Vector source or glyphs unavailable');
+ const font=base.layers.find(l=>l.type==='symbol'&&Array.isArray(l.layout?.['text-font'])&&l.layout['text-font'].every(x=>typeof x==='string'))?.layout['text-font'];
+ if(!font)throw new Error('Font stack unavailable');
+ const layer=(id,type,src,paint,extra={})=>({id,type,source,'source-layer':src,paint,...extra});
+ const fill=(id,src,color,extra={})=>layer(id,'fill',src,{'fill-color':color},extra);
+ const line=(id,src,color,width,extra={})=>layer(id,'line',src,{'line-color':color,'line-width':width},{layout:{'line-cap':'round','line-join':'round'},...extra});
+ const label=(id,src,size,extra={})=>layer(id,'symbol',src,{'text-color':p.text,'text-halo-color':p.halo,'text-halo-width':1.2},{...extra,layout:{'text-field':['coalesce',['get','name'],['get','name:en'],''],'text-font':font,'text-size':size,'text-max-width':9,...extra.layout}});
+ const roadFilter=cls('motorway','trunk','primary','secondary','tertiary','minor','service','track','path');
+ const majorFilter=cls('motorway','trunk','primary','secondary');
+ return {version:8,name:'Tatzo '+theme,glyphs:base.glyphs,sources:{[source]:base.sources[source]},layers:[
+ {id:'tatzo-background',type:'background',paint:{'background-color':p.bg}},
+ fill('tatzo-nature','landcover',p.green),
+ fill('tatzo-parks','park',p.green),
+ fill('tatzo-water','water',p.water),
+ line('tatzo-waterways','waterway',p.water,zoom(8,.4,16,3),{minzoom:8}),
+ fill('tatzo-buildings','building',p.building,{minzoom:13}),
+ layer('tatzo-building-3d','fill-extrusion','building',{'fill-extrusion-color':p.building,'fill-extrusion-height':['max',3,['to-number',['get','render_height'],['get','height'],5]],'fill-extrusion-base':0,'fill-extrusion-opacity':.88},{minzoom:14,layout:{visibility:tilted?'visible':'none'}}),
+ line('tatzo-borders','boundary',p.boundary,zoom(2,.5,10,1.1),{maxzoom:12}),
+ line('tatzo-road-casing','transportation',p.edge,zoom(5,.8,10,2,14,5,18,16),{filter:roadFilter}),
+ line('tatzo-roads','transportation',p.road,zoom(5,.4,10,1.1,14,3.4,18,12),{filter:roadFilter}),
+ line('tatzo-main-casing','transportation',p.edge,zoom(5,1.2,10,3.2,14,7,18,20),{filter:majorFilter}),
+ line('tatzo-main-roads','transportation',p.major,zoom(5,.7,10,2,14,5,18,16),{filter:majorFilter}),
+ label('tatzo-city-labels','place',zoom(3,10,10,14,15,17),{filter:cls('city','town','village','suburb','neighbourhood','quarter','country','state')}),
+ label('tatzo-street-labels','transportation_name',zoom(12,10,17,13),{minzoom:12,filter:roadFilter,layout:{'symbol-placement':'line','symbol-spacing':250,'text-max-angle':35}})
+ ]};
+}
+function message(text,error=false){status.textContent=text;status.classList.toggle('error',error)}
+function selectTheme(theme){if(!map||!base)return;try{const style=makeStyle(theme);map.setStyle(style,{diff:false});current=theme;buttons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.theme===theme)));message('Loading '+theme+' style…')}catch(e){message(e.message,true)}}
+async function init(){try{
+ if(!window.maplibregl)throw new Error('MapLibre failed to load. Check your internet connection.');
+ const response=await fetch('https://tiles.openfreemap.org/styles/liberty');if(!response.ok)throw new Error('Geography service returned '+response.status);
+ base=await response.json();
+ map=new maplibregl.Map({container:'map',style:makeStyle(current),center,zoom:13.7,minZoom:2,maxZoom:19,maxPitch:60,renderWorldCopies:false,attributionControl:{compact:false}});
+ map.addControl(new maplibregl.NavigationControl(),'top-right');
+ map.on('error',e=>message('Map resource error: '+(e.error?.message||'network / rendering'),true));
+ map.on('style.load',()=>{message('Style: '+current+' · vector map ready');document.getElementById('export').disabled=false});
+ const demos=[{xy:[3.087,45.778],name:'Demo A',style:'Fine Line',verified:true},{xy:[3.095,45.774],name:'Demo B',style:'Blackwork',verified:true},{xy:[3.079,45.781],name:'Demo C',style:'Styles pending',verified:false},{xy:[3.101,45.781],name:'Demo D',style:'Realism',verified:true}];
+ demos.forEach((d,i)=>{const el=document.createElement('button');el.type='button';el.className='pin'+(d.verified?'':' claim');el.textContent=String.fromCharCode(65+i);el.setAttribute('aria-label',d.name+' fictional marker');const content=document.createElement('div');const strong=document.createElement('strong');strong.textContent=d.name+' · fictional';const detail=document.createElement('p');detail.textContent=d.style+' / '+(d.verified?'Verified example':'Claimable example');content.append(strong,detail);markers.push(new maplibregl.Marker({element:el}).setLngLat(d.xy).setPopup(new maplibregl.Popup({offset:22}).setDOMContent(content)).addTo(map))});
+ if(window.ResizeObserver)new ResizeObserver(()=>map.resize()).observe(document.getElementById('map'));
+ }catch(e){message('Unable to load map: '+e.message,true)}}
+ buttons.forEach(b=>b.addEventListener('click',()=>selectTheme(b.dataset.theme)));
+ document.getElementById('reset').onclick=()=>map?.easeTo({center,zoom:13.7,bearing:0,pitch:tilted?48:0});
+ document.getElementById('tilt').onclick=e=>{if(!map||!map.isStyleLoaded())return;tilted=!tilted;e.currentTarget.setAttribute('aria-pressed',String(tilted));map.setLayoutProperty('tatzo-building-3d','visibility',tilted?'visible':'none');map.easeTo({pitch:tilted?48:0,zoom:tilted?Math.max(map.getZoom(),15):map.getZoom(),bearing:tilted?-18:0})};
+ document.getElementById('export').onclick=()=>{if(!base)return;const url=URL.createObjectURL(new Blob([JSON.stringify(makeStyle(current),null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='tatzo-'+current+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+ init();
+</script></body></html>
