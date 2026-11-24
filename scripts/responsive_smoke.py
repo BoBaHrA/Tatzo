@@ -72,14 +72,21 @@ def main():
                         const visible = e => e && e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden';
                         const sidebar = document.querySelector('body > .content > .sidebar');
                         const target = document.querySelector('.home-layout > .main-content, body > .content > .profile-page, body > .content > .chat-page, body > .content > .search-page, body > .content > .maps-shell, body > .content > .tatzo-calendar-page, body > .content > .healing-shell, body > .content > .health-page, body > .content > .bookmarks-page, body > .content > .report-page');
+                        const nav = sidebar?.querySelector('.sidebar-main-menu');
+                        const more = sidebar?.querySelector('.more');
+                        const map = document.querySelector('#tatzo-map');
                         const hero = document.querySelector('.seo-brand-hero__inner');
                         const suggestions = document.querySelector('.home-layout > .suggestions');
                         const r = e => e.getBoundingClientRect();
                         const overlap = (a,b) => visible(a) && visible(b) && r(a).left < r(b).right-1 && r(a).right > r(b).left+1 && r(a).top < r(b).bottom-1 && r(a).bottom > r(b).top+1;
                         return {overflow: Math.max(root.scrollWidth, document.body.scrollWidth)-root.clientWidth,
-                            sidebarOverlap: !!overlap(sidebar,target), heroOverlap: !!overlap(hero,suggestions)};
+                            sidebarOverlap: !!overlap(sidebar,target), heroOverlap: !!overlap(hero,suggestions),
+                            navClipped: !!(visible(sidebar) && nav && more && Array.from(nav.children).some(e => visible(e) && r(e).bottom > r(more).top + 1)),
+                            navScroll: !!(visible(sidebar) && nav && ['auto','scroll'].includes(getComputedStyle(nav).overflowY)),
+                            recommendationScroll: !!(visible(suggestions) && innerWidth > 900 && ['auto','scroll'].includes(getComputedStyle(suggestions).overflowY)),
+                            mapOffscreen: !!(map && (!visible(map) || r(map).width < 150 || r(map).height < 150 || r(map).top >= innerHeight || Math.min(r(map).bottom,innerHeight)-Math.max(r(map).top,0) < 100))};
                     }""")
-                    if stats["overflow"] > 2 or stats["sidebarOverlap"] or stats["heroOverlap"]:
+                    if stats["overflow"] > 2 or any(value for key, value in stats.items() if key != "overflow"):
                         raise AssertionError(str(stats))
                     print(f"PASS {name}", flush=True)
                 except Exception as exc:
