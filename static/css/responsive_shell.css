@@ -92,12 +92,6 @@
     grid-column: 1 / -1;
     flex-wrap: wrap;
   }
-  body > .content:has(> .sidebar) .maps-layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  body > .content:has(> .sidebar) .maps-panel {
-    max-height: none;
-  }
   body > .content:has(> .sidebar) .tatzo-calendar-page .calendar-layout,
   body > .content:has(> .sidebar) .tatzo-calendar-page .calendar-topbar,
   body > .content:has(> .sidebar) .healing-layout {
@@ -311,5 +305,178 @@ body > .content > .moderation-page > .moderation-shell {
   }
   .verification-page .verification-header {
     flex-wrap: wrap;
+  }
+}
+
+/* Compact navigation fits the viewport instead of creating a scroll area. */
+html {
+  scrollbar-color: #36565e #000d18;
+  scrollbar-width: thin;
+}
+@media (min-width: 901px) {
+  body > .content > .sidebar {
+    --nav-row: clamp(25px, calc((100dvh - 84px) / 12), 54px);
+    --nav-icon: clamp(18px, calc(var(--nav-row) - 10px), 30px);
+    padding: 10px 12px;
+  }
+  body > .content > .sidebar .sidebar-main-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    flex: 1 1 auto;
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+  }
+  body > .content > .sidebar .sidebar-main-menu > li {
+    flex: 0 0 var(--nav-row);
+    min-height: 0;
+    margin: 0;
+  }
+  body > .content > .sidebar .sidebar-main-menu > li > a {
+    display: grid;
+    grid-template-columns: var(--nav-icon) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    min-height: 0;
+    height: 100%;
+    padding: 3px 8px;
+    font-size: clamp(12px, calc(var(--nav-row) * .36), 16px);
+    line-height: 1.2;
+  }
+  body > .content > .sidebar .sidebar-main-menu > li > a > :is(img,.sidebar-avatar,.sidebar-avatar-placeholder),
+  body > .content > .sidebar .sidebar-more-trigger > img {
+    width: var(--nav-icon);
+    height: var(--nav-icon);
+    min-width: var(--nav-icon);
+    max-width: var(--nav-icon);
+    object-fit: contain;
+    margin: 0;
+  }
+  body > .content > .sidebar .sidebar-main-menu > li > a > span:not(.sidebar-badge) {
+    overflow-wrap: normal;
+  }
+  body > .content > .sidebar .more {
+    flex: 0 0 auto;
+    margin: 0;
+    padding-top: 5px;
+  }
+  body > .content > .sidebar .more > li {
+    margin: 0;
+  }
+  body > .content > .sidebar .sidebar-more-trigger {
+    min-height: 36px;
+    padding: 3px 8px;
+    gap: 10px;
+    font-size: clamp(12px, calc(var(--nav-row) * .36), 16px);
+  }
+  body > .content > .sidebar .sidebar-more-menu {
+    bottom: 42px;
+    left: 0;
+    box-sizing: border-box;
+    width: min(250px, calc(100vw - 24px));
+    max-height: calc(100dvh - 72px);
+    scrollbar-width: thin;
+    scrollbar-color: #36565e transparent;
+  }
+  body > .content > .sidebar .sidebar-shortcuts-compact {
+    display: none;
+  }
+}
+/* Exceptionally short windows: move non-primary links to the existing More
+   menu (not a hidden scrollbar, and every route remains reachable). */
+@media (min-width: 901px) and (max-height: 460px) {
+  body > .content > .sidebar {
+    --nav-row: clamp(24px, calc((100dvh - 72px) / 9), 44px);
+  }
+  body > .content > .sidebar .sidebar-main-menu > .sidebar-secondary-item {
+    display: none;
+  }
+  body > .content > .sidebar .sidebar-shortcuts-compact {
+    display: block;
+  }
+}
+@media (min-width: 901px) and (max-height: 300px) {
+  body > .content > .sidebar {
+    position: absolute;
+    height: auto;
+    min-height: 100dvh;
+    bottom: auto;
+  }
+}
+
+/* Dashboard scrollbar treatment: compact desktop rows; context follows
+   document scrolling rather than an independent white scrollbar. */
+@media (min-width: 821px) {
+  .artist-dashboard-page > .artist-dash-sidebar {
+    scrollbar-width: thin;
+    scrollbar-color: #36565e transparent;
+  }
+  .artist-dashboard-page .artist-dash-nav-item {
+    min-height: clamp(30px, calc((100dvh - 158px) / 10), 42px);
+  }
+  .artist-dashboard-page > .artist-dash-context {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+}
+
+/* Map and controls stay side-by-side at desktop and tablet widths.
+   The map is never pushed below a full list of locations. */
+@media (min-width: 761px) {
+  body > .content > .maps-shell {
+    --map-workspace-h: max(300px, calc(100dvh - 165px));
+  }
+  body > .content > .maps-shell .maps-hero {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+    margin-bottom: 12px;
+  }
+  body > .content > .maps-shell .maps-hero > div:first-child {
+    flex: 1 1 300px;
+    min-width: 0;
+  }
+  body > .content > .maps-shell .maps-hero > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  body > .content > .maps-shell .maps-hero h1 {
+    font-size: clamp(22px, 2.4vw, 36px);
+  }
+  body > .content > .maps-shell .maps-layout {
+    display: grid;
+    grid-template-columns: minmax(220px, 29%) minmax(0, 1fr);
+    align-items: start;
+    gap: clamp(10px, 1.3vw, 18px);
+  }
+  body > .content > .maps-shell .maps-layout > .maps-panel,
+  body > .content > .maps-shell .maps-layout > .maps-canvas {
+    height: var(--map-workspace-h);
+    min-height: 0;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  body > .content > .maps-shell .maps-layout > .maps-panel {
+    max-height: var(--map-workspace-h);
+    overflow-y: auto;
+    scrollbar-color: #36565e transparent;
+    scrollbar-width: thin;
+  }
+  body > .content > .maps-shell .maps-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  body > .content > .maps-shell .maps-stats article {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+@media (min-width: 761px) and (max-width: 900px) {
+  body > .content > .maps-shell {
+    --map-workspace-h: max(280px, calc(100dvh - 300px));
   }
 }
