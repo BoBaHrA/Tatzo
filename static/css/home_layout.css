@@ -1,0 +1,128 @@
+/* Home layout: independent of legacy page-specific fixed offsets. */
+.tatzo-home .home-layout {
+  min-width: 0;
+  box-sizing: border-box;
+}
+.tatzo-home .home-layout .seo-brand-hero {
+  margin: 0;
+  padding: 0;
+}
+.tatzo-home .home-layout .seo-brand-hero__inner {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+}
+.tatzo-home .home-layout .seo-brand-hero h1 {
+  font-size: clamp(26px, 3vw, 44px);
+}
+.tatzo-home .home-layout .seo-brand-hero__links a {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+@media (min-width: 901px) {
+  .tatzo-home {
+    --home-nav-width: clamp(190px, 16vw, 270px);
+    --home-gap: clamp(16px, 2vw, 28px);
+  }
+  .tatzo-home .sidebar {
+    width: var(--home-nav-width);
+    height: 100vh;
+    height: 100dvh;
+    padding: 14px 12px;
+    box-sizing: border-box;
+  }
+  .tatzo-home .sidebar-main-menu {
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: 0;
+    scrollbar-width: thin;
+  }
+  .tatzo-home .sidebar-main-menu li {
+    margin-bottom: clamp(4px, 1.2vh, 14px);
+  }
+  .tatzo-home .sidebar-main-menu li a,
+  .tatzo-home .sidebar-more-trigger {
+    min-height: 44px;
+    padding: 6px 8px;
+    gap: 9px;
+    box-sizing: border-box;
+    font-size: clamp(13px, 1.1vw, 16px);
+  }
+  .tatzo-home .sidebar-main-menu li a > span:not(.sidebar-badge) {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .tatzo-home .sidebar .more {
+    padding-top: 10px;
+    margin-bottom: 0;
+  }
+  .tatzo-home .sidebar-more-menu {
+    max-height: calc(100dvh - 100px);
+    overflow-y: auto;
+  }
+  .tatzo-home .home-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--home-gap);
+    align-items: start;
+    width: calc(100% - var(--home-nav-width));
+    max-width: 1320px;
+    margin-left: max(var(--home-nav-width), calc((100% - 1320px + var(--home-nav-width)) / 2));
+    padding: 16px var(--home-gap) 48px;
+  }
+  .tatzo-home .home-layout > .auth-buttons {
+    position: static;
+    grid-column: 1 / -1;
+    justify-self: end;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    max-width: 100%;
+  }
+  .tatzo-home .home-layout > .main-content {
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .tatzo-home .home-layout .feed {
+    box-sizing: border-box;
+    padding-left: 58px;
+  }
+  .tatzo-home .home-layout > .suggestions {
+    position: static;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 720px;
+    justify-self: center;
+    overflow-wrap: anywhere;
+  }
+}
+@media (min-width: 1200px) {
+  .tatzo-home .home-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  }
+  .tatzo-home .home-layout > .suggestions {
+    position: sticky;
+    top: 16px;
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+  }
+}
+@media (max-width: 900px) {
+  .tatzo-home .home-layout .seo-brand-hero {
+    margin-bottom: 18px;
+  }
+  .tatzo-home .home-layout .seo-brand-hero__inner {
+    padding: 22px 18px;
+  }
+  .tatzo-home .home-layout .suggestions.mobile-suggestions-open {
+    width: auto;
+    top: auto;
+  }
+}
