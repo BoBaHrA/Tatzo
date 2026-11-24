@@ -27,3 +27,9 @@ Three themes: Midnight (current Tatzo brand), Porcelain (warm light), Ink (plum/
 5. Port the selected style to the Expo mobile map separately; test Android WebGL/DOM bridge and native fallback. No automatic production merge or deploy from this branch.
 
 Official references: https://openfreemap.org/quick_start/ and https://maplibre.org/maplibre-gl-js/docs/ and https://openmaptiles.org/docs/schema/
+
+## Stage 2: real web map integration (experimental)
+
+On a local/staging deployment of this branch, open the existing Tatzo Maps page and append `?basemap=midnight`, `?basemap=porcelain` or `?basemap=ink` (use & if the URL already contains query parameters). The usual route without this parameter uses the existing CARTO raster map. The adapter uses the existing Django-rendered artist/studio cards, Leaflet markers, clusters, popups, claim flow and filters unchanged. No fake markers on the existing map. Three themes can be selected after the vector map becomes idle; classic map remains an option. Raster layer stays during initial warm-up and style transitions; initialization errors, context loss and timeouts restore raster. This is a 2D bridge; standalone lab retains native 3D mode.
+
+Static smoke check executed: JS parsed; absent query parameter made zero fetches; each theme generated 14 unique layers with no POI source layer using a synthetic vector-source fixture. Browser, CDN asset loading, live tile schema, CSP, graphics acceleration, attribution, responsive acceptance and failover are not yet verified. Test those on staging before merge. Production deployment unchanged. Dependency versions: MapLibre GL JS 5.6.1 and maplibre-gl-leaflet 0.1.3. Before production, vendor/pin approved assets and validate their integrity, provider terms and privacy impact. The generated style depends on OpenFreeMap metadata/glyphs/tiles until we host a stable source ourselves.
