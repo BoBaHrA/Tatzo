@@ -2179,3 +2179,15 @@
 .maps-canvas .atlas-native-map .maplibregl-ctrl-group{background:#071317ed;border:1px solid #34565a}
 @media(max-width:760px){.maps-canvas .atlas-native-map .maplibregl-ctrl-bottom-right{bottom:48px}}
 @media(prefers-reduced-motion:reduce){.atlas-settings-chevron{transition:none}}
+
+/* Living Atlas: avatar identity, not online/availability indicators. */
+.maps-canvas .atlas-native-map .atlas-avatar{position:relative;display:grid;place-items:center;width:50px;height:50px;padding:3px;overflow:visible;border:1px solid #f2ffff;border-radius:50%;background:linear-gradient(145deg,#d6fffa,#04c5bf 38%,#167981 85%);box-shadow:0 0 0 3px #04c5bf25,0 0 18px 4px #04c5bf55,0 5px 14px #0007;color:#fff;transition:scale .2s ease,box-shadow .2s ease}
+.maps-canvas .atlas-native-map .atlas-avatar.unclaimed{background:linear-gradient(145deg,#ffd0e4,#ee0c6f 45%,#841047);box-shadow:0 0 0 3px #ee0c6f22,0 0 18px 4px #ee0c6f44,0 5px 14px #0007}
+.atlas-avatar-photo{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:#142b35;overflow:hidden;font:700 18px/1 system-ui}
+.atlas-avatar-photo img{display:block;width:100%;height:100%;object-fit:cover}
+.atlas-avatar-status{position:absolute;bottom:0;right:-1px;width:12px;height:12px;box-sizing:border-box;background:#04c5bf;border:2px solid #efffff;border-radius:50%;box-shadow:0 2px 5px #0006;pointer-events:none}
+.atlas-avatar.unclaimed .atlas-avatar-status{background:#ee0c6f}
+.maps-canvas .atlas-native-map .atlas-avatar:hover,.maps-canvas .atlas-native-map .atlas-avatar:focus-visible{scale:1.12;outline:2px solid #fff;outline-offset:4px}
+.maps-canvas .atlas-native-map[data-quality="low"] .atlas-avatar{width:40px;height:40px;box-shadow:0 3px 8px #0006}
+.atlas-settings-section > button + button{margin-top:5px}
+@media(prefers-reduced-motion:reduce){.maps-canvas .atlas-native-map .atlas-avatar{transition:none}.maps-canvas .atlas-native-map .atlas-avatar:hover{scale:1}}
