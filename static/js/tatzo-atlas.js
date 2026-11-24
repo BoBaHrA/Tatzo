@@ -24,7 +24,8 @@ function style(base,theme,quality){
  paint("tatzo-nature",{"fill-color":p.forest,"fill-opacity":.55});
  paint("tatzo-parks",{"fill-color":p.park,"fill-outline-color":p.forest});
  before("tatzo-nature",extra("atlas-neighbourhoods","fill","landuse",{"fill-color":p.land,"fill-opacity":.65},{minzoom:9,filter:cls("residential","commercial","industrial","retail","cemetery")}));
- paint("tatzo-water",{"fill-color":p.water,"fill-outline-color":p.shore});
+ paint("tatzo-water",{"fill-color":p.water});
+ before("tatzo-buildings",extra("atlas-shoreline","line","water",{"line-color":p.shore,"line-width":z(9,.25,15,.9,18,1.5),"line-opacity":.65},{minzoom:9}));
  paint("tatzo-buildings",{"fill-color":p.building,"fill-outline-color":p.outline});
  by("tatzo-buildings").minzoom=13;
  paint("tatzo-road-casing",{"line-color":p.edge,"line-width":z(5,.7,10,2,14,5,18,17)});
@@ -38,11 +39,19 @@ function style(base,theme,quality){
  extrusion.filter=["!=",["to-string",["get","hide_3d"]],"true"];
  extrusion.layout={visibility:quality==="low"?"none":"visible"};
  const height=["max",3,["to-number",["get","render_height"],["get","height"],6]];
- extrusion.paint={"fill-extrusion-color":["interpolate",["linear"],height,3,p.building,45,p.road,120,p.main],"fill-extrusion-height":height,"fill-extrusion-base":["min",height,["max",0,["to-number",["get","render_min_height"],0]]],"fill-extrusion-opacity":1,"fill-extrusion-vertical-gradient":true};
+ extrusion.paint={"fill-extrusion-color":["interpolate",["linear"],height,3,p.building,45,p.building,120,p.road],"fill-extrusion-height":height,"fill-extrusion-base":["min",height,["max",0,["to-number",["get","render_min_height"],0]]],"fill-extrusion-opacity":1,"fill-extrusion-vertical-gradient":true};
  before("tatzo-city-labels",extrusion);
- s.light={anchor:"map",color:"#fff5e8",intensity:.38,position:[1.5,210,35]};
+ s.light={anchor:"map",color:"#fff5e8",intensity:.42,position:[1.5,210,42]};
  for(const id of ["tatzo-city-labels","tatzo-street-labels"]){paint(id,{"text-color":p.text,"text-halo-color":p.bg,"text-halo-width":1.4});}
- by("tatzo-city-labels").layout["text-size"]=z(3,12,10,16,15,18);
+ const regularFont=base.layers.map(l=>l.layout?.["text-font"]).find(f=>Array.isArray(f)&&f.length&&f.every(n=>typeof n==="string"&&!/italic|oblique/i.test(n))&&f.some(n=>/regular|medium/i.test(n)));
+ if(regularFont)for(const id of ["tatzo-city-labels","tatzo-street-labels"])by(id).layout["text-font"]=regularFont;
+ const places=by("tatzo-city-labels");
+ before("tatzo-city-labels",{...places,id:"atlas-country-labels",filter:cls("country"),maxzoom:8,layout:{...places.layout,"text-size":z(3,11,7,15),"text-padding":8}});
+ places.minzoom=5;places.filter=cls("city","town","village","suburb","neighbourhood","quarter");
+ places.layout["text-size"]=z(5,11,10,14,15,16);
+ places.layout["text-padding"]=5;
+ by("tatzo-borders").filter=["<=",["to-number",["get","admin_level"],2],2];
+ before("tatzo-road-casing",extra("atlas-regional-borders","line","boundary",{"line-color":p.outline,"line-width":.65,"line-opacity":.6},{minzoom:6,maxzoom:11,filter:[">",["to-number",["get","admin_level"],2],2]}));
  by("tatzo-street-labels").layout["symbol-spacing"]=320;
  return s;
 }
@@ -68,7 +77,7 @@ function addLocations(map,cards){
  map.addLayer({id:"atlas-cluster-halo",type:"circle",source:"atlas-artists",filter:["has","point_count"],paint:{"circle-color":color,"circle-radius":["step",["get","point_count"],24,25,30,100,36],"circle-opacity":.22}});
  map.addLayer({id:"atlas-clusters",type:"circle",source:"atlas-artists",filter:["has","point_count"],paint:{"circle-color":color,"circle-radius":["step",["get","point_count"],18,25,24,100,30],"circle-stroke-color":"#ffffff","circle-stroke-width":2}});
  const font=map.getStyle().layers.find(l=>l.type==="symbol"&&l.layout?.["text-font"])?.layout["text-font"];
- map.addLayer({id:"atlas-count",type:"symbol",source:"atlas-artists",filter:["has","point_count"],layout:{"text-field":["get","point_count_abbreviated"],"text-font":font,"text-size":13,"text-allow-overlap":true},paint:{"text-color":"#071317","text-halo-color":"#ffffff","text-halo-width":.6}});
+ map.addLayer({id:"atlas-count",type:"symbol",source:"atlas-artists",filter:["has","point_count"],layout:{"text-field":["get","point_count_abbreviated"],"text-font":font,"text-size":13,"text-allow-overlap":true},paint:{"text-color":"#ffffff","text-halo-width":0}});
  map.addLayer({id:"atlas-points",type:"circle",source:"atlas-artists",filter:["!",["has","point_count"]],paint:{"circle-color":["case",["==",["get","verified"],1],"#04c5bf","#ee0c6f"],"circle-radius":9,"circle-stroke-color":"#fff","circle-stroke-width":2}});
 }
 async function activate({leafletMap,cards,markers,onPick}){
@@ -76,14 +85,16 @@ async function activate({leafletMap,cards,markers,onPick}){
  const status=document.querySelector("[data-basemap-status]");
  const classic=leafletMap.getContainer(),frame=classic.parentElement;
  let map,host,controls,observer,resizeObserver,popup,pick,deadline,stopped=false,avatars=new Map(),raf=0,filterFrame=0,base;
+ const bubbles=new Map();let bubbleFrame=0,previousZoom=null,animateFrom=null,splitOrigins=[],splitUntil=0,brand;
  let lastData="";
  let theme=themes.includes(params.get("theme"))?params.get("theme"):"midnight";
  let quality=["low","medium","high"].includes(params.get("quality"))?params.get("quality"):"medium";
  const say=t=>{if(status)status.textContent=t};
+ function clearBubbles(){for(const item of bubbles.values())item.marker.remove();bubbles.clear();animateFrom=null;previousZoom=null;splitOrigins=[];splitUntil=0;}
  function clearAvatars(){for(const m of avatars.values())m.remove();avatars.clear()}
  function fallback(reason){
-  if(stopped)return;stopped=true;clearTimeout(deadline);cancelAnimationFrame(raf);cancelAnimationFrame(filterFrame);observer?.disconnect();resizeObserver?.disconnect();clearAvatars();try{map?.remove()}catch(_){}
-  host?.remove();controls?.remove();classic.style.visibility="";leafletMap.invalidateSize({pan:false});say("Atlas → Classic: "+String(reason).slice(0,130));
+  if(stopped)return;stopped=true;clearTimeout(deadline);cancelAnimationFrame(raf);cancelAnimationFrame(filterFrame);observer?.disconnect();resizeObserver?.disconnect();clearAvatars();clearBubbles();cancelAnimationFrame(bubbleFrame);try{map?.remove()}catch(_){}
+  host?.remove();controls?.remove();brand?.remove();classic.style.visibility="";leafletMap.invalidateSize({pan:false});say("Atlas → Classic: "+String(reason).slice(0,130));
  }
  function openCard(idx,coord){
   const card=cards[idx];if(!card)return;
@@ -93,6 +104,56 @@ async function activate({leafletMap,cards,markers,onPick}){
   if(typeof html==="string")popup=new maplibregl.Popup({offset:20,maxWidth:"350px"}).setLngLat(coord).setHTML(html).addTo(map);
   card.scrollIntoView({behavior:"smooth",block:"nearest"});
  }
+ function reducedMotion(){return window.matchMedia("(prefers-reduced-motion: reduce)").matches}
+ function bubbleType(verified,count){return verified===count?"verified":verified===0?"unclaimed":"mixed"}
+ function pickAt(coord){if(!onPick(coord[1],coord[0]))return false;popup?.remove();if(pick)pick.setLngLat(coord);else pick=new maplibregl.Marker({color:"#ee0c6f"}).setLngLat(coord).addTo(map);return true}
+ async function expandCluster(f,face){
+  const coord=f.geometry.coordinates;
+  if(pickAt(coord))return;
+  const source=map.getSource("atlas-artists");if(!source)return;
+  try{
+   const zoom=await source.getClusterExpansionZoom(f.properties.cluster_id);
+   if(stopped)return;
+   animateFrom={coord:coord.slice(),until:performance.now()+1400};
+   if(face&&!reducedMotion()&&face.animate)face.animate([{transform:"scale(1)"},{transform:"scale(1.18)"},{transform:"scale(.85)",opacity:.6}],{duration:260,easing:"ease-out"});
+   map.easeTo({center:coord,zoom:Math.min(map.getMaxZoom(),zoom),duration:reducedMotion()?0:650});
+  }catch(_){}
+ }
+ function animateArrival(face,coord,origins){
+  if(reducedMotion()||!origins.length||typeof face.animate!=="function")return;
+  const to=map.project(coord);let nearest=null,dist=Infinity;
+  for(const origin of origins){const p=map.project(origin);const d=Math.hypot(p.x-to.x,p.y-to.y);if(d<dist){nearest=p;dist=d}}
+  if(!nearest||dist>260)return;
+  const dx=nearest.x-to.x,dy=nearest.y-to.y;
+  face.animate([{transform:"translate("+dx+"px,"+dy+"px) scale(.38)",opacity:.15},{transform:"translate(0,0) scale(1.1)",opacity:1,offset:.76},{transform:"translate(0,0) scale(1)",opacity:1}],{duration:380,easing:"cubic-bezier(.18,.75,.3,1)"});
+ }
+ function refreshBubbles(){
+  if(stopped||!map?.getLayer("atlas-clusters"))return;
+  const zoom=map.getZoom(),old=[...bubbles.values()];
+  const split=previousZoom!==null&&zoom>previousZoom+.15;
+  if(split&&old.length){splitOrigins=old.map(x=>x.coord);splitUntil=performance.now()+650;}
+  const origins=performance.now()<splitUntil?splitOrigins.slice():[];
+  if(animateFrom&&performance.now()<animateFrom.until)origins.unshift(animateFrom.coord);
+  previousZoom=zoom;
+  const found=new Map();
+  for(const f of map.queryRenderedFeatures({layers:["atlas-clusters"]})){
+   const id=String(f.properties.cluster_id);if(!found.has(id))found.set(id,f);if(found.size>=140)break;
+  }
+  for(const [id,item] of bubbles)if(!found.has(id)){item.marker.remove();bubbles.delete(id)}
+  for(const [id,f] of found){
+   const count=Number(f.properties.point_count),verified=Number(f.properties.verified),coord=f.geometry.coordinates;
+   const type=bubbleType(verified,count);
+   const existing=bubbles.get(id);
+   const size=count>=100?"68px":count>=25?"58px":"48px";
+   if(existing){existing.feature=f;existing.coord=coord;existing.marker.setLngLat(coord);existing.face.textContent=String(count);existing.face.className="atlas-bubble-face tatzo-cluster tatzo-cluster-"+type;existing.face.style.setProperty("--bubble-size",size);existing.button.setAttribute("aria-label",count+" locations — "+type);continue}
+   const button=document.createElement("button");button.type="button";button.className="atlas-bubble-marker";button.setAttribute("aria-label",count+" locations — "+type);
+   const face=document.createElement("span");face.className="atlas-bubble-face tatzo-cluster tatzo-cluster-"+type;face.textContent=String(count);face.style.setProperty("--bubble-size",size);button.append(face);
+   const item={coord,feature:f,face,button,marker:new maplibregl.Marker({element:button,anchor:"center"}).setLngLat(coord).addTo(map)};
+   button.addEventListener("click",e=>{e.stopPropagation();expandCluster(item.feature,face)});
+   bubbles.set(id,item);animateArrival(face,coord,origins);
+  }
+ }
+ function queueBubbles(){cancelAnimationFrame(bubbleFrame);bubbleFrame=requestAnimationFrame(refreshBubbles)}
  function refreshAvatars(){
   if(stopped||!map?.getLayer("atlas-points"))return;
   if(map.getZoom()<13){clearAvatars();return}
@@ -109,10 +170,14 @@ async function activate({leafletMap,cards,markers,onPick}){
    const img=card.querySelector(".maps-avatar img");
    if(img){const clone=document.createElement("img");clone.src=img.src;clone.alt="";clone.addEventListener("error",()=>{clone.remove();el.textContent=(card.dataset.name||"T").slice(0,1).toUpperCase()},{once:true});el.append(clone)}else{el.textContent=card.dataset.source==="verified"?(card.dataset.name||"T").slice(0,1).toUpperCase():"⌖"}
    el.addEventListener("click",e=>{e.stopPropagation();if(onPick(coord[1],coord[0])){popup?.remove();if(pick)pick.setLngLat(coord);else pick=new maplibregl.Marker({color:"#ee0c6f"}).setLngLat(coord).addTo(map);return}openCard(idx,coord)});
-   avatars.set(idx,new maplibregl.Marker({element:el,anchor:"bottom"}).setLngLat(coord).addTo(map));
+   const wrapper=document.createElement("div");wrapper.className="atlas-avatar-marker";wrapper.append(el);
+   avatars.set(idx,new maplibregl.Marker({element:wrapper,anchor:"center"}).setLngLat(coord).addTo(map));
+   const origins=performance.now()<splitUntil?splitOrigins.slice():[];
+   if(animateFrom&&performance.now()<animateFrom.until)origins.unshift(animateFrom.coord);
+   animateArrival(el,coord,origins);
   }
  }
- function update(){if(stopped||!map?.getSource("atlas-artists"))return;const data=features(cards),signature=JSON.stringify(data);if(signature===lastData)return;lastData=signature;map.getSource("atlas-artists").setData(data);popup?.remove();clearAvatars()}
+ function update(){if(stopped||!map?.getSource("atlas-artists"))return;const data=features(cards),signature=JSON.stringify(data);if(signature===lastData)return;lastData=signature;map.getSource("atlas-artists").setData(data);popup?.remove();clearAvatars();clearBubbles()}
  try{
   say("Atlas · loading native 3D");
   const abort=new AbortController();const timeout=setTimeout(()=>abort.abort(),12000);
@@ -122,7 +187,7 @@ async function activate({leafletMap,cards,markers,onPick}){
   host=document.createElement("div");host.className="atlas-native-map";frame.append(host);
   const c=leafletMap.getCenter();
   map=new maplibregl.Map({container:host,style:style(base,theme,quality),center:[c.lng,c.lat],zoom:Math.max(2,leafletMap.getZoom()-1),pitch:0,maxPitch:65,maxZoom:19,minZoom:2,renderWorldCopies:false,attributionControl:false,canvasContextAttributes:{antialias:quality==="high"}});
-  map.addControl(new maplibregl.AttributionControl({compact:true,customAttribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · <a href="https://openmaptiles.org/">OpenMapTiles</a> · <a href="https://openfreemap.org/">OpenFreeMap</a>'}),"bottom-right");
+  map.addControl(new maplibregl.AttributionControl({compact:false,customAttribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · <a href="https://openmaptiles.org/">OpenMapTiles</a> · <a href="https://openfreemap.org/">OpenFreeMap</a>'}),"bottom-right");
   map.addControl(new maplibregl.NavigationControl({visualizePitch:true}),"top-left");
   deadline=setTimeout(()=>fallback("Native map startup timeout"),22000);
   map.on("error",e=>{if(status&& !stopped)status.title=e.error?.message||"Map resource error"});
@@ -142,7 +207,10 @@ async function activate({leafletMap,cards,markers,onPick}){
      for(const value of values){const o=document.createElement("option");o.value=value;o.textContent=value;o.selected=value===current;select.append(o)}
      select.addEventListener("change",()=>{const url=new URL(location.href);url.searchParams.set(key,select.value);location.assign(url)});controls.append(select);
     }
-    frame.append(controls);refreshAvatars();
+    frame.append(controls);
+    brand=document.createElement("div");brand.className="atlas-brand";brand.setAttribute("aria-label","Tatzo Atlas");
+    const word=document.createElement("strong");word.textContent="Tatzo";const dot=document.createElement("span");dot.textContent=".";word.append(dot);const sub=document.createElement("small");sub.textContent="ATLAS";brand.append(word,sub);frame.append(brand);
+    refreshBubbles();refreshAvatars();
    });
   });
   map.on("click",async e=>{
@@ -151,9 +219,9 @@ async function activate({leafletMap,cards,markers,onPick}){
     popup?.remove();if(pick)pick.setLngLat(e.lngLat);else pick=new maplibregl.Marker({color:"#ee0c6f"}).setLngLat(e.lngLat).addTo(map);return
    }
    const hits=map.queryRenderedFeatures(e.point,{layers:["atlas-clusters","atlas-points"]});const f=hits[0];if(!f)return;
-   if(f.layer.id==="atlas-clusters"){try{const zoom=await map.getSource("atlas-artists").getClusterExpansionZoom(f.properties.cluster_id);if(!stopped)map.easeTo({center:f.geometry.coordinates,zoom})}catch(_){}}else openCard(Number(f.properties.idx),f.geometry.coordinates);
+   if(f.layer.id==="atlas-clusters"){await expandCluster(f)}else openCard(Number(f.properties.idx),f.geometry.coordinates);
   });
-  map.on("moveend",refreshAvatars);map.on("sourcedata",e=>{if(e.sourceId==="atlas-artists"&&e.isSourceLoaded){cancelAnimationFrame(raf);raf=requestAnimationFrame(refreshAvatars)}});
+  map.on("moveend",()=>{refreshBubbles();refreshAvatars()});map.on("zoomend",queueBubbles);map.on("sourcedata",e=>{if(e.sourceId==="atlas-artists"&&e.isSourceLoaded){queueBubbles();cancelAnimationFrame(raf);raf=requestAnimationFrame(refreshAvatars)}});
   observer=new MutationObserver(()=>{cancelAnimationFrame(filterFrame);filterFrame=requestAnimationFrame(update)});
   cards.forEach(card=>observer.observe(card,{attributes:true,attributeFilter:["class"]}));
   if(window.ResizeObserver){resizeObserver=new ResizeObserver(()=>{if(!stopped)map.resize()});resizeObserver.observe(host)}

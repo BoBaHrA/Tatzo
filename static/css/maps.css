@@ -2136,3 +2136,23 @@
 .atlas-native-map .maplibregl-popup-tip{border-top-color:#071317}
 .atlas-native-map .maplibregl-ctrl-bottom-right{bottom:30px}
 @media(max-width:760px){.maps-canvas .atlas-controls{top:126px;right:8px}.atlas-controls button,.atlas-controls select{padding:5px;font-size:11px}.atlas-native-map .maplibregl-ctrl-bottom-right{bottom:48px}}
+
+/* Atlas signature bubbles: preserve the classic Tatzo gradients and animate the inner face,
+   not the marker transform used by MapLibre for geographic positioning. */
+.atlas-bubble-marker{padding:0;border:0;background:none;cursor:pointer;display:grid;place-items:center;isolation:isolate;color:#fff;outline-offset:7px}
+.atlas-bubble-face.tatzo-cluster{box-sizing:border-box;width:var(--bubble-size,48px);height:var(--bubble-size,48px);border:2.5px solid rgba(255,255,255,.94);color:#fff;font:900 14px/1 system-ui,sans-serif;letter-spacing:-.35px;font-variant-numeric:tabular-nums;text-shadow:0 1px 3px #07212988;box-shadow:inset 0 2px 6px #ffffff42,0 5px 18px #0005,0 0 0 6px #ffffff0f;transition:box-shadow .18s ease,scale .18s ease;will-change:transform}
+.atlas-bubble-face.tatzo-cluster-verified{background:radial-gradient(circle at 32% 24%,#89ffef,#04c5bf 68%,#028887)}
+.atlas-bubble-face.tatzo-cluster-unclaimed{background:radial-gradient(circle at 32% 24%,#ffa4cb,#ee0c6f 72%,#b9004e)}
+.atlas-bubble-face.tatzo-cluster-mixed{background:radial-gradient(circle at 24% 18%,#ffffff52,transparent 52%),linear-gradient(135deg,#04c5bf 8%,#8c73a9 51%,#ee0c6f 92%)}
+.atlas-bubble-marker:hover .atlas-bubble-face,.atlas-bubble-marker:focus-visible .atlas-bubble-face{scale:1.1;box-shadow:inset 0 2px 8px #ffffff66,0 8px 22px #0006,0 0 0 8px #ffffff22}
+.atlas-avatar-marker{display:grid;place-items:center}
+.atlas-avatar{border-radius:50%;border-width:2.5px;width:38px;height:38px;box-shadow:0 4px 12px #0006,0 0 0 4px #04c5bf22;transition:scale .18s ease}
+.atlas-avatar.unclaimed{background:radial-gradient(circle at 32% 25%,#b92c70,#4a1533);box-shadow:0 4px 12px #0006,0 0 0 4px #ee0c6f22}
+.atlas-avatar:hover,.atlas-avatar:focus-visible{scale:1.1}
+.maps-canvas .atlas-brand{position:absolute;z-index:802;bottom:42px;left:14px;display:flex;align-items:baseline;gap:6px;color:#efffff;background:#071317e8;padding:7px 12px;border:1px solid #34565a;border-radius:10px;pointer-events:none;box-shadow:0 3px 14px #0003}
+.atlas-brand strong{font:900 22px/.95 Poppins,system-ui,sans-serif;letter-spacing:-1px}.atlas-brand strong span{color:#04c5bf}.atlas-brand small{font:700 9px/1 system-ui,sans-serif;letter-spacing:1.7px;color:#9bc0c4}
+.atlas-native-map .maplibregl-ctrl-attrib{font:11px/1.4 system-ui,sans-serif;background:#071317e8;color:#d3e7e7;padding:3px 8px;border-radius:8px 0 0 0;max-width:calc(100vw - 32px)}
+.atlas-native-map .maplibregl-ctrl-attrib a{color:#e0f1f1;text-decoration:underline}.atlas-native-map .maplibregl-ctrl-bottom-right{bottom:0}
+.atlas-native-map .maplibregl-ctrl-group{background:#071317e8;border:1px solid #34565a;box-shadow:0 4px 12px #0004;overflow:hidden;border-radius:10px}.atlas-native-map .maplibregl-ctrl-group button{background-color:transparent}.atlas-native-map .maplibregl-ctrl-group button+button{border-top-color:#34565a}.atlas-native-map .maplibregl-ctrl-group .maplibregl-ctrl-icon{filter:invert(1)}
+@media(max-width:760px){.maps-canvas .atlas-brand{bottom:100px;left:10px;padding:6px 9px}.atlas-brand strong{font-size:19px}.atlas-native-map .maplibregl-ctrl-bottom-right{bottom:48px}.atlas-native-map .maplibregl-ctrl-attrib{font-size:10px;max-width:calc(100vw - 30px)}}
+@media(prefers-reduced-motion:reduce){.atlas-bubble-face,.atlas-avatar{transition:none}.atlas-bubble-marker:hover .atlas-bubble-face,.atlas-avatar:hover{scale:1}}
