@@ -11,7 +11,7 @@ const palettes={
 };
 const z=(...stops)=>["interpolate",["linear"],["zoom"],...stops];
 const cls=(...values)=>["in",["get","class"],["literal",values]];
-function style(base,theme,quality){
+function style(base,theme,quality,dimension=quality!=="low") {
  const p=palettes[theme];if(!p)throw Error("Unknown Atlas theme");
  const s=window.TatzoVectorBasemap.makeStyle(base,theme,false);
  s.name="Tatzo Atlas "+theme;
@@ -42,7 +42,7 @@ function style(base,theme,quality){
  s.layers=s.layers.filter(l=>l!==extrusion);
  extrusion.minzoom=14;
  extrusion.filter=["!=",["to-string",["get","hide_3d"]],"true"];
- extrusion.layout={visibility:quality==="low"?"none":"visible"};
+ extrusion.layout={visibility:dimension?"visible":"none"};extrusion.minzoom=quality==="low"?15.5:14;
  const height=["max",3,["to-number",["get","render_height"],["get","height"],6]];
  extrusion.paint={"fill-extrusion-color":["interpolate",["linear"],height,3,p.building,45,p.building,120,p.road],"fill-extrusion-height":height,"fill-extrusion-base":["min",height,["max",0,["to-number",["get","render_min_height"],0]]],"fill-extrusion-opacity":1,"fill-extrusion-vertical-gradient":true};
  before("tatzo-city-labels",extrusion);
@@ -60,6 +60,7 @@ function style(base,theme,quality){
  const streets=by("tatzo-street-labels");streets.minzoom=13;streets.filter=cls("motorway","trunk","primary","secondary","tertiary","minor");streets.layout["symbol-spacing"]=380;streets.layout["text-size"]=z(13,10,17,12);streets.layout["text-padding"]=5;
  const language=(document.documentElement.lang||"en").split("-")[0];
  if(["en","fr","ru","ro"].includes(language))for(const id of ["atlas-country-labels","tatzo-city-labels"]){by(id).layout["text-field"]=["coalesce",["get","name:"+language],["get","name_"+language],["get","name"],["get","name:en"],""];}
+ if(theme==="midnight"&&window.TatzoLivingCartography)window.TatzoLivingCartography.apply(s,quality,dimension);
  return s;
 }
 function load(tag,url){
@@ -164,7 +165,7 @@ async function activate({leafletMap,cards,markers,onPick}){
  function queueBubbles(){cancelAnimationFrame(bubbleFrame);bubbleFrame=requestAnimationFrame(refreshBubbles)}
  function refreshAvatars(){
   if(stopped||!map?.getLayer("atlas-points"))return;
-  if(map.getZoom()<13){clearAvatars();return}
+  if(map.getZoom()<12){clearAvatars();return}
   const found=new Map();
   for(const f of map.queryRenderedFeatures({layers:["atlas-points"]})){
    const idx=Number(f.properties.idx);if(!found.has(idx))found.set(idx,f.geometry.coordinates);
@@ -175,8 +176,10 @@ async function activate({leafletMap,cards,markers,onPick}){
    if(avatars.has(idx))continue;const card=cards[idx];if(!card)continue;
    const el=document.createElement("button");el.type="button";el.className="atlas-avatar "+(card.dataset.source==="verified"?"verified":"unclaimed");
    el.setAttribute("aria-label",card.dataset.name||"Tatzo location");
+   const photo=document.createElement("span");photo.className="atlas-avatar-photo";el.append(photo);
+   const dot=document.createElement("span");dot.className="atlas-avatar-status";dot.setAttribute("aria-hidden","true");el.append(dot);
    const img=card.querySelector(".maps-avatar img");
-   if(img){const clone=document.createElement("img");clone.src=img.src;clone.alt="";clone.addEventListener("error",()=>{clone.remove();el.textContent=(card.dataset.name||"T").slice(0,1).toUpperCase()},{once:true});el.append(clone)}else{el.textContent=card.dataset.source==="verified"?(card.dataset.name||"T").slice(0,1).toUpperCase():"⌖"}
+   if(img){const clone=document.createElement("img");clone.src=img.src;clone.alt="";clone.addEventListener("error",()=>{clone.remove();photo.textContent=(card.dataset.name||"T").slice(0,1).toUpperCase()},{once:true});photo.append(clone)}else{photo.textContent=card.dataset.source==="verified"?(card.dataset.name||"T").slice(0,1).toUpperCase():"⌖"}
    el.addEventListener("click",e=>{e.stopPropagation();if(onPick(coord[1],coord[0])){popup?.remove();if(pick)pick.setLngLat(coord);else pick=new maplibregl.Marker({color:"#ee0c6f"}).setLngLat(coord).addTo(map);return}openCard(idx,coord)});
    const wrapper=document.createElement("div");wrapper.className="atlas-avatar-marker";wrapper.append(el);
    avatars.set(idx,new maplibregl.Marker({element:wrapper,anchor:"center"}).setLngLat(coord).addTo(map));
@@ -192,11 +195,11 @@ async function activate({leafletMap,cards,markers,onPick}){
   try{const response=await fetch(sourceURL,{signal:abort.signal,credentials:"omit",referrerPolicy:"no-referrer"});if(!response.ok)throw Error("Geography unavailable");base=await response.json()}finally{clearTimeout(timeout)}
   await Promise.all([load("link",rootURL+"maplibre-gl.css"),load("script",rootURL+"maplibre-gl.js")]);
   if(!window.maplibregl?.Map)throw Error("MapLibre unavailable");
-  host=document.createElement("div");host.className="atlas-native-map";frame.append(host);
+  host=document.createElement("div");host.className="atlas-native-map";host.dataset.theme=theme;host.dataset.quality=quality;frame.append(host);
   const c=leafletMap.getCenter();
   const read=(key,lo,hi,fallback)=>{const raw=params.get(key),n=Number(raw);return raw!==null&&raw.trim()&&Number.isFinite(n)&&n>=lo&&n<=hi?n:fallback};
-  const camera={center:[read("lng",-180,180,c.lng),read("lat",-85,85,c.lat)],zoom:read("z",2,19,Math.max(2,leafletMap.getZoom()-1)),pitch:quality==="low"?0:read("pitch",0,65,0),bearing:read("bearing",-180,180,0)};
-  map=new maplibregl.Map({container:host,style:style(base,theme,quality),...camera,maxPitch:quality==="low"?0:65,maxZoom:19,minZoom:2,renderWorldCopies:false,attributionControl:false,canvasContextAttributes:{antialias:quality==="high"}});
+  const camera={center:[read("lng",-180,180,c.lng),read("lat",-85,85,c.lat)],zoom:read("z",2,19,Math.max(2,leafletMap.getZoom()-1)),pitch:read("pitch",0,65,0),bearing:read("bearing",-180,180,0)};
+  map=new maplibregl.Map({container:host,style:style(base,theme,quality,camera.pitch>5),...camera,maxPitch:65,maxZoom:19,minZoom:2,renderWorldCopies:false,attributionControl:false,canvasContextAttributes:{antialias:quality==="high"}});
   map.addControl(new maplibregl.AttributionControl({compact:false}),"bottom-right");
   map.addControl(new maplibregl.NavigationControl({visualizePitch:true}),"top-left");
   deadline=setTimeout(()=>fallback("Native map startup timeout"),22000);
@@ -204,7 +207,7 @@ async function activate({leafletMap,cards,markers,onPick}){
   map.getCanvas().addEventListener("webglcontextlost",()=>fallback("WebGL context lost"),{once:true});
   map.once("load",()=>{
    if(stopped)return;
-   try{addLocations(map,cards);lastData=JSON.stringify(features(cards))}catch(e){fallback(e.message);return}
+   try{if(theme==="midnight"&&window.TatzoLivingCartography){try{window.TatzoLivingCartography.install(map,quality)}catch(e){console.warn("Optional Atlas texture unavailable",e)}}addLocations(map,cards);lastData=JSON.stringify(features(cards))}catch(e){fallback(e.message);return}
    map.once("idle",()=>{
     if(stopped)return;clearTimeout(deadline);classic.style.visibility="hidden";host.classList.add("atlas-ready");say("Tatzo Atlas · "+theme+" / "+quality);
     controls=document.createElement("div");controls.className="atlas-controls";
@@ -212,10 +215,9 @@ async function activate({leafletMap,cards,markers,onPick}){
     const section=(label)=>{const row=document.createElement("div");row.className="atlas-settings-section";const caption=document.createElement("span");caption.className="atlas-settings-label";caption.textContent=label;row.append(caption);controls.append(row);return row};
     const cameraRow=section("View");const views=document.createElement("div");views.className="atlas-view-buttons";cameraRow.append(views);
     const button=(label,fn,container)=>{const b=document.createElement("button");b.type="button";b.textContent=label;b.addEventListener("click",fn);container.append(b);return b};
-    const two=button("2D",()=>{map.easeTo({pitch:0,bearing:0});if(settings)settings.open=false},views);
-    const three=button("3D",()=>{map.easeTo({pitch:55,bearing:-22,zoom:Math.max(15,map.getZoom())});if(settings)settings.open=false},views);
-    three.disabled=quality==="low";three.title=quality==="low"?"Choose Medium or High for 3D":"";
-    const syncView=()=>{const is3d=map.getPitch()>5;two.setAttribute("aria-pressed",String(!is3d));three.setAttribute("aria-pressed",String(is3d));if(settingsTitle)settingsTitle.textContent=is3d?"Atlas 3D":"Atlas 2D"};
+    const two=button("2D",()=>{map.setLayoutProperty("tatzo-building-3d","visibility","none");map.easeTo({pitch:0,bearing:0});if(settings)settings.open=false},views);
+    const three=button("Dimension",()=>{map.setLayoutProperty("tatzo-building-3d","visibility","visible");map.easeTo({pitch:55,bearing:-22,zoom:Math.max(quality==="low"?15.5:15,map.getZoom())});if(settings)settings.open=false},views);
+    const syncView=()=>{const is3d=map.getPitch()>5;map.setLayoutProperty("tatzo-building-3d","visibility",is3d?"visible":"none");two.setAttribute("aria-pressed",String(!is3d));three.setAttribute("aria-pressed",String(is3d));if(settingsTitle)settingsTitle.textContent=is3d?"Atlas 3D":"Atlas 2D"};
     map.on("pitchend",syncView);syncView();
     for(const [key,values,current] of [["theme",themes,theme],["quality",["low","medium","high"],quality]]){
      const row=section(key==="theme"?"Theme":"Graphics");
@@ -225,7 +227,8 @@ async function activate({leafletMap,cards,markers,onPick}){
       for(const [k,v] of [["lng",center.lng],["lat",center.lat],["z",map.getZoom()],["pitch",map.getPitch()],["bearing",map.getBearing()]])url.searchParams.set(k,String(Number(v.toFixed(4))));
       location.assign(url)});row.append(select);
     }
-    const demo=section("Explore");button("Clermont-Ferrand",()=>{map.flyTo({center:[3.087,45.777],zoom:15.5,pitch:quality==="low"?0:55,bearing:quality==="low"?0:-22});if(settings)settings.open=false},demo);
+    const demo=section("Explore");button("Clermont-Ferrand",()=>{map.flyTo({center:[3.087,45.777],zoom:15.5,pitch:55,bearing:-22});if(settings)settings.open=false},demo);
+    button("Lyon",()=>{map.flyTo({center:[4.8357,45.7601],zoom:15.5,pitch:55,bearing:-18});if(settings)settings.open=false},demo);
     if(nativeControls){nativeControls.append(controls);nativeControls.hidden=false}else frame.append(controls);
     brand=document.createElement("div");brand.className="atlas-brand";brand.setAttribute("aria-label","Tatzo Atlas");
     const word=document.createElement("strong");word.textContent="Tatzo";const dot=document.createElement("span");dot.textContent=".";word.append(dot);const sub=document.createElement("small");sub.textContent="ATLAS";brand.append(word,sub);frame.append(brand);
