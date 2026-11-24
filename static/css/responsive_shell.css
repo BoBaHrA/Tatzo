@@ -467,13 +467,6 @@ html {
     scrollbar-color: #36565e transparent;
     scrollbar-width: thin;
   }
-  body > .content > .maps-shell .maps-stats {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  body > .content > .maps-shell .maps-stats article {
-    min-width: 0;
-    overflow-wrap: anywhere;
-  }
 }
 @media (min-width: 761px) and (max-width: 900px) {
   body > .content > .maps-shell {
