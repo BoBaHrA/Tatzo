@@ -2115,3 +2115,18 @@
 .tatzo-map-preview-toolbar a[aria-current=true]{background:#04c5bf;color:#071317;font-weight:700}
 .tatzo-map-preview-toolbar [data-basemap-status]{padding:4px 2px 0;overflow-wrap:anywhere;max-width:300px}
 @media(min-width:761px){body>.content>.maps-shell .maps-stats{grid-template-columns:1fr;gap:5px}body>.content>.maps-shell .maps-stats article{display:flex;align-items:center;gap:10px;min-height:0;padding:8px 10px;overflow-wrap:normal}body>.content>.maps-shell .maps-stats article strong{flex:0 0 42px;margin:0;font-size:20px}body>.content>.maps-shell .maps-stats article span{min-width:0;font-size:12px;line-height:1.3;overflow-wrap:normal;word-break:normal}}
+
+/* Project Atlas opt-in native map, above classic only after successful load. */
+.maps-canvas .atlas-native-map{position:absolute;inset:0;z-index:5;visibility:hidden;pointer-events:none;background:#12242b}
+.maps-canvas .atlas-native-map.atlas-ready{visibility:visible;pointer-events:auto}
+.maps-canvas .atlas-controls{position:absolute;z-index:801;top:105px;right:12px;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px;max-width:calc(100% - 75px);padding:6px;background:#071317ec;border:1px solid #34565a;border-radius:10px}
+.atlas-controls button,.atlas-controls select{font:600 12px/1.3 system-ui;padding:7px 9px;border:1px solid #34565a;border-radius:6px;background:#20343b;color:#efffff;cursor:pointer}
+.atlas-controls button:hover{background:#04c5bf;color:#071317}
+.atlas-avatar{display:grid;place-items:center;width:40px;height:40px;border:3px solid #04c5bf;border-radius:50% 50% 50% 12%;background:#071317;color:#efffff;box-shadow:0 4px 12px #0008;font:bold 18px system-ui;cursor:pointer;overflow:hidden;padding:0}
+.atlas-avatar.unclaimed{border-color:#ee0c6f;background:#4a1533}
+.atlas-avatar img{width:100%;height:100%;object-fit:cover}
+.atlas-native-map .maplibregl-popup-content{background:#071317;color:#efffff;border:1px solid #34565a;border-radius:16px;padding:14px}
+.atlas-native-map .maplibregl-popup-close-button{color:#efffff;font-size:22px;right:3px;top:0}
+.atlas-native-map .maplibregl-popup-tip{border-top-color:#071317}
+.atlas-native-map .maplibregl-ctrl-bottom-right{bottom:30px}
+@media(max-width:760px){.maps-canvas .atlas-controls{top:126px;right:8px}.atlas-controls button,.atlas-controls select{padding:5px;font-size:11px}.atlas-native-map .maplibregl-ctrl-bottom-right{bottom:48px}}

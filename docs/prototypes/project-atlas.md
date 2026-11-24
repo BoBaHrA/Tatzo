@@ -1,0 +1,9 @@
+# Project Atlas — native map preview
+
+Opt in at `/maps/?basemap=atlas&theme=midnight&quality=medium`. Classic remains default. The Atlas tab is visible on the map; the Clermont-Ferrand shortcut is a real city view, not a fictitious studio. Choose 2D/3D, drag to rotate, and select Midnight, Porcelain or Ink. Quality low disables building extrusion, medium enables it, high also requests canvas antialiasing. Switching quality or theme reloads the page.
+
+Uses MapLibre GL JS 5.6.1 and OpenFreeMap vector data. Heights use available OpenMapTiles building attributes with approximate fallback. The Atlas renderer overlays the existing Leaflet view only after native load; fallback restores Classic. It builds clustered GeoJSON from existing Django cards and reuses existing popup HTML, mobile sheet behavior and location picking. Existing card filters update the native source. At higher zoom, up to 90 visible individual features get DOM avatar markers; other points remain visible as circles.
+
+Smoke checks executed against synthetic source metadata: JavaScript parses; all nine theme/quality combinations yield 16 unique layers with correct extrusion visibility; invalid/hidden locations excluded and zero coordinates preserved. These checks do not establish live tile rendering or MapLibre style validation.
+
+Before making Atlas default: verify browser console, actual vector data and credits, Clermont/Lyon city views, cluster expansion and overlapping locations, search/filter synchronization, all popup booking/claim links, add-location coordinates, phone sheet, keyboard and WebGL failure fallback. Verify 1024x600 through ultrawide, and Android separately. Native 3D is experimental and no trees, terrain elevation or custom landmark meshes are included. No mobile app changes, database migrations or paid infrastructure.

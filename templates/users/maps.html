@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ1LXf6PtHLjvwvqgCZC+eyJSE7R2B8=" crossorigin="">
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
-<link rel="stylesheet" href="{% static 'css/maps.css' %}?v=20261124-2">
+<link rel="stylesheet" href="{% static 'css/maps.css' %}?v=20261124-3">
 {% endblock %}
 
 {% block content %}
@@ -132,12 +132,13 @@
       <div id="tatzo-map" class="tatzo-leaflet-map" data-map-container></div>
       <div class="tatzo-map-preview-toolbar">
         <nav aria-label="{% trans 'Map style' %}">
+          <a href="?basemap=atlas"{% if request.GET.basemap == 'atlas' %} aria-current="true"{% endif %}>Atlas 3D</a>
           <a href="?basemap=midnight"{% if request.GET.basemap == 'midnight' %} aria-current="true"{% endif %}>Midnight</a>
           <a href="?basemap=porcelain"{% if request.GET.basemap == 'porcelain' %} aria-current="true"{% endif %}>Porcelain</a>
           <a href="?basemap=ink"{% if request.GET.basemap == 'ink' %} aria-current="true"{% endif %}>Ink</a>
           <a href="?basemap=classic"{% if request.GET.basemap == 'classic' or not request.GET.basemap %} aria-current="true"{% endif %}>Classic</a>
         </nav>
-        <div data-basemap-status role="status">{% if request.GET.basemap == 'midnight' or request.GET.basemap == 'porcelain' or request.GET.basemap == 'ink' %}Tatzo Vector · initializing…{% else %}Tatzo Classic · CARTO{% endif %}</div>
+        <div data-basemap-status role="status">{% if request.GET.basemap == 'atlas' %}Atlas · initializing…{% elif request.GET.basemap == 'midnight' or request.GET.basemap == 'porcelain' or request.GET.basemap == 'ink' %}Tatzo Vector · initializing…{% else %}Tatzo Classic · CARTO{% endif %}</div>
       </div>
       <button class="maps-mobile-explore" type="button" data-mobile-sheet-toggle aria-label="{% trans 'Open map panel' %}">
         <span aria-hidden="true"></span>
@@ -225,5 +226,6 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" defer></script>
 <script src="{% static 'js/carto-basemap-key.js' %}" defer></script>
 <script src="{% static 'js/tatzo-vector-basemap.js' %}?v=20261124-2" defer></script>
-<script src="{% static 'js/maps.js' %}?v=20261124-2" defer></script>
+<script src="{% static 'js/tatzo-atlas.js' %}?v=20261124-3" defer></script>
+<script src="{% static 'js/maps.js' %}?v=20261124-3" defer></script>
 {% endblock %}

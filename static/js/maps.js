@@ -350,6 +350,16 @@
 
     setTimeout(() => map.invalidateSize(), 120);
     window.TatzoVectorBasemap?.activate(map, rasterBasemap);
+    window.TatzoAtlas?.activate({
+      leafletMap: map,
+      cards,
+      markers: leafletMarkersByKey,
+      onPick(lat, lng) {
+        if (!isPickingLocationPin) return false;
+        map.fire("click", {latlng: L.latLng(lat, lng)});
+        return true;
+      },
+    });
   }
 
   function applyFilters() {
