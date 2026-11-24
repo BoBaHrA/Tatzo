@@ -6,6 +6,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/home_layout.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -18,7 +19,35 @@
 
 {% include "partials/sidebar.html" %}
 
+<div class="home-layout">
+<div class="auth-buttons">
+  {% if user.is_authenticated %}
+    <form action="{% url 'logout' %}" method="post" style="display: inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn">{% trans "Logout" %}</button>
+    </form>
+  {% else %}
+    <a href="{% url 'login' %}" class="btn">{% trans "Login" %}</a>
+    <a href="{% url 'signup' %}" class="btn">{% trans "Sign up" %}</a>
+  {% endif %}
+</div>
+
 <div class="main-content">
+    {% if not user.is_authenticated %}
+    <section class="seo-brand-hero" aria-labelledby="tatzo-home-heading">
+        <div class="seo-brand-hero__inner">
+            <span class="seo-brand-hero__eyebrow">TATZO</span>
+            <h1 id="tatzo-home-heading">{% trans "Find the right tattoo artist for your next tattoo." %}</h1>
+            <p>{% trans "Discover tattoo artists and studios, explore portfolios, compare styles and start your booking journey with Tatzo." %}</p>
+            <nav class="seo-brand-hero__links" aria-label="{% trans 'Explore Tatzo' %}">
+                <a href="{% url 'search_page' %}">{% trans "Find tattoo artists" %}</a>
+                <a href="{% url 'maps_page' %}">{% trans "Explore tattoo map" %}</a>
+                <a href="{% url 'style_match:index' %}">{% trans "Try Style Match" %}</a>
+            </nav>
+        </div>
+    </section>
+    {% endif %}
+
   {% if user.is_authenticated %}
     <div class="create-post" id="create-post">
       <div class="post-create-header">
@@ -222,17 +251,8 @@
   </div>
 </div>
 
-<div class="auth-buttons">
-  {% if user.is_authenticated %}
-    <form action="{% url 'logout' %}" method="post" style="display: inline;">
-      {% csrf_token %}
-      <button type="submit" class="btn">{% trans "Logout" %}</button>
-    </form>
-  {% else %}
-    <a href="{% url 'login' %}" class="btn">{% trans "Login" %}</a>
-    <a href="{% url 'signup' %}" class="btn">{% trans "Sign up" %}</a>
-  {% endif %}
-</div>
+
+</div><!-- /.home-layout -->
 
 <div class="post-modal" id="post-modal">
   <div class="post-modal-inner">

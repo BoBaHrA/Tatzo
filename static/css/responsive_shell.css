@@ -1,0 +1,315 @@
+/* Shared web shell. Loaded after route-specific styles; mobile navigation
+   and standalone screens retain their own components and interactions. */
+:root {
+  --tatzo-nav-width: clamp(190px, 16vw, 270px);
+  --tatzo-page-gutter: clamp(14px, 2vw, 32px);
+}
+@media (min-width: 901px) {
+  body:not(.tatzo-home) > .content:has(> .sidebar) {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding-inline-start: var(--tatzo-nav-width);
+  }
+  body > .content > .sidebar {
+    width: var(--tatzo-nav-width);
+    height: 100vh;
+    height: 100dvh;
+    box-sizing: border-box;
+    padding: 14px 12px;
+    z-index: 30;
+  }
+  body > .content > .sidebar .sidebar-main-menu {
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: 0;
+    scrollbar-width: thin;
+  }
+  body > .content > .sidebar .sidebar-main-menu li {
+    margin-bottom: clamp(4px, 1.2vh, 14px);
+  }
+  body > .content > .sidebar .sidebar-main-menu li a,
+  body > .content > .sidebar .sidebar-more-trigger {
+    min-height: 44px;
+    padding: 6px 8px;
+    gap: 9px;
+    box-sizing: border-box;
+    font-size: clamp(13px, 1.1vw, 16px);
+  }
+  body > .content > .sidebar .sidebar-main-menu li a > span:not(.sidebar-badge) {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  body > .content > .sidebar .more {
+    padding-top: 10px;
+    margin-bottom: 0;
+  }
+  body > .content > .sidebar .sidebar-more-menu {
+    max-height: calc(100dvh - 100px);
+    overflow-y: auto;
+  }
+
+  /* The outer shell reserves navigation space once. Do not reserve it again
+     on individual route roots. Exclude the independently gridded home. */
+  body:not(.tatzo-home) > .content:has(> .sidebar) > :is(
+    .main-content, .content-area, .profile-page, .chat-page, .chat-thread-page,
+    .search-page, .tatzo-calendar-page.calendar-shell, .booking-page,
+    .health-page, .bookmarks-page, .coming-soon-page, .report-page,
+    .maps-shell, .my-studios-page, .healing-shell
+  ) {
+    margin-inline: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  body > .content:has(> .sidebar) > :is(.maps-shell, .my-studios-page, .healing-shell) {
+    padding-inline-start: var(--tatzo-page-gutter);
+    padding-inline-end: var(--tatzo-page-gutter);
+  }
+  body > .content:has(> .sidebar) .profile-shell {
+    width: min(100%, 1280px);
+    min-width: 0;
+  }
+  body > .content:has(> .sidebar) .chat-shell {
+    width: min(100%, 980px);
+    min-width: 0;
+  }
+  body > .content:has(> .sidebar) .bookmarks-feed {
+    box-sizing: border-box;
+    padding-inline-start: 58px;
+  }
+}
+@media (min-width: 901px) and (max-width: 1350px) {
+  body > .content:has(> .sidebar) .search-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  body > .content:has(> .sidebar) .search-result-card {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+  body > .content:has(> .sidebar) .search-result-actions {
+    grid-column: 1 / -1;
+    flex-wrap: wrap;
+  }
+  body > .content:has(> .sidebar) .maps-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  body > .content:has(> .sidebar) .maps-panel {
+    max-height: none;
+  }
+  body > .content:has(> .sidebar) .tatzo-calendar-page .calendar-layout,
+  body > .content:has(> .sidebar) .tatzo-calendar-page .calendar-topbar,
+  body > .content:has(> .sidebar) .healing-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  body > .content:has(> .sidebar) .tatzo-calendar-page :is(.calendar-period-nav,.view-tabs) {
+    flex-wrap: wrap;
+  }
+  body > .content:has(> .sidebar) .profile-page {
+    padding-inline: var(--tatzo-page-gutter);
+  }
+}
+@media (min-width: 801px) and (max-width: 900px) {
+  body > .content > .tatzo-calendar-page.calendar-shell {
+    margin-inline: 0;
+    padding: 14px 10px 86px;
+    box-sizing: border-box;
+  }
+  body > .content > .tatzo-calendar-page .calendar-period-nav,
+  body > .content > .tatzo-calendar-page .view-tabs {
+    flex-wrap: wrap;
+  }
+}
+
+/* Fixed viewport heights must not trap form controls on small laptops. */
+body > .content > :is(.coming-soon-page, .report-page, .edit-profile-page) {
+  height: auto;
+  overflow: visible;
+}
+body > .content > .edit-profile-page {
+  align-items: flex-start !important;
+}
+body.edit-profile-no-scroll {
+  overflow-y: auto;
+}
+body > .content > .edit-profile-page > .edit-profile-card {
+  max-height: none;
+  overflow: visible;
+  width: 100%;
+  min-width: 0;
+}
+@media (max-width: 980px) {
+  body > .content .edit-profile-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 24px !important;
+  }
+}
+
+/* Standalone artist control center: adapt according to actual center width,
+   preserve the context cards instead of removing them at tablet widths. */
+body > .content > .artist-dashboard-page {
+  min-width: 0;
+  max-width: 100%;
+}
+.artist-dashboard-page > :is(.artist-dash-main,.artist-dash-sidebar,.artist-dash-context) {
+  min-width: 0;
+  box-sizing: border-box;
+}
+.artist-dashboard-page .artist-dash-main {
+  container-type: inline-size;
+  padding-inline: clamp(14px, 2vw, 34px);
+}
+.artist-dashboard-page .artist-dash-header {
+  flex-wrap: wrap;
+}
+.artist-dashboard-page .artist-dash-nav-item span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+@media (min-width: 821px) {
+  html:has(.artist-dashboard-page), body:has(.artist-dashboard-page) {
+    overflow-x: visible;
+  }
+  body > .content > .artist-dashboard-page {
+    grid-template-columns: clamp(180px, 16vw, 240px) minmax(0, 1fr);
+    align-items: start;
+  }
+  .artist-dashboard-page > .artist-dash-sidebar {
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    height: 100dvh;
+    padding: 14px 12px;
+  }
+  .artist-dashboard-page .artist-dash-brand {
+    flex-shrink: 0;
+    margin-bottom: 16px !important;
+  }
+  .artist-dashboard-page .artist-dash-nav {
+    gap: 4px;
+  }
+  .artist-dashboard-page .artist-dash-profile-mini {
+    position: static;
+    margin-top: auto;
+    flex-shrink: 0;
+  }
+  .artist-dashboard-page > .artist-dash-context {
+    grid-column: 2;
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    height: auto;
+    padding: 16px;
+  }
+}
+@media (min-width: 1500px) {
+  body > .content > .artist-dashboard-page {
+    grid-template-columns: clamp(200px, 16vw, 240px) minmax(0, 1fr) clamp(260px, 18vw, 300px);
+  }
+  .artist-dashboard-page > .artist-dash-sidebar { grid-row: auto; }
+  .artist-dashboard-page > .artist-dash-context {
+    grid-column: 3;
+    position: sticky;
+    top: 0;
+    display: flex;
+    height: 100dvh;
+    overflow-y: auto;
+  }
+}
+@media (max-width: 820px) {
+  .artist-dashboard-page > .artist-dash-context {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    position: static;
+    height: auto;
+    padding: 12px;
+  }
+}
+@container (max-width: 950px) {
+  .artist-dashboard-page .artist-stat-grid,
+  .artist-dashboard-page .artist-rules-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .artist-dashboard-page .artist-calendar-row {
+    grid-template-columns: 54px minmax(0, 1fr);
+  }
+  .artist-dashboard-page .artist-calendar-time-fields,
+  .artist-dashboard-page .artist-calendar-break-fields,
+  .artist-dashboard-page .artist-calendar-row em {
+    grid-column: 2;
+    justify-self: start;
+  }
+  .artist-dashboard-page .artist-week-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .artist-dashboard-page .artist-calendar-toggle {
+    grid-column: 1 / -1;
+  }
+}
+@container (max-width: 580px) {
+  .artist-dashboard-page :is(.artist-stat-grid,.artist-rules-grid,.artist-settings-two-col,.artist-profile-grid,.artist-week-row,.artist-insight-grid,.artist-blocked-period-form) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Standalone authentication forms should scroll rather than be translated
+   outside the viewport. Do not modify dashboard or mobile application body. */
+body:has(> .content > :is(.login-container,.verification-container,.reset-container)) {
+  height: auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  box-sizing: border-box;
+  padding: 32px 14px;
+  overflow-y: auto;
+}
+body:has(> .content > :is(.login-container,.verification-container,.reset-container)) > .content {
+  width: 100%;
+  min-width: 0;
+  max-width: 560px;
+}
+body > .content > :is(.login-container,.verification-container,.reset-container) {
+  box-sizing: border-box;
+  width: 100%;
+  margin-inline: auto;
+  left: auto;
+  transform: none;
+}
+body > .content > :is(.login-container,.verification-container,.reset-container) :is(input,select,textarea) {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Route roots with their own navigation or no sidebar. */
+body > .content > :is(.legal-page-shell,.verification-page,.portfolio-page,.moderation-page,.appointment-page,.calendar-page,.follow-page) {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+}
+.legal-page-shell .legal-page-card {
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+}
+body > .content > .verification-page > .verification-shell,
+body > .content > .portfolio-page > :is(.portfolio-shell,.portfolio-form-shell),
+body > .content > .moderation-page > .moderation-shell {
+  min-width: 0;
+}
+.artist-dashboard-page .artist-dash-main :is(input,select,textarea) {
+  min-width: 0;
+  max-width: 100%;
+}
+@media (max-height: 780px) and (min-width: 901px) {
+  body > .content > :is(.report-page,.coming-soon-page) {
+    align-items: flex-start;
+  }
+}
+@media (max-width: 640px) {
+  .portfolio-page .portfolio-header {
+    flex-wrap: wrap;
+  }
+  .verification-page .verification-header {
+    flex-wrap: wrap;
+  }
+}
