@@ -413,6 +413,17 @@
   bindChipFilters(styleFilters, activeStyleFilters, "draftFilter");
   bindChipFilters(bookingFilters, activeBookingFilters, "bookingFilter");
 
+  const mapSettings = document.querySelector("[data-map-settings]");
+  if (mapSettings) {
+    document.addEventListener("pointerdown", (event) => {
+      if (mapSettings.open && !mapSettings.contains(event.target)) mapSettings.open = false;
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || !mapSettings.open) return;
+      mapSettings.open = false;
+      mapSettings.querySelector("summary")?.focus();
+    });
+  }
   initializeLeafletMap();
 
   mobileSheetToggle?.addEventListener("click", () => openMobileSheet("list"));
