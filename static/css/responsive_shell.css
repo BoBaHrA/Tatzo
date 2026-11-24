@@ -256,7 +256,7 @@ body > .content > .artist-dashboard-page {
 
 /* Standalone authentication forms should scroll rather than be translated
    outside the viewport. Do not modify dashboard or mobile application body. */
-body:has(> .content > :is(.login-container,.verification-container)) {
+body:has(> .content > :is(.login-container,.verification-container,.reset-container)) {
   height: auto;
   min-height: 100vh;
   min-height: 100dvh;
@@ -264,19 +264,52 @@ body:has(> .content > :is(.login-container,.verification-container)) {
   padding: 32px 14px;
   overflow-y: auto;
 }
-body:has(> .content > :is(.login-container,.verification-container)) > .content {
+body:has(> .content > :is(.login-container,.verification-container,.reset-container)) > .content {
   width: 100%;
   min-width: 0;
   max-width: 560px;
 }
-body > .content > :is(.login-container,.verification-container) {
+body > .content > :is(.login-container,.verification-container,.reset-container) {
   box-sizing: border-box;
   width: 100%;
   margin-inline: auto;
   left: auto;
   transform: none;
 }
-body > .content > :is(.login-container,.verification-container) :is(input,select,textarea) {
+body > .content > :is(.login-container,.verification-container,.reset-container) :is(input,select,textarea) {
   max-width: 100%;
   box-sizing: border-box;
+}
+
+/* Route roots with their own navigation or no sidebar. */
+body > .content > :is(.legal-page-shell,.verification-page,.portfolio-page,.moderation-page,.appointment-page,.calendar-page,.follow-page) {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+}
+.legal-page-shell .legal-page-card {
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+}
+body > .content > .verification-page > .verification-shell,
+body > .content > .portfolio-page > :is(.portfolio-shell,.portfolio-form-shell),
+body > .content > .moderation-page > .moderation-shell {
+  min-width: 0;
+}
+.artist-dashboard-page .artist-dash-main :is(input,select,textarea) {
+  min-width: 0;
+  max-width: 100%;
+}
+@media (max-height: 780px) and (min-width: 901px) {
+  body > .content > :is(.report-page,.coming-soon-page) {
+    align-items: flex-start;
+  }
+}
+@media (max-width: 640px) {
+  .portfolio-page .portfolio-header {
+    flex-wrap: wrap;
+  }
+  .verification-page .verification-header {
+    flex-wrap: wrap;
+  }
 }
