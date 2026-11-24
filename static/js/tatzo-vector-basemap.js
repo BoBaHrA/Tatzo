@@ -76,16 +76,31 @@ function makeStyle(base, theme, tilted = false){
     let vector, gl, deadline, observer, control, credited = false, stopped = false, ready = false;
     const container = map.getContainer();
     container.dataset.tatzoBasemap = "loading";
+    let statusNode;
+    const StatusControl = L.Control.extend({
+      onAdd() {
+        statusNode = L.DomUtil.create("div", "leaflet-bar tatzo-vector-status");
+        statusNode.setAttribute("role", "status");
+        statusNode.style.cssText = "max-width:210px;padding:6px 9px;background:#071317;color:#efffff;font:12px/1.4 system-ui;border-radius:6px";
+        statusNode.textContent = "Tatzo Vector · loading";
+        return statusNode;
+      }
+    });
+    new StatusControl({position:"topright"}).addTo(map);
     function fallback(reason) {
       if (stopped) return;
       stopped = true;
       clearTimeout(deadline);
       observer?.disconnect();
       if (!map.hasLayer(raster)) raster.addTo(map);
-      if (vector && map.hasLayer(vector)) map.removeLayer(vector);
+      if (vector && map.hasLayer(vector)) {
+        try {map.removeLayer(vector);} catch (error) {console.warn("Vector cleanup failed",error);}
+      }
+      map.getPane("tatzoVectorPane")?.replaceChildren();
       if (credited) map.attributionControl?.removeAttribution(CREDIT);
       if (control) map.removeControl(control);
       container.dataset.tatzoBasemap = "raster-fallback";
+      if(statusNode) {statusNode.textContent = reason === "Classic map selected" ? "Tatzo Classic" : "Tatzo Vector unavailable · Classic"; statusNode.title = String(reason); }
       console.warn("Tatzo vector basemap fallback:", reason);
     }
     try {
@@ -115,6 +130,7 @@ function makeStyle(base, theme, tilted = false){
         credited = true;
         map.removeLayer(raster);
         container.dataset.tatzoBasemap = requested;
+        statusNode.textContent = "Tatzo Vector · "+requested;
         const ThemeControl = L.Control.extend({
           onAdd() {
             const box = L.DomUtil.create("div","leaflet-bar tatzo-basemap-control");
@@ -142,6 +158,7 @@ function makeStyle(base, theme, tilted = false){
                 ready = false;
                 if (!map.hasLayer(raster)) raster.addTo(map);
                 container.dataset.tatzoBasemap = "loading";
+                statusNode.textContent = "Tatzo Vector · loading";
                 clearTimeout(deadline);
                 deadline = setTimeout(() => fallback("Theme load timeout"),16000);
                 gl.once("idle", () => {
@@ -150,6 +167,7 @@ function makeStyle(base, theme, tilted = false){
                   ready = true;
                   map.removeLayer(raster);
                   container.dataset.tatzoBasemap = next;
+                  statusNode.textContent = "Tatzo Vector · "+next;
                   history.replaceState(history.state,"",url);
                   select.disabled = false;
                 });
