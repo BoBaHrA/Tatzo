@@ -43,7 +43,7 @@ function makeStyle(base, theme, tilted = false){
   const STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
   const CDN = "https://unpkg.com/";
   const MAPLIBRE = "maplibre-gl@5.6.1/dist/";
-  const BRIDGE = "@maplibre/maplibre-gl-leaflet@0.1.3";
+  const BRIDGE = "@maplibre/maplibre-gl-leaflet@0.1.3/leaflet-maplibre-gl.js";
   const CREDIT = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · <a href="https://openmaptiles.org/">OpenMapTiles</a> · <a href="https://openfreemap.org/">OpenFreeMap</a>';
   const allowed = ["midnight", "porcelain", "ink"];
   function asset(tag, url) {
@@ -91,7 +91,8 @@ function makeStyle(base, theme, tilted = false){
     try {
       const base = await fetchStyle();
       await Promise.all([asset("link",CDN+MAPLIBRE+"maplibre-gl.css"),asset("script",CDN+MAPLIBRE+"maplibre-gl.js")]);
-      if (!window.maplibregl?.supported()) throw new Error("WebGL unavailable");
+      if (!window.maplibregl?.Map) throw new Error("MapLibre unavailable");
+      if (typeof window.maplibregl.supported === "function" && !window.maplibregl.supported()) throw new Error("WebGL unavailable");
       await asset("script", CDN+BRIDGE);
       if (typeof L.maplibreGL !== "function") throw new Error("Leaflet adapter unavailable");
       const style = makeStyle(base,requested);
