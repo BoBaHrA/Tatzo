@@ -182,7 +182,7 @@
     // Imported POIs should be saved as Location records with source, source_place_id,
     // name, address, latitude, longitude, and status="imported" or "unclaimed".
     const tileUrl = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-    L.tileLayer(tileUrl, {
+    const rasterBasemap = L.tileLayer(tileUrl, {
       minZoom: 2,
       maxZoom: 19,
       noWrap: true,
@@ -349,6 +349,7 @@
     }
 
     setTimeout(() => map.invalidateSize(), 120);
+    window.TatzoVectorBasemap?.activate(map, rasterBasemap);
   }
 
   function applyFilters() {
