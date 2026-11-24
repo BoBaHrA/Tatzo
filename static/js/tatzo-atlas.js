@@ -85,12 +85,12 @@ async function activate({leafletMap,cards,markers,onPick}){
  const status=document.querySelector("[data-basemap-status]");
  const classic=leafletMap.getContainer(),frame=classic.parentElement;
  let map,host,controls,observer,resizeObserver,popup,pick,deadline,stopped=false,avatars=new Map(),raf=0,filterFrame=0,base;
- const bubbles=new Map();let bubbleFrame=0,previousZoom=null,animateFrom=null,brand;
+ const bubbles=new Map();let bubbleFrame=0,previousZoom=null,animateFrom=null,splitOrigins=[],splitUntil=0,brand;
  let lastData="";
  let theme=themes.includes(params.get("theme"))?params.get("theme"):"midnight";
  let quality=["low","medium","high"].includes(params.get("quality"))?params.get("quality"):"medium";
  const say=t=>{if(status)status.textContent=t};
- function clearBubbles(){for(const item of bubbles.values())item.marker.remove();bubbles.clear();animateFrom=null;previousZoom=null;}
+ function clearBubbles(){for(const item of bubbles.values())item.marker.remove();bubbles.clear();animateFrom=null;previousZoom=null;splitOrigins=[];splitUntil=0;}
  function clearAvatars(){for(const m of avatars.values())m.remove();avatars.clear()}
  function fallback(reason){
   if(stopped)return;stopped=true;clearTimeout(deadline);cancelAnimationFrame(raf);cancelAnimationFrame(filterFrame);observer?.disconnect();resizeObserver?.disconnect();clearAvatars();clearBubbles();cancelAnimationFrame(bubbleFrame);try{map?.remove()}catch(_){}
@@ -131,7 +131,8 @@ async function activate({leafletMap,cards,markers,onPick}){
   if(stopped||!map?.getLayer("atlas-clusters"))return;
   const zoom=map.getZoom(),old=[...bubbles.values()];
   const split=previousZoom!==null&&zoom>previousZoom+.15;
-  const origins=split?old.map(x=>x.coord):[];
+  if(split&&old.length){splitOrigins=old.map(x=>x.coord);splitUntil=performance.now()+650;}
+  const origins=performance.now()<splitUntil?splitOrigins.slice():[];
   if(animateFrom&&performance.now()<animateFrom.until)origins.unshift(animateFrom.coord);
   previousZoom=zoom;
   const found=new Map();
@@ -169,7 +170,11 @@ async function activate({leafletMap,cards,markers,onPick}){
    const img=card.querySelector(".maps-avatar img");
    if(img){const clone=document.createElement("img");clone.src=img.src;clone.alt="";clone.addEventListener("error",()=>{clone.remove();el.textContent=(card.dataset.name||"T").slice(0,1).toUpperCase()},{once:true});el.append(clone)}else{el.textContent=card.dataset.source==="verified"?(card.dataset.name||"T").slice(0,1).toUpperCase():"⌖"}
    el.addEventListener("click",e=>{e.stopPropagation();if(onPick(coord[1],coord[0])){popup?.remove();if(pick)pick.setLngLat(coord);else pick=new maplibregl.Marker({color:"#ee0c6f"}).setLngLat(coord).addTo(map);return}openCard(idx,coord)});
-   avatars.set(idx,new maplibregl.Marker({element:el,anchor:"center"}).setLngLat(coord).addTo(map));
+   const wrapper=document.createElement("div");wrapper.className="atlas-avatar-marker";wrapper.append(el);
+   avatars.set(idx,new maplibregl.Marker({element:wrapper,anchor:"center"}).setLngLat(coord).addTo(map));
+   const origins=performance.now()<splitUntil?splitOrigins.slice():[];
+   if(animateFrom&&performance.now()<animateFrom.until)origins.unshift(animateFrom.coord);
+   animateArrival(el,coord,origins);
   }
  }
  function update(){if(stopped||!map?.getSource("atlas-artists"))return;const data=features(cards),signature=JSON.stringify(data);if(signature===lastData)return;lastData=signature;map.getSource("atlas-artists").setData(data);popup?.remove();clearAvatars();clearBubbles()}
